@@ -1,0 +1,15 @@
+{
+  "name": "falcondrive",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {},
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "@nx/js": "18.0.3",
+    "nx": "18.0.3"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}
