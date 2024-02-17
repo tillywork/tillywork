@@ -1,0 +1,18 @@
+{
+  "name": "frontend",
+  "version": "0.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@mdi/font": "^7.4.47",
+    "@types/node": "^20.11.18",
+    "vuetify": "^3.5.4"
+  },
+  "dependencies": {
+    "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^3.2.1",
+    "vue-router": "^4.2.5"
+  }
+}
