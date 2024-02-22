@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import UsersTable from '@/components/users/UsersTable.vue';
+import UsersTable from '@/modules/users/UsersTable.vue';
 
 export default {
   name: 'Users',

@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import ProjectHome from '@/components/projects/ProjectHome.vue';
+import ProjectHome from '@/modules/projects/ProjectHome.vue';
 
 export default {
   name: 'ProjectHomeView',

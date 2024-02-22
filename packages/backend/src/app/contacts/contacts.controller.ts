@@ -23,8 +23,14 @@ export class ContactsController {
     constructor(private readonly contactsService: ContactsService) { }
 
     @Get()
-    findAll(@Query('projectId') projectId: string): Promise<ContactsFindAllResult> {
-        return this.contactsService.findAll({ projectId: +projectId });
+    findAll(@Query() query): Promise<ContactsFindAllResult> {
+        return this.contactsService.findAll({ 
+            projectId: +query.projectId,
+            page: +query.page,
+            limit: +query.limit,
+            sortBy: query.sortBy,
+            sortOrder: query.sortOrder,
+        });
     }
 
     @Get(':id')
@@ -34,6 +40,7 @@ export class ContactsController {
 
     @Post()
     create(@Body() createContactDto: CreateContactDto): Promise<Contact> {
+        this.logger.debug(createContactDto);
         return this.contactsService.create(createContactDto);
     }
 

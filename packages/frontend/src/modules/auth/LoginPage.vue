@@ -34,9 +34,10 @@
 import { ref } from 'vue';
 import { useAuth } from '@/composables/useAuth';
 import { useSnackbar } from '@/composables/useSnackbar';
+import { useRoute } from 'vue-router';
 
 export default {
-  name: 'LoginCard',
+  name: 'LoginPage',
   setup() {
     const email = ref('');
     const password = ref('');
@@ -46,6 +47,7 @@ export default {
       email: (value: any) => /.+@.+\..+/.test(value) || 'Email must be valid',
     };
     const loading = ref(false);
+    const route = useRoute();
 
     const login = async () => {
       try {
@@ -54,11 +56,14 @@ export default {
         loading.value = true;
         await login(email.value, password.value);
         loading.value = false;
+        window.location.pathname = route.redirectedFrom?.fullPath ?? '/';
       } catch (error) {
         const { showSnackbar } = useSnackbar();
 
         loading.value = false;
         const errorObj = (error as any).value ?? error;
+
+        console.error(errorObj)
 
         if (errorObj.statusCode === 401) {
           errorMessage.value = 'Invalid email or password';

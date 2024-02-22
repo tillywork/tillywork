@@ -11,7 +11,6 @@ import {
 import { User } from '../users/user.entity';
 import { Interaction } from '../interactions/interaction.entity';
 import { Project } from '../projects/project.entity';
-// Additional related entities would also be imported here
 
 @Entity()
 export class Contact {
@@ -48,6 +47,7 @@ export class Contact {
   phoneNumber?: string;
 
   /**
+   * TODO
    * The name of the company where the contact works. Optional field.
    */
   @Column({ type: 'varchar', length: 255, nullable: true })
@@ -110,19 +110,23 @@ export class Contact {
   @Column({ type: 'varchar', length: 255, nullable: true })
   leadStatus?: string;
 
+  /* TODO */
   @Column({ type: 'timestamp', nullable: true })
   dateOfFirstContact?: Date;
 
+  /* TODO */
   @Column({ type: 'timestamp', nullable: true })
   lastContacted?: Date;
 
   /**
+   * TODO
    * Personal info like birthdays or anniversaries.
    */
   @Column({ type: 'timestamp', nullable: true })
   birthdayAnniversary?: Date;
 
   /**
+   * TODO
    * Preferences and any other text-based information about the contact.
    */
   @Column({ type: 'text', nullable: true })
@@ -135,21 +139,25 @@ export class Contact {
   @JoinColumn()
   owner?: User;
 
-  @ManyToOne(() => Project, (project) => project.contacts, { nullable: true })
-  @JoinColumn()
-  project?: Project;
+  @Column({ type: 'bigint' })
+  projectId: number;
 
+  @ManyToOne(() => Project, (project) => project.contacts)
+  @JoinColumn()
+  project: Project;
+
+  /* TODO */
   @Column({ type: 'text', nullable: true })
   notes?: string;
 
   /**
    * System generated timestamps for record keeping.
    */
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp' })
-  lastModified: Date;
+  
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 
   /**
    * Flag to indicate if the contact has opted out of communications.

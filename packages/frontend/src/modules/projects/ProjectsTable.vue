@@ -1,46 +1,49 @@
 <template>
-  <div class="mb-4 d-flex">
-    <h1 class="text-lg-h5 flex-fill">Contacts</h1>
-    <v-btn color="primary" rounded="lg" elevation="0">Create Contact</v-btn>
-  </div>
-  <v-data-table :items="contacts" :server-items-length="total" v-model:options="options" :loading="loading"
-    class="rounded border" height="50vh" />
+  <v-btn color="primary" class="mb-4" @click="openSidebar">Create Project</v-btn>
+  <v-data-table
+    :items="projects"
+    :server-items-length="total"
+    v-model:options="options"
+    :loading="loading"
+    class="elevation-1"
+  />
+  <CreateProjectSidebar @create="fetchProjects" />
 </template>
 
 <script lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useHttp } from '@/composables/useHttp';
 import { useSidebarState } from '@/composables/useSidebarState';
-import { useRoute } from 'vue-router';
+import CreateProjectSidebar from './CreateProjectSidebar.vue';
 
-interface Contact {
+export interface Project {
   name: string;
   ownerId: string;
 }
 
-interface PaginationData {
+export interface PaginationData {
   sortBy: string;
   descending: boolean;
   page: number;
   rowsPerPage: number;
 }
 
-interface ContactsData {
-  contacts: Contact[];
+export interface ProjectsData {
+  projects: Project[];
   total: number;
 }
 
 export default {
-  name: 'ContactsTable',
+  name: 'ProjectsTable',
   components: {
+    CreateProjectSidebar,
   },
   setup() {
     const { openSidebar } = useSidebarState();
     const { data, loading, sendRequest } = useHttp();
-    const route = useRoute();
 
-    const total = computed(() => (data.value as unknown as ContactsData)?.total ?? 0);
-    const contacts = computed(() => (data.value as unknown as ContactsData)?.contacts ?? []);
+    const total = computed(() => (data.value as unknown as ProjectsData)?.total ?? 0);
+    const projects = computed(() => (data.value as unknown as ProjectsData)?.projects ?? []);
 
     const options = ref({
       page: 1,
@@ -49,32 +52,29 @@ export default {
       sortDesc: false,
     });
 
-    const fetchContacts = () => {
+    const fetchProjects = () => {
       const params: PaginationData = {
         sortBy: options.value.sortBy[0] || '',
         descending: options.value.sortDesc || false,
         page: options.value.page || 1,
         rowsPerPage: options.value.itemsPerPage || 5,
       };
-      const projectId = route.params.projectId
 
-      sendRequest('/contacts', {
+      sendRequest('/projects', {
         method: 'GET',
-        params: {
-          projectId,
-        }
       });
     };
 
-    watch(options, fetchContacts, { deep: true });
-    fetchContacts();
+    watch(options, fetchProjects, { deep: true });
+    fetchProjects();
 
     return {
       openSidebar,
-      contacts,
+      projects,
       total,
       options,
       loading,
+      fetchProjects,
     };
   },
 };

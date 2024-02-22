@@ -2,9 +2,7 @@
   <v-switch
     v-model="selectedTheme"
     label="Dark Mode"
-    color="primary"
     hide-details
-    flat
   />
 </template>
 

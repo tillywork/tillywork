@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import ProjectsTable from '@/components/projects/ProjectsTable.vue';
+import ProjectsTable from '@/modules/projects/ProjectsTable.vue';
 
 export default {
   name: 'Projects',

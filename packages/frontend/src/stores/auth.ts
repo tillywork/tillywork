@@ -80,7 +80,6 @@ export const useAuthStore = defineStore('auth', {
       }
 
       this.setToken(data.value.accessToken);
-      window.location.reload();
     },
 
     /**

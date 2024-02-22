@@ -12,8 +12,8 @@ export const requireGuestGuard = (
     to.matched.some((record) => record.meta.requiresGuest) &&
     isAuthenticated()
   ) {
-    // If the route requires authentication and the user is not authenticated
-    next({ name: 'Home' }); // Redirect to the login page
+    // If the route requires no authentication and the user is authenticated
+    next({ name: 'Home' }); // Redirect to home page
   } else {
     // Otherwise, proceed as normal
     next();

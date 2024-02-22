@@ -1,14 +1,14 @@
 <template>
-  <LoginCard />
+  <LoginPage />
 </template>
 
 <script lang="ts">
-import LoginCard from '@/components/auth/LoginCard.vue';
+import LoginPage from '@/modules/auth/LoginPage.vue';
 
 export default {
   name: 'Login',
   components: {
-    LoginCard,
+    LoginPage,
   },
 };
 </script>

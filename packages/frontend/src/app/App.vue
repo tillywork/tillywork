@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-navigation-drawer app v-model="drawer" permanent>
+    <v-navigation-drawer app v-model="drawer" :rail="drawerRail" permanent>
       <!-- Sidebar content -->
       <v-list>
         <v-list-item v-if="user">
@@ -14,6 +14,13 @@
             <v-icon icon="mdi-home" />
           </template>
           <v-list-item-title>Home</v-list-item-title>
+        </v-list-item>
+        <!-- Contacts button -->
+        <v-list-item :to="{ name: 'Contacts', params: { projectId: selectedProjectId }}" v-if="isAuthenticated() && selectedProjectId">
+          <template #prepend>
+            <v-icon icon="mdi-account-group" />
+          </template>
+          <v-list-item-title>Contacts</v-list-item-title>
         </v-list-item>
         <!-- Login button -->
         <v-list-item :to="{ name: 'Login' }" v-if="!isAuthenticated()">
@@ -34,6 +41,9 @@
     </v-navigation-drawer>
 
     <v-app-bar app class="pr-4">
+      <v-btn icon @click="toggleDrawer">
+        <v-icon>mdi-menu</v-icon>
+      </v-btn>
       <v-toolbar-title>FalconDrive</v-toolbar-title>
       <v-spacer />
       <ThemeSwitch />
@@ -44,29 +54,32 @@
         <router-view />
       </v-container>
 
-      <SnackbarComponent />
+      <SnackbarWrapper />
+      <!-- TODO: Add dialog component -->
     </v-main>
   </v-app>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import ThemeSwitch from '@/components/ThemeSwitch.vue';
+import { defineComponent, onMounted, ref } from 'vue';
+import ThemeSwitch from '@/modules/common/ThemeSwitch.vue';
 import { useTheme } from '@/composables/useTheme';
 import { useTheme as useVuetifyTheme } from 'vuetify';
 import { useAuth } from '@/composables/useAuth';
-import SnackbarComponent from '@/components/common/SnackbarComponent.vue';
+import SnackbarWrapper from '@/modules/common/SnackbarWrapper.vue';
 
 export default defineComponent({
   components: {
     ThemeSwitch,
-    SnackbarComponent,
+    SnackbarWrapper,
   },
   setup() {
     // Navigation drawer
     const drawer = ref(true);
+    const drawerRail = ref(true);
+    const drawerPermanent = ref(true);
 
-    const { user, logout, isAuthenticated } = useAuth();
+    const { user, logout, isAuthenticated, selectedProjectId } = useAuth();
 
     /*
      * This handles setting the user's theme mode (dark or light)
@@ -77,11 +90,19 @@ export default defineComponent({
     const appTheme = useVuetifyTheme();
     appTheme.global.name.value = theme;
 
+    const toggleDrawer = () => {
+      drawerRail.value = !drawerRail.value;
+    };
+
     return {
       drawer,
+      drawerRail,
       user,
       logout,
       isAuthenticated,
+      toggleDrawer,
+      drawerPermanent,
+      selectedProjectId,
     };
   },
 });

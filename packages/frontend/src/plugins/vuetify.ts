@@ -10,7 +10,7 @@ const themes = {
     dark: false,
     colors: {
       primary: '#5E35B1',
-      secondary: '#FFC107',
+      secondary: '#FFCA28',
       accent: '#03A9F4',
       background: '#FFFFFF',
       surface: '#F5F5F5',
@@ -43,6 +43,27 @@ const vuetify = createVuetify({
   theme: {
     defaultTheme: 'dark',
     themes: themes,
+  },
+  defaults: {
+    global: {
+      elevation: 0,
+    },
+    VBtn: {
+      color: 'primary',
+      rounded: 'lg',
+      flat: true,
+    },
+    VSwitch: {
+      color: 'primary',
+      flat: true,
+    },
+    VTextField: {
+      color: 'primary',
+      singleLine: true,
+    },
+    VDataTable: {
+      density: 'compact',
+    }
   },
 });
 

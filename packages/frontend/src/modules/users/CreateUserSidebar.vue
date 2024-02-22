@@ -83,8 +83,8 @@ export default {
     // Form validation rules
     const requiredRule = [(v: string) => !!v || 'This field is required'];
     const emailRule = [
-      (v: string) => !!v || 'E-mail is required',
-      (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid',
+      (v: string) => !!v || 'Email is required',
+      (v: string) => /.+@.+\..+/.test(v) || 'Email must be valid',
     ];
     const passwordRule = [
       (v: string) => !!v || 'Password is required',

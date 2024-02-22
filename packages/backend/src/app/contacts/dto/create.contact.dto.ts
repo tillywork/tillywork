@@ -1,3 +1,6 @@
-import { Contact } from '../contact.entity';
-
-export class CreateContactDto implements Partial<Contact> {}
+export interface CreateContactDto {
+	firstName: string;
+	lastName: string;
+	email: string;
+	projectId: number;
+}

@@ -19,7 +19,6 @@ export class LoggingInterceptor implements NestInterceptor {
     const response = ctx.getResponse();
 
     const { method, url } = request;
-    this.logger.log(`${method} ${url}`);
     const startTime = process.hrtime();
 
     return next.handle().pipe(

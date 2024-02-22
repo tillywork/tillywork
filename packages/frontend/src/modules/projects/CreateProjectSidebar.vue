@@ -37,9 +37,10 @@ interface Project {
 
 export default {
   name: 'CreateProjectSidebar',
-  setup() {
+  emits: ['create'],
+  setup(props, { emit }) {
     const { isSidebarOpen, closeSidebar } = useSidebarState();
-    const { sendRequest } = useHttp();
+    const { data, sendRequest } = useHttp();
 
     // Form validation rules
     const requiredRule = [(v: string) => !!v || 'This field is required'];
@@ -51,15 +52,16 @@ export default {
 
     const formValid = ref(false);
 
-    // Function to create a new user
+    // Function to create a new project
     const createProject = async () => {
       if (formValid.value) {
         try {
-          const response = await sendRequest('/projects', {
+          await sendRequest('/projects', {
             method: 'POST',
             data: projectData.value,
           });
           closeSidebar();
+          emit('create', data.value)
         } catch (error) {
           // Handle error
           console.error('Failed to create project:', error);

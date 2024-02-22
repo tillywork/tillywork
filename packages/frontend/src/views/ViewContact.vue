@@ -1,14 +1,14 @@
 <template>
-  <ContactsTable />
+  <ViewContactPage />
 </template>
 
 <script lang="ts">
-import ContactsTable from '@/modules/contacts/ContactsTable.vue';
+import ViewContactPage from '@/modules/contacts/ViewContactPage.vue';
 
 export default {
   name: 'Projects',
   components: {
-    ContactsTable,
+    ViewContactPage,
   },
 };
 </script>
