@@ -11,6 +11,7 @@
     "vuetify": "^3.5.4"
   },
   "dependencies": {
+    "lodash": "^4.17.21",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
     "vue-router": "^4.2.5"

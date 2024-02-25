@@ -9,6 +9,7 @@ export type SnackbarOptions = {
 export type Snackbar = {
   id: number;
   options: SnackbarOptions;
+  timeoutById?: number;
 };
 
 export const useSnackbarStore = defineStore('snackbar', {
@@ -24,9 +25,13 @@ export const useSnackbarStore = defineStore('snackbar', {
      * @returns The ID of the created snackbar.
      */
     showSnackbar(options: SnackbarOptions): number {
-      console.log(options);
       const id = this.nextId++;
-      this.snackbars.push({ id, options });
+      const timeout = options.timeout ? options.timeout + 300 : 3300;
+      const timeoutById = setTimeout(() => {
+        this.closeSnackbar(id);
+      }, timeout);
+
+      this.snackbars.push({ id, options, timeoutById });
       return id;
     },
 
@@ -35,7 +40,10 @@ export const useSnackbarStore = defineStore('snackbar', {
      * @param id - The ID of the snackbar to be removed.
      */
     closeSnackbar(id: number): void {
-      this.snackbars = this.snackbars.filter((snackbar) => snackbar.id !== id);
+      const index = this.snackbars.findIndex(snackbar => snackbar.id === id);
+      if (index === -1) return;
+      clearTimeout(this.snackbars[index].timeoutById);
+      this.snackbars.splice(index, 1);
     },
   },
 });

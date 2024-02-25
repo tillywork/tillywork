@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-navigation-drawer app v-model="drawer" :rail="drawerRail" permanent>
+    <v-navigation-drawer app rail expand-on-hover>
       <!-- Sidebar content -->
       <v-list>
         <v-list-item v-if="user">
@@ -40,19 +40,14 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar app class="pr-4">
-      <v-btn icon @click="toggleDrawer">
-        <v-icon>mdi-menu</v-icon>
-      </v-btn>
+    <v-app-bar app class="pr-4" :height="48">
       <v-toolbar-title>FalconDrive</v-toolbar-title>
       <v-spacer />
       <ThemeSwitch />
     </v-app-bar>
 
     <v-main>
-      <v-container class="pa-6">
-        <router-view />
-      </v-container>
+      <router-view />
 
       <SnackbarWrapper />
       <!-- TODO: Add dialog component -->
@@ -61,24 +56,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
 import ThemeSwitch from '@/modules/common/ThemeSwitch.vue';
 import { useTheme } from '@/composables/useTheme';
 import { useTheme as useVuetifyTheme } from 'vuetify';
 import { useAuth } from '@/composables/useAuth';
 import SnackbarWrapper from '@/modules/common/SnackbarWrapper.vue';
 
-export default defineComponent({
+export default {
   components: {
     ThemeSwitch,
     SnackbarWrapper,
   },
   setup() {
-    // Navigation drawer
-    const drawer = ref(true);
-    const drawerRail = ref(true);
-    const drawerPermanent = ref(true);
-
     const { user, logout, isAuthenticated, selectedProjectId } = useAuth();
 
     /*
@@ -90,20 +79,12 @@ export default defineComponent({
     const appTheme = useVuetifyTheme();
     appTheme.global.name.value = theme;
 
-    const toggleDrawer = () => {
-      drawerRail.value = !drawerRail.value;
-    };
-
     return {
-      drawer,
-      drawerRail,
       user,
       logout,
       isAuthenticated,
-      toggleDrawer,
-      drawerPermanent,
       selectedProjectId,
     };
   },
-});
+};
 </script>

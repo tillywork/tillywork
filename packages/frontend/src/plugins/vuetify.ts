@@ -59,7 +59,7 @@ const vuetify = createVuetify({
     },
     VTextField: {
       color: 'primary',
-      singleLine: true,
+      density: 'compact',
     },
     VDataTable: {
       density: 'compact',

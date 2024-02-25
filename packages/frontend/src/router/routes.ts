@@ -2,17 +2,17 @@ const routes = [
 	{
 		path: '/',
 		name: 'Home',
-		component: () => import('../views/Home.vue'),
+		component: () => import('@/views/Home.vue'),
 	},
 	{
 		path: '/about',
 		name: 'About',
-		component: () => import('../views/About.vue'),
+		component: () => import('@/views/About.vue'),
 	},
 	{
 		path: '/users',
 		name: 'Users',
-		component: () => import('../views/Users.vue'),
+		component: () => import('@/views/Users.vue'),
 		meta: {
 			requiresAuth: false,
 		},
@@ -28,7 +28,7 @@ const routes = [
 	{
 		path: '/projects/:projectId',
 		name: 'ProjectHome',
-		component: () => import('../views/ProjectHomeView.vue'),
+		component: () => import('@/views/ProjectHomeView.vue'),
 		meta: {
 			requiresAuth: true,
 		},
@@ -36,7 +36,7 @@ const routes = [
 	{
 		path: '/projects/:projectId/contacts',
 		name: 'Contacts',
-		component: () => import('../views/Contacts.vue'),
+		component: () => import('@/modules/contacts/ContactsTable.vue'),
 		meta: {
 			requiresAuth: true,
 		},
@@ -44,7 +44,7 @@ const routes = [
 	{
 		path: '/projects/:projectId/contacts/:contactId',
 		name: 'ViewContact',
-		component: () => import('../views/ViewContact.vue'),
+		component: () => import('@/modules/contacts/ViewContactPage.vue'),
 		meta: {
 			requiresAuth: true,
 		},
@@ -52,7 +52,7 @@ const routes = [
 	{
 		path: '/login',
 		name: 'Login',
-		component: () => import('../views/Login.vue'),
+		component: () => import('@/modules/auth/LoginPage.vue'),
 		meta: {
 			requiresGuest: true,
 		},

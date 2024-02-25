@@ -1,4 +1,5 @@
 import { useHttp } from "@/composables/useHttp";
+import { useSnackbar } from "@/composables/useSnackbar";
 
 export interface GetContactsParams {
   projectId: string;
@@ -15,8 +16,20 @@ export interface Contact {
   firstName: string;
   lastName: string;
   email: string;
+  phoneNumber: string;
+  photo: string;
   ownerId: string;
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateContact {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phoneNumber?: string;
+  otherEmails?: string[];
+  projectId: number;
 }
 
 export interface ContactsData {
@@ -42,11 +55,33 @@ export class ContactsService {
     return data.value;
   }
 
+  async createContact(contact: CreateContact): Promise<Contact> {
+    const { data, sendRequest } = useHttp();
+
+    await sendRequest('/contacts', {
+      method: 'POST',
+      data: contact,
+    });
+
+    return data.value;
+  }
+
   async getContact(contactId: number): Promise<Contact> {
     const { data, sendRequest } = useHttp();
 
     await sendRequest(`/contacts/${contactId}`, {
       method: 'GET',
+    });
+
+    return data.value;
+  }
+
+  async updateContact(contact: Contact): Promise<Contact> {
+    const { data, sendRequest } = useHttp();
+
+    await sendRequest(`/contacts/${contact.id}`, {
+      method: 'PUT',
+      data: contact,
     });
 
     return data.value;
@@ -58,5 +93,20 @@ export class ContactsService {
     await sendRequest(`/contacts/${contactId}`, {
       method: 'DELETE',
     });
+  }
+
+  getFullName(contact: Contact): string {
+    if (contact.firstName && contact.lastName) {
+      return `${contact.firstName} ${contact.lastName}`;
+    }
+    else if (contact.firstName) {
+      return contact.firstName;
+    }
+    else if (contact.lastName) {
+      return contact.lastName;
+    }
+    else {
+      return '';
+    }
   }
 }

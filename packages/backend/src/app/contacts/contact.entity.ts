@@ -24,20 +24,20 @@ export class Contact {
   /**
    * The contact's first name. This is a mandatory field.
    */
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   firstName: string;
 
   /**
    * The contact's last name. This is a mandatory field.
    */
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true  })
   lastName: string;
 
   /**
    * The contact's primary email address.
    * Could be set unique if you want to enforce one contact per email.
    */
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true  })
   email: string;
 
   /**
