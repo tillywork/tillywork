@@ -1,5 +1,5 @@
-import type { RouteLocationNormalized, NavigationGuardNext } from "vue-router";
-import { useAuth } from "@/composables/useAuth";
+import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router';
+import { useAuth } from '@/composables/useAuth';
 
 export const requireGuestGuard = (
   to: RouteLocationNormalized,
@@ -18,7 +18,7 @@ export const requireGuestGuard = (
     // Otherwise, proceed as normal
     next();
   }
-}
+};
 
 export const requireAuthGuard = (
   to: RouteLocationNormalized,
@@ -37,4 +37,10 @@ export const requireAuthGuard = (
     // Otherwise, proceed as normal
     next();
   }
-}
+};
+
+export const titleGuard = (to: RouteLocationNormalized) => {
+  document.title = to.meta?.title
+    ? to.meta.title + ' | FalconDrive'
+    : 'FalconDrive';
+};

@@ -1,0 +1,30 @@
+.v-field--focused .v-field__outline {
+    --v-field-border-width: 1px !important;
+}
+
+.w-95px {
+    width: 95px;
+}
+.w-300px {
+    width: 300px;
+}
+.w-350px {
+    width: 350px;
+}
+.w-400px {
+    width: 400px;
+}
+.w-450px {
+    width: 450px;
+}
+
+.w-100-95px {
+    width: calc(100% - 95px);
+}
+.w-100-400px {
+    width: calc(100% - 400px);
+}
+
+.h-40px {
+    height: 40px;
+}

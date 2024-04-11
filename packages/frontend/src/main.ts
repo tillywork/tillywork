@@ -1,4 +1,4 @@
-import './styles.scss';
+import '@/styles/styles.scss';
 import { createApp, markRaw } from 'vue';
 import { createPinia } from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';

@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import ViewContactPage from '@/modules/contacts/ViewContactPage.vue';
+import ViewContactPage from '@/components/contacts/ViewContactPage.vue';
 
 export default {
   name: 'Projects',

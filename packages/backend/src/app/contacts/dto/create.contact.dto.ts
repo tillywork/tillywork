@@ -1,6 +1,6 @@
 export interface CreateContactDto {
 	firstName: string;
 	lastName: string;
-	email: string;
+	emails: string[];
 	projectId: number;
 }

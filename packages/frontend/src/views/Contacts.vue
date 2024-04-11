@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import ContactsTable from '@/modules/contacts/ContactsTable.vue';
+import ContactsTable from '@/components/contacts/ContactsTable.vue';
 
 export default {
   name: 'Projects',

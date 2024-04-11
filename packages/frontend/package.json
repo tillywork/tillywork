@@ -5,15 +5,21 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "license": "MIT",
-  "devDependencies": {
-    "@mdi/font": "^7.4.47",
-    "@types/node": "^20.11.18",
-    "vuetify": "^3.5.4"
-  },
   "dependencies": {
+    "@blocknote/core": "^0.12.1",
+    "@blocknote/react": "^0.12.2",
+    "@mdi/font": "^7.4.47",
+    "@tanstack/vue-table": "^8.13.2",
+    "@vitejs/plugin-react": "^4.2.1",
+    "@vitejs/plugin-vue": "^5.0.4",
     "lodash": "^4.17.21",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
-    "vue-router": "^4.2.5"
+    "veaury": "^2.3.16",
+    "vue-router": "^4.2.5",
+    "vuetify": "^3.5.9"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue-jsx": "^3.1.0"
   }
 }

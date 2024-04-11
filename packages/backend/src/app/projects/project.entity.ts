@@ -1,58 +1,42 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  OneToMany,
-  ManyToMany,
-  JoinTable,
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    CreateDateColumn,
+    UpdateDateColumn,
+    OneToMany,
+    ManyToMany,
+    JoinTable,
+    ManyToOne,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 import { Contact } from '../contacts/contact.entity';
+import { Space } from '../spaces/space.entity';
 
 @Entity()
 export class Project {
-  /**
-   * The unique identifier for the user.
-   */
-  @PrimaryGeneratedColumn('increment')
-  id: number;
+    @PrimaryGeneratedColumn('increment')
+    id: number;
 
-  /**
-   * The username for the user. It is unique across the system.
-   */
-  @Column({ type: 'varchar', length: 255 })
-  name: string;
+    @Column({ type: 'varchar', length: 255 })
+    name: string;
 
-  /**
-   * The ID of the project owner.
-   */
-  @Column({ type: 'bigint' })
-  ownerId: number;
+    @Column({ type: 'bigint' })
+    ownerId: number;
 
-  /**
-   * A relationship to the Project entity representing contacts created in the project.
-   */
-  @OneToMany(() => Contact, (contact) => contact.project)
-  contacts: Contact[];
+    @CreateDateColumn({ type: 'timestamp' })
+    createdAt: Date;
+    @UpdateDateColumn({ type: 'timestamp' })
+    updatedAt: Date;
 
-  /**
-   * A timestamp representing when the user account was created.
-   */
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
+    @ManyToOne(() => Space, (space) => space.project)
+    @JoinTable()
+    spaces: Space[];
 
-  /**
-   * A timestamp representing when the user account was last updated.
-   */
-  @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
+    @ManyToMany(() => User, (user) => user.projects)
+    @JoinTable()
+    users: User[];
 
-  /**
-   * A relationship to the User entity representing users of the project.
-   */
-  @ManyToMany(() => User, (user) => user.projects)
-  @JoinTable()
-  users: User[];
+    @OneToMany(() => Contact, (contact) => contact.project)
+    contacts: Contact[];
 }

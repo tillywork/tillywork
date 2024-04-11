@@ -1,8 +1,5 @@
-import {
-  createRouter,
-  createWebHistory,
-} from 'vue-router';
-import { requireAuthGuard, requireGuestGuard } from './guards';
+import { createRouter, createWebHistory } from 'vue-router';
+import { requireAuthGuard, requireGuestGuard, titleGuard } from './guards';
 import routes from './routes';
 
 // Create the router instance
@@ -13,5 +10,6 @@ const router = createRouter({
 
 router.beforeEach(requireAuthGuard);
 router.beforeEach(requireGuestGuard);
+router.beforeEach(titleGuard);
 
 export default router;
