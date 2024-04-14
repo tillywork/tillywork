@@ -3,16 +3,8 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { UsersModule } from "./users/users.module";
-import { ContactsModule } from "./contacts/contacts.module";
-import { AuthModule } from "./auth/auth.module";
-import { LoggingInterceptor } from "./logger/logging.interceptor";
-import { APP_INTERCEPTOR } from "@nestjs/core";
-import { ProjectsModule } from "./projects/projects.module";
-import { NotesModule } from "./notes/notes.module";
-import { SpacesModule } from "./spaces/spaces.module";
-import { ViewsModule } from "./views/views.module";
-import { CardsModule } from "./cards/cards.module";
+import { CommonModule } from "./common/common.module";
+import { CRMModule } from "./crm/crm.module";
 
 @Module({
     imports: [
@@ -32,22 +24,12 @@ import { CardsModule } from "./cards/cards.module";
             }),
             inject: [ConfigService],
         }),
-        AuthModule,
-        UsersModule,
-        ProjectsModule,
-        SpacesModule,
-        ViewsModule,
-        CardsModule,
-        ContactsModule,
-        NotesModule,
+        CommonModule,
+        CRMModule,
     ],
     controllers: [AppController],
     providers: [
         AppService,
-        {
-            provide: APP_INTERCEPTOR,
-            useClass: LoggingInterceptor,
-        },
     ],
     exports: [],
 })

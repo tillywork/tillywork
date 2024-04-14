@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { requireAuthGuard, requireGuestGuard, titleGuard } from './guards';
-import routes from './routes';
+import routes from './routes'
 
 // Create the router instance
 const router = createRouter({
