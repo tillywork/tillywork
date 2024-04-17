@@ -22,42 +22,42 @@ export class ListsService {
 		return data.value;
 	}
 
-	async createList(space: Partial<List>): Promise<List> {
+	async createList(list: Partial<List>): Promise<List> {
 		const { data, sendRequest } = useHttp();
 
 		await sendRequest('/lists', {
 			method: 'POST',
-			data: space,
+			data: list,
 		});
 
 		return data.value;
 	}
 
-	async getList(spaceId: number): Promise<List> {
+	async getList(id: number): Promise<List> {
 		const { data, sendRequest } = useHttp();
 
-		await sendRequest(`/lists/${spaceId}`, {
+		await sendRequest(`/lists/${id}`, {
 			method: 'GET',
 		});
 
 		return data.value;
 	}
 
-	async updateList(space: List): Promise<List> {
+	async updateList(list: List): Promise<List> {
 		const { data, sendRequest } = useHttp();
 
-		await sendRequest(`/lists/${space.id}`, {
+		await sendRequest(`/lists/${list.id}`, {
 			method: 'PUT',
-			data: space,
+			data: list,
 		});
 
 		return data.value;
 	}
 
-	async deleteList(spaceId: number): Promise<void> {
+	async deleteList(id: number): Promise<void> {
 		const { sendRequest } = useHttp();
 
-		await sendRequest(`/lists/${spaceId}`, {
+		await sendRequest(`/lists/${id}`, {
 			method: 'DELETE',
 		});
 	}

@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import NavigationWorkspaceSelector from './NavigationWorkspaceSelector.vue';
 import CreateSpaceDialogAndButton from '../navigation/CreateSpaceDialogAndButton.vue';
-import CreateListDialog from '../navigation/CreateListDialog.vue';
-import CreateListDialogButton from '../navigation/CreateListDialogButton.vue';
+import CreateListDialogAndButton from '../navigation/CreateListDialogAndButton.vue';
 import { SpacesService } from '../spaces/spaces.service';
 import { watch } from 'vue';
 import { useWorkspaceStore } from '@/stores/workspace';
@@ -14,13 +13,23 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const workspaceStore = useWorkspaceStore();
-const { selectedWorkspace } = storeToRefs(workspaceStore);
+const { selectedWorkspace, selectedSpace, spaceExpansionState } = storeToRefs(workspaceStore);
 
 const spaces = ref<Space[]>();
 const spacesService = new SpacesService();
 const createListDialog = ref(false);
 const listMenu = ref(false);
 const freezeListHoverId = ref<number | null>();
+const freezeSpaceHoverId = ref<number | null>();
+
+const currentSpaceExpansionState = computed({
+  get: () => selectedWorkspace.value ? spaceExpansionState.value[selectedWorkspace.value.id] : [],
+  set: (state) => {
+    if (selectedWorkspace.value) {
+      workspaceStore.setSpaceExpansionState(selectedWorkspace.value.id, state);
+    }
+  }
+});
 
 watch(selectedWorkspace, async (workspace) => {
   if (workspace) {
@@ -37,7 +46,8 @@ async function getSpaces() {
 }
 
 function handleCreateListDialogClick(space: Space) {
-  workspaceStore.setSelectedSpace(space);
+  selectedSpace.value = space;
+  freezeSpaceHoverId.value = space.id;
 }
 
 function handleListClick(list: List) {
@@ -61,13 +71,19 @@ watch(listMenu, (isOpen) => {
     freezeListHoverId.value = null;
   }
 });
+
+watch(createListDialog, (isOpen) => {
+  if (!isOpen) {
+    freezeSpaceHoverId.value = null;
+  }
+});
 </script>
 
 <template>
-  <div>
+  <div class="navigation-workspace">
     <navigation-workspace-selector />
     <!-- Spaces -->
-    <v-list nav density="compact" :lines="false">
+    <v-list v-model:opened="currentSpaceExpansionState" nav density="compact" :lines="false">
       <template v-if="spaces && spaces.length > 0">
         <div class="d-flex mb-2 pe-2">
           <v-spacer />
@@ -75,7 +91,7 @@ watch(listMenu, (isOpen) => {
         </div>
         <template v-for="space in spaces" :key="space.id">
           <v-hover v-slot="{ isHovering, props: hoverProps }">
-            <v-list-group :value="space.name" v-bind="hoverProps" subgroup>
+            <v-list-group :value="space.id" v-bind="hoverProps" subgroup>
               <template v-slot:activator="{ props: groupProps }">
                 <v-list-item rounded="md" v-bind="groupProps" slim>
                   <template v-slot:prepend v-if="!isHovering">
@@ -84,8 +100,8 @@ watch(listMenu, (isOpen) => {
                   <v-list-item-title class="user-select-none">
                     {{ space.name }}
                   </v-list-item-title>
-                  <template v-slot:append v-if="isHovering">
-                    <create-list-dialog-button v-model="createListDialog" @click="handleCreateListDialogClick(space)" />
+                  <template v-slot:append v-if="isHovering || freezeSpaceHoverId === space.id">
+                    <create-list-dialog-and-button v-model="createListDialog" @click="handleCreateListDialogClick(space)" @create="getSpaces" />
                   </template>
                 </v-list-item>
               </template>
@@ -93,11 +109,11 @@ watch(listMenu, (isOpen) => {
               <template v-for="list in space.lists" :key="list.id">
                 <v-hover v-slot="{ isHovering: isListHovering, props: listHoverProps }">
                   <v-list-item rounded="md" prepend-icon="mdi-list-box-outline" slim v-bind="listHoverProps"
-                    @click="handleListClick(list)">
-                    <v-list-item-title user-select-none>{{ list.name }}</v-list-item-title>
+                    @click="handleListClick(list)" exact>
+                    <v-list-item-title class="user-select-none">{{ list.name }}</v-list-item-title>
                     <template v-slot:append v-if="isListHovering || freezeListHoverId === list.id">
-                      <v-btn id="list-menu-btn" color="default" density="compact" icon="mdi-dots-vertical"
-                        rounded="md" size="small" @click.stop @click="handleListMenuClick(list)" />
+                      <v-btn id="list-menu-btn" color="default" density="compact" icon="mdi-dots-vertical" rounded="md"
+                        size="small" @click.stop @click="handleListMenuClick(list)" />
 
                       <v-menu v-model="listMenu" :close-on-content-click="false" target="#list-menu-btn">
                         <v-card class="pt-3 mt-2" width="300px" density="compact">
@@ -127,13 +143,13 @@ watch(listMenu, (isOpen) => {
         </v-list-item>
       </template>
     </v-list>
-
-    <create-list-dialog v-model="createListDialog" @create="getSpaces" />
   </div>
 </template>
 
 <style lang="scss">
-.v-list-group__items .v-list-item {
-  padding-inline-start: 24px !important
+.navigation-workspace {
+  .v-list-group__items .v-list-item {
+    padding-inline-start: 24px !important
+  }
 }
 </style>

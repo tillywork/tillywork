@@ -1,7 +1,9 @@
 export interface Workspace {
 	id: number;
 	name: string;
-	ownerId: string;
+	ownerId: number;
+    projectId: number;
+    workspaceType: WorkspaceTypes;
 	createdAt: string;
 	updatedAt: string;
 }

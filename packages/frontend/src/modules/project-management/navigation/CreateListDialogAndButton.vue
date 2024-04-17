@@ -18,7 +18,7 @@ const createListData = ref({
 	spaceId: selectedSpace.value?.id,
 });
 
-const emit = defineEmits(['create']);
+const emit = defineEmits(['create', 'click']);
 
 function closeCreateListDialog() {
 	createListDialog.value = false;
@@ -36,10 +36,18 @@ async function createList() {
 	createListForm.value.reset();
 	closeCreateListDialog();
 }
+
+function handleCreateListDialogClick() {
+	emit('click');
+}
 </script>
 
 <template>
-	<v-dialog v-model="createListDialog" width="400">
+	<v-btn id="create-list-button" color="default" density="compact" icon="mdi-plus" rounded="circle" size="small" @click.stop @click="handleCreateListDialogClick" />
+	<v-tooltip activator="#create-list-button" location="bottom"><span class="text-caption">Add list to
+			this space</span></v-tooltip>
+
+	<v-dialog v-model="createListDialog" activator="#create-list-button" width="400">
 		<v-form ref="createListForm" @submit.prevent="createList">
 			<v-card :loading="createListLoading">
 				<template v-slot:loader="{ isActive }">
