@@ -5,6 +5,7 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import App from './app/App.vue';
 import vuetify from './plugins/vuetify';
 import router from './router';
+import { VueQueryPlugin } from '@tanstack/vue-query';
 
 const app = createApp(App);
 
@@ -22,5 +23,6 @@ pinia.use(piniaPluginPersistedstate);
 app.use(pinia);
 app.use(vuetify);
 app.use(router);
+app.use(VueQueryPlugin);
 
 app.mount('#root');

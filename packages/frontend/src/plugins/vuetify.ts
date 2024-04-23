@@ -4,6 +4,7 @@ import * as directives from 'vuetify/directives';
 import { md3 } from 'vuetify/blueprints';
 import '@mdi/font/css/materialdesignicons.css';
 import 'vuetify/styles';
+import '@/styles/vuetify.scss';
 
 const themes = {
   light: {
@@ -63,7 +64,7 @@ const vuetify = createVuetify({
     },
     VDataTable: {
       density: 'compact',
-    }
+    },
   },
 });
 

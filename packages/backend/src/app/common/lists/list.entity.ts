@@ -6,29 +6,34 @@ import {
     UpdateDateColumn,
     ManyToOne,
     JoinTable,
-} from 'typeorm';
-import { Space } from '../spaces/space.entity';
-import { Card } from '../cards/card.entity';
+    OneToMany,
+} from "typeorm";
+import { Space } from "../spaces/space.entity";
+import { CardList } from "../cards/card.list.entity";
+import { ListStage } from "./list.stage.entity";
 
 @Entity()
 export class List {
-    @PrimaryGeneratedColumn('increment')
+    @PrimaryGeneratedColumn("increment")
     id: number;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: "varchar", length: 255 })
     name: string;
 
-    @CreateDateColumn({ type: 'timestamp' })
+    @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;
-    @UpdateDateColumn({ type: 'timestamp' })
+    @UpdateDateColumn({ type: "timestamp" })
     updatedAt: Date;
 
     @ManyToOne(() => Space, (space) => space.lists)
     @JoinTable()
     space: Space;
-    @Column({ type: 'bigint' })
+    @Column({ type: "bigint" })
     spaceId: number;
 
-    @ManyToOne(() => Card, (card) => card.view)
-    cards: Card[];
+    @OneToMany(() => ListStage, (listStage) => listStage.list)
+    listStages: ListStage[];
+
+    @OneToMany(() => CardList, (cardList) => cardList.list)
+    cardLists: CardList[];
 }

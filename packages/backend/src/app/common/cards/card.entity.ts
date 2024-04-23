@@ -4,23 +4,36 @@ import {
     Column,
     CreateDateColumn,
     UpdateDateColumn,
-    ManyToOne,
-} from 'typeorm';
-import { View } from '../views/view.entity';
+    OneToMany,
+    DeleteDateColumn,
+    ManyToMany,
+    JoinTable,
+} from "typeorm";
+import { CardList } from "./card.list.entity";
+import { User } from "../users/user.entity";
 
 @Entity()
 export class Card {
-    @PrimaryGeneratedColumn('increment')
+    @PrimaryGeneratedColumn("increment")
     id: number;
 
-    @Column({ type: 'jsonb' })
-    attributes: any;
+    @Column({ type: "varchar" })
+    title: string;
 
-    @ManyToOne(() => View, (view) => view.cards, { nullable: false })
-    view: View;
+    @Column({ type: "varchar", nullable: true })
+    description?: string;
 
-    @CreateDateColumn({ type: 'timestamp' })
+    @OneToMany(() => CardList, (cardList) => cardList.card)
+    cardLists: CardList[];
+
+    @ManyToMany(() => User, (user) => user.cards)
+    @JoinTable({ name: "card_users" })
+    users: User[];
+
+    @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;
-    @UpdateDateColumn({ type: 'timestamp' })
+    @UpdateDateColumn({ type: "timestamp" })
     updatedAt: Date;
+    @DeleteDateColumn({ type: "timestamp" })
+    deletedAt: Date;
 }

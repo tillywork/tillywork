@@ -19,11 +19,7 @@ export class UsersService {
     ) {}
 
     async findAll(): Promise<UserFindAllResult> {
-        const result = await this.usersRepository.findAndCount({
-            where: {
-                deletedAt: null,
-            },
-        });
+        const result = await this.usersRepository.findAndCount({});
         return { users: result[0], total: result[1] };
     }
 
@@ -31,7 +27,6 @@ export class UsersService {
         const user = await this.usersRepository.findOne({
             where: {
                 id,
-                deletedAt: null,
             },
         });
         if (!user) {
@@ -44,7 +39,6 @@ export class UsersService {
         const user = await this.usersRepository.findOne({
             where: {
                 email,
-                deletedAt: null,
             },
         });
         return user;

@@ -6,13 +6,15 @@ import {
     Param,
     Delete,
     Put,
-    UseGuards
+    UseGuards,
 } from "@nestjs/common";
 import { ListFindAllResult, ListsService } from "./lists.service";
 import { List } from "./list.entity";
 import { CreateListDto } from "./dto/create.list.dto";
 import { UpdateListDto } from "./dto/update.list.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
+import { ListStage } from "./list.stage.entity";
+import { ListStagesService } from "./list.stages.service";
 
 @UseGuards(JwtAuthGuard)
 @Controller({
@@ -20,7 +22,10 @@ import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
     version: "1",
 })
 export class ListsController {
-    constructor(private readonly listsService: ListsService) {}
+    constructor(
+        private readonly listsService: ListsService,
+        private readonly listStagesService: ListStagesService
+    ) {}
 
     @Get()
     findAll(): Promise<ListFindAllResult> {
@@ -33,9 +38,7 @@ export class ListsController {
     }
 
     @Post()
-    create(
-        @Body() createListDto: CreateListDto
-    ): Promise<List> {
+    create(@Body() createListDto: CreateListDto): Promise<List> {
         return this.listsService.create(createListDto);
     }
 
@@ -50,5 +53,12 @@ export class ListsController {
     @Delete(":id")
     remove(@Param("id") id: string): Promise<void> {
         return this.listsService.remove(+id);
+    }
+
+    @Get(":listId/stages")
+    findStages(@Param("listId") listId: number): Promise<ListStage[]> {
+        return this.listStagesService.findAll({
+            listId,
+        });
     }
 }

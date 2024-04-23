@@ -33,31 +33,29 @@ export interface NotesData {
   total: number;
 }
 
-export class NotesService {
-  async create(note: {
+export const useNotesService = () => {
+  async function create(note: {
     note: string;
     entityId: number;
     entityType: 'contact' | 'organization';
   }): Promise<any> {
-    const { data, sendRequest } = useHttp();
+    const { sendRequest } = useHttp();
 
-    await sendRequest(`/notes`, {
+    return sendRequest(`/notes`, {
       method: 'POST',
       data: note,
     });
-
-    return data;
   }
 
-  async getContactNotes({
+  async function getContactNotes({
     contactId,
     page,
     itemsPerPage,
     sortBy,
   }: GetContactNotesParams): Promise<NotesData> {
-    const { data, sendRequest } = useHttp();
+    const { sendRequest } = useHttp();
 
-    await sendRequest(`/notes/contacts/${contactId}`, {
+    return sendRequest(`/notes/contacts/${contactId}`, {
       method: 'GET',
       params: {
         page,
@@ -66,7 +64,10 @@ export class NotesService {
         sortOrder: sortBy[0]?.order,
       },
     });
-
-    return data.value;
   }
-}
+
+  return {
+    create,
+    getContactNotes,
+  };
+};
