@@ -36,21 +36,21 @@ export interface ContactsData {
   total: number;
 }
 
-export class ContactsService {
-  async getContacts({
+export const useContactsService = () => {
+  async function getContacts({
     projectId,
     page = 1,
     itemsPerPage = 10,
     sortBy = [
       {
         key: 'createdAt',
-        order: 'desc'
-      }
+        order: 'desc',
+      },
     ],
   }: GetContactsParams): Promise<ContactsData> {
-    const { data, sendRequest } = useHttp();
+    const { sendRequest } = useHttp();
 
-    await sendRequest('/contacts', {
+    return sendRequest('/contacts', {
       method: 'GET',
       params: {
         projectId,
@@ -60,51 +60,43 @@ export class ContactsService {
         sortOrder: sortBy[0]?.order,
       },
     });
-
-    return data.value;
   }
 
-  async createContact(contact: CreateContact): Promise<Contact> {
-    const { data, sendRequest } = useHttp();
+  async function createContact(contact: CreateContact): Promise<Contact> {
+    const { sendRequest } = useHttp();
 
-    await sendRequest('/contacts', {
+    return sendRequest('/contacts', {
       method: 'POST',
       data: contact,
     });
-
-    return data.value;
   }
 
-  async getContact(contactId: number): Promise<Contact> {
-    const { data, sendRequest } = useHttp();
+  async function getContact(contactId: number): Promise<Contact> {
+    const { sendRequest } = useHttp();
 
-    await sendRequest(`/contacts/${contactId}`, {
+    return sendRequest(`/contacts/${contactId}`, {
       method: 'GET',
     });
-
-    return data.value;
   }
 
-  async updateContact(contact: Contact): Promise<Contact> {
-    const { data, sendRequest } = useHttp();
+  async function updateContact(contact: Contact): Promise<Contact> {
+    const { sendRequest } = useHttp();
 
-    await sendRequest(`/contacts/${contact.id}`, {
+    return sendRequest(`/contacts/${contact.id}`, {
       method: 'PUT',
       data: contact,
     });
-
-    return data.value;
   }
 
-  async deleteContact(contactId: number): Promise<void> {
+  async function deleteContact(contactId: number): Promise<void> {
     const { sendRequest } = useHttp();
 
-    await sendRequest(`/contacts/${contactId}`, {
+    return sendRequest(`/contacts/${contactId}`, {
       method: 'DELETE',
     });
   }
 
-  getFullName(contact: Contact): string {
+  function getFullName(contact: Contact): string {
     if (contact.firstName && contact.lastName) {
       return `${contact.firstName} ${contact.lastName}`;
     } else if (contact.firstName) {
@@ -115,4 +107,13 @@ export class ContactsService {
       return '';
     }
   }
-}
+
+  return {
+    getContacts,
+    getContact,
+    createContact,
+    updateContact,
+    deleteContact,
+    getFullName,
+  };
+};

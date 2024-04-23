@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { ContactsService, type Contact } from './contacts.service';
+import {
+  useContactsService,
+  type Contact,
+} from '../../../composables/services/useContactsService';
 import { ref } from 'vue';
 import ContactDetails from './ContactDetails.vue';
 import ContactTimeline from './ContactTimeline.vue';
-import { useDisplay } from 'vuetify'
+import { useDisplay } from 'vuetify';
 
-const { name } = useDisplay()
+const { name } = useDisplay();
 
 const route = useRoute();
 const router = useRouter();
-const contactsService = new ContactsService();
+const contactsService = useContactsService();
 const contact = ref<Contact | null>();
 const contactDropdownMenu = ref([
   {
@@ -49,25 +52,52 @@ fetchContact();
           <!-- User basic info banner -->
           <div class="contact-basic-info d-flex align-center ga-3">
             <v-avatar size="50">
-              <v-img v-if="contact.photo" :src="contact.photo" width="80" height="50" />
-              <v-icon v-else icon="mdi-account-circle" size="50" color="primary"></v-icon>
+              <v-img
+                v-if="contact.photo"
+                :src="contact.photo"
+                width="80"
+                height="50"
+              />
+              <v-icon
+                v-else
+                icon="mdi-account-circle"
+                size="50"
+                color="primary"
+              ></v-icon>
             </v-avatar>
             <div class="d-flex flex-column">
-              <span class="text-body-1 text-truncate">{{ contactsService.getFullName(contact) }}</span>
-              <span class="text-body-2 text-truncate">{{ contact.emails[0] }}</span>
+              <span class="text-body-1 text-truncate">{{
+                contactsService.getFullName(contact)
+              }}</span>
+              <span class="text-body-2 text-truncate">{{
+                contact.emails[0]
+              }}</span>
             </div>
             <v-spacer />
-            <v-btn id="contact-menu-activator" density="comfortable" variant="text" icon="mdi-dots-vertical"
-              rounded="default" />
+            <v-btn
+              id="contact-menu-activator"
+              density="comfortable"
+              variant="text"
+              icon="mdi-dots-vertical"
+              rounded="default"
+            />
           </div>
         </div>
         <!-- User properties -->
-        <ContactDetails :contact="contact" :key="contact.updatedAt" @update="fetchContact()" />
+        <ContactDetails
+          :contact="contact"
+          :key="contact.updatedAt"
+          @update="fetchContact()"
+        />
       </div>
 
       <v-menu activator="#contact-menu-activator" location="bottom right">
         <v-list>
-          <v-list-item v-for="item in contactDropdownMenu" :key="item.title" @click="item.click(contact)">
+          <v-list-item
+            v-for="item in contactDropdownMenu"
+            :key="item.title"
+            @click="item.click(contact)"
+          >
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item>
         </v-list>

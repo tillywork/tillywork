@@ -1,3 +1,10 @@
+import { IsNotEmpty } from "class-validator";
+
 export class CreateCardDto {
-  title: string;
+    @IsNotEmpty()
+    title: string;
+    @IsNotEmpty()
+    listId: number;
+    @IsNotEmpty()
+    listStageId: number;
 }

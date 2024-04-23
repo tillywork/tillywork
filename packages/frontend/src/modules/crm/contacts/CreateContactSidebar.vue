@@ -4,7 +4,10 @@ import { useSidebarState } from '@/composables/useSidebarState';
 import { useSnackbar } from '@/composables/useSnackbar';
 import { useAuth } from '@/composables/useAuth';
 import type { VForm } from 'vuetify/lib/components/index.mjs';
-import { ContactsService, type CreateContact } from './contacts.service';
+import {
+  useContactsService,
+  type CreateContact,
+} from '@/composables/services/useContactsService';
 import { validation } from '@/utils/validation';
 
 export default {
@@ -14,7 +17,7 @@ export default {
     const { isSidebarOpen, closeSidebar } = useSidebarState();
     const { showSnackbar } = useSnackbar();
     const { selectedProjectId } = useAuth();
-    const contactsService = new ContactsService();
+    const contactsService = useContactsService();
 
     const atLeastOneFieldFilledRule = [
       () => {
@@ -28,8 +31,7 @@ export default {
           (field) => field && field.length > 0
         );
         return (
-          isAnyFieldFilled ||
-          'At least one of these fields should be filled'
+          isAnyFieldFilled || 'At least one of these fields should be filled'
         );
       },
     ];
@@ -100,28 +102,61 @@ export default {
 </script>
 
 <template>
-  <v-navigation-drawer v-model="isSidebarOpen" location="right" temporary :width="450">
+  <v-navigation-drawer
+    v-model="isSidebarOpen"
+    location="right"
+    temporary
+    :width="450"
+  >
     <v-form ref="createForm" @submit.prevent="createContact">
       <v-container class="d-flex flex-column ga-2">
-        <span class="text-h5 mb-4 mt-12 font-weight-bold">Create a new contact</span>
-        <v-text-field v-model="contactData.firstName" label="First Name" :rules="atLeastOneFieldFilledRule" />
-        <v-text-field v-model="contactData.lastName" label="Last Name" :rules="atLeastOneFieldFilledRule" />
-        <v-text-field v-model="contactData.email" label="Email"
-          :rules="[validation.rules.email, ...atLeastOneFieldFilledRule]" />
-        <v-text-field v-model="contactData.phoneNumber" label="Phone Number"
-          :rules="[validation.rules.phoneNumber, ...atLeastOneFieldFilledRule]" />
+        <span class="text-h5 mb-4 mt-12 font-weight-bold"
+          >Create a new contact</span
+        >
+        <v-text-field
+          v-model="contactData.firstName"
+          label="First Name"
+          :rules="atLeastOneFieldFilledRule"
+        />
+        <v-text-field
+          v-model="contactData.lastName"
+          label="Last Name"
+          :rules="atLeastOneFieldFilledRule"
+        />
+        <v-text-field
+          v-model="contactData.email"
+          label="Email"
+          :rules="[validation.rules.email, ...atLeastOneFieldFilledRule]"
+        />
+        <v-text-field
+          v-model="contactData.phoneNumber"
+          label="Phone Number"
+          :rules="[validation.rules.phoneNumber, ...atLeastOneFieldFilledRule]"
+        />
 
         <template v-if="contactData.otherEmails">
           <span class="subtitle-2 mb-3">Other Emails</span>
           <v-btn block @click="addOtherEmailField"> Add Another Email </v-btn>
 
-          <div v-for="(otherEmail, index) in contactData.otherEmails" :key="index" class="mb-2">
-            <v-text-field v-model="contactData.otherEmails[index]" :rules="[validation.rules.email]" label="Other Email"
-              @click:clear="removeOtherEmailField(index)" clearable persistent-clear />
+          <div
+            v-for="(otherEmail, index) in contactData.otherEmails"
+            :key="index"
+            class="mb-2"
+          >
+            <v-text-field
+              v-model="contactData.otherEmails[index]"
+              :rules="[validation.rules.email]"
+              label="Other Email"
+              @click:clear="removeOtherEmailField(index)"
+              clearable
+              persistent-clear
+            />
           </div>
         </template>
         <div class="mt-16">
-          <v-btn :loading="loading" type="submit" width="100%" height="40px">Create</v-btn>
+          <v-btn :loading="loading" type="submit" width="100%" height="40px"
+            >Create</v-btn
+          >
         </div>
       </v-container>
     </v-form>

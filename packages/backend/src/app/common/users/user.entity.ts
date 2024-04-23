@@ -10,6 +10,7 @@ import {
 } from "typeorm";
 import { Contact } from "../../crm/contacts/contact.entity";
 import { Project } from "../projects/project.entity";
+import { Card } from "../cards/card.entity";
 
 @Entity()
 export class User {
@@ -28,7 +29,7 @@ export class User {
     /**
      * The hashed password for the user. It is stored in a secure way using bcrypt.
      */
-    @Column({ type: "varchar", length: 255 })
+    @Column({ type: "varchar", length: 255, select: false })
     password: string;
 
     /**
@@ -42,6 +43,12 @@ export class User {
      */
     @Column({ type: "varchar", length: 255 })
     lastName: string;
+
+    /**
+     * The photo URL of the user.
+     */
+    @Column({ type: "varchar", length: 255, nullable: true })
+    photo: string;
 
     /**
      * The roles assigned to the user. It can represent different permission levels.
@@ -75,4 +82,10 @@ export class User {
      */
     @ManyToMany(() => Project, (project) => project.users)
     projects: Project[];
+
+    /**
+     * A relationship to the Project entity representing the user's projects.
+     */
+    @ManyToMany(() => Card, (card) => card.users)
+    cards: Card[];
 }

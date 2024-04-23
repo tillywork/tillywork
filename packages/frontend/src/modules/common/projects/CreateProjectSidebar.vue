@@ -1,5 +1,3 @@
-
-
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useSidebarState } from '@/composables/useSidebarState';

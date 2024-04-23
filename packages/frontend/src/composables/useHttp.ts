@@ -1,4 +1,3 @@
-import { ref } from 'vue';
 import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
 import { useAuth } from './useAuth';
 
@@ -64,15 +63,12 @@ const createAxiosInstance = () => {
 };
 
 export function useHttp() {
-  const data = ref<any | null>(null);
-  const error = ref<unknown | undefined>(undefined);
-  const loading = ref(false);
   axiosInstance = createAxiosInstance();
 
   /**
    * Sends an HTTP request using the created Axios instance.
-   * Response is saved in the data ref.
-   * Errors are caught and filled in the error ref.
+   * and returns the response data.
+   * Errors are not caught here.
    * @param endpoint The endpoint to send the request to
    * @param options AxiosRequestConfig
    */
@@ -80,30 +76,18 @@ export function useHttp() {
     endpoint: string,
     options?: AxiosRequestConfig
   ) => {
-    loading.value = true;
-    error.value = undefined; // Reset the error before new request
+    const response = await axiosInstance.request({
+      url: `${endpoint}`,
+      method: options?.method || 'get',
+      headers: options?.headers,
+      data: options?.data,
+      ...options, // Spreading the rest of options in case there are other Axios-specific properties
+    });
 
-    try {
-      const response = await axiosInstance.request({
-        url: `${endpoint}`,
-        method: options?.method || 'get',
-        headers: options?.headers,
-        data: options?.data,
-        ...options, // Spreading the rest of options in case there are other Axios-specific properties
-      });
-
-      data.value = response.data;
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        // Check if error response is available and use it
-        error.value = (err.response && err.response.data) || err.message;
-      } else {
-        error.value = err;
-      }
-    } finally {
-      loading.value = false;
-    }
+    return response.data;
   };
 
-  return { data, error, loading, sendRequest };
+  return {
+    sendRequest,
+  };
 }

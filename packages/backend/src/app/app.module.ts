@@ -5,6 +5,7 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { CommonModule } from "./common/common.module";
 import { CRMModule } from "./crm/crm.module";
+import { TypeOrmLoggerContainer } from "./common/logger/typeorm.logger.container";
 
 @Module({
     imports: [
@@ -21,6 +22,7 @@ import { CRMModule } from "./crm/crm.module";
                 entities: [__dirname + "/**/*.entity{.ts,.js}"],
                 autoLoadEntities: true,
                 synchronize: true, // use only in development, in production should be handled by migrations
+                logger: TypeOrmLoggerContainer.ForConnection("default", true),
             }),
             inject: [ConfigService],
         }),
@@ -28,9 +30,7 @@ import { CRMModule } from "./crm/crm.module";
         CRMModule,
     ],
     controllers: [AppController],
-    providers: [
-        AppService,
-    ],
+    providers: [AppService],
     exports: [],
 })
 export class AppModule {}

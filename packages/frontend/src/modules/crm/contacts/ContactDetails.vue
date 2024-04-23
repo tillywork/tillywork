@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { ContactsService, type Contact } from './contacts.service';
+import {
+  useContactsService,
+  type Contact,
+} from '@/composables/services/useContactsService';
 import { useSnackbar } from '@/composables/useSnackbar';
 import objectHelper from '@/utils/object';
 import InlineInput from '@/modules/common/inputs/InlineInput.vue';
@@ -15,7 +18,7 @@ const contactCopy = ref<Contact>({ ...(props.contact as Contact) });
 const numberOfEditedFields = ref(0);
 const updateContactLoading = ref(false);
 const isEdited = ref(false);
-const contactsService = new ContactsService();
+const contactsService = useContactsService();
 const isEditing = ref<string | undefined>();
 
 async function saveChanges() {

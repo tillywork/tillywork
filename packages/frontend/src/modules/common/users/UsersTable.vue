@@ -10,7 +10,7 @@
   <CreateUserSidebar />
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useHttp } from '@/composables/useHttp';
 import { useSidebarState } from '@/composables/useSidebarState';
@@ -36,48 +36,32 @@ export interface UsersData {
   total: number;
 }
 
-export default {
-  name: 'UsersTable',
-  components: {
-    CreateUserSidebar,
-  },
-  setup() {
-    const { openSidebar } = useSidebarState();
-    const { data, loading, sendRequest } = useHttp();
+const { openSidebar } = useSidebarState();
+const { data, loading, sendRequest } = useHttp();
 
-    const total = computed(() => (data.value as unknown as UsersData)?.total ?? 0);
-    const users = computed(() => (data.value as unknown as UsersData)?.users ?? []);
+const total = computed(() => (data.value as unknown as UsersData)?.total ?? 0);
+const users = computed(() => (data.value as unknown as UsersData)?.users ?? []);
 
-    const options = ref({
-      page: 1,
-      itemsPerPage: 5,
-      sortBy: [],
-      sortDesc: false,
-    });
+const options = ref({
+  page: 1,
+  itemsPerPage: 5,
+  sortBy: [],
+  sortDesc: false,
+});
 
-    const fetchUsers = () => {
-      const params: PaginationData = {
-        sortBy: options.value.sortBy[0] || '',
-        descending: options.value.sortDesc || false,
-        page: options.value.page || 1,
-        rowsPerPage: options.value.itemsPerPage || 5,
-      };
+const fetchUsers = () => {
+  const params: PaginationData = {
+    sortBy: options.value.sortBy[0] || '',
+    descending: options.value.sortDesc || false,
+    page: options.value.page || 1,
+    rowsPerPage: options.value.itemsPerPage || 5,
+  };
 
-      sendRequest('/users', {
-        method: 'GET',
-      });
-    };
-
-    watch(options, fetchUsers, { deep: true });
-    fetchUsers();
-
-    return {
-      openSidebar,
-      users,
-      total,
-      options,
-      loading,
-    };
-  },
+  sendRequest('/users', {
+    method: 'GET',
+  });
 };
+
+watch(options, fetchUsers, { deep: true });
+fetchUsers();
 </script>

@@ -1,15 +1,18 @@
 <script setup lang="tsx">
 import { ref } from 'vue';
-import { NotesService, type Note } from '@/modules/common/NotesService';
+import {
+  useNotesService,
+  type Note,
+} from '@/composables/services/useNotesService';
 import { onMounted } from 'vue';
 import BlockNote from '@/modules/common/inputs/BlockNote.vue';
-import type { Contact } from './contacts.service';
+import type { Contact } from '@/composables/services/useContactsService';
 
 const { contact } = defineProps<{
-  contact: Contact
-}>()
+  contact: Contact;
+}>();
 const note = ref('');
-const notesService = new NotesService();
+const notesService = useNotesService();
 const options = ref({
   page: 1,
   itemsPerPage: 5,
@@ -62,7 +65,12 @@ onMounted(() => {
         <span class="font-weight-bold">{{ note.note }} -</span>
         <span>&nbsp;{{ note.createdAt }}</span>
       </v-timeline-item>
-      <v-timeline-item size="small" dot-color="accent" icon="mdi-account-circle" fill-dot>
+      <v-timeline-item
+        size="small"
+        dot-color="accent"
+        icon="mdi-account-circle"
+        fill-dot
+      >
         <div class="d-flex">
           <span class="font-weight-bold">Contact Created -</span>
           <span>&nbsp;{{ contact.createdAt }}</span>

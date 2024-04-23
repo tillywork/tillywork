@@ -30,61 +30,47 @@
   </v-container>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useAuth } from '@/composables/useAuth';
 import { useSnackbar } from '@/composables/useSnackbar';
 import { useRoute } from 'vue-router';
 
-export default {
-  name: 'LoginPage',
-  setup() {
-    const email = ref('');
-    const password = ref('');
-    const errorMessage = ref<string | null>(null);
-    const rules = {
-      required: (value: any) => !!value || 'This field is required',
-      email: (value: any) => /.+@.+\..+/.test(value) || 'Email must be valid',
-    };
-    const loading = ref(false);
-    const route = useRoute();
+const email = ref('');
+const password = ref('');
+const errorMessage = ref<string | null>(null);
+const rules = {
+  required: (value: any) => !!value || 'This field is required',
+  email: (value: any) => /.+@.+\..+/.test(value) || 'Email must be valid',
+};
+const loading = ref(false);
+const route = useRoute();
 
-    const login = async () => {
-      try {
-        const { login } = useAuth();
+const login = async () => {
+  try {
+    const { login } = useAuth();
 
-        loading.value = true;
-        await login(email.value, password.value);
-        loading.value = false;
-        window.location.pathname = route.redirectedFrom?.fullPath ?? '/';
-      } catch (error) {
-        const { showSnackbar } = useSnackbar();
+    loading.value = true;
+    await login(email.value, password.value);
+    loading.value = false;
+    window.location.pathname = route.redirectedFrom?.fullPath ?? '/';
+  } catch (error) {
+    const { showSnackbar } = useSnackbar();
 
-        loading.value = false;
-        const errorObj = (error as any).value ?? error;
+    loading.value = false;
+    const errorObj = (error as any).value ?? error;
 
-        console.error(errorObj)
+    console.error(errorObj);
 
-        if (errorObj.statusCode === 401) {
-          errorMessage.value = 'Invalid email or password';
-        } else {
-          errorMessage.value = 'An unknown error occurred';
-        }
-        showSnackbar({
-          message: errorMessage.value,
-          color: 'error',
-        });
-      }
-    };
-
-    return {
-      email,
-      password,
-      errorMessage,
-      rules,
-      login,
-      loading,
-    };
-  },
+    if (errorObj.statusCode === 401) {
+      errorMessage.value = 'Invalid email or password';
+    } else {
+      errorMessage.value = 'An unknown error occurred';
+    }
+    showSnackbar({
+      message: errorMessage.value,
+      color: 'error',
+    });
+  }
 };
 </script>

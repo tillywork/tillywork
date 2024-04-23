@@ -9,6 +9,7 @@ import { UsersModule } from "./users/users.module";
 import { ViewsModule } from "./views/views.module";
 import { WorkspacesModule } from "./workspaces/workspaces.module";
 import { ListsModule } from "./lists/lists.module";
+import { HelpersModule } from "./helpers/helpers.module";
 
 @Module({
     imports: [
@@ -20,6 +21,7 @@ import { ListsModule } from "./lists/lists.module";
         ListsModule,
         UsersModule,
         ViewsModule,
+        HelpersModule,
     ],
     controllers: [],
     providers: [
