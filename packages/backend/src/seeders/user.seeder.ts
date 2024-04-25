@@ -7,7 +7,6 @@ import { WorkspacesService } from "../app/common/workspaces/workspaces.service";
 import { Workspace } from "../app/common/workspaces/workspace.entity";
 import { Project } from "../app/common/projects/project.entity";
 import { ProjectsService } from "../app/common/projects/projects.service";
-import { ProjectTypes } from "../app/common/projects/types";
 import { WorkspaceTypes } from "../app/common/workspaces/types";
 
 const logger = new Logger("UserSeeder");

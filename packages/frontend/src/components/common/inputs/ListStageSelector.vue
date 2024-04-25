@@ -39,6 +39,7 @@ function isStageSelected(stage: ListStage) {
         v-bind="props"
         link
         rounded="md"
+        size="small"
         density="comfortable"
         :color="selectedStage?.color"
         >{{ selectedStage?.name }}</v-chip

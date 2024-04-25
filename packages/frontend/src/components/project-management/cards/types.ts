@@ -1,4 +1,4 @@
-import type { User } from '@/modules/common/users/types';
+import type { User } from '@/components/common/users/types';
 import type { List, ListStage } from '../lists/types';
 
 export interface Card {

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import ThemeSwitch from '@/modules/common/theme/ThemeSwitch.vue';
+import ThemeSwitch from '@/components/common/theme/ThemeSwitch.vue';
 import { useAuth } from '@/composables/useAuth';
-import SnackbarWrapper from '@/modules/common/SnackbarWrapper.vue';
+import SnackbarWrapper from '@/components/common/SnackbarWrapper.vue';
 import { ref } from 'vue';
 import type { RouteLocationRaw } from 'vue-router';
-import ToolbarSearch from '@/modules/common/inputs/ToolbarSearch.vue';
+import ToolbarSearch from '@/components/common/inputs/ToolbarSearch.vue';
 
 export interface NavigationMenuItem {
   title: string

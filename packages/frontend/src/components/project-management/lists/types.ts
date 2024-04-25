@@ -1,11 +1,12 @@
-import type { Card } from '../cards/types';
-import type { PaginationParams, QueryFilter } from '../views/ListView/types';
+import type { PaginationParams, QueryFilter } from '../views/TableView/types';
+import type { View } from '../views/types';
 
 export interface List {
   id: number;
   name: string;
   spaceId: number;
   listStages: ListStage[];
+  views: View[];
 }
 
 export interface ListStage {

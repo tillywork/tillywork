@@ -31,7 +31,7 @@ export class ListsService {
             where: {
                 id,
             },
-            relations: ["listStages"],
+            relations: ["listStages", "views"],
         });
         if (!list) {
             throw new NotFoundException(`List with ID ${id} not found`);

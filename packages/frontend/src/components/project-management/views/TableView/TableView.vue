@@ -277,7 +277,8 @@ function toggleIsCreating(closeOnly?: boolean) {
                   v-model="createCardDto.title"
                   ref="cardTitleInput"
                   autofocus
-                  variant=""
+                  variant="outlined"
+                  color="default"
                   label="Card title"
                   hide-details
                   single-line
@@ -304,9 +305,10 @@ function toggleIsCreating(closeOnly?: boolean) {
                   variant="text"
                   prepend-icon="mdi-plus"
                   size="small"
-                  class="flex-0-0-100 justify-start"
+                  class="flex-0-0-100 justify-start text-capitalize"
                   @click="toggleIsCreating()"
                   style="margin-top: 1px; margin-bottom: 1px;"
+                  color="default"
                   >Add card</v-btn
                 >
               </template>

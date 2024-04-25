@@ -4,7 +4,7 @@ import {
   type UsersData,
 } from '@/composables/services/useUsersService';
 import { onMounted, ref } from 'vue';
-import type { User } from '@/modules/common/users/types';
+import type { User } from '@/components/common/users/types';
 import UserPhoto from '../users/UserPhoto.vue';
 
 const usersData = ref<UsersData>();
@@ -54,6 +54,7 @@ onMounted(async () => {
           density="compact"
           color="default"
           rounded="circle"
+          variant="text"
           v-if="!selectedUsers || selectedUsers.length === 0"
         >
         </v-btn>
@@ -106,3 +107,4 @@ onMounted(async () => {
     </v-card>
   </v-menu>
 </template>
+@/components/common/users/types

@@ -1,6 +1,6 @@
 import { useHttp } from '@/composables/useHttp';
-import type { Card } from '@/modules/project-management/cards/types';
-import type { QueryFilter } from '@/modules/project-management/views/ListView/types';
+import type { Card } from '@/components/project-management/cards/types';
+import type { QueryFilter } from '@/components/project-management/views/TableView/types';
 
 export interface CardsData {
   cards: Card[];

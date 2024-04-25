@@ -2,7 +2,7 @@ import { useHttp } from '@/composables/useHttp';
 import type {
   Workspace,
   WorkspaceTypes,
-} from '../../modules/project-management/workspaces/types';
+} from '../../components/project-management/workspaces/types';
 
 export interface WorkspacesData {
   workspaces: Workspace[];

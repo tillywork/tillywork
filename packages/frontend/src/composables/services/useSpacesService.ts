@@ -1,5 +1,5 @@
 import { useHttp } from '@/composables/useHttp';
-import type { Space } from '../../modules/project-management/spaces/types';
+import type { Space } from '../../components/project-management/spaces/types';
 
 export interface SpacesData {
   spaces: Space[];

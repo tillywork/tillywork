@@ -7,7 +7,7 @@ const crmRoutes = [
       {
         path: '/',
         name: 'Home',
-        component: () => import('@/modules/crm/home/HomePage.vue'),
+        component: () => import('@/components/crm/home/HomePage.vue'),
         meta: {
           title: 'Home',
         },
@@ -15,7 +15,7 @@ const crmRoutes = [
       {
         path: '/projects/:projectId',
         name: 'ProjectHome',
-        component: () => import('@/modules/common/projects/ProjectHome.vue'),
+        component: () => import('@/components/common/projects/ProjectHome.vue'),
         meta: {
           requiresAuth: true,
           title: 'Project Details',
@@ -24,7 +24,7 @@ const crmRoutes = [
       {
         path: '/projects/:projectId/contacts',
         name: 'Contacts',
-        component: () => import('@/modules/crm/contacts/ContactsTable.vue'),
+        component: () => import('@/components/crm/contacts/ContactsTable.vue'),
         meta: {
           requiresAuth: true,
           title: 'Contacts',
@@ -33,7 +33,7 @@ const crmRoutes = [
       {
         path: '/projects/:projectId/contacts/:contactId',
         name: 'ViewContact',
-        component: () => import('@/modules/crm/contacts/ViewContactPage.vue'),
+        component: () => import('@/components/crm/contacts/ViewContactPage.vue'),
         meta: {
           requiresAuth: true,
           title: 'Contact Details',
@@ -42,7 +42,7 @@ const crmRoutes = [
       {
         path: '/projects/:projectId/organizations',
         name: 'Organizations',
-        component: () => import('@/modules/crm/organizations/OrganizationsView.vue'),
+        component: () => import('@/components/crm/organizations/OrganizationsView.vue'),
         meta: {
           requiresAuth: true,
           title: 'Organizations',
@@ -51,7 +51,7 @@ const crmRoutes = [
       {
         path: '/projects/:projectId/deals',
         name: 'Deals',
-        component: () => import('@/modules/crm/deals/DealsView.vue'),
+        component: () => import('@/components/crm/deals/DealsView.vue'),
         meta: {
           requiresAuth: true,
           title: 'Deals',
@@ -60,7 +60,7 @@ const crmRoutes = [
       {
         path: '/projects/:projectId/tasks',
         name: 'Tasks',
-        component: () => import('@/modules/crm/tasks/TasksView.vue'),
+        component: () => import('@/components/crm/tasks/TasksView.vue'),
         meta: {
           requiresAuth: true,
           title: 'Tasks',

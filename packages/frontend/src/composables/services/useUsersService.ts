@@ -1,5 +1,5 @@
 import { useHttp } from '@/composables/useHttp';
-import type { User } from '@/modules/common/users/types';
+import type { User } from '@/components/common/users/types';
 
 export interface UsersData {
   users: User[];
