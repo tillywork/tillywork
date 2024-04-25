@@ -6,8 +6,8 @@ import {
 } from '@/composables/services/useContactsService';
 import { useSnackbar } from '@/composables/useSnackbar';
 import objectHelper from '@/utils/object';
-import InlineInput from '@/modules/common/inputs/InlineInput.vue';
-import { InlineInputTypes } from '@/modules/common/inputs/types';
+import InlineInput from '@/components/common/inputs/InlineInput.vue';
+import { InlineInputTypes } from '@/components/common/inputs/types';
 
 const props = defineProps<{
   contact: Contact;
@@ -155,3 +155,4 @@ function handleClearProperty() {
   height: 40px;
 }
 </style>
+@/components/common/inputs/types

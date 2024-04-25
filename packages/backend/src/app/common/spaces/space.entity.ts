@@ -8,8 +8,6 @@ import {
   OneToMany,
   JoinTable,
 } from 'typeorm';
-import { Project } from '../projects/project.entity';
-import { View } from '../views/view.entity';
 import { Workspace } from '../workspaces/workspace.entity';
 import { List } from '../lists/list.entity';
 
@@ -31,9 +29,6 @@ export class Space {
   workspace: Workspace;
   @Column({ type: 'bigint', nullable: false })
   workspaceId: number;
-
-  @OneToMany(() => View, (view) => view.space)
-  views: View[];
 
   @OneToMany(() => List, (list) => list.space)
   lists: List[];

@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useListsService } from '@/composables/services/useListsService';
-import { useRoute } from 'vue-router';
-import { ListGroupOptions, type ListGroup } from './types';
+import { useRoute, useRouter } from 'vue-router';
+import { ListGroupOptions, type ListGroup } from '../lists/types';
 import { watch } from 'vue';
 import { useCardsService } from '@/composables/services/useCardsService';
+import { useViewsService } from '@/composables/services/useViewsService';
 import type { Card, CreateCardDto } from '../cards/types';
 import { computed } from 'vue';
-import ListView from '@/modules/project-management/views/ListView/ListView.vue';
-import ListStageSelector from '@/modules/common/inputs/ListStageSelector.vue';
-import UserSelector from '@/modules/common/inputs/UserSelector.vue';
+import TableView from '@/components/project-management/views/TableView/TableView.vue';
+import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
+import UserSelector from '@/components/common/inputs/UserSelector.vue';
 import { type ColumnDef, type Row } from '@tanstack/vue-table';
-import type { User } from '@/modules/common/users/types';
+import type { User } from '@/components/common/users/types';
 import {
   useQuery,
   useQueries,
@@ -19,10 +20,13 @@ import {
   useMutation,
 } from '@tanstack/vue-query';
 
+const route = useRoute();
+const router = useRouter();
 const listId = computed(() => +route.params.listId);
+const viewId = computed(() => +route.params.viewId);
 const listsService = useListsService();
 const cardsService = useCardsService();
-const route = useRoute();
+const viewsService = useViewsService();
 
 const columns: ColumnDef<Card, any>[] = [
   {
@@ -47,10 +51,15 @@ const columns: ColumnDef<Card, any>[] = [
 ];
 
 const rowHovered = ref<Row<Card>>();
-const { data: list, refetch: refetchList } = useQuery({
+const { data: list } = useQuery({
   queryKey: ['list', listId.value],
   queryFn: () => listsService.getList(listId.value),
 });
+const getViewQuery = useQuery({
+  queryKey: ['view', viewId.value],
+  queryFn: () => viewsService.getView(viewId.value),
+});
+
 const groupBy = ref<ListGroupOptions>(ListGroupOptions.LIST_STAGE);
 const queryClient = useQueryClient();
 const { mutate: updateCardListStage } = useMutation({
@@ -73,11 +82,28 @@ const createCardMutation = useMutation({
   onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards'] }),
 });
 
-watch(list, () => {
-  document.title = `${list.value?.name} | FalconDrive`;
+watch(getViewQuery.data, (view) => {
+  if (view) {
+    document.title = `${view.name} | FalconDrive`;
+  }
 });
 
-watch(listId, () => refetchList());
+watch(
+  listId,
+  () => {
+    if (listId.value !== getViewQuery.data.value?.listId) {
+      router.replace({
+        name: 'ListPage',
+        params: {
+          ...route.params,
+        },
+      });
+    }
+  },
+  {
+    immediate: true,
+  }
+);
 
 const groups = computed(() => {
   const groups: ListGroup[] = [];
@@ -153,9 +179,31 @@ function handleCardCreation(createCardDto: Partial<CreateCardDto>) {
 </script>
 
 <template>
-  <v-container>
-    <span>{{ list?.name }}</span>
-  </v-container>
+  <div class="d-flex ga-2 py-4 px-8">
+    <v-btn class="text-capitalize" size="small" variant="tonal" rounded="md" color="info">
+      <v-icon icon="mdi-plus" />
+      Add card
+    </v-btn>
+    <v-divider class="mx-2" vertical />
+    <div class="d-flex align-center ga-2">
+      <v-chip link rounded="xl" density="comfortable" variant="tonal" color="info" closable>
+        <v-icon icon="mdi-format-list-group" size="16" start />
+        Group by
+      </v-chip>
+      <v-chip link rounded="xl" density="comfortable" variant="outlined" color="info">
+        <v-icon icon="mdi-filter" size="16" start />
+        Filters
+      </v-chip>
+      <v-chip link rounded="xl" density="comfortable" variant="outlined" color="info">
+        <v-icon icon="mdi-swap-vertical" size="16" start />
+        Sort
+      </v-chip>
+      <v-chip link rounded="xl" density="comfortable" variant="outlined" color="info">
+        <v-icon icon="mdi-eye" size="16" start />
+        Hide
+      </v-chip>
+    </div>
+  </div>
   <v-divider />
   <v-expansion-panels multiple variant="accordion">
     <template v-for="(group, index) in groups" :key="group.name">
@@ -170,7 +218,8 @@ function handleCardCreation(createCardDto: Partial<CreateCardDto>) {
           >
         </v-expansion-panel-title>
         <v-expansion-panel-text>
-          <list-view
+          <v-divider />
+          <table-view
             :key="'list-view-' + group.id"
             v-model:row-hovered="rowHovered"
             :options="group.options"
@@ -221,7 +270,7 @@ function handleCardCreation(createCardDto: Partial<CreateCardDto>) {
                 </v-card>
               </v-menu>
             </template>
-          </list-view>
+          </table-view>
         </v-expansion-panel-text>
       </v-expansion-panel>
     </template>
@@ -236,4 +285,9 @@ function handleCardCreation(createCardDto: Partial<CreateCardDto>) {
     padding: 0;
   }
 }
+
+.v-tab.v-tab.v-btn {
+  min-width: fit-content;
+}
 </style>
+@/components/common/users/types

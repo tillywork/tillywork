@@ -45,7 +45,6 @@ onMounted(async () => {
       density="compact"
       link
       id="workspace-menu-activator"
-      color="background"
       class="flex-1-0 me-2"
     >
       <v-card-title class="d-flex align-center text-body-2 font-weight-bold">

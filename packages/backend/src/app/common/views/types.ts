@@ -1,5 +1,5 @@
 export enum ViewTypes {
-    LIST = 'list',
+    TABLE = 'table',
     BOARD = 'board',
     CALENDAR = 'calendar',
     GANTT = 'gantt',

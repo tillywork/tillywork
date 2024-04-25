@@ -12,7 +12,7 @@ import {
 } from '@/composables/services/useContactsService';
 import FalconTable, {
   type PaginationParams,
-} from '@/modules/common/tables/FalconTable.vue';
+} from '@/components/common/tables/FalconTable.vue';
 import { createColumnHelper, type ColumnDef } from '@tanstack/vue-table';
 import { watch } from 'vue';
 

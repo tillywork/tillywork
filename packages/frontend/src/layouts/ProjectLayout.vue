@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import ThemeSwitch from '@/modules/common/theme/ThemeSwitch.vue';
+import ThemeSwitch from '@/components/common/theme/ThemeSwitch.vue';
 import { useAuth } from '@/composables/useAuth';
-import SnackbarWrapper from '@/modules/common/SnackbarWrapper.vue';
+import SnackbarWrapper from '@/components/common/SnackbarWrapper.vue';
 import { ref } from 'vue';
 import type { RouteLocationRaw } from 'vue-router';
-import ToolbarSearch from '@/modules/common/inputs/ToolbarSearch.vue';
-import NavigationWorkspace from '@/modules/project-management/navigation/NavigationWorkspace.vue';
+import ToolbarSearch from '@/components/common/inputs/ToolbarSearch.vue';
+import NavigationWorkspace from '@/components/project-management/navigation/NavigationWorkspace.vue';
 
 export interface NavigationMenuItem {
   title: string;
@@ -15,6 +15,7 @@ export interface NavigationMenuItem {
   onClick?: () => unknown;
 }
 
+const navigationDrawer = ref(true);
 const { logout, isAuthenticated } = useAuth();
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
@@ -41,7 +42,16 @@ if (isAuthenticated()) {
 
 <template>
   <v-app>
-    <v-navigation-drawer app color="background">
+    <v-app-bar app class="pr-4 border-b" height="56" prominent density="comfortable">
+      <v-app-bar-nav-icon density="comfortable" @click.stop="navigationDrawer = !navigationDrawer"></v-app-bar-nav-icon>
+
+      <v-app-bar-title>Hello</v-app-bar-title>
+      <toolbar-search />
+      <v-spacer />
+      <theme-switch />
+    </v-app-bar>
+
+    <v-navigation-drawer v-model="navigationDrawer">
       <!-- Sidebar content -->
       <v-list density="compact" nav>
         <v-list-item
@@ -81,13 +91,6 @@ if (isAuthenticated()) {
         </v-list>
       </template>
     </v-navigation-drawer>
-
-    <v-app-bar app class="pr-4" height="56" color="background">
-      <v-toolbar-title>FD Project Management</v-toolbar-title>
-      <toolbar-search />
-      <v-spacer />
-      <theme-switch />
-    </v-app-bar>
 
     <v-main>
       <router-view />

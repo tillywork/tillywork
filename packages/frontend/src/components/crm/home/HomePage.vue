@@ -38,7 +38,7 @@ import { onMounted, ref } from 'vue';
 import { computed } from 'vue';
 import noProjectImage from '@/assets/broken-image.png';
 import { useSidebarState } from '@/composables/useSidebarState';
-import CreateProjectSidebar from '@/modules/common/projects/CreateProjectSidebar.vue';
+import CreateProjectSidebar from '@/components/common/projects/CreateProjectSidebar.vue';
 import { useRouter } from 'vue-router';
 
 const { data, error, sendRequest } = useHttp();

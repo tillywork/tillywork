@@ -1,5 +1,5 @@
 import { useHttp } from '@/composables/useHttp';
-import type { List } from '../../modules/project-management/lists/types';
+import type { List } from '../../components/project-management/lists/types';
 
 export interface ListsData {
   lists: List[];

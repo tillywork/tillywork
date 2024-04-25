@@ -5,9 +5,10 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     ManyToOne,
+    JoinColumn,
 } from "typeorm";
 import { ViewTypes } from "./types";
-import { Space } from "../spaces/space.entity";
+import { List } from "../lists/list.entity";
 
 @Entity()
 export class View {
@@ -17,7 +18,7 @@ export class View {
     @Column({ type: "varchar", length: 255 })
     name: string;
 
-    @Column({ type: "enum", enum: ViewTypes, default: ViewTypes.LIST })
+    @Column({ type: "enum", enum: ViewTypes, default: ViewTypes.TABLE })
     viewType: ViewTypes;
 
     @CreateDateColumn({ type: "timestamp" })
@@ -25,6 +26,10 @@ export class View {
     @UpdateDateColumn({ type: "timestamp" })
     updatedAt: Date;
 
-    @ManyToOne(() => Space, (space) => space.views)
-    space: Space;
+    @ManyToOne(() => List, (list) => list.views)
+    @JoinColumn()
+    list: List;
+
+    @Column({ type: 'bigint' })
+    listId: number;
 }

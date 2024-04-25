@@ -2,7 +2,7 @@ const commonRoutes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/modules/common/auth/LoginPage.vue'),
+    component: () => import('@/components/common/auth/LoginPage.vue'),
     meta: {
       requiresGuest: true,
       title: 'Login',
@@ -15,7 +15,7 @@ const commonRoutes = [
       {
         path: '/projects',
         name: 'Projects',
-        component: () => import('@/modules/common/projects/ProjectsTable.vue'),
+        component: () => import('@/components/common/projects/ProjectsTable.vue'),
         meta: {
           requiresAuth: true,
           title: 'Projects',

@@ -5,7 +5,7 @@ import {
   type Note,
 } from '@/composables/services/useNotesService';
 import { onMounted } from 'vue';
-import BlockNote from '@/modules/common/inputs/BlockNote.vue';
+import BlockNote from '@/components/common/inputs/BlockNote.vue';
 import type { Contact } from '@/composables/services/useContactsService';
 
 const { contact } = defineProps<{

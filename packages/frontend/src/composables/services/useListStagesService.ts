@@ -1,5 +1,5 @@
 import { useHttp } from '@/composables/useHttp';
-import type { ListStage } from '../../modules/project-management/lists/types';
+import type { ListStage } from '../../components/project-management/lists/types';
 
 export const useListStagesService = () => {
   async function getListStages({

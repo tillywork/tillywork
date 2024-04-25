@@ -1,5 +1,5 @@
-import type { Space } from '@/modules/project-management/spaces/types';
-import type { Workspace } from '@/modules/project-management/workspaces/types';
+import type { Space } from '@/components/project-management/spaces/types';
+import type { Workspace } from '@/components/project-management/workspaces/types';
 import { defineStore } from 'pinia';
 
 export const useWorkspaceStore = defineStore('workspace', {
