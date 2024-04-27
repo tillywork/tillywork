@@ -5,36 +5,49 @@ import { storeToRefs } from 'pinia';
 import { validation } from '@/utils/validation';
 import { VForm } from 'vuetify/lib/components/index.mjs';
 import { useListsService } from '@/composables/services/useListsService';
+import { useMutation, useQueryClient } from '@tanstack/vue-query';
 
 const workspaceStore = useWorkspaceStore();
-const { selectedSpace } = storeToRefs(workspaceStore);
+const { selectedSpace, selectedWorkspace } = storeToRefs(workspaceStore);
+
+const queryClient = useQueryClient();
+const createListMutation = useMutation({
+  mutationFn: createList,
+  onSuccess: () => {
+    createListForm.value?.reset();
+    closeCreateListDialog();
+    queryClient.invalidateQueries({
+      queryKey: [
+        'spaces',
+        {
+          workspaceId: selectedWorkspace.value?.id,
+        },
+      ],
+    });
+  },
+});
 
 const listsService = useListsService();
 const createListDialog = defineModel<boolean>();
 const createListForm = ref<null | VForm>(null);
-const createListLoading = ref(false);
 const createListData = ref({
   name: '',
   spaceId: selectedSpace.value?.id,
 });
 
-const emit = defineEmits(['create', 'click']);
+const emit = defineEmits(['click']);
 
 function closeCreateListDialog() {
   createListDialog.value = false;
 }
 
 async function createList() {
-  if (!createListForm.value?.isValid) return;
+  if (!createListForm.value?.isValid) throw new Error();
 
-  createListLoading.value = true;
   createListData.value.spaceId = selectedSpace.value?.id;
   const list = await listsService.createList(createListData.value);
 
-  emit('create', list);
-  createListLoading.value = false;
-  createListForm.value.reset();
-  closeCreateListDialog();
+  return list;
 }
 
 function handleCreateListDialogClick() {
@@ -62,8 +75,8 @@ function handleCreateListDialogClick() {
     activator="#create-list-button"
     width="400"
   >
-    <v-form ref="createListForm" @submit.prevent="createList">
-      <v-card :loading="createListLoading">
+    <v-form ref="createListForm" @submit.prevent="createListMutation.mutate">
+      <v-card :loading="createListMutation.isPending.value">
         <template v-slot:loader="{ isActive }">
           <v-progress-linear
             :active="isActive"
@@ -91,14 +104,14 @@ function handleCreateListDialogClick() {
           <v-btn
             color="default"
             @click="closeCreateListDialog()"
-            :disabled="createListLoading"
+            :disabled="createListMutation.isPending.value"
             rounded="xl"
             class="text-capitalize"
             >Cancel</v-btn
           >
           <v-btn
             variant="flat"
-            :disabled="createListLoading"
+            :disabled="createListMutation.isPending.value"
             type="submit"
             rounded="xl"
             class="text-capitalize"
@@ -109,4 +122,3 @@ function handleCreateListDialogClick() {
     </v-form>
   </v-dialog>
 </template>
-../../../composables/services/lists.service

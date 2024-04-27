@@ -69,17 +69,14 @@ export const useAuthStore = defineStore('auth', {
      * @param password The user password
      */
     async login(email: string, password: string) {
-      const { error, sendRequest, data } = useHttp();
+      const { sendRequest } = useHttp();
 
-      await sendRequest('/auth/login', {
+      const user = await sendRequest('/auth/login', {
         method: 'POST',
         data: { email, password },
       });
-      if (error.value) {
-        throw error.value;
-      }
 
-      this.setToken(data.value.accessToken);
+      this.setToken(user.accessToken);
     },
 
     /**
@@ -90,17 +87,13 @@ export const useAuthStore = defineStore('auth', {
      */
     async refreshToken() {
       try {
-        const { error, sendRequest, data } = useHttp();
+        const { sendRequest } = useHttp();
 
-        await sendRequest('/auth/refresh', {
+        const user = await sendRequest('/auth/refresh', {
           method: 'POST',
         });
 
-        if (error.value) {
-          throw error.value;
-        }
-
-        this.setToken(data.value.accessToken);
+        this.setToken(user.accessToken);
       } catch (error) {
         // Refreshing an expired token failed, redirect user to login
         this.logout({ name: 'Login' });

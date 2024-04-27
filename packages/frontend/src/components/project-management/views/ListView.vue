@@ -180,25 +180,25 @@ function handleCardCreation(createCardDto: Partial<CreateCardDto>) {
 
 <template>
   <div class="d-flex ga-2 py-4 px-8">
-    <v-btn class="text-capitalize" size="small" variant="tonal" rounded="md" color="info">
+    <v-btn class="text-capitalize" size="small" variant="tonal" rounded="md" color="accent">
       <v-icon icon="mdi-plus" />
-      Add card
+      Add task
     </v-btn>
     <v-divider class="mx-2" vertical />
     <div class="d-flex align-center ga-2">
-      <v-chip link rounded="xl" density="comfortable" variant="tonal" color="info" closable>
+      <v-chip link rounded="xl" density="comfortable" variant="tonal" color="accent" closable>
         <v-icon icon="mdi-format-list-group" size="16" start />
         Group by
       </v-chip>
-      <v-chip link rounded="xl" density="comfortable" variant="outlined" color="info">
+      <v-chip link rounded="xl" density="comfortable" variant="outlined" color="accent">
         <v-icon icon="mdi-filter" size="16" start />
         Filters
       </v-chip>
-      <v-chip link rounded="xl" density="comfortable" variant="outlined" color="info">
+      <v-chip link rounded="xl" density="comfortable" variant="outlined" color="accent">
         <v-icon icon="mdi-swap-vertical" size="16" start />
         Sort
       </v-chip>
-      <v-chip link rounded="xl" density="comfortable" variant="outlined" color="info">
+      <v-chip link rounded="xl" density="comfortable" variant="outlined" color="accent">
         <v-icon icon="mdi-eye" size="16" start />
         Hide
       </v-chip>
@@ -214,7 +214,7 @@ function handleCardCreation(createCardDto: Partial<CreateCardDto>) {
             group.name
           }}</span>
           <span class="text-caption"
-            >{{ groupCardQueries[index].data?.total ?? 0 }} cards</span
+            >{{ groupCardQueries[index].data?.total ?? 0 }}</span
           >
         </v-expansion-panel-title>
         <v-expansion-panel-text>
@@ -290,4 +290,3 @@ function handleCardCreation(createCardDto: Partial<CreateCardDto>) {
   min-width: fit-content;
 }
 </style>
-@/components/common/users/types

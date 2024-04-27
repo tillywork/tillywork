@@ -16,9 +16,6 @@ const themes = {
       background: '#FFFFFF',
       surface: '#F5F5F5',
       error: '#E53935',
-      'on-primary': '#FFFFFF',
-      'on-secondary': '#212121',
-      'on-surface': '#212121',
     },
   },
   dark: {
@@ -30,9 +27,6 @@ const themes = {
       background: '#1E1F21',
       surface: '#363639',
       error: '#EF5350',
-      'on-primary': '#FFFFFF',
-      'on-secondary': '#212121',
-      'on-surface': '#E0E0E0',
     },
   },
 };

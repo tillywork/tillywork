@@ -24,7 +24,7 @@ watch(listId, () => refetchList());
 
 <template>
   <div class="pa-4 pb-0">
-    <div class="px-4" v-if="list">
+    <div class="px-4 pt-6" v-if="list">
       <p class="text-h5 mb-3">{{ list.name }}</p>
       <list-view-tabs v-model:views="list.views" />
     </div>

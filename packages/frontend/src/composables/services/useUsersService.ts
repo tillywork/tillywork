@@ -7,7 +7,7 @@ export interface UsersData {
 }
 
 export const useUsersService = () => {
-  async function getUsers() {
+  async function getUsers(): Promise<UsersData> {
     const { sendRequest } = useHttp();
 
     return sendRequest('/users', {

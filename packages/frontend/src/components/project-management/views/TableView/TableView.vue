@@ -309,12 +309,12 @@ function toggleIsCreating(closeOnly?: boolean) {
                   @click="toggleIsCreating()"
                   style="margin-top: 1px; margin-bottom: 1px;"
                   color="default"
-                  >Add card</v-btn
+                  >Add task</v-btn
                 >
               </template>
             </div>
             <template v-if="!data || data.length === 0">
-              <span class="text-caption">No cards found.</span>
+              <span class="text-caption">No tasks found.</span>
             </template>
           </th>
         </tr>

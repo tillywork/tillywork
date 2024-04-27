@@ -1,19 +1,20 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { WorkspaceTypes, type Workspace } from '../workspaces/types';
-import {
-  useWorkspacesService,
-  type WorkspacesData,
-} from '@/composables/services/useWorkspacesService';
+import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { storeToRefs } from 'pinia';
 import CreateWorkspaceDialogAndButton from './CreateWorkspaceDialogAndButton.vue';
+import { useQuery } from '@tanstack/vue-query';
 
 const workspacesService = useWorkspacesService();
-const workspaces = ref<WorkspacesData>();
 const selectWorkspaceMenu = ref(false);
 const workspaceStore = useWorkspaceStore();
 const { selectedWorkspace } = storeToRefs(workspaceStore);
+const workspaceQuery = useQuery({
+  queryKey: ['workspaces'],
+  queryFn: getWorkspaces,
+});
 
 function closeSelectWorkspaceMenu() {
   selectWorkspaceMenu.value = false;
@@ -25,18 +26,16 @@ function handleSelectWorkspace(workspace: Workspace) {
 }
 
 async function getWorkspaces() {
-  workspaces.value = await workspacesService.getWorkspaces({
+  const workspaces = await workspacesService.getWorkspaces({
     workspaceType: WorkspaceTypes.PROJECT_MANAGEMENT,
   });
 
-  if (workspaces.value.total > 0 && !selectedWorkspace.value) {
-    handleSelectWorkspace(workspaces.value.workspaces[0]);
+  if (workspaces.total > 0 && !selectedWorkspace.value) {
+    handleSelectWorkspace(workspaces.workspaces[0]);
   }
-}
 
-onMounted(async () => {
-  await getWorkspaces();
-});
+  return workspaces;
+}
 </script>
 
 <template>
@@ -91,7 +90,7 @@ onMounted(async () => {
       </div>
       <v-list density="compact" nav class="px-3" :lines="false">
         <v-list-item
-          v-for="workspace in workspaces?.workspaces"
+          v-for="workspace in workspaceQuery.data.value?.workspaces"
           :key="workspace.id"
           @click="handleSelectWorkspace(workspace)"
           :active="selectedWorkspace?.id === workspace.id"
@@ -101,7 +100,7 @@ onMounted(async () => {
       </v-list>
       <v-divider class="mt-2" />
       <v-card-actions>
-        <create-workspace-dialog-and-button @create="getWorkspaces()" />
+        <create-workspace-dialog-and-button />
       </v-card-actions>
     </v-card>
   </v-menu>
