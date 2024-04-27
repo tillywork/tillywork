@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import {
-  useUsersService,
-  type UsersData,
-} from '@/composables/services/useUsersService';
-import { onMounted, ref } from 'vue';
+import { useUsersService } from '@/composables/services/useUsersService';
 import type { User } from '@/components/common/users/types';
 import UserPhoto from '../users/UserPhoto.vue';
+import { useQuery } from '@tanstack/vue-query';
 
-const usersData = ref<UsersData>();
 const usersService = useUsersService();
 const selectedUsers = defineModel<User[]>({
   default: [],
   required: true,
+});
+const usersQuery = useQuery({
+  queryKey: ['users'],
+  queryFn: usersService.getUsers,
 });
 
 const toggleUserSelection = (user: User) => {
@@ -36,10 +36,6 @@ const isUserSelected = (user: User) => {
   const index = selectedUsers.value.findIndex((u) => u.id === user.id);
   return index !== -1;
 };
-
-onMounted(async () => {
-  usersData.value = await usersService.getUsers();
-});
 </script>
 
 <template>
@@ -81,7 +77,10 @@ onMounted(async () => {
     </template>
     <v-card>
       <v-list nav density="compact">
-        <template v-for="user in usersData?.users" :key="user.email">
+        <template
+          v-for="user in usersQuery.data.value?.users"
+          :key="user.email"
+        >
           <v-list-item @click="toggleUserSelection(user)" slim>
             <template #prepend>
               <v-list-item-action start>

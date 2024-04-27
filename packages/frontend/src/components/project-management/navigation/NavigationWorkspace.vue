@@ -10,18 +10,32 @@ import { storeToRefs } from 'pinia';
 import { type Space } from '../spaces/types';
 import type { List } from '../lists/types';
 import { useRouter } from 'vue-router';
+import { useQuery } from '@tanstack/vue-query';
 
 const router = useRouter();
 const workspaceStore = useWorkspaceStore();
 const { selectedWorkspace, selectedSpace, spaceExpansionState } =
   storeToRefs(workspaceStore);
 
-const spaces = ref<Space[]>();
 const spacesService = useSpacesService();
 const createListDialog = ref(false);
 const listMenu = ref(false);
 const freezeListHoverId = ref<number | null>();
 const freezeSpaceHoverId = ref<number | null>();
+
+const workspaceId = computed(() => selectedWorkspace.value?.id);
+const spacesQuery = useQuery({
+  queryKey: [
+    'spaces',
+    {
+      workspaceId,
+    },
+  ],
+  queryFn: () =>
+    spacesService.getSpaces({
+      workspaceId: selectedWorkspace.value!.id,
+    }),
+});
 
 const currentSpaceExpansionState = computed({
   get: () =>
@@ -34,24 +48,6 @@ const currentSpaceExpansionState = computed({
     }
   },
 });
-
-watch(
-  selectedWorkspace,
-  async (workspace) => {
-    if (workspace) {
-      getSpaces();
-
-      // TODO: Navigate to workspace on change
-    }
-  },
-  { immediate: true }
-);
-
-async function getSpaces() {
-  spaces.value = await spacesService.getSpaces({
-    workspaceId: selectedWorkspace.value!.id,
-  });
-}
 
 function handleCreateListDialogClick(space: Space) {
   selectedSpace.value = space;
@@ -73,6 +69,18 @@ function handleListMenuClick(list: List) {
   listMenu.value = !listMenu.value;
   freezeListHoverId.value = list.id;
 }
+
+watch(
+  selectedWorkspace,
+  async (workspace) => {
+    if (workspace) {
+      spacesQuery.refetch();
+
+      // TODO: Navigate to workspace on change
+    }
+  },
+  { immediate: true }
+);
 
 watch(listMenu, (isOpen) => {
   if (!isOpen) {
@@ -98,12 +106,15 @@ watch(createListDialog, (isOpen) => {
       :lines="false"
       open-strategy="multiple"
     >
-      <template v-if="spaces && spaces.length > 0">
-        <div class="d-flex mb-2 pe-2">
+      <template
+        v-if="spacesQuery.data.value && spacesQuery.data.value.length > 0"
+      >
+        <div class="d-flex mb-2 pa-2">
+          <span class="text-caption">Spaces</span>
           <v-spacer />
-          <create-space-dialog-and-button @create="getSpaces" />
+          <create-space-dialog-and-button />
         </div>
-        <template v-for="space in spaces" :key="space.id">
+        <template v-for="space in spacesQuery.data.value" :key="space.id">
           <v-hover v-slot="{ isHovering, props: hoverProps }">
             <v-list-group :value="space.id" v-bind="hoverProps" subgroup>
               <template v-slot:activator="{ props: groupProps }">
@@ -121,7 +132,6 @@ watch(createListDialog, (isOpen) => {
                     <create-list-dialog-and-button
                       v-model="createListDialog"
                       @click="handleCreateListDialogClick(space)"
-                      @create="getSpaces"
                     />
                   </template>
                 </v-list-item>
@@ -186,7 +196,7 @@ watch(createListDialog, (isOpen) => {
           <v-list-item-title class="d-flex align-center">
             <span>No spaces found</span>
             <v-spacer />
-            <create-space-dialog-and-button @create="getSpaces" />
+            <create-space-dialog-and-button />
           </v-list-item-title>
         </v-list-item>
       </template>
@@ -201,4 +211,3 @@ watch(createListDialog, (isOpen) => {
   }
 }
 </style>
-./CreateSpaceDialogAndButton.vue./CreateListDialogAndButton.vue

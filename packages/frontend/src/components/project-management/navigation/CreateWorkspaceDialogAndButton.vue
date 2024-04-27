@@ -7,41 +7,44 @@ import { storeToRefs } from 'pinia';
 import { validation } from '@/utils/validation';
 import { VForm } from 'vuetify/lib/components/index.mjs';
 import { WorkspaceTypes } from '../workspaces/types';
+import { useMutation, useQueryClient } from '@tanstack/vue-query';
 
 const workspaceStore = useWorkspaceStore();
 const authStore = useAuthStore();
 const { selectedWorkspace } = storeToRefs(workspaceStore);
 const { user } = storeToRefs(authStore);
-
 const workspacesService = useWorkspacesService();
 const createWorkspaceDialog = ref(false);
 const createWorkspaceForm = ref<null | VForm>(null);
-const createWorkspaceLoading = ref(false);
 const createWorkspaceData = ref({
   name: '',
   ownerId: user.value.id,
-  projectId: selectedWorkspace.value?.id,
+  projectId: selectedWorkspace.value?.projectId,
   workspaceType: WorkspaceTypes.PROJECT_MANAGEMENT,
 });
 
-const emit = defineEmits(['create']);
+const queryClient = useQueryClient();
+const createWorkspaceMutation = useMutation({
+  mutationFn: createWorkspace,
+  onSuccess: () => {
+    createWorkspaceForm.value?.reset();
+    closeCreateWorkspaceDialog();
+    queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+  },
+});
 
 function closeCreateWorkspaceDialog() {
   createWorkspaceDialog.value = false;
 }
 
 async function createWorkspace() {
-  if (!createWorkspaceForm.value?.isValid) return;
+  if (!createWorkspaceForm.value?.isValid) throw new Error();
 
-  createWorkspaceLoading.value = true;
-  const space = await workspacesService.createWorkspace(
+  const workspace = await workspacesService.createWorkspace(
     createWorkspaceData.value
   );
 
-  emit('create', space);
-  createWorkspaceLoading.value = false;
-  createWorkspaceForm.value.reset();
-  closeCreateWorkspaceDialog();
+  return workspace;
 }
 </script>
 
@@ -63,8 +66,11 @@ async function createWorkspace() {
     width="400"
   >
     <template v-slot:default>
-      <v-form ref="createWorkspaceForm" @submit.prevent="createWorkspace">
-        <v-card :loading="createWorkspaceLoading">
+      <v-form
+        ref="createWorkspaceForm"
+        @submit.prevent="createWorkspaceMutation.mutate"
+      >
+        <v-card :loading="createWorkspaceMutation.isPending.value">
           <template v-slot:loader="{ isActive }">
             <v-progress-linear
               :active="isActive"
@@ -100,14 +106,14 @@ async function createWorkspace() {
             <v-btn
               color="default"
               @click="closeCreateWorkspaceDialog()"
-              :disabled="createWorkspaceLoading"
+              :disabled="createWorkspaceMutation.isPending.value"
               rounded="xl"
               class="text-capitalize"
               >Cancel</v-btn
             >
             <v-btn
               variant="flat"
-              :disabled="createWorkspaceLoading"
+              :disabled="createWorkspaceMutation.isPending.value"
               type="submit"
               rounded="xl"
               class="text-capitalize"

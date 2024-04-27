@@ -5,6 +5,7 @@ import { useWorkspaceStore } from '@/stores/workspace';
 import { storeToRefs } from 'pinia';
 import { validation } from '@/utils/validation';
 import { VForm } from 'vuetify/lib/components/index.mjs';
+import { useMutation, useQueryClient } from '@tanstack/vue-query';
 
 const workspaceStore = useWorkspaceStore();
 const { selectedWorkspace } = storeToRefs(workspaceStore);
@@ -12,29 +13,39 @@ const { selectedWorkspace } = storeToRefs(workspaceStore);
 const spacesService = useSpacesService();
 const createSpaceDialog = ref(false);
 const createSpaceForm = ref<null | VForm>(null);
-const createSpaceLoading = ref(false);
 const createSpaceData = ref({
   name: '',
   workspaceId: selectedWorkspace.value?.id,
 });
 
-const emit = defineEmits(['create']);
+const queryClient = useQueryClient();
+const createSpaceMutation = useMutation({
+  mutationFn: createSpace,
+  onSuccess: (data) => {
+    createSpaceForm.value?.reset();
+    closeCreateSpaceDialog();
+    queryClient.invalidateQueries({
+      queryKey: [
+        'spaces',
+        {
+          workspaceId: data.workspaceId,
+        },
+      ],
+    });
+  },
+});
 
 function closeCreateSpaceDialog() {
   createSpaceDialog.value = false;
 }
 
 async function createSpace() {
-  if (!createSpaceForm.value?.isValid) return;
+  if (!createSpaceForm.value?.isValid) throw new Error();
 
-  createSpaceLoading.value = true;
   createSpaceData.value.workspaceId = selectedWorkspace.value?.id;
   const space = await spacesService.createSpace(createSpaceData.value);
 
-  emit('create', space);
-  createSpaceLoading.value = false;
-  createSpaceForm.value.reset();
-  closeCreateSpaceDialog();
+  return space;
 }
 </script>
 
@@ -56,8 +67,11 @@ async function createSpace() {
     width="400"
   >
     <template v-slot:default>
-      <v-form ref="createSpaceForm" @submit.prevent="createSpace">
-        <v-card :loading="createSpaceLoading">
+      <v-form
+        ref="createSpaceForm"
+        @submit.prevent="createSpaceMutation.mutate"
+      >
+        <v-card :loading="createSpaceMutation.isPending.value">
           <template v-slot:loader="{ isActive }">
             <v-progress-linear
               :active="isActive"
@@ -85,14 +99,14 @@ async function createSpace() {
             <v-btn
               color="default"
               @click="closeCreateSpaceDialog()"
-              :disabled="createSpaceLoading"
+              :disabled="createSpaceMutation.isPending.value"
               rounded="xl"
               class="text-capitalize"
               >Cancel</v-btn
             >
             <v-btn
               variant="flat"
-              :disabled="createSpaceLoading"
+              :disabled="createSpaceMutation.isPending.value"
               type="submit"
               rounded="xl"
               class="text-capitalize"

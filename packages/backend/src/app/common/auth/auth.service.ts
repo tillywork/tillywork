@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { UsersService } from "../users/users.service";
 import { JwtService } from "@nestjs/jwt";
 import { User } from "../users/user.entity";
@@ -6,10 +6,11 @@ import bcrypt from "bcrypt";
 
 @Injectable()
 export class AuthService {
+    private readonly logger = new Logger("AuthService");
     constructor(
         private usersService: UsersService,
         private jwtService: JwtService
-    ) { }
+    ) {}
 
     async login(user: User): Promise<string> {
         const { password, ...userWithoutPassword } = user;
@@ -29,14 +30,15 @@ export class AuthService {
         password: string
     ): Promise<Omit<User, "password"> | null> {
         try {
-            const user = await this.usersService.findOneByEmail(email);
+            const user = await this.usersService.findOneByEmailWithPassword(
+                email
+            );
+            this.logger.debug({ user });
             if (
                 user &&
                 (await this.validatePassword(password, user.password))
             ) {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const { password, ...result } = user;
-                return result;
+                return user;
             }
 
             return null;
