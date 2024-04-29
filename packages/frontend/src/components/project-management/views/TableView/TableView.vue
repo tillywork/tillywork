@@ -127,8 +127,9 @@ function handleHoverChange(row: Row<unknown>, isHovering: boolean) {
 }
 
 function handleCreateFormSubmit() {
-  emit('submit', createCardDto.value);
-  createCardForm.value?.reset();
+  const cardData = { ...createCardDto.value };
+  emit('submit', cardData);
+  toggleIsCreating();
 }
 
 function getColumnSortIcon(column: Column<unknown, unknown>) {
@@ -144,6 +145,7 @@ function getColumnSortIcon(column: Column<unknown, unknown>) {
 function toggleIsCreating(closeOnly?: boolean) {
   if (!isCreating.value && closeOnly) return;
   isCreating.value = !isCreating.value;
+  createCardForm.value?.reset();
 }
 </script>
 
@@ -307,7 +309,7 @@ function toggleIsCreating(closeOnly?: boolean) {
                   size="small"
                   class="flex-0-0-100 justify-start text-capitalize"
                   @click="toggleIsCreating()"
-                  style="margin-top: 1px; margin-bottom: 1px;"
+                  style="margin-top: 1px; margin-bottom: 1px"
                   color="default"
                   >Add task</v-btn
                 >

@@ -8,36 +8,36 @@ import {
     ManyToMany,
     JoinTable,
     ManyToOne,
-} from 'typeorm';
-import { User } from '../users/user.entity';
-import { Contact } from '../../crm/contacts/contact.entity';
-import { Space } from '../spaces/space.entity';
-import { Project } from '../projects/project.entity';
-import { WorkspaceTypes } from './types';
+} from "typeorm";
+import { User } from "../users/user.entity";
+import { Contact } from "../../crm/contacts/contact.entity";
+import { Space } from "../spaces/space.entity";
+import { Project } from "../projects/project.entity";
+import { WorkspaceTypes } from "./types";
 
 @Entity()
 export class Workspace {
-    @PrimaryGeneratedColumn('increment')
+    @PrimaryGeneratedColumn("increment")
     id: number;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: "varchar", length: 255 })
     name: string;
 
-    @Column({ type: 'bigint' })
+    @Column({ type: "bigint" })
     ownerId: number;
 
-    @Column({ type: 'enum', enum: WorkspaceTypes })
+    @Column({ type: "enum", enum: WorkspaceTypes })
     workspaceType: WorkspaceTypes;
 
-    @CreateDateColumn({ type: 'timestamp' })
+    @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;
-    @UpdateDateColumn({ type: 'timestamp' })
+    @UpdateDateColumn({ type: "timestamp" })
     updatedAt: Date;
 
     @ManyToOne(() => Project, (project) => project.workspaces)
     @JoinTable()
     project: Project[];
-    @Column({ type: 'bigint', nullable: true })
+    @Column({ type: "bigint", nullable: true })
     projectId: number;
 
     @OneToMany(() => Space, (space) => space.workspace)

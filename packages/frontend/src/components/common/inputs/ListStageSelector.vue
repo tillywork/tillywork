@@ -6,6 +6,9 @@ import { watch } from 'vue';
 
 const selectedStage = defineModel<ListStage>();
 const listStageMenu = ref(false);
+defineExpose({
+    listStageMenu
+});
 
 const listStagesService = useListStagesService();
 const listStages = ref<ListStage[]>([]);

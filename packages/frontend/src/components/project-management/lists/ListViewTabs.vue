@@ -63,12 +63,16 @@ watch(
         >
       </template>
       <v-btn
+        class="text-capitalize"
         variant="text"
         size="small"
         rounded="0"
         @click="isLoading = !isLoading"
       >
-        <v-icon icon="mdi-plus" />
+        <template #prepend>
+          <v-icon icon="mdi-plus" />
+        </template>
+        View
       </v-btn>
     </div>
     <v-progress-linear

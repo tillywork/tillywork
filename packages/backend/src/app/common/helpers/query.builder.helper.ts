@@ -1,5 +1,14 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { Not, MoreThan, LessThan, Any } from "typeorm";
+import {
+    Not,
+    MoreThan,
+    LessThan,
+    Any,
+    IsNull,
+    Between,
+    In,
+    Like,
+} from "typeorm";
 
 export type FilterOperator =
     | "eq"
@@ -42,22 +51,44 @@ export class QueryBuilderHelper {
     static fieldFilterToQuery(fieldFilter: FieldFilter) {
         const { field, operator, value } = fieldFilter;
         const pathArray = field.split(".");
-        const nestedValue = QueryBuilderHelper.createNestedObjectFromPath(
-            pathArray,
-            value
-        );
-        QueryBuilderHelper.logger.debug({ fieldFilter });
-        // Mapping between the FilterOperator and TypeORM where clause
 
+        let mappedValue;
         switch (operator) {
             case "eq":
-                return nestedValue;
+                mappedValue = value;
+                break;
             case "ne":
-                return { [pathArray[pathArray.length - 1]]: Not(value) };
-            // ... Add additional cases for other operators
+                mappedValue = Not(value);
+                break;
+            case "gt":
+                mappedValue = MoreThan(value);
+                break;
+            case "lt":
+                mappedValue = LessThan(value);
+                break;
+            case "like":
+                mappedValue = Like(`%${value}%`);
+                break;
+            case "between":
+                mappedValue = Between(value[0], value[1]);
+                break;
+            case "in":
+                mappedValue = In(value);
+                break;
+            case "isNull":
+                mappedValue = IsNull();
+                break;
             default:
-                return {};
+                throw new Error(
+                    `[QueryBuilderHelper#fieldFilterToQuery] No mapping for operator: ${operator}`
+                );
         }
+
+        const queryObject = QueryBuilderHelper.createNestedObjectFromPath(
+            pathArray,
+            mappedValue
+        );
+        return queryObject;
     }
 
     static applyOrConditions(

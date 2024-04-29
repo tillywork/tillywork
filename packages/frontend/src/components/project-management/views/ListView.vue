@@ -6,19 +6,14 @@ import { ListGroupOptions, type ListGroup } from '../lists/types';
 import { watch } from 'vue';
 import { useCardsService } from '@/composables/services/useCardsService';
 import { useViewsService } from '@/composables/services/useViewsService';
-import type { Card, CreateCardDto } from '../cards/types';
+import { useListGroupsService } from '@/composables/services/useListGroupsService';
+import type { Card } from '../cards/types';
 import { computed } from 'vue';
-import TableView from '@/components/project-management/views/TableView/TableView.vue';
-import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
-import UserSelector from '@/components/common/inputs/UserSelector.vue';
 import { type ColumnDef, type Row } from '@tanstack/vue-table';
-import type { User } from '@/components/common/users/types';
-import {
-  useQuery,
-  useQueries,
-  useQueryClient,
-  useMutation,
-} from '@tanstack/vue-query';
+import { useQuery, useQueries } from '@tanstack/vue-query';
+import BaseCard from '../cards/BaseCard.vue';
+import ListViewGroupByChip from './ListViewGroupByChip.vue';
+import ListViewGroup from './ListViewGroup.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -27,6 +22,18 @@ const viewId = computed(() => +route.params.viewId);
 const listsService = useListsService();
 const cardsService = useCardsService();
 const viewsService = useViewsService();
+const listGroupsService = useListGroupsService();
+
+const isPageLoading = computed(() => {
+  return (
+    isListLoading.value ||
+    getViewQuery.isFetching.value ||
+    isGroupsFetching.value
+    // groupCardQueries.value.some((query) => query.isFetching)
+  );
+});
+const openedCard = ref<Card>();
+const cardDialog = ref(false);
 
 const columns: ColumnDef<Card, any>[] = [
   {
@@ -51,7 +58,7 @@ const columns: ColumnDef<Card, any>[] = [
 ];
 
 const rowHovered = ref<Row<Card>>();
-const { data: list } = useQuery({
+const { data: list, isFetching: isListLoading } = useQuery({
   queryKey: ['list', listId.value],
   queryFn: () => listsService.getList(listId.value),
 });
@@ -61,26 +68,6 @@ const getViewQuery = useQuery({
 });
 
 const groupBy = ref<ListGroupOptions>(ListGroupOptions.LIST_STAGE);
-const queryClient = useQueryClient();
-const { mutate: updateCardListStage } = useMutation({
-  mutationFn: ({
-    cardListId,
-    listStageId,
-  }: {
-    cardListId: number;
-    listStageId: number;
-  }) =>
-    cardsService.updateCardListStage({
-      cardListId,
-      listStageId,
-    }),
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards'] }),
-});
-const createCardMutation = useMutation({
-  mutationFn: (createCardDto: CreateCardDto) =>
-    cardsService.createCard(createCardDto),
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards'] }),
-});
 
 watch(getViewQuery.data, (view) => {
   if (view) {
@@ -105,7 +92,25 @@ watch(
   }
 );
 
-const groups = computed(() => {
+const {
+  data: groups,
+  refetch: refetchListGroups,
+  isFetching: isGroupsFetching,
+} = useQuery({
+  queryKey: ['groups', listId.value],
+  queryFn: getListGroups,
+});
+
+async function getListGroups() {
+  const groups = await listGroupsService.getListGroupsByOption({
+    listId: listId.value,
+    groupBy: groupBy.value,
+  });
+
+  return groups;
+}
+
+const oldGroups = computed(() => {
   const groups: ListGroup[] = [];
   switch (groupBy.value) {
     case ListGroupOptions.LIST_STAGE:
@@ -151,130 +156,113 @@ const groups = computed(() => {
   return groups;
 });
 
-const queries = computed(() =>
-  groups.value.map((group) => {
-    return {
-      queryKey: ['cards', group.name, list.value?.id],
-      queryFn: () =>
-        cardsService.getCards({
-          listId: listId.value,
-          page: group.options?.page ?? 1,
-          limit: group.options?.itemsPerPage ?? 10,
-          sortBy: group.options?.sort,
-          filters: group.filters,
-        }),
-    };
-  })
-);
-const groupCardQueries = useQueries({ queries });
+// const queries = computed(() => {
+//   if (groups.value) {
+//     return groups.value.map((group) => {
+//       return {
+//         queryKey: ['cards', group.name, list.value?.id],
+//         queryFn: () =>
+//           cardsService.getCards({
+//             listId: listId.value,
+//             page: group.options?.page ?? 1,
+//             limit: group.options?.itemsPerPage ?? 10,
+//             sortBy: group.options?.sort,
+//             filters: group.filters,
+//           }),
+//       };
+//     });
+//   } else {
+//     return [];
+//   }
+// });
+// const groupCardQueries = useQueries({ queries });
 
-function handleUserSelection(users: User[]) {
-  console.log(users);
+function handleRowClick(row: Row<Card>) {
+  openedCard.value = row.original;
+  openCardDialog();
 }
 
-function handleCardCreation(createCardDto: Partial<CreateCardDto>) {
-  createCardDto.listId = listId.value;
-  createCardMutation.mutate(createCardDto as CreateCardDto);
+function openCardDialog() {
+  cardDialog.value = true;
+}
+
+function closeCardDialog() {
+  cardDialog.value = false;
 }
 </script>
 
 <template>
   <div class="d-flex ga-2 py-4 px-8">
-    <v-btn class="text-capitalize" size="small" variant="tonal" rounded="md" color="accent">
+    <v-progress-linear
+      indeterminate
+      color="primary"
+      :active="isPageLoading"
+      absolute
+      location="top"
+    />
+    <v-btn
+      class="text-capitalize"
+      size="small"
+      variant="tonal"
+      rounded="md"
+      color="accent"
+    >
       <v-icon icon="mdi-plus" />
       Add task
     </v-btn>
-    <v-divider class="mx-2" vertical />
+    <v-divider class="mx-2" :vertical="true" />
     <div class="d-flex align-center ga-2">
-      <v-chip link rounded="xl" density="comfortable" variant="tonal" color="accent" closable>
-        <v-icon icon="mdi-format-list-group" size="16" start />
-        Group by
-      </v-chip>
-      <v-chip link rounded="xl" density="comfortable" variant="outlined" color="accent">
+      <list-view-group-by-chip v-model="groupBy" @update:model-value="refetchListGroups()" />
+      <v-chip
+        link
+        rounded="xl"
+        density="comfortable"
+        variant="outlined"
+        color="accent"
+      >
         <v-icon icon="mdi-filter" size="16" start />
         Filters
       </v-chip>
-      <v-chip link rounded="xl" density="comfortable" variant="outlined" color="accent">
+      <v-chip
+        link
+        rounded="xl"
+        density="comfortable"
+        variant="outlined"
+        color="accent"
+      >
         <v-icon icon="mdi-swap-vertical" size="16" start />
         Sort
       </v-chip>
-      <v-chip link rounded="xl" density="comfortable" variant="outlined" color="accent">
+      <v-chip
+        link
+        rounded="xl"
+        density="comfortable"
+        variant="outlined"
+        color="accent"
+      >
         <v-icon icon="mdi-eye" size="16" start />
         Hide
       </v-chip>
     </div>
   </div>
-  <v-divider />
-  <v-expansion-panels multiple variant="accordion">
-    <template v-for="(group, index) in groups" :key="group.name">
-      <v-expansion-panel>
-        <v-expansion-panel-title>
-          <v-icon size="12" :color="group.color">mdi-circle</v-icon>
-          <span class="text-body-2 font-weight-bold mx-2">{{
-            group.name
-          }}</span>
-          <span class="text-caption"
-            >{{ groupCardQueries[index].data?.total ?? 0 }}</span
-          >
-        </v-expansion-panel-title>
-        <v-expansion-panel-text>
-          <v-divider />
-          <table-view
-            :key="'list-view-' + group.id"
-            v-model:row-hovered="rowHovered"
-            :options="group.options"
-            :columns="columns"
-            :column-pinning="{ left: ['actions'] }"
-            :data="groupCardQueries[index].data?.cards ?? []"
-            :total="groupCardQueries[index].data?.total ?? 0"
-            @click:row="(row) => console.log(row)"
-            @submit="
-              (data) => handleCardCreation({ ...data, listStageId: group.id })
-            "
-          >
-            <template #listStage="{ row }">
-              <list-stage-selector
-                v-model="row.original.cardLists[0].listStage"
-                @update:modelValue="
-                  (modelValue) =>
-                    updateCardListStage({
-                      cardListId: row.original.cardLists[0].id,
-                      listStageId: modelValue.id,
-                    })
-                "
-              />
-            </template>
-            <template #users="{ row }">
-              <user-selector
-                :model-value="row.original.users"
-                @update:modelValue="
-                  (modelValue) => handleUserSelection(modelValue)
-                "
-              />
-            </template>
-            <template #actions="{ row }">
-              <v-menu>
-                <template #activator="{ props }">
-                  <v-btn
-                    v-if="rowHovered?.original.id === row.original.id"
-                    v-bind="props"
-                    density="compact"
-                    size="small"
-                    icon="mdi-dots-vertical"
-                    variant="text"
-                    color="default"
-                  />
-                </template>
-                <v-card>
-                  <v-card-title>Hello</v-card-title>
-                </v-card>
-              </v-menu>
-            </template>
-          </table-view>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </template>
-  </v-expansion-panels>
+
+  <template v-for="(group, index) in groups" :key="group.name">
+    <list-view-group
+      v-if="groups"
+      v-model:group="groups[index]"
+      :columns="columns"
+      @click:row="handleRowClick"
+      v-model:row:hovered="rowHovered"
+    />
+  </template>
+
+  <v-dialog v-model="cardDialog" width="800">
+    <base-card
+      v-model="openedCard"
+      show-close-button
+      @click:close="closeCardDialog"
+    />
+  </v-dialog>
 </template>
 
 <style lang="scss">

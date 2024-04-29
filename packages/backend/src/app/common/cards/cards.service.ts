@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { FindOptionsWhere, Repository } from "typeorm";
 import { Card } from "./card.entity";
 import { CreateCardDto } from "./dto/create.card.dto";
 import { UpdateCardDto } from "./dto/update.card.dto";
@@ -51,17 +51,32 @@ export class CardsService {
             order[sortBy] = sortOrder;
         }
 
-        let where: any = { cardLists: { list: { id: listId } } };
+        const listFilter: QueryFilter = {
+            where: {
+                and: [
+                    {
+                        field: "cardLists.list.id",
+                        operator: "eq",
+                        value: listId,
+                    },
+                ],
+            },
+        };
+
+        let where: FindOptionsWhere<Card>;
         if (filters) {
-            const builtFilters = QueryBuilderHelper.buildQuery(filters.where);
-            this.logger.debug({ builtFilters });
-            where = ObjectHelper.deepMergeObjects(where, builtFilters);
+            const combinedFilters: QueryFilter = ObjectHelper.deepMergeObjects(
+                listFilter,
+                filters
+            );
+            where = QueryBuilderHelper.buildQuery(combinedFilters.where);
+        } else {
+            where = QueryBuilderHelper.buildQuery(listFilter.where);
         }
-        this.logger.debug({ filters, where });
 
         const [cards, total] = await this.cardsRepository.findAndCount({
             where,
-            relations: ["cardLists", "cardLists.listStage"],
+            relations: ["cardLists", "cardLists.listStage", "users"],
             take: take,
             skip: skip,
             order: order,
@@ -71,7 +86,10 @@ export class CardsService {
     }
 
     async findOne(id: number): Promise<Card> {
-        const card = await this.cardsRepository.findOne({ where: { id } });
+        const card = await this.cardsRepository.findOne({
+            where: { id },
+            relations: ["cardLists", "cardLists.listStage"],
+        });
         if (!card) {
             throw new NotFoundException(`Card with ID ${id} not found`);
         }

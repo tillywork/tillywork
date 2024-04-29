@@ -50,10 +50,8 @@ export class CardsController {
         try {
             filters = JSON.parse(query.filters as string);
         } catch (e) {
-            filters = {};
+            filters = undefined;
         }
-
-        this.logger.debug({ filters: filters });
 
         return this.cardsService.findAll({
             listId,

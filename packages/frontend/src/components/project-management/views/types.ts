@@ -1,4 +1,4 @@
-import type { List } from "../lists/types"
+import type { List, ListGroupOptions } from "../lists/types"
 
 export interface View {
     id: number
@@ -13,4 +13,9 @@ export enum ViewTypes {
     BOARD = 'board',
     CALENDAR = 'calendar',
     GANTT = 'gantt',
+}
+
+export interface ListGroupOption {
+    label: string
+    value: ListGroupOptions
 }

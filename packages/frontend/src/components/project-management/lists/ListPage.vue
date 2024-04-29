@@ -23,12 +23,14 @@ watch(listId, () => refetchList());
 </script>
 
 <template>
-  <div class="pa-4 pb-0">
-    <div class="px-4 pt-6" v-if="list">
-      <p class="text-h5 mb-3">{{ list.name }}</p>
-      <list-view-tabs v-model:views="list.views" />
+  <div class="position-relative">
+    <div class="pa-4 pb-0">
+      <div class="px-4 pt-6" v-if="list">
+        <p class="text-h5 mb-3">{{ list.name }}</p>
+        <list-view-tabs v-model:views="list.views" />
+      </div>
     </div>
+    <v-divider />
+    <router-view />
   </div>
-  <v-divider />
-  <router-view />
 </template>

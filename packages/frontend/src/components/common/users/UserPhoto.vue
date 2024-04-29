@@ -3,6 +3,7 @@ const props = defineProps<{
   photo?: string;
   icon?: string;
   color?: string;
+  style?: string;
 }>();
 </script>
 
@@ -10,9 +11,9 @@ const props = defineProps<{
   <v-avatar
     density="comfortable"
     size="small"
-    :variant="props.photo ? 'elevated' : 'flat'"
+    class="border"
   >
-    <v-img v-if="props.photo" :src="props.photo" />
+    <v-img v-if="props.photo" :src="props.photo" v-bind:style="props.style" />
     <v-icon
       v-else
       :icon="props.icon ?? 'mdi-account-circle'"
