@@ -9,9 +9,10 @@ import { useWorkspaceStore } from '@/stores/workspace';
 import { storeToRefs } from 'pinia';
 import { type Space } from '../spaces/types';
 import type { List } from '../lists/types';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useQuery } from '@tanstack/vue-query';
 
+const route = useRoute();
 const router = useRouter();
 const workspaceStore = useWorkspaceStore();
 const { selectedWorkspace, selectedSpace, spaceExpansionState } =
@@ -147,7 +148,7 @@ watch(createListDialog, (isOpen) => {
                     slim
                     v-bind="listHoverProps"
                     @click="handleListClick(list)"
-                    exact
+                    :active="+route.params.listId === list.id"
                   >
                     <v-list-item-title class="user-select-none">{{
                       list.name
