@@ -20,7 +20,7 @@
     "pinia-plugin-persistedstate": "^3.2.1",
     "veaury": "^2.3.16",
     "vue-router": "^4.2.5",
-    "vuetify": "^3.5.9"
+    "vuetify": "^3.5.17"
   },
   "devDependencies": {
     "@vitejs/plugin-vue-jsx": "^3.1.0"

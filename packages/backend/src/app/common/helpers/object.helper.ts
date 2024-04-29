@@ -12,6 +12,9 @@ export class ObjectHelper {
                 ) {
                     if (!target[key]) target[key] = {};
                     this.deepMergeObjects(target[key], source[key]);
+                } else if (Array.isArray(source[key])) {
+                    target[key] = target[key] || [];
+                    target[key] = target[key].concat(source[key]);
                 } else {
                     target[key] = source[key];
                 }

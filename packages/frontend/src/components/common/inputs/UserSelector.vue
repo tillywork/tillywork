@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import { useUsersService } from '@/composables/services/useUsersService';
 import type { User } from '@/components/common/users/types';
 import UserPhoto from '../users/UserPhoto.vue';
-import { useQuery } from '@tanstack/vue-query';
+import { ref } from 'vue';
 
-const usersService = useUsersService();
+const userMenu = ref(false);
+defineExpose({
+  userMenu,
+});
+const props = defineProps<{
+  users: User[];
+}>();
 const selectedUsers = defineModel<User[]>({
   default: [],
   required: true,
-});
-const usersQuery = useQuery({
-  queryKey: ['users'],
-  queryFn: usersService.getUsers,
 });
 
 const toggleUserSelection = (user: User) => {
@@ -39,7 +40,7 @@ const isUserSelected = (user: User) => {
 </script>
 
 <template>
-  <v-menu :close-on-content-click="false" offset="5">
+  <v-menu v-model="userMenu" :close-on-content-click="false" offset="5">
     <template #activator="{ props: menuProps }">
       <div
         class="d-flex align-center justify-start rounded-md px-1"
@@ -56,7 +57,7 @@ const isUserSelected = (user: User) => {
         </v-btn>
         <template v-else>
           <template
-            v-for="selectedUser in selectedUsers"
+            v-for="(selectedUser, index) in selectedUsers"
             :key="selectedUser.email"
           >
             <v-tooltip location="bottom">
@@ -65,6 +66,7 @@ const isUserSelected = (user: User) => {
                   v-bind="tooltipProps"
                   :photo="selectedUser.photo"
                   class="me-n2"
+                  :style="`z-index: ${100 - index}`"
                 />
               </template>
               <span class="text-caption">{{
@@ -75,12 +77,9 @@ const isUserSelected = (user: User) => {
         </template>
       </div>
     </template>
-    <v-card>
+    <v-card width="250" color="surface">
       <v-list nav density="compact">
-        <template
-          v-for="user in usersQuery.data.value?.users"
-          :key="user.email"
-        >
+        <template v-for="user in users" :key="user.email">
           <v-list-item @click="toggleUserSelection(user)" slim>
             <template #prepend>
               <v-list-item-action start>
@@ -106,4 +105,3 @@ const isUserSelected = (user: User) => {
     </v-card>
   </v-menu>
 </template>
-@/components/common/users/types

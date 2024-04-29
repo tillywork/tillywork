@@ -12,6 +12,8 @@ import { Space } from "../spaces/space.entity";
 import { CardList } from "../cards/card.list.entity";
 import { ListStage } from "./list.stage.entity";
 import { View } from "../views/view.entity";
+import { Prop } from "../props/prop.entity";
+import { ListGroup } from "./list.group.entity";
 
 @Entity()
 export class List {
@@ -35,9 +37,15 @@ export class List {
     @OneToMany(() => ListStage, (listStage) => listStage.list)
     listStages: ListStage[];
 
+    @OneToMany(() => ListGroup, (listGroup) => listGroup.list)
+    listGroups: ListGroup[];
+
     @OneToMany(() => CardList, (cardList) => cardList.list)
     cardLists: CardList[];
 
     @OneToMany(() => View, (view) => view.list)
     views: View[];
+
+    @OneToMany(() => Prop, (prop) => prop.list)
+    props: Prop[];
 }

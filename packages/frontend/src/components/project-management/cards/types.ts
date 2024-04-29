@@ -4,8 +4,11 @@ import type { List, ListStage } from '../lists/types';
 export interface Card {
   id: number;
   title: string;
+  description: string;
   cardLists: CardList[];
   users: User[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
   createdAt: string;
 }
 

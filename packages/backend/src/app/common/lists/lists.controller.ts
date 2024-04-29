@@ -15,6 +15,8 @@ import { UpdateListDto } from "./dto/update.list.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
 import { ListStage } from "./list.stage.entity";
 import { ListStagesService } from "./list.stages.service";
+import { ListGroupOptions } from "./types";
+import { ListGroupsService } from "./list.groups.service";
 
 @UseGuards(JwtAuthGuard)
 @Controller({
@@ -24,7 +26,8 @@ import { ListStagesService } from "./list.stages.service";
 export class ListsController {
     constructor(
         private readonly listsService: ListsService,
-        private readonly listStagesService: ListStagesService
+        private readonly listStagesService: ListStagesService,
+        private readonly listGroupsService: ListGroupsService
     ) {}
 
     @Get()
@@ -59,6 +62,18 @@ export class ListsController {
     findStages(@Param("listId") listId: number): Promise<ListStage[]> {
         return this.listStagesService.findAll({
             listId,
+        });
+    }
+
+    @Post(":listId/groups")
+    generateGroups(
+        @Param("listId") listId: number,
+        @Body() body: { groupBy: ListGroupOptions }
+    ) {
+        const { groupBy } = body;
+        return this.listGroupsService.generateGroups({
+            listId,
+            groupBy,
         });
     }
 }

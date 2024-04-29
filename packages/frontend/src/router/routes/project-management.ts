@@ -41,6 +41,15 @@ const projectManagementRoutes = [
           },
         ],
       },
+      {
+        path: '/workspaces/:workspaceId/cards/:cardId',
+        name: 'CardPage',
+        component: () =>
+          import('@/components/project-management/cards/CardPage.vue'),
+        meta: {
+          title: 'Card',
+        },
+      },
     ],
   },
 ];

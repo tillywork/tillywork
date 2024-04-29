@@ -23,6 +23,13 @@ export class Card {
     @Column({ type: "varchar", nullable: true })
     description?: string;
 
+    @Column({ type: "timestamp", nullable: true })
+    dueAt: Date;
+
+    @Column({ type: "jsonb", default: {} })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any;
+
     @OneToMany(() => CardList, (cardList) => cardList.card)
     cardLists: CardList[];
 

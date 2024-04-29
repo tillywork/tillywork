@@ -7,6 +7,8 @@ import {
     Delete,
     Put,
     UseGuards,
+    Request,
+    Logger,
 } from "@nestjs/common";
 import { UserFindAllResult, UsersService } from "./users.service";
 import { User } from "./user.entity";
@@ -22,8 +24,13 @@ import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
+    private logger = new Logger('UsersController')
+
     @Get()
-    findAll(): Promise<UserFindAllResult> {
+    findAll(@Request() request): Promise<UserFindAllResult> {
+        const { user } = request;
+        this.logger.debug({ user })
+        
         return this.usersService.findAll();
     }
 
