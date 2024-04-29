@@ -13,7 +13,6 @@ import BaseCard from '../cards/BaseCard.vue';
 import BaseViewGroupByChip from './BaseViewGroupByChip.vue';
 import BaseViewGroup from './BaseViewGroup.vue';
 import { DEFAULT_PAGINATION_OPTIONS } from './TableView/types';
-import dayjs from 'dayjs';
 
 const route = useRoute();
 const router = useRouter();
@@ -58,6 +57,7 @@ const rowHovered = ref<Row<Card>>();
 const getViewQuery = useQuery({
   queryKey: ['view', viewId.value],
   queryFn: () => viewsService.getView(viewId.value),
+  refetchOnWindowFocus: false,
 });
 const {
   data: groups,

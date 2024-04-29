@@ -14,6 +14,7 @@ const { selectedWorkspace } = storeToRefs(workspaceStore);
 const workspaceQuery = useQuery({
   queryKey: ['workspaces'],
   queryFn: getWorkspaces,
+  refetchOnWindowFocus: false,
 });
 
 function closeSelectWorkspaceMenu() {

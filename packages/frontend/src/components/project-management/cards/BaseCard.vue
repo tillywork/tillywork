@@ -32,6 +32,7 @@ const updateCardMutation = useMutation({
 const usersQuery = useQuery({
   queryKey: ['users'],
   queryFn: usersService.getUsers,
+  refetchOnWindowFocus: false,
 });
 
 const { textarea, input: cardTitle } = useTextareaAutosize();
@@ -76,7 +77,6 @@ const isCardLoading = computed(() => {
 watch(
   card,
   (newCard) => {
-    console.log(newCard);
     cardCopy.value = {
       ...newCard,
     } as Card;

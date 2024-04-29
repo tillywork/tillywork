@@ -30,6 +30,7 @@ const spacesQuery = useQuery({
     spacesService.getSpaces({
       workspaceId: selectedWorkspace.value!.id,
     }),
+  refetchOnWindowFocus: false,
 });
 
 const currentSpaceExpansionState = computed({

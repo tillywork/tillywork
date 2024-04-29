@@ -20,6 +20,7 @@ const {
 } = useQuery({
   queryKey: ['list', listId.value],
   queryFn: () => listsService.getList(listId.value),
+  refetchOnWindowFocus: false,
 });
 
 watch(list, () => {

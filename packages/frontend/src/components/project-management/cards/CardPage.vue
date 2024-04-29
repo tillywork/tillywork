@@ -13,6 +13,7 @@ const cardId = computed(() => route.params.cardId);
 const getCardQuery = useQuery({
   queryKey: ['cards', cardId.value],
   queryFn: () => cardsService.getCard(+cardId.value),
+  refetchOnWindowFocus: false,
 });
 
 const card = computed(() => getCardQuery.data.value);
