@@ -15,7 +15,6 @@ import { Card } from "./card.entity";
 import { CreateCardDto } from "./dto/create.card.dto";
 import { UpdateCardDto } from "./dto/update.card.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
-import { FindManyOptions } from "typeorm";
 import { UpdateCardListDto } from "./dto/update.card.list.dto";
 import { CardListsService } from "./card.lists.service";
 import { QueryFilter } from "../helpers/query.builder.helper";
@@ -76,9 +75,9 @@ export class CardsController {
     @Put(":id")
     update(
         @Param("id") id: string,
-        @Body() updateUserDto: UpdateCardDto
+        @Body() updateCardDto: UpdateCardDto
     ): Promise<Card> {
-        return this.cardsService.update(+id, updateUserDto);
+        return this.cardsService.update(+id, updateCardDto);
     }
 
     @Delete(":id")

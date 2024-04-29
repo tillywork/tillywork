@@ -1,33 +1,19 @@
 <script setup lang="ts">
-import { useListStagesService } from '@/composables/services/useListStagesService';
 import { ref } from 'vue';
 import { type ListStage } from '../../project-management/lists/types';
-import { watch } from 'vue';
 
 const selectedStage = defineModel<ListStage>();
 const listStageMenu = ref(false);
 defineExpose({
-    listStageMenu
+  listStageMenu,
 });
-
-const listStagesService = useListStagesService();
-const listStages = ref<ListStage[]>([]);
+const props = defineProps<{
+  listStages: ListStage[];
+}>();
 
 function handleStageClick(stage: ListStage) {
   selectedStage.value = stage;
 }
-
-watch(
-  selectedStage,
-  async (stage) => {
-    if (stage) {
-      listStages.value = await listStagesService.getListStages({
-        listId: stage.listId,
-      });
-    }
-  },
-  { immediate: true }
-);
 
 function isStageSelected(stage: ListStage) {
   return selectedStage.value && selectedStage.value.id === stage.id;

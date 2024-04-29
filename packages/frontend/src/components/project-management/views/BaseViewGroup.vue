@@ -17,6 +17,10 @@ import { useRoute } from 'vue-router';
 import { useCardsService } from '@/composables/services/useCardsService';
 import { ref } from 'vue';
 import { useUsersService } from '@/composables/services/useUsersService';
+import { type PaginationParams } from './TableView/types';
+import { watch } from 'vue';
+import { useListStagesService } from '@/composables/services/useListStagesService';
+import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 
 const props = defineProps<{
   group: ListGroup;
@@ -24,6 +28,9 @@ const props = defineProps<{
   columns: ColumnDef<any>[];
 }>();
 const emit = defineEmits(['click:row']);
+const paginationOptions = defineModel<PaginationParams>('options', {
+  required: true,
+});
 const rowHovered = defineModel<Row<Card>>('row:hovered');
 const isExpanded = ref(true);
 
@@ -31,6 +38,7 @@ const route = useRoute();
 const listId = computed(() => +route.params.listId);
 const usersService = useUsersService();
 const cardsService = useCardsService();
+const listsStagesService = useListStagesService();
 const queryClient = useQueryClient();
 const { mutate: updateCardListStage } = useMutation({
   mutationFn: ({
@@ -44,16 +52,48 @@ const { mutate: updateCardListStage } = useMutation({
       cardListId,
       listStageId,
     }),
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards'] }),
+  onSuccess: () =>
+    queryClient.invalidateQueries({ queryKey: ['groups', listId.value] }),
 });
 const createCardMutation = useMutation({
   mutationFn: (createCardDto: CreateCardDto) =>
     cardsService.createCard(createCardDto),
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards'] }),
+  onSuccess: () =>
+    queryClient.invalidateQueries({ queryKey: ['groups', listId.value] }),
+});
+const updateCardMutation = useMutation({
+  mutationFn: (updateCardDto: Card) => cardsService.updateCard(updateCardDto),
+  onSuccess: () =>
+    queryClient.invalidateQueries({ queryKey: ['groups', listId.value] }),
 });
 const usersQuery = useQuery({
   queryKey: ['users'],
   queryFn: usersService.getUsers,
+});
+const listStagesQuery = useQuery({
+  queryKey: ['listStages', listId.value],
+  queryFn: () => listsStagesService.getListStages({ listId: listId.value }),
+});
+
+/**
+ * This is needed to rerender all tables with new sorting options
+ * when one table changes sorting state
+ * because we want all tables to have the same sorting state
+ */
+const tableViewKey = computed(() => {
+  if (
+    paginationOptions.value &&
+    paginationOptions.value.sort &&
+    paginationOptions.value.sort.length > 0
+  ) {
+    return (
+      paginationOptions.value.sort[0].key +
+      '-' +
+      paginationOptions.value.sort[0].order
+    );
+  } else {
+    return '';
+  }
 });
 
 function handleRowClick(row: Row<Card>) {
@@ -66,11 +106,24 @@ function handleUserSelection(users: User[]) {
 }
 
 function handleCardCreation(createCardDto: Partial<CreateCardDto>) {
-  console.log(createCardDto);
   createCardDto.listId = listId.value;
   //TODO Card creation won't work if group by is not stages
   createCardDto.listStageId = props.group.entityId;
   createCardMutation.mutate(createCardDto as CreateCardDto);
+}
+
+function handleChangeDueDate({
+  card,
+  newDueDate,
+}: {
+  card: Card;
+  newDueDate: Date;
+}) {
+  const updatedCard = {
+    ...card,
+    dueAt: newDueDate.toISOString(),
+  };
+  updateCardMutation.mutate(updatedCard);
 }
 
 function toggleGroupExpansion() {
@@ -96,9 +149,9 @@ function toggleGroupExpansion() {
     </div>
     <div class="content" v-if="isExpanded">
       <table-view
-        :key="'list-view-' + group.id"
+        :key="tableViewKey"
         v-model:row-hovered="rowHovered"
-        :options="group.options"
+        v-model:options="paginationOptions"
         :columns="columns"
         :column-pinning="{ left: ['actions'] }"
         :data="group.cards?.cards ?? []"
@@ -109,6 +162,7 @@ function toggleGroupExpansion() {
         <template #listStage="{ row }">
           <list-stage-selector
             v-model="row.original.cardLists[0].listStage"
+            :list-stages="listStagesQuery.data.value ?? []"
             @update:modelValue="
               (modelValue) =>
                 updateCardListStage({
@@ -123,6 +177,20 @@ function toggleGroupExpansion() {
             :model-value="row.original.users"
             :users="usersQuery.data.value?.users ?? []"
             @update:modelValue="handleUserSelection"
+          />
+        </template>
+        <template #dueAt="{ row }">
+          <base-date-picker
+            :model-value="row.original.dueAt ? new Date(row.original.dueAt) : undefined"
+            no-date-message="No Due Date"
+            :close-on-content-click="true"
+            @update:model-value="
+              (newValue) =>
+                handleChangeDueDate({
+                  card: row.original,
+                  newDueDate: newValue as Date,
+                })
+            "
           />
         </template>
         <template #actions="{ row }">

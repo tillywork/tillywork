@@ -9,6 +9,7 @@ export interface Card {
   users: User[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
+  dueAt: string;
   createdAt: string;
 }
 
