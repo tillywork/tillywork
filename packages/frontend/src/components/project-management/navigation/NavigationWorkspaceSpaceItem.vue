@@ -42,7 +42,7 @@ watch(createListDialog, () => {
           >
             <create-list-dialog-and-button
               v-model="createListDialog"
-              :space-id="space.id"
+              :space="space"
               @click="handleCreateListDialogClick(space)"
             />
           </template>

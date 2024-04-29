@@ -39,3 +39,14 @@ export interface TableSortOption {
 }
 
 export type TableSortState = TableSortOption[];
+
+export const DEFAULT_PAGINATION_OPTIONS: PaginationParams = {
+  sort: [
+    {
+      key: 'createdAt',
+      order: 'asc',
+    },
+  ],
+  page: 1,
+  itemsPerPage: 5,
+};

@@ -22,7 +22,7 @@ import { TypeOrmLoggerContainer } from "./common/logger/typeorm.logger.container
                 entities: [__dirname + "/**/*.entity{.ts,.js}"],
                 autoLoadEntities: true,
                 synchronize: true, // use only in development, in production should be handled by migrations
-                logger: TypeOrmLoggerContainer.ForConnection("default", true),
+                logger: configService.get('FD_ENABLE_QUERY_LOGGING') !== 'false' ? TypeOrmLoggerContainer.ForConnection(true) : undefined,
             }),
             inject: [ConfigService],
         }),

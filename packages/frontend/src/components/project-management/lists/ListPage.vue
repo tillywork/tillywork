@@ -5,7 +5,7 @@ import { watch } from 'vue';
 import { computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import ListViewTabs from './ListViewTabs.vue';
-import ListView from '../views/ListView.vue';
+import BaseView from '../views/BaseView.vue';
 
 const route = useRoute();
 const listId = computed(() => +route.params.listId);
@@ -40,7 +40,7 @@ watch(listId, () => refetchList());
     </div>
     <v-divider />
     <template v-if="viewId">
-      <list-view />
+      <base-view />
     </template>
   </div>
 </template>

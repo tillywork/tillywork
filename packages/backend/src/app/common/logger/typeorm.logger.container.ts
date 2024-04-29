@@ -8,10 +8,9 @@ import { Logger } from "@nestjs/common";
  */
 export class TypeOrmLoggerContainer implements TypeOrmLogger {
     static ForConnection(
-        connectionName: string,
         options: TypeOrmLoggerOptions
     ) {
-        const logger = new Logger(`TypeORM[${connectionName}]`);
+        const logger = new Logger(`TypeORM`);
         return new TypeOrmLoggerContainer(logger, options);
     }
 

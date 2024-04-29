@@ -10,8 +10,10 @@ import { computed } from 'vue';
 import { type ColumnDef, type Row } from '@tanstack/vue-table';
 import { useQuery } from '@tanstack/vue-query';
 import BaseCard from '../cards/BaseCard.vue';
-import ListViewGroupByChip from './ListViewGroupByChip.vue';
-import ListViewGroup from './ListViewGroup.vue';
+import BaseViewGroupByChip from './BaseViewGroupByChip.vue';
+import BaseViewGroup from './BaseViewGroup.vue';
+import { DEFAULT_PAGINATION_OPTIONS } from './TableView/types';
+import dayjs from 'dayjs';
 
 const route = useRoute();
 const router = useRouter();
@@ -41,6 +43,10 @@ const columns: ColumnDef<Card, any>[] = [
     header: 'Assignees',
   },
   {
+    id: 'dueAt',
+    header: 'Due Date',
+  },
+  {
     id: 'actions',
     enableResizing: false,
     enableSorting: false,
@@ -53,8 +59,17 @@ const getViewQuery = useQuery({
   queryKey: ['view', viewId.value],
   queryFn: () => viewsService.getView(viewId.value),
 });
+const {
+  data: groups,
+  refetch: refetchListGroups,
+  isFetching: isGroupsFetching,
+} = useQuery({
+  queryKey: ['groups', listId.value],
+  queryFn: getListGroups,
+});
 
 const groupBy = ref<ListGroupOptions>(ListGroupOptions.LIST_STAGE);
+const paginationOptions = ref(DEFAULT_PAGINATION_OPTIONS)
 
 watch(getViewQuery.data, (view) => {
   if (view) {
@@ -78,15 +93,6 @@ watch(
     immediate: true,
   }
 );
-
-const {
-  data: groups,
-  refetch: refetchListGroups,
-  isFetching: isGroupsFetching,
-} = useQuery({
-  queryKey: ['groups', listId.value],
-  queryFn: getListGroups,
-});
 
 async function getListGroups() {
   const groups = await listGroupsService.getListGroupsByOption({
@@ -132,7 +138,7 @@ function closeCardDialog() {
     </v-btn>
     <v-divider class="mx-2" :vertical="true" />
     <div class="d-flex align-center ga-2">
-      <list-view-group-by-chip
+      <base-view-group-by-chip
         v-model="groupBy"
         @update:model-value="refetchListGroups()"
       />
@@ -170,9 +176,10 @@ function closeCardDialog() {
   </div>
 
   <template v-for="(group, index) in groups" :key="group.name">
-    <list-view-group
+    <base-view-group
       v-if="groups"
       v-model:group="groups[index]"
+      v-model:options="paginationOptions"
       :columns="columns"
       @click:row="handleRowClick"
       v-model:row:hovered="rowHovered"

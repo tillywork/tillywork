@@ -6,13 +6,14 @@ import { validation } from '@/utils/validation';
 import { VForm } from 'vuetify/lib/components/index.mjs';
 import { useListsService } from '@/composables/services/useListsService';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import type { Space } from '../spaces/types';
 
 const props = defineProps<{
-  spaceId: number;
+  space: Space;
 }>();
 
 const workspaceStore = useWorkspaceStore();
-const { selectedSpace, selectedWorkspace } = storeToRefs(workspaceStore);
+const { selectedWorkspace } = storeToRefs(workspaceStore);
 
 const queryClient = useQueryClient();
 const createListMutation = useMutation({
@@ -36,7 +37,7 @@ const createListDialog = defineModel<boolean>();
 const createListForm = ref<null | VForm>(null);
 const createListData = ref({
   name: '',
-  spaceId: selectedSpace.value?.id,
+  spaceId: props.space.id,
 });
 
 const emit = defineEmits(['click']);
@@ -48,7 +49,7 @@ function closeCreateListDialog() {
 async function createList() {
   if (!createListForm.value?.isValid) throw new Error();
 
-  createListData.value.spaceId = selectedSpace.value?.id;
+  createListData.value.spaceId = props.space.id;
   const list = await listsService.createList(createListData.value);
 
   return list;
@@ -90,7 +91,7 @@ function handleCreateListDialogClick() {
           ></v-progress-linear>
         </template>
         <v-card-title class="text-body-2 font-weight-medium"
-          >Create List in {{ selectedSpace?.name }}</v-card-title
+          >Create List in {{ space?.name }}</v-card-title
         >
         <v-divider />
         <v-card-text>

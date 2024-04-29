@@ -26,7 +26,7 @@ const queryClient = useQueryClient();
 const updateCardMutation = useMutation({
   mutationFn: updateCard,
   onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['cards'] });
+    queryClient.invalidateQueries({ queryKey: ['groups', listId.value] });
   },
 });
 const usersQuery = useQuery({

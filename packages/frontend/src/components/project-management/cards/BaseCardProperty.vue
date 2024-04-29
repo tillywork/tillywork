@@ -6,11 +6,13 @@ import BaseCardPropertyValueBtn from '@/components/project-management/cards/Base
 import UserSelector from '@/components/common/inputs/UserSelector.vue';
 import dayjs from 'dayjs';
 import type { User } from '@/components/common/users/types';
+import type { ListStage } from '../lists/types';
 
 const prop = defineModel<Prop>('prop');
 const value = defineModel<any>('value');
 const props = defineProps<{
   users?: User[];
+  listStages?: ListStage[];
 }>();
 
 const hideTitle = computed(() => prop.value?.name === 'Description');
@@ -55,7 +57,7 @@ function openUserSelector() {
     <v-col class="d-flex">
       <template v-if="prop.type === PropTypes.STAGE">
         <base-card-property-value-btn @click="openListStageSelector">
-          <list-stage-selector v-model="value" ref="listStageSelector" />
+          <list-stage-selector v-model="value" ref="listStageSelector" :listStages="listStages ?? []" />
         </base-card-property-value-btn>
       </template>
       <template v-else-if="prop.type === PropTypes.TEXT">

@@ -83,9 +83,11 @@ const isCreating = ref(false);
 watch(
   options,
   (newValue) => {
+    console.log('updated for inner table');
+    console.log(newValue);
     emit('update:options', newValue);
   },
-  { deep: true }
+  { deep: true, immediate: true }
 );
 
 onKeyStroke(
@@ -150,7 +152,10 @@ function toggleIsCreating(closeOnly?: boolean) {
 </script>
 
 <template>
-  <div class="table-container" :class="themeClass">
+  <div
+    class="table-container"
+    :class="themeClass"
+  >
     <table>
       <thead>
         <tr
