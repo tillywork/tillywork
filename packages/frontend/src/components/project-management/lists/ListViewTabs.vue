@@ -3,29 +3,19 @@ import { useRoute, useRouter } from 'vue-router';
 import { type View } from '../views/types';
 import { ref } from 'vue';
 import { watch } from 'vue';
+import { onMounted } from 'vue';
+
 const router = useRouter();
 const route = useRoute();
-const views = defineModel<View[]>('views', {
-  required: true,
-});
+const props = defineProps<{
+  views: View[];
+}>();
 const selectedTab = defineModel<View>();
 const isLoading = ref(false);
 
 function handleTabSelection(tab: View) {
   selectedTab.value = tab;
 }
-
-watch(
-  views,
-  () => {
-    if (views.value && !selectedTab.value) {
-      selectedTab.value = views.value[0];
-    } else {
-      selectedTab.value = undefined;
-    }
-  },
-  { immediate: true, deep: true }
-);
 
 watch(
   selectedTab,
@@ -41,8 +31,16 @@ watch(
       });
     }
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 );
+
+onMounted(() => {
+  if (props.views && props.views.length > 0 && !selectedTab.value) {
+    selectedTab.value = props.views[0];
+  } else {
+    selectedTab.value = undefined;
+  }
+});
 </script>
 
 <template>

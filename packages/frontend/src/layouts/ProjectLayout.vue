@@ -3,7 +3,7 @@ import ThemeSwitch from '@/components/common/theme/ThemeSwitch.vue';
 import { useAuth } from '@/composables/useAuth';
 import SnackbarWrapper from '@/components/common/SnackbarWrapper.vue';
 import { ref } from 'vue';
-import type { RouteLocationRaw } from 'vue-router';
+import { type RouteLocationRaw } from 'vue-router';
 import ToolbarSearch from '@/components/common/inputs/ToolbarSearch.vue';
 import NavigationWorkspace from '@/components/project-management/navigation/NavigationWorkspace.vue';
 

@@ -34,7 +34,7 @@ const projectManagementRoutes = [
             path: '/workspaces/:workspaceId/spaces/:spaceId/lists/:listId/views/:viewId',
             name: 'ListView',
             component: () =>
-              import('@/components/project-management/views/ListView.vue'),
+              import('@/components/project-management/lists/ListPage.vue'),
             meta: {
               title: 'View',
             },

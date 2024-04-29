@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useListsService } from '@/composables/services/useListsService';
 import { useRoute, useRouter } from 'vue-router';
-import { ListGroupOptions, type ListGroup } from '../lists/types';
+import { ListGroupOptions } from '../lists/types';
 import { watch } from 'vue';
-import { useCardsService } from '@/composables/services/useCardsService';
 import { useViewsService } from '@/composables/services/useViewsService';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import type { Card } from '../cards/types';
 import { computed } from 'vue';
 import { type ColumnDef, type Row } from '@tanstack/vue-table';
-import { useQuery, useQueries } from '@tanstack/vue-query';
+import { useQuery } from '@tanstack/vue-query';
 import BaseCard from '../cards/BaseCard.vue';
 import ListViewGroupByChip from './ListViewGroupByChip.vue';
 import ListViewGroup from './ListViewGroup.vue';
@@ -19,18 +17,11 @@ const route = useRoute();
 const router = useRouter();
 const listId = computed(() => +route.params.listId);
 const viewId = computed(() => +route.params.viewId);
-const listsService = useListsService();
-const cardsService = useCardsService();
 const viewsService = useViewsService();
 const listGroupsService = useListGroupsService();
 
 const isPageLoading = computed(() => {
-  return (
-    isListLoading.value ||
-    getViewQuery.isFetching.value ||
-    isGroupsFetching.value
-    // groupCardQueries.value.some((query) => query.isFetching)
-  );
+  return getViewQuery.isFetching.value || isGroupsFetching.value;
 });
 const openedCard = ref<Card>();
 const cardDialog = ref(false);
@@ -58,10 +49,6 @@ const columns: ColumnDef<Card, any>[] = [
 ];
 
 const rowHovered = ref<Row<Card>>();
-const { data: list, isFetching: isListLoading } = useQuery({
-  queryKey: ['list', listId.value],
-  queryFn: () => listsService.getList(listId.value),
-});
 const getViewQuery = useQuery({
   queryKey: ['view', viewId.value],
   queryFn: () => viewsService.getView(viewId.value),
@@ -110,73 +97,6 @@ async function getListGroups() {
   return groups;
 }
 
-const oldGroups = computed(() => {
-  const groups: ListGroup[] = [];
-  switch (groupBy.value) {
-    case ListGroupOptions.LIST_STAGE:
-      if (list.value && list.value.listStages.length > 0) {
-        list.value?.listStages.forEach((listStage) => {
-          groups.push({
-            id: listStage.id,
-            name: listStage.name,
-            color: listStage.color,
-            filters: {
-              where: {
-                and: [
-                  {
-                    field: 'cardLists.listStageId',
-                    operator: 'eq',
-                    value: listStage.id,
-                  },
-                ],
-              },
-            },
-            options: {
-              page: 1,
-              itemsPerPage: 10,
-              sort: [
-                {
-                  key: 'createdAt',
-                  order: 'desc',
-                },
-              ],
-            },
-          });
-        });
-      }
-      break;
-    default:
-      groups.push({
-        id: list.value?.listStages[0].id ?? 0,
-        name: 'Cards',
-        filters: {},
-      });
-  }
-
-  return groups;
-});
-
-// const queries = computed(() => {
-//   if (groups.value) {
-//     return groups.value.map((group) => {
-//       return {
-//         queryKey: ['cards', group.name, list.value?.id],
-//         queryFn: () =>
-//           cardsService.getCards({
-//             listId: listId.value,
-//             page: group.options?.page ?? 1,
-//             limit: group.options?.itemsPerPage ?? 10,
-//             sortBy: group.options?.sort,
-//             filters: group.filters,
-//           }),
-//       };
-//     });
-//   } else {
-//     return [];
-//   }
-// });
-// const groupCardQueries = useQueries({ queries });
-
 function handleRowClick(row: Row<Card>) {
   openedCard.value = row.original;
   openCardDialog();
@@ -212,7 +132,10 @@ function closeCardDialog() {
     </v-btn>
     <v-divider class="mx-2" :vertical="true" />
     <div class="d-flex align-center ga-2">
-      <list-view-group-by-chip v-model="groupBy" @update:model-value="refetchListGroups()" />
+      <list-view-group-by-chip
+        v-model="groupBy"
+        @update:model-value="refetchListGroups()"
+      />
       <v-chip
         link
         rounded="xl"
@@ -264,17 +187,3 @@ function closeCardDialog() {
     />
   </v-dialog>
 </template>
-
-<style lang="scss">
-.v-expansion-panel {
-  background-color: rgb(var(--v-theme-background));
-
-  .v-expansion-panel-text__wrapper {
-    padding: 0;
-  }
-}
-
-.v-tab.v-tab.v-btn {
-  min-width: fit-content;
-}
-</style>

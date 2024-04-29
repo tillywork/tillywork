@@ -5,12 +5,19 @@ import { watch } from 'vue';
 import { computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import ListViewTabs from './ListViewTabs.vue';
+import ListView from '../views/ListView.vue';
 
+const route = useRoute();
 const listId = computed(() => +route.params.listId);
 const listsService = useListsService();
-const route = useRoute();
+const viewId = computed(() => +route.params.viewId);
+const views = computed(() => list.value?.views ?? []);
 
-const { data: list, refetch: refetchList } = useQuery({
+const {
+  data: list,
+  refetch: refetchList,
+  isFetching: isListFetching,
+} = useQuery({
   queryKey: ['list', listId.value],
   queryFn: () => listsService.getList(listId.value),
 });
@@ -23,14 +30,17 @@ watch(listId, () => refetchList());
 </script>
 
 <template>
-  <div class="position-relative">
+  <div class="position-relative" v-if="list">
     <div class="pa-4 pb-0">
-      <div class="px-4 pt-6" v-if="list">
+      <div class="px-4 pt-6">
         <p class="text-h5 mb-3">{{ list.name }}</p>
-        <list-view-tabs v-model:views="list.views" />
+        <list-view-tabs :views="views" :key="route.fullPath" v-if="!isListFetching" />
+        <v-progress-circular v-else active color="primary" width="2" indeterminate size="24" />
       </div>
     </div>
     <v-divider />
-    <router-view />
+    <template v-if="viewId">
+      <list-view />
+    </template>
   </div>
 </template>
