@@ -2,21 +2,15 @@
 import { computed, ref } from 'vue';
 import NavigationWorkspaceSelector from './NavigationWorkspaceSelector.vue';
 import CreateSpaceDialogAndButton from '../navigation/CreateSpaceDialogAndButton.vue';
-import CreateListDialogAndButton from '../navigation/CreateListDialogAndButton.vue';
 import { useSpacesService } from '../../../composables/services/useSpacesService';
 import { watch } from 'vue';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { storeToRefs } from 'pinia';
-import { type Space } from '../spaces/types';
-import type { List } from '../lists/types';
-import { useRoute, useRouter } from 'vue-router';
 import { useQuery } from '@tanstack/vue-query';
+import NavigationWorkspaceSpaceItem from './NavigationWorkspaceSpaceItem.vue';
 
-const route = useRoute();
-const router = useRouter();
 const workspaceStore = useWorkspaceStore();
-const { selectedWorkspace, selectedSpace, spaceExpansionState } =
-  storeToRefs(workspaceStore);
+const { selectedWorkspace, spaceExpansionState } = storeToRefs(workspaceStore);
 
 const spacesService = useSpacesService();
 const createListDialog = ref(false);
@@ -49,27 +43,6 @@ const currentSpaceExpansionState = computed({
     }
   },
 });
-
-function handleCreateListDialogClick(space: Space) {
-  selectedSpace.value = space;
-  freezeSpaceHoverId.value = space.id;
-}
-
-function handleListClick(list: List) {
-  router.push({
-    name: 'ListPage',
-    params: {
-      workspaceId: selectedWorkspace?.value?.id,
-      spaceId: list.spaceId,
-      listId: list.id,
-    },
-  });
-}
-
-function handleListMenuClick(list: List) {
-  listMenu.value = !listMenu.value;
-  freezeListHoverId.value = list.id;
-}
 
 watch(
   selectedWorkspace,
@@ -116,80 +89,7 @@ watch(createListDialog, (isOpen) => {
           <create-space-dialog-and-button />
         </div>
         <template v-for="space in spacesQuery.data.value" :key="space.id">
-          <v-hover v-slot="{ isHovering, props: hoverProps }">
-            <v-list-group :value="space.id" v-bind="hoverProps" subgroup>
-              <template v-slot:activator="{ props: groupProps }">
-                <v-list-item rounded="md" v-bind="groupProps" slim>
-                  <template v-slot:prepend v-if="!isHovering">
-                    <v-icon>mdi-folder-outline</v-icon>
-                  </template>
-                  <v-list-item-title class="user-select-none">
-                    {{ space.name }}
-                  </v-list-item-title>
-                  <template
-                    v-slot:append
-                    v-if="isHovering || freezeSpaceHoverId === space.id"
-                  >
-                    <create-list-dialog-and-button
-                      v-model="createListDialog"
-                      @click="handleCreateListDialogClick(space)"
-                    />
-                  </template>
-                </v-list-item>
-              </template>
-
-              <template v-for="list in space.lists" :key="list.id">
-                <v-hover
-                  v-slot="{ isHovering: isListHovering, props: listHoverProps }"
-                >
-                  <v-list-item
-                    rounded="md"
-                    prepend-icon="mdi-list-box-outline"
-                    slim
-                    v-bind="listHoverProps"
-                    @click="handleListClick(list)"
-                    :active="+route.params.listId === list.id"
-                  >
-                    <v-list-item-title class="user-select-none">{{
-                      list.name
-                    }}</v-list-item-title>
-                    <template
-                      v-slot:append
-                      v-if="isListHovering || freezeListHoverId === list.id"
-                    >
-                      <v-btn
-                        id="list-menu-btn"
-                        color="default"
-                        density="compact"
-                        icon="mdi-dots-vertical"
-                        rounded="md"
-                        size="small"
-                        @click.stop
-                        @click="handleListMenuClick(list)"
-                      />
-
-                      <v-menu
-                        v-model="listMenu"
-                        :close-on-content-click="false"
-                        target="#list-menu-btn"
-                      >
-                        <v-card
-                          class="pt-3 mt-2"
-                          width="300px"
-                          density="compact"
-                        >
-                          <div class="px-5 text-truncate mb-2">
-                            <v-icon size="small">mdi-sitemap</v-icon>
-                            <span class="ml-1"> Your workspaces </span>
-                          </div>
-                        </v-card>
-                      </v-menu>
-                    </template>
-                  </v-list-item>
-                </v-hover>
-              </template>
-            </v-list-group>
-          </v-hover>
+          <navigation-workspace-space-item :space="space" />
         </template>
       </template>
       <template v-else>
