@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
-import { type View } from '../views/types';
+import { ViewTypes, type View } from '../views/types';
 import { ref } from 'vue';
 import { watch } from 'vue';
 import { onMounted } from 'vue';
@@ -15,6 +15,17 @@ const isLoading = ref(false);
 
 function handleTabSelection(tab: View) {
   selectedTab.value = tab;
+}
+
+function getViewIconByType(viewType: ViewTypes) {
+  switch (viewType) {
+    case ViewTypes.TABLE:
+      return 'mdi-table';
+    case ViewTypes.BOARD:
+      return 'mdi-view-column';
+    default:
+      return 'mdi-view-carousel';
+  }
 }
 
 watch(
@@ -57,8 +68,12 @@ onMounted(() => {
           :class="
             selectedTab?.id === view.id ? 'border-b-md border-b-primary' : ''
           "
-          >{{ view.name }}</v-btn
         >
+          <template #prepend>
+            <v-icon :icon="getViewIconByType(view.viewType)" />
+          </template>
+          {{ view.name }}
+        </v-btn>
       </template>
       <v-btn
         class="text-capitalize"

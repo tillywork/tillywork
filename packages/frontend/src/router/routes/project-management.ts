@@ -13,7 +13,7 @@ const projectManagementRoutes = [
         },
       },
       {
-        path: '/workspaces/:workspaceId/spaces/:spaceId',
+        path: '/pm/spaces/:spaceId',
         name: 'SpacePage',
         component: () =>
           import('@/components/project-management/spaces/SpacePage.vue'),
@@ -22,7 +22,7 @@ const projectManagementRoutes = [
         },
       },
       {
-        path: '/workspaces/:workspaceId/spaces/:spaceId/lists/:listId',
+        path: '/pm/lists/:listId',
         name: 'ListPage',
         component: () =>
           import('@/components/project-management/lists/ListPage.vue'),
@@ -31,7 +31,7 @@ const projectManagementRoutes = [
         },
         children: [
           {
-            path: '/workspaces/:workspaceId/spaces/:spaceId/lists/:listId/views/:viewId',
+            path: '/pm/lists/:listId/views/:viewId',
             name: 'ListView',
             component: () =>
               import('@/components/project-management/lists/ListPage.vue'),
@@ -42,7 +42,7 @@ const projectManagementRoutes = [
         ],
       },
       {
-        path: '/workspaces/:workspaceId/cards/:cardId',
+        path: '/pm/cards/:cardId',
         name: 'CardPage',
         component: () =>
           import('@/components/project-management/cards/CardPage.vue'),

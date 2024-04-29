@@ -7,6 +7,10 @@ import { VForm } from 'vuetify/lib/components/index.mjs';
 import { useListsService } from '@/composables/services/useListsService';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
 
+const props = defineProps<{
+  spaceId: number;
+}>();
+
 const workspaceStore = useWorkspaceStore();
 const { selectedSpace, selectedWorkspace } = storeToRefs(workspaceStore);
 
