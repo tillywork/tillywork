@@ -233,3 +233,10 @@ function toggleGroupExpansion() {
     </div>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.content {
+  max-width: 100%;
+  overflow: auto;
+}
+</style>
