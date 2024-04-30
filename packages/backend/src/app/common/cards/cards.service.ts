@@ -5,11 +5,9 @@ import { Card } from "./card.entity";
 import { CreateCardDto } from "./dto/create.card.dto";
 import { UpdateCardDto } from "./dto/update.card.dto";
 import { CardList } from "./card.list.entity";
-import {
-    QueryBuilderHelper,
-    QueryFilter,
-} from "../helpers/query.builder.helper";
 import { ObjectHelper } from "../helpers/object.helper";
+import { QueryFilter } from "../filters/types";
+import { QueryBuilderHelper } from "../helpers/query.builder.helper";
 
 export type CardFindAllResult = {
     total: number;

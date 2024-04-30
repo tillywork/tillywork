@@ -17,7 +17,7 @@ import { UpdateCardDto } from "./dto/update.card.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
 import { UpdateCardListDto } from "./dto/update.card.list.dto";
 import { CardListsService } from "./card.lists.service";
-import { QueryFilter } from "../helpers/query.builder.helper";
+import { QueryFilter } from "../filters/types";
 
 @UseGuards(JwtAuthGuard)
 @Controller({
