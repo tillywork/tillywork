@@ -18,20 +18,22 @@ export interface ListStage {
 }
 
 export enum ListGroupOptions {
+  ALL = 'ALL',
   LIST_STAGE = 'LIST_STAGE',
-  USERS = 'USERS',
+  ASSIGNEES = 'ASSIGNEES',
   DUE_DATE = 'DUE_DATE',
 }
 
 export interface ListGroup {
   id: number;
   name: string;
+  listId: number;
   entityId?: number;
   color?: string;
-  filters: QueryFilter;
+  filter?: QueryFilter;
   options?: PaginationParams;
   isExpanded?: boolean;
-  cards?: CardsData
+  cards?: CardsData;
 }
 
 export const DEFAULT_LIST_GROUP_BY_OPTIONS = [
@@ -41,7 +43,7 @@ export const DEFAULT_LIST_GROUP_BY_OPTIONS = [
   },
   {
     label: 'Assignee',
-    value: ListGroupOptions.USERS,
+    value: ListGroupOptions.ASSIGNEES,
   },
   {
     label: 'Due Date',

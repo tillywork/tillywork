@@ -8,7 +8,9 @@ import {
     JoinColumn,
 } from "typeorm";
 import { List } from "./list.entity";
-import { ListGroupOptions } from "./types";
+import { ListGroupEntityTypes, ListGroupOptions } from "./types";
+import { Filter } from "../filters/filter.entity";
+import { CardFindAllResult } from "../cards/cards.service";
 
 @Entity()
 export class ListGroup {
@@ -17,6 +19,9 @@ export class ListGroup {
 
     @Column({ type: "bigint", nullable: true })
     entityId: number;
+
+    @Column({ type: "enum", enum: ListGroupEntityTypes, nullable: true })
+    entityType: ListGroupEntityTypes;
 
     @Column({ type: "varchar", length: 255 })
     name: string;
@@ -35,4 +40,11 @@ export class ListGroup {
     @ManyToOne(() => List, (list) => list.listGroups, { nullable: false })
     @JoinColumn()
     list: List;
+
+    @Column({ type: "bigint" })
+    listId: number;
+
+    filter?: Filter;
+
+    cards?: CardFindAllResult;
 }

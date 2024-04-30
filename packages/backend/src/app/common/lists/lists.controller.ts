@@ -7,6 +7,7 @@ import {
     Delete,
     Put,
     UseGuards,
+    Patch,
 } from "@nestjs/common";
 import { ListFindAllResult, ListsService } from "./lists.service";
 import { List } from "./list.entity";
@@ -17,6 +18,7 @@ import { ListStage } from "./list.stage.entity";
 import { ListStagesService } from "./list.stages.service";
 import { ListGroupOptions } from "./types";
 import { ListGroupsService } from "./list.groups.service";
+import { UpdateListGroupDto } from "./dto/update.list.group.dto";
 
 @UseGuards(JwtAuthGuard)
 @Controller({
@@ -73,7 +75,16 @@ export class ListsController {
         const { groupBy } = body;
         return this.listGroupsService.generateGroups({
             listId,
-            groupBy,
+            groupBy: groupBy ?? ListGroupOptions.ALL,
         });
+    }
+
+    @Put(":listId/groups/:listGroupId")
+    updateGroup(
+        @Param("listId") listId: number,
+        @Param("listGroupId") listGroupId: number,
+        @Body() updateListGroupDto: UpdateListGroupDto
+    ) {
+        return this.listGroupsService.update(listGroupId, updateListGroupDto);
     }
 }

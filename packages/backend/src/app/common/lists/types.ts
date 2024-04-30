@@ -1,8 +1,7 @@
-import { ListStage } from "./list.stage.entity";
-
 export enum ListGroupOptions {
+    ALL = "ALL",
     LIST_STAGE = "LIST_STAGE",
-    USERS = "USERS",
+    ASSIGNEES = "ASSIGNEES",
     DUE_DATE = "DUE_DATE",
 }
 
@@ -30,3 +29,8 @@ export const DEFAULT_LIST_STAGES = [
         isCompleted: true,
     },
 ];
+
+export enum ListGroupEntityTypes {
+    LIST_STAGE = "LIST_STAGE",
+    USER = "USER",
+}

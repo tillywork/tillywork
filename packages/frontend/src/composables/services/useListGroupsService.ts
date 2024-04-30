@@ -1,6 +1,6 @@
 import { useHttp } from '@/composables/useHttp';
 import type {
-    ListGroup,
+  ListGroup,
   ListGroupOptions,
 } from '../../components/project-management/lists/types';
 
@@ -18,11 +18,21 @@ export const useListGroupsService = () => {
       method: 'POST',
       data: {
         groupBy,
-      }
+      },
+    });
+  }
+
+  async function update(listGroup: Partial<ListGroup>) {
+    const { sendRequest } = useHttp();
+
+    return sendRequest(`/lists/${listGroup.listId}/groups/${listGroup.id}`, {
+      method: 'PUT',
+      data: listGroup,
     });
   }
 
   return {
     getListGroupsByOption,
+    update,
   };
 };

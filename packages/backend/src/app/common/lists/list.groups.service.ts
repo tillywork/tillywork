@@ -1,24 +1,37 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { FindOptionsWhere, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { ListGroup } from "./list.group.entity";
-import { ListGroupOptions } from "./types";
+import { ListGroupEntityTypes, ListGroupOptions } from "./types";
 import { ListStagesService } from "./list.stages.service";
 import { UsersService } from "../users/users.service";
-import { QueryFilter } from "../helpers/query.builder.helper";
-import { Card } from "../cards/card.entity";
 import { CardsService } from "../cards/cards.service";
 import dayjs from "dayjs";
+import { FilterEntityTypes, FilterGroup } from "../filters/types";
+import { CreateListGroupDto } from "./dto/create.list.group.dto";
+import { FiltersService } from "../filters/filters.service";
+import { Filter } from "../filters/filter.entity";
+import { UpdateListGroupDto } from "./dto/update.list.group.dto";
 
 export type GenerateGroupsParams = {
     listId: number;
     groupBy: ListGroupOptions;
 };
 
-const DEFAULT_GROUP = {
-    entityId: null,
+const DEFAULT_GROUP: GeneratedGroup = {
     name: "Tasks",
+    type: ListGroupOptions.ALL,
 };
+
+interface GeneratedGroup {
+    entityId?: number;
+    entityType?: ListGroupEntityTypes;
+    type?: ListGroupOptions;
+    name?: string;
+    filter?: {
+        where: FilterGroup;
+    };
+}
 
 @Injectable()
 export class ListGroupsService {
@@ -28,55 +41,139 @@ export class ListGroupsService {
         private listGroupsRepository: Repository<ListGroup>,
         private listStagesService: ListStagesService,
         private usersService: UsersService,
-        private cardsService: CardsService
+        private cardsService: CardsService,
+        private filtersService: FiltersService
     ) {}
 
-    async generateGroups({ listId, groupBy }: GenerateGroupsParams) {
-        const where: FindOptionsWhere<ListGroup> = {
-            list: {
-                id: listId,
-            },
-        };
+    async create(createListGroupDto: CreateListGroupDto): Promise<ListGroup> {
+        const listGroup = this.listGroupsRepository.create(createListGroupDto);
+        await this.listGroupsRepository.save(listGroup);
 
-        const existingGroups = this.listGroupsRepository.findBy(where);
+        return listGroup;
+    }
 
-        let cardGroups;
+    findAll({
+        listId,
+        groupBy,
+    }: {
+        listId: number;
+        groupBy?: ListGroupOptions;
+    }): Promise<ListGroup[]> {
+        const query = this.listGroupsRepository
+            .createQueryBuilder("listGroup")
+            .innerJoinAndSelect("listGroup.list", "list")
+            .leftJoinAndMapOne(
+                "listGroup.filter",
+                Filter,
+                "filter",
+                "filter.entityId = listGroup.id AND filter.entityType = :entityType",
+                { entityType: FilterEntityTypes.LIST_GROUP }
+            )
+            .where("listGroup.listId = :listId", { listId });
+
+        if (groupBy) {
+            query.andWhere("listGroup.type = :groupBy", { groupBy });
+        }
+
+        return query.getMany();
+    }
+
+    async generateGroups({
+        listId,
+        groupBy,
+    }: GenerateGroupsParams): Promise<ListGroup[]> {
+        const existingGroups = await this.findAll({ listId, groupBy });
+
+        let cardGroups: GeneratedGroup[];
 
         switch (groupBy) {
             case ListGroupOptions.LIST_STAGE:
-                cardGroups = await this.getGroupsByListStage({ listId });
+                cardGroups = await this.generateGroupsByListStage({ listId });
                 break;
-            case ListGroupOptions.USERS:
-                cardGroups = await this.getGroupsByAssignees({ listId });
+            case ListGroupOptions.ASSIGNEES:
+                cardGroups = await this.generateGroupsByAssignees();
                 break;
             case ListGroupOptions.DUE_DATE:
-                cardGroups = await this.getGroupsByDueDate();
+                cardGroups = await this.generateGroupsByDueDate();
                 break;
             default:
                 cardGroups = [DEFAULT_GROUP];
         }
 
+        /** Compare generated groups with existing groups */
+        const checkIfGroupsExist = cardGroups.map((generatedGroup) => {
+            return new Promise<{ exists: boolean; group: ListGroup }>(
+                (resolve) => {
+                    const check = existingGroups.find(
+                        (group) =>
+                            group.entityId == generatedGroup.entityId &&
+                            group.entityType == generatedGroup.entityType &&
+                            group.name == generatedGroup.name
+                    );
+
+                    this.logger.debug({ check });
+
+                    if (!check) {
+                        this.create({
+                            ...generatedGroup,
+                            isExpanded: true,
+                            type: groupBy,
+                            listId,
+                        }).then((group) => {
+                            if (generatedGroup.filter) {
+                                this.filtersService
+                                    .create({
+                                        entityId: group.id,
+                                        entityType:
+                                            FilterEntityTypes.LIST_GROUP,
+                                        where: generatedGroup.filter.where,
+                                    })
+                                    .then(() =>
+                                        resolve({ exists: false, group })
+                                    );
+                            } else {
+                                resolve({ exists: false, group });
+                            }
+                        });
+                    } else {
+                        resolve({ exists: true, group: check });
+                    }
+                }
+            );
+        });
+
+        await Promise.allSettled(checkIfGroupsExist);
+
+        const finalGroups = await this.findAll({ listId, groupBy });
+
         await Promise.all(
-            cardGroups.map((group) => {
-                return new Promise(async (resolve) => {
-                    group.cards = await this.getGroupCards({ group });
-                    resolve(group.cards.length);
+            finalGroups.map((group) => {
+                return new Promise((resolve) => {
+                    this.getGroupCards({ group }).then((cards) => {
+                        group.cards = cards;
+                        resolve(cards.total);
+                    });
                 });
             })
         );
 
-        return cardGroups;
+        return finalGroups;
     }
 
-    async getGroupsByListStage({ listId }: { listId: number }) {
+    async generateGroupsByListStage({
+        listId,
+    }: {
+        listId: number;
+    }): Promise<GeneratedGroup[]> {
         const stages = await this.listStagesService.findAll({ listId });
 
         return stages.map((stage) => {
-            return {
+            const group: GeneratedGroup = {
                 entityId: stage.id,
+                entityType: ListGroupEntityTypes.LIST_STAGE,
+                type: ListGroupOptions.LIST_STAGE,
                 name: stage.name,
-                isExpanded: true,
-                filters: {
+                filter: {
                     where: {
                         and: [
                             {
@@ -88,26 +185,21 @@ export class ListGroupsService {
                     },
                 },
             };
+
+            return group;
         });
     }
 
-    async getGroupsByAssignees({ listId }: { listId: number }) {
+    async generateGroupsByAssignees() {
         const users = (await this.usersService.findAll()).users;
 
-        const groups: {
-            entityId: number | null;
-            name: string;
-            listId: number;
-            isExpanded: boolean;
-            filters: QueryFilter;
-            cards?: Card[];
-        }[] = users.map((user) => {
-            return {
+        const groups: GeneratedGroup[] = users.map((user) => {
+            const group: GeneratedGroup = {
                 entityId: user.id,
+                entityType: ListGroupEntityTypes.USER,
+                type: ListGroupOptions.ASSIGNEES,
                 name: user.firstName + " " + user.lastName,
-                listId,
-                isExpanded: true,
-                filters: {
+                filter: {
                     where: {
                         and: [
                             {
@@ -119,14 +211,16 @@ export class ListGroupsService {
                     },
                 },
             };
+
+            return group;
         });
 
         groups.push({
             entityId: null,
+            entityType: null,
+            type: ListGroupOptions.ASSIGNEES,
             name: "No Assignee",
-            listId,
-            isExpanded: true,
-            filters: {
+            filter: {
                 where: {
                     and: [
                         {
@@ -142,13 +236,12 @@ export class ListGroupsService {
         return groups;
     }
 
-    async getGroupsByDueDate() {
-        const groups = [
+    async generateGroupsByDueDate() {
+        const groups: GeneratedGroup[] = [
             {
-                entityId: null,
+                type: ListGroupOptions.DUE_DATE,
                 name: "Past Due",
-                isExpanded: true,
-                filters: {
+                filter: {
                     where: {
                         and: [
                             {
@@ -161,10 +254,9 @@ export class ListGroupsService {
                 },
             },
             {
-                entityId: null,
+                type: ListGroupOptions.DUE_DATE,
                 name: "Today",
-                isExpanded: true,
-                filters: {
+                filter: {
                     where: {
                         and: [
                             {
@@ -180,10 +272,9 @@ export class ListGroupsService {
                 },
             },
             {
-                entityId: null,
+                type: ListGroupOptions.DUE_DATE,
                 name: "Upcoming",
-                isExpanded: true,
-                filters: {
+                filter: {
                     where: {
                         and: [
                             {
@@ -196,10 +287,9 @@ export class ListGroupsService {
                 },
             },
             {
-                entityId: null,
+                type: ListGroupOptions.DUE_DATE,
                 name: "No Due Date",
-                isExpanded: true,
-                filters: {
+                filter: {
                     where: {
                         and: [
                             {
@@ -216,10 +306,31 @@ export class ListGroupsService {
         return groups;
     }
 
-    async getGroupCards({ group }) {
+    async getGroupCards({ group }: { group: ListGroup }) {
         return this.cardsService.findAll({
             listId: group.listId,
-            filters: group.filters,
+            filters: group.filter,
         });
+    }
+
+    async findOne(id: number): Promise<ListGroup> {
+        const listGroup = await this.listGroupsRepository.findOne({
+            where: {
+                id,
+            },
+        });
+        if (!listGroup) {
+            throw new NotFoundException(`List Group with ID ${id} not found`);
+        }
+        return listGroup;
+    }
+
+    async update(
+        id: number,
+        updateListGroupDto: UpdateListGroupDto
+    ): Promise<ListGroup> {
+        const listGroup = await this.findOne(id);
+        this.listGroupsRepository.merge(listGroup, updateListGroupDto);
+        return this.listGroupsRepository.save(listGroup);
     }
 }

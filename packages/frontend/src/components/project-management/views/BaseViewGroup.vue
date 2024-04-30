@@ -20,6 +20,7 @@ import { useUsersService } from '@/composables/services/useUsersService';
 import { type PaginationParams } from './TableView/types';
 import { useListStagesService } from '@/composables/services/useListStagesService';
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
+import { useListGroupsService } from '@/composables/services/useListGroupsService';
 
 const props = defineProps<{
   group: ListGroup;
@@ -31,13 +32,14 @@ const paginationOptions = defineModel<PaginationParams>('options', {
   required: true,
 });
 const rowHovered = defineModel<Row<Card>>('row:hovered');
-const isExpanded = ref(true);
+const isExpanded = ref(props.group.isExpanded);
 
 const route = useRoute();
 const listId = computed(() => +route.params.listId);
 const usersService = useUsersService();
 const cardsService = useCardsService();
 const listsStagesService = useListStagesService();
+const listGroupsService = useListGroupsService();
 const queryClient = useQueryClient();
 const { mutate: updateCardListStage } = useMutation({
   mutationFn: ({
@@ -74,6 +76,10 @@ const listStagesQuery = useQuery({
   queryKey: ['listStages', listId.value],
   queryFn: () => listsStagesService.getListStages({ listId: listId.value }),
   refetchOnWindowFocus: false,
+});
+const updateListGroupMutation = useMutation({
+  mutationFn: (listGroup: Partial<ListGroup>) =>
+    listGroupsService.update(listGroup),
 });
 
 /**
@@ -127,9 +133,18 @@ function handleChangeDueDate({
   updateCardMutation.mutate(updatedCard);
 }
 
+function updateListGroup(group: Partial<ListGroup>) {
+  updateListGroupMutation.mutate(group);
+}
+
 function toggleGroupExpansion() {
   isExpanded.value = !isExpanded.value;
-  //TODO save isExpanded value
+
+  updateListGroup({
+    id: props.group.id,
+    listId: listId.value,
+    isExpanded: isExpanded.value,
+  });
 }
 </script>
 
@@ -182,7 +197,9 @@ function toggleGroupExpansion() {
         </template>
         <template #dueAt="{ row }">
           <base-date-picker
-            :model-value="row.original.dueAt ? new Date(row.original.dueAt) : undefined"
+            :model-value="
+              row.original.dueAt ? new Date(row.original.dueAt) : undefined
+            "
             no-date-message="No Due Date"
             :close-on-content-click="true"
             @update:model-value="

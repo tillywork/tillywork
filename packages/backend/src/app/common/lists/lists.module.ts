@@ -11,6 +11,7 @@ import { UsersModule } from "../users/users.module";
 import { CardsModule } from "../cards/cards.module";
 import { ListSideEffectsService } from "./list.side.effects.service";
 import { ViewsModule } from "../views/views.module";
+import { FiltersModule } from "../filters/filters.module";
 
 @Module({
     imports: [
@@ -18,6 +19,7 @@ import { ViewsModule } from "../views/views.module";
         UsersModule,
         CardsModule,
         ViewsModule,
+        FiltersModule,
     ],
     controllers: [ListsController],
     providers: [

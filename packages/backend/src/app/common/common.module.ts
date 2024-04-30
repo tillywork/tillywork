@@ -11,6 +11,7 @@ import { WorkspacesModule } from "./workspaces/workspaces.module";
 import { ListsModule } from "./lists/lists.module";
 import { HelpersModule } from "./helpers/helpers.module";
 import { PropsModule } from "./props/props.module";
+import { FiltersModule } from "./filters/filters.module";
 
 @Module({
     imports: [
@@ -24,6 +25,7 @@ import { PropsModule } from "./props/props.module";
         ViewsModule,
         HelpersModule,
         PropsModule,
+        FiltersModule,
     ],
     controllers: [],
     providers: [
