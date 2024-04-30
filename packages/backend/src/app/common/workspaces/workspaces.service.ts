@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, Repository } from 'typeorm';
-import { Workspace } from './workspace.entity';
-import { CreateWorkspaceDto } from './dto/create.workspace.dto';
-import { UpdateWorkspaceDto } from './dto/update.workspace.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { FindManyOptions, Repository } from "typeorm";
+import { Workspace } from "./workspace.entity";
+import { CreateWorkspaceDto } from "./dto/create.workspace.dto";
+import { UpdateWorkspaceDto } from "./dto/update.workspace.dto";
+import { WorkspaceSideEffectsService } from "./workspace.side.effects.service";
 
 export type WorkspaceFindAllResult = {
     total: number;
@@ -14,8 +15,9 @@ export type WorkspaceFindAllResult = {
 export class WorkspacesService {
     constructor(
         @InjectRepository(Workspace)
-        private workspacesRepository: Repository<Workspace>
-    ) { }
+        private workspacesRepository: Repository<Workspace>,
+        private workspaceSideEffectsService: WorkspaceSideEffectsService
+    ) {}
 
     async findAll(options?: FindManyOptions): Promise<WorkspaceFindAllResult> {
         const result = await this.workspacesRepository.findAndCount(options);
@@ -23,7 +25,9 @@ export class WorkspacesService {
     }
 
     async findOne(id: number): Promise<Workspace> {
-        const workspace = await this.workspacesRepository.findOne({ where: { id } });
+        const workspace = await this.workspacesRepository.findOne({
+            where: { id },
+        });
         if (!workspace) {
             throw new NotFoundException(`Workspace with ID ${id} not found`);
         }
@@ -36,10 +40,19 @@ export class WorkspacesService {
 
     async create(createWorkspaceDto: CreateWorkspaceDto): Promise<Workspace> {
         const workspace = this.workspacesRepository.create(createWorkspaceDto);
-        return this.workspacesRepository.save(workspace);
+        await this.workspacesRepository.save(workspace);
+
+        const postCreate = await this.workspaceSideEffectsService.postCreate(
+            workspace
+        );
+
+        return workspace;
     }
 
-    async update(id: number, updateWorkspaceDto: UpdateWorkspaceDto): Promise<Workspace> {
+    async update(
+        id: number,
+        updateWorkspaceDto: UpdateWorkspaceDto
+    ): Promise<Workspace> {
         const workspace = await this.findOne(id);
         this.workspacesRepository.merge(workspace, updateWorkspaceDto);
         return this.workspacesRepository.save(workspace);

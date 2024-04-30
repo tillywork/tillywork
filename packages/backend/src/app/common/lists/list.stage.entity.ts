@@ -22,6 +22,16 @@ export class ListStage {
     @Column({ type: "varchar", length: 255 })
     color: string;
 
+    @Column({ type: "int" })
+    order: number;
+
+    /**
+     * When set to true, sets card
+     * as closed when it is moved to it.
+     */
+    @Column({ type: "boolean", default: false })
+    isCompleted: boolean;
+
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;
     @UpdateDateColumn({ type: "timestamp" })

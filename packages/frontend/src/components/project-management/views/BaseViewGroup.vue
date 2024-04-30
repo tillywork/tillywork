@@ -18,7 +18,6 @@ import { useCardsService } from '@/composables/services/useCardsService';
 import { ref } from 'vue';
 import { useUsersService } from '@/composables/services/useUsersService';
 import { type PaginationParams } from './TableView/types';
-import { watch } from 'vue';
 import { useListStagesService } from '@/composables/services/useListStagesService';
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 
@@ -69,10 +68,12 @@ const updateCardMutation = useMutation({
 const usersQuery = useQuery({
   queryKey: ['users'],
   queryFn: usersService.getUsers,
+  refetchOnWindowFocus: false,
 });
 const listStagesQuery = useQuery({
   queryKey: ['listStages', listId.value],
   queryFn: () => listsStagesService.getListStages({ listId: listId.value }),
+  refetchOnWindowFocus: false,
 });
 
 /**

@@ -1,10 +1,10 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { List } from "./list.entity";
 import { CreateListDto } from "./dto/create.list.dto";
 import { UpdateListDto } from "./dto/update.list.dto";
-import { ListStagesService } from "./list.stages.service";
+import { ListSideEffectsService } from "./list.side.effects.service";
 
 export type ListFindAllResult = {
     total: number;
@@ -16,7 +16,7 @@ export class ListsService {
     constructor(
         @InjectRepository(List)
         private listsRepository: Repository<List>,
-        private listStagesService: ListStagesService
+        private listSideEffectsService: ListSideEffectsService
     ) {}
 
     async findAll(): Promise<ListFindAllResult> {
@@ -43,27 +43,7 @@ export class ListsService {
         const list = this.listsRepository.create(createListDto);
         await this.listsRepository.save(list);
 
-        const defaultStages = [
-            {
-                name: "To Do",
-                color: "rgb(79, 87, 98)",
-            },
-            {
-                name: "In Progress",
-                color: "#2196F3",
-            },
-            {
-                name: "Done",
-                color: "rgb(51, 211, 145)",
-            },
-        ];
-        defaultStages.forEach((stage) => {
-            this.listStagesService.create({
-                name: stage.name,
-                listId: list.id,
-                color: stage.color,
-            });
-        });
+        const postCreate = await this.listSideEffectsService.postCreate(list);
 
         return list;
     }

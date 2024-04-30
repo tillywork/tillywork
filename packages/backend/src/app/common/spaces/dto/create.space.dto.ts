@@ -1,4 +1,4 @@
 export class CreateSpaceDto {
-  name: string;
-  projectId: number;
+    name: string;
+    workspaceId: number;
 }

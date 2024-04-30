@@ -9,11 +9,28 @@ import { ListGroup } from "./list.group.entity";
 import { ListGroupsService } from "./list.groups.service";
 import { UsersModule } from "../users/users.module";
 import { CardsModule } from "../cards/cards.module";
+import { ListSideEffectsService } from "./list.side.effects.service";
+import { ViewsModule } from "../views/views.module";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([List, ListStage, ListGroup]), UsersModule, CardsModule],
+    imports: [
+        TypeOrmModule.forFeature([List, ListStage, ListGroup]),
+        UsersModule,
+        CardsModule,
+        ViewsModule,
+    ],
     controllers: [ListsController],
-    providers: [ListsService, ListStagesService, ListGroupsService],
-    exports: [ListsService, ListStagesService, ListGroupsService],
+    providers: [
+        ListsService,
+        ListStagesService,
+        ListGroupsService,
+        ListSideEffectsService,
+    ],
+    exports: [
+        ListsService,
+        ListStagesService,
+        ListGroupsService,
+        ListSideEffectsService,
+    ],
 })
 export class ListsModule {}
