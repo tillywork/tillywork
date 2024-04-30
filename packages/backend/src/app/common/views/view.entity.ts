@@ -19,7 +19,7 @@ export class View {
     name: string;
 
     @Column({ type: "enum", enum: ViewTypes, default: ViewTypes.TABLE })
-    viewType: ViewTypes;
+    type: ViewTypes;
 
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;
@@ -30,6 +30,6 @@ export class View {
     @JoinColumn()
     list: List;
 
-    @Column({ type: 'bigint' })
+    @Column({ type: "bigint" })
     listId: number;
 }

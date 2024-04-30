@@ -17,8 +17,8 @@ function handleTabSelection(tab: View) {
   selectedTab.value = tab;
 }
 
-function getViewIconByType(viewType: ViewTypes) {
-  switch (viewType) {
+function getViewIconByType(type: ViewTypes) {
+  switch (type) {
     case ViewTypes.TABLE:
       return 'mdi-table';
     case ViewTypes.BOARD:
@@ -70,7 +70,7 @@ onMounted(() => {
           "
         >
           <template #prepend>
-            <v-icon :icon="getViewIconByType(view.viewType)" />
+            <v-icon :icon="getViewIconByType(view.type)" />
           </template>
           {{ view.name }}
         </v-btn>
