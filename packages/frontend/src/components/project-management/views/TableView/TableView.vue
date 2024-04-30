@@ -152,10 +152,7 @@ function toggleIsCreating(closeOnly?: boolean) {
 </script>
 
 <template>
-  <div
-    class="table-container"
-    :class="themeClass"
-  >
+  <div class="table-container" :class="themeClass">
     <table>
       <thead>
         <tr
@@ -339,10 +336,8 @@ $table-cell-padding-x: 16px;
 $table-cell-padding-y: 0;
 
 .table-container {
-  width: 100%;
-  overflow-x: auto;
-
   table {
+    min-width: max-content;
     border-spacing: 0;
     line-height: 1.5;
     color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));
