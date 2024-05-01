@@ -1,12 +1,12 @@
 import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router';
-import { useAuth } from '@/composables/useAuth';
+import { useAuthStore } from '@/stores/auth';
 
 export const requireGuestGuard = (
   to: RouteLocationNormalized,
   from: RouteLocationNormalized,
   next: NavigationGuardNext
 ) => {
-  const { isAuthenticated } = useAuth(); // Get the isAuthenticated method from the composable
+  const { isAuthenticated } = useAuthStore(); // Get the isAuthenticated method from the composable
 
   if (
     to.matched.some((record) => record.meta.requiresGuest) &&
@@ -25,7 +25,7 @@ export const requireAuthGuard = (
   from: RouteLocationNormalized,
   next: NavigationGuardNext
 ) => {
-  const { isAuthenticated } = useAuth(); // Get the isAuthenticated method from the composable
+  const { isAuthenticated } = useAuthStore(); // Get the isAuthenticated method from the composable
 
   if (
     to.matched.some((record) => record.meta.requiresAuth) &&

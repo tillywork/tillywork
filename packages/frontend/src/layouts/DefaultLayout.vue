@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import ThemeSwitch from '@/components/common/ThemeSwitch.vue';
-import { useAuthStore } from '@/stores/useAuth';
+import { useAuthStore } from '@/stores/auth';
 import SnackbarWrapper from '@/components/common/SnackbarWrapper.vue';
 import { ref } from 'vue';
-import type { RouteLocationRaw } from 'vue-router';
 import ToolbarSearch from '@/components/common/navigation/ToolbarSearch.vue';
 import { storeToRefs } from 'pinia';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
 
 const authStore = useAuthStore();
-const { user, logout, isAuthenticated, selectedProjectId } =
-  storeToRefs(authStore);
+const { user } = storeToRefs(authStore);
+const { isAuthenticated, logout } = authStore;
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
   {
@@ -18,13 +17,6 @@ const navigationMenuItems = ref<NavigationMenuItem[]>([
     title: 'Home',
     route: { name: 'Home' },
     activeOnExactMatch: true,
-  },
-]);
-const salesMenuItems = ref<NavigationMenuItem[]>([
-  {
-    icon: 'mdi-account-cash',
-    title: 'Deals',
-    route: { name: 'Deals', params: { projectId: selectedProjectId } },
   },
 ]);
 
@@ -40,26 +32,26 @@ if (isAuthenticated()) {
   ];
 
   // Show only if a project is selected
-  if (selectedProjectId) {
-    navigationMenuItems.value.push({
-      icon: 'mdi-clipboard-list',
-      title: 'Tasks',
-      route: { name: 'Tasks', params: { projectId: selectedProjectId } },
-    });
-    navigationMenuItems.value.push({
-      icon: 'mdi-account-group',
-      title: 'Contacts',
-      route: { name: 'Contacts', params: { projectId: selectedProjectId } },
-    });
-    navigationMenuItems.value.push({
-      icon: 'mdi-factory',
-      title: 'Organizations',
-      route: {
-        name: 'Organizations',
-        params: { projectId: selectedProjectId },
-      },
-    });
-  }
+  // if (selectedProjectId) {
+  //   navigationMenuItems.value.push({
+  //     icon: 'mdi-clipboard-list',
+  //     title: 'Tasks',
+  //     route: { name: 'Tasks', params: { projectId: selectedProjectId } },
+  //   });
+  //   navigationMenuItems.value.push({
+  //     icon: 'mdi-account-group',
+  //     title: 'Contacts',
+  //     route: { name: 'Contacts', params: { projectId: selectedProjectId } },
+  //   });
+  //   navigationMenuItems.value.push({
+  //     icon: 'mdi-factory',
+  //     title: 'Organizations',
+  //     route: {
+  //       name: 'Organizations',
+  //       params: { projectId: selectedProjectId },
+  //     },
+  //   });
+  // }
 }
 
 function printUserFullName(user: { firstName: string; lastName: string }) {
@@ -109,7 +101,7 @@ function getUserAvatar(user: { photo: string }) {
         <v-divider />
 
         <!-- Sales Menu -->
-        <template v-if="isAuthenticated() && selectedProjectId">
+        <!-- <template v-if="isAuthenticated() && selectedProjectId">
           <v-list-subheader class="my-2 ml-6">Sales</v-list-subheader>
           <v-list-item
             v-for="navigationItem in salesMenuItems"
@@ -124,7 +116,7 @@ function getUserAvatar(user: { photo: string }) {
             </template>
             <v-list-item-title>{{ navigationItem.title }}</v-list-item-title>
           </v-list-item>
-        </template>
+        </template> -->
       </v-list>
 
       <template v-slot:append>
@@ -156,7 +148,6 @@ function getUserAvatar(user: { photo: string }) {
       <router-view />
 
       <SnackbarWrapper />
-      <!-- TODO: Add dialog component -->
     </v-main>
   </v-app>
 </template>
