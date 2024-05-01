@@ -5,6 +5,7 @@ import {
   type QueryObserverResult,
   useMutation,
   useQuery,
+  useInfiniteQuery,
 } from '@tanstack/vue-query';
 import TableView from '@/components/project-management/views/TableView/TableView.vue';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
@@ -21,6 +22,8 @@ import { type PaginationParams } from './TableView/types';
 import { useListStagesService } from '@/composables/services/useListStagesService';
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
+import { ListGroupOptions } from '../lists/types';
+import UserPhoto from '@/components/common/users/UserPhoto.vue';
 
 const props = defineProps<{
   group: ListGroup;
@@ -34,6 +37,8 @@ const paginationOptions = defineModel<PaginationParams>('options', {
 const rowHovered = defineModel<Row<Card>>('row:hovered');
 const isExpanded = ref(props.group.isExpanded);
 
+const itemsPerPage = ref(10);
+
 const route = useRoute();
 const listId = computed(() => +route.params.listId);
 const usersService = useUsersService();
@@ -41,6 +46,30 @@ const cardsService = useCardsService();
 const listsStagesService = useListStagesService();
 const listGroupsService = useListGroupsService();
 const queryClient = useQueryClient();
+const getGroupCardsQuery = useInfiniteQuery({
+  queryFn: getGroupCards,
+  queryKey: [
+    'cards',
+    {
+      groupId: props.group.id,
+    },
+  ],
+  getNextPageParam: (lastPage, allPages, lastPageParam) => {
+    if (lastPage?.cards.length === 0) {
+      return undefined;
+    }
+
+    return lastPageParam + 1;
+  },
+  initialPageParam: 1,
+  initialData: () => {
+    return {
+      pages: [props.group.cards],
+      pageParams: [1],
+    };
+  },
+  staleTime: 5 * 1000,
+});
 const { mutate: updateCardListStage } = useMutation({
   mutationFn: ({
     cardListId,
@@ -82,26 +111,29 @@ const updateListGroupMutation = useMutation({
     listGroupsService.update(listGroup),
 });
 
-/**
- * This is needed to rerender all tables with new sorting options
- * when one table changes sorting state
- * because we want all tables to have the same sorting state
- */
-const tableViewKey = computed(() => {
-  if (
-    paginationOptions.value &&
-    paginationOptions.value.sort &&
-    paginationOptions.value.sort.length > 0
-  ) {
-    return (
-      paginationOptions.value.sort[0].key +
-      '-' +
-      paginationOptions.value.sort[0].order
-    );
-  } else {
-    return '';
-  }
+const groupCards = computed(() => {
+  let cards: Card[] = [];
+  getGroupCardsQuery.data.value?.pages.forEach((pageData) => {
+    if (pageData) {
+      cards = cards.concat(pageData.cards);
+    }
+  });
+
+  return cards;
 });
+
+async function getGroupCards({ pageParam = 1 }) {
+  const group = props.group;
+
+  const cards = await cardsService.getCards({
+    limit: itemsPerPage.value,
+    page: pageParam,
+    listId: listId.value,
+    filters: group.filter,
+  });
+
+  return cards;
+}
 
 function handleRowClick(row: Row<Card>) {
   emit('click:row', row);
@@ -133,47 +165,81 @@ function handleChangeDueDate({
   updateCardMutation.mutate(updatedCard);
 }
 
-function updateListGroup(group: Partial<ListGroup>) {
-  updateListGroupMutation.mutate(group);
-}
-
 function toggleGroupExpansion() {
   isExpanded.value = !isExpanded.value;
 
-  updateListGroup({
+  updateListGroupMutation.mutate({
     id: props.group.id,
     listId: listId.value,
     isExpanded: isExpanded.value,
   });
 }
+
+async function handleInfiniteScroll({ done }: any) {
+  getGroupCardsQuery.fetchNextPage();
+  if (getGroupCardsQuery.hasNextPage.value) {
+    done('ok');
+  } else {
+    done('empty');
+  }
+}
 </script>
 
 <template>
-  <div v-if="group">
-    <div class="header d-flex align-center px-8 py-2">
+  <div v-if="group" class="group">
+    <div class="header d-flex align-center px-4 py-2">
       <v-btn
         variant="text"
         density="comfortable"
+        size="small"
         :icon="isExpanded ? 'mdi-chevron-down' : 'mdi-chevron-right'"
         :color="isExpanded ? 'primary' : 'default'"
-        class="me-3"
+        class="me-2"
         @click="toggleGroupExpansion"
       />
-      <v-icon size="12" :color="group.color">mdi-circle</v-icon>
-      <span class="text-body-2 font-weight-bold mx-2">{{ group.name }}</span>
-      <span class="text-caption">{{ group.cards?.total ?? 0 }}</span>
+      <div>
+        <template v-if="group.type === ListGroupOptions.ASSIGNEES">
+          <user-photo :photo="group.icon" size="20" />
+        </template>
+        <template v-else>
+          <v-icon :color="group.color" size="20">{{
+            group.icon ?? 'mdi-circle-slice-8'
+          }}</v-icon>
+        </template>
+        <v-chip
+          rounded="md"
+          density="comfortable"
+          :color="group.color"
+          class="ms-3"
+        >
+          {{ group.name }}
+          <template #append>
+            <span class="text-caption ms-4 font-weight-bold">{{
+              group.cards?.total ?? 0
+            }}</span>
+          </template>
+        </v-chip>
+      </div>
+      <v-btn
+        variant="text"
+        density="comfortable"
+        size="small"
+        icon="mdi-plus"
+        color="accent"
+        class="ms-2"
+      />
     </div>
     <div class="content" v-if="isExpanded">
       <table-view
-        :key="tableViewKey"
         v-model:row-hovered="rowHovered"
         v-model:options="paginationOptions"
         :columns="columns"
-        :column-pinning="{ left: ['actions'] }"
-        :data="group.cards?.cards ?? []"
+        :data="groupCards ?? []"
         :total="group.cards?.total ?? 0"
+        :loading="getGroupCardsQuery.isFetching.value"
         @click:row="handleRowClick"
         @submit="handleCardCreation"
+        @load="handleInfiniteScroll"
       >
         <template #listStage="{ row }">
           <list-stage-selector
@@ -212,22 +278,24 @@ function toggleGroupExpansion() {
           />
         </template>
         <template #actions="{ row }">
-          <v-menu>
-            <template #activator="{ props }">
-              <v-btn
-                v-if="rowHovered?.original.id === row.original.id"
-                v-bind="props"
-                density="compact"
-                size="small"
-                icon="mdi-dots-vertical"
-                variant="text"
-                color="default"
-              />
-            </template>
-            <v-card>
-              <v-card-title>Hello</v-card-title>
-            </v-card>
-          </v-menu>
+          <div class="text-right">
+            <v-menu>
+              <template #activator="{ props }">
+                <v-btn
+                  v-if="rowHovered?.original.id === row.original.id"
+                  v-bind="props"
+                  density="compact"
+                  size="small"
+                  icon="mdi-dots-vertical"
+                  variant="text"
+                  color="default"
+                />
+              </template>
+              <v-card>
+                <v-card-title>Hello</v-card-title>
+              </v-card>
+            </v-menu>
+          </div>
         </template>
       </table-view>
     </div>
@@ -235,8 +303,19 @@ function toggleGroupExpansion() {
 </template>
 
 <style lang="scss" scoped>
-.content {
-  max-width: 100%;
-  overflow: auto;
+.group {
+  overflow: hidden;
+
+  .content {
+    max-width: 100%;
+    overflow: scroll;
+  }
+}
+</style>
+
+<style lang="scss">
+.v-infinite-scroll {
+  display: block;
+  min-width: max-content;
 }
 </style>

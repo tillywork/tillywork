@@ -33,10 +33,21 @@ watch(listId, () => refetchList());
 <template>
   <div class="position-relative" v-if="list">
     <div class="pa-4 pb-0">
-      <div class="px-4 pt-6">
+      <div class="px-9 pt-6">
         <p class="text-h5 mb-3">{{ list.name }}</p>
-        <list-view-tabs :views="views" :key="route.fullPath" v-if="!isListFetching" />
-        <v-progress-circular v-else active color="primary" width="2" indeterminate size="24" />
+        <list-view-tabs
+          :views="views"
+          :key="route.fullPath"
+          v-if="!isListFetching"
+        />
+        <v-progress-circular
+          v-else
+          active
+          color="primary"
+          width="2"
+          indeterminate
+          size="24"
+        />
       </div>
     </div>
     <v-divider />

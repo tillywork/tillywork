@@ -28,8 +28,10 @@ export interface ListGroup {
   id: number;
   name: string;
   listId: number;
+  type: ListGroupOptions;
   entityId?: number;
   color?: string;
+  icon?: string;
   filter?: QueryFilter;
   options?: PaginationParams;
   isExpanded?: boolean;

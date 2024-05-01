@@ -24,12 +24,13 @@ const props = defineProps<{
   total: number;
   filters?: QueryFilter;
   columnPinning?: ColumnPinningState;
+  loading?: boolean;
 }>();
 
 const options = defineModel<PaginationParams>('options');
 const rowHovered = defineModel<Row<unknown>>('rowHovered');
 
-const emit = defineEmits(['update:options', 'click:row', 'submit']);
+const emit = defineEmits(['update:options', 'click:row', 'submit', 'load']);
 const slots = defineSlots();
 
 const pageCount = computed(() => {
@@ -66,7 +67,7 @@ const table = useVueTable({
   manualSorting: true,
   initialState: {
     sorting: tanstackSortState.value,
-    columnPinning: props.columnPinning,
+    columnPinning: props.columnPinning ?? {},
   },
 });
 
@@ -79,12 +80,11 @@ const createCardDto = ref<Partial<CreateCardDto>>({
   title: '',
 });
 const isCreating = ref(false);
+const tableElement = ref<HTMLTableElement>();
 
 watch(
   options,
   (newValue) => {
-    console.log('updated for inner table');
-    console.log(newValue);
     emit('update:options', newValue);
   },
   { deep: true, immediate: true }
@@ -92,7 +92,7 @@ watch(
 
 onKeyStroke(
   'Escape',
-  (e) => {
+  () => {
     toggleIsCreating(true);
   },
   { target: cardTitleInput.value }
@@ -149,193 +149,206 @@ function toggleIsCreating(closeOnly?: boolean) {
   isCreating.value = !isCreating.value;
   createCardForm.value?.reset();
 }
+
+function handleInfiniteScrollLoad(scrollObj: any) {
+  emit('load', scrollObj);
+}
 </script>
 
 <template>
   <div class="table-container" :class="themeClass">
-    <table>
-      <thead>
-        <tr
-          v-for="headerGroup in table.getHeaderGroups()"
-          :key="headerGroup.id"
-        >
-          <template v-for="header in headerGroup.headers" :key="header.id">
-            <v-hover #="{ isHovering: isHeaderHovering, props: headerProps }">
-              <th
-                v-bind="headerProps"
-                :colSpan="header.colSpan"
-                :style="`width: ${header.getSize()}px; ${
-                  isHeaderHovering ? 'cursor: pointer;' : ''
-                }`"
-                :class="isHeaderHovering ? 'bg-surface' : ''"
-                @click="handleSortingChange(header)"
-              >
-                <!-- Header Content -->
-                <FlexRender
-                  v-if="!header.isPlaceholder"
-                  :render="header.column.columnDef.header"
-                  :props="header.getContext()"
-                />
-                <!-- Sorting Indicator -->
-                <template
-                  v-if="!header.isPlaceholder && header.column.getCanSort()"
+    <v-infinite-scroll @load="handleInfiniteScrollLoad" height="300">
+      <template #empty></template>
+      <table ref="tableElement">
+        <thead>
+          <tr
+            v-for="headerGroup in table.getHeaderGroups()"
+            :key="headerGroup.id"
+          >
+            <template v-for="header in headerGroup.headers" :key="header.id">
+              <v-hover #="{ isHovering: isHeaderHovering, props: headerProps }">
+                <th
+                  v-bind="headerProps"
+                  :colSpan="header.colSpan"
+                  :style="`width: ${header.getSize()}px; ${
+                    isHeaderHovering ? 'cursor: pointer;' : ''
+                  }`"
+                  :class="isHeaderHovering ? 'bg-surface' : ''"
+                  @click="handleSortingChange(header)"
                 >
-                  <v-icon
-                    v-show="isHeaderHovering || header.column.getIsSorted()"
-                    class="ms-1"
-                    :color="
-                      header.column.getIsSorted() === false ? 'grey' : undefined
-                    "
+                  <!-- Header Content -->
+                  <FlexRender
+                    v-if="!header.isPlaceholder"
+                    :render="header.column.columnDef.header"
+                    :props="header.getContext()"
+                  />
+                  <!-- Sorting Indicator -->
+                  <template
+                    v-if="!header.isPlaceholder && header.column.getCanSort()"
                   >
-                    {{ getColumnSortIcon(header.column) }}
-                  </v-icon>
-                </template>
-                <!-- Column Resizer -->
-                <template v-if="header.column.getCanResize()">
-                  <v-hover
-                    #="{ isHovering: isResizeHovering, props: resizeProps }"
-                  >
-                    <div v-bind="resizeProps" class="column-resizer">
-                      <div
-                        @mousedown="header.getResizeHandler()?.($event)"
-                        @touchstart="header.getResizeHandler()?.($event)"
-                        v-show="
-                          isResizeHovering || header.column.getIsResizing()
-                        "
-                        @click.stop
-                      >
+                    <v-icon
+                      v-show="isHeaderHovering || header.column.getIsSorted()"
+                      class="ms-1"
+                      :color="
+                        header.column.getIsSorted() === false
+                          ? 'grey'
+                          : undefined
+                      "
+                    >
+                      {{ getColumnSortIcon(header.column) }}
+                    </v-icon>
+                  </template>
+                  <!-- Column Resizer -->
+                  <template v-if="header.column.getCanResize()">
+                    <v-hover
+                      #="{ isHovering: isResizeHovering, props: resizeProps }"
+                    >
+                      <div v-bind="resizeProps" class="column-resizer">
+                        <div
+                          @mousedown="header.getResizeHandler()?.($event)"
+                          @touchstart="header.getResizeHandler()?.($event)"
+                          v-show="
+                            isResizeHovering || header.column.getIsResizing()
+                          "
+                          @click.stop
+                        >
+                          &nbsp;
+                        </div>
                         &nbsp;
                       </div>
-                      &nbsp;
-                    </div>
-                  </v-hover>
-                </template>
-              </th>
+                    </v-hover>
+                  </template>
+                </th>
+              </v-hover>
+            </template>
+          </tr>
+          <tr class="loading position-relative">
+            <th :colspan="table.getAllColumns().length">
+              <v-progress-linear
+                v-if="loading"
+                active
+                color="primary"
+                height="2"
+                indeterminate
+                absolute
+              />
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <template v-for="row in table.getRowModel().rows" :key="row.id">
+            <v-hover
+              @update:modelValue="
+                (modelValue) => handleHoverChange(row, modelValue)
+              "
+              #="{ isHovering: isRowHovering, props: rowProps }"
+            >
+              <tr
+                v-bind="rowProps"
+                @click="handleRowClick(row)"
+                :class="isRowHovering ? 'bg-surface cursor-pointer' : ''"
+              >
+                <td v-for="cell in row.getVisibleCells()" :key="cell.id">
+                  <!-- Check for named slot that matches columnId, and use template to define slot content -->
+                  <template
+                    v-if="
+                      cell.column.columnDef.id &&
+                      !!slots[cell.column.columnDef.id]
+                    "
+                  >
+                    <slot
+                      :name="cell.column.columnDef.id"
+                      v-bind="cell.getContext()"
+                    ></slot>
+                  </template>
+                  <!-- Default rendering if no slot is provided -->
+                  <template v-else>
+                    <FlexRender
+                      :render="cell.column.columnDef.cell"
+                      :props="cell.getContext()"
+                    />
+                  </template>
+                </td>
+              </tr>
             </v-hover>
           </template>
-        </tr>
-      </thead>
-      <tbody>
-        <template v-for="row in table.getRowModel().rows" :key="row.id">
-          <v-hover
-            @update:modelValue="
-              (modelValue) => handleHoverChange(row, modelValue)
-            "
-            #="{ isHovering: isRowHovering, props: rowProps }"
-          >
-            <tr
-              v-bind="rowProps"
-              @click="handleRowClick(row)"
-              :class="isRowHovering ? 'bg-surface cursor-pointer' : ''"
+        </tbody>
+        <tfoot>
+          <tr>
+            <th
+              :colspan="table.getAllColumns().length"
+              class="pe-0"
+              style="padding-left: 50px"
             >
-              <td v-for="cell in row.getVisibleCells()" :key="cell.id">
-                <!-- Check for named slot that matches columnId, and use template to define slot content -->
-                <template
-                  v-if="
-                    cell.column.columnDef.id &&
-                    !!slots[cell.column.columnDef.id]
-                  "
-                >
-                  <slot
-                    :name="cell.column.columnDef.id"
-                    v-bind="cell.getContext()"
-                  ></slot>
-                </template>
-                <!-- Default rendering if no slot is provided -->
-                <template v-else>
-                  <FlexRender
-                    :render="cell.column.columnDef.cell"
-                    :props="cell.getContext()"
-                  />
-                </template>
-              </td>
-            </tr>
-          </v-hover>
-        </template>
-      </tbody>
-      <tfoot>
-        <tr>
-          <th colspan="1"></th>
-          <th
-            :colspan="table.getAllColumns().length - 1"
-            class="py-2"
-            style="padding-left: 10px"
-          >
-            <!-- <div class="d-flex justify-end align-center ga-3" v-if="options?.itemsPerPage">
-              <span class="font-weight-medium">Items per page:</span>
-              <div class="w-100px">
-                <v-select v-model="options.itemsPerPage" :items="pageSizeDropdownOptions" single-line variant="outlined"
-                  density="compact" hide-details />
-              </div>
-              <v-pagination v-model="options.page" :length="pageCount" rounded density="compact" total-visible="5"
-                show-first-last-page></v-pagination>
-            </div> -->
-            <div class="d-flex align-center ga-2 create-card-wrapper">
-              <v-form
-                v-if="isCreating"
-                ref="createCardForm"
-                class="w-100"
-                @submit.prevent="handleCreateFormSubmit"
-              >
-                <v-text-field
-                  v-model="createCardDto.title"
-                  ref="cardTitleInput"
-                  autofocus
-                  variant="outlined"
-                  color="default"
-                  label="Card title"
-                  hide-details
-                  single-line
-                >
-                  <template #append>
-                    <div class="d-flex align-center ga-2">
-                      <v-btn
-                        color="default"
-                        variant="outlined"
-                        size="small"
-                        rounded="md"
-                        @click="toggleIsCreating()"
-                        >Cancel</v-btn
-                      >
-                      <v-btn type="submit" size="small" rounded="md"
-                        >Save</v-btn
-                      >
-                    </div>
-                  </template>
-                </v-text-field>
-              </v-form>
-              <template v-else>
-                <v-btn
-                  variant="text"
-                  prepend-icon="mdi-plus"
-                  size="small"
-                  class="flex-0-0-100 justify-start text-capitalize"
-                  @click="toggleIsCreating()"
-                  style="margin-top: 1px; margin-bottom: 1px"
-                  color="default"
-                  >Add task</v-btn
-                >
+              <template v-if="!data || data.length === 0">
+                <span class="text-caption">No tasks found.</span>
               </template>
-            </div>
-            <template v-if="!data || data.length === 0">
-              <span class="text-caption">No tasks found.</span>
-            </template>
-          </th>
-        </tr>
-      </tfoot>
-    </table>
+              <div class="d-flex align-center ga-2 create-card-wrapper">
+                <v-form
+                  v-if="isCreating"
+                  ref="createCardForm"
+                  class="w-100"
+                  @submit.prevent="handleCreateFormSubmit"
+                >
+                  <v-text-field
+                    v-model="createCardDto.title"
+                    ref="cardTitleInput"
+                    autofocus
+                    variant="outlined"
+                    color="default"
+                    label="Card title"
+                    hide-details
+                    single-line
+                  >
+                    <template #append>
+                      <div class="d-flex align-center ga-2">
+                        <v-btn
+                          color="default"
+                          variant="outlined"
+                          size="small"
+                          rounded="md"
+                          @click="toggleIsCreating()"
+                          >Cancel</v-btn
+                        >
+                        <v-btn type="submit" size="small" rounded="md"
+                          >Save</v-btn
+                        >
+                      </div>
+                    </template>
+                  </v-text-field>
+                </v-form>
+                <template v-else>
+                  <v-btn
+                    variant="text"
+                    prepend-icon="mdi-plus"
+                    size="small"
+                    class="flex-0-0-100 justify-start text-capitalize"
+                    @click="toggleIsCreating()"
+                    rounded="0"
+                    color="default"
+                    >Add task</v-btn
+                  >
+                </template>
+              </div>
+            </th>
+          </tr>
+        </tfoot>
+      </table>
+    </v-infinite-scroll>
   </div>
 </template>
 
 <style lang="scss" scoped>
 $table-border-color: var(--v-border-color);
 $table-border-opacity: var(--v-border-opacity);
-$table-row-height: 36px;
-$table-header-height: 40px;
-$table-cell-padding-x: 16px;
+$table-row-height: 33px;
+$table-header-height: 33px;
+$table-cell-padding-x: 8px;
 $table-cell-padding-y: 0;
 
 .table-container {
+  position: relative;
+
   table {
     min-width: max-content;
     border-spacing: 0;
@@ -346,9 +359,9 @@ $table-cell-padding-y: 0;
     border-collapse: collapse;
     position: relative;
 
-    > thead > tr > th,
-    > tbody > tr > td,
-    > tbody > tr:not(:last-child) > th {
+    > thead > tr:not(.loading) > th:not(:first-child),
+    > tbody > tr > td:not(:first-child),
+    > tbody > tr:not(.loading) > th {
       border-bottom: thin solid rgba($table-border-color, $table-border-opacity);
     }
 
@@ -358,7 +371,7 @@ $table-cell-padding-y: 0;
       height: $table-row-height;
     }
 
-    > thead > tr > th {
+    > thead > tr:not(.loading) > th {
       position: relative;
       height: $table-header-height;
       font-weight: 500;
@@ -369,7 +382,7 @@ $table-cell-padding-y: 0;
     > tbody > tr > td,
     > tbody > tr > th,
     > thead > tr > td,
-    > thead > tr > th,
+    > thead > tr:not(.loading) > th,
     > tfoot > tr > td,
     > tfoot > tr > th {
       padding: $table-cell-padding-y $table-cell-padding-x;

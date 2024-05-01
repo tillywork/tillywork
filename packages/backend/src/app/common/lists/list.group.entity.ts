@@ -32,6 +32,12 @@ export class ListGroup {
     @Column({ type: "boolean", default: true })
     isExpanded: boolean;
 
+    @Column({ type: "varchar", nullable: true })
+    color: string;
+
+    @Column({ type: "varchar", nullable: true })
+    icon: string;
+
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;
     @UpdateDateColumn({ type: "timestamp" })
