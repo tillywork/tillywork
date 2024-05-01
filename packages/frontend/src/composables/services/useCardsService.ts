@@ -31,8 +31,6 @@ export const useCardsService = () => {
   }): Promise<CardsData> {
     const { sendRequest } = useHttp();
 
-    console.log({ listId, page, limit, sortBy, filters });
-
     return sendRequest('/cards', {
       method: 'GET',
       params: {

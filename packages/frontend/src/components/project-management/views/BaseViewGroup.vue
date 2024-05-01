@@ -182,8 +182,6 @@ async function handleInfiniteScroll({ done }: any) {
   } else {
     done('empty');
   }
-  console.log(getGroupCardsQuery.hasNextPage.value);
-  console.log(done);
 }
 </script>
 
