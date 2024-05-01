@@ -4,15 +4,12 @@ const props = defineProps<{
   icon?: string;
   color?: string;
   style?: string;
+  size?: string;
 }>();
 </script>
 
 <template>
-  <v-avatar
-    density="comfortable"
-    size="small"
-    class="border"
-  >
+  <v-avatar density="comfortable" :size="size ?? 'small'">
     <v-img v-if="props.photo" :src="props.photo" v-bind:style="props.style" />
     <v-icon
       v-else

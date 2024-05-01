@@ -31,6 +31,8 @@ interface GeneratedGroup {
     filter?: {
         where: FilterGroup;
     };
+    color?: string;
+    icon?: string;
 }
 
 @Injectable()
@@ -184,6 +186,7 @@ export class ListGroupsService {
                         ],
                     },
                 },
+                color: stage.color,
             };
 
             return group;
@@ -199,6 +202,7 @@ export class ListGroupsService {
                 entityType: ListGroupEntityTypes.USER,
                 type: ListGroupOptions.ASSIGNEES,
                 name: user.firstName + " " + user.lastName,
+                icon: user.photo,
                 filter: {
                     where: {
                         and: [
@@ -252,6 +256,8 @@ export class ListGroupsService {
                         ],
                     },
                 },
+                icon: "mdi-clock-time-eight",
+                color: "error",
             },
             {
                 type: ListGroupOptions.DUE_DATE,
@@ -270,6 +276,8 @@ export class ListGroupsService {
                         ],
                     },
                 },
+                icon: "mdi-clock-time-twelve",
+                color: "accent",
             },
             {
                 type: ListGroupOptions.DUE_DATE,
@@ -285,6 +293,8 @@ export class ListGroupsService {
                         ],
                     },
                 },
+                icon: "mdi-clock-time-four",
+                color: "default",
             },
             {
                 type: ListGroupOptions.DUE_DATE,
@@ -300,6 +310,8 @@ export class ListGroupsService {
                         ],
                     },
                 },
+                icon: "mdi-clock-time-six-outline",
+                color: "default",
             },
         ];
 

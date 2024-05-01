@@ -29,9 +29,17 @@ const cardDialog = ref(false);
 
 const columns: ColumnDef<Card, any>[] = [
   {
+    id: 'actions',
+    enableResizing: false,
+    enableSorting: false,
+    size: 50,
+  },
+  {
     id: 'title',
     accessorKey: 'title',
     header: 'Title',
+    size: 400,
+    minSize: 100,
   },
   {
     id: 'listStage',
@@ -44,12 +52,7 @@ const columns: ColumnDef<Card, any>[] = [
   {
     id: 'dueAt',
     header: 'Due Date',
-  },
-  {
-    id: 'actions',
-    enableResizing: false,
-    enableSorting: false,
-    size: 25,
+    minSize: 100,
   },
 ];
 
@@ -69,7 +72,7 @@ const {
 });
 
 const groupBy = ref<ListGroupOptions>(ListGroupOptions.LIST_STAGE);
-const paginationOptions = ref(DEFAULT_PAGINATION_OPTIONS)
+const paginationOptions = ref(DEFAULT_PAGINATION_OPTIONS);
 
 watch(getViewQuery.data, (view) => {
   if (view) {
@@ -118,7 +121,7 @@ function closeCardDialog() {
 </script>
 
 <template>
-  <div class="d-flex ga-2 py-4 px-8">
+  <div class="d-flex ga-2 py-4 px-12">
     <v-progress-linear
       indeterminate
       color="primary"
@@ -136,7 +139,9 @@ function closeCardDialog() {
       <v-icon icon="mdi-plus" />
       Add task
     </v-btn>
-    <v-divider class="mx-2" :vertical="true" />
+    <div class="mx-1">
+      <v-divider vertical />
+    </div>
     <div class="d-flex align-center ga-2">
       <base-view-group-by-chip
         v-model="groupBy"
@@ -175,16 +180,18 @@ function closeCardDialog() {
     </div>
   </div>
 
-  <template v-for="(group, index) in groups" :key="group.name">
-    <base-view-group
-      v-if="groups"
-      v-model:group="groups[index]"
-      v-model:options="paginationOptions"
-      :columns="columns"
-      @click:row="handleRowClick"
-      v-model:row:hovered="rowHovered"
-    />
-  </template>
+  <div class="pb-4 d-flex flex-column ga-3">
+    <template v-for="(group, index) in groups" :key="group.name">
+      <base-view-group
+        v-if="groups"
+        v-model:group="groups[index]"
+        v-model:options="paginationOptions"
+        :columns="columns"
+        @click:row="handleRowClick"
+        v-model:row:hovered="rowHovered"
+      />
+    </template>
+  </div>
 
   <v-dialog v-model="cardDialog" width="800">
     <base-card

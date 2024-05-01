@@ -39,13 +39,13 @@ function clearGroupBy() {
       >
         <v-icon icon="mdi-layers-triple-outline" size="14" start />
         <span class="text-caption user-select-none">
-          Group by<template v-if="selectedOption"
+          Group<template v-if="selectedOption"
             >: {{ selectedOption?.label }}</template
           >
         </span>
         <template #append v-if="groupBy">
           <v-btn
-            class="ms-2 me-n2"
+            class="ms-1 me-n2"
             icon="mdi-close"
             size="x-small"
             variant="text"
