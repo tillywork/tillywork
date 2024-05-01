@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import ThemeSwitch from '@/components/common/theme/ThemeSwitch.vue';
-import { useAuth } from '@/composables/useAuth';
+import ThemeSwitch from '@/components/common/ThemeSwitch.vue';
+import { useAuthStore } from '@/stores/useAuth';
 import SnackbarWrapper from '@/components/common/SnackbarWrapper.vue';
 import { ref } from 'vue';
 import { type RouteLocationRaw } from 'vue-router';
@@ -16,7 +16,7 @@ export interface NavigationMenuItem {
 }
 
 const navigationDrawer = ref(true);
-const { logout, isAuthenticated } = useAuth();
+const { logout, isAuthenticated } = useAuthStore();
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
   {
@@ -42,8 +42,17 @@ if (isAuthenticated()) {
 
 <template>
   <v-app>
-    <v-app-bar app class="pr-4 border-b" height="56" prominent density="comfortable">
-      <v-app-bar-nav-icon density="comfortable" @click.stop="navigationDrawer = !navigationDrawer"></v-app-bar-nav-icon>
+    <v-app-bar
+      app
+      class="pr-4 border-b"
+      height="56"
+      prominent
+      density="comfortable"
+    >
+      <v-app-bar-nav-icon
+        density="comfortable"
+        @click.stop="navigationDrawer = !navigationDrawer"
+      ></v-app-bar-nav-icon>
 
       <v-app-bar-title>Hello</v-app-bar-title>
       <toolbar-search />

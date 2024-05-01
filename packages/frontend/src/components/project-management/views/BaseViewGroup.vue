@@ -312,10 +312,3 @@ async function handleInfiniteScroll({ done }: any) {
   }
 }
 </style>
-
-<style lang="scss">
-.v-infinite-scroll {
-  display: block;
-  min-width: max-content;
-}
-</style>

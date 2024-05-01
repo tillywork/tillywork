@@ -1,20 +1,23 @@
 <script setup lang="ts">
-import ThemeSwitch from '@/components/common/theme/ThemeSwitch.vue';
-import { useAuth } from '@/composables/useAuth';
+import ThemeSwitch from '@/components/common/ThemeSwitch.vue';
+import { useAuthStore } from '@/stores/useAuth';
 import SnackbarWrapper from '@/components/common/SnackbarWrapper.vue';
 import { ref } from 'vue';
 import type { RouteLocationRaw } from 'vue-router';
 import ToolbarSearch from '@/components/common/inputs/ToolbarSearch.vue';
+import { storeToRefs } from 'pinia';
 
 export interface NavigationMenuItem {
-  title: string
-  icon?: string
-  route?: RouteLocationRaw
-  activeOnExactMatch?: boolean
-  onClick?: () => unknown
+  title: string;
+  icon?: string;
+  route?: RouteLocationRaw;
+  activeOnExactMatch?: boolean;
+  onClick?: () => unknown;
 }
 
-const { user, logout, isAuthenticated, selectedProjectId } = useAuth();
+const authStore = useAuthStore();
+const { user, logout, isAuthenticated, selectedProjectId } =
+  storeToRefs(authStore);
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
   {
@@ -28,8 +31,8 @@ const salesMenuItems = ref<NavigationMenuItem[]>([
   {
     icon: 'mdi-account-cash',
     title: 'Deals',
-    route: { name: 'Deals', params: { projectId: selectedProjectId } }
-  }
+    route: { name: 'Deals', params: { projectId: selectedProjectId } },
+  },
 ]);
 
 if (isAuthenticated()) {
@@ -41,30 +44,33 @@ if (isAuthenticated()) {
       route: { name: 'Home' },
       activeOnExactMatch: true,
     },
-  ]
+  ];
 
   // Show only if a project is selected
   if (selectedProjectId) {
     navigationMenuItems.value.push({
       icon: 'mdi-clipboard-list',
       title: 'Tasks',
-      route: { name: 'Tasks', params: { projectId: selectedProjectId } }
-    })
+      route: { name: 'Tasks', params: { projectId: selectedProjectId } },
+    });
     navigationMenuItems.value.push({
       icon: 'mdi-account-group',
       title: 'Contacts',
-      route: { name: 'Contacts', params: { projectId: selectedProjectId } }
-    })
+      route: { name: 'Contacts', params: { projectId: selectedProjectId } },
+    });
     navigationMenuItems.value.push({
       icon: 'mdi-factory',
       title: 'Organizations',
-      route: { name: 'Organizations', params: { projectId: selectedProjectId } }
-    })
+      route: {
+        name: 'Organizations',
+        params: { projectId: selectedProjectId },
+      },
+    });
   }
 }
 
-function printUserFullName(user: { firstName: string, lastName: string }) {
-  return `${user.firstName} ${user.lastName}`
+function printUserFullName(user: { firstName: string; lastName: string }) {
+  return `${user.firstName} ${user.lastName}`;
 }
 
 function getUserAvatar(user: { photo: string }) {
@@ -72,7 +78,7 @@ function getUserAvatar(user: { photo: string }) {
     return user.photo;
   }
 
-  return 'https://randomuser.me/api/portraits/women/85.jpg'
+  return 'https://randomuser.me/api/portraits/women/85.jpg';
 }
 </script>
 
@@ -93,9 +99,14 @@ function getUserAvatar(user: { photo: string }) {
       <v-divider></v-divider>
 
       <v-list density="compact" nav>
-        <v-list-item v-for="navigationItem in navigationMenuItems" :key="navigationItem.title"
-          :to="navigationItem.route" @click="navigationItem.onClick" :exact="navigationItem.activeOnExactMatch"
-          rounded="lg">
+        <v-list-item
+          v-for="navigationItem in navigationMenuItems"
+          :key="navigationItem.title"
+          :to="navigationItem.route"
+          @click="navigationItem.onClick"
+          :exact="navigationItem.activeOnExactMatch"
+          rounded="lg"
+        >
           <template #prepend v-if="navigationItem.icon">
             <v-icon :icon="navigationItem.icon" />
           </template>
@@ -107,8 +118,14 @@ function getUserAvatar(user: { photo: string }) {
         <!-- Sales Menu -->
         <template v-if="isAuthenticated() && selectedProjectId">
           <v-list-subheader class="my-2 ml-6">Sales</v-list-subheader>
-          <v-list-item v-for="navigationItem in salesMenuItems" :key="navigationItem.title" :to="navigationItem.route"
-            @click="navigationItem.onClick" :exact="navigationItem.activeOnExactMatch" rounded="lg">
+          <v-list-item
+            v-for="navigationItem in salesMenuItems"
+            :key="navigationItem.title"
+            :to="navigationItem.route"
+            @click="navigationItem.onClick"
+            :exact="navigationItem.activeOnExactMatch"
+            rounded="lg"
+          >
             <template #prepend v-if="navigationItem.icon">
               <v-icon :icon="navigationItem.icon" />
             </template>
