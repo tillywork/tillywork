@@ -4,16 +4,9 @@ import { useAuthStore } from '@/stores/useAuth';
 import SnackbarWrapper from '@/components/common/SnackbarWrapper.vue';
 import { ref } from 'vue';
 import type { RouteLocationRaw } from 'vue-router';
-import ToolbarSearch from '@/components/common/inputs/ToolbarSearch.vue';
+import ToolbarSearch from '@/components/common/navigation/ToolbarSearch.vue';
 import { storeToRefs } from 'pinia';
-
-export interface NavigationMenuItem {
-  title: string;
-  icon?: string;
-  route?: RouteLocationRaw;
-  activeOnExactMatch?: boolean;
-  onClick?: () => unknown;
-}
+import type { NavigationMenuItem } from '@/components/common/navigation/types';
 
 const authStore = useAuthStore();
 const { user, logout, isAuthenticated, selectedProjectId } =

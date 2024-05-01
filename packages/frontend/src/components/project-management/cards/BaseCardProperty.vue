@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import { type Prop, PropTypes } from '../props/types';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import BaseCardPropertyValueBtn from '@/components/project-management/cards/BaseCardPropertyValueBtn.vue';
-import UserSelector from '@/components/common/inputs/UserSelector.vue';
+import BaseUserSelector from '@/components/common/inputs/BaseUserSelector.vue';
 import dayjs from 'dayjs';
 import type { User } from '@/components/common/users/types';
 import type { ListStage } from '../lists/types';
@@ -57,7 +57,11 @@ function openUserSelector() {
     <v-col class="d-flex">
       <template v-if="prop.type === PropTypes.STAGE">
         <base-card-property-value-btn @click="openListStageSelector">
-          <list-stage-selector v-model="value" ref="listStageSelector" :listStages="listStages ?? []" />
+          <list-stage-selector
+            v-model="value"
+            ref="listStageSelector"
+            :listStages="listStages ?? []"
+          />
         </base-card-property-value-btn>
       </template>
       <template v-else-if="prop.type === PropTypes.TEXT">
@@ -76,7 +80,7 @@ function openUserSelector() {
       </template>
       <template v-else-if="prop.type === PropTypes.USER">
         <base-card-property-value-btn @click="openUserSelector">
-          <user-selector
+          <base-user-selector
             v-model="value"
             :users="users ?? []"
             ref="userSelector"
