@@ -1,39 +1,7 @@
-<template>
-  <v-container>
-    <v-row justify="center">
-      <v-col cols="12" sm="8" md="6">
-        <v-card class="pa-4">
-          <v-card-title class="text-h5 mb-6">Welcome back!</v-card-title>
-          <v-card-text>
-            <v-form @submit.prevent="login">
-              <v-text-field
-                v-model="email"
-                label="Email"
-                required
-                :rules="[rules.required, rules.email]"
-              ></v-text-field>
-              <v-text-field
-                v-model="password"
-                label="Password"
-                type="password"
-                required
-                :rules="[rules.required]"
-              ></v-text-field>
-              <v-btn type="submit" color="primary" :loading="loading"
-                >Login</v-btn
-              >
-            </v-form>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
-</template>
-
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useAuthStore } from '@/stores/useAuth';
-import { useSnackbarStore } from '@/stores/useSnackbar';
+import { useAuthStore } from '@/stores/auth';
+import { useSnackbarStore } from '@/stores/snackbar';
 import { useRoute } from 'vue-router';
 
 const email = ref('');
@@ -74,3 +42,35 @@ const login = async () => {
   }
 };
 </script>
+
+<template>
+  <v-container>
+    <v-row justify="center">
+      <v-col cols="12" sm="8" md="6">
+        <v-card class="pa-4">
+          <v-card-title class="text-h5 mb-6">Welcome back!</v-card-title>
+          <v-card-text>
+            <v-form @submit.prevent="login">
+              <v-text-field
+                v-model="email"
+                label="Email"
+                required
+                :rules="[rules.required, rules.email]"
+              ></v-text-field>
+              <v-text-field
+                v-model="password"
+                label="Password"
+                type="password"
+                required
+                :rules="[rules.required]"
+              ></v-text-field>
+              <v-btn type="submit" color="primary" :loading="loading"
+                >Login</v-btn
+              >
+            </v-form>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>

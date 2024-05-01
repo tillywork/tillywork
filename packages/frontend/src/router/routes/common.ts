@@ -8,21 +8,6 @@ const commonRoutes = [
       title: 'Login',
     },
   },
-  {
-    path: '/projects',
-    component: () => import('@/layouts/DefaultLayout.vue'),
-    children: [
-      {
-        path: '/projects',
-        name: 'Projects',
-        component: () => import('@/components/common/projects/ProjectsTable.vue'),
-        meta: {
-          requiresAuth: true,
-          title: 'Projects',
-        },
-      }
-    ]
-  }
 ];
 
 export default commonRoutes;

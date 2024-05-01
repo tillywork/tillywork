@@ -1,5 +1,6 @@
+import { useAuthStore } from '@/stores/auth';
 import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
-import { useAuth } from './useAuth';
+
 
 let axiosInstance: AxiosInstance;
 
@@ -11,7 +12,7 @@ let axiosInstance: AxiosInstance;
  * @returns AxiosInstance
  */
 const refreshTokenInterceptor = async (error: any) => {
-  const { refreshToken, setToken, token } = useAuth();
+  const { refreshToken, setToken, token } = useAuthStore();
 
   if (error.response.status === 401 && !error.config._retry && token) {
     try {
@@ -37,7 +38,7 @@ const refreshTokenInterceptor = async (error: any) => {
  * @returns AxiosInstance
  */
 const createAxiosInstance = () => {
-  const { token } = useAuth();
+  const { token } = useAuthStore();
   const instance = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
   });
