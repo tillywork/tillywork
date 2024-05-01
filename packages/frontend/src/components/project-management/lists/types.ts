@@ -42,13 +42,16 @@ export const DEFAULT_LIST_GROUP_BY_OPTIONS = [
   {
     label: 'Stage',
     value: ListGroupOptions.LIST_STAGE,
+    icon: 'mdi-circle-slice-8'
   },
   {
     label: 'Assignee',
     value: ListGroupOptions.ASSIGNEES,
+    icon: 'mdi-account'
   },
   {
     label: 'Due Date',
     value: ListGroupOptions.DUE_DATE,
+    icon: 'mdi-clock-time-four'
   },
 ];

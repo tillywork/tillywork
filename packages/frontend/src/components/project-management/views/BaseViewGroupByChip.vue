@@ -61,7 +61,18 @@ function clearGroupBy() {
     <v-card color="surface">
       <v-list nav density="compact" :lines="false">
         <template v-for="option in groupByOptions" :key="option.value">
-          <v-list-item @click="handleGroupBySelection(option)" slim>
+          <v-list-item
+            @click="handleGroupBySelection(option)"
+            slim
+            :active="isOptionSelected(option)"
+          >
+            <template #prepend>
+              <v-icon
+                :color="isOptionSelected(option) ? 'primary' : 'grey'"
+                size="18"
+                >{{ option.icon ?? 'mdi-circle-slice-8' }}</v-icon
+              >
+            </template>
             <v-list-item-title
               class="user-select-none"
               :class="isOptionSelected(option) ? 'font-weight-bold' : ''"

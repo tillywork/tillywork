@@ -1,4 +1,3 @@
-import type { Space } from '@/components/project-management/spaces/types';
 import type { Workspace } from '@/components/project-management/workspaces/types';
 import { defineStore } from 'pinia';
 
@@ -7,7 +6,6 @@ export const useWorkspaceStore = defineStore('workspace', {
     state: () => {
         return {
             selectedWorkspace: null as Workspace | null,
-            selectedSpace: null as Space | null,
             spaceExpansionState: {} as Record<number, boolean[]>,
         };
     },
@@ -19,9 +17,6 @@ export const useWorkspaceStore = defineStore('workspace', {
             if (!this.spaceExpansionState[workspace.id]) {
                 this.$patch({ spaceExpansionState: { [workspace.id]: [] } });
             }
-        },
-        setSelectedSpace(space: Space) {
-            this.selectedSpace = space;
         },
         setSpaceExpansionState(workspaceId: number, spaceExpansionState: boolean[]) {
             this.spaceExpansionState[workspaceId] = spaceExpansionState;

@@ -157,7 +157,7 @@ function handleInfiniteScrollLoad(scrollObj: any) {
 
 <template>
   <div class="table-container" :class="themeClass">
-    <v-infinite-scroll @load="handleInfiniteScrollLoad" height="300">
+    <v-infinite-scroll @load="handleInfiniteScrollLoad" max-height="300">
       <template #empty></template>
       <table ref="tableElement">
         <thead>
@@ -420,6 +420,14 @@ $table-cell-padding-y: 0;
 <style lang="scss">
 $v-field-input-x-padding: 8px;
 $v-field-input-font-size: 14px;
+
+.table-container {
+  .v-infinite-scroll {
+    display: inline-block;
+    min-width: max-content;
+  }
+}
+
 .create-card-wrapper {
   .v-field__input {
     min-height: 30px;

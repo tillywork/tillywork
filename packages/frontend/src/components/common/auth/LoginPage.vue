@@ -32,8 +32,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useAuth } from '@/composables/useAuth';
-import { useSnackbar } from '@/composables/useSnackbar';
+import { useAuthStore } from '@/stores/useAuth';
+import { useSnackbarStore } from '@/stores/useSnackbar';
 import { useRoute } from 'vue-router';
 
 const email = ref('');
@@ -48,14 +48,14 @@ const route = useRoute();
 
 const login = async () => {
   try {
-    const { login } = useAuth();
+    const { login } = useAuthStore();
 
     loading.value = true;
     await login(email.value, password.value);
     loading.value = false;
     window.location.pathname = route.redirectedFrom?.fullPath ?? '/';
   } catch (error) {
-    const { showSnackbar } = useSnackbar();
+    const { showSnackbar } = useSnackbarStore();
 
     loading.value = false;
     const errorObj = (error as any).value ?? error;
