@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { User } from '@/components/common/users/types';
-import UserPhoto from '../users/UserPhoto.vue';
+import BaseUserPhoto from '../users/BaseUserPhoto.vue';
 import { ref } from 'vue';
 
 const userMenu = ref(false);
@@ -62,7 +62,7 @@ const isUserSelected = (user: User) => {
           >
             <v-tooltip location="bottom">
               <template #activator="{ props: tooltipProps }">
-                <user-photo
+                <base-user-photo
                   v-bind="tooltipProps"
                   :photo="selectedUser.photo"
                   class="me-n2"
@@ -83,7 +83,7 @@ const isUserSelected = (user: User) => {
           <v-list-item @click="toggleUserSelection(user)" slim>
             <template #prepend>
               <v-list-item-action start>
-                <user-photo
+                <base-user-photo
                   :photo="user.photo"
                   :color="isUserSelected(user) ? 'primary' : ''"
                   class="ms-1"

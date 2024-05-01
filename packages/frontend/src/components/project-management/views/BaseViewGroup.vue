@@ -9,7 +9,7 @@ import {
 } from '@tanstack/vue-query';
 import TableView from '@/components/project-management/views/TableView/TableView.vue';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
-import UserSelector from '@/components/common/inputs/UserSelector.vue';
+import BaseUserSelector from '@/components/common/inputs/BaseUserSelector.vue';
 import { type ColumnDef, type Row } from '@tanstack/vue-table';
 import type { Card, CreateCardDto } from '../cards/types';
 import type { User } from '@/components/common/users/types';
@@ -23,7 +23,7 @@ import { useListStagesService } from '@/composables/services/useListStagesServic
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import { ListGroupOptions } from '../lists/types';
-import UserPhoto from '@/components/common/users/UserPhoto.vue';
+import BaseUserPhoto from '@/components/common/users/BaseUserPhoto.vue';
 
 const props = defineProps<{
   group: ListGroup;
@@ -199,7 +199,7 @@ async function handleInfiniteScroll({ done }: any) {
       />
       <div>
         <template v-if="group.type === ListGroupOptions.ASSIGNEES">
-          <user-photo :photo="group.icon" size="20" />
+          <base-user-photo :photo="group.icon" size="20" />
         </template>
         <template v-else>
           <v-icon :color="group.color" size="20">{{
@@ -255,7 +255,7 @@ async function handleInfiniteScroll({ done }: any) {
           />
         </template>
         <template #users="{ row }">
-          <user-selector
+          <base-user-selector
             :model-value="row.original.users"
             :users="usersQuery.data.value?.users ?? []"
             @update:modelValue="handleUserSelection"
