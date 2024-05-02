@@ -138,7 +138,7 @@ function getUserAvatar(user: { photo: string }) {
     </v-navigation-drawer>
 
     <v-app-bar app class="pr-4" height="56" color="background">
-      <v-toolbar-title>FalconDrive</v-toolbar-title>
+      <v-toolbar-title>TillyWork</v-toolbar-title>
       <toolbar-search />
       <v-spacer />
       <theme-switch />

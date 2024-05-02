@@ -14,15 +14,18 @@ import { TypeOrmLoggerContainer } from "./common/logger/typeorm.logger.container
             imports: [ConfigModule],
             useFactory: async (configService: ConfigService) => ({
                 type: "postgres",
-                host: configService.get("FD_DB_HOST"),
-                port: configService.get("FD_DB_PORT"),
-                username: configService.get("FD_DB_USERNAME"),
-                password: configService.get("FD_DB_PASSWORD"),
-                database: configService.get("FD_DB_NAME"),
+                host: configService.get("TW_DB_HOST"),
+                port: configService.get("TW_DB_PORT"),
+                username: configService.get("TW_DB_USERNAME"),
+                password: configService.get("TW_DB_PASSWORD"),
+                database: configService.get("TW_DB_NAME"),
                 entities: [__dirname + "/**/*.entity{.ts,.js}"],
                 autoLoadEntities: true,
                 synchronize: true, // use only in development, in production should be handled by migrations
-                logger: configService.get('FD_ENABLE_QUERY_LOGGING') !== 'false' ? TypeOrmLoggerContainer.ForConnection(true) : undefined,
+                logger:
+                    configService.get("TW_ENABLE_QUERY_LOGGING") !== "false"
+                        ? TypeOrmLoggerContainer.ForConnection(true)
+                        : undefined,
             }),
             inject: [ConfigService],
         }),

@@ -24,7 +24,7 @@ const {
 });
 
 watch(list, () => {
-  document.title = `${list.value?.name} | FalconDrive`;
+  document.title = `${list.value?.name} | TillyWork`;
 });
 
 watch(listId, () => refetchList());

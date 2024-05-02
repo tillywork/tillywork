@@ -4,7 +4,7 @@ import routes from './routes';
 
 // Create the router instance
 const router = createRouter({
-  history: createWebHistory(import.meta.env.FD_BASE_URL), // Using HTML5 history mode
+  history: createWebHistory(import.meta.env.TW_BASE_URL), // Using HTML5 history mode
   routes,
   scrollBehavior(to, from, savedPosition) {
     // always scroll to top
