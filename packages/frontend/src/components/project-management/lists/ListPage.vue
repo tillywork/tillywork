@@ -31,7 +31,7 @@ watch(listId, () => refetchList());
 </script>
 
 <template>
-  <div class="position-relative" v-if="list">
+  <div class="list-container position-relative" v-if="list">
     <div class="pa-4 pb-0">
       <div class="px-9 pt-6">
         <p class="text-h5 mb-3">{{ list.name }}</p>
@@ -56,3 +56,9 @@ watch(listId, () => refetchList());
     </template>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.list-container {
+  height: calc(100vh - 48px);
+}
+</style>
