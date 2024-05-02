@@ -76,7 +76,7 @@ const paginationOptions = ref(DEFAULT_PAGINATION_OPTIONS);
 
 watch(getViewQuery.data, (view) => {
   if (view) {
-    document.title = `${view.name} | FalconDrive`;
+    document.title = `${view.name} | TillyWork`;
   }
 });
 

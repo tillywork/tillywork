@@ -41,6 +41,6 @@ export const requireAuthGuard = (
 
 export const titleGuard = (to: RouteLocationNormalized) => {
   document.title = to.meta?.title
-    ? to.meta.title + ' | FalconDrive'
-    : 'FalconDrive';
+    ? to.meta.title + ' | TillyWork'
+    : 'TillyWork';
 };

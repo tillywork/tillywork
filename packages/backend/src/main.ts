@@ -39,9 +39,7 @@ async function bootstrap() {
         // await seedCardsData(connection);
     }
 
-    logger.log(
-        `🚀 FalconDrive Backend is running on: http://localhost:${port}`
-    );
+    logger.log(`🚀 Tilly Backend is running on: http://localhost:${port}`);
     logger.log(`Environment: ${environment}`);
 }
 
