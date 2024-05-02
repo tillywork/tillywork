@@ -24,9 +24,11 @@ import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import { ListGroupOptions } from '../lists/types';
 import BaseUserPhoto from '@/components/common/users/BaseUserPhoto.vue';
+import { ViewTypes, type View } from './types';
 
 const props = defineProps<{
   group: ListGroup;
+  view: View;
   query?: QueryObserverResult<any, any>;
   columns: ColumnDef<any>[];
 }>();
@@ -187,7 +189,7 @@ async function handleInfiniteScroll({ done }: any) {
 
 <template>
   <div v-if="group" class="group">
-    <div class="header d-flex align-center px-4 py-2">
+    <v-banner sticky lines="one" border="none" bg-color="transparent">
       <v-btn
         variant="text"
         density="comfortable"
@@ -228,76 +230,78 @@ async function handleInfiniteScroll({ done }: any) {
         color="accent"
         class="ms-2"
       />
-    </div>
+    </v-banner>
     <div class="content" v-if="isExpanded">
-      <table-view
-        v-model:row-hovered="rowHovered"
-        v-model:options="paginationOptions"
-        :columns="columns"
-        :data="groupCards ?? []"
-        :total="group.cards?.total ?? 0"
-        :loading="getGroupCardsQuery.isFetching.value"
-        @click:row="handleRowClick"
-        @submit="handleCardCreation"
-        @load="handleInfiniteScroll"
-      >
-        <template #listStage="{ row }">
-          <list-stage-selector
-            v-model="row.original.cardLists[0].listStage"
-            :list-stages="listStagesQuery.data.value ?? []"
-            @update:modelValue="
-              (modelValue) =>
-                updateCardListStage({
-                  cardListId: row.original.cardLists[0].id,
-                  listStageId: modelValue.id,
-                })
-            "
-          />
-        </template>
-        <template #users="{ row }">
-          <base-user-selector
-            :model-value="row.original.users"
-            :users="usersQuery.data.value?.users ?? []"
-            @update:modelValue="handleUserSelection"
-          />
-        </template>
-        <template #dueAt="{ row }">
-          <base-date-picker
-            :model-value="
-              row.original.dueAt ? new Date(row.original.dueAt) : undefined
-            "
-            no-date-message="No Due Date"
-            :close-on-content-click="true"
-            @update:model-value="
+      <template v-if="view.type === ViewTypes.TABLE">
+        <table-view
+          v-model:row-hovered="rowHovered"
+          v-model:options="paginationOptions"
+          :columns="columns"
+          :data="groupCards ?? []"
+          :total="group.cards?.total ?? 0"
+          :loading="getGroupCardsQuery.isFetching.value"
+          @click:row="handleRowClick"
+          @submit="handleCardCreation"
+          @load="handleInfiniteScroll"
+        >
+          <template #listStage="{ row }">
+            <list-stage-selector
+              v-model="row.original.cardLists[0].listStage"
+              :list-stages="listStagesQuery.data.value ?? []"
+              @update:modelValue="
+                (modelValue) =>
+                  updateCardListStage({
+                    cardListId: row.original.cardLists[0].id,
+                    listStageId: modelValue.id,
+                  })
+              "
+            />
+          </template>
+          <template #users="{ row }">
+            <base-user-selector
+              :model-value="row.original.users"
+              :users="usersQuery.data.value?.users ?? []"
+              @update:modelValue="handleUserSelection"
+            />
+          </template>
+          <template #dueAt="{ row }">
+            <base-date-picker
+              :model-value="
+                row.original.dueAt ? new Date(row.original.dueAt) : undefined
+              "
+              no-date-message="No Due Date"
+              :close-on-content-click="true"
+              @update:model-value="
               (newValue) =>
                 handleChangeDueDate({
                   card: row.original,
                   newDueDate: newValue as Date,
                 })
             "
-          />
-        </template>
-        <template #actions="{ row }">
-          <div class="text-right">
-            <v-menu>
-              <template #activator="{ props }">
-                <v-btn
-                  v-if="rowHovered?.original.id === row.original.id"
-                  v-bind="props"
-                  density="compact"
-                  size="small"
-                  icon="mdi-dots-vertical"
-                  variant="text"
-                  color="default"
-                />
-              </template>
-              <v-card>
-                <v-card-title>Hello</v-card-title>
-              </v-card>
-            </v-menu>
-          </div>
-        </template>
-      </table-view>
+            />
+          </template>
+          <template #actions="{ row }">
+            <div class="text-right">
+              <v-menu>
+                <template #activator="{ props }">
+                  <v-btn
+                    v-if="rowHovered?.original.id === row.original.id"
+                    v-bind="props"
+                    density="compact"
+                    size="small"
+                    icon="mdi-dots-vertical"
+                    variant="text"
+                    color="default"
+                  />
+                </template>
+                <v-card>
+                  <v-card-title>Hello</v-card-title>
+                </v-card>
+              </v-menu>
+            </div>
+          </template>
+        </table-view>
+      </template>
     </div>
   </div>
 </template>

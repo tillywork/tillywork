@@ -180,15 +180,17 @@ function closeCardDialog() {
     </div>
   </div>
 
-  <div class="pb-4 d-flex flex-column ga-3">
+  <div class="groups-container" v-if="getViewQuery.data.value">
     <template v-for="(group, index) in groups" :key="group.name">
       <base-view-group
         v-if="groups"
-        v-model:group="groups[index]"
+        :view="getViewQuery.data.value"
+        :group="groups[index]"
         v-model:options="paginationOptions"
         :columns="columns"
         @click:row="handleRowClick"
         v-model:row:hovered="rowHovered"
+        class="mb-3"
       />
     </template>
   </div>
@@ -201,3 +203,10 @@ function closeCardDialog() {
     />
   </v-dialog>
 </template>
+
+<style lang="scss" scoped>
+.groups-container {
+  max-height: calc(100vh - (48px + 60px + 113px));
+  overflow: auto;
+}
+</style>
