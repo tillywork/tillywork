@@ -167,7 +167,7 @@ async function updateCard(card: Card) {
         />
         <base-card-property
           v-model:prop="dueDateModel"
-          v-model:value="cardCopy.createdAt"
+          v-model:value="cardCopy.dueAt"
         />
         <base-card-property
           v-model:prop="descriptionModel"

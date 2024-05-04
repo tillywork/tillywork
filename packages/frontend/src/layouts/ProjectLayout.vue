@@ -3,10 +3,10 @@ import ThemeSwitch from '@/components/common/ThemeSwitch.vue';
 import { useAuthStore } from '@/stores/auth';
 import SnackbarWrapper from '@/components/common/SnackbarWrapper.vue';
 import { ref } from 'vue';
-import { type RouteLocationRaw } from 'vue-router';
 import ToolbarSearch from '@/components/common/navigation/ToolbarSearch.vue';
 import NavigationWorkspace from '@/components/project-management/navigation/NavigationWorkspace.vue';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
+import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
 
 const navigationDrawer = ref(true);
 const { logout, isAuthenticated } = useAuthStore();
@@ -47,13 +47,16 @@ if (isAuthenticated()) {
         @click.stop="navigationDrawer = !navigationDrawer"
       ></v-app-bar-nav-icon>
 
-      <v-app-bar-title>Hello</v-app-bar-title>
+      <v-app-bar-title>tillywork</v-app-bar-title>
       <toolbar-search />
       <v-spacer />
       <theme-switch />
     </v-app-bar>
 
     <v-navigation-drawer v-model="navigationDrawer">
+      <navigation-workspace-selector class="mb-2" />
+      <v-divider></v-divider>
+
       <!-- Sidebar content -->
       <v-list density="compact" nav>
         <v-list-item
@@ -70,8 +73,6 @@ if (isAuthenticated()) {
           <v-list-item-title>{{ navigationItem.title }}</v-list-item-title>
         </v-list-item>
       </v-list>
-
-      <v-divider></v-divider>
 
       <!-- Current Workspace Information -->
       <navigation-workspace />

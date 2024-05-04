@@ -5,7 +5,8 @@
     "scripts": {
         "dev": "concurrently \"nx serve backend\" \"nx serve frontend\" -n \"API,WEB\" -c \"bgBlue.bold,bgRed.bold\"",
         "lint": "nx lint backend && nx lint frontend",
-        "format": "nx format backend && nx format frontend"
+        "format": "nx format backend && nx format frontend",
+        "build": "nx build backend && nx build frontend"
     },
     "private": true,
     "devDependencies": {

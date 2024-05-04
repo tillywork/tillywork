@@ -45,8 +45,7 @@ const vuetify = createVuetify({
     },
     VBtn: {
       color: 'primary',
-      rounded: 'lg',
-      flat: true,
+      rounded: 'md',
     },
     VSwitch: {
       color: 'primary',

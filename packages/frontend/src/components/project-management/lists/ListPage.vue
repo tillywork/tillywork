@@ -24,7 +24,7 @@ const {
 });
 
 watch(list, () => {
-  document.title = `${list.value?.name} | TillyWork`;
+  document.title = `${list.value?.name} | tillywork`;
 });
 
 watch(listId, () => refetchList());
