@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import dayjs from 'dayjs';
 import BaseCardPropertyValueBtn from '@/components/project-management/cards/BaseCardPropertyValueBtn.vue';
 
@@ -9,6 +9,24 @@ const props = defineProps<{
   closeOnContentClick?: boolean;
 }>();
 const dateDialog = ref(false);
+
+const textColorClass = computed(() => {
+    if (!dateValue.value) {
+        return 'text-default';
+    }
+
+    const date = dayjs(dateValue.value);
+
+    if (date < dayjs().startOf('day')) {
+        return 'text-error';
+    }
+    else if (date > dayjs().endOf('day')) {
+        return 'text-default';
+    }
+    else {
+        return 'text-info';
+    }
+})
 </script>
 
 <template>
@@ -17,7 +35,7 @@ const dateDialog = ref(false);
     :close-on-content-click="closeOnContentClick ?? false"
   >
     <template #activator="{ props }">
-      <base-card-property-value-btn v-bind="props" class="text-caption">
+      <base-card-property-value-btn v-bind="props" class="text-caption" :class="textColorClass">
         <template v-if="dateValue">
           {{ dayjs(dateValue).format('MMM D') ?? 'Empty' }}
         </template>
