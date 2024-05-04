@@ -85,13 +85,13 @@ const { mutate: updateCardListStage } = useMutation({
       listStageId,
     }),
   onSuccess: () =>
-    queryClient.invalidateQueries({ queryKey: ['groups', listId.value] }),
+    queryClient.invalidateQueries({ queryKey: ['cards'] }),
 });
 const createCardMutation = useMutation({
   mutationFn: (createCardDto: CreateCardDto) =>
     cardsService.createCard(createCardDto),
   onSuccess: () =>
-    queryClient.invalidateQueries({ queryKey: ['groups', listId.value] }),
+    queryClient.invalidateQueries({ queryKey: ['cards'] }),
 });
 const updateCardMutation = useMutation({
   mutationFn: (updateCardDto: Card) => cardsService.updateCard(updateCardDto),
