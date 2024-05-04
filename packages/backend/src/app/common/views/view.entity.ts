@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import { ViewTypes } from "./types";
 import { List } from "../lists/list.entity";
+import { ListGroupOptions } from "../lists/types";
 
 @Entity()
 export class View {
@@ -20,6 +21,13 @@ export class View {
 
     @Column({ type: "enum", enum: ViewTypes, default: ViewTypes.TABLE })
     type: ViewTypes;
+
+    @Column({
+        type: "enum",
+        enum: ListGroupOptions,
+        default: ListGroupOptions.LIST_STAGE,
+    })
+    groupBy: ListGroupOptions;
 
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;

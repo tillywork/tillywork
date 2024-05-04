@@ -6,6 +6,7 @@ export interface View {
   type: ViewTypes;
   listId: number;
   list: List;
+  groupBy: ListGroupOptions;
 }
 
 export enum ViewTypes {

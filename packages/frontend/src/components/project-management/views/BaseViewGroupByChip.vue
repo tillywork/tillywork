@@ -12,6 +12,7 @@ const groupByOptions = ref(DEFAULT_LIST_GROUP_BY_OPTIONS);
 const selectedOption = computed(() =>
   groupByOptions.value.find((option) => option.value === groupBy.value)
 );
+const isGroupByFilled = computed(() => groupBy.value && groupBy.value !== ListGroupOptions.ALL)
 
 function handleGroupBySelection(option: ListGroupOption) {
   groupBy.value = option.value;
@@ -22,7 +23,7 @@ function isOptionSelected(option: ListGroupOption) {
 }
 
 function clearGroupBy() {
-  groupBy.value = undefined;
+  groupBy.value = ListGroupOptions.ALL;
 }
 </script>
 
@@ -34,16 +35,16 @@ function clearGroupBy() {
         link
         rounded="xl"
         density="comfortable"
-        :variant="groupBy ? 'tonal' : 'outlined'"
+        :variant="isGroupByFilled ? 'tonal' : 'outlined'"
         color="primary"
       >
         <v-icon icon="mdi-layers-triple-outline" size="14" start />
         <span class="text-caption user-select-none">
-          Group<template v-if="selectedOption"
+          Group<template v-if="isGroupByFilled"
             >: {{ selectedOption?.label }}</template
           >
         </span>
-        <template #append v-if="groupBy">
+        <template #append v-if="isGroupByFilled">
           <v-btn
             class="ms-1 me-n2"
             icon="mdi-close"

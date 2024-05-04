@@ -8,11 +8,12 @@ import { useListGroupsService } from '@/composables/services/useListGroupsServic
 import type { Card } from '../cards/types';
 import { computed } from 'vue';
 import { type ColumnDef, type Row } from '@tanstack/vue-table';
-import { useQuery } from '@tanstack/vue-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import BaseCard from '../cards/BaseCard.vue';
 import BaseViewGroupByChip from './BaseViewGroupByChip.vue';
 import BaseViewGroup from './BaseViewGroup.vue';
 import { DEFAULT_PAGINATION_OPTIONS } from './TableView/types';
+import { type View } from './types';
 
 const route = useRoute();
 const router = useRouter();
@@ -22,7 +23,7 @@ const viewsService = useViewsService();
 const listGroupsService = useListGroupsService();
 
 const isPageLoading = computed(() => {
-  return getViewQuery.isFetching.value || isGroupsFetching.value;
+  return getViewQuery.isFetching.value || isGroupsFetching.value || updateViewMutation.isPending.value;
 });
 const openedCard = ref<Card>();
 const cardDialog = ref(false);
@@ -57,6 +58,8 @@ const columns: ColumnDef<Card, any>[] = [
 ];
 
 const rowHovered = ref<Row<Card>>();
+
+const queryClient = useQueryClient();
 const getViewQuery = useQuery({
   queryKey: ['view', viewId.value],
   queryFn: () => viewsService.getView(viewId.value),
@@ -64,20 +67,29 @@ const getViewQuery = useQuery({
 });
 const {
   data: groups,
-  refetch: refetchListGroups,
   isFetching: isGroupsFetching,
+  refetch: refetchListGroups,
 } = useQuery({
   queryKey: ['groups', listId.value],
   queryFn: getListGroups,
+  enabled: getViewQuery.isFetched.value,
 });
 
-const groupBy = ref<ListGroupOptions>(ListGroupOptions.LIST_STAGE);
+const updateViewMutation = useMutation({
+  mutationFn: viewsService.updateView,
+  onSuccess: () =>  {
+    queryClient.invalidateQueries({ queryKey: ['view', viewId.value] })
+  }
+});
+
 const paginationOptions = ref(DEFAULT_PAGINATION_OPTIONS);
 
 watch(getViewQuery.data, (view) => {
   if (view) {
     document.title = `${view.name} | tillywork`;
   }
+
+  refetchListGroups();
 });
 
 watch(
@@ -100,7 +112,7 @@ watch(
 async function getListGroups() {
   const groups = await listGroupsService.getListGroupsByOption({
     listId: listId.value,
-    groupBy: groupBy.value,
+    groupBy: getViewQuery.data.value!.groupBy,
   });
 
   return groups;
@@ -118,10 +130,17 @@ function openCardDialog() {
 function closeCardDialog() {
   cardDialog.value = false;
 }
+
+function handleGroupBySelection(option: ListGroupOptions) {
+  updateViewMutation.mutate({
+    ...getViewQuery.data.value,
+    groupBy: option,
+  } as View);
+}
 </script>
 
 <template>
-  <div class="d-flex ga-2 py-4 px-12">
+  <div class="d-flex ga-2 py-4 px-12" v-if="getViewQuery.data.value">
     <v-progress-linear
       indeterminate
       color="primary"
@@ -144,8 +163,8 @@ function closeCardDialog() {
     </div>
     <div class="d-flex align-center ga-2">
       <base-view-group-by-chip
-        v-model="groupBy"
-        @update:model-value="refetchListGroups()"
+        v-model="getViewQuery.data.value.groupBy"
+        @update:model-value="handleGroupBySelection"
       />
       <v-chip
         link
