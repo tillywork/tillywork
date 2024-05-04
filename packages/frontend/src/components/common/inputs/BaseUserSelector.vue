@@ -9,28 +9,23 @@ defineExpose({
 });
 const props = defineProps<{
   users: User[];
+  selected?: User[];
 }>();
-const selectedUsers = defineModel<User[]>({
-  default: [],
-  required: true,
-});
+const emit = defineEmits(['update:select'])
+const selectedUsers = ref<User[]>([...(props.selected ?? [])]);
 
 const toggleUserSelection = (user: User) => {
   const index = selectedUsers.value.findIndex((u) => u.id === user.id);
 
   if (index === -1) {
     // User is not in the array, add them
-    // Can't use push(user) since reactivity breaks
-    selectedUsers.value = [...selectedUsers.value, user];
+    selectedUsers.value.push(user)
   } else {
     // User is in the array, remove them
-    // Can't use splice since reactivity breaks
-    // So we hack around it :)
-    selectedUsers.value = [
-      ...selectedUsers.value.slice(0, index),
-      ...selectedUsers.value.slice(index + 1),
-    ];
+    selectedUsers.value.splice(index, 1)
   }
+
+  emit('update:select', selectedUsers.value)
 };
 
 const isUserSelected = (user: User) => {

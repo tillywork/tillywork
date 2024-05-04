@@ -8,6 +8,14 @@ const commonRoutes = [
       title: 'Login',
     },
   },
+  {
+    path: '/',
+    name: 'Home',
+    component: () => import('@/components/common/HomePage.vue'),
+    meta: {
+        title: 'Home'
+    }
+  }
 ];
 
 export default commonRoutes;
