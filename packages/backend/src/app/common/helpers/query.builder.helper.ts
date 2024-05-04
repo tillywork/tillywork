@@ -26,16 +26,15 @@ export class QueryBuilderHelper {
     static processValue(value: any) {
         if (Array.isArray(value)) {
             return value.map((value) => {
-                if (typeof value === "string") {
-                    return this.processValue(value);
-                }
+                return this.processValue(value);
             });
-        } else if (typeof value === "object") {
-            return Object.keys((key) => this.processValue(value[key]));
         } else if (typeof value === "string") {
             return value
                 .replace(":startOfDay", dayjs().startOf("day").toISOString())
                 .replace(":endOfDay", dayjs().endOf("day").toISOString());
+        }
+        else {
+            return value;
         }
     }
 

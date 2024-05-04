@@ -342,7 +342,7 @@ function handleInfiniteScrollLoad(scrollObj: any) {
 <style lang="scss" scoped>
 $table-border-color: var(--v-border-color);
 $table-border-opacity: var(--v-border-opacity);
-$table-row-height: 33px;
+$table-row-height: 36px;
 $table-header-height: 33px;
 $table-cell-padding-x: 8px;
 $table-cell-padding-y: 0;
