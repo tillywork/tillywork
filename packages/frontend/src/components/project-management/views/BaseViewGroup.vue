@@ -204,7 +204,7 @@ async function handleInfiniteScroll({ done }: any) {
       />
       <div>
         <template v-if="group.type === ListGroupOptions.ASSIGNEES">
-          <base-user-photo :photo="group.icon" size="20" />
+          <base-user-photo :photo="group.icon" border size="20" />
         </template>
         <template v-else>
           <v-icon :color="group.color" size="20">{{
