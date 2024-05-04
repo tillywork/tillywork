@@ -60,7 +60,8 @@ const isUserSelected = (user: User) => {
                 <base-user-photo
                   v-bind="tooltipProps"
                   :photo="selectedUser.photo"
-                  class="me-n1 border"
+                  class="me-n1"
+                  border
                   :style="`z-index: ${100 - index}`"
                 />
               </template>
