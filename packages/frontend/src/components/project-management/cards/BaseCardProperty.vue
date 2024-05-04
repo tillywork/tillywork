@@ -91,7 +91,7 @@ function openUserSelector() {
         <v-menu v-model="dateDialog" :close-on-content-click="false">
           <template #activator="{ props }">
             <base-card-property-value-btn v-bind="props" class="text-body-2">
-              {{ dayjs(value).format('dddd, D MMM') ?? 'Empty' }}
+              {{ value ? dayjs(value).format('dddd, D MMM') : 'Empty' }}
             </base-card-property-value-btn>
           </template>
           <v-date-picker

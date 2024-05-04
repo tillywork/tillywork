@@ -40,7 +40,7 @@ async function getWorkspaces() {
 </script>
 
 <template>
-  <div class="d-flex justify-center align-center mt-2 px-2">
+  <div class="d-flex justify-center align-center my-2 px-2">
     <v-card
       density="compact"
       link

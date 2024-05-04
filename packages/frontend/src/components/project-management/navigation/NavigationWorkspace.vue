@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import NavigationWorkspaceSelector from './NavigationWorkspaceSelector.vue';
 import CreateSpaceDialogAndButton from '../navigation/CreateSpaceDialogAndButton.vue';
 import { useSpacesService } from '../../../composables/services/useSpacesService';
 import { watch } from 'vue';
@@ -72,7 +71,6 @@ watch(createListDialog, (isOpen) => {
 
 <template>
   <div class="navigation-workspace">
-    <navigation-workspace-selector />
     <!-- Spaces -->
     <v-list
       v-model:opened="currentSpaceExpansionState"
