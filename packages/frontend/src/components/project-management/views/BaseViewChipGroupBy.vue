@@ -6,13 +6,16 @@ import {
 } from '../lists/types';
 import type { ListGroupOption } from './types';
 import { computed } from 'vue';
+import BaseViewChip from './BaseViewChip.vue';
 
 const groupBy = defineModel<ListGroupOptions>();
 const groupByOptions = ref(DEFAULT_LIST_GROUP_BY_OPTIONS);
 const selectedOption = computed(() =>
   groupByOptions.value.find((option) => option.value === groupBy.value)
 );
-const isGroupByFilled = computed(() => groupBy.value && groupBy.value !== ListGroupOptions.ALL)
+const isGroupByFilled = computed(
+  () => groupBy.value && groupBy.value !== ListGroupOptions.ALL
+);
 
 function handleGroupBySelection(option: ListGroupOption) {
   groupBy.value = option.value;
@@ -30,20 +33,12 @@ function clearGroupBy() {
 <template>
   <v-menu offset="5">
     <template #activator="{ props }">
-      <v-chip
+      <base-view-chip
         v-bind="props"
-        link
-        rounded="xl"
-        density="comfortable"
-        :variant="isGroupByFilled ? 'tonal' : 'outlined'"
-        color="primary"
+        icon="mdi-layers-triple-outline"
+        :label="'Group' + (isGroupByFilled ? ': ' + selectedOption?.label : '')"
+        :is-filled="isGroupByFilled"
       >
-        <v-icon icon="mdi-layers-triple-outline" size="14" start />
-        <span class="text-caption user-select-none">
-          Group<template v-if="isGroupByFilled"
-            >: {{ selectedOption?.label }}</template
-          >
-        </span>
         <template #append v-if="isGroupByFilled">
           <v-btn
             class="ms-1 me-n2"
@@ -57,7 +52,7 @@ function clearGroupBy() {
             rounded="circle"
           />
         </template>
-      </v-chip>
+      </base-view-chip>
     </template>
     <v-card color="surface">
       <v-list nav density="compact" :lines="false">

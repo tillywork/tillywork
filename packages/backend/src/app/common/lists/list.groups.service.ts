@@ -6,7 +6,6 @@ import { ListGroupEntityTypes, ListGroupOptions } from "./types";
 import { ListStagesService } from "./list.stages.service";
 import { UsersService } from "../users/users.service";
 import { CardsService } from "../cards/cards.service";
-import dayjs from "dayjs";
 import { FilterEntityTypes, FilterGroup } from "../filters/types";
 import { CreateListGroupDto } from "./dto/create.list.group.dto";
 import { FiltersService } from "../filters/filters.service";
@@ -251,7 +250,7 @@ export class ListGroupsService {
                             {
                                 field: "dueAt",
                                 operator: "lt",
-                                value: dayjs().startOf("day"),
+                                value: ':startOfDay',
                             },
                         ],
                     },
@@ -269,8 +268,8 @@ export class ListGroupsService {
                                 field: "dueAt",
                                 operator: "between",
                                 value: [
-                                    dayjs().startOf("day"),
-                                    dayjs().endOf("day"),
+                                    ':startOfDay',
+                                    ':endOfDay',
                                 ],
                             },
                         ],
@@ -288,7 +287,7 @@ export class ListGroupsService {
                             {
                                 field: "dueAt",
                                 operator: "gt",
-                                value: dayjs().endOf("day"),
+                                value: ':endOfDay',
                             },
                         ],
                     },
