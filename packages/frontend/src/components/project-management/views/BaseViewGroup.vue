@@ -96,7 +96,7 @@ const createCardMutation = useMutation({
 const updateCardMutation = useMutation({
   mutationFn: (updateCardDto: Card) => cardsService.updateCard(updateCardDto),
   onSuccess: () =>
-    queryClient.invalidateQueries({ queryKey: ['groups', listId.value] }),
+    queryClient.invalidateQueries({ queryKey: ['cards'] }),
 });
 const usersQuery = useQuery({
   queryKey: ['users'],
@@ -141,9 +141,12 @@ function handleRowClick(row: Row<Card>) {
   emit('click:row', row);
 }
 
-function handleUserSelection(users: User[]) {
-  //TODO update card assignees
-  console.log(users);
+function handleUserSelection(users: User[], card: Card) {
+  const updatedCard: Card = {
+    ...card,
+    users,
+  };
+  updateCardMutation.mutate(updatedCard);
 }
 
 function handleCardCreation(createCardDto: Partial<CreateCardDto>) {
@@ -259,9 +262,9 @@ async function handleInfiniteScroll({ done }: any) {
           </template>
           <template #users="{ row }">
             <base-user-selector
-              :model-value="row.original.users"
+              :selected="row.original.users"
               :users="usersQuery.data.value?.users ?? []"
-              @update:modelValue="handleUserSelection"
+              @update:select="(users) => handleUserSelection(users, row.original)"
             />
           </template>
           <template #dueAt="{ row }">
