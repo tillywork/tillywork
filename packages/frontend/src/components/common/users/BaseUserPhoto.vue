@@ -9,12 +9,5 @@ const props = defineProps<{
 </script>
 
 <template>
-  <v-avatar density="comfortable" :size="size ?? 'small'">
-    <v-img v-if="props.photo" :src="props.photo" v-bind:style="props.style" />
-    <v-icon
-      v-else
-      :icon="props.icon ?? 'mdi-account-circle'"
-      :color="props.color"
-    />
-  </v-avatar>
+  <v-avatar :style="style" :image="props.photo" :icon="!props.photo ? 'mdi-account' : undefined" size="28" />
 </template>
