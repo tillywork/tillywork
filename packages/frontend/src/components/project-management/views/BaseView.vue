@@ -10,7 +10,7 @@ import { computed } from 'vue';
 import { type ColumnDef, type Row } from '@tanstack/vue-table';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import BaseCard from '../cards/BaseCard.vue';
-import BaseViewGroupByChip from './BaseViewGroupByChip.vue';
+import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewGroup from './BaseViewGroup.vue';
 import { DEFAULT_PAGINATION_OPTIONS } from './TableView/types';
 import { type View } from './types';
@@ -162,7 +162,7 @@ function handleGroupBySelection(option: ListGroupOptions) {
       <v-divider vertical />
     </div>
     <div class="d-flex align-center ga-2">
-      <base-view-group-by-chip
+      <base-view-chip-group-by
         v-model="getViewQuery.data.value.groupBy"
         @update:model-value="handleGroupBySelection"
       />
@@ -171,7 +171,7 @@ function handleGroupBySelection(option: ListGroupOptions) {
         rounded="xl"
         density="comfortable"
         variant="outlined"
-        color="accent"
+        color="primary"
       >
         <v-icon icon="mdi-filter" size="16" start />
         Filters
@@ -181,7 +181,7 @@ function handleGroupBySelection(option: ListGroupOptions) {
         rounded="xl"
         density="comfortable"
         variant="outlined"
-        color="accent"
+        color="primary"
       >
         <v-icon icon="mdi-swap-vertical" size="16" start />
         Sort
@@ -191,7 +191,7 @@ function handleGroupBySelection(option: ListGroupOptions) {
         rounded="xl"
         density="comfortable"
         variant="outlined"
-        color="accent"
+        color="primary"
       >
         <v-icon icon="mdi-eye" size="16" start />
         Hide

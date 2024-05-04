@@ -175,6 +175,7 @@ function handleInfiniteScrollLoad(scrollObj: any) {
                   }`"
                   :class="isHeaderHovering ? 'bg-surface' : ''"
                   @click="handleSortingChange(header)"
+                  class="text-caption"
                 >
                   <!-- Header Content -->
                   <FlexRender

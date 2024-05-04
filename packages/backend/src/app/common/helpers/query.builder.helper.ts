@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Logger } from "@nestjs/common";
 import {
     Not,
@@ -10,6 +11,7 @@ import {
     Like,
 } from "typeorm";
 import { FieldFilter, FilterGroup } from "../filters/types";
+import dayjs from "dayjs";
 
 @Injectable()
 export class QueryBuilderHelper {
@@ -21,32 +23,49 @@ export class QueryBuilderHelper {
         }, value);
     }
 
+    static processValue(value: any) {
+        if (Array.isArray(value)) {
+            return value.map((value) => {
+                if (typeof value === "string") {
+                    return this.processValue(value);
+                }
+            });
+        } else if (typeof value === "object") {
+            return Object.keys((key) => this.processValue(value[key]));
+        } else if (typeof value === "string") {
+            return value
+                .replace(":startOfDay", dayjs().startOf("day").toISOString())
+                .replace(":endOfDay", dayjs().endOf("day").toISOString());
+        }
+    }
+
     static fieldFilterToQuery(fieldFilter: FieldFilter) {
         const { field, operator, value } = fieldFilter;
         const pathArray = field.split(".");
+        const processedValue = this.processValue(value);
 
         let mappedValue;
         switch (operator) {
             case "eq":
-                mappedValue = value;
+                mappedValue = processedValue;
                 break;
             case "ne":
-                mappedValue = Not(value);
+                mappedValue = Not(processedValue);
                 break;
             case "gt":
-                mappedValue = MoreThan(value);
+                mappedValue = MoreThan(processedValue);
                 break;
             case "lt":
-                mappedValue = LessThan(value);
+                mappedValue = LessThan(processedValue);
                 break;
             case "like":
-                mappedValue = Like(`%${value}%`);
+                mappedValue = Like(`%${processedValue}%`);
                 break;
             case "between":
-                mappedValue = Between(value[0], value[1]);
+                mappedValue = Between(processedValue[0], processedValue[1]);
                 break;
             case "in":
-                mappedValue = In(value);
+                mappedValue = In(processedValue);
                 break;
             case "isNull":
                 mappedValue = IsNull();
