@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "license": "MIT",
     "scripts": {
-        "dev": "concurrently \"nx serve backend\" \"nx serve frontend\" -n \"API,WEB\" -c \"bgBlue.bold,bgRed.bold\"",
+        "dev": "nx run-many -t serve -p frontend backend",
         "lint": "nx lint backend && nx lint frontend",
         "format": "nx format backend && nx format frontend",
         "build": "nx build backend && nx build frontend"
