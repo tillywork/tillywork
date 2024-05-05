@@ -62,3 +62,9 @@ function clearHoverFreeze() {
     </v-list-item>
   </v-hover>
 </template>
+
+<style lang="scss">
+.v-list-item--slim .v-list-item__prepend > .v-icon ~ .v-list-item__spacer {
+  width: 10px;
+}
+</style>
