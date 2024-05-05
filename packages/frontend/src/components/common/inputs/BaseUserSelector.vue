@@ -52,7 +52,7 @@ const isUserSelected = (user: User) => {
                 density="comfortable"
                 size="small"
                 icon="mdi-account"
-                color="accent"
+                color="info"
               >
               </v-btn>
             </template>
@@ -87,8 +87,8 @@ const isUserSelected = (user: User) => {
         </template>
       </div>
     </template>
-    <v-card width="250" color="surface">
-      <v-list nav density="compact">
+    <v-card width="250" color="menu">
+      <v-list nav density="compact" class="bg-menu">
         <template v-for="user in users" :key="user.email">
           <v-list-item
             @click="toggleUserSelection(user)"

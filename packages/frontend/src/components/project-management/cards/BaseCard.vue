@@ -119,7 +119,7 @@ async function updateCard(card: Card) {
 </script>
 
 <template>
-  <v-card v-if="cardCopy">
+  <v-card v-if="cardCopy" color="surface">
     <v-progress-linear
       indeterminate
       color="primary"

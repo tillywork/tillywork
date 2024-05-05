@@ -57,6 +57,11 @@ const dateToText = computed(() => {
         {{ dateToText }}
       </base-card-property-value-btn>
     </template>
-    <v-date-picker v-model="dateValue" show-adjacent-months color="primary" />
+    <v-date-picker
+      v-model="dateValue"
+      show-adjacent-months
+      color="primary"
+      bg-color="menu"
+    />
   </v-menu>
 </template>

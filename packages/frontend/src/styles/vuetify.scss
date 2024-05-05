@@ -5,3 +5,12 @@
 .v-field--focused .v-field__outline {
   --v-field-border-width: 1px !important;
 }
+
+.v-menu {
+  .v-card {
+    border: #292b30 solid thin;
+  }
+  .v-date-picker {
+    border: #292b30 solid thin;
+  }
+}

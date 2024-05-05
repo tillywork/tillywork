@@ -25,7 +25,6 @@ import { useListGroupsService } from '@/composables/services/useListGroupsServic
 import { ListGroupOptions } from '../lists/types';
 import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
 import { ViewTypes, type View } from './types';
-import stringUtils from '@/utils/string';
 
 const props = defineProps<{
   group: ListGroup;
@@ -190,13 +189,13 @@ async function handleInfiniteScroll({ done }: any) {
 
 <template>
   <div v-if="group" class="group">
-    <v-banner sticky lines="one" border="none" bg-color="transparent">
+    <v-banner sticky lines="one" border="none" bg-color="accent">
       <v-btn
         variant="text"
         density="comfortable"
         size="small"
         :icon="isExpanded ? 'mdi-chevron-down' : 'mdi-chevron-right'"
-        :color="isExpanded ? 'primary' : 'default'"
+        :color="isExpanded ? 'info' : 'default'"
         class="me-2"
         @click="toggleGroupExpansion"
       />
@@ -233,7 +232,7 @@ async function handleInfiniteScroll({ done }: any) {
         density="comfortable"
         size="small"
         icon="mdi-plus"
-        color="accent"
+        color="info"
         class="ms-2"
       />
     </v-banner>
@@ -274,6 +273,8 @@ async function handleInfiniteScroll({ done }: any) {
           <template #title="{ row }">
             <list-stage-selector
               v-model="row.original.cardLists[0].listStage"
+              theme="icon"
+              rounded="circle"
               :list-stages="listStagesQuery.data.value ?? []"
               @update:modelValue="
                 (modelValue) =>

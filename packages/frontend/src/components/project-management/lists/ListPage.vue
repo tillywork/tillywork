@@ -38,10 +38,9 @@ watch(listId, () => refetchList());
         <div class="d-flex align-center mb-3">
           <base-avatar
             :text="list.name"
-            color="secondary"
+            color="rgb(116, 140, 7)"
             size="22"
-            rounded="md"
-            class="border"
+            rounded="sm"
           />
           <p class="text-h5 ms-2 mt-1">{{ list.name }}</p>
         </div>

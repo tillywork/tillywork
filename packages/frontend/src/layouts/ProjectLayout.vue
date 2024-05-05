@@ -35,7 +35,12 @@ if (isAuthenticated()) {
 
 <template>
   <v-app>
-    <v-navigation-drawer app v-model="navigationDrawer">
+    <v-navigation-drawer
+      app
+      v-model="navigationDrawer"
+      floating
+      color="background"
+    >
       <navigation-workspace-selector />
 
       <!-- Sidebar content -->
@@ -80,7 +85,14 @@ if (isAuthenticated()) {
         </v-list>
       </template>
     </v-navigation-drawer>
-    <v-app-bar app class="pr-4 border-b" height="56" density="comfortable">
+    <v-app-bar
+      app
+      class="pr-4"
+      height="56"
+      density="comfortable"
+      color="background"
+      v-if="false"
+    >
       <!-- <v-app-bar-nav-icon
         density="comfortable"
         @click.stop="navigationDrawer = !navigationDrawer"
@@ -92,7 +104,7 @@ if (isAuthenticated()) {
       <theme-switch />
     </v-app-bar>
 
-    <v-main>
+    <v-main class="bg-surface">
       <router-view />
 
       <snackbar-wrapper />

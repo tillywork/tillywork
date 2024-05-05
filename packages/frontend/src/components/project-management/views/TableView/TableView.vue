@@ -351,7 +351,6 @@ $table-cell-padding-y: 0;
 
 .table-container {
   position: relative;
-  padding-top: 3px;
 
   table {
     width: 100%;
