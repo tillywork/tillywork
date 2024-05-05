@@ -195,7 +195,7 @@ async function handleInfiniteScroll({ done }: any) {
         density="comfortable"
         size="small"
         :icon="isExpanded ? 'mdi-chevron-down' : 'mdi-chevron-right'"
-        :color="isExpanded ? 'primary' : 'default'"
+        :color="isExpanded ? 'info' : 'default'"
         class="me-2"
         @click="toggleGroupExpansion"
       />
