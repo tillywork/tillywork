@@ -35,12 +35,7 @@ if (isAuthenticated()) {
 
 <template>
   <v-app>
-    <v-navigation-drawer
-      app
-      v-model="navigationDrawer"
-      floating
-      color="background"
-    >
+    <v-navigation-drawer app v-model="navigationDrawer" color="background">
       <navigation-workspace-selector />
 
       <!-- Sidebar content -->
