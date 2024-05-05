@@ -70,12 +70,12 @@ function openUserSelector() {
           hide-details
           single-line
           variant="outlined"
-          color="accent"
+          color="info"
         />
       </template>
       <template v-else-if="prop.type === PropTypes.TEXT_AREA">
         <div class="w-400px">
-          <v-textarea v-model="value" color="accent" label="Description" />
+          <v-textarea v-model="value" color="info" label="Description" />
         </div>
       </template>
       <template v-else-if="prop.type === PropTypes.USER">

@@ -160,7 +160,7 @@ function handleGroupBySelection(option: ListGroupOptions) {
         size="small"
         variant="tonal"
         rounded="md"
-        color="accent"
+        color="accinfoent"
       >
         <v-icon icon="mdi-plus" />
         Add task

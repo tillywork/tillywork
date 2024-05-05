@@ -54,8 +54,8 @@ function clearGroupBy() {
         </template>
       </base-view-chip>
     </template>
-    <v-card color="surface">
-      <v-list nav density="compact" :lines="false">
+    <v-card color="menu">
+      <v-list class="bg-menu" nav density="compact" :lines="false">
         <template v-for="option in groupByOptions" :key="option.value">
           <v-list-item
             @click="handleGroupBySelection(option)"
