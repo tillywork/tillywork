@@ -7,7 +7,6 @@ import {
     Delete,
     Put,
     UseGuards,
-    Query,
     Logger,
 } from "@nestjs/common";
 import { CardFindAllResult, CardsService } from "./cards.service";
@@ -31,10 +30,10 @@ export class CardsController {
         private readonly cardListsService: CardListsService
     ) {}
 
-    @Get()
+    @Post("search")
     findAll(
-        @Query()
-        query: {
+        @Body()
+        body: {
             listId: number;
             page?: number;
             limit?: number;
@@ -43,14 +42,7 @@ export class CardsController {
             filters?: QueryFilter;
         }
     ): Promise<CardFindAllResult> {
-        const { listId, page, limit, sortBy, sortOrder } = query;
-
-        let filters: QueryFilter;
-        try {
-            filters = JSON.parse(query.filters as string);
-        } catch (e) {
-            filters = undefined;
-        }
+        const { listId, page, limit, sortBy, sortOrder, filters } = body;
 
         return this.cardsService.findAll({
             listId,

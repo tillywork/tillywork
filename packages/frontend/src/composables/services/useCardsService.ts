@@ -31,15 +31,15 @@ export const useCardsService = () => {
   }): Promise<CardsData> {
     const { sendRequest } = useHttp();
 
-    return sendRequest('/cards', {
-      method: 'GET',
-      params: {
+    return sendRequest('/cards/search', {
+      method: 'POST',
+      data: {
         listId,
         page,
         limit,
         sortBy: sortBy[0]?.key,
         sortOrder: sortBy[0]?.order,
-        filters: JSON.stringify(filters),
+        filters,
       },
     });
   }
