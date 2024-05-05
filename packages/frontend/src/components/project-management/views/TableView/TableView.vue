@@ -249,7 +249,7 @@ function handleInfiniteScrollLoad(scrollObj: any) {
               <tr
                 v-bind="rowProps"
                 @click="handleRowClick(row)"
-                :class="isRowHovering ? 'bg-surface cursor-pointer' : ''"
+                :class="isRowHovering ? 'bg-accent cursor-pointer' : ''"
               >
                 <td v-for="cell in row.getVisibleCells()" :key="cell.id">
                   <!-- Check for named slot that matches columnId, and use template to define slot content -->

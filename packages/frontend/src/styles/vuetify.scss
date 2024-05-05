@@ -8,9 +8,9 @@
 
 .v-menu {
   .v-card {
-    border: #292b30 solid thin;
+    border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
   }
   .v-date-picker {
-    border: #292b30 solid thin;
+    border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
   }
 }
