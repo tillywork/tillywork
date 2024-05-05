@@ -6,6 +6,7 @@ import { computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import ListViewTabs from './ListViewTabs.vue';
 import BaseView from '../views/BaseView.vue';
+import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
 
 const route = useRoute();
 const listId = computed(() => +route.params.listId);
@@ -33,8 +34,17 @@ watch(listId, () => refetchList());
 <template>
   <div class="list-container position-relative" v-if="list">
     <div class="pa-4 pb-0">
-      <div class="px-9 pt-6">
-        <p class="text-h5 mb-3">{{ list.name }}</p>
+      <div class="px-9">
+        <div class="d-flex align-center mb-3">
+          <base-avatar
+            :text="list.name"
+            color="secondary"
+            size="22"
+            rounded="md"
+            class="border"
+          />
+          <p class="text-h5 ms-2 mt-1">{{ list.name }}</p>
+        </div>
         <list-view-tabs
           :views="views"
           :key="route.fullPath"

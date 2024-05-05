@@ -6,6 +6,7 @@ import { useWorkspaceStore } from '@/stores/workspace';
 import { storeToRefs } from 'pinia';
 import CreateWorkspaceDialogAndButton from './CreateWorkspaceDialogAndButton.vue';
 import { useQuery } from '@tanstack/vue-query';
+import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
 
 const workspacesService = useWorkspacesService();
 const selectWorkspaceMenu = ref(false);
@@ -40,16 +41,25 @@ async function getWorkspaces() {
 </script>
 
 <template>
-  <div class="d-flex justify-center align-center my-2 px-2">
+  <div class="d-flex justify-start align-center ma-2 mt-4 px-2">
     <v-card
       density="compact"
       link
       id="workspace-menu-activator"
-      class="flex-1-0 me-2"
+      class="me-2 user-select-none"
+      rounded="md"
     >
-      <v-card-title class="d-flex align-center text-body-2 font-weight-bold">
-        <span class="text-truncate mr-2">{{ selectedWorkspace?.name }}</span>
-        <v-spacer />
+      <v-card-title
+        class="d-flex align-center text-body-2 font-weight-medium pa-2px ps-1"
+      >
+        <base-avatar
+          :text="selectedWorkspace?.name"
+          color="secondary"
+          size="22"
+          rounded="md"
+          class="text-caption border"
+        />
+        <span class="text-truncate mx-2">{{ selectedWorkspace?.name }}</span>
         <v-icon>{{
           selectWorkspaceMenu ? 'mdi-chevron-up' : 'mdi-chevron-down'
         }}</v-icon>
@@ -84,7 +94,7 @@ async function getWorkspaces() {
     :close-on-content-click="false"
     activator="#workspace-menu-activator"
   >
-    <v-card class="pt-3 mt-2" width="300px" density="compact">
+    <v-card class="pt-3 mt-2 border-thin" width="300px" density="compact">
       <div class="px-5 text-truncate mb-2">
         <v-icon size="small">mdi-sitemap</v-icon>
         <span class="ml-1"> Your workspaces </span>
@@ -96,7 +106,16 @@ async function getWorkspaces() {
           @click="handleSelectWorkspace(workspace)"
           :active="selectedWorkspace?.id === workspace.id"
         >
-          <v-list-item-title>{{ workspace.name }}</v-list-item-title>
+          <v-list-item-title class="d-flex align-center user-select-none">
+            <base-avatar
+              :text="workspace.name"
+              color="secondary"
+              size="22"
+              rounded="md"
+              class="text-caption me-2 border"
+            />
+            <span>{{ workspace.name }}</span>
+          </v-list-item-title>
         </v-list-item>
       </v-list>
       <v-divider class="mt-2" />

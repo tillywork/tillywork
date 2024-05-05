@@ -7,26 +7,29 @@ const dateValue = defineModel<string | Date>();
 const props = defineProps<{
   noDateMessage?: string;
   closeOnContentClick?: boolean;
+  class?: string;
 }>();
 const dateDialog = ref(false);
 
 const textColorClass = computed(() => {
-    if (!dateValue.value) {
-        return 'text-default';
-    }
+  if (!dateValue.value) {
+    return 'text-default';
+  }
 
-    const date = dayjs(dateValue.value);
+  const date = dayjs(dateValue.value);
 
-    if (date < dayjs().startOf('day')) {
-        return 'text-error';
-    }
-    else if (date > dayjs().endOf('day')) {
-        return 'text-default';
-    }
-    else {
-        return 'text-info';
-    }
-})
+  if (date < dayjs().startOf('day')) {
+    return 'text-error';
+  } else if (date > dayjs().endOf('day')) {
+    return 'text-default';
+  } else {
+    return 'text-info';
+  }
+});
+
+const textClass = computed(() => {
+  return textColorClass.value + ' ' + props.class;
+});
 </script>
 
 <template>
@@ -35,7 +38,7 @@ const textColorClass = computed(() => {
     :close-on-content-click="closeOnContentClick ?? false"
   >
     <template #activator="{ props }">
-      <base-card-property-value-btn v-bind="props" class="text-caption" :class="textColorClass">
+      <base-card-property-value-btn v-bind="props" :class="textClass">
         <template v-if="dateValue">
           {{ dayjs(dateValue).format('MMM D') ?? 'Empty' }}
         </template>

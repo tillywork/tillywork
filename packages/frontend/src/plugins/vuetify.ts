@@ -11,7 +11,7 @@ const themes = {
     dark: false,
     colors: {
       primary: '#5E35B1',
-      secondary: '#FFCA28',
+      secondary: '#bcffcd',
       accent: '#03A9F4',
       background: '#FFFFFF',
       surface: '#F5F5F5',
@@ -22,7 +22,7 @@ const themes = {
     dark: true,
     colors: {
       primary: '#5E35B1',
-      secondary: '#FFCA28',
+      secondary: '#88fa8d',
       accent: '#29B6F6',
       background: '#1E1F21',
       surface: '#363639',

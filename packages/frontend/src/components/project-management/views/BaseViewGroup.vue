@@ -23,8 +23,9 @@ import { useListStagesService } from '@/composables/services/useListStagesServic
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import { ListGroupOptions } from '../lists/types';
-import BaseUserPhoto from '@/components/common/users/BaseUserPhoto.vue';
+import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
 import { ViewTypes, type View } from './types';
+import stringUtils from '@/utils/string';
 
 const props = defineProps<{
   group: ListGroup;
@@ -84,19 +85,16 @@ const { mutate: updateCardListStage } = useMutation({
       cardListId,
       listStageId,
     }),
-  onSuccess: () =>
-    queryClient.invalidateQueries({ queryKey: ['cards'] }),
+  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards'] }),
 });
 const createCardMutation = useMutation({
   mutationFn: (createCardDto: CreateCardDto) =>
     cardsService.createCard(createCardDto),
-  onSuccess: () =>
-    queryClient.invalidateQueries({ queryKey: ['cards'] }),
+  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards'] }),
 });
 const updateCardMutation = useMutation({
   mutationFn: (updateCardDto: Card) => cardsService.updateCard(updateCardDto),
-  onSuccess: () =>
-    queryClient.invalidateQueries({ queryKey: ['cards'] }),
+  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards'] }),
 });
 const usersQuery = useQuery({
   queryKey: ['users'],
@@ -204,7 +202,12 @@ async function handleInfiniteScroll({ done }: any) {
       />
       <div>
         <template v-if="group.type === ListGroupOptions.ASSIGNEES">
-          <base-user-photo :photo="group.icon" border size="20" />
+          <base-avatar
+            :photo="group.icon"
+            :text="group.name"
+            size="20"
+            class="text-caption"
+          />
         </template>
         <template v-else>
           <v-icon :color="group.color" size="20">{{
@@ -246,43 +249,8 @@ async function handleInfiniteScroll({ done }: any) {
           @click:row="handleRowClick"
           @submit="handleCardCreation"
           @load="handleInfiniteScroll"
+          no-headers
         >
-          <template #listStage="{ row }">
-            <list-stage-selector
-              v-model="row.original.cardLists[0].listStage"
-              :list-stages="listStagesQuery.data.value ?? []"
-              @update:modelValue="
-                (modelValue) =>
-                  updateCardListStage({
-                    cardListId: row.original.cardLists[0].id,
-                    listStageId: modelValue.id,
-                  })
-              "
-            />
-          </template>
-          <template #users="{ row }">
-            <base-user-selector
-              :selected="row.original.users"
-              :users="usersQuery.data.value?.users ?? []"
-              @update:select="(users) => handleUserSelection(users, row.original)"
-            />
-          </template>
-          <template #dueAt="{ row }">
-            <base-date-picker
-              :model-value="
-                row.original.dueAt ? new Date(row.original.dueAt) : undefined
-              "
-              no-date-message="No Due Date"
-              :close-on-content-click="true"
-              @update:model-value="
-              (newValue) =>
-                handleChangeDueDate({
-                  card: row.original,
-                  newDueDate: newValue as Date,
-                })
-            "
-            />
-          </template>
           <template #actions="{ row }">
             <div class="text-right">
               <v-menu>
@@ -301,6 +269,47 @@ async function handleInfiniteScroll({ done }: any) {
                   <v-card-title>Hello</v-card-title>
                 </v-card>
               </v-menu>
+            </div>
+          </template>
+          <template #title="{ row }">
+            <list-stage-selector
+              v-model="row.original.cardLists[0].listStage"
+              :list-stages="listStagesQuery.data.value ?? []"
+              @update:modelValue="
+                (modelValue) =>
+                  updateCardListStage({
+                    cardListId: row.original.cardLists[0].id,
+                    listStageId: modelValue.id,
+                  })
+              "
+            />
+            <span class="ms-2">{{ row.original.title }}</span>
+          </template>
+          <template #info="{ row }">
+            <div class="d-flex align-center justify-end flex-wrap pe-6">
+              <base-date-picker
+                :model-value="
+                  row.original.dueAt ? new Date(row.original.dueAt) : undefined
+                "
+                class="text-caption"
+                no-date-message="Set due date"
+                :close-on-content-click="true"
+                @update:model-value="
+              (newValue) =>
+                handleChangeDueDate({
+                  card: row.original,
+                  newDueDate: newValue as Date,
+                })
+            "
+              />
+              <base-user-selector
+                :selected="row.original.users"
+                :users="usersQuery.data.value?.users ?? []"
+                activator-hover-text="Assign users"
+                @update:select="
+                  (users) => handleUserSelection(users, row.original)
+                "
+              />
             </div>
           </template>
         </table-view>

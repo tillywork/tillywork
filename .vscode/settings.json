@@ -1,10 +1,7 @@
 {
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "[javascript,typescript]": {
+  "[javascript,typescript,vue]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "editor.formatOnSave": false,
-  "[vue]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  "editor.formatOnSave": true
 }

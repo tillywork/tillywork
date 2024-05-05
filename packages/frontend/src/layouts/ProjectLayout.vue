@@ -12,53 +12,39 @@ const navigationDrawer = ref(true);
 const { logout, isAuthenticated } = useAuthStore();
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
-  {
-    icon: 'mdi-home',
-    title: 'Home',
-    route: { name: 'Home' },
-    activeOnExactMatch: true,
-  },
+  //   {
+  //     icon: 'mdi-home',
+  //     title: 'Home',
+  //     route: { name: 'Home' },
+  //     activeOnExactMatch: true,
+  //   },
 ]);
 
 if (isAuthenticated()) {
   // Initialize with default items
-  navigationMenuItems.value = [
-    {
-      icon: 'mdi-home',
-      title: 'Home',
-      route: { name: 'PMHome' },
-      activeOnExactMatch: true,
-    },
-  ];
+  //   navigationMenuItems.value = [
+  //     {
+  //       icon: 'mdi-home',
+  //       title: 'Home',
+  //       route: { name: 'PMHome' },
+  //       activeOnExactMatch: true,
+  //     },
+  //   ];
 }
 </script>
 
 <template>
   <v-app>
-    <v-app-bar
-      app
-      class="pr-4 border-b"
-      height="56"
-      prominent
-      density="comfortable"
-    >
-      <v-app-bar-nav-icon
-        density="comfortable"
-        @click.stop="navigationDrawer = !navigationDrawer"
-      ></v-app-bar-nav-icon>
-
-      <v-app-bar-title>tillywork</v-app-bar-title>
-      <toolbar-search />
-      <v-spacer />
-      <theme-switch />
-    </v-app-bar>
-
-    <v-navigation-drawer v-model="navigationDrawer">
-      <navigation-workspace-selector class="mb-2" />
-      <v-divider></v-divider>
+    <v-navigation-drawer app v-model="navigationDrawer">
+      <navigation-workspace-selector />
 
       <!-- Sidebar content -->
-      <v-list density="compact" nav>
+      <v-list
+        density="compact"
+        nav
+        :lines="false"
+        v-if="navigationMenuItems.length > 0"
+      >
         <v-list-item
           v-for="navigationItem in navigationMenuItems"
           :key="navigationItem.title"
@@ -94,6 +80,17 @@ if (isAuthenticated()) {
         </v-list>
       </template>
     </v-navigation-drawer>
+    <v-app-bar app class="pr-4 border-b" height="56" density="comfortable">
+      <!-- <v-app-bar-nav-icon
+        density="comfortable"
+        @click.stop="navigationDrawer = !navigationDrawer"
+      ></v-app-bar-nav-icon> -->
+
+      <v-app-bar-title></v-app-bar-title>
+      <toolbar-search />
+      <v-spacer />
+      <theme-switch />
+    </v-app-bar>
 
     <v-main>
       <router-view />
