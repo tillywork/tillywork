@@ -25,6 +25,7 @@ const props = defineProps<{
   filters?: QueryFilter;
   columnPinning?: ColumnPinningState;
   loading?: boolean;
+  noHeaders?: boolean;
 }>();
 
 const options = defineModel<PaginationParams>('options');
@@ -80,7 +81,6 @@ const createCardDto = ref<Partial<CreateCardDto>>({
   title: '',
 });
 const isCreating = ref(false);
-const tableElement = ref<HTMLTableElement>();
 
 watch(
   options,
@@ -159,7 +159,7 @@ function handleInfiniteScrollLoad(scrollObj: any) {
   <div class="table-container" :class="themeClass">
     <v-infinite-scroll @load="handleInfiniteScrollLoad" max-height="300">
       <template #empty></template>
-      <table ref="tableElement">
+      <table>
         <thead>
           <tr
             v-for="headerGroup in table.getHeaderGroups()"
@@ -168,56 +168,58 @@ function handleInfiniteScrollLoad(scrollObj: any) {
             <template v-for="header in headerGroup.headers" :key="header.id">
               <v-hover #="{ isHovering: isHeaderHovering, props: headerProps }">
                 <th
-                  v-bind="headerProps"
+                  v-bind="!noHeaders ? headerProps : undefined"
                   :colSpan="header.colSpan"
                   :style="`width: ${header.getSize()}px; ${
                     isHeaderHovering ? 'cursor: pointer;' : ''
-                  }`"
+                  }; ${noHeaders ? 'height: 0px !important;' : ''}`"
                   :class="isHeaderHovering ? 'bg-surface' : ''"
                   @click="handleSortingChange(header)"
                   class="text-caption"
                 >
                   <!-- Header Content -->
-                  <FlexRender
-                    v-if="!header.isPlaceholder"
-                    :render="header.column.columnDef.header"
-                    :props="header.getContext()"
-                  />
-                  <!-- Sorting Indicator -->
-                  <template
-                    v-if="!header.isPlaceholder && header.column.getCanSort()"
-                  >
-                    <v-icon
-                      v-show="isHeaderHovering || header.column.getIsSorted()"
-                      class="ms-1"
-                      :color="
-                        header.column.getIsSorted() === false
-                          ? 'grey'
-                          : undefined
-                      "
+                  <template v-if="!noHeaders">
+                    <FlexRender
+                      v-if="!header.isPlaceholder"
+                      :render="header.column.columnDef.header"
+                      :props="header.getContext()"
+                    />
+                    <!-- Sorting Indicator -->
+                    <template
+                      v-if="!header.isPlaceholder && header.column.getCanSort()"
                     >
-                      {{ getColumnSortIcon(header.column) }}
-                    </v-icon>
-                  </template>
-                  <!-- Column Resizer -->
-                  <template v-if="header.column.getCanResize()">
-                    <v-hover
-                      #="{ isHovering: isResizeHovering, props: resizeProps }"
-                    >
-                      <div v-bind="resizeProps" class="column-resizer">
-                        <div
-                          @mousedown="header.getResizeHandler()?.($event)"
-                          @touchstart="header.getResizeHandler()?.($event)"
-                          v-show="
-                            isResizeHovering || header.column.getIsResizing()
-                          "
-                          @click.stop
-                        >
+                      <v-icon
+                        v-show="isHeaderHovering || header.column.getIsSorted()"
+                        class="ms-1"
+                        :color="
+                          header.column.getIsSorted() === false
+                            ? 'grey'
+                            : undefined
+                        "
+                      >
+                        {{ getColumnSortIcon(header.column) }}
+                      </v-icon>
+                    </template>
+                    <!-- Column Resizer -->
+                    <template v-if="header.column.getCanResize()">
+                      <v-hover
+                        #="{ isHovering: isResizeHovering, props: resizeProps }"
+                      >
+                        <div v-bind="resizeProps" class="column-resizer">
+                          <div
+                            @mousedown="header.getResizeHandler()?.($event)"
+                            @touchstart="header.getResizeHandler()?.($event)"
+                            v-show="
+                              isResizeHovering || header.column.getIsResizing()
+                            "
+                            @click.stop
+                          >
+                            &nbsp;
+                          </div>
                           &nbsp;
                         </div>
-                        &nbsp;
-                      </div>
-                    </v-hover>
+                      </v-hover>
+                    </template>
                   </template>
                 </th>
               </v-hover>
@@ -349,19 +351,19 @@ $table-cell-padding-y: 0;
 
 .table-container {
   position: relative;
+  padding-top: 3px;
 
   table {
-    min-width: max-content;
+    width: 100%;
     border-spacing: 0;
     line-height: 1.5;
     color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));
     font-size: 0.875rem;
     table-layout: fixed;
-    border-collapse: collapse;
     position: relative;
 
-    > thead > tr:not(.loading) > th:not(:first-child),
-    > tbody > tr > td:not(:first-child),
+    > thead > tr:not(.loading) > th,
+    > tbody > tr > td,
     > tbody > tr:not(.loading) > th {
       border-bottom: thin solid rgba($table-border-color, $table-border-opacity);
     }
@@ -424,8 +426,12 @@ $v-field-input-font-size: 14px;
 
 .table-container {
   .v-infinite-scroll {
-    display: inline-block;
-    min-width: max-content;
+    display: block;
+    // min-width: max-content;
+
+    .v-infinite-scroll__side {
+      padding: 0;
+    }
   }
 }
 

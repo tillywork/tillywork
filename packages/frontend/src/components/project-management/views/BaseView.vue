@@ -23,7 +23,11 @@ const viewsService = useViewsService();
 const listGroupsService = useListGroupsService();
 
 const isPageLoading = computed(() => {
-  return getViewQuery.isFetching.value || isGroupsFetching.value || updateViewMutation.isPending.value;
+  return (
+    getViewQuery.isFetching.value ||
+    isGroupsFetching.value ||
+    updateViewMutation.isPending.value
+  );
 });
 const openedCard = ref<Card>();
 const cardDialog = ref(false);
@@ -33,27 +37,29 @@ const columns: ColumnDef<Card, any>[] = [
     id: 'actions',
     enableResizing: false,
     enableSorting: false,
-    size: 50,
+    size: 40,
+    maxSize: 50,
   },
   {
     id: 'title',
     accessorKey: 'title',
     header: 'Title',
-    size: 400,
-    minSize: 100,
+    size: 680,
   },
+  //   {
+  //     id: 'listStage',
+  //     size: 150,
+  //   },
+  //   {
+  //     id: 'users',
+  //   },
+  //   {
+  //     id: 'dueAt',
+  //     minSize: 100,
+  //   },
   {
-    id: 'listStage',
-    header: 'Stage',
-  },
-  {
-    id: 'users',
-    header: 'Assignees',
-  },
-  {
-    id: 'dueAt',
-    header: 'Due Date',
-    minSize: 100,
+    id: 'info',
+    size: 200,
   },
 ];
 
@@ -77,9 +83,9 @@ const {
 
 const updateViewMutation = useMutation({
   mutationFn: viewsService.updateView,
-  onSuccess: () =>  {
-    queryClient.invalidateQueries({ queryKey: ['view', viewId.value] })
-  }
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['view', viewId.value] });
+  },
 });
 
 const paginationOptions = ref(DEFAULT_PAGINATION_OPTIONS);
@@ -140,87 +146,89 @@ function handleGroupBySelection(option: ListGroupOptions) {
 </script>
 
 <template>
-  <div class="d-flex ga-2 py-4 px-12" v-if="getViewQuery.data.value">
-    <v-progress-linear
-      indeterminate
-      color="primary"
-      :active="isPageLoading"
-      absolute
-      location="top"
-    />
-    <v-btn
-      class="text-capitalize"
-      size="small"
-      variant="tonal"
-      rounded="md"
-      color="accent"
-    >
-      <v-icon icon="mdi-plus" />
-      Add task
-    </v-btn>
-    <div class="mx-1">
-      <v-divider vertical />
-    </div>
-    <div class="d-flex align-center ga-2">
-      <base-view-chip-group-by
-        v-model="getViewQuery.data.value.groupBy"
-        @update:model-value="handleGroupBySelection"
+  <div class="view-container" ref="viewContainer">
+    <div class="d-flex ga-2 py-4 px-12" v-if="getViewQuery.data.value">
+      <v-progress-linear
+        indeterminate
+        color="primary"
+        :active="isPageLoading"
+        absolute
+        location="top"
       />
-      <v-chip
-        link
-        rounded="xl"
-        density="comfortable"
-        variant="outlined"
-        color="primary"
+      <v-btn
+        class="text-capitalize"
+        size="small"
+        variant="tonal"
+        rounded="md"
+        color="accent"
       >
-        <v-icon icon="mdi-filter" size="16" start />
-        Filters
-      </v-chip>
-      <v-chip
-        link
-        rounded="xl"
-        density="comfortable"
-        variant="outlined"
-        color="primary"
-      >
-        <v-icon icon="mdi-swap-vertical" size="16" start />
-        Sort
-      </v-chip>
-      <v-chip
-        link
-        rounded="xl"
-        density="comfortable"
-        variant="outlined"
-        color="primary"
-      >
-        <v-icon icon="mdi-eye" size="16" start />
-        Hide
-      </v-chip>
+        <v-icon icon="mdi-plus" />
+        Add task
+      </v-btn>
+      <div class="mx-1">
+        <v-divider vertical />
+      </div>
+      <div class="d-flex align-center ga-2">
+        <base-view-chip-group-by
+          v-model="getViewQuery.data.value.groupBy"
+          @update:model-value="handleGroupBySelection"
+        />
+        <v-chip
+          link
+          rounded="xl"
+          density="comfortable"
+          variant="outlined"
+          color="primary"
+        >
+          <v-icon icon="mdi-filter" size="16" start />
+          Filters
+        </v-chip>
+        <v-chip
+          link
+          rounded="xl"
+          density="comfortable"
+          variant="outlined"
+          color="primary"
+        >
+          <v-icon icon="mdi-swap-vertical" size="16" start />
+          Sort
+        </v-chip>
+        <v-chip
+          link
+          rounded="xl"
+          density="comfortable"
+          variant="outlined"
+          color="primary"
+        >
+          <v-icon icon="mdi-eye" size="16" start />
+          Hide
+        </v-chip>
+      </div>
     </div>
-  </div>
 
-  <div class="groups-container" v-if="getViewQuery.data.value">
-    <template v-for="(group, index) in groups" :key="group.name">
-      <base-view-group
-        v-if="groups"
-        :view="getViewQuery.data.value"
-        :group="groups[index]"
-        v-model:options="paginationOptions"
-        :columns="columns"
-        @click:row="handleRowClick"
-        v-model:row:hovered="rowHovered"
-        class="mb-3"
+    <div class="groups-container" v-if="getViewQuery.data.value">
+      <template v-for="(group, index) in groups" :key="group.name">
+        <base-view-group
+          v-if="groups"
+          :view="getViewQuery.data.value"
+          :group="groups[index]"
+          v-model:options="paginationOptions"
+          :columns="columns"
+          @click:row="handleRowClick"
+          v-model:row:hovered="rowHovered"
+          class="mb-3"
+        />
+      </template>
+    </div>
+
+    <v-dialog v-model="cardDialog" width="800">
+      <base-card
+        v-model="openedCard"
+        show-close-button
+        @click:close="closeCardDialog"
       />
-    </template>
+    </v-dialog>
   </div>
-
-  <v-dialog v-model="cardDialog" width="800">
-    <base-card
-      v-model="openedCard"
-      show-close-button
-      @click:close="closeCardDialog"
-    />
-  </v-dialog>
 </template>
 
 <style lang="scss" scoped>
