@@ -2,6 +2,9 @@
 import { computed, ref } from 'vue';
 import dayjs from 'dayjs';
 import BaseCardPropertyValueBtn from '@/components/project-management/cards/BaseCardPropertyValueBtn.vue';
+import isToday from 'dayjs/plugin/isToday';
+
+dayjs.extend(isToday);
 
 const dateValue = defineModel<string | Date>();
 const props = defineProps<{
@@ -30,6 +33,18 @@ const textColorClass = computed(() => {
 const textClass = computed(() => {
   return textColorClass.value + ' ' + props.class;
 });
+
+const dateToText = computed(() => {
+  if (!dateValue.value) {
+    return props.noDateMessage ?? 'Empty';
+  }
+
+  if (dayjs(dateValue.value).isToday()) {
+    return 'Today';
+  } else {
+    return dayjs(dateValue.value).format('MMM D');
+  }
+});
 </script>
 
 <template>
@@ -39,12 +54,7 @@ const textClass = computed(() => {
   >
     <template #activator="{ props }">
       <base-card-property-value-btn v-bind="props" :class="textClass">
-        <template v-if="dateValue">
-          {{ dayjs(dateValue).format('MMM D') ?? 'Empty' }}
-        </template>
-        <template v-else>
-          {{ noDateMessage ?? 'No Date Selected' }}
-        </template>
+        {{ dateToText }}
       </base-card-property-value-btn>
     </template>
     <v-date-picker v-model="dateValue" show-adjacent-months color="primary" />
