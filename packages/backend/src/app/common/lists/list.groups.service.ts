@@ -250,7 +250,7 @@ export class ListGroupsService {
                             {
                                 field: "dueAt",
                                 operator: "lt",
-                                value: ':startOfDay',
+                                value: ":startOfDay",
                             },
                         ],
                     },
@@ -267,16 +267,13 @@ export class ListGroupsService {
                             {
                                 field: "dueAt",
                                 operator: "between",
-                                value: [
-                                    ':startOfDay',
-                                    ':endOfDay',
-                                ],
+                                value: [":startOfDay", ":endOfDay"],
                             },
                         ],
                     },
                 },
                 icon: "mdi-clock-time-twelve",
-                color: "accent",
+                color: "info",
             },
             {
                 type: ListGroupOptions.DUE_DATE,
@@ -287,7 +284,7 @@ export class ListGroupsService {
                             {
                                 field: "dueAt",
                                 operator: "gt",
-                                value: ':endOfDay',
+                                value: ":endOfDay",
                             },
                         ],
                     },

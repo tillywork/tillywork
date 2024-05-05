@@ -82,6 +82,9 @@ if (isAuthenticated()) {
             </template>
             <v-list-item-title>Login</v-list-item-title>
           </v-list-item>
+          <v-list-item>
+            <theme-switch />
+          </v-list-item>
         </v-list>
       </template>
     </v-navigation-drawer>

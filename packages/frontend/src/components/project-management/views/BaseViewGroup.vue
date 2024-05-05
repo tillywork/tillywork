@@ -264,7 +264,7 @@ async function handleInfiniteScroll({ done }: any) {
                     color="default"
                   />
                 </template>
-                <v-card>
+                <v-card color="accent">
                   <v-card-title>Hello</v-card-title>
                 </v-card>
               </v-menu>

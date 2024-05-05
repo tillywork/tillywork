@@ -53,13 +53,13 @@ function isStageSelected(stage: ListStage) {
         </v-chip>
       </template>
     </template>
-    <v-card class="bg-menu">
+    <v-card color="accent">
       <v-list
         v-model="selectedStage"
         density="compact"
         :lines="false"
         nav
-        class="bg-menu mt-1 list-stage-list text-align-left"
+        class="bg-accent mt-1 list-stage-list text-align-left"
         rounded="md"
       >
         <template v-for="stage in listStages" :key="stage.id">

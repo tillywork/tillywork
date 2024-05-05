@@ -61,7 +61,7 @@ const dateToText = computed(() => {
       v-model="dateValue"
       show-adjacent-months
       color="primary"
-      bg-color="menu"
+      bg-color="accent"
     />
   </v-menu>
 </template>

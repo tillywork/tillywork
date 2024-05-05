@@ -48,6 +48,7 @@ async function getWorkspaces() {
       id="workspace-menu-activator"
       class="me-2 user-select-none"
       rounded="md"
+      color="transparent"
     >
       <v-card-title
         class="d-flex align-center text-body-1 font-weight-medium pa-2px py-1 ps-2"
@@ -78,7 +79,7 @@ async function getWorkspaces() {
     />
 
     <v-menu activator="#workspace-menu-btn" :close-on-content-click="false">
-      <v-card color="menu" class="pt-3 mt-2" width="300px" density="compact">
+      <v-card color="accent" class="pt-3 mt-2" width="300px" density="compact">
         <div class="px-5 text-truncate mb-2">
           <v-icon size="small">mdi-sitemap</v-icon>
           <span class="ml-1">
@@ -94,12 +95,12 @@ async function getWorkspaces() {
     :close-on-content-click="false"
     activator="#workspace-menu-activator"
   >
-    <v-card color="menu" class="pt-3 mt-2" width="300px" density="compact">
+    <v-card color="accent" class="pt-3 mt-2" width="300px" density="compact">
       <div class="px-5 text-truncate mb-2">
         <v-icon size="small">mdi-sitemap</v-icon>
         <span class="ml-1"> Your workspaces </span>
       </div>
-      <v-list density="compact" nav class="bg-menu px-3" :lines="false">
+      <v-list density="compact" nav class="bg-accent px-3" :lines="false">
         <v-list-item
           v-for="workspace in workspaceQuery.data.value?.workspaces"
           :key="workspace.id"

@@ -52,7 +52,7 @@ const isUserSelected = (user: User) => {
                 density="comfortable"
                 size="small"
                 icon="mdi-account"
-                color="info"
+                color="surface-dark"
               >
               </v-btn>
             </template>
@@ -87,8 +87,8 @@ const isUserSelected = (user: User) => {
         </template>
       </div>
     </template>
-    <v-card width="250" color="menu">
-      <v-list nav density="compact" class="bg-menu">
+    <v-card width="250" color="accent">
+      <v-list nav density="compact" class="bg-accent">
         <template v-for="user in users" :key="user.email">
           <v-list-item
             @click="toggleUserSelection(user)"
@@ -100,7 +100,6 @@ const isUserSelected = (user: User) => {
                 <base-avatar
                   :photo="user.photo"
                   :text="user.firstName + ' ' + user.lastName"
-                  :color="isUserSelected(user) ? 'primary' : undefined"
                   class="ms-1 text-caption"
                 />
               </v-list-item-action>

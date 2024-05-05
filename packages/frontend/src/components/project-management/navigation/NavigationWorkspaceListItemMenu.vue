@@ -35,7 +35,7 @@ watch(listMenu, () => {
     :close-on-content-click="false"
     target="#list-menu-btn"
   >
-    <v-card color="menu" class="pt-3 mt-2" width="300px" density="compact">
+    <v-card color="accent" class="pt-3 mt-2" width="300px" density="compact">
       <div class="px-5 text-truncate mb-2">
         <v-icon size="small">mdi-sitemap</v-icon>
         <span class="ml-1"> Your workspaces </span>
