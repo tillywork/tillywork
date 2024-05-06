@@ -52,7 +52,17 @@ export class CardListsService {
     }
 
     async create(createCardListDto: CreateCardListDto): Promise<CardList> {
-        const cardList = this.cardListsRepository.create(createCardListDto);
+        const cardList = this.cardListsRepository.create({
+            card: {
+                id: createCardListDto.cardId,
+            },
+            list: {
+                id: createCardListDto.listId,
+            },
+            listStage: {
+                id: createCardListDto.listStageId,
+            },
+        });
         await this.cardListsRepository.save(cardList);
 
         return cardList;

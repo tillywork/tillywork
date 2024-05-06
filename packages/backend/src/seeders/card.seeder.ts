@@ -11,13 +11,17 @@ import { View } from "../app/common/views/view.entity";
 import { CardsService } from "../app/common/cards/cards.service";
 import { Card } from "../app/common/cards/card.entity";
 import { CardList } from "../app/common/cards/card.list.entity";
+import { CardListsService } from "../app/common/cards/card.lists.service";
 
 const logger = new Logger("UserSeeder");
 
 export async function seedCardsData(connection: Connection): Promise<void> {
+    const cardListsService = new CardListsService(
+        connection.getRepository(CardList)
+    );
     const cardsService = new CardsService(
         connection.getRepository(Card),
-        connection.getRepository(CardList)
+        cardListsService
     );
     const viewsService = new ViewsService(connection.getRepository(View));
     const listStagesService = new ListStagesService(

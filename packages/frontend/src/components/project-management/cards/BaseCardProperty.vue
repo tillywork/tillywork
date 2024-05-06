@@ -81,7 +81,7 @@ function openUserSelector() {
       <template v-else-if="prop.type === PropTypes.USER">
         <base-card-property-value-btn @click="openUserSelector">
           <base-user-selector
-            :selected="value"
+            v-model="value"
             :users="users ?? []"
             ref="userSelector"
           />

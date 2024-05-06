@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type ListGroup } from '../lists/types';
+import { type ListGroup, type ListStage } from '../lists/types';
 import {
   useQueryClient,
   type QueryObserverResult,
@@ -25,6 +25,8 @@ import { useListGroupsService } from '@/composables/services/useListGroupsServic
 import { ListGroupOptions } from '../lists/types';
 import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
 import { ViewTypes, type View } from './types';
+import { useDialog } from '@/composables/useDialog';
+import { DIALOGS } from '@/components/common/dialogs/types';
 
 const props = defineProps<{
   group: ListGroup;
@@ -41,6 +43,7 @@ const isExpanded = ref(props.group.isExpanded);
 
 const itemsPerPage = ref(10);
 
+const dialog = useDialog();
 const route = useRoute();
 const listId = computed(() => +route.params.listId);
 const usersService = useUsersService();
@@ -49,6 +52,7 @@ const listsStagesService = useListStagesService();
 const listGroupsService = useListGroupsService();
 const queryClient = useQueryClient();
 const getGroupCardsQuery = useInfiniteQuery({
+  gcTime: 1000 * 6 * 5,
   queryFn: getGroupCards,
   queryKey: [
     'cards',
@@ -64,14 +68,12 @@ const getGroupCardsQuery = useInfiniteQuery({
     return lastPageParam + 1;
   },
   initialPageParam: 1,
-  initialData: () => {
-    return {
-      pages: [props.group.cards],
-      pageParams: [1],
-    };
-  },
-  staleTime: 5 * 1000,
+  initialData: () => ({
+    pages: [props.group.cards],
+    pageParams: [1],
+  }),
 });
+
 const { mutate: updateCardListStage } = useMutation({
   mutationFn: ({
     cardListId,
@@ -79,21 +81,31 @@ const { mutate: updateCardListStage } = useMutation({
   }: {
     cardListId: number;
     listStageId: number;
-  }) =>
-    cardsService.updateCardListStage({
+  }) => {
+    return cardsService.updateCardListStage({
       cardListId,
       listStageId,
-    }),
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards'] }),
+    });
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['cards'] });
+  },
 });
 const createCardMutation = useMutation({
-  mutationFn: (createCardDto: CreateCardDto) =>
-    cardsService.createCard(createCardDto),
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards'] }),
+  mutationFn: (createCardDto: CreateCardDto) => {
+    return cardsService.createCard(createCardDto);
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['cards'] });
+  },
 });
 const updateCardMutation = useMutation({
-  mutationFn: (updateCardDto: Card) => cardsService.updateCard(updateCardDto),
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards'] }),
+  mutationFn: (updateCardDto: Card) => {
+    return cardsService.updateCard(updateCardDto);
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['cards'] });
+  },
 });
 const usersQuery = useQuery({
   queryKey: ['users'],
@@ -106,13 +118,15 @@ const listStagesQuery = useQuery({
   refetchOnWindowFocus: false,
 });
 const updateListGroupMutation = useMutation({
-  mutationFn: (listGroup: Partial<ListGroup>) =>
-    listGroupsService.update(listGroup),
+  mutationFn: (listGroup: Partial<ListGroup>) => {
+    return listGroupsService.update(listGroup);
+  },
 });
 
 const groupCards = computed(() => {
   let cards: Card[] = [];
-  getGroupCardsQuery.data.value?.pages.forEach((pageData) => {
+  const queryPages = [...(getGroupCardsQuery.data.value?.pages ?? [])];
+  queryPages.forEach((pageData) => {
     if (pageData) {
       cards = cards.concat(pageData.cards);
     }
@@ -185,6 +199,38 @@ async function handleInfiniteScroll({ done }: any) {
     done('empty');
   }
 }
+
+function openCreateCardDialog(group: ListGroup) {
+  dialog.openDialog(DIALOGS.CREATE_CARD, {
+    listId: listId.value,
+    listStage: getCurrentStage(group),
+    users: getCurrentAssignee(group),
+  });
+}
+
+function getCurrentStage(group: ListGroup) {
+  let stage: ListStage | undefined;
+
+  if (group.type === ListGroupOptions.LIST_STAGE) {
+    stage = listStagesQuery.data.value?.find((stage) => {
+      return stage.id == group.entityId;
+    });
+  }
+
+  return stage ? { ...stage } : undefined;
+}
+
+function getCurrentAssignee(group: ListGroup) {
+  let user: User | undefined;
+
+  if (group.type === ListGroupOptions.ASSIGNEES) {
+    user = usersQuery.data.value?.users.find((user) => {
+      return user.id == group.entityId;
+    });
+  }
+
+  return user ? [{ ...user }] : undefined;
+}
 </script>
 
 <template>
@@ -234,17 +280,15 @@ async function handleInfiniteScroll({ done }: any) {
         icon="mdi-plus"
         color="info"
         class="ms-2"
+        @click="openCreateCardDialog(group)"
       />
     </v-banner>
-    <div class="content" v-if="isExpanded">
+    <div class="content" v-if="group && group.cards && isExpanded">
       <template v-if="view.type === ViewTypes.TABLE">
         <table-view
-          v-model:row-hovered="rowHovered"
-          v-model:options="paginationOptions"
           :columns="columns"
-          :data="groupCards ?? []"
+          :data="groupCards"
           :total="group.cards?.total ?? 0"
-          :loading="getGroupCardsQuery.isFetching.value"
           @click:row="handleRowClick"
           @submit="handleCardCreation"
           @load="handleInfiniteScroll"
@@ -292,22 +336,20 @@ async function handleInfiniteScroll({ done }: any) {
                 :model-value="
                   row.original.dueAt ? new Date(row.original.dueAt) : undefined
                 "
+                @update:model-value="(newValue) =>
+                  handleChangeDueDate({
+                    card: row.original,
+                    newDueDate: newValue as Date,
+                  })
+                "
                 class="text-caption"
                 no-date-message="Set due date"
-                :close-on-content-click="true"
-                @update:model-value="
-              (newValue) =>
-                handleChangeDueDate({
-                  card: row.original,
-                  newDueDate: newValue as Date,
-                })
-            "
               />
               <base-user-selector
-                :selected="row.original.users"
+                :model-value="row.original.users"
                 :users="usersQuery.data.value?.users ?? []"
                 activator-hover-text="Assign users"
-                @update:select="
+                @update:model-value="
                   (users) => handleUserSelection(users, row.original)
                 "
               />

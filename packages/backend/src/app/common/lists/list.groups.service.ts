@@ -318,6 +318,8 @@ export class ListGroupsService {
         return this.cardsService.findAll({
             listId: group.listId,
             filters: group.filter,
+            sortBy: "createdAt",
+            sortOrder: "DESC",
         });
     }
 

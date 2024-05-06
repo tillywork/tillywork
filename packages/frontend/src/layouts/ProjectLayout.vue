@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import ThemeSwitch from '@/components/common/ThemeSwitch.vue';
 import { useAuthStore } from '@/stores/auth';
-import SnackbarWrapper from '@/components/common/SnackbarWrapper.vue';
 import { ref } from 'vue';
 import ToolbarSearch from '@/components/common/navigation/ToolbarSearch.vue';
 import NavigationWorkspace from '@/components/project-management/navigation/NavigationWorkspace.vue';
@@ -104,8 +103,6 @@ if (isAuthenticated()) {
 
     <v-main class="bg-surface">
       <router-view />
-
-      <snackbar-wrapper />
     </v-main>
   </v-app>
 </template>
