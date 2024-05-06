@@ -14,6 +14,8 @@ import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewGroup from './BaseViewGroup.vue';
 import { DEFAULT_PAGINATION_OPTIONS } from './TableView/types';
 import { type View } from './types';
+import { useDialog } from '@/composables/useDialog';
+import { DIALOGS } from '@/components/common/dialogs/types';
 
 const route = useRoute();
 const router = useRouter();
@@ -21,6 +23,7 @@ const listId = computed(() => +route.params.listId);
 const viewId = computed(() => +route.params.viewId);
 const viewsService = useViewsService();
 const listGroupsService = useListGroupsService();
+const dialog = useDialog();
 
 const isPageLoading = computed(() => {
   return (
@@ -32,7 +35,7 @@ const isPageLoading = computed(() => {
 const openedCard = ref<Card>();
 const cardDialog = ref(false);
 
-const columns: ColumnDef<Card, any>[] = [
+const columns = ref<ColumnDef<Card, any>[]>([
   {
     id: 'actions',
     enableResizing: false,
@@ -61,7 +64,7 @@ const columns: ColumnDef<Card, any>[] = [
     id: 'info',
     size: 200,
   },
-];
+]);
 
 const rowHovered = ref<Row<Card>>();
 
@@ -143,6 +146,12 @@ function handleGroupBySelection(option: ListGroupOptions) {
     groupBy: option,
   } as View);
 }
+
+function openCreateCardDialog() {
+  dialog.openDialog(DIALOGS.CREATE_CARD, {
+    list: queryClient.getQueryData(['list', listId.value]),
+  });
+}
 </script>
 
 <template>
@@ -161,6 +170,7 @@ function handleGroupBySelection(option: ListGroupOptions) {
         variant="tonal"
         rounded="md"
         color="primary"
+        @click="openCreateCardDialog"
       >
         <v-icon icon="mdi-plus" />
         Add task
@@ -233,7 +243,7 @@ function handleGroupBySelection(option: ListGroupOptions) {
 
 <style lang="scss" scoped>
 .groups-container {
-  max-height: calc(100vh - (48px + 60px + 113px));
+  max-height: calc(100vh - (40px + 113px));
   overflow: auto;
 }
 </style>

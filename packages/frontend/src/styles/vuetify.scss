@@ -14,3 +14,29 @@
     border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
   }
 }
+
+.v-switch--inset {
+  .v-switch__track {
+    height: 16px;
+    min-width: 32px;
+  }
+  .v-switch__thumb {
+    height: 8px;
+    width: 8px;
+  }
+}
+
+.v-locale--is-ltr.v-switch
+  .v-selection-control--dirty
+  .v-selection-control__input,
+.v-locale--is-ltr
+  .v-switch
+  .v-selection-control--dirty
+  .v-selection-control__input {
+  transform: translateX(7px);
+}
+
+.v-locale--is-ltr.v-switch .v-selection-control__input,
+.v-locale--is-ltr .v-switch .v-selection-control__input {
+  transform: translateX(-7px);
+}

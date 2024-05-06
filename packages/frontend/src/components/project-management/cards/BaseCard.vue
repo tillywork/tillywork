@@ -177,10 +177,3 @@ async function updateCard(card: Card) {
     </div>
   </v-card>
 </template>
-
-<style lang="scss">
-.base-card-textarea {
-  border: none;
-  resize: none; /*remove the resize handle on the bottom right*/
-}
-</style>

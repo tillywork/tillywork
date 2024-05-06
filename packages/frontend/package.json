@@ -6,13 +6,14 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@blocknote/core": "^0.12.1",
-    "@blocknote/react": "^0.12.2",
     "@mdi/font": "^7.4.47",
     "@tanstack/vue-query": "^5.31.0",
     "@tanstack/vue-query-devtools": "^5.32.0",
     "@tanstack/vue-table": "^8.13.2",
-    "@vitejs/plugin-react": "^4.2.1",
+    "@tiptap/extension-placeholder": "^2.3.1",
+    "@tiptap/pm": "^2.3.1",
+    "@tiptap/starter-kit": "^2.3.1",
+    "@tiptap/vue-3": "^2.3.1",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vueuse/core": "^10.9.0",
     "lodash": "^4.17.21",
@@ -21,8 +22,5 @@
     "veaury": "^2.3.16",
     "vue-router": "^4.2.5",
     "vuetify": "^3.5.17"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue-jsx": "^3.1.0"
   }
 }

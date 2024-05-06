@@ -4,10 +4,10 @@ import { FindOptionsWhere, Repository } from "typeorm";
 import { Card } from "./card.entity";
 import { CreateCardDto } from "./dto/create.card.dto";
 import { UpdateCardDto } from "./dto/update.card.dto";
-import { CardList } from "./card.list.entity";
 import { ObjectHelper } from "../helpers/object.helper";
 import { QueryFilter } from "../filters/types";
 import { QueryBuilderHelper } from "../helpers/query.builder.helper";
+import { CardListsService } from "./card.lists.service";
 
 export type CardFindAllResult = {
     total: number;
@@ -29,8 +29,7 @@ export class CardsService {
     constructor(
         @InjectRepository(Card)
         private cardsRepository: Repository<Card>,
-        @InjectRepository(CardList)
-        private cardListsRepository: Repository<CardList>
+        private cardListsService: CardListsService
     ) {}
 
     async findAll({
@@ -95,21 +94,15 @@ export class CardsService {
     }
 
     async create(createCardDto: CreateCardDto): Promise<Card> {
-        const card = this.cardsRepository.create({
-            title: createCardDto.title,
-        });
+        const card = this.cardsRepository.create(createCardDto);
         await this.cardsRepository.save(card);
 
-        const cardList = this.cardListsRepository.create({
-            card,
-            list: {
-                id: createCardDto.listId,
-            },
+        const cardList = await this.cardListsService.create({
+            cardId: card.id,
+            listId: createCardDto.listId,
             listStageId: createCardDto.listStageId,
         });
-        await this.cardListsRepository.save(cardList);
-
-        return card;
+        return { ...card, cardLists: [cardList] };
     }
 
     async update(id: number, updateCardDto: UpdateCardDto): Promise<Card> {

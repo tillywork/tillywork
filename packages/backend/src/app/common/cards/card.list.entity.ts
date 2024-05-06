@@ -8,14 +8,16 @@ export class CardList {
     @PrimaryGeneratedColumn("increment")
     id: number;
 
-    @ManyToOne(() => ListStage, (listStage) => listStage.cardLists)
+    @ManyToOne(() => ListStage, (listStage) => listStage.cardLists, {
+        nullable: false,
+    })
     listStage: ListStage;
-    @Column({ type: "bigint" })
+    @Column({ type: "bigint", nullable: false })
     listStageId: number;
 
-    @ManyToOne(() => Card, (card) => card.cardLists)
+    @ManyToOne(() => Card, (card) => card.cardLists, { nullable: false })
     card: Card;
 
-    @ManyToOne(() => List, (list) => list.cardLists)
+    @ManyToOne(() => List, (list) => list.cardLists, { nullable: false })
     list: List;
 }

@@ -24,6 +24,10 @@ export interface CardList {
 
 export interface CreateCardDto {
   title: string;
-  listId: number;
-  listStageId: number;
+  listId?: number;
+  listStageId?: number;
+  description?: string;
+  dueAt?: string;
+  users?: User[];
+  listStage?: ListStage;
 }

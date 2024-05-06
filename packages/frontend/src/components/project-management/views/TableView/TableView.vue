@@ -7,16 +7,13 @@ import {
   type ColumnDef,
   type Row,
   type Header,
-  type SortingState,
   type Column,
   type ColumnPinningState,
 } from '@tanstack/vue-table';
-import { ref, watch } from 'vue';
 import { computed } from 'vue';
 import { type PaginationParams, type QueryFilter } from './types';
-import type { CreateCardDto } from '../../cards/types';
-import { VTextField, type VForm } from 'vuetify/lib/components/index.mjs';
-import { onKeyStroke } from '@vueuse/core';
+import { onMounted } from 'vue';
+import { onUpdated } from 'vue';
 
 const props = defineProps<{
   columns: ColumnDef<any, any>[];
@@ -34,27 +31,6 @@ const rowHovered = defineModel<Row<unknown>>('rowHovered');
 const emit = defineEmits(['update:options', 'click:row', 'submit', 'load']);
 const slots = defineSlots();
 
-const pageCount = computed(() => {
-  if (!options.value) {
-    return -1;
-  }
-  return Math.ceil(props.total / (options.value?.itemsPerPage ?? 10));
-});
-
-const tanstackSortState = computed(() => {
-  const sortState: SortingState = [];
-  if (options.value && options.value.sort) {
-    options.value?.sort.forEach((sortOption) =>
-      sortState.push({
-        id: sortOption.key,
-        desc: sortOption.order === 'desc',
-      })
-    );
-  }
-
-  return sortState;
-});
-
 const table = useVueTable({
   get data() {
     return props.data;
@@ -62,41 +38,27 @@ const table = useVueTable({
   columns: props.columns as ColumnDef<unknown>[],
   getCoreRowModel: getCoreRowModel(),
   manualPagination: true,
-  rowCount: props.total,
-  pageCount: pageCount.value,
   columnResizeMode: 'onChange',
   manualSorting: true,
   initialState: {
-    sorting: tanstackSortState.value,
+    sorting: [
+      {
+        id:
+          options.value && options.value.sort
+            ? options.value.sort[0].key
+            : 'createdAt',
+        desc:
+          options.value && options.value.sort
+            ? options.value.sort[0].order === 'desc'
+            : true,
+      },
+    ],
     columnPinning: props.columnPinning ?? {},
   },
 });
 
 const themeStore = useThemeStore();
 const themeClass = computed(() => `v-theme--${themeStore.theme}`);
-
-const cardTitleInput = ref<VTextField | undefined>();
-const createCardForm = ref<VForm | undefined>();
-const createCardDto = ref<Partial<CreateCardDto>>({
-  title: '',
-});
-const isCreating = ref(false);
-
-watch(
-  options,
-  (newValue) => {
-    emit('update:options', newValue);
-  },
-  { deep: true, immediate: true }
-);
-
-onKeyStroke(
-  'Escape',
-  () => {
-    toggleIsCreating(true);
-  },
-  { target: cardTitleInput.value }
-);
 
 function handleSortingChange(header: Header<unknown, unknown>) {
   if (options.value && header.column.getCanSort()) {
@@ -128,12 +90,6 @@ function handleHoverChange(row: Row<unknown>, isHovering: boolean) {
   }
 }
 
-function handleCreateFormSubmit() {
-  const cardData = { ...createCardDto.value };
-  emit('submit', cardData);
-  toggleIsCreating();
-}
-
 function getColumnSortIcon(column: Column<unknown, unknown>) {
   switch (column.getIsSorted()) {
     case 'desc':
@@ -142,12 +98,6 @@ function getColumnSortIcon(column: Column<unknown, unknown>) {
     default:
       return 'mdi-arrow-up';
   }
-}
-
-function toggleIsCreating(closeOnly?: boolean) {
-  if (!isCreating.value && closeOnly) return;
-  isCreating.value = !isCreating.value;
-  createCardForm.value?.reset();
 }
 
 function handleInfiniteScrollLoad(scrollObj: any) {
@@ -286,53 +236,6 @@ function handleInfiniteScrollLoad(scrollObj: any) {
               <template v-if="!data || data.length === 0">
                 <span class="text-caption">No tasks found.</span>
               </template>
-              <div class="d-flex align-center ga-2 create-card-wrapper">
-                <v-form
-                  v-if="isCreating"
-                  ref="createCardForm"
-                  class="w-100"
-                  @submit.prevent="handleCreateFormSubmit"
-                >
-                  <v-text-field
-                    v-model="createCardDto.title"
-                    ref="cardTitleInput"
-                    autofocus
-                    variant="outlined"
-                    color="default"
-                    label="Card title"
-                    hide-details
-                    single-line
-                  >
-                    <template #append>
-                      <div class="d-flex align-center ga-2">
-                        <v-btn
-                          color="default"
-                          variant="outlined"
-                          size="small"
-                          rounded="md"
-                          @click="toggleIsCreating()"
-                          >Cancel</v-btn
-                        >
-                        <v-btn type="submit" size="small" rounded="md"
-                          >Save</v-btn
-                        >
-                      </div>
-                    </template>
-                  </v-text-field>
-                </v-form>
-                <template v-else>
-                  <v-btn
-                    variant="text"
-                    prepend-icon="mdi-plus"
-                    size="small"
-                    class="flex-0-0-100 justify-start text-capitalize"
-                    @click="toggleIsCreating()"
-                    rounded="0"
-                    color="default"
-                    >Add task</v-btn
-                  >
-                </template>
-              </div>
             </th>
           </tr>
         </tfoot>

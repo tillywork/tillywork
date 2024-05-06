@@ -2,32 +2,38 @@
 import type { User } from '@/components/common/users/types';
 import BaseAvatar from '../base/BaseAvatar.vue';
 import { ref } from 'vue';
-import stringUtils from '@/utils/string';
 
-const userMenu = ref(false);
+const value = defineModel<User[]>({
+  default: [],
+});
+const userMenu = defineModel('menu', {
+  default: false,
+});
 defineExpose({
   userMenu,
 });
-const props = defineProps<{
+defineProps<{
   users: User[];
-  selected?: User[];
   activatorHoverText?: string;
 }>();
-const emit = defineEmits(['update:select']);
-const selectedUsers = ref<User[]>([...(props.selected ?? [])]);
+const emit = defineEmits(['update:model-value']);
+const selectedUsers = ref<User[]>(value.value ?? []);
 
 const toggleUserSelection = (user: User) => {
   const index = selectedUsers.value.findIndex((u) => u.id === user.id);
 
   if (index === -1) {
     // User is not in the array, add them
-    selectedUsers.value.push(user);
+    selectedUsers.value = [...selectedUsers.value, user];
   } else {
     // User is in the array, remove them
-    selectedUsers.value.splice(index, 1);
+    selectedUsers.value = [
+      ...selectedUsers.value.slice(0, index),
+      ...selectedUsers.value.slice(index + 1),
+    ];
   }
 
-  emit('update:select', selectedUsers.value);
+  emit('update:model-value', selectedUsers.value);
 };
 
 const isUserSelected = (user: User) => {
@@ -37,7 +43,7 @@ const isUserSelected = (user: User) => {
 </script>
 
 <template>
-  <v-menu v-model="userMenu" :close-on-content-click="false" offset="5">
+  <v-menu v-model="userMenu" :close-on-content-click="false" offset="3">
     <template #activator="{ props: menuProps }">
       <div
         class="d-flex align-center justify-start rounded-md px-1"

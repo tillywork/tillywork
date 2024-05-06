@@ -2,16 +2,23 @@
 import { ref } from 'vue';
 import { type ListStage } from '../../project-management/lists/types';
 import BaseIconBtn from '../base/BaseIconBtn.vue';
+import { computed } from 'vue';
 
 const selectedStage = defineModel<ListStage>();
 const listStageMenu = ref(false);
+
 defineExpose({
   listStageMenu,
 });
 defineProps<{
   listStages: ListStage[];
   theme?: 'icon' | 'text' | 'default';
+  label?: string;
 }>();
+
+const mainChipColor = computed(() => {
+  return selectedStage.value?.color;
+});
 
 function handleStageClick(stage: ListStage) {
   selectedStage.value = stage;
@@ -23,14 +30,13 @@ function isStageSelected(stage: ListStage) {
 </script>
 
 <template>
-  <!-- <v-select v-model="selectedStage" :items="listStages" label="Select Stage" item-title="name" item-value="id" /> -->
-  <v-menu v-model="listStageMenu">
+  <v-menu v-model="listStageMenu" offset="3">
     <template #activator="{ props }">
       <template v-if="theme === 'icon'">
         <base-icon-btn
           v-bind="props"
           icon="mdi-circle-slice-8"
-          :color="selectedStage?.color"
+          :color="mainChipColor"
         />
       </template>
       <template v-else>
@@ -40,22 +46,19 @@ function isStageSelected(stage: ListStage) {
           rounded="md"
           size="small"
           density="comfortable"
-          :color="selectedStage?.color"
+          :color="mainChipColor"
         >
-          <v-icon
-            size="16"
-            :color="selectedStage?.color"
-            start
-            v-if="theme !== 'text'"
+          <v-icon size="16" :color="mainChipColor" start v-if="theme !== 'text'"
             >mdi-circle-slice-8</v-icon
           >
-          <span class="text-caption">{{ selectedStage?.name }}</span>
+          <span class="text-caption">{{
+            selectedStage?.name ?? label ?? 'Stage'
+          }}</span>
         </v-chip>
       </template>
     </template>
     <v-card color="accent">
       <v-list
-        v-model="selectedStage"
         density="compact"
         :lines="false"
         nav

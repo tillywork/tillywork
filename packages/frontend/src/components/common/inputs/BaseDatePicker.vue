@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import dayjs from 'dayjs';
 import BaseCardPropertyValueBtn from '@/components/project-management/cards/BaseCardPropertyValueBtn.vue';
 import isToday from 'dayjs/plugin/isToday';
@@ -8,11 +8,14 @@ dayjs.extend(isToday);
 
 const dateValue = defineModel<string | Date>();
 const props = defineProps<{
-  noDateMessage?: string;
+  label?: string;
   closeOnContentClick?: boolean;
   class?: string;
+  icon?: string;
 }>();
-const dateDialog = ref(false);
+const dateDialog = defineModel<boolean>('dialog', {
+  default: false,
+});
 
 const textColorClass = computed(() => {
   if (!dateValue.value) {
@@ -36,7 +39,7 @@ const textClass = computed(() => {
 
 const dateToText = computed(() => {
   if (!dateValue.value) {
-    return props.noDateMessage ?? 'Empty';
+    return props.label ?? 'Empty';
   }
 
   if (dayjs(dateValue.value).isToday()) {
@@ -54,6 +57,9 @@ const dateToText = computed(() => {
   >
     <template #activator="{ props }">
       <base-card-property-value-btn v-bind="props" :class="textClass">
+        <template #prepend v-if="icon">
+          <v-icon :icon color="default" />
+        </template>
         {{ dateToText }}
       </base-card-property-value-btn>
     </template>
