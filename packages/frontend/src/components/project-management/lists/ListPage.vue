@@ -3,7 +3,6 @@ import { useListsService } from '@/composables/services/useListsService';
 import { useRoute } from 'vue-router';
 import { watch } from 'vue';
 import { computed } from 'vue';
-import { useQuery } from '@tanstack/vue-query';
 import ListViewTabs from './ListViewTabs.vue';
 import BaseView from '../views/BaseView.vue';
 import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
@@ -18,11 +17,7 @@ const {
   data: list,
   refetch: refetchList,
   isFetching: isListFetching,
-} = useQuery({
-  queryKey: ['list', listId.value],
-  queryFn: () => listsService.getList(listId.value),
-  refetchOnWindowFocus: false,
-});
+} = listsService.useGetListQuery(listId.value);
 
 watch(list, () => {
   document.title = `${list.value?.name} | tillywork`;

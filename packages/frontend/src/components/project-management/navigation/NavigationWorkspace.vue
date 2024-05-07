@@ -5,7 +5,6 @@ import { useSpacesService } from '../../../composables/services/useSpacesService
 import { watch } from 'vue';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { storeToRefs } from 'pinia';
-import { useQuery } from '@tanstack/vue-query';
 import NavigationWorkspaceSpaceItem from './NavigationWorkspaceSpaceItem.vue';
 
 const workspaceStore = useWorkspaceStore();
@@ -18,19 +17,7 @@ const freezeListHoverId = ref<number | null>();
 const freezeSpaceHoverId = ref<number | null>();
 
 const workspaceId = computed(() => selectedWorkspace.value?.id);
-const spacesQuery = useQuery({
-  queryKey: [
-    'spaces',
-    {
-      workspaceId,
-    },
-  ],
-  queryFn: () =>
-    spacesService.getSpaces({
-      workspaceId: selectedWorkspace.value!.id,
-    }),
-  refetchOnWindowFocus: false,
-});
+const spacesQuery = spacesService.useGetSpacesQuery(workspaceId.value);
 
 const currentSpaceExpansionState = computed({
   get: () =>

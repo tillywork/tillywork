@@ -5,18 +5,16 @@ import { useWorkspacesService } from '@/composables/services/useWorkspacesServic
 import { useWorkspaceStore } from '@/stores/workspace';
 import { storeToRefs } from 'pinia';
 import CreateWorkspaceDialogAndButton from './CreateWorkspaceDialogAndButton.vue';
-import { useQuery } from '@tanstack/vue-query';
 import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
+import { watch } from 'vue';
 
 const workspacesService = useWorkspacesService();
 const selectWorkspaceMenu = ref(false);
 const workspaceStore = useWorkspaceStore();
 const { selectedWorkspace } = storeToRefs(workspaceStore);
-const workspaceQuery = useQuery({
-  queryKey: ['workspaces'],
-  queryFn: getWorkspaces,
-  refetchOnWindowFocus: false,
-});
+const workspaceQuery = workspacesService.useGetWorkspacesQuery(
+  WorkspaceTypes.PROJECT_MANAGEMENT
+);
 
 function closeSelectWorkspaceMenu() {
   selectWorkspaceMenu.value = false;
@@ -27,17 +25,17 @@ function handleSelectWorkspace(workspace: Workspace) {
   closeSelectWorkspaceMenu();
 }
 
-async function getWorkspaces() {
-  const workspaces = await workspacesService.getWorkspaces({
-    workspaceType: WorkspaceTypes.PROJECT_MANAGEMENT,
-  });
-
-  if (workspaces.total > 0 && !selectedWorkspace.value) {
-    handleSelectWorkspace(workspaces.workspaces[0]);
-  }
-
-  return workspaces;
-}
+watch(
+  workspaceQuery.data,
+  (workspaces) => {
+    if (workspaces) {
+      if (workspaces.total > 0 && !selectedWorkspace.value) {
+        handleSelectWorkspace(workspaces.workspaces[0]);
+      }
+    }
+  },
+  { deep: true }
+);
 </script>
 
 <template>

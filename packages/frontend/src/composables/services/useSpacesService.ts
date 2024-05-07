@@ -1,5 +1,6 @@
 import { useHttp } from '@/composables/useHttp';
 import type { Space } from '../../components/project-management/spaces/types';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 
 export interface SpacesData {
   spaces: Space[];
@@ -7,13 +8,14 @@ export interface SpacesData {
 }
 
 export const useSpacesService = () => {
+  const { sendRequest } = useHttp();
+  const queryClient = useQueryClient();
+
   async function getSpaces({
     workspaceId,
   }: {
     workspaceId?: number;
   }): Promise<Space[]> {
-    const { sendRequest } = useHttp();
-
     return sendRequest('/spaces', {
       method: 'GET',
       params: {
@@ -23,8 +25,6 @@ export const useSpacesService = () => {
   }
 
   async function createSpace(space: Partial<Space>): Promise<Space> {
-    const { sendRequest } = useHttp();
-
     return sendRequest('/spaces', {
       method: 'POST',
       data: space,
@@ -32,16 +32,12 @@ export const useSpacesService = () => {
   }
 
   async function getSpace(spaceId: number): Promise<Space> {
-    const { sendRequest } = useHttp();
-
     return sendRequest(`/spaces/${spaceId}`, {
       method: 'GET',
     });
   }
 
   async function updateSpace(space: Space): Promise<Space> {
-    const { sendRequest } = useHttp();
-
     return sendRequest(`/spaces/${space.id}`, {
       method: 'PUT',
       data: space,
@@ -49,10 +45,50 @@ export const useSpacesService = () => {
   }
 
   async function deleteSpace(spaceId: number): Promise<void> {
-    const { sendRequest } = useHttp();
-
     return sendRequest(`/spaces/${spaceId}`, {
       method: 'DELETE',
+    });
+  }
+
+  function useGetSpacesQuery(workspaceId?: number) {
+    return useQuery({
+      queryKey: ['spaces', { workspaceId }],
+      queryFn: () => getSpaces({ workspaceId }),
+    });
+  }
+
+  function useGetSpaceQuery(spaceId: number) {
+    return useQuery({
+      queryKey: ['space', spaceId],
+      queryFn: () => getSpace(spaceId),
+    });
+  }
+
+  function useCreateSpaceMutation() {
+    return useMutation({
+      mutationFn: createSpace,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['spaces'] });
+      },
+    });
+  }
+
+  function useUpdateSpaceMutation() {
+    return useMutation<Space, Error, Space>({
+      mutationFn: updateSpace,
+      onSuccess: (updatedSpace) => {
+        queryClient.invalidateQueries({ queryKey: ['spaces'] });
+        queryClient.invalidateQueries({ queryKey: ['space', updatedSpace.id] });
+      },
+    });
+  }
+
+  function useDeleteSpaceMutation() {
+    return useMutation<void, Error, number>({
+      mutationFn: deleteSpace,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['spaces'] });
+      },
     });
   }
 
@@ -62,5 +98,10 @@ export const useSpacesService = () => {
     createSpace,
     updateSpace,
     deleteSpace,
+    useGetSpacesQuery,
+    useGetSpaceQuery,
+    useCreateSpaceMutation,
+    useUpdateSpaceMutation,
+    useDeleteSpaceMutation,
   };
 };

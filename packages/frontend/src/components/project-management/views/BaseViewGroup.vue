@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import { type ListGroup, type ListStage } from '../lists/types';
-import {
-  useQueryClient,
-  type QueryObserverResult,
-  useMutation,
-  useQuery,
-  useInfiniteQuery,
-} from '@tanstack/vue-query';
+import { type QueryObserverResult } from '@tanstack/vue-query';
 import TableView from '@/components/project-management/views/TableView/TableView.vue';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import BaseUserSelector from '@/components/common/inputs/BaseUserSelector.vue';
@@ -38,10 +32,9 @@ const emit = defineEmits(['click:row']);
 const paginationOptions = defineModel<PaginationParams>('options', {
   required: true,
 });
+const itemsPerPage = ref(10);
 const rowHovered = defineModel<Row<Card>>('row:hovered');
 const isExpanded = ref(props.group.isExpanded);
-
-const itemsPerPage = ref(10);
 
 const dialog = useDialog();
 const route = useRoute();
@@ -50,78 +43,21 @@ const usersService = useUsersService();
 const cardsService = useCardsService();
 const listsStagesService = useListStagesService();
 const listGroupsService = useListGroupsService();
-const queryClient = useQueryClient();
-const getGroupCardsQuery = useInfiniteQuery({
-  gcTime: 1000 * 6 * 5,
-  queryFn: getGroupCards,
-  queryKey: [
-    'cards',
-    {
-      groupId: props.group.id,
-    },
-  ],
-  getNextPageParam: (lastPage, allPages, lastPageParam) => {
-    if (lastPage?.cards.length === 0) {
-      return undefined;
-    }
 
-    return lastPageParam + 1;
-  },
-  initialPageParam: 1,
-  initialData: () => ({
-    pages: [props.group.cards],
-    pageParams: [1],
-  }),
+const getGroupCardsQuery = cardsService.useGetGroupCardsInfinite({
+  listId: listId.value,
+  groupId: props.group.id,
+  filters: props.group.filter,
+  initialCards: props.group.cards,
 });
+const { mutate: updateCardListStage } =
+  cardsService.useUpdateCardListStageMutation();
+const createCardMutation = cardsService.useCreateCardMutation();
+const updateCardMutation = cardsService.useUpdateCardMutation();
+const usersQuery = usersService.useUsersQuery();
 
-const { mutate: updateCardListStage } = useMutation({
-  mutationFn: ({
-    cardListId,
-    listStageId,
-  }: {
-    cardListId: number;
-    listStageId: number;
-  }) => {
-    return cardsService.updateCardListStage({
-      cardListId,
-      listStageId,
-    });
-  },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['cards'] });
-  },
-});
-const createCardMutation = useMutation({
-  mutationFn: (createCardDto: CreateCardDto) => {
-    return cardsService.createCard(createCardDto);
-  },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['cards'] });
-  },
-});
-const updateCardMutation = useMutation({
-  mutationFn: (updateCardDto: Card) => {
-    return cardsService.updateCard(updateCardDto);
-  },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['cards'] });
-  },
-});
-const usersQuery = useQuery({
-  queryKey: ['users'],
-  queryFn: usersService.getUsers,
-  refetchOnWindowFocus: false,
-});
-const listStagesQuery = useQuery({
-  queryKey: ['listStages', listId.value],
-  queryFn: () => listsStagesService.getListStages({ listId: listId.value }),
-  refetchOnWindowFocus: false,
-});
-const updateListGroupMutation = useMutation({
-  mutationFn: (listGroup: Partial<ListGroup>) => {
-    return listGroupsService.update(listGroup);
-  },
-});
+const listStagesQuery = listsStagesService.useGetListStagesQuery(listId.value);
+const updateListGroupMutation = listGroupsService.useUpdateListGroupMutation();
 
 const groupCards = computed(() => {
   let cards: Card[] = [];
@@ -134,19 +70,6 @@ const groupCards = computed(() => {
 
   return cards;
 });
-
-async function getGroupCards({ pageParam = 1 }) {
-  const group = props.group;
-
-  const cards = await cardsService.getCards({
-    limit: itemsPerPage.value,
-    page: pageParam,
-    listId: listId.value,
-    filters: group.filter,
-  });
-
-  return cards;
-}
 
 function handleRowClick(row: Row<Card>) {
   emit('click:row', row);
