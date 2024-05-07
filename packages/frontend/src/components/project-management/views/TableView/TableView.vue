@@ -12,8 +12,6 @@ import {
 } from '@tanstack/vue-table';
 import { computed } from 'vue';
 import { type PaginationParams, type QueryFilter } from './types';
-import { onMounted } from 'vue';
-import { onUpdated } from 'vue';
 
 const props = defineProps<{
   columns: ColumnDef<any, any>[];
@@ -83,6 +81,7 @@ function handleRowClick(row: Row<unknown>) {
 }
 
 function handleHoverChange(row: Row<unknown>, isHovering: boolean) {
+  console.log(row);
   if (isHovering) {
     rowHovered.value = row;
   } else {
@@ -189,7 +188,10 @@ function handleInfiniteScrollLoad(scrollObj: any) {
           </tr>
         </thead>
         <tbody>
-          <template v-for="row in table.getRowModel().rows" :key="row.id">
+          <template
+            v-for="row in table.getRowModel().rows"
+            :key="JSON.stringify(row.original)"
+          >
             <v-hover
               @update:modelValue="
                 (modelValue) => handleHoverChange(row, modelValue)

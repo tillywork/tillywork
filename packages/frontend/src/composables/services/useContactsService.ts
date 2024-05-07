@@ -37,6 +37,8 @@ export interface ContactsData {
 }
 
 export const useContactsService = () => {
+  const { sendRequest } = useHttp();
+
   async function getContacts({
     projectId,
     page = 1,
@@ -48,8 +50,6 @@ export const useContactsService = () => {
       },
     ],
   }: GetContactsParams): Promise<ContactsData> {
-    const { sendRequest } = useHttp();
-
     return sendRequest('/contacts', {
       method: 'GET',
       params: {
@@ -63,8 +63,6 @@ export const useContactsService = () => {
   }
 
   async function createContact(contact: CreateContact): Promise<Contact> {
-    const { sendRequest } = useHttp();
-
     return sendRequest('/contacts', {
       method: 'POST',
       data: contact,
@@ -72,16 +70,12 @@ export const useContactsService = () => {
   }
 
   async function getContact(contactId: number): Promise<Contact> {
-    const { sendRequest } = useHttp();
-
     return sendRequest(`/contacts/${contactId}`, {
       method: 'GET',
     });
   }
 
   async function updateContact(contact: Contact): Promise<Contact> {
-    const { sendRequest } = useHttp();
-
     return sendRequest(`/contacts/${contact.id}`, {
       method: 'PUT',
       data: contact,
@@ -89,8 +83,6 @@ export const useContactsService = () => {
   }
 
   async function deleteContact(contactId: number): Promise<void> {
-    const { sendRequest } = useHttp();
-
     return sendRequest(`/contacts/${contactId}`, {
       method: 'DELETE',
     });

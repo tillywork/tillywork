@@ -8,7 +8,7 @@ import { useListGroupsService } from '@/composables/services/useListGroupsServic
 import type { Card } from '../cards/types';
 import { computed } from 'vue';
 import { type ColumnDef, type Row } from '@tanstack/vue-table';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import { useQueryClient } from '@tanstack/vue-query';
 import BaseCard from '../cards/BaseCard.vue';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewGroup from './BaseViewGroup.vue';
@@ -28,7 +28,7 @@ const dialog = useDialog();
 const isPageLoading = computed(() => {
   return (
     getViewQuery.isFetching.value ||
-    isGroupsFetching.value ||
+    (getListGroupsQuery && getListGroupsQuery.isFetching.value) ||
     updateViewMutation.isPending.value
   );
 });
@@ -69,28 +69,23 @@ const columns = ref<ColumnDef<Card, any>[]>([
 const rowHovered = ref<Row<Card>>();
 
 const queryClient = useQueryClient();
-const getViewQuery = useQuery({
-  queryKey: ['view', viewId.value],
-  queryFn: () => viewsService.getView(viewId.value),
-  refetchOnWindowFocus: false,
+const getViewQuery = viewsService.useGetViewQuery(viewId.value);
+
+const groupBy = computed(() => {
+  if (getViewQuery.data.value?.groupBy) {
+    console.log(getViewQuery.data.value.groupBy);
+    return getViewQuery.data.value.groupBy;
+  } else {
+    return ListGroupOptions.ALL;
+  }
 });
-const {
-  data: groups,
-  isFetching: isGroupsFetching,
-  refetch: refetchListGroups,
-} = useQuery({
-  queryKey: ['groups', listId.value],
-  queryFn: getListGroups,
-  enabled: getViewQuery.isFetched.value,
+let getListGroupsQuery = listGroupsService.useGetListGroupsByOptionQuery({
+  listId: listId.value,
+  groupBy,
+  enabled: getViewQuery.isSuccess,
 });
 
-const updateViewMutation = useMutation({
-  mutationFn: viewsService.updateView,
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['view', viewId.value] });
-  },
-});
-
+const updateViewMutation = viewsService.useUpdateViewMutation();
 const paginationOptions = ref(DEFAULT_PAGINATION_OPTIONS);
 
 watch(getViewQuery.data, (view) => {
@@ -98,7 +93,9 @@ watch(getViewQuery.data, (view) => {
     document.title = `${view.name} | tillywork`;
   }
 
-  refetchListGroups();
+  queryClient.invalidateQueries({
+    queryKey: ['listGroups', { listId: listId.value }],
+  });
 });
 
 watch(
@@ -117,15 +114,6 @@ watch(
     immediate: true,
   }
 );
-
-async function getListGroups() {
-  const groups = await listGroupsService.getListGroupsByOption({
-    listId: listId.value,
-    groupBy: getViewQuery.data.value!.groupBy,
-  });
-
-  return groups;
-}
 
 function handleRowClick(row: Row<Card>) {
   openedCard.value = row.original;
@@ -216,12 +204,17 @@ function openCreateCardDialog() {
       </div>
     </div>
 
-    <div class="groups-container" v-if="getViewQuery.data.value">
-      <template v-for="(group, index) in groups" :key="group.name">
+    <div
+      class="groups-container"
+      v-if="getViewQuery.data.value && getListGroupsQuery?.data.value"
+    >
+      <template
+        v-for="group in getListGroupsQuery.data.value"
+        :key="group.name"
+      >
         <base-view-group
-          v-if="groups"
           :view="getViewQuery.data.value"
-          :group="groups[index]"
+          :group="group"
           v-model:options="paginationOptions"
           :columns="columns"
           @click:row="handleRowClick"

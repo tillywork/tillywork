@@ -112,8 +112,6 @@ export class ListGroupsService {
                             group.name == generatedGroup.name
                     );
 
-                    this.logger.debug({ check });
-
                     if (!check) {
                         this.create({
                             ...generatedGroup,
