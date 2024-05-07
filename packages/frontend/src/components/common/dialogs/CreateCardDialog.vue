@@ -11,7 +11,7 @@ import type {
 import { ref } from 'vue';
 import { useDialog } from '@/composables/useDialog';
 import { type List } from '@/components/project-management/lists/types';
-import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import { useQueryClient } from '@tanstack/vue-query';
 import { useRoute } from 'vue-router';
 import { computed } from 'vue';
 import type { User } from '../users/types';
@@ -19,7 +19,6 @@ import type { UsersData } from '@/composables/services/useUsersService';
 import type { VForm } from 'vuetify/lib/components/index.mjs';
 import { useCardsService } from '@/composables/services/useCardsService';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { watch } from 'vue';
 
 const route = useRoute();
 const queryClient = useQueryClient();
@@ -52,14 +51,9 @@ const users = computed(() => {
   return users;
 });
 
-const createCardMutation = useMutation({
-  mutationFn: cardsService.createCard,
-  onSuccess: (card) => {
-    handlePostCreate(card);
-    queryClient.invalidateQueries({ queryKey: ['cards'] });
-  },
-});
-const createCardDto = ref<Partial<CreateCardDto>>({
+const createCardMutation = cardsService.useCreateCardMutation();
+const createCardDto = ref<CreateCardDto>({
+  title: '',
   listId: list.value?.id,
   listStage: dialog.data.listStage ?? list.value?.listStages[0],
   users: dialog.data.users,
@@ -87,7 +81,7 @@ async function createCard() {
  * @param card
  */
 function handlePostCreate(card: Card) {
-  createCardDto.value.title = undefined;
+  createCardDto.value.title = '';
   createCardDto.value.description = undefined;
 
   snackbarStore.showSnackbar({
