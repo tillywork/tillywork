@@ -4,7 +4,7 @@ import type {
   ListGroupOptions,
 } from '../../components/project-management/lists/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
-import { watch, type Ref } from 'vue';
+import { type Ref } from 'vue';
 
 export interface GetListGroupsByOptionParams {
   listId: number;
@@ -25,7 +25,6 @@ export const useListGroupsService = () => {
     listId,
     groupBy,
   }: GetListGroupsByOptionParams): Promise<ListGroup[]> {
-    console.log(groupBy);
     return sendRequest(`/lists/${listId}/groups`, {
       method: 'POST',
       data: {
