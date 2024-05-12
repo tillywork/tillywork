@@ -81,7 +81,6 @@ function handleRowClick(row: Row<unknown>) {
 }
 
 function handleHoverChange(row: Row<unknown>, isHovering: boolean) {
-  console.log(row);
   if (isHovering) {
     rowHovered.value = row;
   } else {
@@ -190,7 +189,7 @@ function handleInfiniteScrollLoad(scrollObj: any) {
         <tbody>
           <template
             v-for="row in table.getRowModel().rows"
-            :key="JSON.stringify(row.original)"
+            :key="row.original.id ?? row.id"
           >
             <v-hover
               @update:modelValue="

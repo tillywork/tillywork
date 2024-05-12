@@ -8,6 +8,7 @@ import {
     Put,
     UseGuards,
     Logger,
+    Request,
 } from "@nestjs/common";
 import { CardFindAllResult, CardsService } from "./cards.service";
 import { Card } from "./card.entity";
@@ -60,7 +61,12 @@ export class CardsController {
     }
 
     @Post()
-    create(@Body() createCardDto: CreateCardDto): Promise<Card> {
+    create(
+        @Body() createCardDto: CreateCardDto,
+        @Request() req
+    ): Promise<Card> {
+        const { user } = req;
+        createCardDto.createdBy = user.id;
         return this.cardsService.create(createCardDto);
     }
 

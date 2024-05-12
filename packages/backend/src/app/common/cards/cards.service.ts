@@ -85,7 +85,7 @@ export class CardsService {
     async findOne(id: number): Promise<Card> {
         const card = await this.cardsRepository.findOne({
             where: { id },
-            relations: ["cardLists", "cardLists.listStage"],
+            relations: ["cardLists", "cardLists.listStage", "users"],
         });
         if (!card) {
             throw new NotFoundException(`Card with ID ${id} not found`);
@@ -94,20 +94,37 @@ export class CardsService {
     }
 
     async create(createCardDto: CreateCardDto): Promise<Card> {
-        const card = this.cardsRepository.create(createCardDto);
-        await this.cardsRepository.save(card);
+        const initCard = this.cardsRepository.create({
+            ...createCardDto,
+            createdBy: {
+                id: createCardDto.createdBy,
+            },
+        });
 
-        const cardList = await this.cardListsService.create({
-            cardId: card.id,
+        await this.cardsRepository.save(initCard);
+
+        await this.cardListsService.create({
+            cardId: initCard.id,
             listId: createCardDto.listId,
             listStageId: createCardDto.listStageId,
         });
-        return { ...card, cardLists: [cardList] };
+
+        return initCard;
     }
 
     async update(id: number, updateCardDto: UpdateCardDto): Promise<Card> {
         const card = await this.findOne(id);
-        this.cardsRepository.merge(card, updateCardDto);
+
+        // Update card fields except for 'users'
+        const { users, ...updateFields } = updateCardDto;
+        this.cardsRepository.merge(card, updateFields);
+
+        // If 'users' are provided in the update DTO, update the relation
+        if (users) {
+            // Replace the current card.users with the new list from updateCardDto
+            card.users = users;
+        }
+
         return this.cardsRepository.save(card);
     }
 

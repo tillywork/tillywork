@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { useEditor, EditorContent, Editor } from '@tiptap/vue-3';
+import { useEditor, EditorContent, Editor, type Content } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import type { Ref } from 'vue';
 import { onBeforeUnmount, watch } from 'vue';
 import Placeholder from '@tiptap/extension-placeholder';
 import { NoNewLine } from './extensions/NoNewLine';
 import { computed } from 'vue';
+import { Commands } from './extensions/Commands';
+import suggestion from './extensions/suggestion';
 
 const props = defineProps<{
   autofocus?: boolean;
   placeholder?: string;
   heading?: 1 | 2 | 3 | 4 | 5 | 6;
   singleLine?: boolean;
+  editable?: boolean;
 }>();
 
 const extensions = computed(() => {
@@ -19,6 +22,9 @@ const extensions = computed(() => {
     StarterKit,
     Placeholder.configure({
       placeholder: props.placeholder,
+    }),
+    Commands.configure({
+      suggestion,
     }),
   ];
 
@@ -29,32 +35,24 @@ const extensions = computed(() => {
   return extensions;
 });
 
-const textValue = defineModel();
-const htmlValue = defineModel('html');
-const jsonValue = defineModel('json');
+const textValue = defineModel<string>();
+const htmlValue = defineModel<Content>('html');
+const jsonValue = defineModel<Content>('json');
 
 let editor: Ref<Editor | undefined>;
 
+/**
+ * Initializes the editor instance.
+ */
 function initEditor() {
   editor = useEditor({
-    content: [
-      {
-        attrs: { level: 3 },
-        type: 'heading',
-        content: [
-          {
-            text: textValue.value,
-            type: 'text',
-          },
-        ],
-      },
-    ],
     extensions: extensions.value,
     autofocus: props.autofocus,
-    editable: true,
+    editable: props.editable,
     injectCSS: false,
     onCreate: () => {
       enforceHeading();
+      fillEditorFromModelValues();
     },
     onUpdate: () => {
       enforceHeading();
@@ -65,10 +63,54 @@ function initEditor() {
   });
 }
 
+/**
+ * Fills the initial content of the editor
+ * from the v-model values when the editor
+ * is created. Priority: Text -> HTML -> JSON
+ */
+function fillEditorFromModelValues() {
+  if (textValue.value) {
+    setEditorText(textValue.value);
+  } else if (htmlValue.value || jsonValue.value) {
+    editor.value?.commands.setContent(
+      (htmlValue.value ?? jsonValue.value) as Content,
+      true
+    );
+  }
+}
+
+/**
+ * Simpler syntax for updating the editor value
+ * when you only want a single-line string
+ * @param text
+ */
+function setEditorText(text: string) {
+  editor.value?.commands.setContent(
+    [
+      {
+        attrs: props.heading ? { level: props.heading } : undefined,
+        type: props.heading ? 'heading' : 'paragraph',
+        content: [
+          {
+            text,
+            type: 'text',
+          },
+        ],
+      },
+    ],
+    true
+  );
+}
+
 function destroyEditor() {
   editor.value?.destroy();
 }
 
+/**
+ * Used for title inputs, where we want
+ * the styling to be fixed as a heading,
+ * and usually single-line.
+ */
 function enforceHeading() {
   if (
     props.heading &&
@@ -78,16 +120,14 @@ function enforceHeading() {
   }
 }
 
-initEditor();
-
 // Watch for changes to textValue and update the editor content
 watch(textValue, (newText) => {
   if (editor.value && newText !== editor.value.getText()) {
     editor.value.commands.setContent(
       [
         {
-          type: 'heading',
-          attrs: { level: props.heading ?? 1 },
+          type: props.heading ? 'heading' : 'paragraph',
+          attrs: { level: props.heading ? props.heading : undefined },
           content: [{ type: 'text', text: newText }],
         },
       ],
@@ -99,7 +139,7 @@ watch(textValue, (newText) => {
 // Watch for changes to htmlValue and update the editor content
 watch(htmlValue, (newHtml) => {
   if (editor.value && newHtml !== editor.value.getHTML()) {
-    editor.value.commands.setContent(newHtml as any, true);
+    editor.value.commands.setContent(newHtml as string, true);
   }
 });
 
@@ -117,6 +157,8 @@ watch(jsonValue, (newJson) => {
 onBeforeUnmount(() => {
   destroyEditor();
 });
+
+initEditor();
 </script>
 
 <template>

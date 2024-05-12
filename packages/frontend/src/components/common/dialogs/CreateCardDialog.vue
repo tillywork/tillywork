@@ -116,10 +116,12 @@ function handlePostCreate(card: Card) {
           :heading="3"
           single-line
           class="mb-3"
+          editable
         />
         <base-editor-input
           v-model:json="createCardDto.description"
           placeholder="Enter description.."
+          editable
         />
       </div>
       <v-card-actions class="d-flex justify-start align-center py-0 px-4">

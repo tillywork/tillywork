@@ -19,7 +19,6 @@ import { TypeOrmLoggerContainer } from "./common/logger/typeorm.logger.container
                 username: configService.get("TW_DB_USERNAME"),
                 password: configService.get("TW_DB_PASSWORD"),
                 database: configService.get("TW_DB_NAME"),
-                entities: [__dirname + "/**/*.entity{.ts,.js}"],
                 autoLoadEntities: true,
                 synchronize: true, // use only in development, in production should be handled by migrations
                 logger:

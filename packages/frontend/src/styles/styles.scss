@@ -31,6 +31,13 @@
   height: 40px;
 }
 
+.h-100vh {
+  height: 100vh;
+}
+.max-h-100vh {
+  max-height: 100vh;
+}
+
 .user-select-none {
   user-select: none !important;
 }

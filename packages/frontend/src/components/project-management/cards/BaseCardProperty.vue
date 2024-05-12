@@ -73,6 +73,15 @@ function openUserSelector() {
           color="info"
         />
       </template>
+      <template v-else-if="prop.type === PropTypes.NUMBER">
+        <v-number-input
+          v-model="value"
+          hide-details
+          single-line
+          variant="outlined"
+          color="info"
+        />
+      </template>
       <template v-else-if="prop.type === PropTypes.TEXT_AREA">
         <div class="w-400px">
           <v-textarea v-model="value" color="info" label="Description" />

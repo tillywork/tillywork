@@ -4,16 +4,18 @@ defineProps<{
   color?: string;
   rounded?: string;
   density?: string;
+  variant?: 'flat' | 'text';
+  size?: 'small' | 'x-small';
 }>();
 </script>
 
 <template>
   <v-btn
-    variant="text"
+    :variant="variant ?? 'text'"
     :density="(density as any) ?? 'comfortable'"
-    size="small"
+    :size="size ?? 'small'"
     :icon="icon ?? 'mdi-plus'"
-    :color="color ?? 'accent'"
+    :color="color ?? 'default'"
     :rounded="rounded"
   />
 </template>

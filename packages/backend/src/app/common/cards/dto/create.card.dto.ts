@@ -12,4 +12,5 @@ export class CreateCardDto {
     description?: any;
     dueAt?: Date;
     users?: User[];
+    createdBy: number;
 }

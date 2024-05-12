@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import dayjs from 'dayjs';
 import BaseCardPropertyValueBtn from '@/components/project-management/cards/BaseCardPropertyValueBtn.vue';
 import isToday from 'dayjs/plugin/isToday';
+import { onMounted } from 'vue';
 
 dayjs.extend(isToday);
 
@@ -48,12 +49,19 @@ const dateToText = computed(() => {
     return dayjs(dateValue.value).format('MMM D');
   }
 });
+
+onMounted(() => {
+  if (typeof dateValue.value === 'string') {
+    dateValue.value = new Date(dateValue.value);
+  }
+});
 </script>
 
 <template>
   <v-menu
     v-model="dateDialog"
     :close-on-content-click="closeOnContentClick ?? false"
+    offset="3"
   >
     <template #activator="{ props }">
       <base-card-property-value-btn v-bind="props" :class="textClass">

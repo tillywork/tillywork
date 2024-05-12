@@ -14,6 +14,7 @@ defineProps<{
   listStages: ListStage[];
   theme?: 'icon' | 'text' | 'default';
   label?: string;
+  size?: 'x-small' | 'small' | 'default';
 }>();
 
 const mainChipColor = computed(() => {
@@ -44,7 +45,7 @@ function isStageSelected(stage: ListStage) {
           v-bind="props"
           link
           rounded="md"
-          size="small"
+          :size="size ?? 'small'"
           density="comfortable"
           :color="mainChipColor"
         >

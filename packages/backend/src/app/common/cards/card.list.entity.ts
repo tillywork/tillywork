@@ -20,4 +20,6 @@ export class CardList {
 
     @ManyToOne(() => List, (list) => list.cardLists, { nullable: false })
     list: List;
+    @Column({ type: "bigint", nullable: false })
+    listId: number;
 }

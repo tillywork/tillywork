@@ -13,6 +13,7 @@
     "@tiptap/extension-placeholder": "^2.3.1",
     "@tiptap/pm": "^2.3.1",
     "@tiptap/starter-kit": "^2.3.1",
+    "@tiptap/suggestion": "^2.3.1",
     "@tiptap/vue-3": "^2.3.1",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vueuse/core": "^10.9.0",

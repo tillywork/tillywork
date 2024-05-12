@@ -40,3 +40,8 @@
 .v-locale--is-ltr .v-switch .v-selection-control__input {
   transform: translateX(-7px);
 }
+
+.v-btn--icon.v-btn--density-default {
+  width: calc(var(--v-btn-height) + 6px);
+  height: calc(var(--v-btn-height) + 6px);
+}

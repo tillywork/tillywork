@@ -9,7 +9,6 @@ import type { Card } from '../cards/types';
 import { computed } from 'vue';
 import { type ColumnDef, type Row } from '@tanstack/vue-table';
 import { useQueryClient } from '@tanstack/vue-query';
-import BaseCard from '../cards/BaseCard.vue';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewGroup from './BaseViewGroup.vue';
 import { DEFAULT_PAGINATION_OPTIONS } from './TableView/types';
@@ -32,8 +31,6 @@ const isPageLoading = computed(() => {
     updateViewMutation.isPending.value
   );
 });
-const openedCard = ref<Card>();
-const cardDialog = ref(false);
 
 const columns = ref<ColumnDef<Card, any>[]>([
   {
@@ -116,16 +113,12 @@ watch(
 );
 
 function handleRowClick(row: Row<Card>) {
-  openedCard.value = row.original;
-  openCardDialog();
-}
-
-function openCardDialog() {
-  cardDialog.value = true;
-}
-
-function closeCardDialog() {
-  cardDialog.value = false;
+  router.push({
+    name: 'CardPage',
+    params: {
+      cardId: row.original.id,
+    },
+  });
 }
 
 function handleGroupBySelection(option: ListGroupOptions) {
@@ -223,14 +216,6 @@ function openCreateCardDialog() {
         />
       </template>
     </div>
-
-    <v-dialog v-model="cardDialog" width="800">
-      <base-card
-        v-model="openedCard"
-        show-close-button
-        @click:close="closeCardDialog"
-      />
-    </v-dialog>
   </div>
 </template>
 

@@ -12,11 +12,20 @@ import { ListsModule } from "./lists/lists.module";
 import { HelpersModule } from "./helpers/helpers.module";
 import { PropsModule } from "./props/props.module";
 import { FiltersModule } from "./filters/filters.module";
+import { CardActivitiesModule } from "./card.activities/card.activities.module";
+import { ClsModule } from "nestjs-cls";
 
 @Module({
     imports: [
+        ClsModule.forRoot({
+            global: true,
+            middleware: {
+                mount: true,
+            },
+        }),
         AuthModule,
         CardsModule,
+        CardActivitiesModule,
         WorkspacesModule,
         ProjectsModule,
         SpacesModule,

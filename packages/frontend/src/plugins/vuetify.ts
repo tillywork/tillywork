@@ -58,6 +58,9 @@ const vuetify = createVuetify({
     VDataTable: {
       density: 'compact',
     },
+    VCard: {
+      rounded: 'md',
+    },
   },
 });
 
