@@ -1,0 +1,57 @@
+.w-95px {
+  width: 95px;
+}
+.w-100px {
+  width: 100px;
+}
+.w-300px {
+  width: 300px;
+}
+.w-350px {
+  width: 350px;
+}
+.w-400px {
+  width: 400px !important;
+}
+.w-450px {
+  width: 450px;
+}
+
+.w-100-95px {
+  width: calc(100% - 95px);
+}
+.w-100-400px {
+  width: calc(100% - 400px);
+}
+.w-100 {
+  width: 100%;
+}
+
+.h-40px {
+  height: 40px;
+}
+
+.h-100vh {
+  height: 100vh;
+}
+.max-h-100vh {
+  max-height: 100vh;
+}
+
+.user-select-none {
+  user-select: none !important;
+}
+
+.rounded-md {
+  border-radius: 6px !important;
+}
+
+.pa-2px {
+  padding: 2px !important;
+}
+
+textarea {
+  border: none !important;
+  resize: none !important;
+  outline: none !important;
+}

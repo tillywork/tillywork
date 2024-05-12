@@ -1,0 +1,32 @@
+{
+    "name": "backend",
+    "version": "0.0.0",
+    "main": "main.ts",
+    "scripts": {},
+    "keywords": [
+        "nest"
+    ],
+    "license": "MIT",
+    "dependencies": {
+        "@nestjs/config": "^3.2.0",
+        "@nestjs/jwt": "^10.2.0",
+        "@nestjs/passport": "^10.0.3",
+        "@nestjs/platform-fastify": "^10.3.3",
+        "@nestjs/typeorm": "^10.0.2",
+        "bcrypt": "^5.1.1",
+        "class-transformer": "^0.5.1",
+        "class-validator": "^0.14.1",
+        "nestjs-cls": "^4.3.0",
+        "passport": "^0.7.0",
+        "passport-jwt": "^4.0.1",
+        "passport-local": "^1.0.0",
+        "pg": "^8.11.3",
+        "typeorm": "^0.3.20"
+    },
+    "devDependencies": {
+        "@types/bcrypt": "^5.0.2",
+        "@types/passport-jwt": "^4.0.1",
+        "@types/passport-local": "^1.0.38",
+        "webpack-cli": "^5.1.4"
+    }
+}

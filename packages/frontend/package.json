@@ -1,0 +1,27 @@
+{
+  "name": "frontend",
+  "version": "0.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "@tanstack/vue-query": "^5.31.0",
+    "@tanstack/vue-query-devtools": "^5.32.0",
+    "@tanstack/vue-table": "^8.13.2",
+    "@tiptap/extension-placeholder": "^2.3.1",
+    "@tiptap/pm": "^2.3.1",
+    "@tiptap/starter-kit": "^2.3.1",
+    "@tiptap/suggestion": "^2.3.1",
+    "@tiptap/vue-3": "^2.3.1",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "@vueuse/core": "^10.9.0",
+    "lodash": "^4.17.21",
+    "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^3.2.1",
+    "veaury": "^2.3.16",
+    "vue-router": "^4.2.5",
+    "vuetify": "^3.5.17"
+  }
+}
