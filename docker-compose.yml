@@ -10,6 +10,4 @@ services:
       - '3000:3000' # Expose port 3000 for backend access via Node.js
     env_file:
       - .env
-    environment:
-      - NODE_ENV=production
     command: '/start.sh'

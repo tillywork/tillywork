@@ -25,6 +25,18 @@ import { TypeOrmLoggerContainer } from "./common/logger/typeorm.logger.container
                     configService.get("TW_ENABLE_QUERY_LOGGING") !== "false"
                         ? TypeOrmLoggerContainer.ForConnection(true)
                         : undefined,
+                ssl:
+                    configService.get("NODE_ENV") === "production"
+                        ? true
+                        : false,
+                extra:
+                    configService.get("NODE_ENV") === "production"
+                        ? {
+                              ssl: {
+                                  rejectUnauthorized: false,
+                              },
+                          }
+                        : undefined,
             }),
             inject: [ConfigService],
         }),

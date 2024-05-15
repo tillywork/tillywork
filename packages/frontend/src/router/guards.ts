@@ -1,4 +1,7 @@
-import type { RouteLocationNormalized, NavigationGuardNext } from 'vue-router';
+import type {
+  RouteLocationNormalized,
+  NavigationGuardNext,
+} from 'vue-router/auto';
 import { useAuthStore } from '@/stores/auth';
 
 export const requireGuestGuard = (
@@ -13,7 +16,7 @@ export const requireGuestGuard = (
     isAuthenticated()
   ) {
     // If the route requires no authentication and the user is authenticated
-    next({ name: 'Home' }); // Redirect to home page
+    next('/'); // Redirect to home page
   } else {
     // Otherwise, proceed as normal
     next();
@@ -32,15 +35,9 @@ export const requireAuthGuard = (
     !isAuthenticated()
   ) {
     // If the route requires authentication and the user is not authenticated
-    next({ name: 'Login' }); // Redirect to the login page
+    next('/login'); // Redirect to the login page
   } else {
     // Otherwise, proceed as normal
     next();
   }
-};
-
-export const titleGuard = (to: RouteLocationNormalized) => {
-  document.title = to.meta?.title
-    ? to.meta.title + ' | tillywork'
-    : 'tillywork';
 };

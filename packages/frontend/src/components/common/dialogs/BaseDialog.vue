@@ -4,8 +4,7 @@ import { defineAsyncComponent } from 'vue';
 import { useDialogStore } from '@/stores/dialog';
 import { storeToRefs } from 'pinia';
 import { useWindowSize } from '@vueuse/core';
-
-const DIALOG_PATH = '../dialogs';
+import { DIALOGS } from './types';
 
 const dialogStore = useDialogStore();
 const { currentDialog } = storeToRefs(dialogStore);
@@ -18,14 +17,19 @@ const isDialogOpen = computed({
   },
 });
 
+const dialogComponents = {
+  [DIALOGS.CONFIRM]: () => import('./ConfirmDialog.vue'),
+  [DIALOGS.CREATE_CARD]: () => import('./CreateCardDialog.vue'),
+};
+
 const currentDialogComponent = computed(() => {
   if (!currentDialog.value) return null;
 
-  return lazyLoadDialog(`${DIALOG_PATH}/${currentDialog.value}.vue`);
+  return lazyLoadDialog(currentDialog.value);
 });
 
-function lazyLoadDialog(path: string) {
-  return defineAsyncComponent(() => import(/* @vite-ignore */ path));
+function lazyLoadDialog(dialog: DIALOGS) {
+  return defineAsyncComponent(dialogComponents[dialog]);
 }
 </script>
 

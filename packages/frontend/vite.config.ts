@@ -3,6 +3,9 @@ import { defineConfig } from 'vite';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import * as path from 'path';
 import vue from '@vitejs/plugin-vue';
+import VueRouter from 'unplugin-vue-router/vite';
+import AutoImport from 'unplugin-auto-import/vite';
+import { VueRouterAutoImports } from 'unplugin-vue-router';
 
 export default defineConfig({
   root: __dirname,
@@ -25,7 +28,14 @@ export default defineConfig({
     host: 'localhost',
   },
 
-  plugins: [vue(), nxViteTsPaths()],
+  plugins: [
+    VueRouter(),
+    vue(),
+    nxViteTsPaths(),
+    AutoImport({
+      imports: ['vue', VueRouterAutoImports, 'pinia', '@vueuse/core'],
+    }),
+  ],
 
   // Uncomment this if you are using workers.
   // worker: {
@@ -54,4 +64,6 @@ export default defineConfig({
       provider: 'v8',
     },
   },
+
+  envPrefix: 'TW_',
 });

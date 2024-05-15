@@ -12,25 +12,24 @@ const { user } = storeToRefs(authStore);
 const { isAuthenticated, logout } = authStore;
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
-  {
-    icon: 'mdi-home',
-    title: 'Home',
-    route: { name: 'Home' },
-    activeOnExactMatch: true,
-  },
+  //   {
+  //     icon: 'mdi-home',
+  //     title: 'Home',
+  //     route: { name: 'Home' },
+  //     activeOnExactMatch: true,
+  //   },
 ]);
 
 if (isAuthenticated()) {
   // Initialize with default items
-  navigationMenuItems.value = [
-    {
-      icon: 'mdi-home',
-      title: 'Home',
-      route: { name: 'Home' },
-      activeOnExactMatch: true,
-    },
-  ];
-
+  //   navigationMenuItems.value = [
+  //     {
+  //       icon: 'mdi-home',
+  //       title: 'Home',
+  //       route: { name: 'Home' },
+  //       activeOnExactMatch: true,
+  //     },
+  //   ];
   // Show only if a project is selected
   // if (selectedProjectId) {
   //   navigationMenuItems.value.push({

@@ -23,5 +23,9 @@
     "veaury": "^2.3.16",
     "vue-router": "^4.2.5",
     "vuetify": "^3.5.17"
+  },
+  "devDependencies": {
+    "unplugin-auto-import": "^0.17.6",
+    "unplugin-vue-router": "^0.8.6"
   }
 }

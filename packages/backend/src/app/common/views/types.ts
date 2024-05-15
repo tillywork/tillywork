@@ -11,3 +11,10 @@ export const DEFAULT_VIEWS = [
         type: ViewTypes.TABLE,
     },
 ];
+
+export type SortDirection = "ASC" | "DESC";
+
+export interface ViewSortOption {
+    key: string;
+    order: SortDirection;
+}

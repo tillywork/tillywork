@@ -2,12 +2,13 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "types": ["vite/client"],
+    "types": ["vite/client", "unplugin-vue-router/client"],
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"],
       "~/*": ["src/*"]
-    }
+    },
+    "moduleResolution": "Bundler"
   },
   "exclude": [
     "src/**/*.spec.ts",
@@ -15,5 +16,12 @@
     "src/**/*.spec.vue",
     "src/**/*.test.vue"
   ],
-  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.vue"]
+  "include": [
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "./typed-router.d.ts",
+    "./auto-imports.d.ts"
+  ]
 }

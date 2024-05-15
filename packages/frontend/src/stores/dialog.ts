@@ -1,8 +1,9 @@
+import type { DIALOGS } from '@/components/common/dialogs/types';
 import { defineStore } from 'pinia';
 
 export const useDialogStore = defineStore('dialog', {
   state: () => ({
-    currentDialog: null as null | string,
+    currentDialog: null as null | DIALOGS,
     width: null as null | string | number,
     dialogData: {} as any,
   }),
@@ -13,7 +14,7 @@ export const useDialogStore = defineStore('dialog', {
       data,
       width,
     }: {
-      dialog: string | null;
+      dialog: DIALOGS | null;
       data?: any;
       width?: string | number;
     }) {

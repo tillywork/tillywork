@@ -7,7 +7,7 @@ import {
     ManyToOne,
     JoinColumn,
 } from "typeorm";
-import { ViewTypes } from "./types";
+import { ViewSortOption, ViewTypes } from "./types";
 import { List } from "../lists/list.entity";
 import { ListGroupOptions } from "../lists/types";
 
@@ -28,6 +28,9 @@ export class View {
         default: ListGroupOptions.LIST_STAGE,
     })
     groupBy: ListGroupOptions;
+
+    @Column("jsonb", { nullable: true })
+    sortBy: ViewSortOption;
 
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;

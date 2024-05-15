@@ -173,7 +173,7 @@ function getCurrentAssignee(group: ListGroup) {
           <base-avatar
             :photo="group.icon"
             :text="group.name"
-            size="20"
+            size="x-small"
             class="text-caption"
           />
         </template>

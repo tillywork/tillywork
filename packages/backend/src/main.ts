@@ -15,17 +15,15 @@ async function bootstrap() {
     const logger = new Logger("main.ts");
     const app = await NestFactory.create<NestFastifyApplication>(
         AppModule,
-        new FastifyAdapter()
+        new FastifyAdapter(),
+        {
+            cors: true,
+        }
     );
 
     // Enable API URI Versioning
     app.enableVersioning({
         type: VersioningType.URI,
-    });
-
-    // Allow Cross Origin Requests
-    app.enableCors({
-        origin: "*",
     });
 
     // Add Global Validation Pipe

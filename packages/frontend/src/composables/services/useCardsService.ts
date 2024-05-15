@@ -3,7 +3,10 @@ import type {
   Card,
   CreateCardDto,
 } from '@/components/project-management/cards/types';
-import type { QueryFilter } from '@/components/project-management/views/TableView/types';
+import type {
+  QueryFilter,
+  TableSortOption,
+} from '@/components/project-management/views/TableView/types';
 import {
   useInfiniteQuery,
   useMutation,
@@ -20,10 +23,7 @@ export interface GetCardsParams {
   listId: number;
   page: number;
   limit: number;
-  sortBy?: {
-    key: string;
-    order: string;
-  }[];
+  sortBy?: TableSortOption[];
   filters?: QueryFilter;
 }
 
@@ -32,6 +32,7 @@ export interface GetGroupCardsInfiniteQueryParams {
   groupId: number;
   initialCards?: CardsData;
   filters?: QueryFilter;
+  sortBy?: TableSortOption;
 }
 
 export const useCardsService = () => {
@@ -109,6 +110,7 @@ export const useCardsService = () => {
     groupId,
     initialCards,
     filters,
+    sortBy,
   }: GetGroupCardsInfiniteQueryParams) {
     return useInfiniteQuery({
       gcTime: 1000 * 6 * 5,
@@ -118,6 +120,7 @@ export const useCardsService = () => {
           page: pageParam,
           limit: 10,
           filters,
+          sortBy: sortBy ? [sortBy] : undefined,
         }),
       queryKey: ['cards', { groupId }],
       getNextPageParam: (lastPage, allPages, lastPageParam) => {

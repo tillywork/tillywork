@@ -10,24 +10,31 @@ import { computed } from 'vue';
 import { type ColumnDef, type Row } from '@tanstack/vue-table';
 import { useQueryClient } from '@tanstack/vue-query';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
+import BaseViewChipSort from './BaseViewChipSort.vue';
 import BaseViewGroup from './BaseViewGroup.vue';
-import { DEFAULT_PAGINATION_OPTIONS } from './TableView/types';
-import { type View } from './types';
+import {
+  DEFAULT_PAGINATION_OPTIONS,
+  type TableSortOption,
+} from './TableView/types';
 import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
+import type { View } from './types';
 
+const props = defineProps<{
+  viewId: number;
+}>();
+const viewCopy = ref<View>();
 const route = useRoute();
 const router = useRouter();
 const listId = computed(() => +route.params.listId);
-const viewId = computed(() => +route.params.viewId);
 const viewsService = useViewsService();
 const listGroupsService = useListGroupsService();
 const dialog = useDialog();
 
 const isPageLoading = computed(() => {
   return (
-    getViewQuery.isFetching.value ||
-    (getListGroupsQuery && getListGroupsQuery.isFetching.value) ||
+    isViewFetching.value ||
+    getListGroupsQuery.isFetching.value ||
     updateViewMutation.isPending.value
   );
 });
@@ -46,17 +53,6 @@ const columns = ref<ColumnDef<Card, any>[]>([
     header: 'Title',
     size: 680,
   },
-  //   {
-  //     id: 'listStage',
-  //     size: 150,
-  //   },
-  //   {
-  //     id: 'users',
-  //   },
-  //   {
-  //     id: 'dueAt',
-  //     minSize: 100,
-  //   },
   {
     id: 'info',
     size: 200,
@@ -66,66 +62,75 @@ const columns = ref<ColumnDef<Card, any>[]>([
 const rowHovered = ref<Row<Card>>();
 
 const queryClient = useQueryClient();
-const getViewQuery = viewsService.useGetViewQuery(viewId.value);
+const {
+  data: view,
+  isFetched: isViewFetched,
+  isFetching: isViewFetching,
+  refetch: refetchView,
+} = viewsService.useGetViewQuery({
+  id: props.viewId,
+});
+
+watch(
+  view,
+  (v) => {
+    if (v) {
+      viewCopy.value = {
+        ...v,
+      } as View;
+    }
+  },
+  { deep: true, immediate: true }
+);
+
+watch(viewCopy, (view) => {
+  if (view) {
+    getListGroupsQuery.refetch();
+  }
+});
 
 const groupBy = computed(() => {
-  if (getViewQuery.data.value?.groupBy) {
-    console.log(getViewQuery.data.value.groupBy);
-    return getViewQuery.data.value.groupBy;
+  if (view.value?.groupBy) {
+    console.log(view.value.groupBy);
+    return view.value.groupBy;
   } else {
     return ListGroupOptions.ALL;
   }
 });
-let getListGroupsQuery = listGroupsService.useGetListGroupsByOptionQuery({
+
+const getListGroupsQuery = listGroupsService.useGetListGroupsByOptionQuery({
   listId: listId.value,
   groupBy,
-  enabled: getViewQuery.isSuccess,
+  enabled: isViewFetched,
 });
 
 const updateViewMutation = viewsService.useUpdateViewMutation();
 const paginationOptions = ref(DEFAULT_PAGINATION_OPTIONS);
 
-watch(getViewQuery.data, (view) => {
-  if (view) {
-    document.title = `${view.name} | tillywork`;
+watch(listId, () => {
+  if (listId.value !== viewCopy.value?.listId) {
+    router.replace(`/pm/list/${listId.value}`);
   }
-
-  queryClient.invalidateQueries({
-    queryKey: ['listGroups', { listId: listId.value }],
-  });
 });
 
-watch(
-  listId,
-  () => {
-    if (listId.value !== getViewQuery.data.value?.listId) {
-      router.replace({
-        name: 'ListPage',
-        params: {
-          ...route.params,
-        },
-      });
-    }
-  },
-  {
-    immediate: true,
-  }
-);
-
 function handleRowClick(row: Row<Card>) {
-  router.push({
-    name: 'CardPage',
-    params: {
-      cardId: row.original.id,
-    },
-  });
+  //   router.push({
+  //     name: 'CardPage',
+  //     params: {
+  //       cardId: row.original.id,
+  //     },
+  //   });
 }
 
 function handleGroupBySelection(option: ListGroupOptions) {
   updateViewMutation.mutate({
-    ...getViewQuery.data.value,
+    ...viewCopy.value,
     groupBy: option,
   } as View);
+}
+
+function handleSortBySelection(option: TableSortOption) {
+  console.log(option.key);
 }
 
 function openCreateCardDialog() {
@@ -136,8 +141,8 @@ function openCreateCardDialog() {
 </script>
 
 <template>
-  <div class="view-container" ref="viewContainer">
-    <div class="d-flex ga-2 py-4 px-12" v-if="getViewQuery.data.value">
+  <div class="view-container">
+    <div class="d-flex ga-2 py-4 px-12" v-if="viewCopy">
       <v-progress-linear
         indeterminate
         color="primary"
@@ -161,7 +166,7 @@ function openCreateCardDialog() {
       </div>
       <div class="d-flex align-center ga-2">
         <base-view-chip-group-by
-          v-model="getViewQuery.data.value.groupBy"
+          v-model="viewCopy.groupBy"
           @update:model-value="handleGroupBySelection"
         />
         <v-chip
@@ -174,48 +179,34 @@ function openCreateCardDialog() {
           <v-icon icon="mdi-filter" size="16" start />
           Filters
         </v-chip>
-        <v-chip
-          link
-          rounded="xl"
-          density="comfortable"
-          variant="outlined"
-          color="primary"
-        >
-          <v-icon icon="mdi-swap-vertical" size="16" start />
-          Sort
-        </v-chip>
-        <v-chip
-          link
-          rounded="xl"
-          density="comfortable"
-          variant="outlined"
-          color="primary"
-        >
-          <v-icon icon="mdi-eye" size="16" start />
-          Hide
-        </v-chip>
+        <base-view-chip-sort
+          :model-value="viewCopy.sortBy"
+          @update:model-value="handleSortBySelection"
+        />
       </div>
     </div>
 
-    <div
-      class="groups-container"
-      v-if="getViewQuery.data.value && getListGroupsQuery?.data.value"
-    >
-      <template
-        v-for="group in getListGroupsQuery.data.value"
-        :key="group.name"
+    <suspense>
+      <div
+        class="groups-container"
+        v-if="viewCopy && getListGroupsQuery?.data.value"
       >
-        <base-view-group
-          :view="getViewQuery.data.value"
-          :group="group"
-          v-model:options="paginationOptions"
-          :columns="columns"
-          @click:row="handleRowClick"
-          v-model:row:hovered="rowHovered"
-          class="mb-3"
-        />
-      </template>
-    </div>
+        <template
+          v-for="group in getListGroupsQuery.data.value"
+          :key="group.name"
+        >
+          <base-view-group
+            :view="viewCopy"
+            :group="group"
+            v-model:options="paginationOptions"
+            :columns="columns"
+            @click:row="handleRowClick"
+            v-model:row:hovered="rowHovered"
+            class="mb-3"
+          />
+        </template>
+      </div>
+    </suspense>
   </div>
 </template>
 
