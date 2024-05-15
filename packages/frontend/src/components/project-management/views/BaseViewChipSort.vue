@@ -8,7 +8,7 @@ import type { TableSortOption } from './TableView/types';
 const sortBy = defineModel<TableSortOption>();
 const sortByOptions = ref(DEFAULT_SORT_OPTIONS);
 const selectedOption = computed(() =>
-  sortByOptions.value.find((option) => option.value === sortBy.value)
+  sortByOptions.value.find((option) => isOptionSelected(option))
 );
 const isSortByFilled = computed(() => !!sortBy.value);
 const sortDirectionIcon = computed(() => {
@@ -21,13 +21,13 @@ function handleSortBySelection(option: ListSortOption) {
   if (isOptionSelected(option)) {
     toggleSortDirection();
   } else {
-    sortBy.value = option.value;
+    sortBy.value = { ...option.value };
     if (sortBy.value) sortBy.value.order = 'ASC';
   }
 }
 
 function isOptionSelected(option: ListSortOption) {
-  return option.value === sortBy.value;
+  return option.value.key === sortBy.value?.key;
 }
 
 function clearSortBy() {
@@ -36,7 +36,10 @@ function clearSortBy() {
 
 function toggleSortDirection() {
   if (sortBy.value) {
-    sortBy.value.order = sortBy.value?.order === 'ASC' ? 'DESC' : 'ASC';
+    sortBy.value = {
+      ...sortBy.value,
+      order: sortBy.value?.order === 'ASC' ? 'DESC' : 'ASC',
+    };
   }
 }
 </script>

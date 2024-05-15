@@ -24,13 +24,10 @@ import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
 
-    private logger = new Logger('UsersController')
+    private logger = new Logger("UsersController");
 
     @Get()
     findAll(@Request() request): Promise<UserFindAllResult> {
-        const { user } = request;
-        this.logger.debug({ user })
-        
         return this.usersService.findAll();
     }
 

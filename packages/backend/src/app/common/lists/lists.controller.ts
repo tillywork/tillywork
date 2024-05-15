@@ -19,6 +19,7 @@ import { ListStagesService } from "./list.stages.service";
 import { ListGroupOptions } from "./types";
 import { ListGroupsService } from "./list.groups.service";
 import { UpdateListGroupDto } from "./dto/update.list.group.dto";
+import { ViewSortOption } from "../views/types";
 
 @UseGuards(JwtAuthGuard)
 @Controller({
@@ -70,12 +71,16 @@ export class ListsController {
     @Post(":listId/groups")
     generateGroups(
         @Param("listId") listId: number,
-        @Body() body: { groupBy: ListGroupOptions }
+        @Body()
+        {
+            groupBy,
+            sortCardsBy,
+        }: { groupBy: ListGroupOptions; sortCardsBy: ViewSortOption[] }
     ) {
-        const { groupBy } = body;
         return this.listGroupsService.generateGroups({
             listId,
             groupBy: groupBy ?? ListGroupOptions.ALL,
+            sortCardsBy,
         });
     }
 

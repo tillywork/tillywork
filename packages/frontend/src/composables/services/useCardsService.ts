@@ -32,7 +32,7 @@ export interface GetGroupCardsInfiniteQueryParams {
   groupId: number;
   initialCards?: CardsData;
   filters?: QueryFilter;
-  sortBy?: TableSortOption;
+  sortBy?: Ref<TableSortOption | undefined>;
 }
 
 export const useCardsService = () => {
@@ -113,14 +113,13 @@ export const useCardsService = () => {
     sortBy,
   }: GetGroupCardsInfiniteQueryParams) {
     return useInfiniteQuery({
-      gcTime: 1000 * 6 * 5,
       queryFn: ({ pageParam = 1 }) =>
         getCards({
           listId: listId,
           page: pageParam,
           limit: 10,
           filters,
-          sortBy: sortBy ? [sortBy] : undefined,
+          sortBy: sortBy?.value ? [sortBy.value] : undefined,
         }),
       queryKey: ['cards', { groupId }],
       getNextPageParam: (lastPage, allPages, lastPageParam) => {
@@ -131,10 +130,13 @@ export const useCardsService = () => {
         return lastPageParam + 1;
       },
       initialPageParam: 1,
-      initialData: () => ({
-        pages: [initialCards],
-        pageParams: [1],
-      }),
+      initialData: () =>
+        initialCards
+          ? {
+              pages: [initialCards],
+              pageParams: [1],
+            }
+          : undefined,
     });
   }
 
