@@ -11,10 +11,12 @@ import { CreateListGroupDto } from "./dto/create.list.group.dto";
 import { FiltersService } from "../filters/filters.service";
 import { Filter } from "../filters/filter.entity";
 import { UpdateListGroupDto } from "./dto/update.list.group.dto";
+import { ViewSortOption } from "../views/types";
 
 export type GenerateGroupsParams = {
     listId: number;
     groupBy: ListGroupOptions;
+    sortCardsBy: ViewSortOption[];
 };
 
 const DEFAULT_GROUP: GeneratedGroup = {
@@ -82,6 +84,7 @@ export class ListGroupsService {
     async generateGroups({
         listId,
         groupBy,
+        sortCardsBy,
     }: GenerateGroupsParams): Promise<ListGroup[]> {
         const existingGroups = await this.findAll({ listId, groupBy });
 
@@ -148,7 +151,7 @@ export class ListGroupsService {
         await Promise.all(
             finalGroups.map((group) => {
                 return new Promise((resolve) => {
-                    this.getGroupCards({ group }).then((cards) => {
+                    this.getGroupCards({ group, sortCardsBy }).then((cards) => {
                         group.cards = cards;
                         resolve(cards.total);
                     });
@@ -312,12 +315,24 @@ export class ListGroupsService {
         return groups;
     }
 
-    async getGroupCards({ group }: { group: ListGroup }) {
+    async getGroupCards({
+        group,
+        sortCardsBy,
+    }: {
+        group: ListGroup;
+        sortCardsBy: ViewSortOption[];
+    }) {
+        const sortBy =
+            sortCardsBy && sortCardsBy.length
+                ? sortCardsBy[0].key
+                : "createdAt";
+        const sortOrder =
+            sortCardsBy && sortCardsBy.length ? sortCardsBy[0].order : "DESC";
         return this.cardsService.findAll({
             listId: group.listId,
             filters: group.filter,
-            sortBy: "createdAt",
-            sortOrder: "DESC",
+            sortBy,
+            sortOrder,
         });
     }
 

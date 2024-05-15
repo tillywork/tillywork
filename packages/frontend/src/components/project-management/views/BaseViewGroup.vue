@@ -1,18 +1,13 @@
 <script setup lang="ts">
 import { type ListGroup, type ListStage } from '../lists/types';
-import { type QueryObserverResult } from '@tanstack/vue-query';
 import TableView from '@/components/project-management/views/TableView/TableView.vue';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import BaseUserSelector from '@/components/common/inputs/BaseUserSelector.vue';
 import { type ColumnDef, type Row } from '@tanstack/vue-table';
 import type { Card, CreateCardDto } from '../cards/types';
 import type { User } from '@/components/common/users/types';
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
 import { useCardsService } from '@/composables/services/useCardsService';
-import { ref } from 'vue';
 import { useUsersService } from '@/composables/services/useUsersService';
-import { type PaginationParams } from './TableView/types';
 import { useListStagesService } from '@/composables/services/useListStagesService';
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
@@ -21,18 +16,14 @@ import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
 import { ViewTypes, type View } from './types';
 import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
+import type { TableSortOption } from './TableView/types';
 
 const props = defineProps<{
   group: ListGroup;
   view: View;
-  query?: QueryObserverResult<any, any>;
   columns: ColumnDef<any>[];
 }>();
 const emit = defineEmits(['click:row']);
-const paginationOptions = defineModel<PaginationParams>('options', {
-  required: true,
-});
-const itemsPerPage = ref(10);
 const rowHovered = defineModel<Row<Card>>('row:hovered');
 const isExpanded = ref(props.group.isExpanded);
 
@@ -43,13 +34,25 @@ const usersService = useUsersService();
 const cardsService = useCardsService();
 const listsStagesService = useListStagesService();
 const listGroupsService = useListGroupsService();
+const sortBy = ref<TableSortOption | undefined>(props.view.sortBy);
 
 const getGroupCardsQuery = cardsService.useGetGroupCardsInfinite({
   listId: listId.value,
   groupId: props.group.id,
   filters: props.group.filter,
   initialCards: props.group.cards,
+  sortBy,
 });
+
+watch(
+  () => props.view,
+  (v) => {
+    sortBy.value = v.sortBy;
+    getGroupCardsQuery.refetch();
+  },
+  { deep: true }
+);
+
 const { mutate: updateCardListStage } =
   cardsService.useUpdateCardListStageMutation();
 const createCardMutation = cardsService.useCreateCardMutation();
@@ -61,10 +64,10 @@ const updateListGroupMutation = listGroupsService.useUpdateListGroupMutation();
 
 const groupCards = computed(() => {
   let cards: Card[] = [];
-  const queryPages = [...(getGroupCardsQuery.data.value?.pages ?? [])];
+  const queryPages = getGroupCardsQuery.data.value?.pages ?? [];
   queryPages.forEach((pageData) => {
     if (pageData) {
-      cards = cards.concat(pageData.cards);
+      cards = [...cards, ...pageData.cards];
     }
   });
 
@@ -115,11 +118,15 @@ function toggleGroupExpansion() {
 }
 
 async function handleInfiniteScroll({ done }: any) {
-  getGroupCardsQuery.fetchNextPage();
-  if (getGroupCardsQuery.hasNextPage.value) {
-    done('ok');
+  if (!getGroupCardsQuery.isFetching.value) {
+    getGroupCardsQuery.fetchNextPage();
+    if (getGroupCardsQuery.hasNextPage.value) {
+      done('ok');
+    } else {
+      done('empty');
+    }
   } else {
-    done('empty');
+    done();
   }
 }
 

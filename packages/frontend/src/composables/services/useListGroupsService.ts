@@ -5,15 +5,18 @@ import type {
 } from '../../components/project-management/lists/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import { type Ref } from 'vue';
+import type { TableSortOption } from '@/components/project-management/views/TableView/types';
 
 export interface GetListGroupsByOptionParams {
   listId: number;
   groupBy: ListGroupOptions;
+  sortCardsBy?: TableSortOption[];
 }
 
 export type GetListGroupsQueryParams = {
   listId: number;
   groupBy: Ref<ListGroupOptions>;
+  sortCardsBy?: Ref<TableSortOption[] | undefined>;
   enabled: Ref<boolean>;
 };
 
@@ -24,11 +27,13 @@ export const useListGroupsService = () => {
   async function getListGroupsByOption({
     listId,
     groupBy,
+    sortCardsBy,
   }: GetListGroupsByOptionParams): Promise<ListGroup[]> {
     return sendRequest(`/lists/${listId}/groups`, {
       method: 'POST',
       data: {
         groupBy,
+        sortCardsBy,
       },
     });
   }
@@ -47,6 +52,7 @@ export const useListGroupsService = () => {
         getListGroupsByOption({
           listId: params.listId,
           groupBy: params.groupBy.value,
+          sortCardsBy: params.sortCardsBy?.value,
         }),
       enabled: params.enabled,
     });

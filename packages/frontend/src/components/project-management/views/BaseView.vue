@@ -12,10 +12,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import BaseViewGroup from './BaseViewGroup.vue';
-import {
-  DEFAULT_PAGINATION_OPTIONS,
-  type TableSortOption,
-} from './TableView/types';
+import { type TableSortOption, type TableSortState } from './TableView/types';
 import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import type { View } from './types';
@@ -66,21 +63,24 @@ const {
   data: view,
   isFetched: isViewFetched,
   isFetching: isViewFetching,
-  refetch: refetchView,
 } = viewsService.useGetViewQuery({
   id: props.viewId,
 });
 
+const sortBy = ref<TableSortState>();
 watch(
   view,
   (v) => {
     if (v) {
       viewCopy.value = {
         ...v,
-      } as View;
+      };
+      if (viewCopy.value.sortBy) {
+        sortBy.value = [{ ...viewCopy.value.sortBy }];
+      }
     }
   },
-  { deep: true, immediate: true }
+  { immediate: true }
 );
 
 watch(viewCopy, (view) => {
@@ -91,7 +91,6 @@ watch(viewCopy, (view) => {
 
 const groupBy = computed(() => {
   if (view.value?.groupBy) {
-    console.log(view.value.groupBy);
     return view.value.groupBy;
   } else {
     return ListGroupOptions.ALL;
@@ -101,11 +100,11 @@ const groupBy = computed(() => {
 const getListGroupsQuery = listGroupsService.useGetListGroupsByOptionQuery({
   listId: listId.value,
   groupBy,
+  sortCardsBy: sortBy,
   enabled: isViewFetched,
 });
 
 const updateViewMutation = viewsService.useUpdateViewMutation();
-const paginationOptions = ref(DEFAULT_PAGINATION_OPTIONS);
 
 watch(listId, () => {
   if (listId.value !== viewCopy.value?.listId) {
@@ -114,12 +113,7 @@ watch(listId, () => {
 });
 
 function handleRowClick(row: Row<Card>) {
-  //   router.push({
-  //     name: 'CardPage',
-  //     params: {
-  //       cardId: row.original.id,
-  //     },
-  //   });
+  router.push(`/pm/card/${row.original.id}`);
 }
 
 function handleGroupBySelection(option: ListGroupOptions) {
@@ -130,7 +124,10 @@ function handleGroupBySelection(option: ListGroupOptions) {
 }
 
 function handleSortBySelection(option: TableSortOption) {
-  console.log(option.key);
+  updateViewMutation.mutateAsync({
+    ...viewCopy.value,
+    sortBy: option ?? null, // If no option, we want to clear the sort by setting it to null
+  } as View);
 }
 
 function openCreateCardDialog() {
@@ -180,7 +177,7 @@ function openCreateCardDialog() {
           Filters
         </v-chip>
         <base-view-chip-sort
-          :model-value="viewCopy.sortBy"
+          v-model="viewCopy.sortBy"
           @update:model-value="handleSortBySelection"
         />
       </div>
@@ -198,7 +195,6 @@ function openCreateCardDialog() {
           <base-view-group
             :view="viewCopy"
             :group="group"
-            v-model:options="paginationOptions"
             :columns="columns"
             @click:row="handleRowClick"
             v-model:row:hovered="rowHovered"
