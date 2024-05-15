@@ -6,6 +6,7 @@ import App from './app/App.vue';
 import vuetify from './plugins/vuetify';
 import router from './router';
 import { VueQueryPlugin } from '@tanstack/vue-query';
+import { DataLoaderPlugin } from 'vue-router/auto';
 
 const app = createApp(App);
 
@@ -22,6 +23,7 @@ pinia.use(piniaPluginPersistedstate);
 
 app.use(pinia);
 app.use(vuetify);
+app.use(DataLoaderPlugin, { router });
 app.use(router);
 app.use(VueQueryPlugin);
 

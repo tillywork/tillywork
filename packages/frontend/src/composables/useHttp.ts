@@ -1,7 +1,6 @@
 import { useAuthStore } from '@/stores/auth';
 import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
 
-
 let axiosInstance: AxiosInstance;
 
 /**
@@ -40,7 +39,7 @@ const refreshTokenInterceptor = async (error: any) => {
 const createAxiosInstance = () => {
   const { token } = useAuthStore();
   const instance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: import.meta.env.TW_API_URL,
   });
 
   instance.interceptors.request.use(

@@ -5,7 +5,7 @@ defineProps<{
   photo?: string;
   text?: string;
   color?: string;
-  style?: string;
+  style?: any;
   size?: number | 'x-small' | 'small' | 'default';
   rounded?: string;
 }>();
