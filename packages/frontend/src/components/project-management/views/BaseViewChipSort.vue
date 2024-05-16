@@ -45,7 +45,7 @@ function toggleSortDirection() {
 </script>
 
 <template>
-  <v-menu offset="5" :close-on-content-click="false">
+  <v-menu offset="5" :close-on-content-click="false" transition="none">
     <template #activator="{ props }">
       <base-view-chip
         v-bind="props"

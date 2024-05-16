@@ -8,7 +8,6 @@ import { useListGroupsService } from '@/composables/services/useListGroupsServic
 import type { Card } from '../cards/types';
 import { computed } from 'vue';
 import { type ColumnDef, type Row } from '@tanstack/vue-table';
-import { useQueryClient } from '@tanstack/vue-query';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import BaseViewGroup from './BaseViewGroup.vue';
@@ -58,7 +57,6 @@ const columns = ref<ColumnDef<Card, any>[]>([
 
 const rowHovered = ref<Row<Card>>();
 
-const queryClient = useQueryClient();
 const {
   data: view,
   isFetched: isViewFetched,

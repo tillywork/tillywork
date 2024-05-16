@@ -28,7 +28,7 @@ const rowHovered = defineModel<Row<Card>>('row:hovered');
 const isExpanded = ref(props.group.isExpanded);
 
 const dialog = useDialog();
-const route = useRoute();
+const route = useRoute('/pm/list/[listId]/view/[viewId]');
 const listId = computed(() => +route.params.listId);
 const usersService = useUsersService();
 const cardsService = useCardsService();
