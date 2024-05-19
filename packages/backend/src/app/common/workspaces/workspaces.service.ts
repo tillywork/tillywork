@@ -19,9 +19,8 @@ export class WorkspacesService {
         private workspaceSideEffectsService: WorkspaceSideEffectsService
     ) {}
 
-    async findAll(options?: FindManyOptions): Promise<WorkspaceFindAllResult> {
-        const result = await this.workspacesRepository.findAndCount(options);
-        return { workspaces: result[0], total: result[1] };
+    async findAll(options?: FindManyOptions): Promise<Workspace[]> {
+        return this.workspacesRepository.find(options);
     }
 
     async findOne(id: number): Promise<Workspace> {
@@ -42,9 +41,12 @@ export class WorkspacesService {
         const workspace = this.workspacesRepository.create(createWorkspaceDto);
         await this.workspacesRepository.save(workspace);
 
-        const postCreate = await this.workspaceSideEffectsService.postCreate(
-            workspace
-        );
+        if (createWorkspaceDto.createOnboardingData) {
+            const space = await this.workspaceSideEffectsService.postCreate(
+                workspace
+            );
+            workspace.spaces = [space];
+        }
 
         return workspace;
     }
@@ -60,6 +62,6 @@ export class WorkspacesService {
 
     async remove(id: number): Promise<void> {
         const workspace = await this.findOne(id);
-        await this.workspacesRepository.remove(workspace);
+        await this.workspacesRepository.softRemove(workspace);
     }
 }

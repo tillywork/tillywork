@@ -18,7 +18,10 @@ export class CardList {
     @ManyToOne(() => Card, (card) => card.cardLists, { nullable: false })
     card: Card;
 
-    @ManyToOne(() => List, (list) => list.cardLists, { nullable: false })
+    @ManyToOne(() => List, (list) => list.cardLists, {
+        nullable: false,
+        onDelete: "CASCADE",
+    })
     list: List;
     @Column({ type: "bigint", nullable: false })
     listId: number;

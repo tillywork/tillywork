@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { useRoute } from 'vue-router';
+import type { VForm } from 'vuetify/components';
 
+const logo = useLogo();
+const loginForm = ref<VForm>();
 const email = ref('');
 const password = ref('');
 const errorMessage = ref<string | null>(null);
@@ -12,45 +14,53 @@ const rules = {
   email: (value: any) => /.+@.+\..+/.test(value) || 'Email must be valid',
 };
 const loading = ref(false);
-const route = useRoute();
+const route = useRoute('/login');
 
 const login = async () => {
-  try {
-    const { login } = useAuthStore();
+  if (loginForm.value?.isValid) {
+    try {
+      const { login } = useAuthStore();
 
-    loading.value = true;
-    await login(email.value, password.value);
-    loading.value = false;
-    window.location.pathname = route.redirectedFrom?.fullPath ?? '/';
-  } catch (error) {
-    const { showSnackbar } = useSnackbarStore();
+      loading.value = true;
+      await login(email.value, password.value);
+      loading.value = false;
+      window.location.pathname = route.redirectedFrom?.fullPath ?? '/';
+    } catch (error) {
+      const { showSnackbar } = useSnackbarStore();
 
-    loading.value = false;
-    const errorObj = (error as any).value ?? error;
+      loading.value = false;
+      const errorObj = (error as any).value ?? error;
 
-    console.error(errorObj);
+      console.error(errorObj);
 
-    if (errorObj.statusCode === 401) {
-      errorMessage.value = 'Invalid email or password';
-    } else {
-      errorMessage.value = 'An unknown error occurred';
+      if (errorObj.statusCode === 401) {
+        errorMessage.value = 'Invalid email or password';
+      } else {
+        errorMessage.value = 'An unknown error occurred';
+      }
+      showSnackbar({
+        message: errorMessage.value,
+        color: 'error',
+      });
     }
-    showSnackbar({
-      message: errorMessage.value,
-      color: 'error',
-    });
   }
 };
 </script>
 
 <template>
-  <v-container>
-    <v-row justify="center">
-      <v-col cols="12" sm="8" md="6">
-        <v-card class="pa-4">
-          <v-card-title class="text-h5 mb-6">Welcome back!</v-card-title>
-          <v-card-text>
-            <v-form @submit.prevent="login">
+  <v-container class="fill-height">
+    <v-row class="justify-center">
+      <v-col cols="12" sm="8" md="6" class="mt-n12">
+        <v-img
+          :src="logo.getLogoUrlByTheme()"
+          alt="tillywork"
+          width="225"
+          class="mx-auto mb-3"
+        />
+        <v-form ref="loginForm" @submit.prevent="login">
+          <v-card color="accent" class="pa-4">
+            <v-card-title class="text-h5 mb-4">Welcome back!</v-card-title>
+            <v-card-text>
               <v-text-field
                 v-model="email"
                 label="Email"
@@ -64,12 +74,20 @@ const login = async () => {
                 required
                 :rules="[rules.required]"
               ></v-text-field>
-              <v-btn type="submit" color="primary" :loading="loading"
+            </v-card-text>
+            <v-card-actions class="px-4 pt-0">
+              <v-spacer />
+              <v-btn
+                type="submit"
+                variant="flat"
+                color="primary"
+                :loading="loading"
+                class="text-body-2"
                 >Login</v-btn
               >
-            </v-form>
-          </v-card-text>
-        </v-card>
+            </v-card-actions>
+          </v-card>
+        </v-form>
       </v-col>
     </v-row>
   </v-container>

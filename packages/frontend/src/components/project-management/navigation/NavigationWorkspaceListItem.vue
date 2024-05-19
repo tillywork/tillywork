@@ -45,6 +45,7 @@ function clearHoverFreeze() {
         <navigation-workspace-list-item-menu
           @hover:freeze="setHoverFreeze(list)"
           @hover:unfreeze="clearHoverFreeze"
+          :list
         />
       </template>
     </v-list-item>

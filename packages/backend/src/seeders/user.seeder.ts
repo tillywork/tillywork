@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Connection } from "typeorm";
 import { UsersService } from "../app/common/users/users.service";
 import { User } from "../app/common/users/user.entity";
@@ -52,7 +53,7 @@ export async function seedUserData(connection: Connection): Promise<void> {
         connection.getRepository(Project)
     );
 
-    const email = "dev@fd.com";
+    const email = "dev@tw.com";
     const password = "12345678";
     const workspaceName = "My Workspace";
     const projectName = "Starter Project";
@@ -62,7 +63,7 @@ export async function seedUserData(connection: Connection): Promise<void> {
     let project: Project;
 
     logger.log("Seeding user data...");
-    logger.log("Email: dev@fd.com", "Password: 12345678");
+    logger.log("Email: dev@tw.com", "Password: 12345678");
 
     // Check if test user already exists or not
     const testUser = await usersService.findOneByEmail(email);
@@ -75,6 +76,7 @@ export async function seedUserData(connection: Connection): Promise<void> {
             password,
             firstName: faker.person.firstName(),
             lastName: faker.person.lastName(),
+            phoneNumber: faker.phone.number(),
         });
         logger.log("Test user created successfully...");
     }
@@ -106,7 +108,7 @@ export async function seedUserData(connection: Connection): Promise<void> {
         workspace = await workspacesService.create({
             name: workspaceName,
             ownerId: user.id,
-            workspaceType: WorkspaceTypes.PROJECT_MANAGEMENT,
+            type: WorkspaceTypes.PROJECT_MANAGEMENT,
             projectId: project.id,
         });
         logger.log("Test workspace created successfully...");

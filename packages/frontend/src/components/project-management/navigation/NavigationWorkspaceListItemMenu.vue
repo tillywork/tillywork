@@ -1,14 +1,59 @@
 <script setup lang="ts">
-import { watch } from 'vue';
-import { ref } from 'vue';
+import BaseIconBtn from '@/components/common/base/BaseIconBtn.vue';
+import type { List } from '../lists/types';
+import { useListsService } from '@/composables/services/useListsService';
+import { useSnackbarStore } from '@/stores/snackbar';
+import { useQueryClient } from '@tanstack/vue-query';
+import { useDialog } from '@/composables/useDialog';
+import { DIALOGS } from '@/components/common/dialogs/types';
 
 const listMenu = ref(false);
+const listsService = useListsService();
+const { showSnackbar } = useSnackbarStore();
+const queryClient = useQueryClient();
+const dialog = useDialog();
 
+const deleteListMutation = listsService.useDeleteListMutation();
+
+defineProps<{
+  list: List;
+}>();
 const emit = defineEmits(['hover:freeze', 'hover:unfreeze']);
 
 function handleListMenuClick() {
   listMenu.value = !listMenu.value;
   emit('hover:freeze');
+}
+
+function handleDeleteList(list: List) {
+  dialog.openDialog({
+    dialog: DIALOGS.CONFIRM,
+    data: {
+      title: 'Confirm',
+      message: 'Are you sure you want to delete this list?',
+      onCancel: dialog.closeDialog,
+      onConfirm: () => deleteList(list),
+      isLoading: deleteListMutation.isPending.value,
+    },
+  });
+}
+
+function deleteList(list: List) {
+  deleteListMutation
+    .mutateAsync(list.id)
+    .then(() => {
+      queryClient.invalidateQueries({ queryKey: ['spaces'] });
+      queryClient.invalidateQueries({ queryKey: ['list', list.id] });
+      dialog.closeDialog();
+    })
+    .catch((e) => {
+      console.log(e);
+      showSnackbar({
+        message: 'Something went wrong, please try again.',
+        color: 'error',
+        timeout: 3000,
+      });
+    });
 }
 
 watch(listMenu, () => {
@@ -19,27 +64,33 @@ watch(listMenu, () => {
 </script>
 
 <template>
-  <v-btn
+  <base-icon-btn
     id="list-menu-btn"
-    color="default"
-    density="compact"
     icon="mdi-dots-vertical"
-    rounded="md"
-    size="small"
     @click.stop
     @click="handleListMenuClick"
+    density="compact"
   />
 
   <v-menu
     v-model="listMenu"
-    :close-on-content-click="false"
     target="#list-menu-btn"
+    offset="3"
+    width="200"
+    :close-on-content-click="false"
   >
-    <v-card color="accent" class="pt-3 mt-2" width="300px" density="compact">
-      <div class="px-5 text-truncate mb-2">
-        <v-icon size="small">mdi-sitemap</v-icon>
-        <span class="ml-1"> Your workspaces </span>
-      </div>
+    <v-card color="accent" :loading="deleteListMutation.isPending.value">
+      <v-list nav>
+        <v-list-item
+          class="text-error text-body-2"
+          @click="handleDeleteList(list)"
+        >
+          <template #prepend>
+            <v-icon size="18" icon="mdi-delete" />
+          </template>
+          Delete
+        </v-list-item>
+      </v-list>
     </v-card>
   </v-menu>
 </template>

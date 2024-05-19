@@ -14,6 +14,7 @@ export class WorkspaceSideEffectsService {
                     .create({
                         name: space.name,
                         workspaceId: workspace.id,
+                        createOnboardingData: true,
                     })
                     .then((space) => resolve(space));
             });
@@ -21,6 +22,6 @@ export class WorkspaceSideEffectsService {
 
         const result = await Promise.allSettled(spacePromises);
 
-        return result.every((promise) => promise.status === "fulfilled");
+        return (result[0] as any).value;
     }
 }

@@ -87,11 +87,6 @@ export const useListStagesService = () => {
   }
 
   return {
-    getListStages,
-    getListStage,
-    createListStage,
-    updateListStage,
-    deleteListStage,
     useGetListStagesQuery,
     useGetListStageQuery,
     useCreateListStageMutation,

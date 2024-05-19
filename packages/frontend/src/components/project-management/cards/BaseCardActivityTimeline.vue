@@ -30,12 +30,15 @@ const deleteActivity = cardActivitiesService.useDeleteActivityMutation({
 });
 
 function openConfirmDeleteDialog(comment: CardActivity) {
-  dialog.openDialog(DIALOGS.CONFIRM, {
-    title: 'Confirm',
-    message: 'Are you sure you want to delete this comment?',
-    onCancel: dialog.closeDialog,
-    onConfirm: () => deleteComment(comment),
-    isLoading: deleteActivity.isPending.value,
+  dialog.openDialog({
+    dialog: DIALOGS.CONFIRM,
+    data: {
+      title: 'Confirm',
+      message: 'Are you sure you want to delete this comment?',
+      onCancel: dialog.closeDialog,
+      onConfirm: () => deleteComment(comment),
+      isLoading: deleteActivity.isPending.value,
+    },
   });
 }
 
@@ -80,7 +83,7 @@ function deleteComment(comment: CardActivity) {
           </template>
           <span>
             {{
-              user.id === activity.createdBy.id
+              user?.id === activity.createdBy.id
                 ? 'You'
                 : activity.createdBy.firstName
             }}
@@ -108,7 +111,7 @@ function deleteComment(comment: CardActivity) {
             >
               <span>
                 {{
-                  user.id === activity.createdBy.id
+                  user?.id === activity.createdBy.id
                     ? 'You'
                     : activity.createdBy.firstName +
                       ' ' +

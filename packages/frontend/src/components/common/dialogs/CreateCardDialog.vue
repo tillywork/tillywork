@@ -4,10 +4,7 @@ import BaseIconBtn from '../base/BaseIconBtn.vue';
 import ListStageSelector from '../inputs/ListStageSelector.vue';
 import BaseUserSelector from '../inputs/BaseUserSelector.vue';
 import BaseDatePicker from '../inputs/BaseDatePicker.vue';
-import type {
-  Card,
-  CreateCardDto,
-} from '@/components/project-management/cards/types';
+import type { CreateCardDto } from '@/components/project-management/cards/types';
 import { ref } from 'vue';
 import { useDialog } from '@/composables/useDialog';
 import { type List } from '@/components/project-management/lists/types';
@@ -71,16 +68,17 @@ async function createCard() {
     createCardDto.value.listId
   ) {
     createCardDto.value.listStageId = createCardDto.value.listStage.id;
-    createCardMutation.mutate(createCardDto.value);
+    createCardMutation.mutateAsync(createCardDto.value).then(() => {
+      handlePostCreate();
+    });
   }
 }
 
 /**
  * Reset title and description fields.
  * If create more is on, don't close the dialog.
- * @param card
  */
-function handlePostCreate(card: Card) {
+function handlePostCreate() {
   createCardDto.value.title = '';
   createCardDto.value.description = undefined;
 

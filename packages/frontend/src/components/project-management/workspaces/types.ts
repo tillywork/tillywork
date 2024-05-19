@@ -1,14 +1,18 @@
+import type { Space } from '../spaces/types';
+
 export interface Workspace {
-	id: number;
-	name: string;
-	ownerId: number;
-    projectId: number;
-    workspaceType: WorkspaceTypes;
-	createdAt: string;
-	updatedAt: string;
+  id: number;
+  name: string;
+  ownerId: number;
+  projectId: number;
+  type: WorkspaceTypes;
+  spaces: Space[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export enum WorkspaceTypes {
-	CRM = 'CRM',
-	PROJECT_MANAGEMENT = 'PROJECT_MANAGEMENT',
+  CRM = 'crm',
+  PROJECT_MANAGEMENT = 'project_mangement',
+  AGILE_PROJECTS = 'agile_projects',
 }

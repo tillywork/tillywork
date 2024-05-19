@@ -16,8 +16,14 @@ const listMenu = ref(false);
 const freezeListHoverId = ref<number | null>();
 const freezeSpaceHoverId = ref<number | null>();
 
+const enableSpacesFetch = ref(false);
+
 const workspaceId = computed(() => selectedWorkspace.value?.id);
-const spacesQuery = spacesService.useGetSpacesQuery(workspaceId.value);
+
+const spacesQuery = spacesService.useGetSpacesQuery({
+  workspaceId: workspaceId,
+  enabled: enableSpacesFetch,
+});
 
 const currentSpaceExpansionState = computed({
   get: () =>
@@ -35,6 +41,7 @@ watch(
   selectedWorkspace,
   async (workspace) => {
     if (workspace) {
+      enableSpacesFetch.value = true;
       spacesQuery.refetch();
 
       // TODO: Navigate to workspace on change
@@ -61,10 +68,8 @@ watch(createListDialog, (isOpen) => {
     <!-- Spaces -->
     <v-list
       v-model:opened="currentSpaceExpansionState"
-      nav
-      density="compact"
-      :lines="false"
       open-strategy="multiple"
+      v-if="selectedWorkspace"
     >
       <template
         v-if="spacesQuery.data.value && spacesQuery.data.value.length > 0"

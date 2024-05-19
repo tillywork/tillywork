@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { storeToRefs } from 'pinia';
-import { validation } from '@/utils/validation';
+import validationUtils from '@/utils/validation';
 import { VForm } from 'vuetify/lib/components/index.mjs';
 import { useListsService } from '@/composables/services/useListsService';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
@@ -100,7 +100,7 @@ function handleCreateListDialogClick() {
             prepend-inner-icon="mdi-file-cabinet"
             single-line
             label="List Name"
-            :rules="[validation.rules.required]"
+            :rules="[validationUtils.rules.required]"
           />
         </v-card-text>
         <v-divider />

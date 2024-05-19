@@ -2,6 +2,12 @@
 import BaseCard from '@/components/project-management/cards/BaseCard.vue';
 import { useCardsService } from '@/composables/services/useCardsService';
 
+definePage({
+  meta: {
+    requiresAuth: true,
+  },
+});
+
 const route = useRoute('/pm/card/[cardId]');
 const cardsService = useCardsService();
 

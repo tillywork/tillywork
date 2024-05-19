@@ -8,6 +8,7 @@ import { JwtAuthGuard } from "./guards/jwt.auth.guard";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { LocalStrategy } from "./strategies/local.strategy";
 import { ConfigModule } from "@nestjs/config";
+import { ProjectsModule } from "../projects/projects.module";
 
 @Module({
     imports: [
@@ -17,6 +18,7 @@ import { ConfigModule } from "@nestjs/config";
             signOptions: { expiresIn: "7d" },
         }),
         ConfigModule.forRoot(),
+        forwardRef(() => ProjectsModule),
     ],
     providers: [
         AuthService,

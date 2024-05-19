@@ -4,7 +4,7 @@ import { useWorkspacesService } from '@/composables/services/useWorkspacesServic
 import { useWorkspaceStore } from '@/stores/workspace';
 import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
-import { validation } from '@/utils/validation';
+import validationUtils from '@/utils/validation';
 import { VForm } from 'vuetify/lib/components/index.mjs';
 import { WorkspaceTypes } from '../workspaces/types';
 import { useMutation, useQueryClient } from '@tanstack/vue-query';
@@ -20,7 +20,7 @@ const createWorkspaceData = ref({
   name: '',
   ownerId: user.value.id,
   projectId: selectedWorkspace.value?.projectId,
-  workspaceType: WorkspaceTypes.PROJECT_MANAGEMENT,
+  type: WorkspaceTypes.PROJECT_MANAGEMENT,
 });
 
 const queryClient = useQueryClient();
@@ -89,10 +89,10 @@ async function createWorkspace() {
               prepend-inner-icon="mdi-file-cabinet"
               single-line
               label="Workspace Name"
-              :rules="[validation.rules.required]"
+              :rules="[validationUtils.rules.required]"
             />
             <v-select
-              v-model="createWorkspaceData.workspaceType"
+              v-model="createWorkspaceData.type"
               prepend-inner-icon="mdi-filter-variant"
               density="compact"
               label="Workspace Type"

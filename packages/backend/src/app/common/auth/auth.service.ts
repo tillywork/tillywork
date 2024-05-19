@@ -3,16 +3,28 @@ import { UsersService } from "../users/users.service";
 import { JwtService } from "@nestjs/jwt";
 import { User } from "../users/user.entity";
 import bcrypt from "bcrypt";
+import { CreateUserDto } from "../users/dto/create.user.dto";
+import { ProjectsService } from "../projects/projects.service";
+
+export type RegisterResponse =
+    | (User & {
+          accessToken: string;
+      })
+    | {
+          error: "EMAIL_EXISTS";
+      };
 
 @Injectable()
 export class AuthService {
     private readonly logger = new Logger("AuthService");
     constructor(
         private usersService: UsersService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private projectsService: ProjectsService
     ) {}
 
     async login(user: User): Promise<string> {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password, ...userWithoutPassword } = user;
         const payload = { ...userWithoutPassword, sub: user.id };
         return this.jwtService.sign(payload);
@@ -33,7 +45,7 @@ export class AuthService {
             const user = await this.usersService.findOneByEmailWithPassword(
                 email
             );
-            this.logger.debug({ user });
+
             if (
                 user &&
                 (await this.validatePassword(password, user.password))
@@ -45,5 +57,28 @@ export class AuthService {
         } catch (error) {
             return null;
         }
+    }
+
+    async register(createUserDto: CreateUserDto): Promise<RegisterResponse> {
+        const emailCheck = await this.usersService.findOneByEmail(
+            createUserDto.email
+        );
+
+        if (emailCheck) {
+            return {
+                error: "EMAIL_EXISTS",
+            };
+        }
+
+        const createdUser = await this.usersService.create(createUserDto);
+        await this.projectsService.create({
+            name: `${createdUser.firstName}'s Project`,
+            ownerId: createdUser.id,
+            users: [createdUser],
+        });
+
+        const accessToken = await this.login(createdUser);
+
+        return { ...createdUser, accessToken };
     }
 }

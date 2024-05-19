@@ -9,6 +9,7 @@ export interface ListsData {
 
 export const useListsService = () => {
   const { sendRequest } = useHttp();
+  const queryClient = useQueryClient();
 
   async function getLists({
     workspaceId,
@@ -60,6 +61,7 @@ export const useListsService = () => {
     return useQuery({
       queryKey: ['list', id],
       queryFn: () => getList(id),
+      retry: false,
     });
   }
 
@@ -67,7 +69,6 @@ export const useListsService = () => {
     return useMutation({
       mutationFn: createList,
       onSuccess: () => {
-        const queryClient = useQueryClient();
         queryClient.invalidateQueries({ queryKey: ['lists'] });
       },
     });
@@ -77,7 +78,6 @@ export const useListsService = () => {
     return useMutation({
       mutationFn: updateList,
       onSuccess: () => {
-        const queryClient = useQueryClient();
         queryClient.invalidateQueries({ queryKey: ['lists'] });
       },
     });
@@ -87,18 +87,12 @@ export const useListsService = () => {
     return useMutation({
       mutationFn: deleteList,
       onSuccess: () => {
-        const queryClient = useQueryClient();
         queryClient.invalidateQueries({ queryKey: ['lists'] });
       },
     });
   }
 
   return {
-    getLists,
-    getList,
-    createList,
-    updateList,
-    deleteList,
     useGetListsQuery,
     useGetListQuery,
     useCreateListMutation,

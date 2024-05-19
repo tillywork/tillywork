@@ -17,12 +17,14 @@
     "@tiptap/vue-3": "^2.3.1",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vueuse/core": "^10.9.0",
+    "flag-icons": "^7.2.1",
     "lodash": "^4.17.21",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
+    "v-phone-input": "^4.1.2",
     "veaury": "^2.3.16",
     "vue-router": "^4.2.5",
-    "vuetify": "^3.5.17"
+    "vuetify": "^3.6.6"
   },
   "devDependencies": {
     "unplugin-auto-import": "^0.17.6",

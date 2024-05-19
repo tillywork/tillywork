@@ -37,7 +37,7 @@ export class View {
     @UpdateDateColumn({ type: "timestamp" })
     updatedAt: Date;
 
-    @ManyToOne(() => List, (list) => list.views)
+    @ManyToOne(() => List, (list) => list.views, { onDelete: "CASCADE" })
     @JoinColumn()
     list: List;
 

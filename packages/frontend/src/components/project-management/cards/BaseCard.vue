@@ -18,7 +18,7 @@ import { useListStagesService } from '@/composables/services/useListStagesServic
 import { useCardActivitiesService } from '@/composables/services/useCardActivitiesService';
 import type { User } from '@/components/common/users/types';
 import type { ListStage } from '../lists/types';
-import objectHelper from '@/utils/object';
+import objectUtils from '@/utils/object';
 
 dayjs.extend(relativeTime);
 
@@ -56,13 +56,13 @@ const isCardLoading = computed(() => {
 });
 
 const cardTitle = ref(cardCopy.value.title);
-const debouncedTitle = useDebounce(cardTitle, 1000);
+const debouncedTitle = useDebounce(cardTitle, 2000);
 watch(debouncedTitle, () => {
   updateTitle();
 });
 
 const cardDescription = ref(cardCopy.value.description);
-const debouncedDescription = useDebounce(cardDescription, 1000);
+const debouncedDescription = useDebounce(cardDescription, 2000);
 watch(debouncedDescription, () => {
   updateDescription();
 });
@@ -86,10 +86,11 @@ function updateTitle() {
 function updateDescription() {
   if (
     cardDescription.value &&
-    !objectHelper.isEqual(
-      cardDescription.value as any,
-      cardCopy.value.description as any
-    )
+    (!cardCopy.value.description ||
+      !objectUtils.isEqual(
+        cardDescription.value as any,
+        cardCopy.value.description
+      ))
   ) {
     cardCopy.value.description = cardDescription.value;
     updateCardMutation.mutateAsync(cardCopy.value).then(() => {
@@ -229,7 +230,7 @@ function updateCardListStage(listStage: ListStage) {
             v-model="cardCopy.users"
             :users="usersQuery.data.value?.users ?? []"
             @update:model-value="updateCardAssignees"
-            class="ms-n3 my-4"
+            content-class="ms-n3 my-4"
             show-first-names
             label="Assign"
           />

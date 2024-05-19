@@ -1,10 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
 import { CommonModule } from "./common/common.module";
-import { CRMModule } from "./crm/crm.module";
 import { TypeOrmLoggerContainer } from "./common/logger/typeorm.logger.container";
 
 @Module({
@@ -41,10 +38,9 @@ import { TypeOrmLoggerContainer } from "./common/logger/typeorm.logger.container
             inject: [ConfigService],
         }),
         CommonModule,
-        CRMModule,
     ],
-    controllers: [AppController],
-    providers: [AppService],
+    controllers: [],
+    providers: [],
     exports: [],
 })
 export class AppModule {}

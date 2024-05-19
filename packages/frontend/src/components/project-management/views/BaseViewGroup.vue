@@ -131,10 +131,13 @@ async function handleInfiniteScroll({ done }: any) {
 }
 
 function openCreateCardDialog(group: ListGroup) {
-  dialog.openDialog(DIALOGS.CREATE_CARD, {
-    listId: listId.value,
-    listStage: getCurrentStage(group),
-    users: getCurrentAssignee(group),
+  dialog.openDialog({
+    dialog: DIALOGS.CREATE_CARD,
+    data: {
+      listId: listId.value,
+      listStage: getCurrentStage(group),
+      users: getCurrentAssignee(group),
+    },
   });
 }
 

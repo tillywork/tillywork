@@ -72,8 +72,6 @@ export const useListGroupsService = () => {
   }
 
   return {
-    getListGroupsByOption,
-    update,
     useGetListGroupsByOptionQuery,
     useUpdateListGroupMutation,
   };

@@ -43,7 +43,7 @@ export class ListsService {
         const list = this.listsRepository.create(createListDto);
         await this.listsRepository.save(list);
 
-        const postCreate = await this.listSideEffectsService.postCreate(list);
+        await this.listSideEffectsService.postCreate(list);
 
         return list;
     }

@@ -1,7 +1,6 @@
 import { useHttp } from '@/composables/useHttp';
 import type { View } from '../../components/project-management/views/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
-import type { Ref } from 'vue';
 
 export interface ViewsData {
   views: View[];
@@ -94,11 +93,6 @@ export const useViewsService = () => {
   }
 
   return {
-    getViews,
-    getView,
-    createView,
-    updateView,
-    deleteView,
     useGetViewsQuery,
     useGetViewQuery,
     useCreateViewMutation,

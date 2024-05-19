@@ -8,9 +8,9 @@ import {
     ManyToMany,
     JoinTable,
     ManyToOne,
+    DeleteDateColumn,
 } from "typeorm";
 import { User } from "../users/user.entity";
-import { Contact } from "../../crm/contacts/contact.entity";
 import { Space } from "../spaces/space.entity";
 import { Project } from "../projects/project.entity";
 import { WorkspaceTypes } from "./types";
@@ -27,12 +27,14 @@ export class Workspace {
     ownerId: number;
 
     @Column({ type: "enum", enum: WorkspaceTypes })
-    workspaceType: WorkspaceTypes;
+    type: WorkspaceTypes;
 
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;
     @UpdateDateColumn({ type: "timestamp" })
     updatedAt: Date;
+    @DeleteDateColumn({ type: "timestamp" })
+    deletedAt: Date;
 
     @ManyToOne(() => Project, (project) => project.workspaces)
     @JoinTable()
@@ -46,7 +48,4 @@ export class Workspace {
     @ManyToMany(() => User, (user) => user.projects)
     @JoinTable()
     users: User[];
-
-    @OneToMany(() => Contact, (contact) => contact.project)
-    contacts: Contact[];
 }

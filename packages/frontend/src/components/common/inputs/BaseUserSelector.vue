@@ -16,7 +16,7 @@ defineProps<{
   users: User[];
   activatorHoverText?: string;
   size?: number | 'x-small' | 'small' | 'default';
-  class?: string;
+  contentClass?: string;
   showFirstNames?: boolean;
   label?: string;
 }>();
@@ -47,7 +47,7 @@ const isUserSelected = (user: User) => {
     <template #activator="{ props: menuProps }">
       <div
         class="d-flex align-center justify-start rounded-md px-1 cursor-pointer"
-        :class
+        :class="contentClass"
         v-bind="menuProps"
       >
         <div class="me-n1" v-if="value.length === 0">

@@ -15,6 +15,7 @@ import { type TableSortOption, type TableSortState } from './TableView/types';
 import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import type { View } from './types';
+import { useQueryClient } from '@tanstack/vue-query';
 
 const props = defineProps<{
   viewId: number;
@@ -26,6 +27,7 @@ const listId = computed(() => +route.params.listId);
 const viewsService = useViewsService();
 const listGroupsService = useListGroupsService();
 const dialog = useDialog();
+const queryClient = useQueryClient();
 
 const isPageLoading = computed(() => {
   return (
@@ -129,8 +131,11 @@ function handleSortBySelection(option: TableSortOption) {
 }
 
 function openCreateCardDialog() {
-  dialog.openDialog(DIALOGS.CREATE_CARD, {
-    list: queryClient.getQueryData(['list', listId.value]),
+  dialog.openDialog({
+    dialog: DIALOGS.CREATE_CARD,
+    data: {
+      list: queryClient.getQueryData(['list', listId.value]),
+    },
   });
 }
 </script>

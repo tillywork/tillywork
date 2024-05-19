@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Logger as TypeOrmLogger, QueryRunner } from "typeorm";
 import { LoggerOptions as TypeOrmLoggerOptions } from "typeorm/logger/LoggerOptions";
 import { Logger } from "@nestjs/common";
@@ -7,9 +9,7 @@ import { Logger } from "@nestjs/common";
  * https://github.com/typeorm/typeorm/blob/master/src/logger/SimpleConsoleLogger.ts
  */
 export class TypeOrmLoggerContainer implements TypeOrmLogger {
-    static ForConnection(
-        options: TypeOrmLoggerOptions
-    ) {
+    static ForConnection(options: TypeOrmLoggerOptions) {
         const logger = new Logger(`TypeORM`);
         return new TypeOrmLoggerContainer(logger, options);
     }

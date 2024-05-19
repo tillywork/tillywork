@@ -7,7 +7,6 @@ import {
     Delete,
     Put,
     UseGuards,
-    Request,
 } from "@nestjs/common";
 import { FilterFindAllResult, FiltersService } from "./filters.service";
 import { Filter } from "./filter.entity";
@@ -24,8 +23,7 @@ export class FiltersController {
     constructor(private readonly filtersService: FiltersService) {}
 
     @Get()
-    findAll(@Request() req): Promise<FilterFindAllResult> {
-        const { user } = req;
+    findAll(): Promise<FilterFindAllResult> {
         return this.filtersService.findAll();
     }
 

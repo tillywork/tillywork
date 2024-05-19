@@ -7,7 +7,6 @@ import {
     Delete,
     Put,
     UseGuards,
-    Request,
     Logger,
 } from "@nestjs/common";
 import { UserFindAllResult, UsersService } from "./users.service";
@@ -27,7 +26,7 @@ export class UsersController {
     private logger = new Logger("UsersController");
 
     @Get()
-    findAll(@Request() request): Promise<UserFindAllResult> {
+    findAll(): Promise<UserFindAllResult> {
         return this.usersService.findAll();
     }
 

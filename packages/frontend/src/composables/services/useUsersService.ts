@@ -1,6 +1,6 @@
 import { useHttp } from '@/composables/useHttp';
 import type { User } from '@/components/common/users/types';
-import { useQuery } from '@tanstack/vue-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 
 export interface UsersData {
   users: User[];
@@ -9,6 +9,7 @@ export interface UsersData {
 
 export const useUsersService = () => {
   const { sendRequest } = useHttp();
+  const queryClient = useQueryClient();
 
   async function getUsers(): Promise<UsersData> {
     return sendRequest('/users', {
@@ -24,8 +25,22 @@ export const useUsersService = () => {
     });
   }
 
+  function updateUser(user: Partial<User>) {
+    return sendRequest(`/users/${user.id}`, {
+      method: 'PUT',
+      data: user,
+    });
+  }
+
+  function updateUserMutation() {
+    return useMutation({
+      mutationFn: updateUser,
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
+    });
+  }
+
   return {
-    getUsers,
     useUsersQuery,
+    updateUserMutation,
   };
 };

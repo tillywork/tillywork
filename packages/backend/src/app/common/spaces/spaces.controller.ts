@@ -9,7 +9,7 @@ import {
     UseGuards,
     Query,
 } from "@nestjs/common";
-import { SpaceFindAllResult, SpacesService } from "./spaces.service";
+import { SpacesService } from "./spaces.service";
 import { Space } from "./space.entity";
 import { CreateSpaceDto } from "./dto/create.space.dto";
 import { UpdateSpaceDto } from "./dto/update.space.dto";
@@ -21,17 +21,15 @@ import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
     version: "1",
 })
 export class SpacesController {
-    constructor(private readonly spacesService: SpacesService) { }
+    constructor(private readonly spacesService: SpacesService) {}
 
     @Get()
-    findAll(@Query() query: {
-        workspaceId: number
-    }): Promise<Space[]> {
+    findAll(@Query() query: { workspaceId: number }): Promise<Space[]> {
         const { workspaceId } = query;
         return this.spacesService.findAllBy({
             where: {
                 workspaceId,
-            }
+            },
         });
     }
 
@@ -41,9 +39,7 @@ export class SpacesController {
     }
 
     @Post()
-    create(
-        @Body() createSpaceDto: CreateSpaceDto
-    ): Promise<Space> {
+    create(@Body() createSpaceDto: CreateSpaceDto): Promise<Space> {
         return this.spacesService.create(createSpaceDto);
     }
 

@@ -7,26 +7,26 @@ const dialog = useDialogStore();
 <template>
   <v-card color="accent" class="border-thin">
     <v-card-title class="text-body-1 pa-4 pb-1 bg-accent">{{
-      dialog.dialogData.title
+      dialog.data.title
     }}</v-card-title>
     <v-card-text class="text-body-2 pa-4">{{
-      dialog.dialogData.message
+      dialog.data.message
     }}</v-card-text>
     <v-card-actions class="text-body-2">
       <v-btn
         color="error"
         class="text-body-2"
         size="small"
-        @click="dialog.dialogData.onCancel"
-        :disabled="dialog.dialogData.isLoading"
+        @click="dialog.data.onCancel"
+        :disabled="dialog.data.isLoading"
         >Cancel</v-btn
       >
       <v-btn
         color="info"
         class="text-body-2"
         size="small"
-        @click="dialog.dialogData.onConfirm"
-        :loading="dialog.dialogData.isLoading"
+        @click="dialog.data.onConfirm"
+        :loading="dialog.data.isLoading"
         >Confirm</v-btn
       >
     </v-card-actions>

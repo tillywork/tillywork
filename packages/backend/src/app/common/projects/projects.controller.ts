@@ -9,7 +9,7 @@ import {
     UseGuards,
     Request,
 } from "@nestjs/common";
-import { ProjectFindAllResult, ProjectsService } from "./projects.service";
+import { ProjectsService } from "./projects.service";
 import { Project } from "./project.entity";
 import { CreateProjectDto } from "./dto/create.project.dto";
 import { UpdateProjectDto } from "./dto/update.project.dto";
@@ -24,12 +24,14 @@ export class ProjectsController {
     constructor(private readonly projectsService: ProjectsService) {}
 
     @Get()
-    findAll(@Request() req): Promise<ProjectFindAllResult> {
+    findAll(@Request() req): Promise<Project[]> {
         const { user } = req;
         return this.projectsService.findAll({
             where: {
-                ownerId: user.id,
-            }
+                users: {
+                    id: user.id,
+                },
+            },
         });
     }
 
@@ -46,6 +48,7 @@ export class ProjectsController {
         return this.projectsService.create({
             ...createProjectDto,
             ownerId: req.user.id,
+            users: [req.user],
         });
     }
 

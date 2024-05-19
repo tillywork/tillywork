@@ -6,15 +6,21 @@ import { useWorkspaceStore } from '@/stores/workspace';
 import { storeToRefs } from 'pinia';
 import CreateWorkspaceDialogAndButton from './CreateWorkspaceDialogAndButton.vue';
 import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
+import BaseIconBtn from '@/components/common/base/BaseIconBtn.vue';
 import { watch } from 'vue';
+import { useDialog } from '@/composables/useDialog';
+import { DIALOGS } from '@/components/common/dialogs/types';
 
+const dialog = useDialog();
 const workspacesService = useWorkspacesService();
 const selectWorkspaceMenu = ref(false);
 const workspaceStore = useWorkspaceStore();
 const { selectedWorkspace } = storeToRefs(workspaceStore);
-const workspaceQuery = workspacesService.useGetWorkspacesQuery(
-  WorkspaceTypes.PROJECT_MANAGEMENT
-);
+const workspaceQuery = workspacesService.useGetWorkspacesQuery({
+  type: WorkspaceTypes.PROJECT_MANAGEMENT,
+});
+const { mutateAsync: deleteWorkspace, isPending: isDeleteLoading } =
+  workspacesService.useDeleteWorkspaceMutation();
 
 function closeSelectWorkspaceMenu() {
   selectWorkspaceMenu.value = false;
@@ -25,12 +31,33 @@ function handleSelectWorkspace(workspace: Workspace) {
   closeSelectWorkspaceMenu();
 }
 
+function handleDeleteWorkspace(workspace: Workspace) {
+  dialog.openDialog({
+    dialog: DIALOGS.CONFIRM,
+    data: {
+      title: 'Confirm',
+      message: 'Are you sure you want to delete this workspace?',
+      onCancel: dialog.closeDialog,
+      onConfirm: () =>
+        deleteWorkspace(workspace.id).then(() => {
+          selectedWorkspace.value = null;
+          dialog.closeDialog();
+        }),
+      isLoading: isDeleteLoading.value,
+    },
+  });
+}
+
 watch(
   workspaceQuery.data,
   (workspaces) => {
     if (workspaces) {
-      if (workspaces.total > 0 && !selectedWorkspace.value) {
-        handleSelectWorkspace(workspaces.workspaces[0]);
+      if (workspaces.length && !selectedWorkspace.value) {
+        handleSelectWorkspace(workspaces[0]);
+      }
+
+      if (!workspaces.length) {
+        selectedWorkspace.value = null;
       }
     }
   },
@@ -44,7 +71,7 @@ watch(
       density="compact"
       link
       id="workspace-menu-activator"
-      class="me-2 user-select-none"
+      class="me-2 user-select-none w-100"
       rounded="md"
       color="transparent"
     >
@@ -52,38 +79,42 @@ watch(
         class="d-flex align-center text-body-1 font-weight-medium pa-2px py-1 ps-2"
       >
         <base-avatar
-          :text="selectedWorkspace?.name"
+          :text="selectedWorkspace?.name ?? 'N A'"
           color="rgb(116, 140, 7)"
-          size="24"
-          rounded="sm"
+          rounded="md"
           class="text-caption"
+          size="x-small"
         />
-        <span class="text-truncate mx-2">{{ selectedWorkspace?.name }}</span>
-        <v-icon>{{
-          selectWorkspaceMenu ? 'mdi-chevron-up' : 'mdi-chevron-down'
-        }}</v-icon>
+        <span class="text-truncate text-body-2 mx-2">
+          {{ selectedWorkspace?.name ?? 'Select a workspace' }}
+        </span>
+        <v-spacer />
+        <v-icon>
+          {{ selectWorkspaceMenu ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+        </v-icon>
       </v-card-title>
     </v-card>
 
-    <v-btn
+    <base-icon-btn
       id="workspace-menu-btn"
-      variant="text"
-      color="default"
-      density="compact"
       icon="mdi-dots-vertical"
-      rounded="md"
-      size="small"
       @click.stop
+      v-show="selectedWorkspace"
     />
 
-    <v-menu activator="#workspace-menu-btn" :close-on-content-click="false">
-      <v-card color="accent" class="pt-3 mt-2" width="300px" density="compact">
-        <div class="px-5 text-truncate mb-2">
-          <v-icon size="small">mdi-sitemap</v-icon>
-          <span class="ml-1">
-            {{ selectedWorkspace?.name }}
-          </span>
-        </div>
+    <v-menu activator="#workspace-menu-btn" offset="3">
+      <v-card color="accent" width="200">
+        <v-list class="bg-transparent">
+          <v-list-item
+            class="text-error text-caption"
+            @click="handleDeleteWorkspace(selectedWorkspace as Workspace)"
+          >
+            <template #prepend>
+              <v-icon icon="mdi-delete" />
+            </template>
+            Delete
+          </v-list-item>
+        </v-list>
       </v-card>
     </v-menu>
   </div>
@@ -98,9 +129,9 @@ watch(
         <v-icon size="small">mdi-sitemap</v-icon>
         <span class="ml-1"> Your workspaces </span>
       </div>
-      <v-list density="compact" nav class="bg-accent px-3" :lines="false">
+      <v-list density="compact" nav :lines="false" class="bg-accent px-3">
         <v-list-item
-          v-for="workspace in workspaceQuery.data.value?.workspaces"
+          v-for="workspace in workspaceQuery.data.value"
           :key="workspace.id"
           @click="handleSelectWorkspace(workspace)"
           :active="selectedWorkspace?.id === workspace.id"
@@ -109,8 +140,8 @@ watch(
             <base-avatar
               :text="workspace.name"
               color="rgb(116, 140, 7)"
-              size="22"
-              rounded="sm"
+              size="x-small"
+              rounded="md"
               class="text-caption me-2"
             />
             <span>{{ workspace.name }}</span>

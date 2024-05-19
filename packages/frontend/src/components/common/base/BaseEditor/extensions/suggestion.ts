@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import BaseEditorCommands from '../BaseEditorCommands.vue';
 import { VueRenderer, Editor, type Range } from '@tiptap/vue-3';
 import tippy from 'tippy.js';

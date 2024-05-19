@@ -37,7 +37,7 @@ export class ListStage {
     @UpdateDateColumn({ type: "timestamp" })
     updatedAt: Date;
 
-    @ManyToOne(() => List, (list) => list.listStages)
+    @ManyToOne(() => List, (list) => list.listStages, { onDelete: "CASCADE" })
     @JoinTable()
     list: List;
     @Column({ type: "bigint" })

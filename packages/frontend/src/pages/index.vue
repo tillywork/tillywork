@@ -1,9 +1,9 @@
 <script setup lang="ts">
 definePage({
   meta: {
-    title: 'Home',
+    requiresAuth: true,
   },
 });
 </script>
 
-<template>Hello</template>
+<template>&nbsp;</template>

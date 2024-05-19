@@ -4,11 +4,9 @@ import {
     Column,
     CreateDateColumn,
     UpdateDateColumn,
-    OneToMany,
     ManyToMany,
     DeleteDateColumn,
 } from "typeorm";
-import { Contact } from "../../crm/contacts/contact.entity";
 import { Project } from "../projects/project.entity";
 import { Card } from "../cards/card.entity";
 
@@ -45,6 +43,18 @@ export class User {
     lastName: string;
 
     /**
+     * The user's phone number.
+     */
+    @Column("varchar")
+    phoneNumber: string;
+
+    /**
+     * The user's country (ISO2 code)
+     */
+    @Column({ type: "char", length: 2, nullable: true })
+    country: string;
+
+    /**
      * The photo URL of the user.
      */
     @Column({ type: "varchar", length: 255, nullable: true })
@@ -55,6 +65,12 @@ export class User {
      */
     @Column({ type: "simple-array", default: ["user"] })
     roles: string[];
+
+    /**
+     * Holds general data from the user's onboarding
+     */
+    @Column({ type: "jsonb", default: {}, nullable: true })
+    onboarding: any;
 
     /**
      * A timestamp representing when the user account was created.
@@ -68,14 +84,8 @@ export class User {
     @UpdateDateColumn({ type: "timestamp" })
     updatedAt: Date;
 
-    @DeleteDateColumn({ type: "timestamptz" })
+    @DeleteDateColumn({ type: "timestamp" })
     deletedAt: Date;
-
-    /**
-     * A relationship to the Contact entity representing contacts owned by the user.
-     */
-    @OneToMany(() => Contact, (contact) => contact.owner)
-    contacts: Contact[];
 
     /**
      * A relationship to the Project entity representing the user's projects.

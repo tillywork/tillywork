@@ -7,8 +7,8 @@ import { useWindowSize } from '@vueuse/core';
 import { DIALOGS } from './types';
 
 const dialogStore = useDialogStore();
-const { currentDialog } = storeToRefs(dialogStore);
-const { width, height } = useWindowSize();
+const { currentDialog, options } = storeToRefs(dialogStore);
+const { width: windowWidth, height: windowHeight } = useWindowSize();
 
 const isDialogOpen = computed({
   get: () => currentDialog.value !== null,
@@ -20,6 +20,8 @@ const isDialogOpen = computed({
 const dialogComponents = {
   [DIALOGS.CONFIRM]: () => import('./ConfirmDialog.vue'),
   [DIALOGS.CREATE_CARD]: () => import('./CreateCardDialog.vue'),
+  [DIALOGS.ONBOARDING]: () => import('./OnboardingDialog.vue'),
+  [DIALOGS.SETTINGS]: () => import('./SettingsDialog.vue'),
 };
 
 const currentDialogComponent = computed(() => {
@@ -28,18 +30,41 @@ const currentDialogComponent = computed(() => {
   return lazyLoadDialog(currentDialog.value);
 });
 
+const width = computed(() => {
+  return !options.value.fullscreen ? options.value.width ?? 750 : undefined;
+});
+
+const target = computed(() => {
+  return !options.value.fullscreen
+    ? ([windowWidth.value / 2, windowHeight.value / 3.5] as any)
+    : undefined;
+});
+
+const locationStrategy = computed(() => {
+  return !options.value.fullscreen ? 'connected' : undefined;
+});
+
 function lazyLoadDialog(dialog: DIALOGS) {
   return defineAsyncComponent(dialogComponents[dialog]);
+}
+
+function handleAfterLeave() {
+  dialogStore.setData({});
+  dialogStore.setOptions({});
 }
 </script>
 
 <template>
   <v-dialog
     v-model="isDialogOpen"
-    :width="dialogStore.width ?? 750"
+    :width
     opacity="0.1"
-    location-strategy="connected"
-    :target="[width / 2, height / 3.5]"
+    :location-strategy="locationStrategy"
+    :target
+    :fullscreen="options.fullscreen"
+    :persistent="options.persistent"
+    :key="currentDialogComponent?.name"
+    @after-leave="handleAfterLeave"
   >
     <component :is="currentDialogComponent" />
   </v-dialog>

@@ -17,13 +17,23 @@ watch(selectedTheme, () => {
  * Default: dark
  */
 const appTheme = useTheme();
-watch(() => themeStore.theme, (theme) => {
-  appTheme.global.name.value = theme;
-}, {
-  immediate: true
-})
+watch(
+  () => themeStore.theme,
+  (theme) => {
+    appTheme.global.name.value = theme;
+  },
+  {
+    immediate: true,
+  }
+);
 </script>
 
 <template>
-  <v-switch v-model="selectedTheme" label="Dark Mode" hide-details />
+  <v-switch
+    v-model="selectedTheme"
+    label="Dark Mode"
+    inset
+    hide-details
+    density="compact"
+  />
 </template>

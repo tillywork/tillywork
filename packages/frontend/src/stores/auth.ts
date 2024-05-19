@@ -1,35 +1,32 @@
 import { defineStore } from 'pinia';
 import { jwtDecode } from 'jwt-decode';
-import { useHttp } from '@/composables/useHttp';
+import type { CreateUserDto, User } from '@/components/common/users/types';
+import type { RouteLocation } from 'vue-router/auto';
+import { useAuthService } from '@/composables/services/useAuthService';
+import { useSnackbarStore } from './snackbar';
+import type { Project } from '@/components/common/projects/types';
 
 export const useAuthStore = defineStore('auth', {
   persist: true,
 
   state: () => {
     return {
-      user: null as any | null,
+      user: null as User | null,
       token: null as string | null,
-      selectedProjectId: null as number | null,
+      project: null as Project | null,
     };
   },
 
   actions: {
     /**
-     * Sets the selected project ID
-     * to navigate user to project
-     * @param projectId The ID of the project
-     */
-    setSelectedProject(projectId: number) {
-      this.selectedProjectId = projectId;
-    },
-    /**
      * Sets the user object
      * for display on UI
      * @param user The user data
      */
-    setUser(user: any) {
+    setUser(user: User) {
       this.user = user;
     },
+
     /**
      * Sets the token to be injected
      * in the axios instance to
@@ -39,20 +36,31 @@ export const useAuthStore = defineStore('auth', {
     setToken(token: string) {
       this.token = token;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const decodedToken: any = jwtDecode(token);
       this.setUser(decodedToken);
     },
+
+    /**
+     * Sets the user's currently
+     * active project.
+     * @param project
+     */
+    setProject(project: Project) {
+      this.project = project;
+    },
+
     /**
      * Logs the user out by
      * clearing the token and user object values
      * saved in store
      */
-    logout(go?: any) {
+    logout(go?: RouteLocation) {
       this.token = null;
       this.user = null;
-      this.selectedProjectId = null;
-      this.$router.go(go ?? { name: 'Home' });
+      this.$router.go(go ?? '/');
     },
+
     /**
      * Checks if there is a token saved in the store
      * @returns boolean
@@ -63,41 +71,36 @@ export const useAuthStore = defineStore('auth', {
 
     /**
      * Logs the user in through their email and password
-     * and reloads the page to inject token in Axios
-     * and display user information on frontend
      * @param email The user email
      * @param password The user password
      */
     async login(email: string, password: string) {
-      const { sendRequest } = useHttp();
+      const { login } = useAuthService();
 
-      const user = await sendRequest('/auth/login', {
-        method: 'POST',
-        data: { email, password },
-      });
+      const user = await login({ email, password });
 
       this.setToken(user.accessToken);
     },
 
-    /**
-     * Refreshes an expired token
-     * by exchanging the token through
-     * the API or redirects user to 
-     * login page if it fails
-     */
-    async refreshToken() {
-      try {
-        const { sendRequest } = useHttp();
+    async register(user: CreateUserDto) {
+      const { register } = useAuthService();
+      const { showSnackbar } = useSnackbarStore();
 
-        const user = await sendRequest('/auth/refresh', {
-          method: 'POST',
-        });
+      const response = await register(user);
 
-        this.setToken(user.accessToken);
-      } catch (error) {
-        // Refreshing an expired token failed, redirect user to login
-        this.logout({ name: 'Login' });
+      if (response.error) {
+        if (response.error === 'EMAIL_EXISTS') {
+          showSnackbar({
+            message: 'An account with this email already exists.',
+            color: 'error',
+            timeout: 5000,
+          });
+        }
+      } else {
+        this.setToken(response.accessToken);
       }
+
+      return response;
     },
   },
 });

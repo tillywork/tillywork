@@ -12,6 +12,7 @@ import { Observable } from "rxjs";
 export class UserClsInterceptor implements NestInterceptor {
     constructor(@Inject(ClsService) public cls: ClsService) {}
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
         const request = context.switchToHttp().getRequest();
         this.cls.set("user", request.user);

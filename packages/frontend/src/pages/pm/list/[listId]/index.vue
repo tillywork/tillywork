@@ -9,8 +9,17 @@ definePage({
 });
 
 const route = useRoute('/pm/list/[listId]/');
+const router = useRouter();
 const listsService = useListsService();
-const { data: list } = listsService.useGetListQuery(+route.params.listId);
+const { data: list, error } = listsService.useGetListQuery(
+  +route.params.listId
+);
+
+watch(error, (v: any) => {
+  if (v.response.status === 404) {
+    router.push('/');
+  }
+});
 
 watch(
   list,

@@ -184,11 +184,6 @@ export const useCardsService = () => {
   }
 
   return {
-    getCards,
-    createCard,
-    getCard,
-    updateCard,
-    deleteCard,
     updateCardListStage,
     useGetGroupCardsInfinite,
     useUpdateCardListStageMutation,

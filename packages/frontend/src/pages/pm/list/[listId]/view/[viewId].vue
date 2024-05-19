@@ -1,15 +1,8 @@
-<script lang="ts">
-import { defineBasicLoader } from 'unplugin-vue-router/data-loaders/basic';
+<script setup lang="ts">
+import BaseList from '@/components/project-management/lists/BaseList.vue';
 import { useListsService } from '@/composables/services/useListsService';
 
 const listsService = useListsService();
-export const useListData = defineBasicLoader(async (to) => {
-  return listsService.getList(+to.params.listId);
-});
-</script>
-
-<script setup lang="ts">
-import BaseList from '@/components/project-management/lists/BaseList.vue';
 
 definePage({
   meta: {
@@ -18,13 +11,30 @@ definePage({
 });
 
 const route = useRoute('/pm/list/[listId]/view/[viewId]');
-const { data: list } = useListData();
+const router = useRouter();
+const { data: list, error } = listsService.useGetListQuery(
+  +route.params.listId
+);
 
-watch(list, () => (document.title = `${list.value.name} - tillywork`), {
-  immediate: true,
+watch(error, (v: any) => {
+  if (v.response.status === 404) {
+    router.push('/');
+  }
 });
+
+watch(
+  list,
+  (v) => {
+    if (v) {
+      document.title = `${v.name} - tillywork`;
+    }
+  },
+  {
+    immediate: true,
+  }
+);
 </script>
 
 <template>
-  <base-list :list :view-id="+route.params.viewId" />
+  <base-list v-if="list" :list :view-id="+route.params.viewId" />
 </template>

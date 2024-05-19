@@ -1,25 +1,40 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DIALOG_WIDTHS, type DIALOGS } from '@/components/common/dialogs/types';
-import { useDialogStore } from '@/stores/dialog';
+import { useDialogStore, type DialogOptions } from '@/stores/dialog';
 
 export const useDialog = () => {
   const dialogStore = useDialogStore();
 
-  function openDialog(dialog: DIALOGS, data?: any) {
+  function openDialog({
+    dialog,
+    data,
+    options,
+  }: {
+    dialog: DIALOGS;
+    data?: any;
+    options?: DialogOptions;
+  }) {
     dialogStore.openDialog({
       dialog,
-      width: DIALOG_WIDTHS[dialog] ?? 750,
       data,
+      options: {
+        width: options?.width ?? DIALOG_WIDTHS[dialog],
+        fullscreen: options?.fullscreen,
+        persistent: options?.persistent,
+      },
     });
   }
 
   function closeDialog() {
     dialogStore.openDialog({ dialog: null });
-    dialogStore.setDialogData({});
+    dialogStore.setData({});
+    dialogStore.setOptions({});
   }
 
   return {
     openDialog,
     closeDialog,
-    data: dialogStore.dialogData,
+    data: dialogStore.data,
+    options: dialogStore.options,
   };
 };

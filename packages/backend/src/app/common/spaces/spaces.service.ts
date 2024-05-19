@@ -44,7 +44,10 @@ export class SpacesService {
         const space = this.spacesRepository.create(createSpaceDto);
         await this.spacesRepository.save(space);
 
-        const postCreate = await this.spaceSideEffectsService.postCreate(space);
+        if (createSpaceDto.createOnboardingData) {
+            const list = await this.spaceSideEffectsService.postCreate(space);
+            space.lists = [list];
+        }
 
         return space;
     }
@@ -57,6 +60,6 @@ export class SpacesService {
 
     async remove(id: number): Promise<void> {
         const space = await this.findOne(id);
-        await this.spacesRepository.remove(space);
+        await this.spacesRepository.softRemove(space);
     }
 }

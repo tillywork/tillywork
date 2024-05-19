@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { QueryBuilder, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { User } from "./user.entity";
 import { CreateUserDto } from "./dto/create.user.dto";
 import { UpdateUserDto } from "./dto/update.user.dto";
@@ -47,7 +47,7 @@ export class UsersService {
     async findOneByEmailWithPassword(email: string): Promise<User> {
         const user = this.usersRepository
             .createQueryBuilder("user")
-            .addSelect('user.password')
+            .addSelect("user.password")
             .where(`email = :email`, { email })
             .getOne();
 

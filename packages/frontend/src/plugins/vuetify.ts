@@ -61,6 +61,12 @@ const vuetify = createVuetify({
     VCard: {
       rounded: 'md',
     },
+    VList: {
+      lines: false,
+      density: 'compact',
+      slim: true,
+      nav: true,
+    },
   },
 });
 

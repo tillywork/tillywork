@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ListViewTabs from './ListViewTabs.vue';
+import BaseListViewTabs from './BaseListViewTabs.vue';
 import BaseView from '../views/BaseView.vue';
 import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
 import type { List } from './types';
@@ -13,7 +13,7 @@ const views = computed(() => props.list.views);
 </script>
 
 <template>
-  <div class="list-container position-relative" v-if="list">
+  <div class="position-relative" v-if="list">
     <div class="pa-4 pb-0">
       <div class="px-9">
         <div class="d-flex align-center mb-3">
@@ -21,13 +21,11 @@ const views = computed(() => props.list.views);
             :text="list.name"
             color="rgb(116, 140, 7)"
             size="x-small"
-            rounded="sm"
+            rounded="md"
           />
           <p class="text-h5 ms-2 mt-1">{{ list.name }}</p>
         </div>
-        <keep-alive>
-          <list-view-tabs :views="views" />
-        </keep-alive>
+        <base-list-view-tabs :views="views" />
       </div>
     </div>
     <v-divider />
@@ -38,9 +36,3 @@ const views = computed(() => props.list.views);
     </template>
   </div>
 </template>
-
-<style lang="scss" scoped>
-.list-container {
-  height: calc(100vh - 48px);
-}
-</style>

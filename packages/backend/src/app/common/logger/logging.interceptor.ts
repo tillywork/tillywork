@@ -21,11 +21,10 @@ export class LoggingInterceptor implements NestInterceptor {
         const request = ctx.getRequest<FastifyRequest>();
         const response = ctx.getResponse<FastifyReply>();
 
-        const { id, method, url, body } = request;
+        const { body } = request;
         const startTime = process.hrtime();
 
         if (process.env.NODE_ENV !== "production") {
-            // this.logger.log(`${id} - ${method} ${url}`);
             if (process.env.TW_ENABLE_REQ_BODY_LOGGING !== "false" && body) {
                 this.logger.log(body);
             }

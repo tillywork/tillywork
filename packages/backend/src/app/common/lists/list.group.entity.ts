@@ -43,7 +43,10 @@ export class ListGroup {
     @UpdateDateColumn({ type: "timestamp" })
     updatedAt: Date;
 
-    @ManyToOne(() => List, (list) => list.listGroups, { nullable: false })
+    @ManyToOne(() => List, (list) => list.listGroups, {
+        nullable: false,
+        onDelete: "CASCADE",
+    })
     @JoinColumn()
     list: List;
 

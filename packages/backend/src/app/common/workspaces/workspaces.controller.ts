@@ -11,7 +11,7 @@ import {
     Logger,
     Query,
 } from "@nestjs/common";
-import { WorkspaceFindAllResult, WorkspacesService } from "./workspaces.service";
+import { WorkspacesService } from "./workspaces.service";
 import { Workspace } from "./workspace.entity";
 import { CreateWorkspaceDto } from "./dto/create.workspace.dto";
 import { UpdateWorkspaceDto } from "./dto/update.workspace.dto";
@@ -28,24 +28,26 @@ export class WorkspacesController {
     constructor(private readonly workspacesService: WorkspacesService) {}
 
     @Get()
-    findAll(@Request() req, @Query() query: {
-        workspaceType?: WorkspaceTypes;
-    }): Promise<WorkspaceFindAllResult> {
+    findAll(
+        @Request() req,
+        @Query()
+        query: {
+            type?: WorkspaceTypes;
+        }
+    ): Promise<Workspace[]> {
         const { user } = req;
-        const { workspaceType } = query;
+        const { type } = query;
 
         const where = {
             ownerId: user.id,
-        }
+        };
 
-        if (workspaceType) {
-            where['workspaceType'] = workspaceType;
+        if (type) {
+            where["type"] = type;
         }
-
-        this.logger.debug({ where })
 
         return this.workspacesService.findAll({
-            where
+            where,
         });
     }
 

@@ -7,7 +7,6 @@ import {
     Delete,
     Put,
     UseGuards,
-    Patch,
 } from "@nestjs/common";
 import { ListFindAllResult, ListsService } from "./lists.service";
 import { List } from "./list.entity";

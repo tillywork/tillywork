@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, Repository } from 'typeorm';
-import { Project } from './project.entity';
-import { CreateProjectDto } from './dto/create.project.dto';
-import { UpdateProjectDto } from './dto/update.project.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { FindManyOptions, Repository } from "typeorm";
+import { Project } from "./project.entity";
+import { CreateProjectDto } from "./dto/create.project.dto";
+import { UpdateProjectDto } from "./dto/update.project.dto";
 
 export type ProjectFindAllResult = {
     total: number;
@@ -15,15 +15,16 @@ export class ProjectsService {
     constructor(
         @InjectRepository(Project)
         private projectsRepository: Repository<Project>
-    ) { }
+    ) {}
 
-    async findAll(options?: FindManyOptions): Promise<ProjectFindAllResult> {
-        const result = await this.projectsRepository.findAndCount(options);
-        return { projects: result[0], total: result[1] };
+    async findAll(options?: FindManyOptions): Promise<Project[]> {
+        return this.projectsRepository.find(options);
     }
 
     async findOne(id: number): Promise<Project> {
-        const project = await this.projectsRepository.findOne({ where: { id } });
+        const project = await this.projectsRepository.findOne({
+            where: { id },
+        });
         if (!project) {
             throw new NotFoundException(`Project with ID ${id} not found`);
         }
@@ -39,7 +40,10 @@ export class ProjectsService {
         return this.projectsRepository.save(project);
     }
 
-    async update(id: number, updateProjectDto: UpdateProjectDto): Promise<Project> {
+    async update(
+        id: number,
+        updateProjectDto: UpdateProjectDto
+    ): Promise<Project> {
         const project = await this.findOne(id);
         this.projectsRepository.merge(project, updateProjectDto);
         return this.projectsRepository.save(project);

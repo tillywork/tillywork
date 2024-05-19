@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { type Space } from '../spaces/types';
 import NavigationWorkspaceListItem from './NavigationWorkspaceListItem.vue';
+import NavigationWorkspaceSpaceItemMenu from './NavigationWorkspaceSpaceItemMenu.vue';
 import CreateListDialogAndButton from '../navigation/CreateListDialogAndButton.vue';
-import { watch } from 'vue';
 
-const props = defineProps<{
+defineProps<{
   space: Space;
 }>();
 
@@ -14,8 +13,15 @@ const freezeSpaceHoverId = ref<number | null>();
 const createListDialog = ref(false);
 
 function handleCreateListDialogClick(space: Space) {
-  //   selectedSpace.value = space;
   freezeSpaceHoverId.value = space.id;
+}
+
+function setHoverFreeze(space: Space) {
+  freezeSpaceHoverId.value = space.id;
+}
+
+function clearHoverFreeze() {
+  freezeSpaceHoverId.value = null;
 }
 
 watch(createListDialog, () => {
@@ -40,11 +46,18 @@ watch(createListDialog, () => {
             v-slot:append
             v-if="isHovering || freezeSpaceHoverId === space.id"
           >
-            <create-list-dialog-and-button
-              v-model="createListDialog"
-              :space="space"
-              @click="handleCreateListDialogClick(space)"
-            />
+            <div class="d-flex ga-1">
+              <create-list-dialog-and-button
+                v-model="createListDialog"
+                :space="space"
+                @click="handleCreateListDialogClick(space)"
+              />
+              <navigation-workspace-space-item-menu
+                :space
+                @hover:freeze="setHoverFreeze(space)"
+                @hover:unfreeze="clearHoverFreeze"
+              />
+            </div>
           </template>
         </v-list-item>
       </template>

@@ -5,24 +5,19 @@ import type {
 } from '../../components/project-management/workspaces/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 
-export interface WorkspacesData {
-  workspaces: Workspace[];
-  total: number;
-}
-
 export const useWorkspacesService = () => {
   const { sendRequest } = useHttp();
   const queryClient = useQueryClient();
 
   async function getWorkspaces({
-    workspaceType,
+    type,
   }: {
-    workspaceType?: WorkspaceTypes;
-  }): Promise<WorkspacesData> {
+    type?: WorkspaceTypes;
+  }): Promise<Workspace[]> {
     return sendRequest('/workspaces', {
       method: 'GET',
       params: {
-        workspaceType,
+        type,
       },
     });
   }
@@ -55,10 +50,17 @@ export const useWorkspacesService = () => {
     });
   }
 
-  function useGetWorkspacesQuery(workspaceType?: WorkspaceTypes) {
+  function useGetWorkspacesQuery({
+    type,
+    enabled,
+  }: {
+    type?: WorkspaceTypes;
+    enabled?: Ref<boolean>;
+  }) {
     return useQuery({
-      queryKey: ['workspaces', workspaceType],
-      queryFn: () => getWorkspaces({ workspaceType }),
+      queryKey: ['workspaces', type],
+      queryFn: () => getWorkspaces({ type }),
+      enabled,
     });
   }
 
@@ -100,11 +102,6 @@ export const useWorkspacesService = () => {
   }
 
   return {
-    getWorkspaces,
-    getWorkspace,
-    createWorkspace,
-    updateWorkspace,
-    deleteWorkspace,
     useGetWorkspacesQuery,
     useGetWorkspaceQuery,
     useCreateWorkspaceMutation,

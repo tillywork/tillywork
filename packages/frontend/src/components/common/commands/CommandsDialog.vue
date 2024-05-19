@@ -34,7 +34,9 @@ function openKeysClicked(keys: Set<string>) {
 }
 
 function toggleDialog() {
-  dialog.openDialog(DIALOGS.CREATE_CARD);
+  dialog.openDialog({
+    dialog: DIALOGS.CREATE_CARD,
+  });
 }
 
 function handleDialogClose() {

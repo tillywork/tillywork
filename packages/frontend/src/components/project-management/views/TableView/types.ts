@@ -14,6 +14,7 @@ export type FilterOperator =
 export interface FieldFilter {
   field: string;
   operator: FilterOperator;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value?: any; // Value can depend on the operator, like an array for 'in' & 'nin', range for 'between', etc.
 }
 

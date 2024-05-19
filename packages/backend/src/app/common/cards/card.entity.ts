@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     Entity,
     PrimaryGeneratedColumn,
@@ -29,7 +30,6 @@ export class Card {
     dueAt: Date;
 
     @Column({ type: "jsonb", default: {} })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any;
 
     @OneToMany(() => CardList, (cardList) => cardList.card)

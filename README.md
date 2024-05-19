@@ -2,29 +2,37 @@
 
 [![tillywork logo](https://cdn.tilly.work/logo-white.png)](https://tilly.work)
 
-Welcome to **tillywork**—an open-source work management platform tailored for dynamic teams. Our platform supports teams in enhancing their productivity and making more informed decisions swiftly.
+Welcome to **tillywork**—an open-source work management platform tailored for dynamic teams.
 
-## Key Modules
+## Modules
 
 tillywork addresses a variety of team requirements through three dedicated modules:
 
-### 1. Project Management Solution
+### 1. Project Management
 
-Our Project Management module offers a suite of tools to effectively oversee projects from planning to completion. It includes capabilities for managing timelines, allocating resources, and monitoring deliverables, making it ideal for teams aiming to enhance their project delivery.
+Manage timelines, allocate resources, and monitor deliverables for your projects.
 
-### 2. Sales CRM for Marketing and Sales
+### 2. Sales CRM (Coming next)
 
-The Sales CRM module is designed to elevate your sales and marketing operations. It features tools for comprehensive customer relationship management, sales tracking, and performance analysis to help you devise superior strategies and foster customer loyalty.
+Customer relationship management, sales tracking, and performance analysis.
 
-### 3. Agile Product Management
+### 3. Agile Projects (Coming soon)
 
-This module supports product and technology teams by providing tools for sprint planning, roadmap creation, and issue tracking. It ensures that teams can plan accurately, maintain transparent roadmaps, and resolve issues effectively, thereby enhancing product development processes.
+Product roadmaps, sprint planning, and issue tracking.
 
 ## Features
 
 - **Open Source**: Customize and extend tillywork as per your specific needs.
 - **Comprehensive Toolset**: Possesses a range of tools covering project oversight, sales management, and issue resolution.
-- **Intuitive User Interface**: Features a straightforward, user-friendly interface that facilitates efficient management of your workflows.
+- **Intuitive User Interface**: Features a straightforward, user-friendly interface (Material 3 anyone?)
+
+## Getting started
+
+- Clone the repository `git clone https://github.com/tillywork/tillywork.git`
+- Install Postgres on your device
+- Install dependancies `npm install`
+- Copy .env.example and rename to .env `cp .env.example .env` and update the values
+- Run the app `npm run dev`
 
 ## Contributing
 

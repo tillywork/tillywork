@@ -5,7 +5,7 @@ defineProps<{
   rounded?: string;
   density?: string;
   variant?: 'flat' | 'text';
-  size?: 'small' | 'x-small';
+  size?: 'small' | 'x-small' | 'default';
 }>();
 </script>
 

@@ -10,7 +10,7 @@ import type { ListStage } from '../lists/types';
 
 const prop = defineModel<Prop>('prop');
 const value = defineModel<any>('value');
-const props = defineProps<{
+defineProps<{
   users?: User[];
   listStages?: ListStage[];
 }>();

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { Space } from "./space.entity";
 import { ListsService } from "../lists/lists.service";
 import { DEFAULT_LISTS } from "../lists/types";
@@ -14,6 +14,7 @@ export class SpaceSideEffectsService {
                     .create({
                         name: list.name,
                         spaceId: space.id,
+                        createOnboardingData: true,
                     })
                     .then((list) => resolve(list));
             });
@@ -21,6 +22,6 @@ export class SpaceSideEffectsService {
 
         const result = await Promise.allSettled(listPromises);
 
-        return result.every((promise) => promise.status === "fulfilled");
+        return (result[0] as any).value;
     }
 }

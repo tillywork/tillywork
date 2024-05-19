@@ -9,6 +9,7 @@ export class CreateCardDto {
     @IsNotEmpty()
     listStageId: number;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     description?: any;
     dueAt?: Date;
     users?: User[];
