@@ -15,7 +15,7 @@ function printUserFullName(user: { firstName: string; lastName: string }) {
 </script>
 
 <template>
-  <v-list-item v-if="user">
+  <v-list-item v-if="user" class="user-list-item">
     <template #prepend>
       <base-avatar
         :photo="user.photo"
@@ -24,10 +24,24 @@ function printUserFullName(user: { firstName: string; lastName: string }) {
         class="text-caption"
       />
     </template>
-    <v-list-item-title>{{ printUserFullName(user) }}</v-list-item-title>
-    <v-list-item-subtitle>{{ user.email }}</v-list-item-subtitle>
+    <v-list-item-title class="text-truncate">{{
+      printUserFullName(user) +
+      printUserFullName(user) +
+      printUserFullName(user)
+    }}</v-list-item-title>
+    <v-list-item-subtitle class="d-block text-truncate">{{
+      user.email + printUserFullName(user)
+    }}</v-list-item-subtitle>
     <template #append v-if="slots['append']">
       <slot name="append"></slot>
     </template>
   </v-list-item>
 </template>
+
+<style lang="scss">
+.user-list-item {
+  .v-list-item__append > .v-icon ~ .v-list-item__spacer {
+    width: 12px;
+  }
+}
+</style>

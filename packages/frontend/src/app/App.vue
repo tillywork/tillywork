@@ -13,6 +13,10 @@ import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useAuthStore } from '@/stores/auth';
 import { useProjectsService } from '@/composables/services/useProjectsService';
+import { useThemeStore } from '@/stores/theme';
+import { useTheme } from 'vuetify';
+
+const themeStore = useThemeStore();
 
 const workspacesService = useWorkspacesService();
 const projectsService = useProjectsService();
@@ -30,6 +34,23 @@ const { data: workspaces } = workspacesService.useGetWorkspacesQuery({
 const { data: projects } = projectsService.useGetProjectsQuery({
   enabled: projectsEnabled,
 });
+
+/*
+ * This handles setting the user's theme mode (dark or light)
+ * across the application and setting it on Vuetify settings
+ * when the application is opened and when the value is changed.
+ * Default: dark
+ */
+const appTheme = useTheme();
+watch(
+  () => themeStore.theme,
+  (theme) => {
+    appTheme.global.name.value = theme;
+  },
+  {
+    immediate: true,
+  }
+);
 
 watch(workspaces, (v) => {
   if (v) {

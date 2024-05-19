@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import BaseThemeSwitch from '@/components/common/base/BaseThemeSwitch.vue';
 import { useAuthStore } from '@/stores/auth';
 import { ref } from 'vue';
 import NavigationWorkspace from '@/components/project-management/navigation/NavigationWorkspace.vue';
