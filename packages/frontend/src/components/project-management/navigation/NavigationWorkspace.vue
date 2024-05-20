@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import CreateSpaceDialogAndButton from '../navigation/CreateSpaceDialogAndButton.vue';
+import CreateSpaceBtn from './CreateSpaceBtn.vue';
 import { useSpacesService } from '../../../composables/services/useSpacesService';
 import { watch } from 'vue';
 import { useWorkspaceStore } from '@/stores/workspace';
@@ -77,7 +77,7 @@ watch(createListDialog, (isOpen) => {
         <div class="d-flex mb-2 pa-2">
           <span class="text-caption">Spaces</span>
           <v-spacer />
-          <create-space-dialog-and-button />
+          <create-space-btn />
         </div>
         <template v-for="space in spacesQuery.data.value" :key="space.id">
           <navigation-workspace-space-item :space="space" />
@@ -88,7 +88,7 @@ watch(createListDialog, (isOpen) => {
           <v-list-item-title class="d-flex align-center">
             <span>No spaces found</span>
             <v-spacer />
-            <create-space-dialog-and-button />
+            <create-space-btn />
           </v-list-item-title>
         </v-list-item>
       </template>

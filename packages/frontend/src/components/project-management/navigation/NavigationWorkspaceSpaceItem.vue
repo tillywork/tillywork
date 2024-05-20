@@ -2,7 +2,7 @@
 import { type Space } from '../spaces/types';
 import NavigationWorkspaceListItem from './NavigationWorkspaceListItem.vue';
 import NavigationWorkspaceSpaceItemMenu from './NavigationWorkspaceSpaceItemMenu.vue';
-import CreateListDialogAndButton from '../navigation/CreateListDialogAndButton.vue';
+import CreateListBtn from './CreateListBtn.vue';
 
 defineProps<{
   space: Space;
@@ -11,10 +11,6 @@ defineProps<{
 const freezeSpaceHoverId = ref<number | null>();
 
 const createListDialog = ref(false);
-
-function handleCreateListDialogClick(space: Space) {
-  freezeSpaceHoverId.value = space.id;
-}
 
 function setHoverFreeze(space: Space) {
   freezeSpaceHoverId.value = space.id;
@@ -47,11 +43,7 @@ watch(createListDialog, () => {
             v-if="isHovering || freezeSpaceHoverId === space.id"
           >
             <div class="d-flex ga-1">
-              <create-list-dialog-and-button
-                v-model="createListDialog"
-                :space="space"
-                @click="handleCreateListDialogClick(space)"
-              />
+              <create-list-btn :space="space" @click.stop />
               <navigation-workspace-space-item-menu
                 :space
                 @hover:freeze="setHoverFreeze(space)"
