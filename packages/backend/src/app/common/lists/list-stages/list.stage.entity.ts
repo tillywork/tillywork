@@ -8,8 +8,8 @@ import {
     JoinTable,
     OneToMany,
 } from "typeorm";
-import { CardList } from "../cards/card-lists/card.list.entity";
-import { List } from "./list.entity";
+import { CardList } from "../../cards/card-lists/card.list.entity";
+import { List } from "../list.entity";
 
 @Entity()
 export class ListStage {

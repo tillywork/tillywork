@@ -39,9 +39,7 @@ export class PropsController {
     }
 
     @Post()
-    create(
-        @Body() createPropDto: CreatePropDto
-    ): Promise<Prop> {
+    create(@Body() createPropDto: CreatePropDto): Promise<Prop> {
         return this.propsService.create({
             ...createPropDto,
         });
@@ -50,9 +48,9 @@ export class PropsController {
     @Put(":id")
     update(
         @Param("id") id: string,
-        @Body() updateUserDto: UpdatePropDto
+        @Body() updatePropDto: UpdatePropDto
     ): Promise<Prop> {
-        return this.propsService.update(+id, updateUserDto);
+        return this.propsService.update(+id, updatePropDto);
     }
 
     @Delete(":id")

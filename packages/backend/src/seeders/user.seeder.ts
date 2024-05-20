@@ -16,8 +16,8 @@ import { SpaceSideEffectsService } from "../app/common/spaces/space.side.effects
 import { ListsService } from "../app/common/lists/lists.service";
 import { List } from "../app/common/lists/list.entity";
 import { ListSideEffectsService } from "../app/common/lists/list.side.effects.service";
-import { ListStagesService } from "../app/common/lists/list.stages.service";
-import { ListStage } from "../app/common/lists/list.stage.entity";
+import { ListStagesService } from "../app/common/lists/list-stages/list.stages.service";
+import { ListStage } from "../app/common/lists/list-stages/list.stage.entity";
 import { ViewsService } from "../app/common/views/views.service";
 import { View } from "../app/common/views/view.entity";
 import { ProjectUsersService } from "../app/common/projects/project-users/project.users.service";
@@ -100,6 +100,13 @@ export async function seedUserData(connection: Connection): Promise<void> {
         project = await projectsService.create({
             name: projectName,
             ownerId: user.id,
+            users: [
+                {
+                    role: "owner",
+                    user,
+                    project: {} as Project,
+                },
+            ],
         });
         logger.log("Test project created successfully...");
     }
@@ -116,6 +123,7 @@ export async function seedUserData(connection: Connection): Promise<void> {
             ownerId: user.id,
             type: WorkspaceTypes.PROJECT_MANAGEMENT,
             projectId: project.id,
+            createOnboardingData: true,
         });
         logger.log("Test workspace created successfully...");
     }

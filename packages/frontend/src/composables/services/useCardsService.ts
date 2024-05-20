@@ -99,7 +99,7 @@ export const useCardsService = () => {
     cardListId: number;
     listStageId: number;
   }) {
-    return sendRequest(`/cards/${cardId}lists/${cardListId}`, {
+    return sendRequest(`/cards/${cardId}/lists/${cardListId}`, {
       method: 'PUT',
       data: {
         listStageId,

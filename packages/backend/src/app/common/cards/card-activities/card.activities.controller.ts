@@ -11,7 +11,7 @@ import {
 } from "@nestjs/common";
 import { CardActivitiesService } from "./card.activities.service";
 import { CreateCardActivityDto } from "./dto/create.card.activity.dto";
-import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
+import { JwtAuthGuard } from "../../auth/guards/jwt.auth.guard";
 
 @UseGuards(JwtAuthGuard)
 @Controller({

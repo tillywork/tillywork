@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { List } from "./list.entity";
-import { ListStagesService } from "./list.stages.service";
+import { ListStagesService } from "./list-stages/list.stages.service";
 import { DEFAULT_LIST_STAGES } from "./types";
 import { ViewsService } from "../views/views.service";
 import { DEFAULT_VIEWS } from "../views/types";

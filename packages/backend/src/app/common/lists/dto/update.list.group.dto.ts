@@ -1,3 +1,3 @@
-import { ListGroup } from "../list.group.entity";
+import { ListGroup } from "../list-groups/list.group.entity";
 
 export class UpdateListGroupDto implements Partial<ListGroup> {}

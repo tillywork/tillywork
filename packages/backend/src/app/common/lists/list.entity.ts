@@ -10,10 +10,10 @@ import {
 } from "typeorm";
 import { Space } from "../spaces/space.entity";
 import { CardList } from "../cards/card-lists/card.list.entity";
-import { ListStage } from "./list.stage.entity";
+import { ListStage } from "./list-stages/list.stage.entity";
 import { View } from "../views/view.entity";
 import { Prop } from "../props/prop.entity";
-import { ListGroup } from "./list.group.entity";
+import { ListGroup } from "./list-groups/list.group.entity";
 
 @Entity()
 export class List {
