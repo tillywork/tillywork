@@ -21,13 +21,7 @@ export class ListsService {
 
     async findAll(): Promise<ListFindAllResult> {
         const [lists, total] = await this.listsRepository.findAndCount({
-            relations: [
-                "listStages",
-                "space",
-                "space.workspace",
-                "space.workspace.project",
-                "space.workspace.project.users",
-            ],
+            relations: ["listStages"],
         });
 
         return { lists, total };
