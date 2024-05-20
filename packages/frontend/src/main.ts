@@ -27,7 +27,16 @@ pinia.use(piniaPluginPersistedstate);
 app.use(pinia);
 app.use(vuetify);
 app.use(router);
-app.use(VueQueryPlugin);
+app.use(VueQueryPlugin, {
+  queryClientConfig: {
+    defaultOptions: {
+      queries: {
+        refetchOnReconnect: false,
+        refetchOnWindowFocus: false,
+      },
+    },
+  },
+});
 app.use(posthog);
 
 app.mount('#root');
