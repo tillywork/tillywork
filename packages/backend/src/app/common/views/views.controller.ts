@@ -6,7 +6,7 @@ import {
     Param,
     Delete,
     Put,
-    UseGuards
+    UseGuards,
 } from "@nestjs/common";
 import { ViewFindAllResult, ViewsService } from "./views.service";
 import { View } from "./view.entity";
@@ -33,18 +33,16 @@ export class ViewsController {
     }
 
     @Post()
-    create(
-        @Body() createViewDto: CreateViewDto
-    ): Promise<View> {
+    create(@Body() createViewDto: CreateViewDto): Promise<View> {
         return this.viewsService.create(createViewDto);
     }
 
     @Put(":id")
     update(
         @Param("id") id: string,
-        @Body() updateUserDto: UpdateViewDto
+        @Body() updateViewDto: UpdateViewDto
     ): Promise<View> {
-        return this.viewsService.update(+id, updateUserDto);
+        return this.viewsService.update(+id, updateViewDto);
     }
 
     @Delete(":id")

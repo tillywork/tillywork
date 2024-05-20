@@ -20,10 +20,17 @@ export class ListsService {
     ) {}
 
     async findAll(): Promise<ListFindAllResult> {
-        const result = await this.listsRepository.findAndCount({
-            relations: ["listStages"],
+        const [lists, total] = await this.listsRepository.findAndCount({
+            relations: [
+                "listStages",
+                "space",
+                "space.workspace",
+                "space.workspace.project",
+                "space.workspace.project.users",
+            ],
         });
-        return { lists: result[0], total: result[1] };
+
+        return { lists, total };
     }
 
     async findOne(id: number): Promise<List> {

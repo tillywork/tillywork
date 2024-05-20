@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
 import { Card } from "../card.entity";
 import { List } from "../../lists/list.entity";
-import { ListStage } from "../../lists/list.stage.entity";
+import { ListStage } from "../../lists/list-stages/list.stage.entity";
 
 @Entity()
 export class CardList {

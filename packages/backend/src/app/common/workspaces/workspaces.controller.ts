@@ -70,9 +70,9 @@ export class WorkspacesController {
     @Put(":id")
     update(
         @Param("id") id: string,
-        @Body() updateUserDto: UpdateWorkspaceDto
+        @Body() updateWorkspaceDto: UpdateWorkspaceDto
     ): Promise<Workspace> {
-        return this.workspacesService.update(+id, updateUserDto);
+        return this.workspacesService.update(+id, updateWorkspaceDto);
     }
 
     @Delete(":id")

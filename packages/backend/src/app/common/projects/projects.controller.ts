@@ -61,9 +61,9 @@ export class ProjectsController {
     @Put(":id")
     update(
         @Param("id") id: string,
-        @Body() updateUserDto: UpdateProjectDto
+        @Body() updateProjectDto: UpdateProjectDto
     ): Promise<Project> {
-        return this.projectsService.update(+id, updateUserDto);
+        return this.projectsService.update(+id, updateProjectDto);
     }
 
     @Delete(":id")

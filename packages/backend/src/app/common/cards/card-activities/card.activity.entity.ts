@@ -5,8 +5,8 @@ import {
     ManyToOne,
     CreateDateColumn,
 } from "typeorm";
-import { Card } from "../cards/card.entity";
-import { User } from "../users/user.entity";
+import { Card } from "../card.entity";
+import { User } from "../../users/user.entity";
 
 export enum ActivityType {
     UPDATE = "UPDATE",

@@ -46,9 +46,9 @@ export class SpacesController {
     @Put(":id")
     update(
         @Param("id") id: string,
-        @Body() updateUserDto: UpdateSpaceDto
+        @Body() updateSpaceDto: UpdateSpaceDto
     ): Promise<Space> {
-        return this.spacesService.update(+id, updateUserDto);
+        return this.spacesService.update(+id, updateSpaceDto);
     }
 
     @Delete(":id")

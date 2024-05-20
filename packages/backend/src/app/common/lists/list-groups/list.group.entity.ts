@@ -7,10 +7,10 @@ import {
     ManyToOne,
     JoinColumn,
 } from "typeorm";
-import { List } from "./list.entity";
-import { ListGroupEntityTypes, ListGroupOptions } from "./types";
-import { Filter } from "../filters/filter.entity";
-import { CardFindAllResult } from "../cards/cards.service";
+import { List } from "../list.entity";
+import { ListGroupEntityTypes, ListGroupOptions } from "../types";
+import { Filter } from "../../filters/filter.entity";
+import { CardFindAllResult } from "../../cards/cards.service";
 
 @Entity()
 export class ListGroup {
