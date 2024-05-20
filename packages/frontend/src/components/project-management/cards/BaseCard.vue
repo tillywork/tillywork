@@ -10,7 +10,6 @@ import { computed, ref } from 'vue';
 import { watch } from 'vue';
 import { useCardsService } from '@/composables/services/useCardsService';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { useUsersService } from '@/composables/services/useUsersService';
 import { useDebounce } from '@vueuse/core';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -19,6 +18,8 @@ import { useCardActivitiesService } from '@/composables/services/useCardActiviti
 import type { User } from '@/components/common/users/types';
 import type { ListStage } from '../lists/types';
 import objectUtils from '@/utils/object';
+import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { useAuthStore } from '@/stores/auth';
 
 dayjs.extend(relativeTime);
 
@@ -27,15 +28,18 @@ const props = defineProps<{
   showCloseButton?: boolean;
 }>();
 const emit = defineEmits(['click:close']);
+const authStore = useAuthStore();
 const cardCopy = ref<Card>({ ...props.card });
 const cardsService = useCardsService();
 const cardActivitiesService = useCardActivitiesService();
-const usersService = useUsersService();
+const projectUsersService = useProjectUsersService();
 const listStagesService = useListStagesService();
 const snackbar = useSnackbarStore();
 
 const updateCardMutation = cardsService.useUpdateCardMutation();
-const usersQuery = usersService.useUsersQuery();
+const usersQuery = projectUsersService.useProjectUsersQuery({
+  projectId: authStore.project!.id,
+});
 
 const listId = computed(() => props.card.cardLists[0].listStage.listId);
 const listStagesQuery = listStagesService.useGetListStagesQuery(listId.value);
@@ -46,6 +50,10 @@ const createActivityMutation = cardActivitiesService.useCreateActivityMutation({
 
 const updateCardListStageMutation =
   cardsService.useUpdateCardListStageMutation();
+
+const users = computed(() =>
+  usersQuery.data.value?.map((projectUser) => projectUser.user)
+);
 
 const isCardLoading = computed(() => {
   return (
@@ -89,7 +97,7 @@ function updateDescription() {
     (!cardCopy.value.description ||
       !objectUtils.isEqual(
         cardDescription.value as any,
-        cardCopy.value.description
+        cardCopy.value.description as any
       ))
   ) {
     cardCopy.value.description = cardDescription.value;
@@ -146,6 +154,7 @@ function updateCardDueAt(newDueAt: string | Date) {
 function updateCardListStage(listStage: ListStage) {
   updateCardListStageMutation
     .mutateAsync({
+      cardId: cardCopy.value.id,
       cardListId: cardCopy.value.cardLists[0].id,
       listStageId: listStage.id,
     })
@@ -228,7 +237,7 @@ function updateCardListStage(listStage: ListStage) {
           />
           <base-user-selector
             v-model="cardCopy.users"
-            :users="usersQuery.data.value?.users ?? []"
+            :users="users ?? []"
             @update:model-value="updateCardAssignees"
             content-class="ms-n3 my-4"
             show-first-names

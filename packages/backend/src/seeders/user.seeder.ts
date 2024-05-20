@@ -20,6 +20,8 @@ import { ListStagesService } from "../app/common/lists/list.stages.service";
 import { ListStage } from "../app/common/lists/list.stage.entity";
 import { ViewsService } from "../app/common/views/views.service";
 import { View } from "../app/common/views/view.entity";
+import { ProjectUsersService } from "../app/common/projects/project-users/project.users.service";
+import { ProjectUser } from "../app/common/projects/project-users/project.user.entity";
 
 const logger = new Logger("UserSeeder");
 
@@ -49,8 +51,12 @@ export async function seedUserData(connection: Connection): Promise<void> {
         connection.getRepository(Workspace),
         workspaceSideEffectsService
     );
+    const projectUsersService = new ProjectUsersService(
+        connection.getRepository(ProjectUser)
+    );
     const projectsService = new ProjectsService(
-        connection.getRepository(Project)
+        connection.getRepository(Project),
+        projectUsersService
     );
 
     const email = "dev@tw.com";

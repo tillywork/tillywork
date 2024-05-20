@@ -11,19 +11,25 @@ import { type List } from '@/components/project-management/lists/types';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useRoute } from 'vue-router';
 import { computed } from 'vue';
-import type { User } from '../users/types';
-import type { UsersData } from '@/composables/services/useUsersService';
 import type { VForm } from 'vuetify/lib/components/index.mjs';
 import { useCardsService } from '@/composables/services/useCardsService';
 import { useSnackbarStore } from '@/stores/snackbar';
+import { useAuthStore } from '@/stores/auth';
+import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
 
 const route = useRoute();
+const authStore = useAuthStore();
 const queryClient = useQueryClient();
 const dialog = useDialog();
 const snackbarStore = useSnackbarStore();
 const cardsService = useCardsService();
+const projectUsersService = useProjectUsersService();
 const createForm = ref<VForm>();
 const isCreatingMore = ref(false);
+
+const usersQuery = projectUsersService.useProjectUsersQuery({
+  projectId: authStore.project!.id,
+});
 
 const list = computed(() => {
   let list: List | undefined;
@@ -34,19 +40,12 @@ const list = computed(() => {
     list = queryClient.getQueryData(['list', +route.params.listId]);
   }
 
-  console.log(dialog.data);
-
   return list;
 });
 
-const users = computed(() => {
-  let users: User[] = [];
-  const cached: UsersData | undefined = queryClient.getQueryData(['users']);
-  if (cached) {
-    users = cached.users;
-  }
-  return users;
-});
+const users = computed(
+  () => usersQuery.data.value?.map((projectUser) => projectUser.user) ?? []
+);
 
 const createCardMutation = cardsService.useCreateCardMutation();
 const createCardDto = ref<CreateCardDto>({

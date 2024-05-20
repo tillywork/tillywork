@@ -11,7 +11,7 @@ import { User } from "../users/user.entity";
 import {
     ActivityType,
     CardActivity,
-} from "../card.activities/card.activity.entity";
+} from "../card-activities/card.activity.entity";
 import { ClsService } from "nestjs-cls";
 
 @Injectable()

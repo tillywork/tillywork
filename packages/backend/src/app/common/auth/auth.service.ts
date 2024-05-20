@@ -5,6 +5,8 @@ import { User } from "../users/user.entity";
 import bcrypt from "bcrypt";
 import { CreateUserDto } from "../users/dto/create.user.dto";
 import { ProjectsService } from "../projects/projects.service";
+import { CreateProjectDto } from "../projects/dto/create.project.dto";
+import { Project } from "../projects/project.entity";
 
 export type RegisterResponse =
     | (User & {
@@ -71,10 +73,19 @@ export class AuthService {
         }
 
         const createdUser = await this.usersService.create(createUserDto);
-        await this.projectsService.create({
+        const projectDto: CreateProjectDto = {
             name: `${createdUser.firstName}'s Project`,
             ownerId: createdUser.id,
-            users: [createdUser],
+        };
+        await this.projectsService.create({
+            ...projectDto,
+            users: [
+                {
+                    user: createdUser,
+                    role: "owner",
+                    project: projectDto as Project,
+                },
+            ],
         });
 
         const accessToken = await this.login(createdUser);

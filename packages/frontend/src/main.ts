@@ -6,6 +6,7 @@ import App from './app/App.vue';
 import vuetify from './plugins/vuetify';
 import router from './router';
 import { VueQueryPlugin } from '@tanstack/vue-query';
+import posthog from './plugins/posthog';
 
 const app = createApp(App);
 
@@ -24,5 +25,6 @@ app.use(pinia);
 app.use(vuetify);
 app.use(router);
 app.use(VueQueryPlugin);
+app.use(posthog);
 
 app.mount('#root');

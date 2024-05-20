@@ -11,9 +11,9 @@ import {
     JoinTable,
     ManyToOne,
 } from "typeorm";
-import { CardList } from "./card.list.entity";
+import { CardList } from "./card-lists/card.list.entity";
 import { User } from "../users/user.entity";
-import { CardActivity } from "../card.activities/card.activity.entity";
+import { CardActivity } from "../card-activities/card.activity.entity";
 
 @Entity()
 export class Card {

@@ -7,7 +7,7 @@ import {
 import { AppModule } from "./app/app.module";
 import { Connection } from "typeorm";
 import { seedUserData } from "./seeders/user.seeder";
-import { seedCardsData } from "./seeders/card.seeder";
+// import { seedCardsData } from "./seeders/card.seeder";
 
 async function bootstrap() {
     const port = process.env.PORT || 3000;
