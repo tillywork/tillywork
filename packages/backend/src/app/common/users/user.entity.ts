@@ -6,9 +6,10 @@ import {
     UpdateDateColumn,
     ManyToMany,
     DeleteDateColumn,
+    OneToMany,
 } from "typeorm";
-import { Project } from "../projects/project.entity";
 import { Card } from "../cards/card.entity";
+import { ProjectUser } from "../projects/project-users/project.user.entity";
 
 @Entity()
 export class User {
@@ -45,7 +46,7 @@ export class User {
     /**
      * The user's phone number.
      */
-    @Column("varchar")
+    @Column({ type: "varchar", length: 20, nullable: true })
     phoneNumber: string;
 
     /**
@@ -70,6 +71,7 @@ export class User {
      * Holds general data from the user's onboarding
      */
     @Column({ type: "jsonb", default: {}, nullable: true })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onboarding: any;
 
     /**
@@ -88,13 +90,13 @@ export class User {
     deletedAt: Date;
 
     /**
-     * A relationship to the Project entity representing the user's projects.
+     * A relationship to the ProjectUser entity representing the user's projects.
      */
-    @ManyToMany(() => Project, (project) => project.users)
-    projects: Project[];
+    @OneToMany(() => ProjectUser, (project) => project.user)
+    projects: ProjectUser[];
 
     /**
-     * A relationship to the Project entity representing the user's projects.
+     * A relationship to the Card entity representing the user's cards.
      */
     @ManyToMany(() => Card, (card) => card.users)
     cards: Card[];

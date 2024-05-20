@@ -4,6 +4,7 @@ import { FindManyOptions, Repository } from "typeorm";
 import { Project } from "./project.entity";
 import { CreateProjectDto } from "./dto/create.project.dto";
 import { UpdateProjectDto } from "./dto/update.project.dto";
+import { ProjectUsersService } from "./project-users/project.users.service";
 
 export type ProjectFindAllResult = {
     total: number;
@@ -14,7 +15,8 @@ export type ProjectFindAllResult = {
 export class ProjectsService {
     constructor(
         @InjectRepository(Project)
-        private projectsRepository: Repository<Project>
+        private projectsRepository: Repository<Project>,
+        private projectUsersService: ProjectUsersService
     ) {}
 
     async findAll(options?: FindManyOptions): Promise<Project[]> {
@@ -37,7 +39,18 @@ export class ProjectsService {
 
     async create(createProjectDto: CreateProjectDto): Promise<Project> {
         const project = this.projectsRepository.create(createProjectDto);
-        return this.projectsRepository.save(project);
+        await this.projectsRepository.save(project);
+
+        await Promise.all(
+            createProjectDto.users.map((projectUser) =>
+                this.projectUsersService.create({
+                    ...projectUser,
+                    project,
+                })
+            )
+        );
+
+        return project;
     }
 
     async update(

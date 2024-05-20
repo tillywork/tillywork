@@ -17,6 +17,8 @@ import { ViewTypes, type View } from './types';
 import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import type { TableSortOption } from './TableView/types';
+import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { useAuthStore } from '@/stores/auth';
 
 const props = defineProps<{
   group: ListGroup;
@@ -26,11 +28,12 @@ const props = defineProps<{
 const emit = defineEmits(['click:row']);
 const rowHovered = defineModel<Row<Card>>('row:hovered');
 const isExpanded = ref(props.group.isExpanded);
-
+const authStore = useAuthStore();
 const dialog = useDialog();
 const route = useRoute('/pm/list/[listId]/view/[viewId]');
 const listId = computed(() => +route.params.listId);
 const usersService = useUsersService();
+const projectUsersService = useProjectUsersService();
 const cardsService = useCardsService();
 const listsStagesService = useListStagesService();
 const listGroupsService = useListGroupsService();
@@ -57,10 +60,16 @@ const { mutate: updateCardListStage } =
   cardsService.useUpdateCardListStageMutation();
 const createCardMutation = cardsService.useCreateCardMutation();
 const updateCardMutation = cardsService.useUpdateCardMutation();
-const usersQuery = usersService.useUsersQuery();
+const usersQuery = projectUsersService.useProjectUsersQuery({
+  projectId: authStore.project!.id,
+});
 
 const listStagesQuery = listsStagesService.useGetListStagesQuery(listId.value);
 const updateListGroupMutation = listGroupsService.useUpdateListGroupMutation();
+
+const users = computed(
+  () => usersQuery.data.value?.map((projectUser) => projectUser.user) ?? []
+);
 
 const groupCards = computed(() => {
   let cards: Card[] = [];
@@ -157,7 +166,7 @@ function getCurrentAssignee(group: ListGroup) {
   let user: User | undefined;
 
   if (group.type === ListGroupOptions.ASSIGNEES) {
-    user = usersQuery.data.value?.users.find((user) => {
+    user = users.value.find((user: User) => {
       return user.id == group.entityId;
     });
   }
@@ -256,6 +265,7 @@ function getCurrentAssignee(group: ListGroup) {
               @update:modelValue="
                 (modelValue) =>
                   updateCardListStage({
+                    cardId: row.original.id,
                     cardListId: row.original.cardLists[0].id,
                     listStageId: modelValue.id,
                   })
@@ -280,7 +290,7 @@ function getCurrentAssignee(group: ListGroup) {
               />
               <base-user-selector
                 :model-value="row.original.users"
-                :users="usersQuery.data.value?.users ?? []"
+                :users
                 activator-hover-text="Assign users"
                 @update:model-value="
                   (users) => handleUserSelection(users, row.original)

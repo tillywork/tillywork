@@ -3,20 +3,14 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { CardsController } from "./cards.controller";
 import { CardsService } from "./cards.service";
 import { Card } from "./card.entity";
-import { CardList } from "./card.list.entity";
-import { CardListsService } from "./card.lists.service";
 import { CardSubscriber } from "./card.subscriber";
 import { CardUserSubscriber } from "./card.user.subscriber";
+import { CardListsModule } from "./card-lists/card.lists.module";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Card, CardList])],
+    imports: [TypeOrmModule.forFeature([Card]), CardListsModule],
     controllers: [CardsController],
-    providers: [
-        CardsService,
-        CardListsService,
-        CardSubscriber,
-        CardUserSubscriber,
-    ],
-    exports: [CardsService, CardListsService],
+    providers: [CardsService, CardSubscriber, CardUserSubscriber],
+    exports: [CardsService],
 })
 export class CardsModule {}

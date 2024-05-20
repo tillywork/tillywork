@@ -9,7 +9,7 @@ import { Injectable } from "@nestjs/common";
 import {
     ActivityType,
     CardActivity,
-} from "../card.activities/card.activity.entity";
+} from "../card-activities/card.activity.entity";
 
 @Injectable()
 @EventSubscriber()

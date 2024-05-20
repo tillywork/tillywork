@@ -10,8 +10,8 @@ import { ViewsService } from "../app/common/views/views.service";
 import { View } from "../app/common/views/view.entity";
 import { CardsService } from "../app/common/cards/cards.service";
 import { Card } from "../app/common/cards/card.entity";
-import { CardList } from "../app/common/cards/card.list.entity";
-import { CardListsService } from "../app/common/cards/card.lists.service";
+import { CardList } from "../app/common/cards/card-lists/card.list.entity";
+import { CardListsService } from "../app/common/cards/card-lists/card.lists.service";
 
 const logger = new Logger("UserSeeder");
 

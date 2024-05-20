@@ -29,7 +29,7 @@ export class ProjectsController {
         return this.projectsService.findAll({
             where: {
                 users: {
-                    id: user.id,
+                    user,
                 },
             },
         });
@@ -48,7 +48,13 @@ export class ProjectsController {
         return this.projectsService.create({
             ...createProjectDto,
             ownerId: req.user.id,
-            users: [req.user],
+            users: [
+                {
+                    user: req.user,
+                    role: "owner",
+                    project: createProjectDto as Project,
+                },
+            ],
         });
     }
 

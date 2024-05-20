@@ -15,8 +15,8 @@ import { Card } from "./card.entity";
 import { CreateCardDto } from "./dto/create.card.dto";
 import { UpdateCardDto } from "./dto/update.card.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
-import { UpdateCardListDto } from "./dto/update.card.list.dto";
-import { CardListsService } from "./card.lists.service";
+import { UpdateCardListDto } from "./card-lists/dto/update.card.list.dto";
+import { CardListsService } from "./card-lists/card.lists.service";
 import { QueryFilter } from "../filters/types";
 
 @UseGuards(JwtAuthGuard)

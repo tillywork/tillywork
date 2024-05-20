@@ -24,14 +24,12 @@ function printUserFullName(user: { firstName: string; lastName: string }) {
         class="text-caption"
       />
     </template>
-    <v-list-item-title class="text-truncate">{{
-      printUserFullName(user) +
-      printUserFullName(user) +
-      printUserFullName(user)
-    }}</v-list-item-title>
-    <v-list-item-subtitle class="d-block text-truncate">{{
-      user.email + printUserFullName(user)
-    }}</v-list-item-subtitle>
+    <v-list-item-title class="text-truncate">
+      {{ printUserFullName(user) }}
+    </v-list-item-title>
+    <v-list-item-subtitle class="d-block text-truncate">
+      {{ user.email }}
+    </v-list-item-subtitle>
     <template #append v-if="slots['append']">
       <slot name="append"></slot>
     </template>

@@ -7,7 +7,7 @@ import { UpdateCardDto } from "./dto/update.card.dto";
 import { ObjectHelper } from "../helpers/object.helper";
 import { QueryFilter } from "../filters/types";
 import { QueryBuilderHelper } from "../helpers/query.builder.helper";
-import { CardListsService } from "./card.lists.service";
+import { CardListsService } from "./card-lists/card.lists.service";
 
 export type CardFindAllResult = {
     total: number;

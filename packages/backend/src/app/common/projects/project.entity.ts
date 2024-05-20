@@ -5,11 +5,9 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     OneToMany,
-    ManyToMany,
-    JoinTable,
 } from "typeorm";
-import { User } from "../users/user.entity";
 import { Workspace } from "../workspaces/workspace.entity";
+import { ProjectUser } from "./project-users/project.user.entity";
 
 @Entity()
 export class Project {
@@ -27,9 +25,8 @@ export class Project {
     @UpdateDateColumn({ type: "timestamp" })
     updatedAt: Date;
 
-    @ManyToMany(() => User, (user) => user.projects)
-    @JoinTable()
-    users: User[];
+    @OneToMany(() => ProjectUser, (user) => user.project)
+    users: ProjectUser[];
 
     @OneToMany(() => Workspace, (workspace) => workspace.project)
     workspaces: Workspace[];

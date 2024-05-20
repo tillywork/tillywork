@@ -9,7 +9,7 @@ import {
     OneToMany,
 } from "typeorm";
 import { Space } from "../spaces/space.entity";
-import { CardList } from "../cards/card.list.entity";
+import { CardList } from "../cards/card-lists/card.list.entity";
 import { ListStage } from "./list.stage.entity";
 import { View } from "../views/view.entity";
 import { Prop } from "../props/prop.entity";

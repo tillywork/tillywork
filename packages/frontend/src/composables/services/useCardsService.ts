@@ -91,13 +91,15 @@ export const useCardsService = () => {
   }
 
   async function updateCardListStage({
+    cardId,
     cardListId,
     listStageId,
   }: {
+    cardId: number;
     cardListId: number;
     listStageId: number;
   }) {
-    return sendRequest(`/cards/lists/${cardListId}`, {
+    return sendRequest(`/cards/${cardId}lists/${cardListId}`, {
       method: 'PUT',
       data: {
         listStageId,
