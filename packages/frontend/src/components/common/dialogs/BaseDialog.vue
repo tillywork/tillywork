@@ -20,6 +20,9 @@ const isDialogOpen = computed({
 const dialogComponents = {
   [DIALOGS.CONFIRM]: () => import('./ConfirmDialog.vue'),
   [DIALOGS.CREATE_CARD]: () => import('./CreateCardDialog.vue'),
+  [DIALOGS.CREATE_SPACE]: () => import('./CreateSpaceDialog.vue'),
+  [DIALOGS.CREATE_LIST]: () => import('./CreateListDialog.vue'),
+  [DIALOGS.CREATE_WORKSPACE]: () => import('./CreateWorkspaceDialog.vue'),
   [DIALOGS.ONBOARDING]: () => import('./OnboardingDialog.vue'),
   [DIALOGS.SETTINGS]: () => import('./SettingsDialog.vue'),
 };

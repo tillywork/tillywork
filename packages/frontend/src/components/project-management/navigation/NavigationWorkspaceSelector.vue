@@ -4,7 +4,7 @@ import { WorkspaceTypes, type Workspace } from '../workspaces/types';
 import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { storeToRefs } from 'pinia';
-import CreateWorkspaceDialogAndButton from './CreateWorkspaceDialogAndButton.vue';
+import CreateWorkspaceBtn from './CreateWorkspaceBtn.vue';
 import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
 import BaseIconBtn from '@/components/common/base/BaseIconBtn.vue';
 import { watch } from 'vue';
@@ -150,7 +150,7 @@ watch(
       </v-list>
       <v-divider class="mt-2" />
       <v-card-actions>
-        <create-workspace-dialog-and-button />
+        <create-workspace-btn />
       </v-card-actions>
     </v-card>
   </v-menu>

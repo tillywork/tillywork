@@ -7,8 +7,11 @@ import vuetify from './plugins/vuetify';
 import router from './router';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 import posthog from './plugins/posthog';
+import BaseIconBtn from './components/common/base/BaseIconBtn.vue';
 
 const app = createApp(App);
+
+app.component('BaseIconBtn', BaseIconBtn);
 
 const pinia = createPinia();
 // Adds router as a store plugin for each store
