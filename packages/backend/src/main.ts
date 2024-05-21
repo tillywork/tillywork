@@ -6,7 +6,7 @@ import {
 } from "@nestjs/platform-fastify";
 import { AppModule } from "./app/app.module";
 import { Connection } from "typeorm";
-import { seedUserData } from "./seeders/user.seeder";
+// import { seedUserData } from "./seeders/user.seeder";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 // import { seedCardsData } from "./seeders/card.seeder";
 import metadata from "./metadata";
@@ -45,7 +45,7 @@ async function bootstrap() {
 
     if (environment === "development") {
         const connection = app.get(Connection);
-        await seedUserData(connection);
+        // await seedUserData(connection);
         // await seedCardsData(connection);
     }
 

@@ -2,40 +2,18 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { CommonModule } from "./common/common.module";
-import { TypeOrmLoggerContainer } from "./common/logger/typeorm.logger.container";
+import typeorm from "../config/typeorm";
 
 @Module({
     imports: [
-        ConfigModule.forRoot(),
+        ConfigModule.forRoot({
+            load: [typeorm],
+        }),
         TypeOrmModule.forRootAsync({
-            imports: [ConfigModule],
-            useFactory: async (configService: ConfigService) => ({
-                type: "postgres",
-                host: configService.get("TW_DB_HOST"),
-                port: configService.get("TW_DB_PORT"),
-                username: configService.get("TW_DB_USERNAME"),
-                password: configService.get("TW_DB_PASSWORD"),
-                database: configService.get("TW_DB_NAME"),
-                autoLoadEntities: true,
-                synchronize: true, // use only in development, in production should be handled by migrations
-                logger:
-                    configService.get("TW_ENABLE_QUERY_LOGGING") !== "false"
-                        ? TypeOrmLoggerContainer.ForConnection(true)
-                        : undefined,
-                ssl:
-                    configService.get("NODE_ENV") === "production"
-                        ? true
-                        : false,
-                extra:
-                    configService.get("NODE_ENV") === "production"
-                        ? {
-                              ssl: {
-                                  rejectUnauthorized: false,
-                              },
-                          }
-                        : undefined,
-            }),
+            useFactory: async (configService: ConfigService) =>
+                configService.get("typeorm"),
             inject: [ConfigService],
+            imports: [ConfigModule],
         }),
         CommonModule,
     ],
