@@ -1,30 +1,55 @@
 {
-  "name": "backend",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/backend/src",
-  "projectType": "application",
-  "targets": {
-    "serve": {
-      "executor": "@nx/js:node",
-      "defaultConfiguration": "development",
-      "options": {
-        "buildTarget": "backend:build"
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "backend:build:development"
+    "name": "backend",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "packages/backend/src",
+    "projectType": "application",
+    "targets": {
+        "serve": {
+            "executor": "@nx/js:node",
+            "defaultConfiguration": "development",
+            "options": {
+                "buildTarget": "backend:build"
+            },
+            "configurations": {
+                "development": {
+                    "buildTarget": "backend:build:development"
+                },
+                "production": {
+                    "buildTarget": "backend:build:production"
+                }
+            }
         },
-        "production": {
-          "buildTarget": "backend:build:production"
+        "metadata": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "ts-node ./src/scripts/generate-metadata.ts",
+                "cwd": "packages/backend"
+            }
+        },
+        "migration:run": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "ts-node node_modules/typeorm/cli migration:run -d packages/backend/src/config/typeorm.ts"
+            }
+        },
+        "migration:generate": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "ts-node node_modules/typeorm/cli -d packages/backend/src/config/typeorm.ts migration:generate"
+            }
+        },
+        "migration:create": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "ts-node node_modules/typeorm/cli migration:create"
+            }
+        },
+        "migration:revert": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "ts-node node_modules/typeorm/cli -d packages/backend/src/config/typeorm.ts migration:revert"
+            }
         }
-      }
     },
-    "metadata": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "ts-node packages/backend/src/scripts/generate-metadata.ts"
-      }
-    }
-  },
-  "tags": []
+    "tags": []
 }
