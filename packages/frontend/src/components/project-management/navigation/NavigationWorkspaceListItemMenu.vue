@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import BaseIconBtn from '@/components/common/base/BaseIconBtn.vue';
 import type { List } from '../lists/types';
 import { useListsService } from '@/composables/services/useListsService';
 import { useSnackbarStore } from '@/stores/snackbar';

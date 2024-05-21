@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
-import BaseIconBtn from '@/components/common/base/BaseIconBtn.vue';
-import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
 import { useCardActivitiesService } from '@/composables/services/useCardActivitiesService';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';

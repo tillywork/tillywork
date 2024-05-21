@@ -5,8 +5,6 @@ import { useWorkspacesService } from '@/composables/services/useWorkspacesServic
 import { useWorkspaceStore } from '@/stores/workspace';
 import { storeToRefs } from 'pinia';
 import CreateWorkspaceBtn from './CreateWorkspaceBtn.vue';
-import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
-import BaseIconBtn from '@/components/common/base/BaseIconBtn.vue';
 import { watch } from 'vue';
 import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';

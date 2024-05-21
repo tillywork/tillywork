@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import BaseIconBtn from '@/components/common/base/BaseIconBtn.vue';
 import type { Space } from '../spaces/types';
 import { useSpacesService } from '@/composables/services/useSpacesService';
 import { useSnackbarStore } from '@/stores/snackbar';

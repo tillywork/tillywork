@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useDialog } from '@/composables/useDialog';
-import BaseIconBtn from '../base/BaseIconBtn.vue';
 import BaseThemeSwitch from '../base/BaseThemeSwitch.vue';
 
 const dialog = useDialog();

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ViewTypes, type View } from '../views/types';
-import BaseIconBtn from '@/components/common/base/BaseIconBtn.vue';
 
 const router = useRouter();
 const props = defineProps<{

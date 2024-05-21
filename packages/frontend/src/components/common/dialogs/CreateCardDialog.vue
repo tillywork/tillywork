@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import BaseEditorInput from '../base/BaseEditor/BaseEditorInput.vue';
-import BaseIconBtn from '../base/BaseIconBtn.vue';
 import ListStageSelector from '../inputs/ListStageSelector.vue';
 import BaseUserSelector from '../inputs/BaseUserSelector.vue';
 import BaseDatePicker from '../inputs/BaseDatePicker.vue';
@@ -114,6 +113,7 @@ function handlePostCreate() {
           single-line
           class="mb-3"
           editable
+          disable-commands
         />
         <base-editor-input
           v-model:json="createCardDto.description"

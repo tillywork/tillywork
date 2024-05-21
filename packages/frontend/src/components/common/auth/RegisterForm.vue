@@ -5,7 +5,7 @@ import validationUtils from '@/utils/validation';
 import type { VForm } from 'vuetify/components';
 import 'flag-icons/css/flag-icons.min.css';
 import 'v-phone-input/dist/v-phone-input.css';
-// import { VPhoneInput } from 'v-phone-input';
+import { VPhoneInput } from 'v-phone-input';
 import { useLogo } from '@/composables/useLogo';
 import { type CreateUserDto } from '../users/types';
 
@@ -96,7 +96,7 @@ async function handleRegister() {
                 required
                 :rules="[rules.required]"
               ></v-text-field>
-              <!-- <v-phone-input
+              <v-phone-input
                 v-model="createUserDto.phoneNumber"
                 v-model:country="createUserDto.country"
                 label="Phone*"
@@ -104,7 +104,7 @@ async function handleRegister() {
                 enable-searching-country
                 density="compact"
                 :rules="[rules.required]"
-              /> -->
+              />
             </v-card-text>
             <v-card-actions class="px-4 pt-0">
               <v-spacer />
