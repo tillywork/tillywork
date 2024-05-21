@@ -192,6 +192,7 @@ function updateCardListStage(listStage: ListStage) {
           single-line
           class="flex-1-1-100 mt-1"
           editable
+          disable-commands
         />
         <v-spacer />
         <div class="d-flex align-center ga-2">

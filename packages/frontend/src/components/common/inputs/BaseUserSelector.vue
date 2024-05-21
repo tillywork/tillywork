@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import type { User } from '@/components/common/users/types';
-import BaseAvatar from '../base/BaseAvatar.vue';
-import BaseIconBtn from '../base/BaseIconBtn.vue';
 
 const value = defineModel<User[]>({
   default: [],

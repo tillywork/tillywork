@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { type ListStage } from '../../project-management/lists/types';
-import BaseIconBtn from '../base/BaseIconBtn.vue';
-import { computed } from 'vue';
 
 const selectedStage = defineModel<ListStage>();
 const listStageMenu = ref(false);

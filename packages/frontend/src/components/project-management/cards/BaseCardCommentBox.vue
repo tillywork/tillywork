@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
-import BaseIconBtn from '@/components/common/base/BaseIconBtn.vue';
 import { type Content } from '@tiptap/vue-3';
 
 const value = defineModel<Content>();

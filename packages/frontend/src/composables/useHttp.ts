@@ -11,24 +11,24 @@ let axiosInstance: AxiosInstance;
  * @returns AxiosInstance
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const refreshTokenInterceptor = async (error: any) => {
-  const { refreshToken, setToken, token } = useAuthStore();
+// const refreshTokenInterceptor = async (error: any) => {
+//   const { refreshToken, setToken, token } = useAuthStore();
 
-  if (error.response.status === 401 && !error.config._retry && token) {
-    try {
-      const newToken = await refreshToken();
-      if (newToken) {
-        setToken(newToken);
-        error.config._retry = true;
-        error.config.headers['Authorization'] = `Bearer ${newToken}`;
-        return axiosInstance(error.config);
-      }
-    } catch (refreshError) {
-      return Promise.reject(refreshError);
-    }
-  }
-  return Promise.reject(error);
-};
+//   if (error.response.status === 401 && !error.config._retry && token) {
+//     try {
+//       const newToken = await refreshToken();
+//       if (newToken) {
+//         setToken(newToken);
+//         error.config._retry = true;
+//         error.config.headers['Authorization'] = `Bearer ${newToken}`;
+//         return axiosInstance(error.config);
+//       }
+//     } catch (refreshError) {
+//       return Promise.reject(refreshError);
+//     }
+//   }
+//   return Promise.reject(error);
+// };
 
 /**
  * Creates a new Axios instance,
@@ -55,10 +55,10 @@ const createAxiosInstance = () => {
     }
   );
 
-  instance.interceptors.response.use(
-    (response) => response,
-    refreshTokenInterceptor
-  );
+  //   instance.interceptors.response.use(
+  //     (response) => response,
+  //     refreshTokenInterceptor
+  //   );
 
   return instance;
 };

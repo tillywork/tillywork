@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import BaseIconBtn from '@/components/common/base/BaseIconBtn.vue';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useDialog } from '@/composables/useDialog';
 

@@ -16,6 +16,8 @@ RUN npm run build
 # Stage 3: Final image with Nginx for frontend and Node for backend
 FROM nginx:alpine-slim as runner
 
+ENV NODE_ENV=production
+
 # Set working directory
 WORKDIR /app
 
@@ -31,7 +33,7 @@ COPY --from=build /app/dist/packages/backend ./dist/backend
 # Copy frontend build from the frontend stage
 COPY --from=build /app/dist/packages/frontend /usr/share/nginx/html
 
-# Copy Nginx configuration for frontend
+# Copy Nginx configuration
 COPY nginx/frontend.conf /etc/nginx/conf.d/default.conf
 
 # Copy ecosystem file for PM2
@@ -40,7 +42,7 @@ COPY package*.json ./
 COPY packages/backend/package*.json ./packages/backend/
 
 # Install dependencies
-RUN npm ci --omit=dev
+RUN npm ci
 
 # Copy start script
 COPY ./start.sh /start.sh

@@ -175,6 +175,7 @@ function openCreateCardDialog() {
           density="comfortable"
           variant="outlined"
           color="primary"
+          v-tooltip="'Coming soon'"
         >
           <v-icon icon="mdi-filter" size="16" start />
           Filters

@@ -15,6 +15,7 @@ const props = defineProps<{
   heading?: 1 | 2 | 3 | 4 | 5 | 6;
   singleLine?: boolean;
   editable?: boolean;
+  disableCommands?: boolean;
 }>();
 
 const extensions = computed(() => {
@@ -23,13 +24,18 @@ const extensions = computed(() => {
     Placeholder.configure({
       placeholder: props.placeholder,
     }),
-    Commands.configure({
-      suggestion,
-    }),
   ];
 
   if (props.singleLine) {
     extensions.push(NoNewLine);
+  }
+
+  if (!props.disableCommands) {
+    extensions.push(
+      Commands.configure({
+        suggestion,
+      })
+    );
   }
 
   return extensions;

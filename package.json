@@ -6,7 +6,7 @@
     "dev": "nx run-many -t serve -p frontend backend",
     "lint": "nx lint backend && nx lint frontend",
     "format": "nx format backend && nx format frontend",
-    "build": "nx run-many -t build -p frontend backend"
+    "build": "nx run-many -t build -p frontend backend -c production"
   },
   "private": true,
   "devDependencies": {
