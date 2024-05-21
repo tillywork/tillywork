@@ -6,6 +6,7 @@ import {
     UpdateDateColumn,
     ManyToOne,
     JoinColumn,
+    Relation,
 } from "typeorm";
 import { List } from "../list.entity";
 import { ListGroupEntityTypes, ListGroupOptions } from "../types";
@@ -48,12 +49,12 @@ export class ListGroup {
         onDelete: "CASCADE",
     })
     @JoinColumn()
-    list: List;
+    list: Relation<List>;
 
     @Column({ type: "bigint" })
     listId: number;
 
-    filter?: Filter;
+    filter?: Relation<Filter>;
 
     cards?: CardFindAllResult;
 }

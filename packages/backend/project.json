@@ -18,6 +18,12 @@
           "buildTarget": "backend:build:production"
         }
       }
+    },
+    "metadata": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "ts-node packages/backend/src/scripts/generate-metadata.ts"
+      }
     }
   },
   "tags": []

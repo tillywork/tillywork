@@ -9,6 +9,7 @@ import {
     JoinTable,
     ManyToOne,
     DeleteDateColumn,
+    Relation,
 } from "typeorm";
 import { User } from "../users/user.entity";
 import { Space } from "../spaces/space.entity";
@@ -38,14 +39,14 @@ export class Workspace {
 
     @ManyToOne(() => Project, (project) => project.workspaces)
     @JoinTable()
-    project: Project[];
+    project: Relation<Project[]>;
     @Column({ type: "bigint", nullable: true })
     projectId: number;
 
     @OneToMany(() => Space, (space) => space.workspace)
-    spaces: Space[];
+    spaces: Relation<Space[]>;
 
     @ManyToMany(() => User, (user) => user.projects)
     @JoinTable()
-    users: User[];
+    users: Relation<User[]>;
 }

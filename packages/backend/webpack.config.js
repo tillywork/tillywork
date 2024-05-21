@@ -1,5 +1,6 @@
 const { NxWebpackPlugin } = require('@nx/webpack');
 const { join } = require('path');
+const swcDefaultConfig = require('@nestjs/cli/lib/compiler/defaults/swc-defaults').swcDefaultsFactory().swcOptions;
 
 module.exports = {
   output: {
@@ -16,4 +17,16 @@ module.exports = {
       outputHashing: 'none',
     }),
   ],
+  module: {
+    rules: [
+      {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'swc-loader',
+          options: swcDefaultConfig,
+        },
+      },
+    ],
+  },
 };

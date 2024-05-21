@@ -4,7 +4,10 @@ import { ViewSortOption } from "../../views/types";
 import { UpdateListGroupDto } from "../dto/update.list.group.dto";
 import { ListGroupOptions } from "../types";
 import { ListGroupsService } from "./list.groups.service";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+@ApiBearerAuth()
+@ApiTags("lists")
 @UseGuards(JwtAuthGuard)
 @Controller({
     path: "lists/:listId/groups",

@@ -7,6 +7,7 @@ import {
     ManyToOne,
     JoinTable,
     OneToMany,
+    Relation,
 } from "typeorm";
 import { CardList } from "../../cards/card-lists/card.list.entity";
 import { List } from "../list.entity";
@@ -39,10 +40,10 @@ export class ListStage {
 
     @ManyToOne(() => List, (list) => list.listStages, { onDelete: "CASCADE" })
     @JoinTable()
-    list: List;
+    list: Relation<List>;
     @Column({ type: "bigint" })
     listId: number;
 
     @OneToMany(() => CardList, (cardList) => cardList.listStage)
-    cardLists: CardList[];
+    cardLists: Relation<CardList[]>;
 }

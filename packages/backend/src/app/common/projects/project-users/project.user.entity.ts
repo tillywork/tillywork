@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    ManyToOne,
+    Relation,
+} from "typeorm";
 import { Project } from "../project.entity";
 import { User } from "../../users/user.entity";
 
@@ -8,13 +14,13 @@ export class ProjectUser {
     id: number;
 
     @ManyToOne(() => Project, (project) => project.users, { nullable: false })
-    project: Project;
+    project: Relation<Project>;
 
     @ManyToOne(() => User, (user) => user.projects, {
         nullable: false,
         eager: true,
     })
-    user: User;
+    user: Relation<User>;
 
     @Column({ type: "varchar", length: 255 })
     role: string;

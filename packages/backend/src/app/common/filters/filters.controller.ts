@@ -13,7 +13,10 @@ import { Filter } from "./filter.entity";
 import { CreateFilterDto } from "./dto/create.filter.dto";
 import { UpdateFilterDto } from "./dto/update.filter.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+@ApiBearerAuth()
+@ApiTags("filters")
 @UseGuards(JwtAuthGuard)
 @Controller({
     path: "filters",

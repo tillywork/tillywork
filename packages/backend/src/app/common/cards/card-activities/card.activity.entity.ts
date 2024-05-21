@@ -4,6 +4,7 @@ import {
     Column,
     ManyToOne,
     CreateDateColumn,
+    Relation,
 } from "typeorm";
 import { Card } from "../card.entity";
 import { User } from "../../users/user.entity";
@@ -24,7 +25,7 @@ export class CardActivity {
     id: number;
 
     @ManyToOne(() => Card, (card) => card.activities, { nullable: false })
-    card: Card;
+    card: Relation<Card>;
 
     @Column({
         type: "enum",
@@ -36,7 +37,7 @@ export class CardActivity {
     content: ActivityContent;
 
     @ManyToOne(() => User)
-    createdBy: User;
+    createdBy: Relation<User>;
 
     @CreateDateColumn()
     createdAt: Date;

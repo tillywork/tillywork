@@ -7,6 +7,7 @@ import {
     ManyToMany,
     DeleteDateColumn,
     OneToMany,
+    Relation,
 } from "typeorm";
 import { Card } from "../cards/card.entity";
 import { ProjectUser } from "../projects/project-users/project.user.entity";
@@ -93,11 +94,11 @@ export class User {
      * A relationship to the ProjectUser entity representing the user's projects.
      */
     @OneToMany(() => ProjectUser, (project) => project.user)
-    projects: ProjectUser[];
+    projects: Relation<ProjectUser[]>;
 
     /**
      * A relationship to the Card entity representing the user's cards.
      */
     @ManyToMany(() => Card, (card) => card.users)
-    cards: Card[];
+    cards: Relation<Card[]>;
 }

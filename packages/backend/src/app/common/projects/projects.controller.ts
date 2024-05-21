@@ -14,7 +14,10 @@ import { Project } from "./project.entity";
 import { CreateProjectDto } from "./dto/create.project.dto";
 import { UpdateProjectDto } from "./dto/update.project.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+@ApiBearerAuth()
+@ApiTags("projects")
 @UseGuards(JwtAuthGuard)
 @Controller({
     path: "projects",

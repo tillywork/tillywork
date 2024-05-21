@@ -8,6 +8,7 @@ import {
     OneToMany,
     JoinTable,
     DeleteDateColumn,
+    Relation,
 } from "typeorm";
 import { Workspace } from "../workspaces/workspace.entity";
 import { List } from "../lists/list.entity";
@@ -29,10 +30,10 @@ export class Space {
 
     @ManyToOne(() => Workspace, (workspace) => workspace.spaces)
     @JoinTable()
-    workspace: Workspace;
+    workspace: Relation<Workspace>;
     @Column({ type: "bigint", nullable: false })
     workspaceId: number;
 
     @OneToMany(() => List, (list) => list.space)
-    lists: List[];
+    lists: Relation<List[]>;
 }

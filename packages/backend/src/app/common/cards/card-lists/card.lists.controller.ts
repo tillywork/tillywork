@@ -9,7 +9,10 @@ import {
 import { JwtAuthGuard } from "../../auth/guards/jwt.auth.guard";
 import { CardListsService } from "./card.lists.service";
 import { UpdateCardListDto } from "./dto/update.card.list.dto";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+@ApiBearerAuth()
+@ApiTags("cards")
 @UseGuards(JwtAuthGuard)
 @Controller({
     path: "cards/:cardId/lists",
