@@ -26,6 +26,10 @@ Product roadmaps, sprint planning, and issue tracking.
 - **Comprehensive Toolset**: Possesses a range of tools covering project oversight, sales management, and issue resolution.
 - **Intuitive User Interface**: Features a straightforward, user-friendly interface (Material 3 anyone?)
 
+## Contact
+
+For further details and support, please visit [our website](https://tilly.work) or join [our Discord](https://discord.gg/Ttn4WeNJbb).
+
 ## Getting started
 
 - Clone the repository `git clone https://github.com/tillywork/tillywork.git`
@@ -41,7 +45,3 @@ We invite contributions to tillywork! If you have ideas for bug fixes, enhanceme
 ## License
 
 tillywork is available under the MIT License.
-
-## Contact
-
-For further details and support, please visit [our website](https://tilly.work) or contact our support team.
