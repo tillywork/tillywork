@@ -1,6 +1,6 @@
 # tillywork
 
-[![tillywork logo](https://cdn.tilly.work/logo-white.png)](https://tilly.work)
+[![tillywork logo](https://cdn.tilly.work/github.png)](https://tilly.work)
 
 Welcome to **tillywork**—an open-source work management platform tailored for dynamic teams.
 
