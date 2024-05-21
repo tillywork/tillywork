@@ -6,6 +6,7 @@ import {
     UpdateDateColumn,
     ManyToOne,
     JoinColumn,
+    Relation,
 } from "typeorm";
 import { ViewSortOption, ViewTypes } from "./types";
 import { List } from "../lists/list.entity";
@@ -39,7 +40,7 @@ export class View {
 
     @ManyToOne(() => List, (list) => list.views, { onDelete: "CASCADE" })
     @JoinColumn()
-    list: List;
+    list: Relation<List>;
 
     @Column({ type: "bigint" })
     listId: number;

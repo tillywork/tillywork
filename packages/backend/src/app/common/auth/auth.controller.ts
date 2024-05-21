@@ -9,7 +9,9 @@ import {
 import { AuthService, RegisterResponse } from "./auth.service";
 import { LocalAuthGuard } from "./guards/local.auth.guard";
 import { CreateUserDto } from "../users/dto/create.user.dto";
+import { ApiBody, ApiTags } from "@nestjs/swagger";
 
+@ApiTags("auth")
 @Controller({
     path: "auth",
     version: "1",
@@ -17,7 +19,22 @@ import { CreateUserDto } from "../users/dto/create.user.dto";
 export class AuthController {
     constructor(private authService: AuthService) {}
 
+    /**
+     * Logs the user in with email and password
+     */
     @UseGuards(LocalAuthGuard)
+    @ApiBody({
+        schema: {
+            properties: {
+                email: {
+                    type: "string",
+                },
+                password: {
+                    type: "string",
+                },
+            },
+        },
+    })
     @Post("login")
     async login(@Request() req): Promise<LoginResponse> {
         const accessToken = await this.authService.login(req.user);

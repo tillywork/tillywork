@@ -8,11 +8,13 @@
     ],
     "license": "MIT",
     "dependencies": {
+        "@fastify/static": "^7.0.4",
         "@nestjs/config": "^3.2.0",
         "@nestjs/jwt": "^10.2.0",
         "@nestjs/mapped-types": "^2.0.5",
         "@nestjs/passport": "^10.0.3",
         "@nestjs/platform-fastify": "^10.3.3",
+        "@nestjs/swagger": "^7.3.1",
         "@nestjs/typeorm": "^10.0.2",
         "bcrypt": "^5.1.1",
         "class-transformer": "^0.5.1",
@@ -25,9 +27,11 @@
         "typeorm": "^0.3.20"
     },
     "devDependencies": {
+        "@nestjs/cli": "^10.3.2",
         "@types/bcrypt": "^5.0.2",
         "@types/passport-jwt": "^4.0.1",
         "@types/passport-local": "^1.0.38",
+        "swc-loader": "^0.2.6",
         "webpack-cli": "^5.1.4"
     }
 }

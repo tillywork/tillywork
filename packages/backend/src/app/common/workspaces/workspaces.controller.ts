@@ -17,7 +17,10 @@ import { CreateWorkspaceDto } from "./dto/create.workspace.dto";
 import { UpdateWorkspaceDto } from "./dto/update.workspace.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
 import { WorkspaceTypes } from "./types";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+@ApiBearerAuth()
+@ApiTags("workspaces")
 @UseGuards(JwtAuthGuard)
 @Controller({
     path: "workspaces",

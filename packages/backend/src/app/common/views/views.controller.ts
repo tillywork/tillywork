@@ -13,7 +13,10 @@ import { View } from "./view.entity";
 import { CreateViewDto } from "./dto/create.view.dto";
 import { UpdateViewDto } from "./dto/update.view.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+@ApiBearerAuth()
+@ApiTags("views")
 @UseGuards(JwtAuthGuard)
 @Controller({
     path: "views",

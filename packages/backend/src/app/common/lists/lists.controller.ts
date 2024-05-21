@@ -13,7 +13,10 @@ import { List } from "./list.entity";
 import { CreateListDto } from "./dto/create.list.dto";
 import { UpdateListDto } from "./dto/update.list.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+@ApiBearerAuth()
+@ApiTags("lists")
 @UseGuards(JwtAuthGuard)
 @Controller({
     path: "lists",

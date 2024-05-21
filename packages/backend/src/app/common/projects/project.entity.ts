@@ -5,6 +5,7 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     OneToMany,
+    Relation,
 } from "typeorm";
 import { Workspace } from "../workspaces/workspace.entity";
 import { ProjectUser } from "./project-users/project.user.entity";
@@ -26,8 +27,8 @@ export class Project {
     updatedAt: Date;
 
     @OneToMany(() => ProjectUser, (user) => user.project)
-    users: ProjectUser[];
+    users: Relation<ProjectUser[]>;
 
     @OneToMany(() => Workspace, (workspace) => workspace.project)
-    workspaces: Workspace[];
+    workspaces: Relation<Workspace[]>;
 }

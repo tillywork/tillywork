@@ -12,7 +12,10 @@ import {
 import { CardActivitiesService } from "./card.activities.service";
 import { CreateCardActivityDto } from "./dto/create.card.activity.dto";
 import { JwtAuthGuard } from "../../auth/guards/jwt.auth.guard";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+@ApiBearerAuth()
+@ApiTags("cards")
 @UseGuards(JwtAuthGuard)
 @Controller({
     path: "/cards/:cardId/activities",

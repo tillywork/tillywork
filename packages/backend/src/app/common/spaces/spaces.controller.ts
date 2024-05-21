@@ -14,7 +14,10 @@ import { Space } from "./space.entity";
 import { CreateSpaceDto } from "./dto/create.space.dto";
 import { UpdateSpaceDto } from "./dto/update.space.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+@ApiBearerAuth()
+@ApiTags("spaces")
 @UseGuards(JwtAuthGuard)
 @Controller({
     path: "spaces",

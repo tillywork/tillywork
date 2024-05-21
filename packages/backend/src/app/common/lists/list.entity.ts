@@ -7,6 +7,7 @@ import {
     ManyToOne,
     JoinTable,
     OneToMany,
+    Relation,
 } from "typeorm";
 import { Space } from "../spaces/space.entity";
 import { CardList } from "../cards/card-lists/card.list.entity";
@@ -30,22 +31,22 @@ export class List {
 
     @ManyToOne(() => Space, (space) => space.lists)
     @JoinTable()
-    space: Space;
+    space: Relation<Space>;
     @Column({ type: "bigint" })
     spaceId: number;
 
     @OneToMany(() => ListStage, (listStage) => listStage.list)
-    listStages: ListStage[];
+    listStages: Relation<ListStage[]>;
 
     @OneToMany(() => ListGroup, (listGroup) => listGroup.list)
-    listGroups: ListGroup[];
+    listGroups: Relation<ListGroup[]>;
 
     @OneToMany(() => CardList, (cardList) => cardList.list)
-    cardLists: CardList[];
+    cardLists: Relation<CardList[]>;
 
     @OneToMany(() => View, (view) => view.list)
-    views: View[];
+    views: Relation<View[]>;
 
     @OneToMany(() => Prop, (prop) => prop.list)
-    props: Prop[];
+    props: Relation<Prop[]>;
 }

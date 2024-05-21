@@ -14,7 +14,10 @@ import { Prop } from "./prop.entity";
 import { CreatePropDto } from "./dto/create.prop.dto";
 import { UpdatePropDto } from "./dto/update.prop.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+@ApiBearerAuth()
+@ApiTags("props")
 @UseGuards(JwtAuthGuard)
 @Controller({
     path: "props",

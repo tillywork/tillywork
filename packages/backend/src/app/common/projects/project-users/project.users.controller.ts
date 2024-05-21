@@ -7,14 +7,16 @@ import {
     Delete,
     Put,
     UseGuards,
-    Request,
 } from "@nestjs/common";
 import { JwtAuthGuard } from "../../auth/guards/jwt.auth.guard";
 import { CreateProjectUserDto } from "./dto/create.project.user.dto";
 import { UpdateProjectUserDto } from "./dto/update.project.user.dto";
 import { ProjectUser } from "./project.user.entity";
 import { ProjectUsersService } from "./project.users.service";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+@ApiBearerAuth()
+@ApiTags("projects")
 @UseGuards(JwtAuthGuard)
 @Controller({
     path: "projects/:projectId/users",

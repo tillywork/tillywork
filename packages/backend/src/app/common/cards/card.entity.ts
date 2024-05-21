@@ -10,6 +10,7 @@ import {
     ManyToMany,
     JoinTable,
     ManyToOne,
+    Relation,
 } from "typeorm";
 import { CardList } from "./card-lists/card.list.entity";
 import { User } from "../users/user.entity";
@@ -33,17 +34,17 @@ export class Card {
     data: any;
 
     @OneToMany(() => CardList, (cardList) => cardList.card)
-    cardLists: CardList[];
+    cardLists: Relation<CardList[]>;
 
     @ManyToMany(() => User, (user) => user.cards)
     @JoinTable({ name: "card_users" })
-    users: User[];
+    users: Relation<User[]>;
 
     @OneToMany(() => CardActivity, (cardActivity) => cardActivity.card)
-    activities: CardActivity[];
+    activities: Relation<CardActivity[]>;
 
     @ManyToOne(() => User)
-    createdBy: User;
+    createdBy: Relation<User>;
 
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;

@@ -5,6 +5,7 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     ManyToOne,
+    Relation,
 } from "typeorm";
 import { PropTypes } from "./types";
 import { List } from "../lists/list.entity";
@@ -31,5 +32,5 @@ export class Prop {
     @ManyToOne(() => List, (list) => list.props, {
         nullable: false,
     })
-    list: List;
+    list: Relation<List>;
 }
