@@ -22,8 +22,7 @@
         "metadata": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "ts-node ./src/scripts/generate-metadata.ts",
-                "cwd": "packages/backend"
+                "command": "ts-node packages/backend/src/scripts/generate-metadata.ts",
             }
         },
         "migration:run": {
