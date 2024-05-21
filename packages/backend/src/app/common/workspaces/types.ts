@@ -1,5 +1,5 @@
 export enum WorkspaceTypes {
     CRM = "crm",
-    PROJECT_MANAGEMENT = "project_mangement",
+    PROJECT_MANAGEMENT = "project_management",
     AGILE_PROJECTS = "agile_projects",
 }
