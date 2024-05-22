@@ -44,4 +44,4 @@ We invite contributions to tillywork! If you have ideas for bug fixes, enhanceme
 
 ## License
 
-tillywork is available under the MIT License.
+tillywork is available under the [MIT License](LICENSE).
