@@ -30,7 +30,7 @@ export class UsersController {
 
     @Get()
     findAll(): Promise<UserFindAllResult> {
-        return this.usersService.findAll();
+        return this.usersService.findAll({});
     }
 
     @Get(":id")

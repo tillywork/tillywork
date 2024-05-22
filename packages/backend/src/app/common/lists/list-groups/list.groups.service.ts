@@ -95,7 +95,7 @@ export class ListGroupsService {
                 cardGroups = await this.generateGroupsByListStage({ listId });
                 break;
             case ListGroupOptions.ASSIGNEES:
-                cardGroups = await this.generateGroupsByAssignees();
+                cardGroups = await this.generateGroupsByAssignees(listId);
                 break;
             case ListGroupOptions.DUE_DATE:
                 cardGroups = await this.generateGroupsByDueDate();
@@ -193,8 +193,24 @@ export class ListGroupsService {
         });
     }
 
-    async generateGroupsByAssignees() {
-        const users = (await this.usersService.findAll()).users;
+    async generateGroupsByAssignees(listId: number) {
+        const users = (
+            await this.usersService.findAll({
+                where: {
+                    projects: {
+                        project: {
+                            workspaces: {
+                                spaces: {
+                                    lists: {
+                                        id: listId,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+        ).users;
 
         const groups: GeneratedGroup[] = users.map((user) => {
             const group: GeneratedGroup = {
