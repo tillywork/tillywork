@@ -28,6 +28,9 @@ export class ListStagesService {
 
         return this.listStagesRepository.find({
             where,
+            order: {
+                order: "ASC",
+            },
         });
     }
 

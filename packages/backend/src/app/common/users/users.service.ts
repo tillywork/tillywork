@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { FindManyOptions, Repository } from "typeorm";
 import { User } from "./user.entity";
 import { CreateUserDto } from "./dto/create.user.dto";
 import { UpdateUserDto } from "./dto/update.user.dto";
@@ -18,8 +18,8 @@ export class UsersService {
         private usersRepository: Repository<User>
     ) {}
 
-    async findAll(): Promise<UserFindAllResult> {
-        const result = await this.usersRepository.findAndCount({});
+    async findAll(options: FindManyOptions<User>): Promise<UserFindAllResult> {
+        const result = await this.usersRepository.findAndCount(options);
         return { users: result[0], total: result[1] };
     }
 

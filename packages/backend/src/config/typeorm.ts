@@ -16,6 +16,7 @@ import { CreateCardListTable1716298856999 } from "../migrations/1716298856999-cr
 import { CreateCardActivityTable1716298912783 } from "../migrations/1716298912783-create-card-activity-table";
 import { CreateViewTable1716299003967 } from "../migrations/1716299003967-create-view-table";
 import { CreatePropTable1716299140812 } from "../migrations/1716299140812-create-prop-table";
+import { DeleteUserGroups1716372393939 } from "../migrations/1716372393939-delete-user-groups";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -33,6 +34,7 @@ const migrations = [
     CreateCardActivityTable1716298912783,
     CreateViewTable1716299003967,
     CreatePropTable1716299140812,
+    DeleteUserGroups1716372393939,
 ];
 
 const config: TypeOrmModuleOptions = {
