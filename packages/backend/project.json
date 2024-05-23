@@ -40,7 +40,8 @@
         "migration:create": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "ts-node node_modules/typeorm/cli migration:create"
+                "command": "ts-node ../../../../node_modules/typeorm/cli migration:create",
+                "cwd": "packages/backend/src/migrations"
             }
         },
         "migration:revert": {

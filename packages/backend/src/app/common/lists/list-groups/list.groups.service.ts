@@ -12,6 +12,7 @@ import { FiltersService } from "../../filters/filters.service";
 import { Filter } from "../../filters/filter.entity";
 import { UpdateListGroupDto } from "../dto/update.list.group.dto";
 import { ViewSortOption } from "../../views/types";
+import { CreateGroupDto } from "./dto/create.group.entity.dto";
 
 export type GenerateGroupsParams = {
     listId: number;
@@ -19,22 +20,10 @@ export type GenerateGroupsParams = {
     sortCardsBy: ViewSortOption[];
 };
 
-const DEFAULT_GROUP: GeneratedGroup = {
+const DEFAULT_GROUP: CreateGroupDto = {
     name: "Tasks",
     type: ListGroupOptions.ALL,
 };
-
-interface GeneratedGroup {
-    entityId?: number;
-    entityType?: ListGroupEntityTypes;
-    type?: ListGroupOptions;
-    name?: string;
-    filter?: {
-        where: FilterGroup;
-    };
-    color?: string;
-    icon?: string;
-}
 
 @Injectable()
 export class ListGroupsService {
@@ -72,7 +61,8 @@ export class ListGroupsService {
                 "filter.entityId = listGroup.id AND filter.entityType = :entityType",
                 { entityType: FilterEntityTypes.LIST_GROUP }
             )
-            .where("listGroup.listId = :listId", { listId });
+            .where("listGroup.listId = :listId", { listId })
+            .orderBy("listGroup.order", "ASC");
 
         if (groupBy) {
             query.andWhere("listGroup.type = :groupBy", { groupBy });
@@ -88,7 +78,7 @@ export class ListGroupsService {
     }: GenerateGroupsParams): Promise<ListGroup[]> {
         const existingGroups = await this.findAll({ listId, groupBy });
 
-        let cardGroups: GeneratedGroup[];
+        let cardGroups: CreateGroupDto[];
 
         switch (groupBy) {
             case ListGroupOptions.LIST_STAGE:
@@ -166,11 +156,11 @@ export class ListGroupsService {
         listId,
     }: {
         listId: number;
-    }): Promise<GeneratedGroup[]> {
+    }): Promise<CreateGroupDto[]> {
         const stages = await this.listStagesService.findAll({ listId });
 
         return stages.map((stage) => {
-            const group: GeneratedGroup = {
+            const group: CreateGroupDto = {
                 entityId: stage.id,
                 entityType: ListGroupEntityTypes.LIST_STAGE,
                 type: ListGroupOptions.LIST_STAGE,
@@ -187,6 +177,7 @@ export class ListGroupsService {
                     },
                 },
                 color: stage.color,
+                order: stage.order,
             };
 
             return group;
@@ -212,8 +203,8 @@ export class ListGroupsService {
             })
         ).users;
 
-        const groups: GeneratedGroup[] = users.map((user) => {
-            const group: GeneratedGroup = {
+        const groups: CreateGroupDto[] = users.map((user, index) => {
+            const group: CreateGroupDto = {
                 entityId: user.id,
                 entityType: ListGroupEntityTypes.USER,
                 type: ListGroupOptions.ASSIGNEES,
@@ -230,6 +221,7 @@ export class ListGroupsService {
                         ],
                     },
                 },
+                order: index + 1,
             };
 
             return group;
@@ -257,7 +249,7 @@ export class ListGroupsService {
     }
 
     async generateGroupsByDueDate() {
-        const groups: GeneratedGroup[] = [
+        const groups: CreateGroupDto[] = [
             {
                 type: ListGroupOptions.DUE_DATE,
                 name: "Past Due",
@@ -274,6 +266,7 @@ export class ListGroupsService {
                 },
                 icon: "mdi-clock-time-eight",
                 color: "error",
+                order: 1,
             },
             {
                 type: ListGroupOptions.DUE_DATE,
@@ -291,6 +284,7 @@ export class ListGroupsService {
                 },
                 icon: "mdi-clock-time-twelve",
                 color: "info",
+                order: 2,
             },
             {
                 type: ListGroupOptions.DUE_DATE,
@@ -308,6 +302,7 @@ export class ListGroupsService {
                 },
                 icon: "mdi-clock-time-four",
                 color: "default",
+                order: 3,
             },
             {
                 type: ListGroupOptions.DUE_DATE,
@@ -325,6 +320,7 @@ export class ListGroupsService {
                 },
                 icon: "mdi-clock-time-six-outline",
                 color: "default",
+                order: 4,
             },
         ];
 
