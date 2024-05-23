@@ -20,6 +20,7 @@ import type { ListStage } from '../lists/types';
 import objectUtils from '@/utils/object';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
 import { useAuthStore } from '@/stores/auth';
+import { type Content } from '@tiptap/vue-3';
 
 dayjs.extend(relativeTime);
 
@@ -30,6 +31,8 @@ const props = defineProps<{
 const emit = defineEmits(['click:close']);
 const authStore = useAuthStore();
 const cardCopy = ref<Card>({ ...props.card });
+const comment = ref<Content>();
+const isCommentEmpty = ref<boolean>();
 const cardsService = useCardsService();
 const cardActivitiesService = useCardActivitiesService();
 const projectUsersService = useProjectUsersService();
@@ -122,20 +125,26 @@ function updateCardAssignees(assignees: User[]) {
   });
 }
 function createComment(content: ActivityContent) {
-  createActivityMutation
-    .mutateAsync({
-      cardId: props.card.id,
-      type: ActivityType.COMMENT,
-      content,
-    })
-    .catch((e) => {
-      snackbar.showSnackbar({
-        color: 'error',
-        message:
-          e.response.data.message ?? 'Something went wrong, please try again.',
-        timeout: 5000,
+  if (!isCommentEmpty.value) {
+    createActivityMutation
+      .mutateAsync({
+        cardId: props.card.id,
+        type: ActivityType.COMMENT,
+        content,
+      })
+      .then(() => {
+        comment.value = undefined;
+      })
+      .catch((e) => {
+        snackbar.showSnackbar({
+          color: 'error',
+          message:
+            e.response.data.message ??
+            'Something went wrong, please try again.',
+          timeout: 5000,
+        });
       });
-    });
+  }
 }
 
 function updateCardDueAt(newDueAt: string | Date) {
@@ -183,48 +192,54 @@ function updateCardListStage(listStage: ListStage) {
         location="top"
       />
     </template>
-    <div class="v-col-9 px-16 py-12 max-h-100vh overflow-scroll">
-      <div class="d-flex align-top">
-        <base-editor-input
-          v-model="cardTitle"
-          placeholder="Task title"
-          :heading="2"
-          single-line
-          class="flex-1-1-100 mt-1"
-          editable
-          disable-commands
-        />
-        <v-spacer />
-        <div class="d-flex align-center ga-2">
-          <v-btn
-            v-if="props.showCloseButton"
-            variant="text"
-            icon="mdi-close"
-            density="comfortable"
-            color="default"
-            @click="emit('click:close')"
+    <div
+      class="base-card-content-wrapper pa-md-12 pa-6 max-h-100vh overflow-scroll"
+    >
+      <div class="base-card-content mx-auto">
+        <div class="d-flex align-top">
+          <base-editor-input
+            v-model="cardTitle"
+            placeholder="Task title"
+            :heading="2"
+            single-line
+            class="flex-1-1-100 mt-1"
+            editable
+            disable-commands
+          />
+          <v-spacer />
+          <div class="d-flex align-center ga-2">
+            <v-btn
+              v-if="props.showCloseButton"
+              variant="text"
+              icon="mdi-close"
+              density="comfortable"
+              color="default"
+              @click="emit('click:close')"
+            />
+          </div>
+        </div>
+        <div class="mt-8">
+          <base-editor-input
+            v-model:json="cardDescription"
+            placeholder="Enter description.. (/ for commands)"
+            editable
           />
         </div>
+        <v-divider class="my-8" />
+        <v-card>
+          <v-card-subtitle class="text-body-2 ps-1">Activity</v-card-subtitle>
+          <v-card-text class="pa-0">
+            <base-card-activity-timeline :card-id="cardCopy.id" />
+            <base-card-comment-box
+              v-model="comment"
+              v-model:empty="isCommentEmpty"
+              placeholder="Write comment.. (/ for commands)"
+              @submit="createComment"
+              class="ms-1"
+            />
+          </v-card-text>
+        </v-card>
       </div>
-      <div class="mt-6">
-        <base-editor-input
-          v-model:json="cardDescription"
-          placeholder="Enter description.. (/ for commands)"
-          editable
-        />
-      </div>
-      <v-divider class="my-4" />
-      <v-card>
-        <v-card-subtitle class="text-body-2 ps-1">Activity</v-card-subtitle>
-        <v-card-text class="pa-0">
-          <base-card-activity-timeline :card-id="cardCopy.id" />
-          <base-card-comment-box
-            placeholder="Write comment.. (/ for commands)"
-            @submit="createComment"
-            class="ms-1"
-          />
-        </v-card-text>
-      </v-card>
     </div>
     <div class="v-col-3 border-s-thin h-100vh">
       <v-card class="pt-3">
@@ -263,5 +278,18 @@ function updateCardListStage(listStage: ListStage) {
     padding-inline-start: 12px;
     width: 100%;
   }
+}
+</style>
+
+<style lang="scss" scoped>
+.base-card-content-wrapper {
+  width: 794px;
+  max-width: 100%;
+  justify-content: center;
+}
+
+.base-card-content {
+  width: 600px;
+  max-width: 100%;
 }
 </style>

@@ -44,6 +44,7 @@ const extensions = computed(() => {
 const textValue = defineModel<string>();
 const htmlValue = defineModel<Content>('html');
 const jsonValue = defineModel<Content>('json');
+const isEmpty = defineModel<boolean>('empty');
 
 let editor: Ref<Editor | undefined>;
 
@@ -59,12 +60,14 @@ function initEditor() {
     onCreate: () => {
       enforceHeading();
       fillEditorFromModelValues();
+      isEmpty.value = editor.value?.isEmpty;
     },
     onUpdate: () => {
       enforceHeading();
       textValue.value = editor.value?.getText();
       htmlValue.value = editor.value?.getHTML();
       jsonValue.value = editor.value?.getJSON();
+      isEmpty.value = editor.value?.isEmpty;
     },
   });
 }
