@@ -17,6 +17,7 @@ import { CreateCardActivityTable1716298912783 } from "../migrations/171629891278
 import { CreateViewTable1716299003967 } from "../migrations/1716299003967-create-view-table";
 import { CreatePropTable1716299140812 } from "../migrations/1716299140812-create-prop-table";
 import { DeleteUserGroups1716372393939 } from "../migrations/1716372393939-delete-user-groups";
+import { AddOrderColumnToListGroups1716455762784 } from "../migrations/1716455762784-add-order-column-to-list-groups";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -35,11 +36,13 @@ const migrations = [
     CreateViewTable1716299003967,
     CreatePropTable1716299140812,
     DeleteUserGroups1716372393939,
+    AddOrderColumnToListGroups1716455762784,
 ];
 
 const config: TypeOrmModuleOptions = {
     type: "postgres",
     host: `${process.env.TW_DB_HOST}`,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     port: +process.env.TW_DB_PORT!,
     username: `${process.env.TW_DB_USERNAME}`,
     password: `${process.env.TW_DB_PASSWORD}`,

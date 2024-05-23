@@ -36,6 +36,9 @@ export class ListGroup {
     @Column({ type: "varchar", nullable: true })
     color: string;
 
+    @Column({ type: "int" })
+    order: number;
+
     @Column({ type: "varchar", nullable: true })
     icon: string;
 
