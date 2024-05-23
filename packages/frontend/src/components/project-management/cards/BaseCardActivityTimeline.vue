@@ -93,19 +93,19 @@ function deleteComment(comment: CardActivity) {
         </v-timeline-item>
       </template>
       <template v-else>
-        <v-timeline-item class="text-caption" size="default">
+        <v-timeline-item class="text-caption" size="small">
           <template #icon>
             <base-avatar
               :text="
                 activity.createdBy.firstName + ' ' + activity.createdBy.lastName
               "
               :photo="activity.createdBy.photo"
-              size="default"
+              size="small"
             />
           </template>
           <v-card border="thin" class="w-100">
             <v-card-text
-              class="py-2 px-3 border-b-thin bg-accent text-caption d-flex align-center"
+              class="py-1 px-3 border-b-thin bg-accent text-caption d-flex align-center"
             >
               <span>
                 {{

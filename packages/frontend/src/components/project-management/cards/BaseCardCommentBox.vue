@@ -3,13 +3,15 @@ import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput
 import { type Content } from '@tiptap/vue-3';
 
 const value = defineModel<Content>();
+const isEmpty = defineModel<boolean>('empty');
+
 defineProps<{
   placeholder?: string;
+  //TODO add rules
 }>();
 const emit = defineEmits(['submit']);
 
 function handleSubmit() {
-  console.log('submit', value.value);
   emit('submit', value.value);
 }
 </script>
@@ -17,7 +19,12 @@ function handleSubmit() {
 <template>
   <v-card rounded="md" border="thin" class="mt-6">
     <v-card-text>
-      <base-editor-input v-model:json="value" editable :placeholder />
+      <base-editor-input
+        v-model:json="value"
+        editable
+        :placeholder
+        v-model:empty="isEmpty"
+      />
     </v-card-text>
     <v-card-actions class="justify-end px-4">
       <base-icon-btn

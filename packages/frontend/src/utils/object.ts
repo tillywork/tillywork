@@ -88,23 +88,16 @@ const objectUtils = {
       // Check individual values for equality
       else if (val1 !== val2) {
         // Check individual values for equality
-        console.log('old updatedAt: ', obj1['updatedAt']);
-        console.log('new updatedAt: ', obj2['updatedAt']);
-        console.log('old firstName: ', obj1['firstName']);
-        console.log('new firstName: ', obj2['firstName']);
-        console.log(
-          val1,
-          val2,
-          obj1['firstName'],
-          obj2['firstName'],
-          key,
-          val1 === val2
-        );
+
         differenceCount++;
       }
     });
 
     return differenceCount;
+  },
+
+  isNotEmptyObject(obj: PlainObject) {
+    return Object.keys(obj).length > 0;
   },
 };
 
