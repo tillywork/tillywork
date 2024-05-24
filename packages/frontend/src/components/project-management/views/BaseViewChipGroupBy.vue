@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import {
   DEFAULT_LIST_GROUP_BY_OPTIONS,
   ListGroupOptions,
 } from '../lists/types';
 import type { ListGroupOption } from './types';
-import { computed } from 'vue';
 import BaseViewChip from './BaseViewChip.vue';
 
 const groupBy = defineModel<ListGroupOptions>();
@@ -31,7 +29,7 @@ function clearGroupBy() {
 </script>
 
 <template>
-  <v-menu offset="5">
+  <v-menu>
     <template #activator="{ props }">
       <base-view-chip
         v-bind="props"
@@ -54,8 +52,8 @@ function clearGroupBy() {
         </template>
       </base-view-chip>
     </template>
-    <v-card color="accent">
-      <v-list class="bg-accent" nav density="compact" :lines="false">
+    <v-card>
+      <v-list>
         <template v-for="option in groupByOptions" :key="option.value">
           <v-list-item
             @click="handleGroupBySelection(option)"
@@ -65,7 +63,7 @@ function clearGroupBy() {
             <template #prepend>
               <v-icon
                 :color="isOptionSelected(option) ? 'primary' : 'grey'"
-                size="18"
+                size="small"
                 >{{ option.icon ?? 'mdi-circle-slice-8' }}</v-icon
               >
             </template>

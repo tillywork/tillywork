@@ -1,15 +1,9 @@
 <script setup lang="ts">
 import BaseEditorInput from '../base/BaseEditor/BaseEditorInput.vue';
-import ListStageSelector from '../inputs/ListStageSelector.vue';
-import BaseUserSelector from '../inputs/BaseUserSelector.vue';
-import BaseDatePicker from '../inputs/BaseDatePicker.vue';
 import type { CreateCardDto } from '@/components/project-management/cards/types';
-import { ref } from 'vue';
 import { useDialog } from '@/composables/useDialog';
 import { type List } from '@/components/project-management/lists/types';
 import { useQueryClient } from '@tanstack/vue-query';
-import { useRoute } from 'vue-router';
-import { computed } from 'vue';
 import type { VForm } from 'vuetify/lib/components/index.mjs';
 import { useCardsService } from '@/composables/services/useCardsService';
 import { useSnackbarStore } from '@/stores/snackbar';

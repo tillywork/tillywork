@@ -74,12 +74,10 @@ watch(spaceMenu, () => {
   <v-menu
     v-model="spaceMenu"
     target="#space-menu-btn"
-    offset="3"
-    width="200"
     :close-on-content-click="false"
   >
-    <v-card color="accent" :loading="deleteSpaceMutation.isPending.value">
-      <v-list nav>
+    <v-card :loading="deleteSpaceMutation.isPending.value">
+      <v-list>
         <v-list-item
           class="text-error text-body-2"
           @click="handleDeleteSpace(space)"

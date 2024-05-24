@@ -1,5 +1,4 @@
 import type { Workspace } from '@/components/project-management/workspaces/types';
-import { defineStore } from 'pinia';
 
 export const useWorkspaceStore = defineStore('workspace', {
   persist: true,

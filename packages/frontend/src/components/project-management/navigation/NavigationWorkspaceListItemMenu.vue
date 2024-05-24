@@ -74,18 +74,16 @@ watch(listMenu, () => {
   <v-menu
     v-model="listMenu"
     target="#list-menu-btn"
-    offset="3"
-    width="200"
     :close-on-content-click="false"
   >
-    <v-card color="accent" :loading="deleteListMutation.isPending.value">
-      <v-list nav>
+    <v-card :loading="deleteListMutation.isPending.value">
+      <v-list>
         <v-list-item
           class="text-error text-body-2"
           @click="handleDeleteList(list)"
         >
           <template #prepend>
-            <v-icon size="18" icon="mdi-delete" />
+            <v-icon size="small" icon="mdi-delete" />
           </template>
           Delete
         </v-list-item>

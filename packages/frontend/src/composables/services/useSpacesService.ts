@@ -1,7 +1,6 @@
 import { useHttp } from '@/composables/useHttp';
 import type { Space } from '../../components/project-management/spaces/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
-import type { MaybeRef } from 'vue';
 
 export interface SpacesData {
   spaces: Space[];

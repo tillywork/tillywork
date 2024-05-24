@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { useEditor, EditorContent, Editor, type Content } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
-import type { Ref } from 'vue';
-import { onBeforeUnmount, watch } from 'vue';
 import Placeholder from '@tiptap/extension-placeholder';
 import { NoNewLine } from './extensions/NoNewLine';
-import { computed } from 'vue';
 import { Commands } from './extensions/Commands';
 import suggestion from './extensions/suggestion';
 

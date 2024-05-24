@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router';
 import { type List } from '../lists/types';
-import { ref } from 'vue';
 import NavigationWorkspaceListItemMenu from './NavigationWorkspaceListItemMenu.vue';
 
 const route = useRoute();

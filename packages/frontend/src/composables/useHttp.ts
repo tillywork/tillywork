@@ -40,7 +40,7 @@ let axiosInstance: AxiosInstance;
 const createAxiosInstance = () => {
   const { token } = useAuthStore();
   const instance = axios.create({
-    baseURL: import.meta.env.TW_API_URL,
+    baseURL: import.meta.env.TW_VITE_API_URL,
   });
 
   instance.interceptors.request.use(

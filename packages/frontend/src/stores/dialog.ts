@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { DIALOGS } from '@/components/common/dialogs/types';
-import { defineStore } from 'pinia';
 
 export type DialogOptions = {
   width?: string | number;

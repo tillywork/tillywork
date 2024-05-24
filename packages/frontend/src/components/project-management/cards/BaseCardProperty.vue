@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
 import { type Prop, PropTypes } from '../props/types';
-import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import BaseCardPropertyValueBtn from '@/components/project-management/cards/BaseCardPropertyValueBtn.vue';
-import BaseUserSelector from '@/components/common/inputs/BaseUserSelector.vue';
-import dayjs from 'dayjs';
 import type { User } from '@/components/common/users/types';
 import type { ListStage } from '../lists/types';
+import { useDate } from '@/composables/useDate';
+
+const { dayjs } = useDate();
 
 const prop = defineModel<Prop>('prop');
 const value = defineModel<any>('value');

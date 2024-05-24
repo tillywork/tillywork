@@ -10,8 +10,6 @@ import {
   type SortingState,
   type Column,
 } from '@tanstack/vue-table';
-import { watch } from 'vue';
-import { computed } from 'vue';
 
 export interface PaginationParams {
   page?: number;

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import BaseListViewTabs from './BaseListViewTabs.vue';
 import BaseView from '../views/BaseView.vue';
-import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
 import type { List } from './types';
+import type { View } from '../views/types';
 
 const props = defineProps<{
   list: List;
-  viewId?: number;
+  view?: View;
 }>();
 
 const views = computed(() => props.list.views);
@@ -29,10 +29,8 @@ const views = computed(() => props.list.views);
       </div>
     </div>
     <v-divider />
-    <template v-if="viewId">
-      <suspense>
-        <base-view :view-id="viewId" />
-      </suspense>
+    <template v-if="view">
+      <base-view :view :list />
     </template>
   </div>
 </template>

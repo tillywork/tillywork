@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { WorkspaceTypes, type Workspace } from '../workspaces/types';
 import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
 import { useWorkspaceStore } from '@/stores/workspace';
-import { storeToRefs } from 'pinia';
 import CreateWorkspaceBtn from './CreateWorkspaceBtn.vue';
-import { watch } from 'vue';
 import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
 
@@ -101,10 +98,10 @@ watch(
     />
 
     <v-menu activator="#workspace-menu-btn" offset="3">
-      <v-card color="accent" width="200">
+      <v-card>
         <v-list class="bg-transparent">
           <v-list-item
-            class="text-error text-caption"
+            class="text-error text-body-2"
             @click="handleDeleteWorkspace(selectedWorkspace as Workspace)"
           >
             <template #prepend>
@@ -122,12 +119,12 @@ watch(
     :close-on-content-click="false"
     activator="#workspace-menu-activator"
   >
-    <v-card color="accent" class="pt-3 mt-2" width="300px" density="compact">
+    <v-card class="pt-3 mt-2" width="300px" density="compact">
       <div class="px-5 text-truncate mb-2">
         <v-icon size="small">mdi-sitemap</v-icon>
         <span class="ml-1"> Your workspaces </span>
       </div>
-      <v-list density="compact" nav :lines="false" class="bg-accent px-3">
+      <v-list class="bg-accent px-3">
         <v-list-item
           v-for="workspace in workspaceQuery.data.value"
           :key="workspace.id"

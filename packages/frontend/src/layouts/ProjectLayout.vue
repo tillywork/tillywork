@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
-import { ref } from 'vue';
 import NavigationWorkspace from '@/components/project-management/navigation/NavigationWorkspace.vue';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
 import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
@@ -74,12 +73,7 @@ function openSettingsDialog() {
 
       <template v-slot:append>
         <v-list :slim="false">
-          <v-menu
-            v-if="isAuthenticated()"
-            offset="3"
-            width="200"
-            :close-on-content-click="false"
-          >
+          <v-menu v-if="isAuthenticated()" :close-on-content-click="false">
             <template #activator="{ props }">
               <user-list-item v-bind="props">
                 <template #append>
@@ -87,7 +81,7 @@ function openSettingsDialog() {
                 </template>
               </user-list-item>
             </template>
-            <v-card color="accent" class="border-thin ms-n2">
+            <v-card class="border-thin ms-n2">
               <v-list>
                 <v-list-item @click="openSettingsDialog">
                   <template #prepend>

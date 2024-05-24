@@ -1,43 +1,59 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { ListGroupOptions } from '../lists/types';
-import { watch } from 'vue';
+import {
+  ListGroupOptions,
+  type List,
+  type ListGroup,
+  type ListStage,
+} from '../lists/types';
 import { useViewsService } from '@/composables/services/useViewsService';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import type { Card } from '../cards/types';
-import { computed } from 'vue';
 import { type ColumnDef, type Row } from '@tanstack/vue-table';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
-import BaseViewGroup from './BaseViewGroup.vue';
-import { type TableSortOption, type TableSortState } from './TableView/types';
+import TableView from './TableView/TableView.vue';
+import { type TableSortOption } from './TableView/types';
 import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
-import type { View } from './types';
+import { ViewTypes, type View } from './types';
 import { useQueryClient } from '@tanstack/vue-query';
+import { useCardsService } from '@/composables/services/useCardsService';
+import type { User } from '@/components/common/users/types';
+import { useSnackbarStore } from '@/stores/snackbar';
+import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { useAuthStore } from '@/stores/auth';
 
 const props = defineProps<{
-  viewId: number;
+  view: View;
+  list: List;
 }>();
-const viewCopy = ref<View>();
-const route = useRoute();
+const viewCopy = ref<View>({ ...props.view });
+const rowHovered = ref<Row<ListGroup>>();
+const cardMenuOpen = ref<Row<ListGroup> | null>();
 const router = useRouter();
-const listId = computed(() => +route.params.listId);
 const viewsService = useViewsService();
+const cardsService = useCardsService();
+const projectUsersService = useProjectUsersService();
 const listGroupsService = useListGroupsService();
+const authStore = useAuthStore();
 const dialog = useDialog();
+const { showSnackbar } = useSnackbarStore();
 const queryClient = useQueryClient();
+
+const groupBy = computed(() => props.view.groupBy);
+const sortBy = computed(() => (props.view.sortBy ? [props.view.sortBy] : []));
 
 const isPageLoading = computed(() => {
   return (
-    isViewFetching.value ||
-    getListGroupsQuery.isFetching.value ||
-    updateViewMutation.isPending.value
+    updateViewMutation.isPending.value ||
+    isFetchingGroups.value ||
+    isUpdatingCard.value ||
+    isUpdatingStage.value ||
+    isDeletingCard.value
   );
 });
 
-const columns = ref<ColumnDef<Card, any>[]>([
+const columns = ref<ColumnDef<ListGroup, any>[]>([
   {
     id: 'actions',
     enableResizing: false,
@@ -49,100 +65,189 @@ const columns = ref<ColumnDef<Card, any>[]>([
     id: 'title',
     accessorKey: 'title',
     header: 'Title',
-    size: 680,
+    size: 800,
   },
   {
-    id: 'info',
-    size: 200,
+    id: 'users',
+    accessorKey: 'users',
+    header: 'Assignee',
+    size: 100,
+  },
+  {
+    id: 'dueAt',
+    accessorKey: 'dueAt',
+    header: 'Due Date',
+    size: 100,
   },
 ]);
 
-const rowHovered = ref<Row<Card>>();
-
-const {
-  data: view,
-  isFetched: isViewFetched,
-  isFetching: isViewFetching,
-} = viewsService.useGetViewQuery({
-  id: props.viewId,
+const { data: projectUsers } = projectUsersService.useProjectUsersQuery({
+  projectId: authStore.project!.id,
 });
-
-const sortBy = ref<TableSortState>();
-watch(
-  view,
-  (v) => {
-    if (v) {
-      viewCopy.value = {
-        ...v,
-      };
-      if (viewCopy.value.sortBy) {
-        sortBy.value = [{ ...viewCopy.value.sortBy }];
-      }
-    }
-  },
-  { immediate: true }
+const users = computed(
+  () => projectUsers.value?.map((projectUser) => projectUser.user) ?? []
 );
-
-watch(viewCopy, (view) => {
-  if (view) {
-    getListGroupsQuery.refetch();
-  }
-});
-
-const groupBy = computed(() => {
-  if (view.value?.groupBy) {
-    return view.value.groupBy;
-  } else {
-    return ListGroupOptions.ALL;
-  }
-});
-
-const getListGroupsQuery = listGroupsService.useGetListGroupsByOptionQuery({
-  listId: listId.value,
-  groupBy,
-  sortCardsBy: sortBy,
-  enabled: isViewFetched,
-});
 
 const updateViewMutation = viewsService.useUpdateViewMutation();
 
-watch(listId, () => {
-  if (listId.value !== viewCopy.value?.listId) {
-    router.replace(`/pm/list/${listId.value}`);
-  }
+const {
+  data: listGroups,
+  isFetching: isFetchingGroups,
+  refetch: refetchListGroups,
+} = listGroupsService.useGetListGroupsByOptionQuery({
+  listId: props.list.id,
+  sortCardsBy: sortBy,
+  groupBy,
 });
+
+const { mutateAsync: updateCard, isPending: isUpdatingCard } =
+  cardsService.useUpdateCardMutation();
+const { mutateAsync: updateCardListStage, isPending: isUpdatingStage } =
+  cardsService.useUpdateCardListStageMutation();
+const { mutateAsync: deleteCard, isPending: isDeletingCard } =
+  cardsService.useDeleteCardMutation();
 
 function handleRowClick(row: Row<Card>) {
   router.push(`/pm/card/${row.original.id}`);
 }
 
 function handleGroupBySelection(option: ListGroupOptions) {
-  updateViewMutation.mutate({
+  updateViewMutation.mutateAsync({
     ...viewCopy.value,
     groupBy: option,
-  } as View);
+  });
 }
 
 function handleSortBySelection(option: TableSortOption) {
   updateViewMutation.mutateAsync({
     ...viewCopy.value,
     sortBy: option ?? null, // If no option, we want to clear the sort by setting it to null
-  } as View);
+  });
 }
 
 function openCreateCardDialog() {
   dialog.openDialog({
     dialog: DIALOGS.CREATE_CARD,
     data: {
-      list: queryClient.getQueryData(['list', listId.value]),
+      list: props.list,
     },
   });
 }
+
+function handleUserSelection(users: User[], card: Card) {
+  const updatedCard: Card = {
+    ...card,
+    users,
+  };
+
+  updateCard(updatedCard)
+    .then(() => {
+      queryClient.invalidateQueries({
+        queryKey: ['listGroups', { listId: props.list.id }],
+      });
+    })
+    .catch(() => {
+      showSnackbar({
+        message: 'Something went wrong, please try again.',
+        color: 'error',
+        timeout: 5000,
+      });
+    });
+}
+
+function handleChangeDueDate({
+  card,
+  newDueDate,
+}: {
+  card: Card;
+  newDueDate: string;
+}) {
+  const updatedCard = {
+    ...card,
+    dueAt: newDueDate,
+  };
+  updateCard(updatedCard);
+}
+
+function handleUpdateCardStage({
+  cardId,
+  cardListId,
+  listStageId,
+}: {
+  cardId: number;
+  cardListId: number;
+  listStageId: number;
+}) {
+  updateCardListStage({ cardId, cardListId, listStageId })
+    .then(() => {
+      queryClient.invalidateQueries({
+        queryKey: ['listGroups', { listId: props.list.id }],
+      });
+    })
+    .catch(() => {
+      showSnackbar({
+        message: 'Something went wrong, please try again.',
+        color: 'error',
+        timeout: 5000,
+      });
+    });
+}
+
+function handleCardMenuClick({
+  row,
+  isOpen,
+}: {
+  row: Row<ListGroup>;
+  isOpen: boolean;
+}) {
+  if (isOpen) {
+    cardMenuOpen.value = row;
+  } else {
+    cardMenuOpen.value = null;
+  }
+}
+
+function handleDeleteCard(card: Card) {
+  dialog.openDialog({
+    dialog: DIALOGS.CONFIRM,
+    data: {
+      title: 'Confirm',
+      message: 'Are you sure you want to delete this task?',
+      onConfirm: () =>
+        deleteCard(card.id)
+          .then(() => {
+            dialog.closeDialog();
+            queryClient.invalidateQueries({
+              queryKey: ['listGroups', { listId: props.list.id }],
+            });
+          })
+          .catch(() => {
+            showSnackbar({
+              message: 'Something went wrong, please try again!',
+              color: 'error',
+              timeout: 5000,
+            });
+          }),
+      onCancel: () => dialog.closeDialog(),
+      isLoading: isDeletingCard,
+    },
+  });
+}
+
+watch(
+  () => props.view,
+  (v) => {
+    if (v) {
+      viewCopy.value = { ...v };
+      refetchListGroups();
+    }
+  }
+);
 </script>
 
 <template>
-  <div class="view-container">
-    <div class="d-flex ga-2 py-4 px-12" v-if="viewCopy">
+  <div class="view-container" v-if="viewCopy">
+    <div class="view-actions d-flex ga-2 py-4 px-12">
       <v-progress-linear
         indeterminate
         color="primary"
@@ -187,31 +292,102 @@ function openCreateCardDialog() {
       </div>
     </div>
 
-    <suspense>
-      <div
-        class="groups-container"
-        v-if="viewCopy && getListGroupsQuery?.data.value"
-      >
-        <template
-          v-for="group in getListGroupsQuery.data.value"
-          :key="group.name"
+    <div class="view">
+      <template v-if="viewCopy.type === ViewTypes.TABLE">
+        <table-view
+          v-model:row-hovered="rowHovered"
+          :columns
+          :view
+          :groups="listGroups ?? []"
+          fixed-headers
+          @click:row="handleRowClick"
         >
-          <base-view-group
-            :view="viewCopy"
-            :group="group"
-            :columns="columns"
-            @click:row="handleRowClick"
-            v-model:row:hovered="rowHovered"
-            class="mb-3"
-          />
-        </template>
-      </div>
-    </suspense>
+          <template #actions="{ row }">
+            <div class="d-flex flex-fill justify-end">
+              <v-menu
+                @update:model-value="
+                  (v) => handleCardMenuClick({ row, isOpen: v })
+                "
+              >
+                <template #activator="{ props }">
+                  <base-icon-btn
+                    v-if="
+                      rowHovered?.original.id === row.original.id ||
+                      cardMenuOpen?.original.id === row.original.id
+                    "
+                    v-bind="props"
+                    icon="mdi-dots-vertical"
+                  />
+                </template>
+                <v-card class="border-thin">
+                  <v-list>
+                    <v-list-item
+                      class="text-error text-body-2"
+                      @click="handleDeleteCard(row.original)"
+                    >
+                      <template #prepend>
+                        <v-icon icon="mdi-delete" />
+                      </template>
+                      Delete
+                    </v-list-item>
+                  </v-list>
+                </v-card>
+              </v-menu>
+            </div>
+          </template>
+          <template #title="{ row }">
+            <v-card color="transparent" class="pa-4">
+              <list-stage-selector
+                :model-value="row.original.cardLists[0].listStage"
+                theme="icon"
+                rounded="circle"
+                :list-stages="list.listStages ?? []"
+                @update:modelValue="
+                (modelValue: ListStage) =>
+                  handleUpdateCardStage({
+                    cardId: row.original.id,
+                    cardListId: row.original.cardLists[0].id,
+                    listStageId: modelValue.id,
+                  })
+              "
+              />
+              <span class="ms-2 text-truncate">{{ row.original.title }}</span>
+            </v-card>
+          </template>
+          <template #dueAt="{ row }">
+            <base-date-picker
+              :model-value="row.original.dueAt"
+              @update:model-value="(newValue: string) =>
+                  handleChangeDueDate({
+                    card: row.original,
+                    newDueDate: newValue,
+                  })
+                "
+              class="text-caption d-flex flex-fill justify-start rounded-0"
+              label="No due date"
+            />
+          </template>
+          <template #users="{ row }">
+            <base-user-selector
+              :model-value="row.original.users"
+              :users
+              fill
+              @update:model-value="
+                  (users: User[]) => handleUserSelection(users, row.original)
+                "
+            />
+          </template>
+        </table-view>
+      </template>
+      <template v-else>
+        <span class="text-body-2 text-error">Error: Unknown view type</span>
+      </template>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.groups-container {
+.view {
   max-height: calc(100vh - (40px + 113px));
   overflow: auto;
 }

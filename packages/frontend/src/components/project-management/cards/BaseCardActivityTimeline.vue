@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
 import { useCardActivitiesService } from '@/composables/services/useCardActivitiesService';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
 import { useAuthStore } from '@/stores/auth';
-import { storeToRefs } from 'pinia';
 import { ActivityType, type CardActivity } from './types';
 import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useSnackbarStore } from '@/stores/snackbar';
+import { useDate } from '@/composables/useDate';
 
-dayjs.extend(relativeTime);
+const { dayjs } = useDate();
 
 const props = defineProps<{
   cardId: number;
@@ -121,7 +119,7 @@ function deleteComment(comment: CardActivity) {
                 {{ dayjs(activity.createdAt).fromNow() }}
               </span>
               <v-spacer />
-              <v-menu offset="2" width="200">
+              <v-menu>
                 <template #activator="{ props }">
                   <base-icon-btn
                     v-bind="props"
@@ -129,13 +127,8 @@ function deleteComment(comment: CardActivity) {
                     size="x-small"
                   />
                 </template>
-                <v-card color="accent" class="border-thin">
-                  <v-list
-                    class="bg-transparent"
-                    :lines="false"
-                    nav
-                    density="compact"
-                  >
+                <v-card class="border-thin">
+                  <v-list>
                     <v-list-item
                       slim
                       class="text-error"

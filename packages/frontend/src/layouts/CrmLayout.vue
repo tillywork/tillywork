@@ -2,8 +2,6 @@
 import BaseThemeSwitch from '@/components/common/base/BaseThemeSwitch.vue';
 import UserListItem from '@/components/common/navigation/UserListItem.vue';
 import { useAuthStore } from '@/stores/auth';
-import BaseSnackbarWrapper from '@/components/common/base/BaseSnackbarWrapper.vue';
-import { ref } from 'vue';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
 import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
 import { useLogo } from '@/composables/useLogo';

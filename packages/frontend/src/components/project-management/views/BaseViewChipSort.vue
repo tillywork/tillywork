@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { DEFAULT_SORT_OPTIONS, type ListSortOption } from './types';
-import { computed } from 'vue';
 import BaseViewChip from './BaseViewChip.vue';
 import type { TableSortOption } from './TableView/types';
 
@@ -45,7 +43,7 @@ function toggleSortDirection() {
 </script>
 
 <template>
-  <v-menu offset="5" :close-on-content-click="false" transition="none">
+  <v-menu :close-on-content-click="false">
     <template #activator="{ props }">
       <base-view-chip
         v-bind="props"
@@ -68,16 +66,15 @@ function toggleSortDirection() {
         </template>
       </base-view-chip>
     </template>
-    <v-card color="accent">
-      <v-list class="bg-transparent" nav density="compact" :lines="false">
+    <v-card>
+      <v-list>
         <template v-for="option in sortByOptions" :key="option.value">
           <v-list-item
             @click="handleSortBySelection(option)"
-            slim
             :active="isOptionSelected(option)"
           >
             <template #prepend>
-              <v-icon v-if="isOptionSelected(option)" size="18">
+              <v-icon v-if="isOptionSelected(option)" size="x-small">
                 {{ sortDirectionIcon }}
               </v-icon>
             </template>

@@ -6,7 +6,7 @@ import { ListGroupEntityTypes, ListGroupOptions } from "../types";
 import { ListStagesService } from "../list-stages/list.stages.service";
 import { UsersService } from "../../users/users.service";
 import { CardsService } from "../../cards/cards.service";
-import { FilterEntityTypes, FilterGroup } from "../../filters/types";
+import { FilterEntityTypes } from "../../filters/types";
 import { CreateListGroupDto } from "../dto/create.list.group.dto";
 import { FiltersService } from "../../filters/filters.service";
 import { Filter } from "../../filters/filter.entity";
