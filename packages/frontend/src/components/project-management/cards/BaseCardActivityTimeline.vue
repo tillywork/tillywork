@@ -130,12 +130,11 @@ function deleteComment(comment: CardActivity) {
                 <v-card class="border-thin">
                   <v-list>
                     <v-list-item
-                      slim
                       class="text-error"
                       @click="openConfirmDeleteDialog(activity)"
                     >
                       <template #prepend>
-                        <v-icon size="16" icon="mdi-delete" />
+                        <v-icon icon="mdi-delete" />
                       </template>
                       <v-list-item-title>Delete</v-list-item-title>
                     </v-list-item>

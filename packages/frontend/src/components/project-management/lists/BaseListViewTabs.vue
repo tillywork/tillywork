@@ -73,9 +73,9 @@ onMounted(() => {
                 <v-list>
                   <v-list-item class="text-error">
                     <template #prepend>
-                      <v-icon icon="mdi-delete" size="small" />
+                      <v-icon icon="mdi-delete" />
                     </template>
-                    Delete
+                    <v-list-item-title>Delete</v-list-item-title>
                   </v-list-item>
                 </v-list>
               </v-card>

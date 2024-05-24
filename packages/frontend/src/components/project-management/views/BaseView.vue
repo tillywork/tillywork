@@ -322,13 +322,13 @@ watch(
                 <v-card class="border-thin">
                   <v-list>
                     <v-list-item
-                      class="text-error text-body-2"
+                      class="text-error"
                       @click="handleDeleteCard(row.original)"
                     >
                       <template #prepend>
                         <v-icon icon="mdi-delete" />
                       </template>
-                      Delete
+                      <v-list-item-title>Delete</v-list-item-title>
                     </v-list-item>
                   </v-list>
                 </v-card>

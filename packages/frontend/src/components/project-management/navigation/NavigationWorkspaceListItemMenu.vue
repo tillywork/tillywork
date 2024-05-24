@@ -78,14 +78,11 @@ watch(listMenu, () => {
   >
     <v-card :loading="deleteListMutation.isPending.value">
       <v-list>
-        <v-list-item
-          class="text-error text-body-2"
-          @click="handleDeleteList(list)"
-        >
+        <v-list-item class="text-error" @click="handleDeleteList(list)">
           <template #prepend>
-            <v-icon size="small" icon="mdi-delete" />
+            <v-icon icon="mdi-delete" />
           </template>
-          Delete
+          <v-list-item-title>Delete</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-card>

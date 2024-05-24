@@ -78,14 +78,11 @@ watch(spaceMenu, () => {
   >
     <v-card :loading="deleteSpaceMutation.isPending.value">
       <v-list>
-        <v-list-item
-          class="text-error text-body-2"
-          @click="handleDeleteSpace(space)"
-        >
+        <v-list-item class="text-error" @click="handleDeleteSpace(space)">
           <template #prepend>
-            <v-icon size="18" icon="mdi-delete" />
+            <v-icon icon="mdi-delete" />
           </template>
-          Delete
+          <v-list-item-title>Delete</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-card>

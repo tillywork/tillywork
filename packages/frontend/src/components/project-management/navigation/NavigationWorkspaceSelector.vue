@@ -97,17 +97,17 @@ watch(
       v-show="selectedWorkspace"
     />
 
-    <v-menu activator="#workspace-menu-btn" offset="3">
+    <v-menu activator="#workspace-menu-btn">
       <v-card>
-        <v-list class="bg-transparent">
+        <v-list>
           <v-list-item
-            class="text-error text-body-2"
+            class="text-error"
             @click="handleDeleteWorkspace(selectedWorkspace as Workspace)"
           >
             <template #prepend>
               <v-icon icon="mdi-delete" />
             </template>
-            Delete
+            <v-list-item-title>Delete</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-card>
