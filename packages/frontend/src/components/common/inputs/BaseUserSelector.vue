@@ -56,9 +56,15 @@ watch(selectedUsers, (v) => {
           fill ? 'flex-fill' : ''
         }`"
         v-bind="menuProps"
+        @click.prevent
       >
         <div class="me-n1" v-if="selectedUsers.length === 0">
-          <base-icon-btn v-bind="menuProps" icon="mdi-account" v-if="!label" />
+          <base-icon-btn
+            v-bind="menuProps"
+            icon="mdi-account"
+            v-if="!label"
+            @click.prevent
+          />
           <v-btn
             v-if="label"
             v-bind="menuProps"
@@ -66,6 +72,7 @@ watch(selectedUsers, (v) => {
             size="small"
             color="surface-dark"
             class="text-body-2"
+            @click.prevent
           >
             <template #prepend>
               <v-icon icon="mdi-account" :size="size ?? 'small'" />
@@ -74,7 +81,7 @@ watch(selectedUsers, (v) => {
           </v-btn>
         </div>
         <template v-else>
-          <div class="ms-3 mt-1">
+          <div class="ms-3 mt-1" @click.prevent>
             <template
               v-for="(selectedUser, index) in selectedUsers"
               :key="selectedUser.email + 'selected-user'"

@@ -54,6 +54,7 @@ export const useListsService = () => {
     return useQuery({
       queryKey: ['lists', workspaceId],
       queryFn: () => getLists({ workspaceId }),
+      staleTime: 1 * 60 * 1000,
     });
   }
 
@@ -62,6 +63,7 @@ export const useListsService = () => {
       queryKey: ['list', id],
       queryFn: () => getList(id),
       retry: false,
+      staleTime: 1 * 60 * 1000,
     });
   }
 

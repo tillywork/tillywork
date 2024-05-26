@@ -46,6 +46,7 @@ export const useListStagesService = () => {
     return useQuery({
       queryKey: ['listStages', listId],
       queryFn: () => getListStages({ listId }),
+      staleTime: 5 * 60 * 1000,
     });
   }
 

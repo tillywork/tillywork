@@ -45,3 +45,7 @@
   width: calc(var(--v-btn-height) + 6px);
   height: calc(var(--v-btn-height) + 6px);
 }
+
+.v-infinite-scroll__side {
+  padding: 0;
+}

@@ -20,6 +20,7 @@ export const useProjectUsersService = () => {
       queryKey: ['users', { projectId: projectId }],
       queryFn: () => getProjectUsers({ projectId }),
       refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
     });
   }
 

@@ -54,6 +54,7 @@ export const useListGroupsService = () => {
           sortCardsBy: params.sortCardsBy?.value,
         }),
       enabled: params.enabled,
+      staleTime: 1 * 60 * 1000,
     });
 
     return getListGroupsQuery;
@@ -64,7 +65,12 @@ export const useListGroupsService = () => {
       mutationFn: update,
       onSuccess: (listGroup) => {
         queryClient.invalidateQueries({
-          queryKey: ['listGroups', listGroup.listId],
+          queryKey: [
+            'listGroups',
+            {
+              listId: listGroup.listId,
+            },
+          ],
         });
       },
     });

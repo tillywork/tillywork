@@ -35,6 +35,7 @@ function isStageSelected(stage: ListStage) {
           v-bind="props"
           icon="mdi-circle-slice-8"
           :color="mainChipColor"
+          @click.prevent
         />
       </template>
       <template v-else>
@@ -45,6 +46,7 @@ function isStageSelected(stage: ListStage) {
           :size="size ?? 'small'"
           density="comfortable"
           :color="mainChipColor"
+          @click.prevent
         >
           <v-icon size="16" :color="mainChipColor" start v-if="theme !== 'text'"
             >mdi-circle-slice-8</v-icon

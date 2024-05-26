@@ -54,6 +54,7 @@ export const useViewsService = () => {
     return useQuery({
       queryKey: ['views', workspaceId],
       queryFn: () => getViews({ workspaceId }),
+      staleTime: 1 * 60 * 1000,
     });
   }
 
@@ -61,6 +62,7 @@ export const useViewsService = () => {
     return useQuery({
       queryKey: ['view', id],
       queryFn: () => getView(id),
+      staleTime: 1 * 60 * 1000,
     });
   }
 

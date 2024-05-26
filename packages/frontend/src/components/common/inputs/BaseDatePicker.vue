@@ -75,7 +75,11 @@ const dateToText = computed(() => {
     width="fit-content"
   >
     <template #activator="{ props }">
-      <base-card-property-value-btn v-bind="props" :class="textClass">
+      <base-card-property-value-btn
+        v-bind="props"
+        :class="textClass"
+        @click.prevent
+      >
         <template #prepend v-if="icon">
           <v-icon :icon color="default" />
         </template>

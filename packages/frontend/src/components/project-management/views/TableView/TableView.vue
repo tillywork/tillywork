@@ -6,41 +6,53 @@ import {
   type ColumnDef,
   type Row,
   type Column,
-  getGroupedRowModel,
 } from '@tanstack/vue-table';
-import { type PaginationParams, type QueryFilter } from './types';
+import {
+  type PaginationParams,
+  type QueryFilter,
+  type TableSortOption,
+} from './types';
 import type { View } from '../types';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import type { Card } from '../../cards/types';
-import {
-  type ListGroup,
-  ListGroupOptions,
-  type ListStage,
-} from '../../lists/types';
-import { DIALOGS } from '@/components/common/dialogs/types';
-import { useDialog } from '@/composables/useDialog';
+import { type ListGroup, type ListStage } from '../../lists/types';
 import { useListStagesService } from '@/composables/services/useListStagesService';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
 import { useAuthStore } from '@/stores/auth';
-import type { ProjectUser } from '@/components/common/projects/types';
+import TableViewGroup from './TableViewGroup.vue';
+import type { User } from '@/components/common/users/types';
+import { useSnackbarStore } from '@/stores/snackbar';
 
 const options = defineModel<PaginationParams>('options');
-const rowHovered = defineModel<Row<ListGroup>>('rowHovered');
+const rowHovered = defineModel<Row<Card>>('rowHovered');
+const isLoading = defineModel<boolean>('loading');
 
 const props = defineProps<{
-  columns: ColumnDef<ListGroup, Card>[];
+  columns: ColumnDef<ListGroup, any>[];
   filters?: QueryFilter;
-  loading?: boolean;
   noHeaders?: boolean;
   view: View;
   groups: ListGroup[];
   fixedHeaders?: boolean;
 }>();
 
-const emit = defineEmits(['update:options', 'click:row', 'submit', 'load']);
-const slots = defineSlots();
+const emit = defineEmits([
+  'update:options',
+  'row:delete',
+  'submit',
+  'load',
+  'row:update:stage',
+  'row:update:due-date',
+  'row:update:assignees',
+]);
 
-const dialog = useDialog();
+const sortBy = ref<TableSortOption[]>(
+  props.view.sortBy ? [props.view.sortBy] : [{ key: 'createdAt', order: 'asc' }]
+);
+const cardMenuOpen = ref<Row<Card> | null>();
+const expandedState = ref<Record<string, boolean>>();
+
+const { showSnackbar } = useSnackbarStore();
 const authStore = useAuthStore();
 
 const listGroupsService = useListGroupsService();
@@ -57,34 +69,23 @@ const { data: projectUsers } = projectUsersService.useProjectUsersQuery({
   projectId: authStore.project!.id,
 });
 
-const tableData = ref<ListGroup[]>([]);
-
-watch(
-  () => props.groups,
-  (v) => {
-    if (v) {
-      const tableGroups = v.map((listGroup) => ({
-        ...listGroup,
-        subRows: listGroup.cards ? [...listGroup.cards.cards] : [],
-      }));
-      tableData.value = [...tableGroups];
-    }
-  },
-  { immediate: true }
+const users = computed(() =>
+  projectUsers.value?.map((projectUser) => projectUser.user)
 );
 
 const table = useVueTable({
   get data() {
-    return tableData.value;
+    return props.groups;
   },
   columns: props.columns as ColumnDef<ListGroup, any>[],
   getCoreRowModel: getCoreRowModel(),
-  getGroupedRowModel: getGroupedRowModel(),
-  getSubRows: (row) => row.cards?.cards as any[],
+  getRowId: (row) => `${row.id}`,
   manualPagination: true,
   manualGrouping: true,
   manualSorting: true,
   columnResizeMode: 'onChange',
+  enableColumnResizing: false,
+  enableSorting: false,
   initialState: {
     sorting: [
       {
@@ -95,23 +96,27 @@ const table = useVueTable({
         desc:
           options.value && options.value.sort
             ? options.value.sort[0].order === 'desc'
-            : true,
+            : false,
       },
     ],
   },
 });
 
-function handleRowClick(row: Row<ListGroup>) {
-  emit('click:row', row);
-}
-
-function handleHoverChange(row: Row<ListGroup>, isHovering: boolean) {
-  if (isHovering) {
-    rowHovered.value = row;
-  } else {
-    rowHovered.value = undefined;
+watchEffect(() => {
+  const { groups, view } = props;
+  if (groups) {
+    const state: Record<string, boolean> = {};
+    groups.forEach((listGroup) => {
+      state[listGroup.id] = listGroup.isExpanded ?? false;
+    });
+    expandedState.value = state;
+    table.setExpanded(expandedState.value);
   }
-}
+
+  if (view.sortBy) {
+    sortBy.value = [view.sortBy];
+  }
+});
 
 function getColumnSortIcon(column: Column<ListGroup, unknown>) {
   switch (column.getIsSorted()) {
@@ -123,45 +128,77 @@ function getColumnSortIcon(column: Column<ListGroup, unknown>) {
   }
 }
 
-function openCreateCardDialog(listGroup: ListGroup) {
-  dialog.openDialog({
-    dialog: DIALOGS.CREATE_CARD,
-    data: {
-      listId: props.view.listId,
-      listStage: getCurrentStage(listGroup),
-      users: getCurrentAssignee(listGroup),
-    },
+function toggleGroupExpansion(listGroup: Row<ListGroup>) {
+  listGroup.toggleExpanded();
+  isLoading.value = true;
+  updateListGroup({
+    ...listGroup.original,
+    isExpanded: listGroup.getIsExpanded(),
+  })
+    .catch(() => {
+      showSnackbar({
+        message: 'Something went wrong, please try again.',
+        color: 'error',
+        timeout: 5000,
+      });
+    })
+    .finally(() => {
+      isLoading.value = false;
+    });
+}
+
+function handleUserSelection({ users, card }: { users: User[]; card: Card }) {
+  emit('row:update:assignees', {
+    users,
+    card,
   });
 }
 
-function toggleGroupExpansion(listGroup: ListGroup) {
-  listGroup.isExpanded = true;
-
-  updateListGroup(listGroup);
+function handleUpdateDueDate({
+  newDueDate,
+  card,
+}: {
+  newDueDate: string;
+  card: Card;
+}) {
+  emit('row:update:due-date', {
+    newDueDate,
+    card,
+  });
 }
 
-function getCurrentStage(group: ListGroup) {
-  let stage: ListStage | undefined;
-
-  if (group.type === ListGroupOptions.LIST_STAGE) {
-    stage = listStages.value?.find((stage) => {
-      return stage.id == group.entityId;
-    });
+function handleCardMenuClick({
+  row,
+  isOpen,
+}: {
+  row: Row<Card>;
+  isOpen: boolean;
+}) {
+  if (isOpen) {
+    cardMenuOpen.value = row;
+  } else {
+    cardMenuOpen.value = null;
   }
-
-  return stage ? { ...stage } : undefined;
 }
 
-function getCurrentAssignee(group: ListGroup) {
-  let user: ProjectUser | undefined;
+function handleDeleteCard(card: Card) {
+  emit('row:delete', card);
+}
 
-  if (group.type === ListGroupOptions.ASSIGNEES && projectUsers.value) {
-    user = projectUsers.value.find((user: ProjectUser) => {
-      return user.user.id == group.entityId;
-    });
-  }
-
-  return user ? [{ ...user }] : undefined;
+function handleUpdateCardStage({
+  cardId,
+  cardListId,
+  listStageId,
+}: {
+  cardId: number;
+  cardListId: number;
+  listStageId: number;
+}) {
+  emit('row:update:stage', {
+    cardId,
+    cardListId,
+    listStageId,
+  });
 }
 </script>
 
@@ -186,6 +223,7 @@ function getCurrentAssignee(group: ListGroup) {
                   link
                   color="accent"
                   :width="header.getSize()"
+                  height="28"
                   :style="`${noHeaders ? 'height: 0px !important;' : ''}`"
                 >
                   <!-- Header Content -->
@@ -234,9 +272,9 @@ function getCurrentAssignee(group: ListGroup) {
           </div>
         </template>
       </div>
-      <v-card class="table-groups overflow-scroll" height="calc(100vh - 64px)">
+      <v-card class="table-groups overflow-scroll">
         <template
-          v-for="listGroup in table.getGroupedRowModel().rows"
+          v-for="listGroup in table.getCoreRowModel().rows"
           :key="
             'table-group-' +
             listGroup.original.id +
@@ -244,122 +282,102 @@ function getCurrentAssignee(group: ListGroup) {
             listGroup.subRows.length
           "
         >
-          <v-card color="transparent" class="table-group" rounded="0">
-            <v-banner sticky lines="one" border="none" bg-color="accent">
-              <v-btn
-                variant="text"
-                density="comfortable"
-                size="small"
-                :icon="
-                  listGroup.original.isExpanded
-                    ? 'mdi-chevron-down'
-                    : 'mdi-chevron-right'
-                "
-                :color="listGroup.original.isExpanded ? 'info' : 'default'"
-                class="me-2"
-                @click="toggleGroupExpansion(listGroup.original)"
-              />
-              <div>
-                <template
-                  v-if="listGroup.original.type === ListGroupOptions.ASSIGNEES"
-                >
-                  <base-avatar
-                    :photo="listGroup.original.icon"
-                    :text="listGroup.original.name"
-                    size="x-small"
-                    class="text-caption"
-                  />
-                </template>
-                <template v-else>
-                  <v-icon :color="listGroup.original.color" size="20">
-                    {{ listGroup.original.icon ?? 'mdi-circle-slice-8' }}
-                  </v-icon>
-                </template>
-                <v-chip
-                  rounded="md"
-                  density="comfortable"
-                  :color="listGroup.original.color"
-                  class="ms-3"
-                >
-                  {{ listGroup.original.name }}
-                  <template #append>
-                    <span class="text-caption ms-4 font-weight-bold">
-                      {{ listGroup.original.cards?.total }}
-                    </span>
-                  </template>
-                </v-chip>
-              </div>
-              <v-btn
-                variant="text"
-                density="comfortable"
-                size="small"
-                icon="mdi-plus"
-                color="info"
-                class="ms-2"
-                @click="openCreateCardDialog(listGroup.original)"
-              />
-            </v-banner>
-            <v-list
-              class="pa-0 overflow-scroll"
-              rounded="0"
-              height="max-content"
-              max-height="330"
-              :nav="false"
+          <suspense>
+            <table-view-group
+              v-model:row:hovered="rowHovered"
+              v-model:loading="isLoading"
+              :list-group="listGroup"
+              :list-stages="listStages ?? []"
+              :project-users="projectUsers ?? []"
+              :sort-by="sortBy"
+              :table
+              @toggle:group="toggleGroupExpansion"
             >
-              <template
-                v-for="row in listGroup.subRows"
-                :key="'table-row-' + row.original.id"
-              >
-                <v-list-item class="pa-0" rounded="0" height="33">
-                  <v-hover
-                    @update:modelValue="
-                      (modelValue) => handleHoverChange(row, modelValue)
+              <template #actions="{ row }">
+                <div class="d-flex flex-fill justify-end">
+                  <v-menu
+                    @update:model-value="
+                      (v) => handleCardMenuClick({ row, isOpen: v })
                     "
-                    #="{ isHovering: isRowHovering, props: rowProps }"
                   >
-                    <v-card
-                      v-bind="rowProps"
-                      @click="handleRowClick(row)"
-                      link
-                      height="33"
-                      class="table-row d-flex align-center text-body-2"
-                      rounded="0"
-                    >
-                      <v-card
-                        v-for="cell in row.getVisibleCells()"
-                        :key="cell.id"
-                        class="table-cell d-flex align-center fill-height"
-                        :width="cell.column.getSize()"
-                        rounded="0"
-                        color="transparent"
-                        link
-                      >
-                        <!-- Check for named slot that matches columnId, and use template to define slot content -->
-                        <template
-                          v-if="
-                            cell.column.columnDef.id &&
-                            !!slots[cell.column.columnDef.id]
-                          "
+                    <template #activator="{ props }">
+                      <base-icon-btn
+                        v-if="
+                          rowHovered?.original.id === row.original.id ||
+                          cardMenuOpen?.original.id === row.original.id
+                        "
+                        v-bind="props"
+                        icon="mdi-dots-vertical"
+                        @click.prevent
+                      />
+                    </template>
+                    <v-card class="border-thin">
+                      <v-list>
+                        <v-list-item
+                          class="text-error"
+                          @click="handleDeleteCard(row.original)"
                         >
-                          <slot
-                            :name="cell.column.columnDef.id"
-                            v-bind="cell.getContext()"
-                          ></slot>
-                        </template>
-                        <!-- Default rendering if no slot is provided -->
-                        <template v-else>
-                          <FlexRender
-                            :render="cell.column.columnDef.cell"
-                            :props="cell.getContext()"
-                          />
-                        </template>
-                      </v-card>
+                          <template #prepend>
+                            <v-icon icon="mdi-delete" />
+                          </template>
+                          <v-list-item-title>Delete</v-list-item-title>
+                        </v-list-item>
+                      </v-list>
                     </v-card>
-                  </v-hover>
-                </v-list-item>
+                  </v-menu>
+                </div>
               </template>
-            </v-list>
-          </v-card>
+              <template #title="{ row }">
+                <v-list-item-title class="text-body-2 px-2">
+                  <list-stage-selector
+                    :model-value="row.original.cardLists[0].listStage"
+                    theme="icon"
+                    rounded="circle"
+                    :list-stages="listStages ?? []"
+                    @update:modelValue="
+                (modelValue: ListStage) =>
+                  handleUpdateCardStage({
+                    cardId: row.original.id,
+                    cardListId: row.original.cardLists[0].id,
+                    listStageId: modelValue.id,
+                  })
+              "
+                    @click.prevent
+                  />
+                  <span class="line-height-1 ms-2">{{
+                    row.original.title
+                  }}</span>
+                </v-list-item-title>
+              </template>
+              <template #dueAt="{ row }">
+                <base-date-picker
+                  :model-value="row.original.dueAt"
+                  @update:model-value="(newValue: string) =>
+                  handleUpdateDueDate({
+                    card: row.original,
+                    newDueDate: newValue,
+                  })
+                "
+                  class="text-caption d-flex flex-fill justify-start rounded-0"
+                  label="No due date"
+                  @click.prevent
+                />
+              </template>
+              <template #users="{ row }">
+                <base-user-selector
+                  :model-value="row.original.users"
+                  :users
+                  fill
+                  @update:model-value="
+                  (users: User[]) => handleUserSelection({
+                    users, card: row.original
+                  })
+                "
+                  @click.stop
+                />
+              </template>
+            </table-view-group>
+          </suspense>
         </template>
       </v-card>
     </div>
@@ -369,8 +387,8 @@ function getCurrentAssignee(group: ListGroup) {
 <style lang="scss" scoped>
 $table-border-color: var(--v-border-color);
 $table-border-opacity: var(--v-border-opacity);
-$table-row-height: 36px;
-$table-header-height: 33px;
+$table-row-height: 33px;
+$table-header-height: px;
 $table-cell-padding-x: 8px;
 $table-cell-padding-y: 0;
 
@@ -379,7 +397,7 @@ $table-cell-padding-y: 0;
 
   .table {
     max-height: calc(100vh - (40px + 113px));
-    overflow: auto;
+    // overflow: auto;
     min-width: 100%;
     width: fit-content;
   }

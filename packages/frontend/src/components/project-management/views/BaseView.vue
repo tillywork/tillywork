@@ -1,14 +1,9 @@
 <script setup lang="ts">
-import {
-  ListGroupOptions,
-  type List,
-  type ListGroup,
-  type ListStage,
-} from '../lists/types';
+import { ListGroupOptions, type List, type ListGroup } from '../lists/types';
 import { useViewsService } from '@/composables/services/useViewsService';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import type { Card } from '../cards/types';
-import { type ColumnDef, type Row } from '@tanstack/vue-table';
+import { type ColumnDef } from '@tanstack/vue-table';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
@@ -20,22 +15,15 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { useCardsService } from '@/composables/services/useCardsService';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
-import { useAuthStore } from '@/stores/auth';
 
 const props = defineProps<{
   view: View;
   list: List;
 }>();
 const viewCopy = ref<View>({ ...props.view });
-const rowHovered = ref<Row<ListGroup>>();
-const cardMenuOpen = ref<Row<ListGroup> | null>();
-const router = useRouter();
 const viewsService = useViewsService();
 const cardsService = useCardsService();
-const projectUsersService = useProjectUsersService();
 const listGroupsService = useListGroupsService();
-const authStore = useAuthStore();
 const dialog = useDialog();
 const { showSnackbar } = useSnackbarStore();
 const queryClient = useQueryClient();
@@ -43,13 +31,16 @@ const queryClient = useQueryClient();
 const groupBy = computed(() => props.view.groupBy);
 const sortBy = computed(() => (props.view.sortBy ? [props.view.sortBy] : []));
 
+const isViewLoading = ref(false);
+
 const isPageLoading = computed(() => {
   return (
     updateViewMutation.isPending.value ||
     isFetchingGroups.value ||
     isUpdatingCard.value ||
     isUpdatingStage.value ||
-    isDeletingCard.value
+    isDeletingCard.value ||
+    isViewLoading.value
   );
 });
 
@@ -81,13 +72,6 @@ const columns = ref<ColumnDef<ListGroup, any>[]>([
   },
 ]);
 
-const { data: projectUsers } = projectUsersService.useProjectUsersQuery({
-  projectId: authStore.project!.id,
-});
-const users = computed(
-  () => projectUsers.value?.map((projectUser) => projectUser.user) ?? []
-);
-
 const updateViewMutation = viewsService.useUpdateViewMutation();
 
 const {
@@ -106,10 +90,6 @@ const { mutateAsync: updateCardListStage, isPending: isUpdatingStage } =
   cardsService.useUpdateCardListStageMutation();
 const { mutateAsync: deleteCard, isPending: isDeletingCard } =
   cardsService.useDeleteCardMutation();
-
-function handleRowClick(row: Row<Card>) {
-  router.push(`/pm/card/${row.original.id}`);
-}
 
 function handleGroupBySelection(option: ListGroupOptions) {
   updateViewMutation.mutateAsync({
@@ -134,28 +114,22 @@ function openCreateCardDialog() {
   });
 }
 
-function handleUserSelection(users: User[], card: Card) {
+function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
   const updatedCard: Card = {
     ...card,
     users,
   };
 
-  updateCard(updatedCard)
-    .then(() => {
-      queryClient.invalidateQueries({
-        queryKey: ['listGroups', { listId: props.list.id }],
-      });
-    })
-    .catch(() => {
-      showSnackbar({
-        message: 'Something went wrong, please try again.',
-        color: 'error',
-        timeout: 5000,
-      });
+  updateCard(updatedCard).catch(() => {
+    showSnackbar({
+      message: 'Something went wrong, please try again.',
+      color: 'error',
+      timeout: 5000,
     });
+  });
 }
 
-function handleChangeDueDate({
+function handleUpdateDueDate({
   card,
   newDueDate,
 }: {
@@ -193,20 +167,6 @@ function handleUpdateCardStage({
     });
 }
 
-function handleCardMenuClick({
-  row,
-  isOpen,
-}: {
-  row: Row<ListGroup>;
-  isOpen: boolean;
-}) {
-  if (isOpen) {
-    cardMenuOpen.value = row;
-  } else {
-    cardMenuOpen.value = null;
-  }
-}
-
 function handleDeleteCard(card: Card) {
   dialog.openDialog({
     dialog: DIALOGS.CONFIRM,
@@ -217,9 +177,6 @@ function handleDeleteCard(card: Card) {
         deleteCard(card.id)
           .then(() => {
             dialog.closeDialog();
-            queryClient.invalidateQueries({
-              queryKey: ['listGroups', { listId: props.list.id }],
-            });
           })
           .catch(() => {
             showSnackbar({
@@ -295,88 +252,16 @@ watch(
     <div class="view">
       <template v-if="viewCopy.type === ViewTypes.TABLE">
         <table-view
-          v-model:row-hovered="rowHovered"
+          v-model:loading="isViewLoading"
           :columns
           :view
           :groups="listGroups ?? []"
           fixed-headers
-          @click:row="handleRowClick"
+          @row:delete="handleDeleteCard"
+          @row:update:stage="handleUpdateCardStage"
+          @row:update:due-date="handleUpdateDueDate"
+          @row:update:assignees="handleUpdateAssignees"
         >
-          <template #actions="{ row }">
-            <div class="d-flex flex-fill justify-end">
-              <v-menu
-                @update:model-value="
-                  (v) => handleCardMenuClick({ row, isOpen: v })
-                "
-              >
-                <template #activator="{ props }">
-                  <base-icon-btn
-                    v-if="
-                      rowHovered?.original.id === row.original.id ||
-                      cardMenuOpen?.original.id === row.original.id
-                    "
-                    v-bind="props"
-                    icon="mdi-dots-vertical"
-                  />
-                </template>
-                <v-card class="border-thin">
-                  <v-list>
-                    <v-list-item
-                      class="text-error"
-                      @click="handleDeleteCard(row.original)"
-                    >
-                      <template #prepend>
-                        <v-icon icon="mdi-delete" />
-                      </template>
-                      <v-list-item-title>Delete</v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </v-card>
-              </v-menu>
-            </div>
-          </template>
-          <template #title="{ row }">
-            <v-card color="transparent" class="pa-4">
-              <list-stage-selector
-                :model-value="row.original.cardLists[0].listStage"
-                theme="icon"
-                rounded="circle"
-                :list-stages="list.listStages ?? []"
-                @update:modelValue="
-                (modelValue: ListStage) =>
-                  handleUpdateCardStage({
-                    cardId: row.original.id,
-                    cardListId: row.original.cardLists[0].id,
-                    listStageId: modelValue.id,
-                  })
-              "
-              />
-              <span class="ms-2 text-truncate">{{ row.original.title }}</span>
-            </v-card>
-          </template>
-          <template #dueAt="{ row }">
-            <base-date-picker
-              :model-value="row.original.dueAt"
-              @update:model-value="(newValue: string) =>
-                  handleChangeDueDate({
-                    card: row.original,
-                    newDueDate: newValue,
-                  })
-                "
-              class="text-caption d-flex flex-fill justify-start rounded-0"
-              label="No due date"
-            />
-          </template>
-          <template #users="{ row }">
-            <base-user-selector
-              :model-value="row.original.users"
-              :users
-              fill
-              @update:model-value="
-                  (users: User[]) => handleUserSelection(users, row.original)
-                "
-            />
-          </template>
         </table-view>
       </template>
       <template v-else>
