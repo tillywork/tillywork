@@ -62,7 +62,7 @@ export default {
   },
 
   render: () => {
-    let component: BaseEditorCommands;
+    let component: any;
     let popup: any;
 
     return {
