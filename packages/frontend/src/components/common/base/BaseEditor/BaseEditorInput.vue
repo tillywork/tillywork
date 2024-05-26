@@ -1,10 +1,18 @@
 <script setup lang="ts">
-import { useEditor, EditorContent, Editor, type Content } from '@tiptap/vue-3';
+import {
+  useEditor,
+  EditorContent,
+  Editor,
+  type Content,
+  Extension,
+} from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import { NoNewLine } from './extensions/NoNewLine';
 import { Commands } from './extensions/Commands';
 import suggestion from './extensions/suggestion';
+import { Indent } from './extensions/Indent';
+import { TextDirection } from './extensions/TextDirection';
 
 const props = defineProps<{
   autofocus?: boolean;
@@ -16,15 +24,20 @@ const props = defineProps<{
 }>();
 
 const extensions = computed(() => {
-  const extensions = [
+  const extensions: Extension<any, any>[] = [
     StarterKit,
     Placeholder.configure({
       placeholder: props.placeholder,
+    }),
+    TextDirection.configure({
+      types: ['heading', 'paragraph', 'listItem'],
     }),
   ];
 
   if (props.singleLine) {
     extensions.push(NoNewLine);
+  } else {
+    extensions.push(Indent);
   }
 
   if (!props.disableCommands) {
@@ -176,13 +189,44 @@ initEditor();
   outline: none;
 }
 
-/* Placeholder (at the top) */
-.tiptap .is-empty:first-child::before,
-.tiptap .is-editor-empty:first-child::before {
-  content: attr(data-placeholder);
-  float: left;
-  color: #adb5bd;
-  pointer-events: none;
-  height: 0;
+.tiptap {
+  > * + * {
+    margin-top: 0.75em;
+  }
+
+  ul,
+  ol {
+    padding: 0 24px;
+  }
+
+  /* Placeholder (at the top) */
+  .is-empty:first-child::before,
+  .is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: #adb5bd;
+    pointer-events: none;
+    height: 0;
+  }
+
+  p[dir='rtl'],
+  h1[dir='rtl'],
+  h2[dir='rtl'],
+  h3[dir='rtl'],
+  h4[dir='rtl'],
+  h5[dir='rtl'],
+  h6[dir='rtl'] {
+    text-align: right;
+  }
+
+  p[dir='ltr'],
+  h1[dir='ltr'],
+  h2[dir='ltr'],
+  h3[dir='ltr'],
+  h4[dir='ltr'],
+  h5[dir='ltr'],
+  h6[dir='ltr'] {
+    text-align: left;
+  }
 }
 </style>
