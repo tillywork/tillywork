@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import {
-  useEditor,
-  EditorContent,
-  Editor,
-  type Content,
-  Extension,
-} from '@tiptap/vue-3';
+import { useEditor, EditorContent, Editor, type Content } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import { NoNewLine } from './extensions/NoNewLine';
 import { Commands } from './extensions/Commands';
-import suggestion from './extensions/suggestion';
+import suggestion from './extensions/Commands/suggestions';
 import { Indent } from './extensions/Indent';
 import { TextDirection } from './extensions/TextDirection';
+import { Codeblock } from './extensions/Codeblock';
+import { Underline } from '@tiptap/extension-underline';
 
 const props = defineProps<{
   autofocus?: boolean;
@@ -24,14 +20,18 @@ const props = defineProps<{
 }>();
 
 const extensions = computed(() => {
-  const extensions: Extension<any, any>[] = [
-    StarterKit,
+  const extensions: any[] = [
+    StarterKit.configure({
+      codeBlock: false,
+    }),
     Placeholder.configure({
       placeholder: props.placeholder,
     }),
     TextDirection.configure({
       types: ['heading', 'paragraph', 'listItem'],
     }),
+    Codeblock,
+    Underline,
   ];
 
   if (props.singleLine) {
@@ -66,7 +66,6 @@ function initEditor() {
     extensions: extensions.value,
     autofocus: props.autofocus,
     editable: props.editable,
-    injectCSS: false,
     onCreate: () => {
       enforceHeading();
       fillEditorFromModelValues();
@@ -227,6 +226,89 @@ initEditor();
   h5[dir='ltr'],
   h6[dir='ltr'] {
     text-align: left;
+  }
+
+  pre {
+    background: #101112;
+    color: #fff;
+    font-family: 'JetBrainsMono', monospace;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+
+    code {
+      color: inherit;
+      padding: 0;
+      background: none;
+      font-size: 0.8rem;
+    }
+
+    .hljs-comment,
+    .hljs-quote {
+      color: #616161;
+    }
+
+    .hljs-variable,
+    .hljs-template-variable,
+    .hljs-attribute,
+    .hljs-tag,
+    .hljs-name,
+    .hljs-regexp,
+    .hljs-link,
+    .hljs-name,
+    .hljs-selector-id,
+    .hljs-selector-class {
+      color: #f98181;
+    }
+
+    .hljs-number,
+    .hljs-meta,
+    .hljs-built_in,
+    .hljs-builtin-name,
+    .hljs-literal,
+    .hljs-type,
+    .hljs-params {
+      color: #fbbc88;
+    }
+
+    .hljs-string,
+    .hljs-symbol,
+    .hljs-bullet {
+      color: #b9f18d;
+    }
+
+    .hljs-title,
+    .hljs-section {
+      color: #faf594;
+    }
+
+    .hljs-keyword,
+    .hljs-selector-tag {
+      color: #70cff8;
+    }
+
+    .hljs-emphasis {
+      font-style: italic;
+    }
+
+    .hljs-strong {
+      font-weight: 700;
+    }
+  }
+
+  :not(pre) code {
+    background: #101112;
+    color: #fff;
+    font-family: 'JetBrainsMono', monospace;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+    font-size: 0.8rem;
+  }
+
+  blockquote {
+    padding-inline-start: 1rem;
+    border-inline-start: 3px solid rgba(#0d0d0d, 0.1);
   }
 }
 </style>

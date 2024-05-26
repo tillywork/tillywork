@@ -1,4 +1,6 @@
 <script lang="ts">
+import type { VCard, VList } from 'vuetify/components';
+
 export default {
   props: {
     items: {
@@ -18,9 +20,18 @@ export default {
     };
   },
 
+  mounted() {
+    this.$nextTick(() => {
+      this.ensureVisible();
+    });
+  },
+
   watch: {
     items() {
       this.selectedIndex = 0;
+    },
+    selectedIndex() {
+      this.ensureVisible();
     },
   },
 
@@ -64,18 +75,37 @@ export default {
         this.command(item);
       }
     },
+
+    ensureVisible() {
+      this.$nextTick(() => {
+        const list = this.$refs.suggestionsList as VList;
+        if (list.$el) {
+          const selectedItem = list.$el.querySelector(
+            `.item:nth-child(${this.selectedIndex + 1})`
+          );
+
+          const scrollOption = {
+            behavior: 'smooth',
+            block: 'nearest',
+          };
+
+          if (selectedItem) {
+            selectedItem.scrollIntoView(scrollOption);
+          }
+        }
+      });
+    },
   },
 };
 </script>
 
 <template>
-  <v-card color="surface" class="items border-thin" width="200">
-    <v-list
-      class="bg-transparent text-body-2 pb-1"
-      nav
-      :lines="false"
-      density="compact"
-    >
+  <v-card
+    class="items border-thin overflow-scroll"
+    width="200"
+    max-height="305"
+  >
+    <v-list class="pb-1" ref="suggestionsList">
       <template v-if="items.length">
         <template v-for="(item, index) in items" :key="'item-' + index">
           <v-list-item
@@ -86,7 +116,9 @@ export default {
             <template #prepend>
               <v-icon size="14" :icon="item.icon" />
             </template>
-            <v-list-iteme-title>{{ item.title }}</v-list-iteme-title>
+            <v-list-item-title class="text-body-2">
+              {{ item.title }}
+            </v-list-item-title>
           </v-list-item>
         </template>
       </template>
@@ -98,5 +130,9 @@ export default {
 <style lang="scss">
 .v-list-item__prepend > .v-icon ~ .v-list-item__spacer {
   width: 10px;
+}
+.v-list-item {
+  scroll-margin-top: 8px;
+  scroll-margin-bottom: 8px;
 }
 </style>

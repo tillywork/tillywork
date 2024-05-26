@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import BaseEditorCommands from '../BaseEditorCommands.vue';
+import BaseEditorCommands from './BaseEditorCommands.vue';
 import { VueRenderer, Editor, type Range } from '@tiptap/vue-3';
 import tippy from 'tippy.js';
 
@@ -14,7 +14,7 @@ export default {
             .chain()
             .focus()
             .deleteRange(range)
-            .setNode('heading', { level: 1 })
+            .setHeading({ level: 1 })
             .run();
         },
       },
@@ -26,7 +26,7 @@ export default {
             .chain()
             .focus()
             .deleteRange(range)
-            .setNode('heading', { level: 2 })
+            .setHeading({ level: 2 })
             .run();
         },
       },
@@ -38,7 +38,7 @@ export default {
             .chain()
             .focus()
             .deleteRange(range)
-            .setNode('heading', { level: 3 })
+            .setHeading({ level: 3 })
             .run();
         },
       },
@@ -46,19 +46,75 @@ export default {
         title: 'Bold',
         icon: 'mdi-format-bold',
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
-          editor.chain().focus().deleteRange(range).setMark('bold').run();
+          editor.chain().focus().deleteRange(range).setBold().run();
         },
       },
       {
         title: 'Italic',
         icon: 'mdi-format-italic',
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
-          editor.chain().focus().deleteRange(range).setMark('italic').run();
+          editor.chain().focus().deleteRange(range).setItalic().run();
+        },
+      },
+      {
+        title: 'Underline',
+        icon: 'mdi-format-underline',
+        command: ({ editor, range }: { editor: Editor; range: Range }) => {
+          editor.chain().focus().deleteRange(range).setUnderline().run();
+        },
+      },
+      {
+        title: 'Strike',
+        icon: 'mdi-format-strikethrough',
+        command: ({ editor, range }: { editor: Editor; range: Range }) => {
+          editor.chain().focus().deleteRange(range).setStrike().run();
+        },
+      },
+      {
+        title: 'Blockquote',
+        icon: 'mdi-format-quote-open',
+        command: ({ editor, range }: { editor: Editor; range: Range }) => {
+          editor.chain().focus().deleteRange(range).setBlockquote().run();
+        },
+      },
+      {
+        title: 'Bullet List',
+        icon: 'mdi-format-list-bulleted',
+        command: ({ editor, range }: { editor: Editor; range: Range }) => {
+          editor.chain().focus().deleteRange(range).toggleBulletList().run();
+        },
+      },
+      {
+        title: 'Ordered List',
+        icon: 'mdi-format-list-numbered',
+        command: ({ editor, range }: { editor: Editor; range: Range }) => {
+          editor.chain().focus().deleteRange(range).toggleOrderedList().run();
+        },
+      },
+      {
+        title: 'Code',
+        icon: 'mdi-code-tags',
+        command: ({ editor, range }: { editor: Editor; range: Range }) => {
+          editor.chain().focus().deleteRange(range).setCode().run();
+        },
+      },
+      {
+        title: 'Code Block',
+        icon: 'mdi-code-brackets',
+        command: ({ editor, range }: { editor: Editor; range: Range }) => {
+          editor.chain().focus().deleteRange(range).setCodeBlock().run();
+        },
+      },
+      {
+        title: 'Horizontal Rule',
+        icon: 'mdi-minus',
+        command: ({ editor, range }: { editor: Editor; range: Range }) => {
+          editor.chain().focus().deleteRange(range).setHorizontalRule().run();
         },
       },
     ]
       .filter((item) => item.title.toLowerCase().includes(query.toLowerCase()))
-      .slice(0, 10);
+      .slice(0, 20);
   },
 
   render: () => {
