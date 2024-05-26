@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
 import CreateSpaceBtn from './CreateSpaceBtn.vue';
 import { useSpacesService } from '../../../composables/services/useSpacesService';
-import { watch } from 'vue';
 import { useWorkspaceStore } from '@/stores/workspace';
-import { storeToRefs } from 'pinia';
 import NavigationWorkspaceSpaceItem from './NavigationWorkspaceSpaceItem.vue';
 
 const workspaceStore = useWorkspaceStore();

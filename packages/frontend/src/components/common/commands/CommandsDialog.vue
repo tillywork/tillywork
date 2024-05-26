@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { useMagicKeys } from '@vueuse/core';
-import { onBeforeUnmount, onMounted, watch } from 'vue';
-import { ref } from 'vue';
 import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '../dialogs/types';
 

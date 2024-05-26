@@ -1,22 +1,39 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import dayjs from 'dayjs';
 import BaseCardPropertyValueBtn from '@/components/project-management/cards/BaseCardPropertyValueBtn.vue';
-import isToday from 'dayjs/plugin/isToday';
-import { onMounted } from 'vue';
+import { useDate } from '@/composables/useDate';
 
-dayjs.extend(isToday);
+const { dayjs } = useDate();
 
-const dateValue = defineModel<string | Date>();
+const dateModel = defineModel<string>();
+const dateValue = ref(dateModel.value);
+
 const props = defineProps<{
   label?: string;
   closeOnContentClick?: boolean;
   class?: string;
   icon?: string;
+  activatorColor?: string;
 }>();
 const dateDialog = defineModel<boolean>('dialog', {
   default: false,
 });
+
+const processedDate = computed({
+  get() {
+    const processedDate = dateValue.value
+      ? new Date(`${dateValue.value}`)
+      : undefined;
+
+    return processedDate;
+  },
+  set(v) {
+    if (v) {
+      dateValue.value = v?.toISOString();
+    }
+  },
+});
+
+watch(dateValue, (v) => (dateModel.value = v));
 
 const textColorClass = computed(() => {
   if (!dateValue.value) {
@@ -49,22 +66,20 @@ const dateToText = computed(() => {
     return dayjs(dateValue.value).format('MMM D');
   }
 });
-
-onMounted(() => {
-  if (typeof dateValue.value === 'string') {
-    dateValue.value = new Date(dateValue.value);
-  }
-});
 </script>
 
 <template>
   <v-menu
     v-model="dateDialog"
     :close-on-content-click="closeOnContentClick ?? false"
-    offset="3"
+    width="fit-content"
   >
     <template #activator="{ props }">
-      <base-card-property-value-btn v-bind="props" :class="textClass">
+      <base-card-property-value-btn
+        v-bind="props"
+        :class="textClass"
+        @click.prevent
+      >
         <template #prepend v-if="icon">
           <v-icon :icon color="default" />
         </template>
@@ -72,10 +87,9 @@ onMounted(() => {
       </base-card-property-value-btn>
     </template>
     <v-date-picker
-      v-model="dateValue"
+      v-model="processedDate"
       show-adjacent-months
       color="primary"
-      bg-color="accent"
     />
   </v-menu>
 </template>

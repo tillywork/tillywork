@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import { useThemeStore } from '@/stores/theme';
 
 const themeStore = useThemeStore();

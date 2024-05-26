@@ -22,6 +22,7 @@ export const useUsersService = () => {
       queryKey: ['users'],
       queryFn: getUsers,
       refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
     });
   }
 

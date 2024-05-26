@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
 import { useCardsService } from '@/composables/services/useCardsService';
 import BaseCard from './BaseCard.vue';
 
-const route = useRoute();
+const route = useRoute('/pm/card/[cardId]');
 const cardsService = useCardsService();
 
 const cardId = computed(() => route.params.cardId);

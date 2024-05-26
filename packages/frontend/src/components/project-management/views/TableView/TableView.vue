@@ -1,43 +1,91 @@
 <script setup lang="ts">
-import { useThemeStore } from '@/stores/theme';
 import {
   FlexRender,
   getCoreRowModel,
   useVueTable,
   type ColumnDef,
   type Row,
-  type Header,
   type Column,
-  type ColumnPinningState,
 } from '@tanstack/vue-table';
-import { computed } from 'vue';
-import { type PaginationParams, type QueryFilter } from './types';
-
-const props = defineProps<{
-  columns: ColumnDef<any, any>[];
-  data: unknown[];
-  total: number;
-  filters?: QueryFilter;
-  columnPinning?: ColumnPinningState;
-  loading?: boolean;
-  noHeaders?: boolean;
-}>();
+import {
+  type PaginationParams,
+  type QueryFilter,
+  type TableSortOption,
+} from './types';
+import type { View } from '../types';
+import { useListGroupsService } from '@/composables/services/useListGroupsService';
+import type { Card } from '../../cards/types';
+import { type ListGroup, type ListStage } from '../../lists/types';
+import { useListStagesService } from '@/composables/services/useListStagesService';
+import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { useAuthStore } from '@/stores/auth';
+import TableViewGroup from './TableViewGroup.vue';
+import type { User } from '@/components/common/users/types';
+import { useSnackbarStore } from '@/stores/snackbar';
 
 const options = defineModel<PaginationParams>('options');
-const rowHovered = defineModel<Row<unknown>>('rowHovered');
+const rowHovered = defineModel<Row<Card>>('rowHovered');
+const isLoading = defineModel<boolean>('loading');
 
-const emit = defineEmits(['update:options', 'click:row', 'submit', 'load']);
-const slots = defineSlots();
+const props = defineProps<{
+  columns: ColumnDef<ListGroup, any>[];
+  filters?: QueryFilter;
+  noHeaders?: boolean;
+  view: View;
+  groups: ListGroup[];
+  fixedHeaders?: boolean;
+}>();
+
+const emit = defineEmits([
+  'update:options',
+  'row:delete',
+  'submit',
+  'load',
+  'row:update:stage',
+  'row:update:due-date',
+  'row:update:assignees',
+]);
+
+const sortBy = ref<TableSortOption[]>(
+  props.view.sortBy ? [props.view.sortBy] : [{ key: 'createdAt', order: 'asc' }]
+);
+const cardMenuOpen = ref<Row<Card> | null>();
+const expandedState = ref<Record<string, boolean>>();
+
+const { showSnackbar } = useSnackbarStore();
+const authStore = useAuthStore();
+
+const listGroupsService = useListGroupsService();
+const { mutateAsync: updateListGroup } =
+  listGroupsService.useUpdateListGroupMutation();
+
+const listsStagesService = useListStagesService();
+const { data: listStages } = listsStagesService.useGetListStagesQuery(
+  props.view.listId
+);
+
+const projectUsersService = useProjectUsersService();
+const { data: projectUsers } = projectUsersService.useProjectUsersQuery({
+  projectId: authStore.project!.id,
+});
+
+const users = computed(() =>
+  projectUsers.value?.map((projectUser) => projectUser.user)
+);
 
 const table = useVueTable({
   get data() {
-    return props.data;
+    return props.groups;
   },
-  columns: props.columns as ColumnDef<unknown>[],
+  columns: props.columns as ColumnDef<ListGroup, any>[],
   getCoreRowModel: getCoreRowModel(),
+  getRowId: (row) => `${row.id}`,
   manualPagination: true,
-  columnResizeMode: 'onChange',
+  manualGrouping: true,
   manualSorting: true,
+  columnResizeMode: 'onChange',
+  enableColumnResizing: false,
+  enableSorting: false,
   initialState: {
     sorting: [
       {
@@ -48,47 +96,29 @@ const table = useVueTable({
         desc:
           options.value && options.value.sort
             ? options.value.sort[0].order === 'desc'
-            : true,
+            : false,
       },
     ],
-    columnPinning: props.columnPinning ?? {},
   },
 });
 
-const themeStore = useThemeStore();
-const themeClass = computed(() => `v-theme--${themeStore.theme}`);
-
-function handleSortingChange(header: Header<unknown, unknown>) {
-  if (options.value && header.column.getCanSort()) {
-    header.column.toggleSorting();
-    if (header.column.getIsSorted() !== false) {
-      options.value.sort = [
-        {
-          key: header.column.id,
-          order: header.column.getIsSorted() as string,
-        },
-      ];
-    } else {
-      options.value.sort = options.value.sort?.filter(
-        (sortOption) => sortOption.key !== header.column.id
-      );
-    }
+watchEffect(() => {
+  const { groups, view } = props;
+  if (groups) {
+    const state: Record<string, boolean> = {};
+    groups.forEach((listGroup) => {
+      state[listGroup.id] = listGroup.isExpanded ?? false;
+    });
+    expandedState.value = state;
+    table.setExpanded(expandedState.value);
   }
-}
 
-function handleRowClick(row: Row<unknown>) {
-  emit('click:row', row);
-}
-
-function handleHoverChange(row: Row<unknown>, isHovering: boolean) {
-  if (isHovering) {
-    rowHovered.value = row;
-  } else {
-    rowHovered.value = undefined;
+  if (view.sortBy) {
+    sortBy.value = [view.sortBy];
   }
-}
+});
 
-function getColumnSortIcon(column: Column<unknown, unknown>) {
+function getColumnSortIcon(column: Column<ListGroup, unknown>) {
   switch (column.getIsSorted()) {
     case 'desc':
       return 'mdi-arrow-down';
@@ -98,212 +128,278 @@ function getColumnSortIcon(column: Column<unknown, unknown>) {
   }
 }
 
-function handleInfiniteScrollLoad(scrollObj: any) {
-  emit('load', scrollObj);
+function toggleGroupExpansion(listGroup: Row<ListGroup>) {
+  listGroup.toggleExpanded();
+  isLoading.value = true;
+  updateListGroup({
+    ...listGroup.original,
+    isExpanded: listGroup.getIsExpanded(),
+  })
+    .catch(() => {
+      showSnackbar({
+        message: 'Something went wrong, please try again.',
+        color: 'error',
+        timeout: 5000,
+      });
+    })
+    .finally(() => {
+      isLoading.value = false;
+    });
+}
+
+function handleUserSelection({ users, card }: { users: User[]; card: Card }) {
+  emit('row:update:assignees', {
+    users,
+    card,
+  });
+}
+
+function handleUpdateDueDate({
+  newDueDate,
+  card,
+}: {
+  newDueDate: string;
+  card: Card;
+}) {
+  emit('row:update:due-date', {
+    newDueDate,
+    card,
+  });
+}
+
+function handleCardMenuClick({
+  row,
+  isOpen,
+}: {
+  row: Row<Card>;
+  isOpen: boolean;
+}) {
+  if (isOpen) {
+    cardMenuOpen.value = row;
+  } else {
+    cardMenuOpen.value = null;
+  }
+}
+
+function handleDeleteCard(card: Card) {
+  emit('row:delete', card);
+}
+
+function handleUpdateCardStage({
+  cardId,
+  cardListId,
+  listStageId,
+}: {
+  cardId: number;
+  cardListId: number;
+  listStageId: number;
+}) {
+  emit('row:update:stage', {
+    cardId,
+    cardListId,
+    listStageId,
+  });
 }
 </script>
 
 <template>
-  <div class="table-container" :class="themeClass">
-    <v-infinite-scroll @load="handleInfiniteScrollLoad" max-height="300">
-      <template #empty></template>
-      <table>
-        <thead>
-          <tr
-            v-for="headerGroup in table.getHeaderGroups()"
-            :key="headerGroup.id"
-          >
+  <div class="table-container">
+    <div class="table d-flex flex-column">
+      <div class="table-header">
+        <template
+          v-for="headerGroup in table.getHeaderGroups()"
+          :key="headerGroup.id"
+        >
+          <div class="table-header-group d-flex border-b-thin border-collapse">
             <template v-for="header in headerGroup.headers" :key="header.id">
-              <v-hover #="{ isHovering: isHeaderHovering, props: headerProps }">
-                <th
-                  v-bind="!noHeaders ? headerProps : undefined"
-                  :colSpan="header.colSpan"
-                  :style="`width: ${header.getSize()}px; ${
-                    isHeaderHovering ? 'cursor: pointer;' : ''
-                  }; ${noHeaders ? 'height: 0px !important;' : ''}`"
-                  :class="isHeaderHovering ? 'bg-surface' : ''"
-                  @click="handleSortingChange(header)"
-                  class="text-caption"
+              <v-hover
+                #="{ isHovering: isHeaderHovering, props: headerProps }"
+                v-if="!noHeaders"
+              >
+                <v-card
+                  v-bind="headerProps"
+                  class="table-header-cell py-1 px-4 text-caption user-select-none d-flex align-center text-truncate"
+                  rounded="0"
+                  link
+                  color="accent"
+                  :width="header.getSize()"
+                  height="28"
+                  :style="`${noHeaders ? 'height: 0px !important;' : ''}`"
                 >
                   <!-- Header Content -->
-                  <template v-if="!noHeaders">
-                    <FlexRender
-                      v-if="!header.isPlaceholder"
-                      :render="header.column.columnDef.header"
-                      :props="header.getContext()"
-                    />
-                    <!-- Sorting Indicator -->
-                    <template
-                      v-if="!header.isPlaceholder && header.column.getCanSort()"
+                  <FlexRender
+                    v-if="!header.isPlaceholder"
+                    :render="header.column.columnDef.header"
+                    :props="header.getContext()"
+                  />
+                  <!-- Sorting Indicator -->
+                  <template
+                    v-if="!header.isPlaceholder && header.column.getCanSort()"
+                  >
+                    <v-icon
+                      v-show="isHeaderHovering || header.column.getIsSorted()"
+                      class="ms-1"
+                      :color="
+                        header.column.getIsSorted() === false
+                          ? 'grey'
+                          : undefined
+                      "
                     >
-                      <v-icon
-                        v-show="isHeaderHovering || header.column.getIsSorted()"
-                        class="ms-1"
-                        :color="
-                          header.column.getIsSorted() === false
-                            ? 'grey'
-                            : undefined
-                        "
-                      >
-                        {{ getColumnSortIcon(header.column) }}
-                      </v-icon>
-                    </template>
-                    <!-- Column Resizer -->
-                    <template v-if="header.column.getCanResize()">
-                      <v-hover
-                        #="{ isHovering: isResizeHovering, props: resizeProps }"
-                      >
-                        <div v-bind="resizeProps" class="column-resizer">
-                          <div
-                            @mousedown="header.getResizeHandler()?.($event)"
-                            @touchstart="header.getResizeHandler()?.($event)"
-                            v-show="
-                              isResizeHovering || header.column.getIsResizing()
-                            "
-                            @click.stop
-                          >
-                            &nbsp;
-                          </div>
-                          &nbsp;
-                        </div>
-                      </v-hover>
-                    </template>
+                      {{ getColumnSortIcon(header.column) }}
+                    </v-icon>
                   </template>
-                </th>
+                  <!-- Column Resizer -->
+                  <template
+                    v-if="isHeaderHovering && header.column.getCanResize()"
+                  >
+                    <div class="column-resizer">
+                      <div
+                        @mousedown="header.getResizeHandler()?.($event)"
+                        @touchstart="header.getResizeHandler()?.($event)"
+                        v-show="
+                          isHeaderHovering || header.column.getIsResizing()
+                        "
+                        @click.stop
+                      >
+                        &nbsp;
+                      </div>
+                      &nbsp;
+                    </div>
+                  </template>
+                </v-card>
               </v-hover>
             </template>
-          </tr>
-          <tr class="loading position-relative">
-            <th :colspan="table.getAllColumns().length">
-              <v-progress-linear
-                v-if="loading"
-                active
-                color="primary"
-                height="2"
-                indeterminate
-                absolute
-              />
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <template
-            v-for="row in table.getRowModel().rows"
-            :key="row.original.id ?? row.id"
-          >
-            <v-hover
-              @update:modelValue="
-                (modelValue) => handleHoverChange(row, modelValue)
-              "
-              #="{ isHovering: isRowHovering, props: rowProps }"
+          </div>
+        </template>
+      </div>
+      <v-card class="table-groups overflow-scroll">
+        <template
+          v-for="listGroup in table.getCoreRowModel().rows"
+          :key="
+            'table-group-' +
+            listGroup.original.id +
+            '-' +
+            listGroup.subRows.length
+          "
+        >
+          <suspense>
+            <table-view-group
+              v-model:row:hovered="rowHovered"
+              v-model:loading="isLoading"
+              :list-group="listGroup"
+              :list-stages="listStages ?? []"
+              :project-users="projectUsers ?? []"
+              :sort-by="sortBy"
+              :table
+              @toggle:group="toggleGroupExpansion"
             >
-              <tr
-                v-bind="rowProps"
-                @click="handleRowClick(row)"
-                :class="isRowHovering ? 'bg-accent cursor-pointer' : ''"
-              >
-                <td v-for="cell in row.getVisibleCells()" :key="cell.id">
-                  <!-- Check for named slot that matches columnId, and use template to define slot content -->
-                  <template
-                    v-if="
-                      cell.column.columnDef.id &&
-                      !!slots[cell.column.columnDef.id]
+              <template #actions="{ row }">
+                <div class="d-flex flex-fill justify-end">
+                  <v-menu
+                    @update:model-value="
+                      (v) => handleCardMenuClick({ row, isOpen: v })
                     "
                   >
-                    <slot
-                      :name="cell.column.columnDef.id"
-                      v-bind="cell.getContext()"
-                    ></slot>
-                  </template>
-                  <!-- Default rendering if no slot is provided -->
-                  <template v-else>
-                    <FlexRender
-                      :render="cell.column.columnDef.cell"
-                      :props="cell.getContext()"
-                    />
-                  </template>
-                </td>
-              </tr>
-            </v-hover>
-          </template>
-        </tbody>
-        <tfoot>
-          <tr>
-            <th
-              :colspan="table.getAllColumns().length"
-              class="pe-0"
-              style="padding-left: 50px"
-            >
-              <template v-if="!data || data.length === 0">
-                <span class="text-caption">No tasks found.</span>
+                    <template #activator="{ props }">
+                      <base-icon-btn
+                        v-if="
+                          rowHovered?.original.id === row.original.id ||
+                          cardMenuOpen?.original.id === row.original.id
+                        "
+                        v-bind="props"
+                        icon="mdi-dots-vertical"
+                        @click.prevent
+                      />
+                    </template>
+                    <v-card class="border-thin">
+                      <v-list>
+                        <v-list-item
+                          class="text-error"
+                          @click="handleDeleteCard(row.original)"
+                        >
+                          <template #prepend>
+                            <v-icon icon="mdi-delete" />
+                          </template>
+                          <v-list-item-title>Delete</v-list-item-title>
+                        </v-list-item>
+                      </v-list>
+                    </v-card>
+                  </v-menu>
+                </div>
               </template>
-            </th>
-          </tr>
-        </tfoot>
-      </table>
-    </v-infinite-scroll>
+              <template #title="{ row }">
+                <v-list-item-title class="text-body-2 px-2">
+                  <list-stage-selector
+                    :model-value="row.original.cardLists[0].listStage"
+                    theme="icon"
+                    rounded="circle"
+                    :list-stages="listStages ?? []"
+                    @update:modelValue="
+                (modelValue: ListStage) =>
+                  handleUpdateCardStage({
+                    cardId: row.original.id,
+                    cardListId: row.original.cardLists[0].id,
+                    listStageId: modelValue.id,
+                  })
+              "
+                    @click.prevent
+                  />
+                  <span class="line-height-1 ms-2">{{
+                    row.original.title
+                  }}</span>
+                </v-list-item-title>
+              </template>
+              <template #dueAt="{ row }">
+                <base-date-picker
+                  :model-value="row.original.dueAt"
+                  @update:model-value="(newValue: string) =>
+                  handleUpdateDueDate({
+                    card: row.original,
+                    newDueDate: newValue,
+                  })
+                "
+                  class="text-caption d-flex flex-fill justify-start rounded-0"
+                  label="No due date"
+                  @click.prevent
+                />
+              </template>
+              <template #users="{ row }">
+                <base-user-selector
+                  :model-value="row.original.users"
+                  :users
+                  fill
+                  @update:model-value="
+                  (users: User[]) => handleUserSelection({
+                    users, card: row.original
+                  })
+                "
+                  @click.stop
+                />
+              </template>
+            </table-view-group>
+          </suspense>
+        </template>
+      </v-card>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
 $table-border-color: var(--v-border-color);
 $table-border-opacity: var(--v-border-opacity);
-$table-row-height: 36px;
-$table-header-height: 33px;
+$table-row-height: 33px;
+$table-header-height: px;
 $table-cell-padding-x: 8px;
 $table-cell-padding-y: 0;
 
 .table-container {
   position: relative;
 
-  table {
-    width: 100%;
-    border-spacing: 0;
-    line-height: 1.5;
-    color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));
-    font-size: 0.875rem;
-    table-layout: fixed;
-    position: relative;
-
-    > thead > tr:not(.loading) > th,
-    > tbody > tr > td,
-    > tbody > tr:not(.loading) > th {
-      border-bottom: thin solid rgba($table-border-color, $table-border-opacity);
-    }
-
-    > tbody > tr > td,
-    > thead > tr > td,
-    > tfoot > tr > td {
-      height: $table-row-height;
-    }
-
-    > thead > tr:not(.loading) > th {
-      position: relative;
-      height: $table-header-height;
-      font-weight: 500;
-      user-select: none;
-      text-align: start;
-    }
-
-    > tbody > tr > td,
-    > tbody > tr > th,
-    > thead > tr > td,
-    > thead > tr:not(.loading) > th,
-    > tfoot > tr > td,
-    > tfoot > tr > th {
-      padding: $table-cell-padding-y $table-cell-padding-x;
-      transition-duration: 0.28s;
-      transition-property: box-shadow, opacity, background, height;
-      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    // For truncating text, doesn't work without max-width: 0;
-    > tbody > tr > td {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 0;
-    }
+  .table {
+    max-height: calc(100vh - (40px + 113px));
+    // overflow: auto;
+    min-width: 100%;
+    width: fit-content;
   }
 
   .column-resizer {
@@ -319,38 +415,6 @@ $table-cell-padding-y: 0;
       border-right: 3px solid #2196f3;
       height: 100%;
     }
-  }
-}
-</style>
-
-<style lang="scss">
-$v-field-input-x-padding: 8px;
-$v-field-input-font-size: 14px;
-
-.table-container {
-  .v-infinite-scroll {
-    display: block;
-    // min-width: max-content;
-
-    .v-infinite-scroll__side {
-      padding: 0;
-    }
-  }
-}
-
-.create-card-wrapper {
-  .v-field__input {
-    min-height: 30px;
-    padding-inline: $v-field-input-x-padding;
-    padding-top: var(--v-field-input-padding-top) - 10;
-    padding-bottom: var(--v-field-input-padding-bottom) - 10;
-    font-size: $v-field-input-font-size;
-  }
-
-  .v-label.v-field-label {
-    margin-inline-start: $v-field-input-x-padding - 2;
-    margin-inline-end: $v-field-input-x-padding - 2;
-    font-size: $v-field-input-font-size;
   }
 }
 </style>

@@ -11,9 +11,9 @@ const themes = {
     dark: false,
     colors: {
       primary: '#1976D2',
-      background: '#F3F3F3',
-      surface: '#FEFFFE',
-      accent: '#F5F5F5',
+      background: '#FEFFFE',
+      surface: '#FEFEFE',
+      accent: '#F7F7F7',
       secondary: '#BCFFCD',
       error: '#E53935',
     },
@@ -66,6 +66,15 @@ const vuetify = createVuetify({
       density: 'compact',
       slim: true,
       nav: true,
+      class: 'bg-transparent',
+    },
+    VMenu: {
+      transition: 'none',
+      offset: 3,
+      width: 200,
+    },
+    VIcon: {
+      size: 'small',
     },
   },
 });

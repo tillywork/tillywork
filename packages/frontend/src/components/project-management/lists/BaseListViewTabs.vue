@@ -59,8 +59,6 @@ onMounted(() => {
                   if (!v) freezeHoverViewId = undefined;
                 }
               "
-              offset="3"
-              width="200"
             >
               <template #activator="{ props }">
                 <base-icon-btn
@@ -71,13 +69,13 @@ onMounted(() => {
                   @click="freezeHoverViewId = view.id"
                 />
               </template>
-              <v-card color="accent" class="border-thin">
-                <v-list class="bg-transparent">
-                  <v-list-item class="text-error text-caption">
+              <v-card class="border-thin">
+                <v-list>
+                  <v-list-item class="text-error">
                     <template #prepend>
                       <v-icon icon="mdi-delete" />
                     </template>
-                    Delete
+                    <v-list-item-title>Delete</v-list-item-title>
                   </v-list-item>
                 </v-list>
               </v-card>

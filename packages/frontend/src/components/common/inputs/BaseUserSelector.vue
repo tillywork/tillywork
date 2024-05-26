@@ -1,80 +1,89 @@
 <script setup lang="ts">
 import type { User } from '@/components/common/users/types';
 
-const value = defineModel<User[]>({
-  default: [],
-});
 const userMenu = defineModel('menu', {
   default: false,
 });
+const value = defineModel<User[]>({
+  default: [],
+});
+const selectedUsers = ref(value.value ?? []);
+
 defineExpose({
   userMenu,
 });
+
 defineProps<{
   users: User[];
-  activatorHoverText?: string;
   size?: number | 'x-small' | 'small' | 'default';
   contentClass?: string;
   showFirstNames?: boolean;
   label?: string;
+  fill?: boolean;
 }>();
 
 const toggleUserSelection = (user: User) => {
-  const index = value.value.findIndex((u) => u.id === user.id);
+  const index = selectedUsers.value.findIndex((u) => u.id === user.id);
 
   if (index === -1) {
     // User is not in the array, add them
-    value.value = [...value.value, user];
+    selectedUsers.value = [...selectedUsers.value, user];
   } else {
     // User is in the array, remove them
-    value.value = [
-      ...value.value.slice(0, index),
-      ...value.value.slice(index + 1),
+    selectedUsers.value = [
+      ...selectedUsers.value.slice(0, index),
+      ...selectedUsers.value.slice(index + 1),
     ];
   }
 };
 
 const isUserSelected = (user: User) => {
-  const index = value.value.findIndex((u) => u.id === user.id);
+  const index = selectedUsers.value.findIndex((u) => u.id === user.id);
   return index !== -1;
 };
+
+watch(selectedUsers, (v) => {
+  value.value = [...v];
+});
 </script>
 
 <template>
-  <v-menu v-model="userMenu" :close-on-content-click="false" offset="3">
+  <v-menu v-model="userMenu" :close-on-content-click="false">
     <template #activator="{ props: menuProps }">
       <div
-        class="d-flex align-center justify-start rounded-md px-1 cursor-pointer"
-        :class="contentClass"
+        class="d-flex align-center justify-start rounded-md px-1 cursor-pointer fill-height"
+        :class="`${contentClass ? contentClass : ''} ${
+          fill ? 'flex-fill' : ''
+        }`"
         v-bind="menuProps"
+        @click.prevent
       >
-        <div class="me-n1" v-if="value.length === 0">
-          <v-tooltip location="bottom">
-            <template #activator="{ props }">
-              <base-icon-btn icon="mdi-account" v-if="!label" />
-              <v-btn
-                v-if="label"
-                v-bind="props"
-                variant="text"
-                size="small"
-                color="surface-dark"
-                class="text-body-2"
-              >
-                <template #prepend>
-                  <v-icon icon="mdi-account" :size="size ?? 'small'" />
-                </template>
-                {{ label }}
-              </v-btn>
+        <div class="me-n1" v-if="selectedUsers.length === 0">
+          <base-icon-btn
+            v-bind="menuProps"
+            icon="mdi-account"
+            v-if="!label"
+            @click.prevent
+          />
+          <v-btn
+            v-if="label"
+            v-bind="menuProps"
+            variant="text"
+            size="small"
+            color="surface-dark"
+            class="text-body-2"
+            @click.prevent
+          >
+            <template #prepend>
+              <v-icon icon="mdi-account" :size="size ?? 'small'" />
             </template>
-            <span class="text-caption">{{
-              activatorHoverText ?? 'Select users'
-            }}</span>
-          </v-tooltip>
+            {{ label }}
+          </v-btn>
         </div>
         <template v-else>
-          <div class="ms-3 mt-1">
+          <div class="ms-3 mt-1" @click.prevent>
             <template
-              v-for="(selectedUser, index) in value"
+              v-for="(selectedUser, index) in selectedUsers"
               :key="selectedUser.email + 'selected-user'"
             >
               <v-tooltip location="bottom">
@@ -94,23 +103,22 @@ const isUserSelected = (user: User) => {
               </v-tooltip>
             </template>
             <template v-if="showFirstNames">
-              <span class="ms-2 text-body-2">
-                {{ value.map((user) => user.firstName).join(', ') }}
+              <span class="ms-2 text-body-2 user-select-none">
+                {{ selectedUsers.map((user) => user.firstName).join(', ') }}
               </span>
             </template>
           </div>
         </template>
       </div>
     </template>
-    <v-card width="250" color="accent">
-      <v-list nav density="compact" class="bg-accent">
+    <v-card width="250">
+      <v-list>
         <template
           v-for="user in users"
           :key="user.email + 'list-item' + isUserSelected(user)"
         >
           <v-list-item
             @click="toggleUserSelection(user)"
-            slim
             :active="isUserSelected(user)"
           >
             <template #prepend>

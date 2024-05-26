@@ -50,6 +50,17 @@
   padding: 2px !important;
 }
 
+.text-color-subtitle {
+  opacity: var(
+    --v-card-subtitle-opacity,
+    var(--v-medium-emphasis-opacity)
+  ) !important;
+}
+
+.line-height-1 {
+  line-height: 1;
+}
+
 textarea {
   border: none !important;
   resize: none !important;

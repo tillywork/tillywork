@@ -1,5 +1,3 @@
-import { defineStore } from 'pinia';
-
 export type SnackbarOptions = {
   message: string;
   color?: string;
@@ -40,7 +38,7 @@ export const useSnackbarStore = defineStore('snackbar', {
      * @param id - The ID of the snackbar to be removed.
      */
     closeSnackbar(id: number): void {
-      const index = this.snackbars.findIndex(snackbar => snackbar.id === id);
+      const index = this.snackbars.findIndex((snackbar) => snackbar.id === id);
       if (index === -1) return;
       clearTimeout(this.snackbars[index].timeoutById);
       this.snackbars.splice(index, 1);

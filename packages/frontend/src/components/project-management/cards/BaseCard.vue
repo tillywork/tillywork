@@ -1,18 +1,10 @@
 <script setup lang="ts">
 import { ActivityType, type ActivityContent, type Card } from './types';
-import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
 import BaseCardCommentBox from './BaseCardCommentBox.vue';
 import BaseCardActivityTimeline from './BaseCardActivityTimeline.vue';
-import BaseUserSelector from '@/components/common/inputs/BaseUserSelector.vue';
-import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
-import { computed, ref } from 'vue';
-import { watch } from 'vue';
 import { useCardsService } from '@/composables/services/useCardsService';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { useDebounce } from '@vueuse/core';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
 import { useListStagesService } from '@/composables/services/useListStagesService';
 import { useCardActivitiesService } from '@/composables/services/useCardActivitiesService';
 import type { User } from '@/components/common/users/types';
@@ -21,8 +13,6 @@ import objectUtils from '@/utils/object';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
 import { useAuthStore } from '@/stores/auth';
 import { type Content } from '@tiptap/vue-3';
-
-dayjs.extend(relativeTime);
 
 const props = defineProps<{
   card: Card;
@@ -147,8 +137,8 @@ function createComment(content: ActivityContent) {
   }
 }
 
-function updateCardDueAt(newDueAt: string | Date) {
-  if (props.card.dueAt !== (newDueAt as Date).toISOString()) {
+function updateCardDueAt(newDueAt: string) {
+  if (props.card.dueAt !== newDueAt) {
     updateCardMutation.mutateAsync(cardCopy.value).catch((e) => {
       snackbar.showSnackbar({
         color: 'error',
@@ -181,7 +171,11 @@ function updateCardListStage(listStage: ListStage) {
 </script>
 
 <template>
-  <v-card v-if="cardCopy" :loading="isCardLoading" class="d-flex">
+  <v-card
+    v-if="cardCopy"
+    :loading="isCardLoading"
+    class="d-flex flex-sm-row flex-column"
+  >
     <template #loader="{ isActive }">
       <v-progress-linear
         indeterminate
@@ -192,9 +186,7 @@ function updateCardListStage(listStage: ListStage) {
         location="top"
       />
     </template>
-    <div
-      class="base-card-content-wrapper pa-md-12 pa-6 max-h-100vh overflow-scroll"
-    >
+    <div class="base-card-content-wrapper pa-md-12 pa-6 flex-fill">
       <div class="base-card-content mx-auto">
         <div class="d-flex align-top">
           <base-editor-input
@@ -241,34 +233,34 @@ function updateCardListStage(listStage: ListStage) {
         </v-card>
       </div>
     </div>
-    <div class="v-col-3 border-s-thin h-100vh">
-      <v-card class="pt-3">
-        <v-card-subtitle class="ps-2">Properties</v-card-subtitle>
-        <v-card-text>
-          <list-stage-selector
-            v-model="cardListStage"
-            :listStages="listStagesQuery.data.value ?? []"
-            size="default"
-            @update:model-value="updateCardListStage"
-          />
-          <base-user-selector
-            v-model="cardCopy.users"
-            :users="users ?? []"
-            @update:model-value="updateCardAssignees"
-            content-class="ms-n3 my-4"
-            show-first-names
-            label="Assign"
-          />
-          <base-date-picker
-            class="text-body-2 ms-n2"
-            label="Due date"
-            icon="mdi-calendar"
-            v-model="cardCopy.dueAt"
-            @update:model-value="updateCardDueAt"
-          />
-        </v-card-text>
-      </v-card>
-    </div>
+    <v-card class="border-s-thin h-100vh pa-4" width="400">
+      <v-card-text class="ps-2 text-color-subtitle pb-0"
+        >Properties</v-card-text
+      >
+      <v-card-text>
+        <list-stage-selector
+          v-model="cardListStage"
+          :listStages="listStagesQuery.data.value ?? []"
+          size="default"
+          @update:model-value="updateCardListStage"
+        />
+        <base-user-selector
+          v-model="cardCopy.users"
+          :users="users ?? []"
+          @update:model-value="updateCardAssignees"
+          content-class="ms-n3 my-4"
+          show-first-names
+          label="Assign"
+        />
+        <base-date-picker
+          class="text-body-2 ms-n2"
+          label="Due date"
+          icon="mdi-calendar"
+          v-model="cardCopy.dueAt"
+          @update:model-value="updateCardDueAt"
+        />
+      </v-card-text>
+    </v-card>
   </v-card>
 </template>
 
@@ -283,9 +275,8 @@ function updateCardListStage(listStage: ListStage) {
 
 <style lang="scss" scoped>
 .base-card-content-wrapper {
-  width: 794px;
-  max-width: 100%;
-  justify-content: center;
+  max-height: 100vh;
+  overflow: scroll;
 }
 
 .base-card-content {

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
 import { useAuthStore } from '@/stores/auth';
 
 const authStore = useAuthStore();

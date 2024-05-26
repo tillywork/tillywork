@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { defineAsyncComponent } from 'vue';
 import { useDialogStore } from '@/stores/dialog';
-import { storeToRefs } from 'pinia';
-import { useWindowSize } from '@vueuse/core';
 import { DIALOGS } from './types';
 
 const dialogStore = useDialogStore();

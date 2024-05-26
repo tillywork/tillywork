@@ -28,13 +28,14 @@ function isStageSelected(stage: ListStage) {
 </script>
 
 <template>
-  <v-menu v-model="listStageMenu" offset="3">
+  <v-menu v-model="listStageMenu">
     <template #activator="{ props }">
       <template v-if="theme === 'icon'">
         <base-icon-btn
           v-bind="props"
           icon="mdi-circle-slice-8"
           :color="mainChipColor"
+          @click.prevent
         />
       </template>
       <template v-else>
@@ -45,6 +46,7 @@ function isStageSelected(stage: ListStage) {
           :size="size ?? 'small'"
           density="comfortable"
           :color="mainChipColor"
+          @click.prevent
         >
           <v-icon size="16" :color="mainChipColor" start v-if="theme !== 'text'"
             >mdi-circle-slice-8</v-icon
@@ -55,19 +57,11 @@ function isStageSelected(stage: ListStage) {
         </v-chip>
       </template>
     </template>
-    <v-card color="accent">
-      <v-list
-        density="compact"
-        :lines="false"
-        nav
-        class="bg-accent mt-1 list-stage-list text-align-left"
-        rounded="md"
-      >
+    <v-card>
+      <v-list class="mt-1 text-align-left" rounded="md">
         <template v-for="stage in listStages" :key="stage.id">
           <v-list-item
             @click="handleStageClick(stage)"
-            class="d-flex"
-            slim
             :active="isStageSelected(stage)"
           >
             <template #prepend>

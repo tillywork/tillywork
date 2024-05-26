@@ -1,4 +1,3 @@
-import { defineStore } from 'pinia';
 import { jwtDecode } from 'jwt-decode';
 import type { CreateUserDto, User } from '@/components/common/users/types';
 import type { RouteLocation } from 'vue-router/auto';

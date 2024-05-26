@@ -130,6 +130,6 @@ export class CardsService {
 
     async remove(id: number): Promise<void> {
         const card = await this.findOne(id);
-        await this.cardsRepository.remove(card);
+        await this.cardsRepository.softRemove(card);
     }
 }
