@@ -35,7 +35,14 @@ export const Indent = Extension.create<IndentOptions, never>({
 
   addOptions() {
     return {
-      names: ['heading', 'paragraph', 'listItem'],
+      names: [
+        'heading',
+        'paragraph',
+        'listItem',
+        'code',
+        'codeBlock',
+        'blockquote',
+      ],
       indentRange: 24,
       minIndentLevel: 0,
       maxIndentLevel: 24 * 10,
@@ -52,7 +59,7 @@ export const Indent = Extension.create<IndentOptions, never>({
           indent: {
             default: this.options.defaultIndentLevel,
             renderHTML: (attributes) => ({
-              style: `margin-left: ${attributes.indent}px!important;`,
+              style: `margin-inline-start: ${attributes.indent}px!important;`,
             }),
             parseHTML: (element) =>
               parseInt(element.style.marginLeft, 10) ||

@@ -69,7 +69,6 @@ export async function seedUserData(connection: Connection): Promise<void> {
     let project: Project;
 
     logger.log("Seeding user data...");
-    logger.log("Email: dev@tw.com", "Password: 12345678");
 
     // Check if test user already exists or not
     const testUser = await usersService.findOneByEmail(email);
@@ -127,4 +126,6 @@ export async function seedUserData(connection: Connection): Promise<void> {
         });
         logger.log("Test workspace created successfully...");
     }
+
+    logger.log("Email: dev@tw.com", "Password: 12345678");
 }
