@@ -1,7 +1,7 @@
 import { FilterGroup } from "../../../filters/types";
 import { ListGroupEntityTypes, ListGroupOptions } from "../../types";
 
-export class CreateGroupDto {
+export class CreateListGroupDto {
     entityId?: number;
     entityType?: ListGroupEntityTypes;
     type?: ListGroupOptions;
@@ -12,4 +12,6 @@ export class CreateGroupDto {
     color?: string;
     icon?: string;
     order?: number;
+    isExpanded?: boolean;
+    listId?: number;
 }

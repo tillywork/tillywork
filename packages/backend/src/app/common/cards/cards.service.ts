@@ -36,16 +36,27 @@ export class CardsService {
         listId,
         page = 1,
         limit = 10,
-        sortBy,
-        sortOrder,
+        sortBy = "cardLists.order",
+        sortOrder = "ASC",
         filters,
     }: FindAllParams): Promise<CardFindAllResult> {
         const skip = (page - 1) * limit;
         const take = limit != -1 ? limit : undefined;
-        const order = {};
+        let order;
 
         if (sortBy && sortOrder) {
-            order[sortBy] = sortOrder;
+            /**
+             * If the sortBy is e.g cardLists.order we want it to be:
+             * cardLists: {
+             *   order: 'ASC'
+             * }
+             */
+            const builtOrder = QueryBuilderHelper.createNestedObjectFromPath(
+                sortBy.split("."),
+                sortOrder
+            );
+
+            order = builtOrder;
         }
 
         const listFilter: QueryFilter = {

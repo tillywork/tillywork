@@ -14,7 +14,7 @@ const route = useRoute();
 const authStore = useAuthStore();
 const queryClient = useQueryClient();
 const dialog = useDialog();
-const snackbarStore = useSnackbarStore();
+const { showSnackbar } = useSnackbarStore();
 const cardsService = useCardsService();
 const projectUsersService = useProjectUsersService();
 const createForm = ref<VForm>();
@@ -60,9 +60,18 @@ async function createCard() {
     createCardDto.value.listId
   ) {
     createCardDto.value.listStageId = createCardDto.value.listStage.id;
-    createCardMutation.mutateAsync(createCardDto.value).then(() => {
-      handlePostCreate();
-    });
+    createCardMutation
+      .mutateAsync(createCardDto.value)
+      .then(() => {
+        handlePostCreate();
+      })
+      .catch(() => {
+        showSnackbar({
+          message: 'Something went wrong, please try again.',
+          color: 'error',
+          timeout: 5000,
+        });
+      });
   }
 }
 
@@ -74,7 +83,7 @@ function handlePostCreate() {
   createCardDto.value.title = '';
   createCardDto.value.description = undefined;
 
-  snackbarStore.showSnackbar({
+  showSnackbar({
     message: `Task created`,
     color: 'success',
     timeout: 2000,

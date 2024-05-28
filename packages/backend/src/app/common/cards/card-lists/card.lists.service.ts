@@ -63,6 +63,15 @@ export class CardListsService {
                 id: createCardListDto.listStageId,
             },
         });
+
+        if (createCardListDto.order) {
+            cardList.order = createCardListDto.order;
+        } else {
+            cardList.order = await this.getNewCardOrder(
+                createCardListDto.listStageId
+            );
+        }
+
         await this.cardListsRepository.save(cardList);
 
         return cardList;
@@ -80,5 +89,22 @@ export class CardListsService {
     async remove(id: number): Promise<void> {
         const cardList = await this.findOne(id);
         await this.cardListsRepository.remove(cardList);
+    }
+
+    /**
+     * Get the max order for a list stage + 100
+     * @param listStageId
+     * @returns The order for the card being inserted to the list
+     */
+    async getNewCardOrder(listStageId: number): Promise<number> {
+        const result = await this.cardListsRepository
+            .createQueryBuilder("cardList")
+            .select("MAX(cardList.order)", "maxOrder")
+            .innerJoin("cardList.card", "card", "card.id = cardList.cardId")
+            .where("cardList.listStageId = :listStageId", { listStageId })
+            .andWhere("card.deletedAt is null")
+            .getRawOne();
+
+        return result.maxOrder ? Number(result.maxOrder) + 100 : 100; // Assume  100 if no cards are present
     }
 }

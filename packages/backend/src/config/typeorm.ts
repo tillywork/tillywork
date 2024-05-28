@@ -18,6 +18,8 @@ import { CreateViewTable1716299003967 } from "../migrations/1716299003967-create
 import { CreatePropTable1716299140812 } from "../migrations/1716299140812-create-prop-table";
 import { DeleteUserGroups1716372393939 } from "../migrations/1716372393939-delete-user-groups";
 import { AddOrderColumnToListGroups1716455762784 } from "../migrations/1716455762784-add-order-column-to-list-groups";
+import { AddOrderColumnToCardListsTable1716798868594 } from "../migrations/1716798868594-add-order-column-to-card-lists-table";
+import { AddCreatedAtUpdatedAtToCardListTable1716883730399 } from "../migrations/1716883730399-add-createdAt-updatedAt-to-card-list-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -37,6 +39,8 @@ const migrations = [
     CreatePropTable1716299140812,
     DeleteUserGroups1716372393939,
     AddOrderColumnToListGroups1716455762784,
+    AddOrderColumnToCardListsTable1716798868594,
+    AddCreatedAtUpdatedAtToCardListTable1716883730399,
 ];
 
 const config: TypeOrmModuleOptions = {

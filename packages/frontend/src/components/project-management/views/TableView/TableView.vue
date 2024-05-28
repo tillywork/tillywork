@@ -7,15 +7,11 @@ import {
   type Row,
   type Column,
 } from '@tanstack/vue-table';
-import {
-  type PaginationParams,
-  type QueryFilter,
-  type TableSortOption,
-} from './types';
+import { type TableSortOption } from './types';
 import type { View } from '../types';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import type { Card } from '../../cards/types';
-import { type ListGroup, type ListStage } from '../../lists/types';
+import { type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/composables/services/useListStagesService';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
 import { useAuthStore } from '@/stores/auth';
@@ -23,21 +19,16 @@ import TableViewGroup from './TableViewGroup.vue';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 
-const options = defineModel<PaginationParams>('options');
-const rowHovered = defineModel<Row<Card>>('rowHovered');
 const isLoading = defineModel<boolean>('loading');
 
 const props = defineProps<{
   columns: ColumnDef<ListGroup, any>[];
-  filters?: QueryFilter;
   noHeaders?: boolean;
   view: View;
   groups: ListGroup[];
-  fixedHeaders?: boolean;
 }>();
 
 const emit = defineEmits([
-  'update:options',
   'row:delete',
   'submit',
   'load',
@@ -46,10 +37,9 @@ const emit = defineEmits([
   'row:update:assignees',
 ]);
 
-const sortBy = ref<TableSortOption[]>(
-  props.view.sortBy ? [props.view.sortBy] : [{ key: 'createdAt', order: 'asc' }]
+const sortBy = ref<TableSortOption[] | undefined>(
+  props.view.sortBy ? [props.view.sortBy] : undefined
 );
-const cardMenuOpen = ref<Row<Card> | null>();
 const expandedState = ref<Record<string, boolean>>();
 
 const { showSnackbar } = useSnackbarStore();
@@ -69,10 +59,6 @@ const { data: projectUsers } = projectUsersService.useProjectUsersQuery({
   projectId: authStore.project!.id,
 });
 
-const users = computed(() =>
-  projectUsers.value?.map((projectUser) => projectUser.user)
-);
-
 const table = useVueTable({
   get data() {
     return props.groups;
@@ -86,20 +72,6 @@ const table = useVueTable({
   columnResizeMode: 'onChange',
   enableColumnResizing: false,
   enableSorting: false,
-  initialState: {
-    sorting: [
-      {
-        id:
-          options.value && options.value.sort
-            ? options.value.sort[0].key
-            : 'createdAt',
-        desc:
-          options.value && options.value.sort
-            ? options.value.sort[0].order === 'desc'
-            : false,
-      },
-    ],
-  },
 });
 
 watchEffect(() => {
@@ -113,8 +85,8 @@ watchEffect(() => {
     table.setExpanded(expandedState.value);
   }
 
-  if (view.sortBy) {
-    sortBy.value = [view.sortBy];
+  if (view) {
+    sortBy.value = view.sortBy ? [view.sortBy] : undefined;
   }
 });
 
@@ -147,7 +119,7 @@ function toggleGroupExpansion(listGroup: Row<ListGroup>) {
     });
 }
 
-function handleUserSelection({ users, card }: { users: User[]; card: Card }) {
+function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
   emit('row:update:assignees', {
     users,
     card,
@@ -165,20 +137,6 @@ function handleUpdateDueDate({
     newDueDate,
     card,
   });
-}
-
-function handleCardMenuClick({
-  row,
-  isOpen,
-}: {
-  row: Row<Card>;
-  isOpen: boolean;
-}) {
-  if (isOpen) {
-    cardMenuOpen.value = row;
-  } else {
-    cardMenuOpen.value = null;
-  }
 }
 
 function handleDeleteCard(card: Card) {
@@ -220,11 +178,9 @@ function handleUpdateCardStage({
                   v-bind="headerProps"
                   class="table-header-cell py-1 px-4 text-caption user-select-none d-flex align-center text-truncate"
                   rounded="0"
-                  link
                   color="accent"
                   :width="header.getSize()"
-                  height="28"
-                  :style="`${noHeaders ? 'height: 0px !important;' : ''}`"
+                  :height="noHeaders ? 0 : 28"
                 >
                   <!-- Header Content -->
                   <FlexRender
@@ -284,7 +240,6 @@ function handleUpdateCardStage({
         >
           <suspense>
             <table-view-group
-              v-model:row:hovered="rowHovered"
               v-model:loading="isLoading"
               :list-group="listGroup"
               :list-stages="listStages ?? []"
@@ -292,91 +247,11 @@ function handleUpdateCardStage({
               :sort-by="sortBy"
               :table
               @toggle:group="toggleGroupExpansion"
-            >
-              <template #actions="{ row }">
-                <div class="d-flex flex-fill justify-end">
-                  <v-menu
-                    @update:model-value="
-                      (v) => handleCardMenuClick({ row, isOpen: v })
-                    "
-                  >
-                    <template #activator="{ props }">
-                      <base-icon-btn
-                        v-if="
-                          rowHovered?.original.id === row.original.id ||
-                          cardMenuOpen?.original.id === row.original.id
-                        "
-                        v-bind="props"
-                        icon="mdi-dots-vertical"
-                        @click.prevent
-                      />
-                    </template>
-                    <v-card class="border-thin">
-                      <v-list>
-                        <v-list-item
-                          class="text-error"
-                          @click="handleDeleteCard(row.original)"
-                        >
-                          <template #prepend>
-                            <v-icon icon="mdi-delete" />
-                          </template>
-                          <v-list-item-title>Delete</v-list-item-title>
-                        </v-list-item>
-                      </v-list>
-                    </v-card>
-                  </v-menu>
-                </div>
-              </template>
-              <template #title="{ row }">
-                <v-list-item-title class="text-body-2 px-2">
-                  <list-stage-selector
-                    :model-value="row.original.cardLists[0].listStage"
-                    theme="icon"
-                    rounded="circle"
-                    :list-stages="listStages ?? []"
-                    @update:modelValue="
-                (modelValue: ListStage) =>
-                  handleUpdateCardStage({
-                    cardId: row.original.id,
-                    cardListId: row.original.cardLists[0].id,
-                    listStageId: modelValue.id,
-                  })
-              "
-                    @click.prevent
-                  />
-                  <span class="line-height-1 ms-2">{{
-                    row.original.title
-                  }}</span>
-                </v-list-item-title>
-              </template>
-              <template #dueAt="{ row }">
-                <base-date-picker
-                  :model-value="row.original.dueAt"
-                  @update:model-value="(newValue: string) =>
-                  handleUpdateDueDate({
-                    card: row.original,
-                    newDueDate: newValue,
-                  })
-                "
-                  class="text-caption d-flex flex-fill justify-start rounded-0"
-                  label="No due date"
-                  @click.prevent
-                />
-              </template>
-              <template #users="{ row }">
-                <base-user-selector
-                  :model-value="row.original.users"
-                  :users
-                  fill
-                  @update:model-value="
-                  (users: User[]) => handleUserSelection({
-                    users, card: row.original
-                  })
-                "
-                  @click.stop
-                />
-              </template>
-            </table-view-group>
+              @row:delete="handleDeleteCard"
+              @row:update:stage="handleUpdateCardStage"
+              @row:update:due-date="handleUpdateDueDate"
+              @row:update:assignees="handleUpdateAssignees"
+            />
           </suspense>
         </template>
       </v-card>

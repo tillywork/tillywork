@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ListStage } from "./list.stage.entity";
-import { CreateListStageDto } from "../dto/create.list.stage.dto";
-import { UpdateListStageDto } from "../dto/update.list.stage.dto";
+import { CreateListStageDto } from "./dto/create.list.stage.dto";
+import { UpdateListStageDto } from "./dto/update.list.stage.dto";
 
 export type ListStageFindAllResult = {
     total: number;

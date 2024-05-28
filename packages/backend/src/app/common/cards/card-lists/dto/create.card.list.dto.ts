@@ -1,4 +1,4 @@
-import { IsNotEmpty } from "class-validator";
+import { IsNotEmpty, IsNumber } from "class-validator";
 
 export class CreateCardListDto {
     @IsNotEmpty()
@@ -7,4 +7,6 @@ export class CreateCardListDto {
     listId: number;
     @IsNotEmpty()
     listStageId: number;
+    @IsNumber()
+    order?: number;
 }

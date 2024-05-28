@@ -17,26 +17,36 @@ import { useDialog } from '@/composables/useDialog';
 import type { ProjectUser } from '@/components/common/projects/types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import type { Card } from '../../cards/types';
+import { FlexRender } from '@tanstack/vue-table';
+import draggable from 'vuedraggable';
+import type { User } from '@/components/common/users/types';
+import { useSnackbarStore } from '@/stores/snackbar';
 
-const emit = defineEmits(['load', 'toggle:group']);
-const slots = defineSlots();
+const emit = defineEmits([
+  'toggle:group',
+  'row:delete',
+  'row:update:stage',
+  'row:update:due-date',
+  'row:update:assignees',
+]);
 const props = defineProps<{
   listGroup: Row<ListGroup>;
-  sortBy: TableSortOption[];
+  sortBy?: TableSortOption[];
   listStages: ListStage[];
   projectUsers: ProjectUser[];
   table: Table<ListGroup>;
 }>();
-const rowHovered = defineModel('row:hovered');
+const rowMenuOpen = ref<Row<Card> | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
 
 const dialog = useDialog();
 const cardsService = useCardsService();
+const { showSnackbar } = useSnackbarStore();
 
 const groupCopy = ref(props.listGroup);
 const sortBy = computed(() => props.sortBy);
 const tableSortState = computed(() =>
-  sortBy.value.map((sortOption) => {
+  sortBy.value?.map((sortOption) => {
     return { id: sortOption.key, desc: sortOption.order === 'desc' };
   })
 );
@@ -47,6 +57,18 @@ const columns = computed(
 const groupHeight = computed(() => (cards.value.length ?? 0) * 33 + 33);
 const maxHeight = computed(() =>
   props.listGroup.original.name === 'Tasks' ? 'calc(100vh - 230px)' : 350
+);
+
+const isDraggingDisabled = computed(() => {
+  return (
+    ![ListGroupOptions.LIST_STAGE, ListGroupOptions.ALL].includes(
+      props.listGroup.original.type
+    ) || sortBy.value
+  );
+});
+
+const users = computed(() =>
+  props.projectUsers.map((projectUser) => projectUser.user)
 );
 
 const cards = ref<Card[]>(props.listGroup.original.cards?.cards ?? []);
@@ -60,6 +82,9 @@ const { fetchNextPage, isFetching, hasNextPage, refetch, data } =
     initialCards: groupCopy.value.original.cards,
     sortBy,
   });
+
+const { mutateAsync: updateCardList, isPending: isUpdatingCardList } =
+  cardsService.useUpdateCardListMutation();
 
 const groupTable = useVueTable({
   get data() {
@@ -77,12 +102,15 @@ const groupTable = useVueTable({
   },
 });
 
+const draggableCards = ref(groupTable.getCoreRowModel().rows);
+const isDragging = ref(false);
+
 async function handleGroupCardsLoad({
   done,
 }: {
   done: (status?: any) => void;
 }) {
-  if (!isFetching.value) {
+  if (!isFetching.value && !isDragging.value) {
     fetchNextPage();
 
     if (hasNextPage.value) {
@@ -106,14 +134,6 @@ function openCreateCardDialog(listGroup: ListGroup) {
       users: getCurrentAssignee(listGroup),
     },
   });
-}
-
-function handleHoverChange(row: Row<Card>, isHovering: boolean) {
-  if (isHovering) {
-    rowHovered.value = row;
-  } else {
-    rowHovered.value = undefined;
-  }
 }
 
 function getCurrentStage(group: ListGroup) {
@@ -140,10 +160,132 @@ function getCurrentAssignee(group: ListGroup) {
   return user ? [{ ...user }] : undefined;
 }
 
+function onDragMove() {
+  if (isDraggingDisabled.value) {
+    isDragging.value = false;
+    return false;
+  }
+}
+
+function onDragStart() {
+  isDragging.value = true;
+
+  if (isDraggingDisabled.value) {
+    showSnackbar({
+      message:
+        'Dragging cards is only enabled when sorting is disabled and when grouping by list stage.',
+      color: 'error',
+      timeout: 5000,
+    });
+  }
+}
+
+function onDragEnd(event: any) {
+  const { oldIndex, newIndex } = event;
+  isDragging.value = false;
+
+  if (oldIndex !== newIndex) {
+    const previousItem = draggableCards.value[newIndex - 1]?.original;
+    const currentItem = draggableCards.value[newIndex].original;
+    const nextItem = draggableCards.value[newIndex + 1]?.original;
+
+    const currentCardList = currentItem.cardLists.find(
+      (cl) => cl.listId === props.listGroup.original.listId
+    );
+
+    let newOrder: number;
+    if (!previousItem) {
+      newOrder = nextItem.cardLists[0].order / 2;
+    } else if (!nextItem) {
+      newOrder = previousItem.cardLists[0].order + 100;
+    } else {
+      newOrder =
+        (nextItem.cardLists[0].order + previousItem.cardLists[0].order) / 2;
+    }
+
+    newOrder = Math.round(newOrder);
+
+    updateCardList({
+      cardId: currentItem.id,
+      cardListId: currentCardList!.id,
+      updateCardListDto: {
+        order: newOrder,
+      },
+    }).catch(() => {
+      showSnackbar({
+        message: 'Something went wrong, please try again.',
+        color: 'error',
+        timeout: 5000,
+      });
+    });
+  }
+}
+
+function setDragItem(data: DataTransfer) {
+  const img = new Image();
+  img.src = 'https://en.wikipedia.org/wiki/File:1x1.png#/media/File:1x1.png';
+  data.setDragImage(img, 0, 0);
+}
+
+function handleCardMenuClick({
+  row,
+  isOpen,
+}: {
+  row: Row<Card>;
+  isOpen: boolean;
+}) {
+  if (isOpen) {
+    rowMenuOpen.value = row;
+  } else {
+    rowMenuOpen.value = null;
+  }
+}
+
+function handleDeleteCard(card: Card) {
+  emit('row:delete', card);
+}
+
+function handleUpdateCardStage({
+  cardId,
+  cardListId,
+  listStageId,
+}: {
+  cardId: number;
+  cardListId: number;
+  listStageId: number;
+}) {
+  emit('row:update:stage', {
+    cardId,
+    cardListId,
+    listStageId,
+  });
+}
+
+function handleUpdateDueDate({
+  newDueDate,
+  card,
+}: {
+  newDueDate: string;
+  card: Card;
+}) {
+  emit('row:update:due-date', {
+    newDueDate,
+    card,
+  });
+}
+
+function handleUserSelection({ users, card }: { users: User[]; card: Card }) {
+  emit('row:update:assignees', {
+    users,
+    card,
+  });
+}
+
 watch(data, (v) => {
   if (v) {
     cards.value = v?.pages.map((page) => page.cards).flat() ?? [];
     total.value = v?.pages[0].total ?? 0;
+    draggableCards.value = groupTable.getCoreRowModel().rows;
   }
 });
 
@@ -155,7 +297,7 @@ watch(
 );
 
 watchEffect(() => {
-  if (isFetching.value) {
+  if (isFetching.value || isUpdatingCardList.value) {
     isGroupCardsLoading.value = true;
   } else {
     isGroupCardsLoading.value = false;
@@ -235,60 +377,171 @@ watchEffect(() => {
       >
         <template #empty></template>
         <template #loading></template>
-        <template
-          v-for="row in groupTable.getCoreRowModel().rows"
-          :key="row.id"
+        <draggable
+          v-model="draggableCards"
+          :move="onDragMove"
+          @start="onDragStart"
+          @end="onDragEnd"
+          :setData="setDragItem"
+          item-key="id"
+          animation="100"
+          ghost-class="v-list-item--active"
         >
-          <v-list-item
-            class="pa-0"
-            rounded="0"
-            height="33"
-            :to="`/pm/card/${row.original.id}`"
-          >
-            <v-hover
-              @update:modelValue="
-                (modelValue) => handleHoverChange(row, modelValue)
-              "
-              #="{ isHovering: isRowHovering, props: rowProps }"
+          <template #item="{ element: row }">
+            <v-list-item
+              class="pa-0"
+              rounded="0"
+              height="33"
+              :to="`/pm/card/${row.original.id}`"
             >
-              <v-card
-                v-bind="rowProps"
-                link
-                height="33"
-                class="table-row d-flex align-center text-body-2"
-                rounded="0"
+              <v-hover
+                #="{ isHovering: isRowHovering, props: rowProps }"
+                :disabled="isDragging"
               >
                 <v-card
-                  v-for="cell in row.getVisibleCells()"
-                  :key="cell.id"
-                  :width="cell.column.getSize()"
-                  class="table-cell d-flex align-center fill-height"
-                  rounded="0"
                   color="transparent"
+                  v-bind="rowProps"
+                  height="33"
+                  class="table-row d-flex align-center text-body-2"
+                  rounded="0"
                   link
                 >
                   <template
-                    v-if="
-                      cell.column.columnDef.id &&
-                      !!slots[cell.column.columnDef.id]
-                    "
+                    v-for="cell in row.getVisibleCells()"
+                    :key="cell.id"
                   >
-                    <slot
-                      :name="cell.column.columnDef.id"
-                      v-bind="cell.getContext()"
-                    ></slot>
-                  </template>
-                  <template v-else>
-                    <FlexRender
-                      :render="cell.column.columnDef.cell"
-                      :props="cell.getContext()"
-                    />
+                    <template v-if="cell.column.columnDef.id === 'actions'">
+                      <v-card
+                        :width="cell.column.getSize()"
+                        class="table-cell d-flex align-center fill-height"
+                        rounded="0"
+                        color="transparent"
+                      >
+                        <div
+                          class="d-flex flex-fill justify-end ga-1"
+                          v-if="isRowHovering || rowMenuOpen?.id === row.id"
+                        >
+                          <v-menu
+                            @update:model-value="
+                              (v) => handleCardMenuClick({ row, isOpen: v })
+                            "
+                          >
+                            <template #activator="{ props }">
+                              <base-icon-btn
+                                v-bind="props"
+                                icon="mdi-dots-vertical"
+                                @click.prevent
+                              />
+                            </template>
+                            <v-card class="border-thin">
+                              <v-list>
+                                <v-list-item
+                                  class="text-error"
+                                  @click="handleDeleteCard(row.original)"
+                                >
+                                  <template #prepend>
+                                    <v-icon icon="mdi-delete" />
+                                  </template>
+                                  <v-list-item-title>Delete</v-list-item-title>
+                                </v-list-item>
+                              </v-list>
+                            </v-card>
+                          </v-menu>
+                          <base-icon-btn
+                            class="cursor-grab"
+                            icon="mdi-cursor-move"
+                            variant="text"
+                          />
+                        </div>
+                      </v-card>
+                    </template>
+                    <template v-else-if="cell.column.columnDef.id === 'title'">
+                      <v-card
+                        :width="cell.column.getSize()"
+                        class="d-flex align-center fill-height text-body-2 px-2 table-cell"
+                        rounded="0"
+                        color="transparent"
+                      >
+                        <list-stage-selector
+                          :model-value="row.original.cardLists[0].listStage"
+                          theme="icon"
+                          rounded="circle"
+                          :list-stages="listStages ?? []"
+                          @update:modelValue="
+                        (modelValue: ListStage) =>
+                        handleUpdateCardStage({
+                            cardId: row.original.id,
+                            cardListId: row.original.cardLists[0].id,
+                            listStageId: modelValue.id,
+                        })
+                    "
+                          @click.prevent
+                        />
+                        <span class="line-height-1 ms-2">
+                          {{ row.original.title }}
+                        </span>
+                      </v-card>
+                    </template>
+                    <template v-else-if="cell.column.columnDef.id === 'dueAt'">
+                      <v-card
+                        :width="cell.column.getSize()"
+                        class="table-cell d-flex align-center fill-height"
+                        rounded="0"
+                        color="transparent"
+                        link
+                      >
+                        <base-date-picker
+                          :model-value="row.original.dueAt"
+                          @update:model-value="(newValue: string) => handleUpdateDueDate({
+                            card: row.original,
+                            newDueDate: newValue,
+                          })"
+                          class="text-caption d-flex flex-fill justify-start rounded-0"
+                          label="No due date"
+                          @click.prevent
+                        />
+                      </v-card>
+                    </template>
+                    <template v-else-if="cell.column.columnDef.id === 'users'">
+                      <v-card
+                        :width="cell.column.getSize()"
+                        class="table-cell d-flex align-center fill-height"
+                        rounded="0"
+                        color="transparent"
+                        link
+                      >
+                        <base-user-selector
+                          :model-value="row.original.users"
+                          :users
+                          fill
+                          @update:model-value="
+                            (users: User[]) => handleUserSelection({
+                                users, card: row.original
+                            })
+                          "
+                          @click.stop
+                        />
+                      </v-card>
+                    </template>
+                    <template v-else>
+                      <v-card
+                        :width="cell.column.getSize()"
+                        class="table-cell d-flex align-center fill-height"
+                        rounded="0"
+                        color="transparent"
+                      >
+                        <FlexRender
+                          :render="cell.column.columnDef.cell"
+                          :props="cell.getContext()"
+                        />
+                      </v-card>
+                    </template>
                   </template>
                 </v-card>
-              </v-card>
-            </v-hover>
-          </v-list-item>
-        </template>
+              </v-hover>
+            </v-list-item>
+          </template>
+        </draggable>
       </v-infinite-scroll>
     </v-list>
   </template>
