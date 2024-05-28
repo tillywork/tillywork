@@ -49,8 +49,7 @@ const columns = ref<ColumnDef<ListGroup, any>[]>([
     id: 'actions',
     enableResizing: false,
     enableSorting: false,
-    size: 40,
-    maxSize: 50,
+    size: 80,
   },
   {
     id: 'title',
@@ -256,7 +255,6 @@ watch(
           :columns
           :view
           :groups="listGroups ?? []"
-          fixed-headers
           @row:delete="handleDeleteCard"
           @row:update:stage="handleUpdateCardStage"
           @row:update:due-date="handleUpdateDueDate"

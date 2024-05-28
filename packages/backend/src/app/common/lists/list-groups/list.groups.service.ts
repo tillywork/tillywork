@@ -7,12 +7,11 @@ import { ListStagesService } from "../list-stages/list.stages.service";
 import { UsersService } from "../../users/users.service";
 import { CardsService } from "../../cards/cards.service";
 import { FilterEntityTypes } from "../../filters/types";
-import { CreateListGroupDto } from "../dto/create.list.group.dto";
+import { CreateListGroupDto } from "./dto/create.list.group.dto";
 import { FiltersService } from "../../filters/filters.service";
 import { Filter } from "../../filters/filter.entity";
-import { UpdateListGroupDto } from "../dto/update.list.group.dto";
+import { UpdateListGroupDto } from "./dto/update.list.group.dto";
 import { ViewSortOption } from "../../views/types";
-import { CreateGroupDto } from "./dto/create.group.entity.dto";
 
 export type GenerateGroupsParams = {
     listId: number;
@@ -20,7 +19,7 @@ export type GenerateGroupsParams = {
     sortCardsBy: ViewSortOption[];
 };
 
-const DEFAULT_GROUP: CreateGroupDto = {
+const DEFAULT_GROUP: CreateListGroupDto = {
     name: "Tasks",
     type: ListGroupOptions.ALL,
 };
@@ -78,7 +77,7 @@ export class ListGroupsService {
     }: GenerateGroupsParams): Promise<ListGroup[]> {
         const existingGroups = await this.findAll({ listId, groupBy });
 
-        let cardGroups: CreateGroupDto[];
+        let cardGroups: CreateListGroupDto[];
 
         switch (groupBy) {
             case ListGroupOptions.LIST_STAGE:
@@ -156,11 +155,11 @@ export class ListGroupsService {
         listId,
     }: {
         listId: number;
-    }): Promise<CreateGroupDto[]> {
+    }): Promise<CreateListGroupDto[]> {
         const stages = await this.listStagesService.findAll({ listId });
 
         return stages.map((stage) => {
-            const group: CreateGroupDto = {
+            const group: CreateListGroupDto = {
                 entityId: stage.id,
                 entityType: ListGroupEntityTypes.LIST_STAGE,
                 type: ListGroupOptions.LIST_STAGE,
@@ -203,8 +202,8 @@ export class ListGroupsService {
             })
         ).users;
 
-        const groups: CreateGroupDto[] = users.map((user, index) => {
-            const group: CreateGroupDto = {
+        const groups: CreateListGroupDto[] = users.map((user, index) => {
+            const group: CreateListGroupDto = {
                 entityId: user.id,
                 entityType: ListGroupEntityTypes.USER,
                 type: ListGroupOptions.ASSIGNEES,
@@ -249,7 +248,7 @@ export class ListGroupsService {
     }
 
     async generateGroupsByDueDate() {
-        const groups: CreateGroupDto[] = [
+        const groups: CreateListGroupDto[] = [
             {
                 type: ListGroupOptions.DUE_DATE,
                 name: "Past Due",
@@ -334,12 +333,9 @@ export class ListGroupsService {
         group: ListGroup;
         sortCardsBy: ViewSortOption[];
     }) {
-        const sortBy =
-            sortCardsBy && sortCardsBy.length
-                ? sortCardsBy[0].key
-                : "createdAt";
-        const sortOrder =
-            sortCardsBy && sortCardsBy.length ? sortCardsBy[0].order : "ASC";
+        const sortBy = sortCardsBy[0]?.key;
+        const sortOrder = sortCardsBy[0]?.order;
+
         return this.cardsService.findAll({
             listId: group.listId,
             filters: group.filter,

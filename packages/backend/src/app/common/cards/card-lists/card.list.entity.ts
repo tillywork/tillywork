@@ -4,6 +4,8 @@ import {
     Column,
     ManyToOne,
     Relation,
+    CreateDateColumn,
+    UpdateDateColumn,
 } from "typeorm";
 import { Card } from "../card.entity";
 import { List } from "../../lists/list.entity";
@@ -31,4 +33,12 @@ export class CardList {
     list: Relation<List>;
     @Column({ type: "bigint", nullable: false })
     listId: number;
+
+    @Column({ type: "int", default: 100 })
+    order: number;
+
+    @CreateDateColumn({ type: "timestamp" })
+    createdAt: Date;
+    @UpdateDateColumn({ type: "timestamp" })
+    updatedAt: Date;
 }

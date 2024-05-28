@@ -1,6 +1,7 @@
 import { useHttp } from '@/composables/useHttp';
 import type {
   Card,
+  CardList,
   CreateCardDto,
 } from '@/components/project-management/cards/types';
 import type {
@@ -45,7 +46,7 @@ export const useCardsService = () => {
     limit = 10,
     sortBy = [
       {
-        key: 'createdAt',
+        key: 'cardLists.order',
         order: 'asc',
       },
     ],
@@ -186,6 +187,28 @@ export const useCardsService = () => {
     });
   }
 
+  async function updateCardList({
+    cardId,
+    cardListId,
+    updateCardListDto,
+  }: {
+    cardId: number;
+    cardListId: number;
+    updateCardListDto: Partial<CardList>;
+  }) {
+    return sendRequest(`/cards/${cardId}/lists/${cardListId}`, {
+      method: 'PUT',
+      data: updateCardListDto,
+    });
+  }
+
+  function useUpdateCardListMutation() {
+    return useMutation({
+      mutationFn: updateCardList,
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards'] }),
+    });
+  }
+
   return {
     updateCardListStage,
     useGetGroupCardsInfinite,
@@ -194,5 +217,6 @@ export const useCardsService = () => {
     useUpdateCardMutation,
     useGetCardQuery,
     useDeleteCardMutation,
+    useUpdateCardListMutation,
   };
 };

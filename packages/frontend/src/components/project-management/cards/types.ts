@@ -22,6 +22,7 @@ export interface CardList {
   list: List;
   listStageId: number;
   listStage: ListStage;
+  order: number;
 }
 
 export interface CreateCardDto {

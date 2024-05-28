@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Param, Put, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../../auth/guards/jwt.auth.guard";
 import { ViewSortOption } from "../../views/types";
-import { UpdateListGroupDto } from "../dto/update.list.group.dto";
+import { UpdateListGroupDto } from "./dto/update.list.group.dto";
 import { ListGroupOptions } from "../types";
 import { ListGroupsService } from "./list.groups.service";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
