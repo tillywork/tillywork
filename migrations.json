@@ -1,19 +1,12 @@
 {
   "migrations": [
     {
-      "version": "18.1.0-beta.3",
-      "description": "Moves affected.defaultBase to defaultBase in `nx.json`",
-      "implementation": "./src/migrations/update-17-2-0/move-default-base",
-      "package": "nx",
-      "name": "move-default-base-to-nx-json-root"
-    },
-    {
       "cli": "nx",
-      "version": "18.1.0-beta.3",
-      "description": "Update to Cypress ^13.6.6 if the workspace is using Cypress v13 to ensure workspaces don't use v13.6.5 which has an issue when verifying Cypress.",
-      "implementation": "./src/migrations/update-18-1-0/update-cypress-version-13-6-6",
-      "package": "@nx/cypress",
-      "name": "update-cypress-version-13-6-6"
+      "version": "19.1.0-beta.6",
+      "description": "Migrate no-extra-semi rules into user config, out of nx extendable configs",
+      "implementation": "./src/migrations/update-19-1-0-migrate-no-extra-semi/migrate-no-extra-semi",
+      "package": "@nx/eslint-plugin",
+      "name": "update-19-1-0-rename-no-extra-semi"
     }
   ]
 }
