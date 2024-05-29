@@ -120,7 +120,6 @@ export default {
       {
         title: 'Horizontal Rule',
         icon: 'mdi-minus',
-        shortcut: 'Undefined',
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).setHorizontalRule().run();
         },
