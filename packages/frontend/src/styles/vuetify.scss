@@ -49,3 +49,11 @@
 .v-infinite-scroll__side {
   padding: 0;
 }
+
+.v-card.table-cell:hover > .v-card__overlay{
+  opacity: 0;
+}
+
+.v-card.table-groups .v-btn:hover > .v-btn__overlay{
+  opacity: 0.15;
+}
