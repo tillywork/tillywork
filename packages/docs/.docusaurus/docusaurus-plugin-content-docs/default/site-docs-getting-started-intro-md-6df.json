@@ -1,0 +1,29 @@
+{
+  "id": "getting-started/intro",
+  "title": "What is tillywork?",
+  "description": "A high level overview of tillywork",
+  "source": "@site/docs/getting-started/intro.md",
+  "sourceDirName": "getting-started",
+  "slug": "/",
+  "permalink": "/",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/tillywork/tillywork/tree/main/packages/docs/docs/getting-started/intro.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1,
+    "slug": "/",
+    "description": "A high level overview of tillywork"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Getting Started",
+    "permalink": "/category/getting-started"
+  },
+  "next": {
+    "title": "Contribution",
+    "permalink": "/category/contribution"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "id": "contribution/overview",
+  "title": "Project Overview",
+  "description": "Understand the project stack and general structure",
+  "source": "@site/docs/contribution/overview.md",
+  "sourceDirName": "contribution",
+  "slug": "/contribution/overview",
+  "permalink": "/contribution/overview",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/tillywork/tillywork/tree/main/packages/docs/docs/contribution/overview.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1,
+    "description": "Understand the project stack and general structure"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Contribution",
+    "permalink": "/category/contribution"
+  },
+  "next": {
+    "title": "Frontend",
+    "permalink": "/category/frontend"
+  }
+}

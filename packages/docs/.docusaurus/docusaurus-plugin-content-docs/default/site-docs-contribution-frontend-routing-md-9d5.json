@@ -1,0 +1,28 @@
+{
+  "id": "contribution/frontend/routing",
+  "title": "Routing",
+  "description": "How do we manage routes",
+  "source": "@site/docs/contribution/frontend/routing.md",
+  "sourceDirName": "contribution/frontend",
+  "slug": "/contribution/frontend/routing",
+  "permalink": "/contribution/frontend/routing",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/tillywork/tillywork/tree/main/packages/docs/docs/contribution/frontend/routing.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3,
+    "description": "How do we manage routes"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Data Fetching",
+    "permalink": "/contribution/frontend/data"
+  },
+  "next": {
+    "title": "VS Code and Vue",
+    "permalink": "/contribution/frontend/devtools"
+  }
+}

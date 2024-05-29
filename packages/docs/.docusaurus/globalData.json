@@ -1,0 +1,73 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/",
+          "mainDocId": "getting-started/intro",
+          "docs": [
+            {
+              "id": "contribution/frontend/data",
+              "path": "/contribution/frontend/data",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "contribution/frontend/devtools",
+              "path": "/contribution/frontend/devtools",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "contribution/frontend/routing",
+              "path": "/contribution/frontend/routing",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "contribution/frontend/vuetify",
+              "path": "/contribution/frontend/vuetify",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "contribution/overview",
+              "path": "/contribution/overview",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "getting-started/intro",
+              "path": "/",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "/category/getting-started",
+              "path": "/category/getting-started",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "/category/contribution",
+              "path": "/category/contribution",
+              "sidebar": "tutorialSidebar"
+            },
+            {
+              "id": "/category/frontend",
+              "path": "/category/frontend",
+              "sidebar": "tutorialSidebar"
+            }
+          ],
+          "draftIds": [],
+          "sidebars": {
+            "tutorialSidebar": {
+              "link": {
+                "path": "/category/getting-started",
+                "label": "Getting Started"
+              }
+            }
+          }
+        }
+      ],
+      "breadcrumbs": true
+    }
+  }
+}

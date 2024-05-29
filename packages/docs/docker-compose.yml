@@ -1,9 +1,0 @@
-version: '3.8'
-
-services:
-  tillywork:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - '88:88'

@@ -1,0 +1,28 @@
+{
+  "id": "contribution/frontend/vuetify",
+  "title": "Vuetify",
+  "description": "What is Vuetify",
+  "source": "@site/docs/contribution/frontend/vuetify.md",
+  "sourceDirName": "contribution/frontend",
+  "slug": "/contribution/frontend/vuetify",
+  "permalink": "/contribution/frontend/vuetify",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/tillywork/tillywork/tree/main/packages/docs/docs/contribution/frontend/vuetify.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1,
+    "description": "What is Vuetify"
+  },
+  "sidebar": "tutorialSidebar",
+  "previous": {
+    "title": "Frontend",
+    "permalink": "/category/frontend"
+  },
+  "next": {
+    "title": "Data Fetching",
+    "permalink": "/contribution/frontend/data"
+  }
+}
