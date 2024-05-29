@@ -3,13 +3,8 @@ import { Editor, VueRenderer, type Range } from '@tiptap/vue-3';
 import tippy from 'tippy.js';
 import BaseEditorCommands from './BaseEditorCommands.vue';
 
-function getLeaderKey(): string {
-  return navigator.userAgent.includes('Mac OS') ? 'Cmd' : 'Ctrl';
-}
-
-function getAlternativeKey(): string {
-  return navigator.userAgent.includes('Mac OS') ? 'Option' : 'Alt';
-}
+const leaderKey = navigator.userAgent.includes('Mac OS') ? 'Cmd' : 'Ctrl';
+const alternateKey = navigator.userAgent.includes('Mac OS') ? 'Option' : 'Alt';
 
 export default {
   items: ({ query }: { query: string }) => {
@@ -17,7 +12,7 @@ export default {
       {
         title: 'Heading 1',
         icon: 'mdi-format-header-1',
-        shortcut: `${getLeaderKey()} + ${getAlternativeKey()} + 1`,
+        shortcut: `${leaderKey} + ${alternateKey} + 1`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor
             .chain()
@@ -30,7 +25,7 @@ export default {
       {
         title: 'Heading 2',
         icon: 'mdi-format-header-2',
-        shortcut: `${getLeaderKey()} + ${getAlternativeKey()} + 2`,
+        shortcut: `${leaderKey} + ${alternateKey} + 2`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor
             .chain()
@@ -43,7 +38,7 @@ export default {
       {
         title: 'Heading 3',
         icon: 'mdi-format-header-3',
-        shortcut: `${getLeaderKey()} + ${getAlternativeKey()} + 3`,
+        shortcut: `${leaderKey} + ${alternateKey} + 3`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor
             .chain()
@@ -56,7 +51,7 @@ export default {
       {
         title: 'Bold',
         icon: 'mdi-format-bold',
-        shortcut: `${getLeaderKey()} + B`,
+        shortcut: `${leaderKey} + B`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).setBold().run();
         },
@@ -64,7 +59,7 @@ export default {
       {
         title: 'Italic',
         icon: 'mdi-format-italic',
-        shortcut: `${getLeaderKey()} + I`,
+        shortcut: `${leaderKey} + I`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).setItalic().run();
         },
@@ -72,7 +67,7 @@ export default {
       {
         title: 'Underline',
         icon: 'mdi-format-underline',
-        shortcut: `${getLeaderKey()} + U`,
+        shortcut: `${leaderKey} + U`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).setUnderline().run();
         },
@@ -80,7 +75,7 @@ export default {
       {
         title: 'Strike',
         icon: 'mdi-format-strikethrough',
-        shortcut: `${getLeaderKey()} + Shift X`,
+        shortcut: `${leaderKey} + Shift X`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).setStrike().run();
         },
@@ -88,7 +83,7 @@ export default {
       {
         title: 'Blockquote',
         icon: 'mdi-format-quote-open',
-        shortcut: `${getLeaderKey()} + Shift B`,
+        shortcut: `${leaderKey} + Shift B`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).setBlockquote().run();
         },
@@ -96,7 +91,7 @@ export default {
       {
         title: 'Bullet List',
         icon: 'mdi-format-list-bulleted',
-        shortcut: `${getLeaderKey()} + Shift 8`,
+        shortcut: `${leaderKey} + Shift 8`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).toggleBulletList().run();
         },
@@ -104,7 +99,7 @@ export default {
       {
         title: 'Ordered List',
         icon: 'mdi-format-list-numbered',
-        shortcut: `${getLeaderKey()} + Shift 7`,
+        shortcut: `${leaderKey} + Shift 7`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).toggleOrderedList().run();
         },
@@ -112,7 +107,7 @@ export default {
       {
         title: 'Code',
         icon: 'mdi-code-tags',
-        shortcut: `${getLeaderKey()} + E`,
+        shortcut: `${leaderKey} + E`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).setCode().run();
         },
@@ -120,7 +115,7 @@ export default {
       {
         title: 'Code Block',
         icon: 'mdi-code-brackets',
-        shortcut: `${getLeaderKey()} + ${getAlternativeKey()} + C`,
+        shortcut: `${leaderKey} + ${alternateKey} + C`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).setCodeBlock().run();
         },
