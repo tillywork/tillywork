@@ -33,9 +33,6 @@ COPY --from=build /app/dist/packages/backend ./dist/backend
 # Copy frontend build
 COPY --from=build /app/dist/packages/frontend /usr/share/nginx/html
 
-# Copy docs build
-COPY --from=build /app/packages/docs/build /usr/share/nginx/html/docs
-
 # Copy Nginx configuration
 COPY nginx/frontend.conf /etc/nginx/conf.d/default.conf
 

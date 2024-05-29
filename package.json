@@ -6,7 +6,7 @@
     "dev": "nx run-many -t serve -p frontend backend",
     "lint": "nx run-many -t lint -p frontend backend",
     "format": "nx run-many -t format -p frontend backend",
-    "build": "nx run-many -t build -p frontend backend docs -c production",
+    "build": "nx run-many -t build -p frontend backend -c production",
     "swagger": "nx run backend:metadata"
   },
   "private": true,
