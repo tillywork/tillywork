@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { VCard, VList } from 'vuetify/components';
+import type { VList } from 'vuetify/components';
 
 export default {
   props: {
@@ -119,6 +119,9 @@ export default {
             <v-list-item-title class="text-body-2">
               {{ item.title }}
             </v-list-item-title>
+            <v-list-item-subtitle>
+              {{ item.shortcut }}
+            </v-list-item-subtitle>
           </v-list-item>
         </template>
       </template>
