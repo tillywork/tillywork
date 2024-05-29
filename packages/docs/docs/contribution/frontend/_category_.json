@@ -1,0 +1,8 @@
+{
+    "label": "Frontend",
+    "position": 2,
+    "link": {
+        "type": "generated-index",
+        "description": "There are a couple of topics to be aware of when dealing with our Vue 3 app."
+    }
+}
