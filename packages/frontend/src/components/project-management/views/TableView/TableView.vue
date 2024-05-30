@@ -7,8 +7,7 @@ import {
   type Row,
   type Column,
 } from '@tanstack/vue-table';
-import { type TableSortOption } from './types';
-import type { View } from '../types';
+import type { View, TableSortOption } from '../types';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import type { Card } from '../../cards/types';
 import { type ListGroup } from '../../lists/types';
@@ -35,6 +34,7 @@ const emit = defineEmits([
   'row:update:stage',
   'row:update:due-date',
   'row:update:assignees',
+  'row:update:order',
 ]);
 
 const sortBy = ref<TableSortOption[] | undefined>(
@@ -143,20 +143,21 @@ function handleDeleteCard(card: Card) {
   emit('row:delete', card);
 }
 
-function handleUpdateCardStage({
-  cardId,
-  cardListId,
-  listStageId,
-}: {
+function handleUpdateCardStage(data: {
   cardId: number;
   cardListId: number;
   listStageId: number;
+  order?: number;
 }) {
-  emit('row:update:stage', {
-    cardId,
-    cardListId,
-    listStageId,
-  });
+  emit('row:update:stage', data);
+}
+
+function handleUpdateCardOrder(data: {
+  currentCard: Card;
+  previousCard?: Card;
+  nextCard?: Card;
+}) {
+  emit('row:update:order', data);
 }
 </script>
 
@@ -238,21 +239,20 @@ function handleUpdateCardStage({
             listGroup.subRows.length
           "
         >
-          <suspense>
-            <table-view-group
-              v-model:loading="isLoading"
-              :list-group="listGroup"
-              :list-stages="listStages ?? []"
-              :project-users="projectUsers ?? []"
-              :sort-by="sortBy"
-              :table
-              @toggle:group="toggleGroupExpansion"
-              @row:delete="handleDeleteCard"
-              @row:update:stage="handleUpdateCardStage"
-              @row:update:due-date="handleUpdateDueDate"
-              @row:update:assignees="handleUpdateAssignees"
-            />
-          </suspense>
+          <table-view-group
+            v-model:loading="isLoading"
+            :list-group="listGroup"
+            :list-stages="listStages ?? []"
+            :project-users="projectUsers ?? []"
+            :sort-by="sortBy"
+            :table
+            @toggle:group="toggleGroupExpansion"
+            @row:delete="handleDeleteCard"
+            @row:update:stage="handleUpdateCardStage"
+            @row:update:due-date="handleUpdateDueDate"
+            @row:update:assignees="handleUpdateAssignees"
+            @row:update:order="handleUpdateCardOrder"
+          />
         </template>
       </v-card>
     </div>

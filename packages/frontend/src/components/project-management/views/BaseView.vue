@@ -7,7 +7,7 @@ import { type ColumnDef } from '@tanstack/vue-table';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
-import { type TableSortOption } from './TableView/types';
+import { type TableSortOption } from './types';
 import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { ViewTypes, type View } from './types';
@@ -15,6 +15,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { useCardsService } from '@/composables/services/useCardsService';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
+import BoardView from './BoardView/BoardView.vue';
 
 const props = defineProps<{
   view: View;
@@ -38,7 +39,6 @@ const isPageLoading = computed(() => {
     updateViewMutation.isPending.value ||
     isFetchingGroups.value ||
     isUpdatingCard.value ||
-    isUpdatingStage.value ||
     isDeletingCard.value ||
     isViewLoading.value
   );
@@ -85,10 +85,10 @@ const {
 
 const { mutateAsync: updateCard, isPending: isUpdatingCard } =
   cardsService.useUpdateCardMutation();
-const { mutateAsync: updateCardListStage, isPending: isUpdatingStage } =
-  cardsService.useUpdateCardListStageMutation();
 const { mutateAsync: deleteCard, isPending: isDeletingCard } =
   cardsService.useDeleteCardMutation();
+const { mutateAsync: updateCardList } =
+  cardsService.useUpdateCardListMutation();
 
 function handleGroupBySelection(option: ListGroupOptions) {
   updateViewMutation.mutateAsync({
@@ -146,12 +146,21 @@ function handleUpdateCardStage({
   cardId,
   cardListId,
   listStageId,
+  order,
 }: {
   cardId: number;
   cardListId: number;
   listStageId: number;
+  order?: number;
 }) {
-  updateCardListStage({ cardId, cardListId, listStageId })
+  updateCardList({
+    cardId,
+    cardListId,
+    updateCardListDto: {
+      listStageId,
+      order,
+    },
+  })
     .then(() => {
       queryClient.invalidateQueries({
         queryKey: ['listGroups', { listId: props.list.id }],
@@ -187,6 +196,35 @@ function handleDeleteCard(card: Card) {
       onCancel: () => dialog.closeDialog(),
       isLoading: isDeletingCard,
     },
+  });
+}
+
+function handleUpdateCardOrder({
+  currentCard,
+  previousCard,
+  nextCard,
+}: {
+  currentCard: Card;
+  previousCard?: Card;
+  nextCard?: Card;
+}) {
+  const newOrder = cardsService.calculateCardOrder({
+    previousCard,
+    nextCard,
+  });
+
+  updateCardList({
+    cardId: currentCard.id,
+    cardListId: currentCard.cardLists[0].id,
+    updateCardListDto: {
+      order: newOrder,
+    },
+  }).catch(() => {
+    showSnackbar({
+      message: 'Something went wrong, please try again.',
+      color: 'error',
+      timeout: 5000,
+    });
   });
 }
 
@@ -259,8 +297,20 @@ watch(
           @row:update:stage="handleUpdateCardStage"
           @row:update:due-date="handleUpdateDueDate"
           @row:update:assignees="handleUpdateAssignees"
+          @row:update:order="handleUpdateCardOrder"
         >
         </table-view>
+      </template>
+      <template v-else-if="viewCopy.type === ViewTypes.BOARD">
+        <board-view
+          :view
+          :list-groups="listGroups ?? []"
+          @card:delete="handleDeleteCard"
+          @card:update:assignees="handleUpdateAssignees"
+          @card:update:due-date="handleUpdateDueDate"
+          @card:update:stage="handleUpdateCardStage"
+          @card:update:order="handleUpdateCardOrder"
+        />
       </template>
       <template v-else>
         <span class="text-body-2 text-error">Error: Unknown view type</span>

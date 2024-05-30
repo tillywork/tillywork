@@ -83,6 +83,14 @@ export class CardListsService {
     ): Promise<CardList> {
         const cardList = await this.findOne(id);
         this.cardListsRepository.merge(cardList, updateCardListDto);
+
+        // If stage was changed, and order was not updated, move card to bottom of list
+        if (updateCardListDto.listStageId && !updateCardListDto.order) {
+            cardList.order = await this.getNewCardOrder(
+                updateCardListDto.listStageId
+            );
+        }
+
         return this.cardListsRepository.save(cardList);
     }
 

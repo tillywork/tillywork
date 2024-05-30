@@ -3,13 +3,16 @@ import BaseListViewTabs from './BaseListViewTabs.vue';
 import BaseView from '../views/BaseView.vue';
 import type { List } from './types';
 import type { View } from '../views/types';
+import { useViewsService } from '@/composables/services/useViewsService';
 
 const props = defineProps<{
   list: List;
 }>();
 
-const views = computed(() => props.list.views);
-const view = ref<View>(views.value[0]);
+const { useGetViewsQuery } = useViewsService();
+
+const { data: views } = useGetViewsQuery({ listId: props.list.id });
+const view = ref<View>();
 </script>
 
 <template>
@@ -25,7 +28,7 @@ const view = ref<View>(views.value[0]);
           />
           <p class="text-h5 ms-2 mt-1">{{ list.name }}</p>
         </div>
-        <base-list-view-tabs :list :views v-model="view" />
+        <base-list-view-tabs :list :views="views" v-model="view" v-if="views" />
       </div>
     </div>
     <v-divider />

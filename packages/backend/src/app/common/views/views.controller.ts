@@ -7,8 +7,9 @@ import {
     Delete,
     Put,
     UseGuards,
+    Query,
 } from "@nestjs/common";
-import { ViewFindAllResult, ViewsService } from "./views.service";
+import { ViewsService } from "./views.service";
 import { View } from "./view.entity";
 import { CreateViewDto } from "./dto/create.view.dto";
 import { UpdateViewDto } from "./dto/update.view.dto";
@@ -26,8 +27,8 @@ export class ViewsController {
     constructor(private readonly viewsService: ViewsService) {}
 
     @Get()
-    findAll(): Promise<ViewFindAllResult> {
-        return this.viewsService.findAll();
+    findAll(@Query("listId") listId: number): Promise<View[]> {
+        return this.viewsService.findAll({ listId });
     }
 
     @Get(":id")

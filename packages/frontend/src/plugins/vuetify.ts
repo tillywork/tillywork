@@ -66,7 +66,6 @@ const vuetify = createVuetify({
       density: 'compact',
       slim: true,
       nav: true,
-      class: 'bg-transparent',
     },
     VMenu: {
       transition: 'none',
@@ -75,6 +74,18 @@ const vuetify = createVuetify({
     },
     VIcon: {
       size: 'small',
+    },
+    VSelect: {
+      VList: {
+        lines: 'one',
+        nav: false,
+      },
+    },
+    VAutocomplete: {
+      VList: {
+        lines: 'one',
+        nav: false,
+      },
     },
   },
 });
