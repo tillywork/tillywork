@@ -37,8 +37,6 @@ const list = computed(() => {
   return list;
 });
 
-console.log(dialog.data.users);
-
 const createCardMutation = cardsService.useCreateCardMutation();
 const createCardDto = ref<CreateCardDto>({
   title: '',
