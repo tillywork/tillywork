@@ -15,12 +15,19 @@ export const useProjectUsersService = () => {
     });
   }
 
-  function useProjectUsersQuery({ projectId }: { projectId: number }) {
+  function useProjectUsersQuery({
+    projectId,
+    select,
+  }: {
+    projectId: number;
+    select?: (data: ProjectUser[]) => any[];
+  }) {
     return useQuery({
       queryKey: ['users', { projectId: projectId }],
       queryFn: () => getProjectUsers({ projectId }),
       refetchOnWindowFocus: false,
       staleTime: 5 * 60 * 1000,
+      select,
     });
   }
 

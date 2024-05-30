@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { type TableSortOption } from './types';
-import type { View } from '../types';
+import type { View, TableSortOption } from '../types';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import type { Card } from '../../cards/types';
 import { type ListGroup } from '../../lists/types';

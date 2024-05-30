@@ -7,7 +7,7 @@ import type {
 import type {
   QueryFilter,
   TableSortOption,
-} from '@/components/project-management/views/TableView/types';
+} from '@/components/project-management/views/types';
 import {
   useInfiniteQuery,
   useMutation,

@@ -7,8 +7,7 @@ import {
   type Row,
   type Column,
 } from '@tanstack/vue-table';
-import { type TableSortOption } from './types';
-import type { View } from '../types';
+import type { View, TableSortOption } from '../types';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import type { Card } from '../../cards/types';
 import { type ListGroup } from '../../lists/types';

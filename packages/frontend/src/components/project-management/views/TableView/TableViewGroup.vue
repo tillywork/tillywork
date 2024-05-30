@@ -12,7 +12,7 @@ import {
   type ListStage,
 } from '../../lists/types';
 import { useCardsService } from '@/composables/services/useCardsService';
-import type { TableSortOption } from './types';
+import type { TableSortOption } from '../types';
 import { useDialog } from '@/composables/useDialog';
 import type { ProjectUser } from '@/components/common/projects/types';
 import { DIALOGS } from '@/components/common/dialogs/types';
@@ -84,9 +84,6 @@ const { fetchNextPage, isFetching, hasNextPage, refetch, data } =
     sortBy,
   });
 
-const { mutateAsync: updateCardList, isPending: isUpdatingCardList } =
-  cardsService.useUpdateCardListMutation();
-
 const groupTable = useVueTable({
   get data() {
     return cards.value;
@@ -150,15 +147,15 @@ function getCurrentStage(group: ListGroup) {
 }
 
 function getCurrentAssignee(group: ListGroup) {
-  let user: ProjectUser | undefined;
+  let user: User | undefined;
 
   if (group.type === ListGroupOptions.ASSIGNEES) {
     user = props.projectUsers.find((user: ProjectUser) => {
       return user.user.id == group.entityId;
-    });
+    })?.user;
   }
 
-  return user ? [{ ...user }] : undefined;
+  return user ? [user] : undefined;
 }
 
 function onDragMove() {
@@ -291,7 +288,7 @@ watch(
 );
 
 watchEffect(() => {
-  if (isFetching.value || isUpdatingCardList.value) {
+  if (isFetching.value) {
     isGroupCardsLoading.value = true;
   } else {
     isGroupCardsLoading.value = false;

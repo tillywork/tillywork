@@ -20,8 +20,9 @@ const projectUsersService = useProjectUsersService();
 const createForm = ref<VForm>();
 const isCreatingMore = ref(false);
 
-const usersQuery = projectUsersService.useProjectUsersQuery({
+const { data: users } = projectUsersService.useProjectUsersQuery({
   projectId: authStore.project!.id,
+  select: (data) => data.map((pu) => pu.user),
 });
 
 const list = computed(() => {
@@ -36,9 +37,7 @@ const list = computed(() => {
   return list;
 });
 
-const users = computed(
-  () => usersQuery.data.value?.map((projectUser) => projectUser.user) ?? []
-);
+console.log(dialog.data.users);
 
 const createCardMutation = cardsService.useCreateCardMutation();
 const createCardDto = ref<CreateCardDto>({
