@@ -1,16 +1,20 @@
 <script setup lang="ts">
+import { useDialog } from '@/composables/useDialog';
 import { ViewTypes, type View } from '../views/types';
+import type { List } from './types';
+import { DIALOGS } from '@/components/common/dialogs/types';
 
-const router = useRouter();
+const dialog = useDialog();
 const props = defineProps<{
   views: View[];
+  list: List;
 }>();
-const selectedTab = defineModel<number>();
+
+const selectedView = defineModel<View>();
 const freezeHoverViewId = ref<number>();
 
-function handleTabSelection(tab: View) {
-  selectedTab.value = tab.id;
-  router.replace(`/pm/list/${tab.listId}/view/${tab.id}`);
+function handleTabSelection(view: View) {
+  selectedView.value = view;
 }
 
 function getViewIconByType(type: ViewTypes) {
@@ -24,11 +28,14 @@ function getViewIconByType(type: ViewTypes) {
   }
 }
 
-onMounted(() => {
-  if (props.views && props.views.length && !selectedTab.value) {
-    handleTabSelection(props.views[0]);
-  }
-});
+function openCreateViewDialog() {
+  dialog.openDialog({
+    dialog: DIALOGS.CREATE_VIEW,
+    data: {
+      list: props.list,
+    },
+  });
+}
 </script>
 
 <template>
@@ -43,20 +50,20 @@ onMounted(() => {
           color="default"
           @click="handleTabSelection(view)"
           size="small"
-          :class="selectedTab === view.id ? 'border-b-md border-b-primary' : ''"
+          :class="
+            selectedView?.id === view.id ? 'border-b-md border-b-primary' : ''
+          "
         >
           <template #prepend>
             <v-icon :icon="getViewIconByType(view.type)" />
           </template>
           {{ view.name }}
-          <template
-            #append
-            v-if="(false && isHovering) || freezeHoverViewId === view.id"
-          >
+          <template #append v-if="isHovering || freezeHoverViewId === view.id">
             <v-menu
               @update:model-value="
                 (v) => {
                   if (!v) freezeHoverViewId = undefined;
+                  else freezeHoverViewId = view.id;
                 }
               "
             >
@@ -66,7 +73,6 @@ onMounted(() => {
                   icon="mdi-dots-vertical"
                   density="compact"
                   class="ms-2"
-                  @click="freezeHoverViewId = view.id"
                 />
               </template>
               <v-card class="border-thin">
@@ -89,7 +95,7 @@ onMounted(() => {
       variant="text"
       size="small"
       rounded="0"
-      v-tooltip:end="'Coming Soon'"
+      @click="openCreateViewDialog"
     >
       <template #prepend>
         <v-icon icon="mdi-plus" />
@@ -98,9 +104,3 @@ onMounted(() => {
     </v-btn>
   </div>
 </template>
-
-<style lang="scss">
-.border-b-primary {
-  border-block-end-color: rgba(var(--v-theme-primary)) !important;
-}
-</style>

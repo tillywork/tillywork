@@ -58,11 +58,18 @@ export const useViewsService = () => {
     });
   }
 
-  function useGetViewQuery({ id }: { id: number }) {
+  function useGetViewQuery({
+    id,
+    enabled,
+  }: {
+    id: Ref<number>;
+    enabled?: Ref<boolean>;
+  }) {
     return useQuery({
-      queryKey: ['view', id],
-      queryFn: () => getView(id),
+      queryKey: ['view', id.value],
+      queryFn: () => getView(id.value),
       staleTime: 1 * 60 * 1000,
+      enabled,
     });
   }
 

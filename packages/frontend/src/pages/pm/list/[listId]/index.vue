@@ -10,10 +10,10 @@ definePage({
 
 const route = useRoute('/pm/list/[listId]/');
 const router = useRouter();
+
+const listId = computed(() => +route.params.listId);
 const listsService = useListsService();
-const { data: list, error } = listsService.useGetListQuery(
-  +route.params.listId
-);
+const { data: list, error, refetch } = listsService.useGetListQuery(listId);
 
 watch(error, (v: any) => {
   if (v.response.status === 404) {
@@ -32,6 +32,8 @@ watch(
     immediate: true,
   }
 );
+
+watch(listId, () => refetch());
 </script>
 
 <template>

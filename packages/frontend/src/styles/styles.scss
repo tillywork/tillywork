@@ -66,3 +66,7 @@ textarea {
   resize: none !important;
   outline: none !important;
 }
+
+.border-b-primary {
+  border-block-end-color: rgba(var(--v-theme-primary)) !important;
+}
