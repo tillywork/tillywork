@@ -58,10 +58,10 @@ export const useListsService = () => {
     });
   }
 
-  function useGetListQuery(id: number) {
+  function useGetListQuery(id: Ref<number>) {
     return useQuery({
-      queryKey: ['list', id],
-      queryFn: () => getList(id),
+      queryKey: ['list', id.value],
+      queryFn: () => getList(id.value),
       retry: false,
       staleTime: 1 * 60 * 1000,
     });

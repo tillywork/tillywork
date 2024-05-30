@@ -6,10 +6,10 @@ import type { View } from '../views/types';
 
 const props = defineProps<{
   list: List;
-  view?: View;
 }>();
 
 const views = computed(() => props.list.views);
+const view = ref<View>(views.value[0]);
 </script>
 
 <template>
@@ -25,7 +25,7 @@ const views = computed(() => props.list.views);
           />
           <p class="text-h5 ms-2 mt-1">{{ list.name }}</p>
         </div>
-        <base-list-view-tabs :views="views" />
+        <base-list-view-tabs :list :views v-model="view" />
       </div>
     </div>
     <v-divider />
