@@ -2,46 +2,43 @@
 import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
+import validationUtils from '@/utils/validation';
 import type { VForm } from 'vuetify/components';
 
 const logo = useLogo();
 const loginForm = ref<VForm>();
 const email = ref('');
 const password = ref('');
-const errorMessage = ref<string | null>(null);
-const rules = {
-  required: (value: any) => !!value || 'This field is required',
-  email: (value: any) => /.+@.+\..+/.test(value) || 'Email must be valid',
-};
+const errorMessage = ref<string[] | null>(null);
+const { rules } = validationUtils;
 const loading = ref(false);
 const route = useRoute('/login');
 
 const login = async () => {
-  if (loginForm.value?.isValid) {
+  errorMessage.value = null;
+
+  const isValid = await loginForm.value?.validate();
+  if (isValid?.valid) {
     try {
       const { login } = useAuthStore();
 
       loading.value = true;
       await login(email.value, password.value);
-      loading.value = false;
+
       window.location.pathname = route.redirectedFrom?.fullPath ?? '/';
-    } catch (error) {
+    } catch (error: any) {
       const { showSnackbar } = useSnackbarStore();
 
       loading.value = false;
-      const errorObj = (error as any).value ?? error;
 
-      console.error(errorObj);
-
-      if (errorObj.statusCode === 401) {
-        errorMessage.value = 'Invalid email or password';
+      if (error.response.status === 401) {
+        errorMessage.value = ['Wrong email or password.'];
       } else {
-        errorMessage.value = 'An unknown error occurred';
+        showSnackbar({
+          message: 'Something went wrong, please try again.',
+          color: 'error',
+        });
       }
-      showSnackbar({
-        message: errorMessage.value,
-        color: 'error',
-      });
     }
   }
 };
@@ -66,6 +63,7 @@ const login = async () => {
                 label="Email"
                 required
                 :rules="[rules.required, rules.email]"
+                :error="!!errorMessage?.length"
               ></v-text-field>
               <v-text-field
                 v-model="password"
@@ -73,6 +71,7 @@ const login = async () => {
                 type="password"
                 required
                 :rules="[rules.required]"
+                :error-messages="errorMessage"
               ></v-text-field>
             </v-card-text>
             <v-card-actions class="px-4 pt-0">
