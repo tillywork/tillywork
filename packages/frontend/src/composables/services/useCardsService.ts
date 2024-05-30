@@ -91,23 +91,6 @@ export const useCardsService = () => {
     });
   }
 
-  async function updateCardListStage({
-    cardId,
-    cardListId,
-    listStageId,
-  }: {
-    cardId: number;
-    cardListId: number;
-    listStageId: number;
-  }) {
-    return sendRequest(`/cards/${cardId}/lists/${cardListId}`, {
-      method: 'PUT',
-      data: {
-        listStageId,
-      },
-    });
-  }
-
   function useGetGroupCardsInfinite({
     listId,
     groupId,
@@ -178,15 +161,6 @@ export const useCardsService = () => {
     });
   }
 
-  function useUpdateCardListStageMutation() {
-    return useMutation({
-      mutationFn: updateCardListStage,
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['cards'] });
-      },
-    });
-  }
-
   async function updateCardList({
     cardId,
     cardListId,
@@ -209,14 +183,37 @@ export const useCardsService = () => {
     });
   }
 
+  function calculateCardOrder({
+    previousCard,
+    nextCard,
+  }: {
+    previousCard?: Card;
+    nextCard?: Card;
+  }) {
+    let newOrder: number;
+    if (!previousCard && nextCard) {
+      newOrder = nextCard.cardLists[0].order / 2;
+    } else if (previousCard && !nextCard) {
+      newOrder = previousCard.cardLists[0].order + 100;
+    } else if (previousCard && nextCard) {
+      newOrder =
+        (nextCard.cardLists[0].order + previousCard.cardLists[0].order) / 2;
+    } else {
+      newOrder = 100;
+    }
+
+    newOrder = Math.round(newOrder);
+
+    return newOrder;
+  }
+
   return {
-    updateCardListStage,
     useGetGroupCardsInfinite,
-    useUpdateCardListStageMutation,
     useCreateCardMutation,
     useUpdateCardMutation,
     useGetCardQuery,
     useDeleteCardMutation,
     useUpdateCardListMutation,
+    calculateCardOrder,
   };
 };

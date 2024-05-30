@@ -28,6 +28,7 @@ const emit = defineEmits([
   'row:update:stage',
   'row:update:due-date',
   'row:update:assignees',
+  'row:update:order',
 ]);
 const props = defineProps<{
   listGroup: Row<ListGroup>;
@@ -180,45 +181,45 @@ function onDragStart() {
   }
 }
 
-function onDragEnd(event: any) {
-  const { oldIndex, newIndex } = event;
+function onDragUpdate(event: any) {
+  const { newIndex } = event;
   isDragging.value = false;
 
-  if (oldIndex !== newIndex) {
-    const previousItem = draggableCards.value[newIndex - 1]?.original;
-    const currentItem = draggableCards.value[newIndex].original;
-    const nextItem = draggableCards.value[newIndex + 1]?.original;
+  const previousCard = draggableCards.value[newIndex - 1]?.original;
+  const currentCard = draggableCards.value[newIndex]?.original;
+  const nextCard = draggableCards.value[newIndex + 1]?.original;
 
-    const currentCardList = currentItem.cardLists.find(
-      (cl) => cl.listId === props.listGroup.original.listId
-    );
+  handleUpdateCardOrder({
+    currentCard,
+    previousCard,
+    nextCard,
+  });
+}
 
-    let newOrder: number;
-    if (!previousItem) {
-      newOrder = nextItem.cardLists[0].order / 2;
-    } else if (!nextItem) {
-      newOrder = previousItem.cardLists[0].order + 100;
-    } else {
-      newOrder =
-        (nextItem.cardLists[0].order + previousItem.cardLists[0].order) / 2;
-    }
+function onDragAdd(event: any) {
+  const { newIndex } = event;
+  isDragging.value = false;
 
-    newOrder = Math.round(newOrder);
+  const previousCard = draggableCards.value[newIndex - 1]?.original;
+  const currentCard = draggableCards.value[newIndex]?.original;
+  const nextCard = draggableCards.value[newIndex + 1]?.original;
 
-    updateCardList({
-      cardId: currentItem.id,
-      cardListId: currentCardList!.id,
-      updateCardListDto: {
-        order: newOrder,
-      },
-    }).catch(() => {
-      showSnackbar({
-        message: 'Something went wrong, please try again.',
-        color: 'error',
-        timeout: 5000,
-      });
-    });
-  }
+  const newOrder = cardsService.calculateCardOrder({ previousCard, nextCard });
+
+  handleUpdateCardStage({
+    cardId: currentCard.id,
+    cardListId: currentCard.cardLists[0].id,
+    listStageId: props.listGroup.original.entityId!,
+    order: newOrder,
+  });
+}
+
+function handleUpdateCardOrder(data: {
+  currentCard: Card;
+  previousCard?: Card;
+  nextCard?: Card;
+}) {
+  emit('row:update:order', data);
 }
 
 function setDragItem(data: DataTransfer) {
@@ -245,20 +246,13 @@ function handleDeleteCard(card: Card) {
   emit('row:delete', card);
 }
 
-function handleUpdateCardStage({
-  cardId,
-  cardListId,
-  listStageId,
-}: {
+function handleUpdateCardStage(data: {
   cardId: number;
   cardListId: number;
   listStageId: number;
+  order?: number;
 }) {
-  emit('row:update:stage', {
-    cardId,
-    cardListId,
-    listStageId,
-  });
+  emit('row:update:stage', data);
 }
 
 function handleUpdateDueDate({
@@ -381,11 +375,13 @@ watchEffect(() => {
           v-model="draggableCards"
           :move="onDragMove"
           @start="onDragStart"
-          @end="onDragEnd"
+          @add="onDragAdd"
+          @update="onDragUpdate"
           :setData="setDragItem"
           item-key="id"
           animation="100"
           ghost-class="v-list-item--active"
+          group="cards"
         >
           <template #item="{ element: row }">
             <v-list-item

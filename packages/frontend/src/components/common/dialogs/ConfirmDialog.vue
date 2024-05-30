@@ -6,12 +6,12 @@ const dialog = useDialogStore();
 
 <template>
   <v-card color="accent" class="border-thin">
-    <v-card-title class="text-body-1 pa-4 pb-1 bg-accent">{{
-      dialog.data.title
-    }}</v-card-title>
-    <v-card-text class="text-body-2 pa-4">{{
-      dialog.data.message
-    }}</v-card-text>
+    <v-card-title class="text-body-1 pa-4 pb-1 bg-accent">
+      {{ dialog.data.title ?? 'Confirm' }}
+    </v-card-title>
+    <v-card-text class="text-body-2 pa-4">
+      {{ dialog.data.message }}
+    </v-card-text>
     <v-card-actions class="text-body-2">
       <v-btn
         color="error"

@@ -3,6 +3,9 @@ import { useDialog } from '@/composables/useDialog';
 import { ViewTypes, type View } from '../views/types';
 import type { List } from './types';
 import { DIALOGS } from '@/components/common/dialogs/types';
+import { useWorkspaceStore } from '@/stores/workspace';
+import { useViewsService } from '@/composables/services/useViewsService';
+import { useSnackbarStore } from '@/stores/snackbar';
 
 const dialog = useDialog();
 const props = defineProps<{
@@ -10,11 +13,24 @@ const props = defineProps<{
   list: List;
 }>();
 
-const selectedView = defineModel<View>();
+const workspaceStore = useWorkspaceStore();
+const { listState } = storeToRefs(workspaceStore);
+
+const { showSnackbar } = useSnackbarStore();
+
+const { useDeleteViewMutation } = useViewsService();
+const { mutateAsync: mutateDeleteView, isPending: isDeletingView } =
+  useDeleteViewMutation();
+
+const selectedView = defineModel<View | null>();
 const freezeHoverViewId = ref<number>();
 
 function handleTabSelection(view: View) {
   selectedView.value = view;
+
+  if (view) {
+    workspaceStore.setListLastView({ listId: props.list.id, viewId: view.id });
+  }
 }
 
 function getViewIconByType(type: ViewTypes) {
@@ -36,6 +52,62 @@ function openCreateViewDialog() {
     },
   });
 }
+
+function selectViewFromListStateOrFirstView() {
+  let viewToSelect: View | undefined;
+  if (
+    listState.value[props.list.id] &&
+    listState.value[props.list.id].lastViewId
+  ) {
+    viewToSelect = props.views.find(
+      (v) => v.id === listState.value[props.list.id].lastViewId
+    );
+  }
+
+  if (!viewToSelect) {
+    viewToSelect = props.views[0];
+  }
+
+  handleTabSelection(viewToSelect);
+}
+
+function handleDeleteView(view: View) {
+  dialog.openDialog({
+    dialog: DIALOGS.CONFIRM,
+    data: {
+      message: 'Are you sure you want to delete this view?',
+      isLoading: isDeletingView,
+      onCancel: dialog.closeDialog,
+      onConfirm: () => deleteView(view),
+    },
+  });
+}
+
+function deleteView(view: View) {
+  mutateDeleteView(view.id)
+    .catch(() => {
+      showSnackbar({
+        message: 'Something went wrong, please try again.',
+        color: 'error',
+        timeout: 5000,
+      });
+    })
+    .then(() => {
+      dialog.closeDialog();
+
+      if (view.id === selectedView.value?.id) {
+        selectViewFromListStateOrFirstView();
+      }
+    });
+}
+
+watch(
+  () => props.views,
+  () => {
+    selectViewFromListStateOrFirstView();
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -58,7 +130,14 @@ function openCreateViewDialog() {
             <v-icon :icon="getViewIconByType(view.type)" />
           </template>
           {{ view.name }}
-          <template #append v-if="isHovering || freezeHoverViewId === view.id">
+          <template
+            #append
+            v-if="
+              selectedView?.id === view.id ||
+              isHovering ||
+              freezeHoverViewId === view.id
+            "
+          >
             <v-menu
               @update:model-value="
                 (v) => {
@@ -77,7 +156,10 @@ function openCreateViewDialog() {
               </template>
               <v-card class="border-thin">
                 <v-list>
-                  <v-list-item class="text-error">
+                  <v-list-item
+                    class="text-error"
+                    @click="handleDeleteView(view)"
+                  >
                     <template #prepend>
                       <v-icon icon="mdi-delete" />
                     </template>
@@ -104,3 +186,9 @@ function openCreateViewDialog() {
     </v-btn>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.border-b-primary {
+  border-block-end-color: rgb(var(--v-theme-primary)) !important;
+}
+</style>

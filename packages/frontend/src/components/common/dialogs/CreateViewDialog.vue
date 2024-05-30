@@ -3,7 +3,10 @@ import { useViewsService } from '@/composables/services/useViewsService';
 import { useDialog } from '@/composables/useDialog';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
-import type { View } from '@/components/project-management/views/types';
+import {
+  ViewTypes,
+  type View,
+} from '@/components/project-management/views/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 
@@ -18,6 +21,19 @@ const viewDto = ref<Partial<View>>({
   name: '',
   listId: dialog.data.list.id,
 });
+
+const viewTypeOptions = ref([
+  {
+    title: 'Table',
+    value: ViewTypes.TABLE,
+    icon: 'mdi-table',
+  },
+  {
+    title: 'Board',
+    value: ViewTypes.BOARD,
+    icon: 'mdi-view-column',
+  },
+]);
 
 const { mutateAsync: createView, isPending } =
   viewsService.useCreateViewMutation();
@@ -64,6 +80,27 @@ async function handleCreate() {
           label="Name*"
           autofocus
         />
+        <v-select
+          v-model="viewDto.type"
+          label="Type*"
+          density="compact"
+          :items="viewTypeOptions"
+          :rules="[rules.required]"
+        >
+          <template #item="{ item, props }">
+            <v-list-item v-bind="props">
+              <template #prepend>
+                <v-icon :icon="item.raw.icon" />
+              </template>
+            </v-list-item>
+          </template>
+          <template #selection="{ item }">
+            <span class="d-flex align-center ga-3 text-body-2">
+              <v-icon :icon="item.raw.icon" />
+              {{ item.title }}
+            </span>
+          </template>
+        </v-select>
       </div>
       <v-card-actions class="d-flex justify-start align-center py-0 px-4">
         <v-spacer />

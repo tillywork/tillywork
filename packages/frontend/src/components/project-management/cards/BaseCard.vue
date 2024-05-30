@@ -41,8 +41,7 @@ const createActivityMutation = cardActivitiesService.useCreateActivityMutation({
   cardId: props.card.id,
 });
 
-const updateCardListStageMutation =
-  cardsService.useUpdateCardListStageMutation();
+const updateCardListMutation = cardsService.useUpdateCardListMutation();
 
 const users = computed(() =>
   usersQuery.data.value?.map((projectUser) => projectUser.user)
@@ -52,7 +51,7 @@ const isCardLoading = computed(() => {
   return (
     updateCardMutation.isPending.value ||
     createActivityMutation.isPending.value ||
-    updateCardListStageMutation.isPending.value
+    updateCardListMutation.isPending.value
   );
 });
 
@@ -151,11 +150,13 @@ function updateCardDueAt(newDueAt: string) {
 }
 
 function updateCardListStage(listStage: ListStage) {
-  updateCardListStageMutation
+  updateCardListMutation
     .mutateAsync({
       cardId: cardCopy.value.id,
       cardListId: cardCopy.value.cardLists[0].id,
-      listStageId: listStage.id,
+      updateCardListDto: {
+        listStageId: listStage.id,
+      },
     })
     .catch((e) => {
       snackbar.showSnackbar({

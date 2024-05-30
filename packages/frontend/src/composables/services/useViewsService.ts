@@ -11,15 +11,11 @@ export const useViewsService = () => {
   const { sendRequest } = useHttp();
   const queryClient = useQueryClient();
 
-  async function getViews({
-    workspaceId,
-  }: {
-    workspaceId?: number;
-  }): Promise<View[]> {
+  async function getViews({ listId }: { listId: number }): Promise<View[]> {
     return sendRequest('/views', {
       method: 'GET',
       params: {
-        workspaceId,
+        listId,
       },
     });
   }
@@ -50,10 +46,15 @@ export const useViewsService = () => {
     });
   }
 
-  function useGetViewsQuery(workspaceId?: number) {
+  function useGetViewsQuery({ listId }: { listId: number }) {
     return useQuery({
-      queryKey: ['views', workspaceId],
-      queryFn: () => getViews({ workspaceId }),
+      queryKey: [
+        'views',
+        {
+          listId,
+        },
+      ],
+      queryFn: () => getViews({ listId }),
       staleTime: 1 * 60 * 1000,
     });
   }
@@ -66,7 +67,7 @@ export const useViewsService = () => {
     enabled?: Ref<boolean>;
   }) {
     return useQuery({
-      queryKey: ['view', id.value],
+      queryKey: ['views', id.value],
       queryFn: () => getView(id.value),
       staleTime: 1 * 60 * 1000,
       enabled,
