@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { User } from '@/components/common/users/types';
+import { getUserFullName, type User } from '../users/types';
 
 const userMenu = defineModel('menu', {
   default: false,
@@ -7,6 +7,7 @@ const userMenu = defineModel('menu', {
 const value = defineModel<User[]>({
   default: [],
 });
+const searchedUserName = ref('');
 const selectedUsers = ref(value.value ?? []);
 
 defineExpose({
@@ -111,10 +112,18 @@ watch(selectedUsers, (v) => {
         </template>
       </div>
     </template>
-    <v-card width="250">
+    <v-card width="250" v-click-outside="(searchedUserName = '')">
+      <v-text-field hide-details single-line v-model="searchedUserName" />
       <v-list>
         <template
-          v-for="user in users"
+          v-for="user in users.filter(
+            (u) =>
+              !searchedUserName ||
+              getUserFullName(u)
+                // NOTE: Case is lowered to achieve case-insensitive search.
+                .toLowerCase()
+                .startsWith(searchedUserName.toLowerCase())
+          )"
           :key="user.email + 'list-item' + isUserSelected(user)"
         >
           <v-list-item
