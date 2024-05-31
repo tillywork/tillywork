@@ -7,14 +7,12 @@ const userMenu = defineModel('menu', {
 const value = defineModel<User[]>({
   default: [],
 });
-const searchedUserName = ref('');
-const selectedUsers = ref(value.value ?? []);
 
 defineExpose({
   userMenu,
 });
 
-defineProps<{
+const props = defineProps<{
   users: User[];
   size?: number | 'x-small' | 'small' | 'default';
   contentClass?: string;
@@ -22,6 +20,17 @@ defineProps<{
   label?: string;
   fill?: boolean;
 }>();
+
+const searchTerm = ref('');
+const searchedUsers = computed(() =>
+  props.users.filter((user) =>
+    // NOTE: Case is lowered to achieve case-insensitive search.
+    getUserFullName(user)
+      .toLowerCase()
+      .startsWith(searchTerm.value.toLowerCase())
+  )
+);
+const selectedUsers = ref(value.value ?? []);
 
 const toggleUserSelection = (user: User) => {
   const index = selectedUsers.value.findIndex((u) => u.id === user.id);
@@ -112,18 +121,11 @@ watch(selectedUsers, (v) => {
         </template>
       </div>
     </template>
-    <v-card width="250" v-click-outside="(searchedUserName = '')">
-      <v-text-field hide-details single-line v-model="searchedUserName" />
+    <v-card width="250" v-click-outside="(searchTerm = '')">
+      <v-text-field hide-details single-line v-model="searchTerm" />
       <v-list>
         <template
-          v-for="user in users.filter(
-            (u) =>
-              !searchedUserName ||
-              getUserFullName(u)
-                // NOTE: Case is lowered to achieve case-insensitive search.
-                .toLowerCase()
-                .startsWith(searchedUserName.toLowerCase())
-          )"
+          v-for="user in searchedUsers"
           :key="user.email + 'list-item' + isUserSelected(user)"
         >
           <v-list-item
