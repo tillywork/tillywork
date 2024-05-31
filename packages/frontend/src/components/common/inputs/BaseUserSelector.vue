@@ -24,8 +24,13 @@ const props = defineProps<{
 
 const searchTerm = ref('');
 const searchedUsers = computed(() =>
-  props.users.filter((user) =>
-    stringUtils.fuzzySearch(searchTerm.value, getUserFullName(user))
+  props.users.filter(
+    (user) =>
+      // Searches for a matching name.
+      stringUtils.fuzzySearch(searchTerm.value, getUserFullName(user)) ||
+      // Searches for a matching email.
+      // HMMM: What should we prioritize, name or email searching?
+      stringUtils.fuzzySearch(searchTerm.value, user.email)
   )
 );
 const selectedUsers = ref(value.value ?? []);
@@ -145,6 +150,9 @@ watch(selectedUsers, (v) => {
             >
               {{ user.firstName + ' ' + user.lastName }}
             </v-list-item-title>
+            <v-list-item-subtitle>
+              {{ user.email }}
+            </v-list-item-subtitle>
             <template #append>
               <v-icon icon="mdi-check" size="12" v-if="isUserSelected(user)" />
             </template>
