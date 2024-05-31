@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import stringUtils from '@/utils/string';
 import { getUserFullName, type User } from '../users/types';
 
 const userMenu = defineModel('menu', {
@@ -24,10 +25,7 @@ const props = defineProps<{
 const searchTerm = ref('');
 const searchedUsers = computed(() =>
   props.users.filter((user) =>
-    // NOTE: Case is lowered to achieve case-insensitive search.
-    getUserFullName(user)
-      .toLowerCase()
-      .startsWith(searchTerm.value.toLowerCase())
+    stringUtils.fuzzySearch(searchTerm.value, getUserFullName(user))
   )
 );
 const selectedUsers = ref(value.value ?? []);

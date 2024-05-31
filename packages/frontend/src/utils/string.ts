@@ -11,6 +11,40 @@ const stringUtils = {
       stringToArray[1] ? stringToArray[1].charAt(0).toLocaleUpperCase() : ''
     }`;
   },
+
+  /**
+   * Fuzzy searches for a query in a string with respect to the characters' order. The
+   * query `"ndo"` will be found in string `"John Doe"`, thus the function will return
+   * `true`, while the query `akc` won't be found in the string `"Jack Pearson"` because
+   * the order of characters `'c'` and `'k'` isn't the same, thus the function will
+   * return `false`
+   *
+   * @param query The query to search for.
+   * @param string The string to search for the query in.
+   * @returns `true` if the query was inside the string, otherwise `false`
+   *
+   * @remarks
+   * This function performs a case-insensitive.
+   * An empty query will always return `true` as it is trivially found in any string.
+   * A non-empty query will always return `false` when the string is empty.
+   */
+  fuzzySearch(query: string, string: string) {
+    if (!query) return true;
+    if (!string) return false;
+
+    // NOTE: Both strings are lowered for the case-insensitive search.
+    query = query.toLowerCase();
+    string = string.toLowerCase();
+
+    let i = 0;
+    for (const c of string) {
+      if (c === query[i]) i++;
+      // ~ All characters of the query has been matched.
+      if (i === query.length) return true;
+    }
+
+    return false;
+  },
 };
 
 export default stringUtils;
