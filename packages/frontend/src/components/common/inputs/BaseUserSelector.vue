@@ -125,7 +125,7 @@ watch(selectedUsers, (v) => {
       </div>
     </template>
     <v-card width="250" v-click-outside="(searchTerm = '')">
-      <v-text-field hide-details single-line v-model="searchTerm" />
+      <v-text-field hide-details single-line autofocus v-model="searchTerm" />
       <v-list>
         <template
           v-for="user in searchedUsers"
