@@ -6,14 +6,8 @@ import vue from '@vitejs/plugin-vue';
 import VueRouter from 'unplugin-vue-router/vite';
 import AutoImport from 'unplugin-auto-import/vite';
 import { VueRouterAutoImports } from 'unplugin-vue-router';
-import dotenv from 'dotenv';
 
-export default defineConfig(({ mode }) => {
-  const rootPath = path.resolve(__dirname, '../../');
-  if (mode === 'production') {
-    dotenv.config({ path: path.resolve(rootPath, '.env.production') });
-  }
-
+export default defineConfig(() => {
   return {
     root: __dirname,
     cacheDir: '../../node_modules/.vite/packages/frontend',

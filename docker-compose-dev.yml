@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   tillywork:
-    image: tillywork/tillywork:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - '80:80'
       - '3000:3000'

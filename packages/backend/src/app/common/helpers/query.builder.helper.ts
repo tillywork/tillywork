@@ -103,16 +103,39 @@ export class QueryBuilderHelper {
         if (filterGroup.and) {
             return filterGroup.and.reduce((whereClause, condition) => {
                 if (QueryBuilderHelper.isFilterGroup(condition)) {
-                    return ObjectHelper.deepMergeObjects(
-                        whereClause,
-                        QueryBuilderHelper.buildQuery(condition)
-                    );
+                    const subQuery = QueryBuilderHelper.buildQuery(condition);
+                    return { ...whereClause, ...subQuery };
                 } else {
-                    return ObjectHelper.deepMergeObjects(
-                        whereClause,
-                        QueryBuilderHelper.fieldFilterToQuery(
-                            condition as FieldFilter
-                        )
+                    const queryPart = QueryBuilderHelper.fieldFilterToQuery(
+                        condition as FieldFilter
+                    );
+                    // Adjust the merging strategy for nested conditions
+                    return Object.entries(queryPart).reduce(
+                        (acc, [key, value]) => {
+                            if (value instanceof Function) {
+                                // If the value is a function, use it directly without merging
+                                acc[key] = value;
+                            } else {
+                                const current = acc[key];
+                                if (
+                                    current &&
+                                    typeof current === "object" &&
+                                    typeof value === "object"
+                                ) {
+                                    // If both are objects, merge them
+                                    acc[key] = { ...current, ...value };
+                                } else if (current !== undefined) {
+                                    // If key exists but aren't both objects, convert to array
+                                    acc[key] = Array.isArray(current)
+                                        ? [...current, value]
+                                        : [current, value];
+                                } else {
+                                    acc[key] = value;
+                                }
+                            }
+                            return acc;
+                        },
+                        whereClause
                     );
                 }
             }, {});
@@ -122,9 +145,8 @@ export class QueryBuilderHelper {
                     ? QueryBuilderHelper.buildQuery(subCondition)
                     : QueryBuilderHelper.fieldFilterToQuery(subCondition);
             });
-            return orConditions.length === 1
-                ? orConditions[0]
-                : Any(orConditions);
+            // Use a conditional structure to handle 'or' relations
+            return orConditions.length === 1 ? orConditions[0] : {};
         }
         return {};
     }

@@ -59,9 +59,9 @@ const config: TypeOrmModuleOptions = {
         process.env.TW_ENABLE_QUERY_LOGGING !== "false"
             ? TypeOrmLoggerContainer.ForConnection(true)
             : undefined,
-    ssl: process.env.NODE_ENV === "production" ? true : false,
+    ssl: process.env.TW_DB_ENABLE_SSL === "true" ? true : false,
     extra:
-        process.env.NODE_ENV === "production"
+        process.env.TW_DB_ENABLE_SSL === "true"
             ? {
                   ssl: {
                       rejectUnauthorized: false,
