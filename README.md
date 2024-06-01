@@ -16,6 +16,7 @@
   <a href="https://discord.gg/Ttn4WeNJbb" target="_blank">
     <img src="https://img.shields.io/discord/1241636783465168977?logo=discord&logoColor=white&label=Chat&color=7289da" alt="Chat Discord" />
   </a>
+  <img src="https://img.shields.io/github/commit-activity/w/tillywork/tillywork" alt="Repo Activity" />
 </p>
 <p align="center">
   <strong>Open-source work management</strong>
