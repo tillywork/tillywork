@@ -12,6 +12,7 @@ import {
 } from "typeorm";
 import { FieldFilter, FilterGroup } from "../filters/types";
 import dayjs from "dayjs";
+import { ObjectHelper } from "./object.helper";
 
 @Injectable()
 export class QueryBuilderHelper {
@@ -32,8 +33,7 @@ export class QueryBuilderHelper {
             return value
                 .replace(":startOfDay", dayjs().startOf("day").toISOString())
                 .replace(":endOfDay", dayjs().endOf("day").toISOString());
-        }
-        else {
+        } else {
             return value;
         }
     }
@@ -102,42 +102,37 @@ export class QueryBuilderHelper {
     static buildQuery(filterGroup: FilterGroup): any {
         if (filterGroup.and) {
             return filterGroup.and.reduce((whereClause, condition) => {
-                if (
-                    (condition as FilterGroup).and ||
-                    (condition as FilterGroup).or
-                ) {
-                    Object.assign(
+                if (QueryBuilderHelper.isFilterGroup(condition)) {
+                    return ObjectHelper.deepMergeObjects(
                         whereClause,
-                        QueryBuilderHelper.buildQuery(condition as FilterGroup)
+                        QueryBuilderHelper.buildQuery(condition)
                     );
                 } else {
-                    Object.assign(
+                    return ObjectHelper.deepMergeObjects(
                         whereClause,
                         QueryBuilderHelper.fieldFilterToQuery(
                             condition as FieldFilter
                         )
                     );
                 }
-                return whereClause;
             }, {});
         } else if (filterGroup.or) {
-            // We use `Any` from TypeORM for OR conditions
             const orConditions = filterGroup.or.map((subCondition) => {
-                const queryConditions = QueryBuilderHelper.applyOrConditions([
-                    subCondition,
-                ]);
-
-                // Construct OR conditions as an array of query conditions
-                return queryConditions.length === 1
-                    ? queryConditions[0]
-                    : Any(queryConditions);
+                return QueryBuilderHelper.isFilterGroup(subCondition)
+                    ? QueryBuilderHelper.buildQuery(subCondition)
+                    : QueryBuilderHelper.fieldFilterToQuery(subCondition);
             });
-
-            // If there's only one condition, return it directly, otherwise merge them with `Any`
             return orConditions.length === 1
                 ? orConditions[0]
                 : Any(orConditions);
         }
         return {};
+    }
+
+    // A type guard to check if a condition is a FilterGroup
+    static isFilterGroup(
+        condition: FieldFilter | FilterGroup
+    ): condition is FilterGroup {
+        return "and" in condition || "or" in condition;
     }
 }

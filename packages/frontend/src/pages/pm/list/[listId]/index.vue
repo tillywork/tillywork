@@ -37,5 +37,5 @@ watch(listId, () => refetch());
 </script>
 
 <template>
-  <base-list v-if="list" :list :key="list.id" />
+  <base-list v-if="list" :list />
 </template>

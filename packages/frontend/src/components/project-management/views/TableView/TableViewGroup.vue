@@ -130,6 +130,7 @@ function openCreateCardDialog(listGroup: ListGroup) {
       listId: listGroup.listId,
       listStage: getCurrentStage(listGroup),
       users: getCurrentAssignee(listGroup),
+      listStages: props.listStages,
     },
   });
 }

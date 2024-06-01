@@ -25,11 +25,16 @@ const { mutateAsync: mutateDeleteView, isPending: isDeletingView } =
 const selectedView = defineModel<View | null>();
 const freezeHoverViewId = ref<number>();
 
+const listCopy = computed(() => props.list);
+
 function handleTabSelection(view: View) {
   selectedView.value = view;
 
   if (view) {
-    workspaceStore.setListLastView({ listId: props.list.id, viewId: view.id });
+    workspaceStore.setListLastView({
+      listId: listCopy.value.id,
+      viewId: view.id,
+    });
   }
 }
 
@@ -48,7 +53,7 @@ function openCreateViewDialog() {
   dialog.openDialog({
     dialog: DIALOGS.CREATE_VIEW,
     data: {
-      list: props.list,
+      list: listCopy,
     },
   });
 }
@@ -56,11 +61,11 @@ function openCreateViewDialog() {
 function selectViewFromListStateOrFirstView() {
   let viewToSelect: View | undefined;
   if (
-    listState.value[props.list.id] &&
-    listState.value[props.list.id].lastViewId
+    listState.value[listCopy.value.id] &&
+    listState.value[listCopy.value.id].lastViewId
   ) {
     viewToSelect = props.views.find(
-      (v) => v.id === listState.value[props.list.id].lastViewId
+      (v) => v.id === listState.value[listCopy.value.id].lastViewId
     );
   }
 
