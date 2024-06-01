@@ -4,7 +4,7 @@ slug: /
 description: A high level overview of tillywork
 ---
 
-# What is tillywork?
+# Overview
 
 tillywork is a work management software that you will enjoy using. tillywork under the hood has 3 apps:
 

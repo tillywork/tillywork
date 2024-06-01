@@ -4,6 +4,8 @@ FROM node:bullseye-slim AS build
 # Set working directory
 WORKDIR /app
 
+ENV TW_VITE_API_URL=/api/v1
+
 # Copy source code
 COPY . .
 
@@ -13,7 +15,7 @@ RUN npm ci
 # Build the app
 RUN npm run build
 
-# Stage 3: Final image with Nginx for frontend and Node for backend
+# Stage 2: Final image with Nginx
 FROM nginx:alpine-slim as runner
 
 ENV NODE_ENV=production
@@ -48,7 +50,7 @@ RUN npm ci
 COPY ./start.sh /start.sh
 RUN chmod +x /start.sh
 
-# Expose ports for frontend (Nginx) and backend (Node.js)
+# Expose ports
 EXPOSE 80
 EXPOSE 3000
 
