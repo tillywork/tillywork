@@ -2,7 +2,10 @@
 import BaseEditorInput from '../base/BaseEditor/BaseEditorInput.vue';
 import type { CreateCardDto } from '@/components/project-management/cards/types';
 import { useDialog } from '@/composables/useDialog';
-import { type List } from '@/components/project-management/lists/types';
+import {
+  type List,
+  type ListStage,
+} from '@/components/project-management/lists/types';
 import { useQueryClient } from '@tanstack/vue-query';
 import type { VForm } from 'vuetify/lib/components/index.mjs';
 import { useCardsService } from '@/composables/services/useCardsService';
@@ -37,11 +40,23 @@ const list = computed(() => {
   return list;
 });
 
+const listStages = computed(() => {
+  let listStages: ListStage[] | undefined;
+
+  if (dialog.data && dialog.data.listStages) {
+    listStages = dialog.data.listStages;
+  } else {
+    listStages = list.value?.listStages ?? [];
+  }
+
+  return listStages ?? [];
+});
+
 const createCardMutation = cardsService.useCreateCardMutation();
 const createCardDto = ref<CreateCardDto>({
   title: '',
-  listId: list.value?.id,
-  listStage: dialog.data.listStage ?? list.value?.listStages[0],
+  listId: dialog.data.listId ?? list.value?.id,
+  listStage: dialog.data.listStage ?? listStages.value[0],
   users: dialog.data.users,
 });
 
@@ -123,10 +138,7 @@ function handlePostCreate() {
       </div>
       <v-card-actions class="d-flex justify-start align-center py-0 px-4">
         <div class="d-flex ga-2 align-center">
-          <list-stage-selector
-            v-model="createCardDto.listStage"
-            :listStages="list?.listStages ?? []"
-          />
+          <list-stage-selector v-model="createCardDto.listStage" :listStages />
           <base-user-selector
             v-model="createCardDto.users"
             :users

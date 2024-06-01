@@ -21,6 +21,7 @@ const props = defineProps<{
   view: View;
   list: List;
 }>();
+const listId = computed(() => props.list.id);
 const viewCopy = ref<View>({ ...props.view });
 const viewsService = useViewsService();
 const cardsService = useCardsService();
@@ -78,7 +79,7 @@ const {
   isFetching: isFetchingGroups,
   refetch: refetchListGroups,
 } = listGroupsService.useGetListGroupsByOptionQuery({
-  listId: props.list.id,
+  listId,
   sortCardsBy: sortBy,
   groupBy,
 });

@@ -46,7 +46,7 @@ export const useViewsService = () => {
     });
   }
 
-  function useGetViewsQuery({ listId }: { listId: number }) {
+  function useGetViewsQuery({ listId }: { listId: Ref<number> }) {
     return useQuery({
       queryKey: [
         'views',
@@ -54,7 +54,7 @@ export const useViewsService = () => {
           listId,
         },
       ],
-      queryFn: () => getViews({ listId }),
+      queryFn: () => getViews({ listId: listId.value }),
       staleTime: 1 * 60 * 1000,
     });
   }
