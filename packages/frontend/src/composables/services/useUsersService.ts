@@ -1,5 +1,5 @@
-import { useHttp } from '@/composables/useHttp';
 import type { User } from '@/components/common/users/types';
+import { useHttp } from '@/composables/useHttp';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 
 export interface UsersData {
@@ -40,8 +40,13 @@ export const useUsersService = () => {
     });
   }
 
+  function getUserFullName(user: User) {
+    return user.firstName + ' ' + user.lastName;
+  }
+
   return {
     useUsersQuery,
     updateUserMutation,
+    getUserFullName,
   };
 };

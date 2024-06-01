@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
-import { useCardActivitiesService } from '@/composables/services/useCardActivitiesService';
-import { useAuthStore } from '@/stores/auth';
-import { ActivityType, type CardActivity } from './types';
-import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
-import { useSnackbarStore } from '@/stores/snackbar';
+import { useCardActivitiesService } from '@/composables/services/useCardActivitiesService';
+import { useUsersService } from '@/composables/services/useUsersService';
 import { useDate } from '@/composables/useDate';
+import { useDialog } from '@/composables/useDialog';
+import { useAuthStore } from '@/stores/auth';
+import { useSnackbarStore } from '@/stores/snackbar';
+import { ActivityType, type CardActivity } from './types';
 
 const { dayjs } = useDate();
 
@@ -24,6 +25,8 @@ const query = cardActivitiesService.useFindAllQuery(props.cardId);
 const deleteActivity = cardActivitiesService.useDeleteActivityMutation({
   cardId: props.cardId,
 });
+
+const { getUserFullName } = useUsersService();
 
 function openConfirmDeleteDialog(comment: CardActivity) {
   dialog.openDialog({
@@ -71,9 +74,7 @@ function deleteComment(comment: CardActivity) {
         <v-timeline-item class="text-caption">
           <template #icon>
             <base-avatar
-              :text="
-                activity.createdBy.firstName + ' ' + activity.createdBy.lastName
-              "
+              :text="getUserFullName(activity.createdBy)"
               :photo="activity.createdBy.photo"
             />
           </template>
@@ -94,9 +95,7 @@ function deleteComment(comment: CardActivity) {
         <v-timeline-item class="text-caption" size="small">
           <template #icon>
             <base-avatar
-              :text="
-                activity.createdBy.firstName + ' ' + activity.createdBy.lastName
-              "
+              :text="getUserFullName(activity.createdBy)"
               :photo="activity.createdBy.photo"
               size="small"
             />
@@ -109,9 +108,7 @@ function deleteComment(comment: CardActivity) {
                 {{
                   user?.id === activity.createdBy.id
                     ? 'You'
-                    : activity.createdBy.firstName +
-                      ' ' +
-                      activity.createdBy.lastName
+                    : getUserFullName(activity.createdBy)
                 }}
               </span>
               <span class="text-surface-variant">

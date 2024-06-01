@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { useUsersService } from '@/composables/services/useUsersService';
 import { useAuthStore } from '@/stores/auth';
-import { getUserFullName } from '../users/types';
 
+const { getUserFullName } = useUsersService();
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
 const slots = defineSlots();
