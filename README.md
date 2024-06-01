@@ -1,12 +1,32 @@
-# tillywork
+<p align="center">
+  <a target="_blank" href="https://tilly.work">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://cdn.tilly.work/logo-white.png">
+      <img alt="tillywork Logo" src="https://cdn.tilly.work/logo-black.png" width="380"/>
+    </picture>
+  </a>
+</p>
+<p align="center">
+  <a href="https://makeapullrequest.com" target="_blank">
+    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" />
+  </a>
+  <a href="https://github.com/tillywork/tillywork/blob/main/LICENSE" target="_blank">
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" />
+  </a>
+  <a href="https://discord.com/invite/cjSBxnB9z8" target="_blank">
+    <img src="https://img.shields.io/discord/1241636783465168977?logo=discord&logoColor=white&label=Chat&color=7289da" alt="Chat Discord" />
+  </a>
+</p>
+<p align="center">
+  <strong>Open-source work management</strong>
+</p>
+<p align="center">
+  <a target="_blank" href="https://docs.tilly.work/getting-started/using-tillywork"><strong>Get Started 👋</strong></a> ・ <a target="_blank" href="https://docs.configu.com"><strong>Explore Docs 📚</strong></a>
+</p>
 
-[![tillywork logo](https://cdn.tilly.work/github.png)](https://tilly.work)
+## Apps
 
-Welcome to **tillywork**—an open-source work management platform tailored for dynamic teams.
-
-## Modules
-
-tillywork addresses a variety of team requirements through three dedicated modules:
+tillywork addresses a variety of team requirements through three opinionated apps:
 
 ### 1. Project Management
 
@@ -14,11 +34,11 @@ Manage timelines, allocate resources, and monitor deliverables for your projects
 
 ### 2. Sales CRM (Coming next)
 
-Customer relationship management, sales tracking, and performance analysis.
+Manage contacts, organizations and deals.
 
 ### 3. Agile Projects (Coming soon)
 
-Product roadmaps, sprint planning, and issue tracking.
+Manage issues, sprints, and product roadmaps
 
 ## Features
 
