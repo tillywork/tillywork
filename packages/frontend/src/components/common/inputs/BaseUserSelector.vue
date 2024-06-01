@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import type { User } from '@/components/common/users/types';
+import { useUsersService } from '@/composables/services/useUsersService';
+import stringUtils from '@/utils/string';
+import { type User } from '../users/types';
 
 const userMenu = defineModel('menu', {
   default: false,
@@ -7,13 +9,12 @@ const userMenu = defineModel('menu', {
 const value = defineModel<User[]>({
   default: [],
 });
-const selectedUsers = ref(value.value ?? []);
 
 defineExpose({
   userMenu,
 });
 
-defineProps<{
+const props = defineProps<{
   users: User[];
   size?: number | 'x-small' | 'small' | 'default';
   contentClass?: string;
@@ -21,6 +22,20 @@ defineProps<{
   label?: string;
   fill?: boolean;
 }>();
+
+const { getUserFullName } = useUsersService();
+const searchTerm = ref('');
+const searchedUsers = computed(() =>
+  props.users.filter(
+    (user) =>
+      // Searches for a matching name.
+      stringUtils.fuzzySearch(searchTerm.value, getUserFullName(user)) ||
+      // Searches for a matching email.
+      // HMMM: What should we prioritize, name or email searching?
+      stringUtils.fuzzySearch(searchTerm.value, user.email)
+  )
+);
+const selectedUsers = ref(value.value ?? []);
 
 const toggleUserSelection = (user: User) => {
   const index = selectedUsers.value.findIndex((u) => u.id === user.id);
@@ -91,14 +106,14 @@ watch(selectedUsers, (v) => {
                   <base-avatar
                     v-bind="tooltipProps"
                     :photo="selectedUser.photo"
-                    :text="selectedUser.firstName + ' ' + selectedUser.lastName"
+                    :text="getUserFullName(selectedUser)"
                     class="ms-n1 text-caption"
                     :size="size ?? 20"
                     :style="`z-index: ${100 - index}`"
                   />
                 </template>
                 <span class="text-caption">{{
-                  selectedUser.firstName + ' ' + selectedUser.lastName
+                  getUserFullName(selectedUser)
                 }}</span>
               </v-tooltip>
             </template>
@@ -111,10 +126,17 @@ watch(selectedUsers, (v) => {
         </template>
       </div>
     </template>
-    <v-card width="250">
+    <v-card width="250" v-click-outside="(searchTerm = '')">
+      <v-text-field
+        placeholder="Search"
+        hide-details
+        single-line
+        autofocus
+        v-model="searchTerm"
+      />
       <v-list>
         <template
-          v-for="user in users"
+          v-for="user in searchedUsers"
           :key="user.email + 'list-item' + isUserSelected(user)"
         >
           <v-list-item
@@ -125,7 +147,7 @@ watch(selectedUsers, (v) => {
               <v-list-item-action start>
                 <base-avatar
                   :photo="user.photo"
-                  :text="user.firstName + ' ' + user.lastName"
+                  :text="getUserFullName(user)"
                   class="ms-1 text-caption"
                 />
               </v-list-item-action>
@@ -134,8 +156,11 @@ watch(selectedUsers, (v) => {
               class="user-select-none"
               :class="isUserSelected(user) ? 'font-weight-bold' : ''"
             >
-              {{ user.firstName + ' ' + user.lastName }}
+              {{ getUserFullName(user) }}
             </v-list-item-title>
+            <v-list-item-subtitle>
+              {{ user.email }}
+            </v-list-item-subtitle>
             <template #append>
               <v-icon icon="mdi-check" size="12" v-if="isUserSelected(user)" />
             </template>

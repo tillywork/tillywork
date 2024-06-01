@@ -1,16 +1,14 @@
 <script setup lang="ts">
+import { useUsersService } from '@/composables/services/useUsersService';
 import { useAuthStore } from '@/stores/auth';
 
+const { getUserFullName } = useUsersService();
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
 const slots = defineSlots();
 defineProps<{
   avatarSize?: 'x-small' | 'small' | 'default';
 }>();
-
-function printUserFullName(user: { firstName: string; lastName: string }) {
-  return `${user.firstName} ${user.lastName}`;
-}
 </script>
 
 <template>
@@ -18,13 +16,13 @@ function printUserFullName(user: { firstName: string; lastName: string }) {
     <template #prepend>
       <base-avatar
         :photo="user.photo"
-        :text="printUserFullName(user)"
+        :text="getUserFullName(user)"
         :size="avatarSize ?? 'default'"
         class="text-caption"
       />
     </template>
     <v-list-item-title class="text-truncate">
-      {{ printUserFullName(user) }}
+      {{ getUserFullName(user) }}
     </v-list-item-title>
     <v-list-item-subtitle class="d-block text-truncate">
       {{ user.email }}
