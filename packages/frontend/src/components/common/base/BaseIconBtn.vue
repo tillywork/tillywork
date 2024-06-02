@@ -11,6 +11,7 @@ defineProps<{
 
 <template>
   <v-btn
+    class="base-icon-btn"
     :variant="variant ?? 'text'"
     :density="(density as any) ?? 'comfortable'"
     :size="size ?? 'small'"

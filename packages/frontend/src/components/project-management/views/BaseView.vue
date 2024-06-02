@@ -16,6 +16,7 @@ import { useCardsService } from '@/composables/services/useCardsService';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import BoardView from './BoardView/BoardView.vue';
+import ListView from './ListView/ListView.vue';
 
 const props = defineProps<{
   view: View;
@@ -312,6 +313,21 @@ watch(
           @card:update:stage="handleUpdateCardStage"
           @card:update:order="handleUpdateCardOrder"
         />
+      </template>
+      <template v-else-if="viewCopy.type === ViewTypes.LIST">
+        <list-view
+          v-model:loading="isViewLoading"
+          :columns
+          :view
+          :groups="listGroups ?? []"
+          no-headers
+          @row:delete="handleDeleteCard"
+          @row:update:stage="handleUpdateCardStage"
+          @row:update:due-date="handleUpdateDueDate"
+          @row:update:assignees="handleUpdateAssignees"
+          @row:update:order="handleUpdateCardOrder"
+        >
+        </list-view>
       </template>
       <template v-else>
         <span class="text-body-2 text-error">Error: Unknown view type</span>
