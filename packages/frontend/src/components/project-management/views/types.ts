@@ -16,6 +16,7 @@ export enum ViewTypes {
   BOARD = 'board',
   CALENDAR = 'calendar',
   GANTT = 'gantt',
+  LIST = 'list',
 }
 
 export interface ListGroupOption {

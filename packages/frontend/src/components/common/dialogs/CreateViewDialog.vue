@@ -33,6 +33,11 @@ const viewTypeOptions = ref([
     value: ViewTypes.BOARD,
     icon: 'mdi-view-column',
   },
+  {
+    title: 'List',
+    value: ViewTypes.LIST,
+    icon: 'mdi-list-box-outline',
+  },
 ]);
 
 const { mutateAsync: createView, isPending } =

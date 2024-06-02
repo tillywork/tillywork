@@ -36,11 +36,6 @@ const props = defineProps<{
   listStages: ListStage[];
   projectUsers: ProjectUser[];
   table: Table<ListGroup>;
-  columnSizes: {
-    id: string;
-    size: number;
-  }[];
-  noGroupBanners?: boolean;
 }>();
 const rowMenuOpen = ref<Row<Card> | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
@@ -278,11 +273,6 @@ function handleUserSelection({ users, card }: { users: User[]; card: Card }) {
   });
 }
 
-function getColumnSize(columnId: string) {
-  const columnSize = props.columnSizes.find((cs) => cs.id === columnId);
-  return columnSize?.size;
-}
-
 watch(data, (v) => {
   if (v) {
     cards.value = v?.pages.map((page) => page.cards).flat() ?? [];
@@ -311,13 +301,14 @@ watchEffect(() => {
   <v-banner
     sticky
     lines="one"
-    density="comfortable"
     :border="listGroup.getIsExpanded() ? 'b-thin' : 'none'"
     bg-color="accent"
     style="z-index: 10"
-    v-if="!noGroupBanners"
   >
-    <base-icon-btn
+    <v-btn
+      variant="text"
+      density="comfortable"
+      size="small"
       :icon="
         listGroup.getIsExpanded() ? 'mdi-chevron-down' : 'mdi-chevron-right'
       "
@@ -335,20 +326,31 @@ watchEffect(() => {
         />
       </template>
       <template v-else>
-        <v-icon :color="listGroup.original.color" size="small">
+        <v-icon :color="listGroup.original.color" size="20">
           {{ listGroup.original.icon ?? 'mdi-circle-slice-8' }}
         </v-icon>
       </template>
-      <span class="text-body-2 ms-3">
+      <v-chip
+        rounded="md"
+        density="comfortable"
+        :color="listGroup.original.color"
+        class="ms-3"
+      >
         {{ listGroup.original.name }}
-        <span class="ms-2 text-caption text-color-subtitle">
-          {{ total }}
-        </span>
-      </span>
+        <template #append>
+          <span class="text-caption ms-4 font-weight-bold">
+            {{ total }}
+          </span>
+        </template>
+      </v-chip>
     </div>
-    <base-icon-btn
-      class="ms-4"
+    <v-btn
+      variant="text"
+      density="comfortable"
+      size="small"
       icon="mdi-plus"
+      color="info"
+      class="ms-2"
       @click="openCreateCardDialog(listGroup.original)"
     />
   </v-banner>
@@ -394,7 +396,7 @@ watchEffect(() => {
                   color="transparent"
                   v-bind="rowProps"
                   height="33"
-                  class="table-row d-flex align-center text-body-2 flex-fill"
+                  class="list-row d-flex align-center text-body-2"
                   rounded="0"
                   link
                 >
@@ -404,8 +406,8 @@ watchEffect(() => {
                   >
                     <template v-if="cell.column.columnDef.id === 'actions'">
                       <v-card
-                        :width="getColumnSize(cell.column.columnDef.id)"
-                        class="table-cell d-flex align-center fill-height"
+                        :width="cell.column.getSize()"
+                        class="list-cell d-flex align-center fill-height"
                         rounded="0"
                         color="transparent"
                       >
@@ -449,8 +451,8 @@ watchEffect(() => {
                     </template>
                     <template v-else-if="cell.column.columnDef.id === 'title'">
                       <v-card
-                        :width="getColumnSize(cell.column.columnDef.id)"
-                        class="d-flex align-center fill-height text-body-2 px-2 table-cell"
+                        :width="cell.column.getSize()"
+                        class="d-flex align-center fill-height text-body-2 px-2 list-cell"
                         rounded="0"
                         color="transparent"
                       >
@@ -476,8 +478,8 @@ watchEffect(() => {
                     </template>
                     <template v-else-if="cell.column.columnDef.id === 'dueAt'">
                       <v-card
-                        :width="getColumnSize(cell.column.columnDef.id)"
-                        class="table-cell d-flex align-center fill-height"
+                        :width="cell.column.getSize()"
+                        class="list-cell d-flex align-center fill-height"
                         rounded="0"
                         color="transparent"
                         link
@@ -496,8 +498,8 @@ watchEffect(() => {
                     </template>
                     <template v-else-if="cell.column.columnDef.id === 'users'">
                       <v-card
-                        :width="getColumnSize(cell.column.columnDef.id)"
-                        class="table-cell d-flex align-center fill-height"
+                        :width="cell.column.getSize()"
+                        class="list-cell d-flex align-center fill-height"
                         rounded="0"
                         color="transparent"
                         link
@@ -517,8 +519,8 @@ watchEffect(() => {
                     </template>
                     <template v-else>
                       <v-card
-                        :width="getColumnSize(cell.column.columnDef.id)"
-                        class="table-cell d-flex align-center fill-height"
+                        :width="cell.column.getSize()"
+                        class="list-cell d-flex align-center fill-height"
                         rounded="0"
                         color="transparent"
                       >
@@ -538,12 +540,3 @@ watchEffect(() => {
     </v-list>
   </template>
 </template>
-
-<style lang="scss">
-.table {
-  .table-row {
-    border-bottom: 0.25px solid
-      rgba(var(--v-border-color), var(--v-border-opacity));
-  }
-}
-</style>

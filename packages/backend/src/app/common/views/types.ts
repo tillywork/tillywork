@@ -3,6 +3,7 @@ export enum ViewTypes {
     BOARD = "board",
     CALENDAR = "calendar",
     GANTT = "gantt",
+    LIST = "list",
 }
 
 export const DEFAULT_VIEWS = [

@@ -20,6 +20,7 @@ import { DeleteUserGroups1716372393939 } from "../migrations/1716372393939-delet
 import { AddOrderColumnToListGroups1716455762784 } from "../migrations/1716455762784-add-order-column-to-list-groups";
 import { AddOrderColumnToCardListsTable1716798868594 } from "../migrations/1716798868594-add-order-column-to-card-lists-table";
 import { AddCreatedAtUpdatedAtToCardListTable1716883730399 } from "../migrations/1716883730399-add-createdAt-updatedAt-to-card-list-table";
+import { AddListViewType1717363107808 } from "../migrations/1717363107808-add-list-view-type";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -41,6 +42,7 @@ const migrations = [
     AddOrderColumnToListGroups1716455762784,
     AddOrderColumnToCardListsTable1716798868594,
     AddCreatedAtUpdatedAtToCardListTable1716883730399,
+    AddListViewType1717363107808,
 ];
 
 const config: TypeOrmModuleOptions = {

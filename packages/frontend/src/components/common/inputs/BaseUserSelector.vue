@@ -142,6 +142,7 @@ watch(selectedUsers, (v) => {
           <v-list-item
             @click="toggleUserSelection(user)"
             :active="isUserSelected(user)"
+            class="text-truncate"
           >
             <template #prepend>
               <v-list-item-action start>
@@ -158,7 +159,7 @@ watch(selectedUsers, (v) => {
             >
               {{ getUserFullName(user) }}
             </v-list-item-title>
-            <v-list-item-subtitle>
+            <v-list-item-subtitle class="d-block">
               {{ user.email }}
             </v-list-item-subtitle>
             <template #append>

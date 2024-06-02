@@ -14,7 +14,7 @@ import { type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/composables/services/useListStagesService';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
 import { useAuthStore } from '@/stores/auth';
-import TableViewGroup from './TableViewGroup.vue';
+import ListViewGroup from './ListViewGroup.vue';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 
@@ -22,6 +22,7 @@ const isLoading = defineModel<boolean>('loading');
 
 const props = defineProps<{
   columns: ColumnDef<ListGroup, any>[];
+  noHeaders?: boolean;
   view: View;
   groups: ListGroup[];
 }>();
@@ -69,21 +70,9 @@ const table = useVueTable({
   manualGrouping: true,
   manualSorting: true,
   columnResizeMode: 'onChange',
+  enableColumnResizing: false,
   enableSorting: false,
 });
-
-const columnSizes = computed(() => {
-  const sizes = table.getAllColumns().map((column) => {
-    return {
-      id: column.id,
-      size: column.getSize(),
-    };
-  });
-
-  return sizes;
-});
-
-const noGroupBanners = computed(() => props.groups.length < 2);
 
 watchEffect(() => {
   const { groups, view } = props;
@@ -173,24 +162,29 @@ function handleUpdateCardOrder(data: {
 </script>
 
 <template>
-  <div class="table-container px-6 position-relative overflow-hidden">
-    <div class="table d-flex flex-column my-2">
-      <div class="table-header">
+  <div class="list-container">
+    <div class="list d-flex flex-column">
+      <div class="list-header">
         <template
           v-for="headerGroup in table.getHeaderGroups()"
           :key="headerGroup.id"
         >
           <div
-            class="table-header-group d-flex border-b-thin border-collapse bg-accent"
+            class="list-header-group d-flex border-b-thin border-collapse"
+            v-if="!noHeaders"
           >
             <template v-for="header in headerGroup.headers" :key="header.id">
-              <v-hover #="{ isHovering: isHeaderHovering, props: headerProps }">
+              <v-hover
+                #="{ isHovering: isHeaderHovering, props: headerProps }"
+                v-if="!noHeaders"
+              >
                 <v-card
                   v-bind="headerProps"
-                  class="table-header-cell py-1 px-4 text-caption user-select-none d-flex align-center text-truncate"
+                  class="list-header-cell py-1 px-4 text-caption user-select-none d-flex align-center text-truncate"
                   rounded="0"
                   color="accent"
                   :width="header.getSize()"
+                  :height="noHeaders ? 0 : 28"
                 >
                   <!-- Header Content -->
                   <FlexRender
@@ -238,25 +232,23 @@ function handleUpdateCardOrder(data: {
           </div>
         </template>
       </div>
-      <v-card class="table-groups overflow-scroll" rounded="0">
+      <v-card class="list-groups overflow-scroll">
         <template
           v-for="listGroup in table.getCoreRowModel().rows"
           :key="
-            'table-group-' +
+            'list-group-' +
             listGroup.original.id +
             '-' +
             listGroup.subRows.length
           "
         >
-          <table-view-group
+          <list-view-group
             v-model:loading="isLoading"
             :list-group="listGroup"
             :list-stages="listStages ?? []"
             :project-users="projectUsers ?? []"
             :sort-by="sortBy"
             :table
-            :column-sizes="columnSizes"
-            :no-group-banners="noGroupBanners"
             @toggle:group="toggleGroupExpansion"
             @row:delete="handleDeleteCard"
             @row:update:stage="handleUpdateCardStage"
@@ -271,23 +263,21 @@ function handleUpdateCardOrder(data: {
 </template>
 
 <style lang="scss" scoped>
-$table-border-color: var(--v-border-color);
-$table-border-opacity: var(--v-border-opacity);
+$list-border-color: var(--v-border-color);
+$list-border-opacity: var(--v-border-opacity);
+$list-row-height: 33px;
+$list-header-height: px;
+$list-cell-padding-x: 8px;
+$list-cell-padding-y: 0;
 
-.table-container {
-  .table {
-    max-height: calc(100vh - 180px);
+.list-container {
+  position: relative;
+
+  .list {
+    max-height: calc(100vh - (40px + 113px));
     // overflow: auto;
     min-width: 100%;
     width: fit-content;
-    border: 0.25px solid rgba($table-border-color, $table-border-opacity);
-    border-radius: 4px;
-    overflow: hidden;
-
-    .table-header {
-      border-bottom: 0.25px solid
-        rgba($table-border-color, $table-border-opacity);
-    }
   }
 
   .column-resizer {

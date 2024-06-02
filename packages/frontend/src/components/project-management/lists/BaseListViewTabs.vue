@@ -44,6 +44,8 @@ function getViewIconByType(type: ViewTypes) {
       return 'mdi-table';
     case ViewTypes.BOARD:
       return 'mdi-view-column';
+    case ViewTypes.LIST:
+      return 'mdi-list-box-outline';
     default:
       return 'mdi-view-carousel';
   }
