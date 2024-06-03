@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { ActivityType, type ActivityContent, type Card } from './types';
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
-import BaseCardCommentBox from './BaseCardCommentBox.vue';
-import BaseCardActivityTimeline from './BaseCardActivityTimeline.vue';
-import { useCardsService } from '@/composables/services/useCardsService';
-import { useSnackbarStore } from '@/stores/snackbar';
-import { useListStagesService } from '@/composables/services/useListStagesService';
-import { useCardActivitiesService } from '@/composables/services/useCardActivitiesService';
 import type { User } from '@/components/common/users/types';
-import type { ListStage } from '../lists/types';
-import objectUtils from '@/utils/object';
+import { useCardActivitiesService } from '@/composables/services/useCardActivitiesService';
+import { useCardsService } from '@/composables/services/useCardsService';
+import { useListStagesService } from '@/composables/services/useListStagesService';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
 import { useAuthStore } from '@/stores/auth';
+import { useSnackbarStore } from '@/stores/snackbar';
+import objectUtils from '@/utils/object';
 import { type Content } from '@tiptap/vue-3';
+import type { ListStage } from '../lists/types';
+import BaseCardActivityTimeline from './BaseCardActivityTimeline.vue';
+import BaseCardCommentBox from './BaseCardCommentBox.vue';
+import { ActivityType, type ActivityContent, type Card } from './types';
 
 const props = defineProps<{
   card: Card;
@@ -252,6 +252,13 @@ function updateCardListStage(listStage: ListStage) {
           content-class="ms-n3 my-4"
           show-first-names
           label="Assign"
+        />
+        <base-date-picker
+          class="text-body-2 ms-n2"
+          label="Due date"
+          icon="mdi-calendar"
+          v-model="cardCopy.startsAt"
+          @update:model-value="updateCardDueAt"
         />
         <base-date-picker
           class="text-body-2 ms-n2"

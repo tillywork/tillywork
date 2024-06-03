@@ -10,6 +10,7 @@ export interface Card {
   cardLists: CardList[];
   users: User[];
   data: any;
+  startsAt: string;
   dueAt: string;
   createdAt: string;
   updatedAt: string;
