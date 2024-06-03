@@ -385,6 +385,7 @@ watchEffect(() => {
               rounded="0"
               height="33"
               :to="`/pm/card/${row.original.id}`"
+              :ripple="false"
             >
               <v-hover
                 #="{ isHovering: isRowHovering, props: rowProps }"
@@ -397,6 +398,7 @@ watchEffect(() => {
                   class="table-row d-flex align-center text-body-2 flex-fill"
                   rounded="0"
                   link
+                  :ripple="false"
                 >
                   <template
                     v-for="cell in row.getVisibleCells()"

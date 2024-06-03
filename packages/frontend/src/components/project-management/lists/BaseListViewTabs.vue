@@ -132,6 +132,7 @@ watch(
           :class="
             selectedView?.id === view.id ? 'border-b-md border-b-primary' : ''
           "
+          :ripple="false"
         >
           <template #prepend>
             <v-icon :icon="getViewIconByType(view.type)" />
