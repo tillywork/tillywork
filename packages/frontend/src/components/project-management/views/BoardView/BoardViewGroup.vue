@@ -301,7 +301,11 @@ watchEffect(() => {
         style="min-height: calc(100vh - (40px + 113px + 77px))"
       >
         <template #item="{ element: card }">
-          <v-card class="board-card" :to="`/pm/card/${card.id}`">
+          <v-card
+            class="board-card"
+            :to="`/pm/card/${card.id}`"
+            :ripple="false"
+          >
             <v-card-item class="pa-2 align-start">
               <template #prepend>
                 <list-stage-selector
