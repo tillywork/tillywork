@@ -95,6 +95,10 @@ const dateToText = computed(() => {
 function getTextFromDate(date: string) {
   if (dayjs(date).isToday()) {
     return 'Today';
+  } else if (dayjs(dateValue.value).isTomorrow()) {
+    return 'Tomorrow';
+  } else if (dayjs(dateValue.value).isYesterday()) {
+    return 'Yesterday';
   } else {
     return dayjs(date).format('MMM D');
   }

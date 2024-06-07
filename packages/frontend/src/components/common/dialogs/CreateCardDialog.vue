@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import BaseEditorInput from '../base/BaseEditor/BaseEditorInput.vue';
 import type { CreateCardDto } from '@/components/project-management/cards/types';
-import { useDialog } from '@/composables/useDialog';
 import {
   type List,
   type ListStage,
 } from '@/components/project-management/lists/types';
+import { useCardsService } from '@/composables/services/useCardsService';
+import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { useDialog } from '@/composables/useDialog';
+import { useAuthStore } from '@/stores/auth';
+import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 import type { VForm } from 'vuetify/lib/components/index.mjs';
-import { useCardsService } from '@/composables/services/useCardsService';
-import { useSnackbarStore } from '@/stores/snackbar';
-import { useAuthStore } from '@/stores/auth';
-import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import BaseEditorInput from '../base/BaseEditor/BaseEditorInput.vue';
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -143,6 +143,12 @@ function handlePostCreate() {
             v-model="createCardDto.users"
             :users
             activator-hover-text="Assignee"
+          />
+          <base-date-picker
+            v-model="createCardDto.startsAt"
+            icon="mdi-calendar"
+            class="text-caption"
+            label="Start Date"
           />
           <base-date-picker
             v-model="createCardDto.dueAt"

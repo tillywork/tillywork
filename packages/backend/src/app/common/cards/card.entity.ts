@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-    Entity,
-    PrimaryGeneratedColumn,
     Column,
     CreateDateColumn,
-    UpdateDateColumn,
-    OneToMany,
     DeleteDateColumn,
-    ManyToMany,
+    Entity,
     JoinTable,
+    ManyToMany,
     ManyToOne,
+    OneToMany,
+    PrimaryGeneratedColumn,
     Relation,
+    UpdateDateColumn,
 } from "typeorm";
-import { CardList } from "./card-lists/card.list.entity";
 import { User } from "../users/user.entity";
 import { CardActivity } from "./card-activities/card.activity.entity";
+import { CardList } from "./card-lists/card.list.entity";
 
 @Entity()
 export class Card {
@@ -27,6 +27,8 @@ export class Card {
     @Column({ type: "jsonb", nullable: true })
     description?: any;
 
+    @Column({ type: "timestamp", nullable: true })
+    startsAt: Date;
     @Column({ type: "timestamp", nullable: true })
     dueAt: Date;
 
