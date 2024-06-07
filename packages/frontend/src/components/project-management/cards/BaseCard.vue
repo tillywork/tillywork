@@ -255,7 +255,7 @@ function updateCardListStage(listStage: ListStage) {
         />
         <base-date-picker
           class="text-body-2 ms-n2"
-          label="Due date"
+          label="Start date"
           icon="mdi-calendar"
           v-model="cardCopy.startsAt"
           @update:model-value="updateCardDueAt"
