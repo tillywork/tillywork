@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { User } from '@/components/common/users/types';
-import type { List, ListStage } from '../lists/types';
 import type { Content } from '@tiptap/vue-3';
+import type { List, ListStage } from '../lists/types';
 
 export interface Card {
   id: number;
@@ -10,6 +10,7 @@ export interface Card {
   cardLists: CardList[];
   users: User[];
   data: any;
+  startsAt: string;
   dueAt: string;
   createdAt: string;
   updatedAt: string;
@@ -30,6 +31,7 @@ export interface CreateCardDto {
   listId?: number;
   listStageId?: number;
   description?: Content;
+  startsAt?: string;
   dueAt?: string;
   users?: User[];
   listStage?: ListStage;

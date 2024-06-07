@@ -11,6 +11,7 @@ export class CreateCardDto {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     description?: any;
+    startsAt?: Date;
     dueAt?: Date;
     users?: User[];
     createdBy: number;

@@ -1,8 +1,8 @@
 import { registerAs } from "@nestjs/config";
+import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { config as dotenvConfig } from "dotenv";
 import { DataSource, DataSourceOptions } from "typeorm";
 import { TypeOrmLoggerContainer } from "../app/common/logger/typeorm.logger.container";
-import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { CreateUserTable1716293040055 } from "../migrations/1716293040055-create-user-table";
 import { CreateProjectTable1716293121622 } from "../migrations/1716293121622-create-project-table";
 import { CreateWorkspaceTable1716293265171 } from "../migrations/1716293265171-create-workspace-table";
@@ -21,6 +21,7 @@ import { AddOrderColumnToListGroups1716455762784 } from "../migrations/171645576
 import { AddOrderColumnToCardListsTable1716798868594 } from "../migrations/1716798868594-add-order-column-to-card-lists-table";
 import { AddCreatedAtUpdatedAtToCardListTable1716883730399 } from "../migrations/1716883730399-add-createdAt-updatedAt-to-card-list-table";
 import { AddListViewType1717363107808 } from "../migrations/1717363107808-add-list-view-type";
+import { AddStartsAtColumnToCardsTable1717406725195 } from "../migrations/1717406725195-add-starts-at-column-to-cards-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -43,6 +44,7 @@ const migrations = [
     AddOrderColumnToCardListsTable1716798868594,
     AddCreatedAtUpdatedAtToCardListTable1716883730399,
     AddListViewType1717363107808,
+    AddStartsAtColumnToCardsTable1717406725195,
 ];
 
 const config: TypeOrmModuleOptions = {
