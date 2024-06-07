@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { View, TableSortOption } from '../types';
+import type { View } from '../types';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import type { Card } from '../../cards/types';
 import { type ListGroup } from '../../lists/types';
@@ -27,10 +27,6 @@ const emit = defineEmits([
   'card:update:order',
 ]);
 
-const sortBy = ref<TableSortOption[] | undefined>(
-  props.view.sortBy ? [props.view.sortBy] : undefined
-);
-
 const { showSnackbar } = useSnackbarStore();
 const authStore = useAuthStore();
 
@@ -46,13 +42,6 @@ const { data: listStages } = listsStagesService.useGetListStagesQuery(
 const projectUsersService = useProjectUsersService();
 const { data: projectUsers } = projectUsersService.useProjectUsersQuery({
   projectId: authStore.project!.id,
-});
-
-watchEffect(() => {
-  const { view } = props;
-  if (view) {
-    sortBy.value = view.sortBy ? [view.sortBy] : undefined;
-  }
 });
 
 function toggleGroupExpansion(listGroup: ListGroup) {
@@ -128,8 +117,8 @@ function handleUpdateCardOrder(data: {
             v-model:loading="isLoading"
             :list-group="listGroup"
             :list-stages="listStages ?? []"
+            :view
             :project-users="projectUsers ?? []"
-            :sort-by="sortBy"
             @toggle:group="toggleGroupExpansion"
             @card:delete="handleDeleteCard"
             @card:update:stage="handleUpdateCardStage"

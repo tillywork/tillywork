@@ -7,6 +7,8 @@ export type FilterOperator =
     | "gte"
     | "lte"
     | "like"
+    | "like%"
+    | "%like"
     | "between"
     | "in"
     | "isNull";

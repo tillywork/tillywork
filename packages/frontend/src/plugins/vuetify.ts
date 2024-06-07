@@ -62,10 +62,20 @@ const vuetify = createVuetify({
       rounded: 'md',
     },
     VList: {
-      lines: false,
       density: 'compact',
       slim: true,
-      nav: true,
+      VListItem: {
+        VListItemTitle: {
+          class: 'text-body-2',
+        },
+      },
+    },
+    VNavigationDrawer: {
+      VList: {
+        lines: false,
+        slim: true,
+        nav: true,
+      },
     },
     VMenu: {
       transition: 'none',
@@ -76,16 +86,10 @@ const vuetify = createVuetify({
       size: 'small',
     },
     VSelect: {
-      VList: {
-        lines: 'one',
-        nav: false,
-      },
+      density: 'compact',
     },
     VAutocomplete: {
-      VList: {
-        lines: 'one',
-        nav: false,
-      },
+      density: 'compact',
     },
   },
 });

@@ -1,3 +1,4 @@
+import type { Filter } from '../filters/types';
 import type { List, ListGroupOptions } from '../lists/types';
 
 export interface View {
@@ -9,6 +10,7 @@ export interface View {
   groupBy: ListGroupOptions;
   sortBy?: TableSortOption;
   updatedAt: string;
+  filters?: Filter;
 }
 
 export enum ViewTypes {
@@ -58,6 +60,8 @@ export type FilterOperator =
   | 'in' // is in an array of values
   | 'nin' // is not in an array of values
   | 'like' // like (pattern matching)
+  | 'like%' // starts with
+  | '%like' // ends with
   | 'between' // between two values
   | 'isNull'; // checks if a value is null
 

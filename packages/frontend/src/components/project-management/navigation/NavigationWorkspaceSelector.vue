@@ -124,7 +124,7 @@ watch(
         <v-icon size="small">mdi-sitemap</v-icon>
         <span class="ml-1"> Your workspaces </span>
       </div>
-      <v-list class="bg-accent px-3">
+      <v-list class="px-3" nav :lines="false">
         <v-list-item
           v-for="workspace in workspaceQuery.data.value"
           :key="workspace.id"

@@ -4,15 +4,16 @@ import {
     Not,
     MoreThan,
     LessThan,
-    Any,
     IsNull,
     Between,
     In,
     Like,
+    And,
+    Equal,
+    FindOperator,
 } from "typeorm";
 import { FieldFilter, FilterGroup } from "../filters/types";
 import dayjs from "dayjs";
-import { ObjectHelper } from "./object.helper";
 
 @Injectable()
 export class QueryBuilderHelper {
@@ -46,7 +47,7 @@ export class QueryBuilderHelper {
         let mappedValue;
         switch (operator) {
             case "eq":
-                mappedValue = processedValue;
+                mappedValue = Equal(processedValue);
                 break;
             case "ne":
                 mappedValue = Not(processedValue);
@@ -59,6 +60,12 @@ export class QueryBuilderHelper {
                 break;
             case "like":
                 mappedValue = Like(`%${processedValue}%`);
+                break;
+            case "like%":
+                mappedValue = Like(`${processedValue}%`);
+                break;
+            case "%like":
+                mappedValue = Like(`%${processedValue}`);
                 break;
             case "between":
                 mappedValue = Between(processedValue[0], processedValue[1]);
@@ -109,29 +116,34 @@ export class QueryBuilderHelper {
                     const queryPart = QueryBuilderHelper.fieldFilterToQuery(
                         condition as FieldFilter
                     );
-                    // Adjust the merging strategy for nested conditions
+
                     return Object.entries(queryPart).reduce(
                         (acc, [key, value]) => {
-                            if (value instanceof Function) {
-                                // If the value is a function, use it directly without merging
-                                acc[key] = value;
+                            const current = acc[key];
+                            if (
+                                !!current &&
+                                this.isObject(current) &&
+                                this.isObject(value)
+                            ) {
+                                /**
+                                 * If key exists and both are objects, merge them
+                                 */
+                                acc[key] = { ...current, ...(value as object) };
+                            } else if (!!current && !this.isObject(value)) {
+                                /**
+                                 * If key exists, and the incoming value is not an object,
+                                 * multiple filters exist on the same property, merge them
+                                 * with And operator
+                                 */
+                                acc[key] = And(
+                                    current,
+                                    value as FindOperator<any>
+                                );
                             } else {
-                                const current = acc[key];
-                                if (
-                                    current &&
-                                    typeof current === "object" &&
-                                    typeof value === "object"
-                                ) {
-                                    // If both are objects, merge them
-                                    acc[key] = { ...current, ...value };
-                                } else if (current !== undefined) {
-                                    // If key exists but aren't both objects, convert to array
-                                    acc[key] = Array.isArray(current)
-                                        ? [...current, value]
-                                        : [current, value];
-                                } else {
-                                    acc[key] = value;
-                                }
+                                /**
+                                 * If key doesn't exist, set it
+                                 */
+                                acc[key] = value;
                             }
                             return acc;
                         },
@@ -139,22 +151,24 @@ export class QueryBuilderHelper {
                     );
                 }
             }, {});
-        } else if (filterGroup.or) {
-            const orConditions = filterGroup.or.map((subCondition) => {
-                return QueryBuilderHelper.isFilterGroup(subCondition)
-                    ? QueryBuilderHelper.buildQuery(subCondition)
-                    : QueryBuilderHelper.fieldFilterToQuery(subCondition);
-            });
-            // Use a conditional structure to handle 'or' relations
-            return orConditions.length === 1 ? orConditions[0] : {};
         }
+
         return {};
     }
 
-    // A type guard to check if a condition is a FilterGroup
     static isFilterGroup(
         condition: FieldFilter | FilterGroup
     ): condition is FilterGroup {
         return "and" in condition || "or" in condition;
+    }
+
+    /**
+     * Check if given value is an object
+     * and not a TypeORM operator such as Like or IsNull
+     * @param value
+     * @returns boolean
+     */
+    static isObject(value: any) {
+        return typeof value === "object" && !("_type" in value);
     }
 }

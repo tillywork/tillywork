@@ -7,7 +7,18 @@ const objectUtils = {
   areArraysEqual(arr1: any[], arr2: any[]): boolean {
     return (
       arr1.length === arr2.length &&
-      arr1.every((item, index) => item === arr2[index])
+      arr1.every((item, index) => {
+        if (
+          item &&
+          arr2[index] &&
+          typeof item === 'object' &&
+          typeof arr2[index] === 'object'
+        ) {
+          return this.isEqual(item, arr2[index]);
+        } else {
+          return item === arr2[index];
+        }
+      })
     );
   },
 
@@ -98,6 +109,27 @@ const objectUtils = {
 
   isNotEmptyObject(obj: PlainObject) {
     return Object.keys(obj).length > 0;
+  },
+
+  deepMergeObjects(target: PlainObject, source: PlainObject): PlainObject {
+    if (source && typeof source === 'object' && !Array.isArray(source)) {
+      Object.keys(source).forEach((key) => {
+        if (
+          source[key] &&
+          typeof source[key] === 'object' &&
+          !Array.isArray(source[key])
+        ) {
+          if (!target[key]) target[key] = {};
+          this.deepMergeObjects(target[key], source[key]);
+        } else if (Array.isArray(source[key])) {
+          target[key] = target[key] || [];
+          target[key] = target[key].concat(source[key]);
+        } else {
+          target[key] = source[key];
+        }
+      });
+    }
+    return target;
   },
 };
 

@@ -30,12 +30,14 @@ export class LoggingInterceptor implements NestInterceptor {
             }
         }
 
+        this.logger.log(`${request.id} - ${request.method} ${request.url}`);
+
         return next
             .handle()
             .pipe()
             .toPromise()
             .then((result) => {
-                this.logResponse(request, response, startTime);
+                // this.logResponse(request, response, startTime);
                 return result;
             })
             .catch((error) => {
