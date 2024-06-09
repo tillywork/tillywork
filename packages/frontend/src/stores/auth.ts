@@ -4,6 +4,7 @@ import type { RouteLocation } from 'vue-router/auto';
 import { useAuthService } from '@/composables/services/useAuthService';
 import { useSnackbarStore } from './snackbar';
 import type { Project } from '@/components/common/projects/types';
+import posthog from 'posthog-js';
 
 export const useAuthStore = defineStore('auth', {
   persist: true,
@@ -24,6 +25,12 @@ export const useAuthStore = defineStore('auth', {
      */
     setUser(user: User) {
       this.user = user;
+      if (user.id) {
+        posthog.identify(`${user.id}`, {
+          email: user.email,
+          name: `${user.firstName} ${user.lastName}`,
+        });
+      }
     },
 
     /**
