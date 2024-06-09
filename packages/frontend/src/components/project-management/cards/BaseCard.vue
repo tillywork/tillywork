@@ -239,34 +239,42 @@ function updateCardListStage(listStage: ListStage) {
         >Properties</v-card-text
       >
       <v-card-text>
-        <list-stage-selector
-          v-model="cardListStage"
-          :listStages="listStagesQuery.data.value ?? []"
-          size="default"
-          @update:model-value="updateCardListStage"
-        />
-        <base-user-selector
-          v-model="cardCopy.users"
-          :users="users ?? []"
-          @update:model-value="updateCardAssignees"
-          content-class="ms-n3 my-4"
-          show-first-names
-          label="Assign"
-        />
-        <base-date-picker
-          class="text-body-2 ms-n2"
-          label="Start date"
-          icon="mdi-calendar"
-          v-model="cardCopy.startsAt"
-          @update:model-value="updateCardDueAt"
-        />
-        <base-date-picker
-          class="text-body-2 ms-n2"
-          label="Due date"
-          icon="mdi-calendar"
-          v-model="cardCopy.dueAt"
-          @update:model-value="updateCardDueAt"
-        />
+        <div class="mb-4">
+          <list-stage-selector
+            v-model="cardListStage"
+            :listStages="listStagesQuery.data.value ?? []"
+            size="default"
+            @update:model-value="updateCardListStage"
+          />
+        </div>
+        <div class="my-4">
+          <base-user-selector
+            v-model="cardCopy.users"
+            :users="users ?? []"
+            @update:model-value="updateCardAssignees"
+            content-class="ms-n3"
+            show-first-names
+            label="Assign"
+          />
+        </div>
+        <div class="my-4">
+          <base-date-picker
+            class="text-body-2 ms-n2"
+            label="Start date"
+            icon="mdi-calendar"
+            v-model="cardCopy.startsAt"
+            @update:model-value="updateCardDueAt"
+          />
+        </div>
+        <div class="my-4">
+          <base-date-picker
+            class="text-body-2 ms-n2"
+            label="Due date"
+            icon="mdi-calendar"
+            v-model="cardCopy.dueAt"
+            @update:model-value="updateCardDueAt"
+          />
+        </div>
       </v-card-text>
     </v-card>
   </v-card>
