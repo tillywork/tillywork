@@ -2,12 +2,15 @@ export type SnackbarOptions = {
   message: string;
   color?: string;
   timeout?: number;
+  showConfirm?: boolean;
+  confirmText?: string;
+  onConfirm?: () => void;
 };
 
 export type Snackbar = {
   id: number;
   options: SnackbarOptions;
-  timeoutById?: number;
+  timeout?: number;
 };
 
 export const useSnackbarStore = defineStore('snackbar', {
@@ -24,12 +27,9 @@ export const useSnackbarStore = defineStore('snackbar', {
      */
     showSnackbar(options: SnackbarOptions): number {
       const id = this.nextId++;
-      const timeout = options.timeout ? options.timeout + 300 : 3300;
-      const timeoutById = setTimeout(() => {
-        this.closeSnackbar(id);
-      }, timeout);
+      const timeout = options.timeout ?? 4000;
 
-      this.snackbars.push({ id, options, timeoutById });
+      this.snackbars.push({ id, options, timeout });
       return id;
     },
 
@@ -40,7 +40,6 @@ export const useSnackbarStore = defineStore('snackbar', {
     closeSnackbar(id: number): void {
       const index = this.snackbars.findIndex((snackbar) => snackbar.id === id);
       if (index === -1) return;
-      clearTimeout(this.snackbars[index].timeoutById);
       this.snackbars.splice(index, 1);
     },
   },

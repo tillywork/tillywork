@@ -7,7 +7,7 @@ import {
   type Row,
   type Column,
 } from '@tanstack/vue-table';
-import type { View, TableSortOption } from '../types';
+import type { View } from '../types';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import type { Card } from '../../cards/types';
 import { type ListGroup } from '../../lists/types';
@@ -37,9 +37,6 @@ const emit = defineEmits([
   'row:update:order',
 ]);
 
-const sortBy = ref<TableSortOption[] | undefined>(
-  props.view.sortBy ? [props.view.sortBy] : undefined
-);
 const expandedState = ref<Record<string, boolean>>();
 
 const { showSnackbar } = useSnackbarStore();
@@ -75,7 +72,7 @@ const table = useVueTable({
 });
 
 watchEffect(() => {
-  const { groups, view } = props;
+  const { groups } = props;
   if (groups) {
     const state: Record<string, boolean> = {};
     groups.forEach((listGroup) => {
@@ -83,10 +80,6 @@ watchEffect(() => {
     });
     expandedState.value = state;
     table.setExpanded(expandedState.value);
-  }
-
-  if (view) {
-    sortBy.value = view.sortBy ? [view.sortBy] : undefined;
   }
 });
 
@@ -246,8 +239,8 @@ function handleUpdateCardOrder(data: {
             v-model:loading="isLoading"
             :list-group="listGroup"
             :list-stages="listStages ?? []"
+            :view
             :project-users="projectUsers ?? []"
-            :sort-by="sortBy"
             :table
             @toggle:group="toggleGroupExpansion"
             @row:delete="handleDeleteCard"

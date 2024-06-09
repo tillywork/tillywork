@@ -4,16 +4,14 @@ import type {
   CardList,
   CreateCardDto,
 } from '@/components/project-management/cards/types';
-import type {
-  QueryFilter,
-  TableSortOption,
-} from '@/components/project-management/views/types';
+import type { TableSortOption } from '@/components/project-management/views/types';
 import {
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
 } from '@tanstack/vue-query';
+import type { QueryFilter } from '@/components/project-management/filters/types';
 
 export interface CardsData {
   cards: Card[];
@@ -32,7 +30,7 @@ export interface GetGroupCardsInfiniteQueryParams {
   listId: number;
   groupId: number;
   initialCards?: CardsData;
-  filters?: QueryFilter;
+  filters?: Ref<QueryFilter>;
   sortBy?: Ref<TableSortOption[] | undefined>;
 }
 
@@ -104,10 +102,10 @@ export const useCardsService = () => {
           listId: listId,
           page: pageParam,
           limit: 15,
-          filters,
+          filters: filters?.value,
           sortBy: sortBy?.value,
         }),
-      queryKey: ['cards', { groupId }],
+      queryKey: ['cards', { groupId, filters: filters?.value }],
       getNextPageParam: (lastPage, allPages, lastPageParam) => {
         if (lastPage?.cards.length === 0) {
           return undefined;
@@ -123,7 +121,6 @@ export const useCardsService = () => {
               pageParams: [1],
             }
           : undefined,
-      staleTime: 1 * 60 * 1000,
     });
   }
 

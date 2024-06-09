@@ -1,6 +1,7 @@
 import type { CardsData } from '@/composables/services/useCardsService';
-import type { PaginationParams, QueryFilter } from '../views/TableView/types';
+import type { PaginationParams } from '../views/types';
 import type { View } from '../views/types';
+import type { QueryFilter } from '../filters/types';
 
 export interface List {
   id: number;
@@ -42,16 +43,16 @@ export const DEFAULT_LIST_GROUP_BY_OPTIONS = [
   {
     label: 'Stage',
     value: ListGroupOptions.LIST_STAGE,
-    icon: 'mdi-circle-slice-8'
+    icon: 'mdi-circle-slice-8',
   },
   {
     label: 'Assignee',
     value: ListGroupOptions.ASSIGNEES,
-    icon: 'mdi-account'
+    icon: 'mdi-account',
   },
   {
     label: 'Due Date',
     value: ListGroupOptions.DUE_DATE,
-    icon: 'mdi-clock-time-four'
+    icon: 'mdi-clock-time-four',
   },
 ];

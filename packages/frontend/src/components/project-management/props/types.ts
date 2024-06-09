@@ -6,16 +6,40 @@ export interface Prop {
 }
 
 export enum PropTypes {
-  TEXT = 'TEXT',
-  TEXT_AREA = 'TEXT_AREA',
-  DROPDOWN = 'DROPDOWN',
-  LABEL = 'LABEL',
-  USER = 'USER',
-  DATE = 'DATE',
-  NUMBER = 'NUMBER',
-  CHECKBOX = 'CHECKBOX',
-  EMAIL = 'EMAIL',
-  URL = 'URL',
-  CURRENCY = 'CURRENCY',
-  STAGE = 'STAGE',
+  TEXT = 'text',
+  TEXT_AREA = 'text_area',
+  DROPDOWN = 'dropdown',
+  LABEL = 'label',
+  USER = 'user',
+  DATE = 'date',
+  NUMBER = 'number',
+  CHECKBOX = 'checkbox',
+  EMAIL = 'email',
+  URL = 'url',
+  CURRENCY = 'currency',
+  STAGE = 'stage',
+  RICH = 'rich',
 }
+
+export const DEFAULT_CARD_PROPS: Omit<Prop, 'listId'>[] = [
+  {
+    name: 'title',
+    type: PropTypes.TEXT,
+    required: true,
+  },
+  {
+    name: 'description',
+    type: PropTypes.RICH,
+    required: false,
+  },
+  {
+    name: 'dueAt',
+    type: PropTypes.DATE,
+    required: false,
+  },
+  {
+    name: 'users',
+    type: PropTypes.USER,
+    required: false,
+  },
+];

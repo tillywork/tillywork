@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { FindManyOptions, Repository } from "typeorm";
+import { FindManyOptions, FindOptionsWhere, Repository } from "typeorm";
 import { Filter } from "./filter.entity";
 import { CreateFilterDto } from "./dto/create.filter.dto";
 import { UpdateFilterDto } from "./dto/update.filter.dto";
@@ -30,7 +30,11 @@ export class FiltersService {
         return filter;
     }
 
-    async findOneBy({ where }: { where: object }): Promise<Filter> {
+    async findOneBy({
+        where,
+    }: {
+        where: FindOptionsWhere<Filter>;
+    }): Promise<Filter> {
         return this.filtersRepository.findOne({ where });
     }
 

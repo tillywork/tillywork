@@ -20,6 +20,7 @@ export const useProjectUsersService = () => {
     select,
   }: {
     projectId: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     select?: (data: ProjectUser[]) => any[];
   }) {
     return useQuery({

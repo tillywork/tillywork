@@ -5,7 +5,7 @@ import {
   type ListStage,
 } from '../../lists/types';
 import { useCardsService } from '@/composables/services/useCardsService';
-import type { TableSortOption } from '../types';
+import type { View } from '../types';
 import { useDialog } from '@/composables/useDialog';
 import type { ProjectUser } from '@/components/common/projects/types';
 import { DIALOGS } from '@/components/common/dialogs/types';
@@ -13,6 +13,9 @@ import type { Card } from '../../cards/types';
 import draggable from 'vuedraggable';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
+import objectUtils from '@/utils/object';
+import { cloneDeep } from 'lodash';
+import type { QueryFilter } from '../../filters/types';
 
 const emit = defineEmits([
   'toggle:group',
@@ -24,8 +27,8 @@ const emit = defineEmits([
 ]);
 const props = defineProps<{
   listGroup: ListGroup;
-  sortBy?: TableSortOption[];
   listStages: ListStage[];
+  view: View;
   projectUsers: ProjectUser[];
 }>();
 const cardMenuOpen = ref<Card | null>();
@@ -35,8 +38,10 @@ const dialog = useDialog();
 const cardsService = useCardsService();
 const { showSnackbar } = useSnackbarStore();
 
-const groupCopy = ref(props.listGroup);
-const sortBy = computed(() => props.sortBy);
+const groupCopy = ref(cloneDeep(props.listGroup));
+const sortBy = computed(() =>
+  props.view.sortBy ? [cloneDeep(props.view.sortBy)] : []
+);
 
 const isDraggingDisabled = computed(() => {
   return (
@@ -50,16 +55,26 @@ const users = computed(() =>
   props.projectUsers.map((projectUser) => projectUser.user)
 );
 
-const cards = ref<Card[]>(props.listGroup.cards?.cards ?? []);
-const total = ref(props.listGroup.cards?.total ?? 0);
+const filters = computed<QueryFilter>(() => {
+  if (props.view.filters) {
+    return objectUtils.deepMergeObjects(
+      cloneDeep(props.view.filters),
+      cloneDeep(props.listGroup.filter) ?? {}
+    );
+  } else {
+    return props.listGroup.filter ?? {};
+  }
+});
+
+const cards = ref<Card[]>([]);
+const total = ref(0);
 const isDragging = ref(false);
 
 const { fetchNextPage, isFetching, hasNextPage, refetch, data } =
   cardsService.useGetGroupCardsInfinite({
     listId: groupCopy.value.listId,
     groupId: groupCopy.value.id,
-    filters: groupCopy.value.filter,
-    initialCards: groupCopy.value.cards,
+    filters,
     sortBy,
   });
 
@@ -227,18 +242,23 @@ function handleUserSelection({ users, card }: { users: User[]; card: Card }) {
   });
 }
 
-watch(data, (v) => {
-  if (v) {
-    cards.value = v?.pages.map((page) => page.cards).flat() ?? [];
-    total.value = v?.pages[0].total ?? 0;
-  }
-});
+watch(
+  data,
+  (v) => {
+    if (v) {
+      cards.value = v?.pages.map((page) => page.cards).flat() ?? [];
+      total.value = v?.pages[0].total ?? 0;
+    }
+  },
+  { immediate: true }
+);
 
 watch(
-  () => props.listGroup.cards,
+  () => props.view,
   () => {
     refetch();
-  }
+  },
+  { deep: true }
 );
 
 watchEffect(() => {

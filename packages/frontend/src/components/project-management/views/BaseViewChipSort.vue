@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { DEFAULT_SORT_OPTIONS, type ListSortOption } from './types';
 import BaseViewChip from './BaseViewChip.vue';
-import type { TableSortOption } from './TableView/types';
+import type { TableSortOption } from './types';
 
 const sortBy = defineModel<TableSortOption>();
 const sortByOptions = ref(DEFAULT_SORT_OPTIONS);

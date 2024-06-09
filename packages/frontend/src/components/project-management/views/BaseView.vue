@@ -17,22 +17,31 @@ import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import BoardView from './BoardView/BoardView.vue';
 import ListView from './ListView/ListView.vue';
+import BaseViewChipFilter from './BaseViewChipFilter/BaseViewChipFilter.vue';
+import { useFitlersService } from '@/composables/services/useFiltersService';
+import {
+  FilterEntityTypes,
+  type Filter,
+  type QueryFilter,
+} from '../filters/types';
+import { cloneDeep } from 'lodash';
 
 const props = defineProps<{
   view: View;
   list: List;
 }>();
 const listId = computed(() => props.list.id);
-const viewCopy = ref<View>({ ...props.view });
+const viewCopy = ref<View>(cloneDeep(props.view));
 const viewsService = useViewsService();
 const cardsService = useCardsService();
 const listGroupsService = useListGroupsService();
+const { useCreateFilterMutation, useUpdateFilterMutation } =
+  useFitlersService();
 const dialog = useDialog();
 const { showSnackbar } = useSnackbarStore();
 const queryClient = useQueryClient();
 
 const groupBy = computed(() => props.view.groupBy);
-const sortBy = computed(() => (props.view.sortBy ? [props.view.sortBy] : []));
 
 const isViewLoading = ref(false);
 
@@ -81,7 +90,6 @@ const {
   refetch: refetchListGroups,
 } = listGroupsService.useGetListGroupsByOptionQuery({
   listId,
-  sortCardsBy: sortBy,
   groupBy,
 });
 
@@ -91,6 +99,9 @@ const { mutateAsync: deleteCard, isPending: isDeletingCard } =
   cardsService.useDeleteCardMutation();
 const { mutateAsync: updateCardList } =
   cardsService.useUpdateCardListMutation();
+
+const { mutateAsync: createFilter } = useCreateFilterMutation();
+const { mutateAsync: updateFilter } = useUpdateFilterMutation();
 
 function handleGroupBySelection(option: ListGroupOptions) {
   updateViewMutation.mutateAsync({
@@ -230,6 +241,63 @@ function handleUpdateCardOrder({
   });
 }
 
+function handleUpdateFilters(filters: QueryFilter | null) {
+  viewCopy.value = {
+    ...viewCopy.value,
+    filters: cloneDeep(filters) as Filter,
+  };
+}
+
+function handleSaveFilters() {
+  if (!props.view.filters) {
+    createFilter({
+      entityId: viewCopy.value.id,
+      entityType: FilterEntityTypes.VIEW,
+      name: 'Custom Filters',
+      where: viewCopy.value.filters?.where ?? {},
+    })
+      .then(() => {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'views',
+            {
+              listId: listId.value,
+            },
+          ],
+        });
+      })
+      .catch(() => {
+        showSnackbar({
+          message: 'Something went wrong, please try again.',
+          color: 'error',
+        });
+      });
+  } else {
+    updateFilter({
+      id: props.view.filters.id,
+      updateFilterDto: {
+        where: viewCopy.value.filters?.where,
+      },
+    })
+      .then(() => {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'views',
+            {
+              listId: listId.value,
+            },
+          ],
+        });
+      })
+      .catch(() => {
+        showSnackbar({
+          message: 'Something went wrong, please try again.',
+          color: 'error',
+        });
+      });
+  }
+}
+
 watch(
   () => props.view,
   (v) => {
@@ -270,17 +338,12 @@ watch(
           v-model="viewCopy.groupBy"
           @update:model-value="handleGroupBySelection"
         />
-        <v-chip
-          link
-          rounded="xl"
-          density="comfortable"
-          variant="outlined"
-          color="primary"
-          v-tooltip="'Coming soon'"
-        >
-          <v-icon icon="mdi-filter" size="16" start />
-          Filters
-        </v-chip>
+        <base-view-chip-filter
+          :filters="viewCopy.filters"
+          :view-id="viewCopy.id"
+          @update="handleUpdateFilters"
+          @save="handleSaveFilters"
+        />
         <base-view-chip-sort
           v-model="viewCopy.sortBy"
           @update:model-value="handleSortBySelection"
@@ -293,7 +356,7 @@ watch(
         <table-view
           v-model:loading="isViewLoading"
           :columns
-          :view
+          :view="viewCopy"
           :groups="listGroups ?? []"
           @row:delete="handleDeleteCard"
           @row:update:stage="handleUpdateCardStage"
@@ -305,7 +368,7 @@ watch(
       </template>
       <template v-else-if="viewCopy.type === ViewTypes.BOARD">
         <board-view
-          :view
+          :view="viewCopy"
           :list-groups="listGroups ?? []"
           @card:delete="handleDeleteCard"
           @card:update:assignees="handleUpdateAssignees"
@@ -318,9 +381,8 @@ watch(
         <list-view
           v-model:loading="isViewLoading"
           :columns
-          :view
+          :view="viewCopy"
           :groups="listGroups ?? []"
-          no-headers
           @row:delete="handleDeleteCard"
           @row:update:stage="handleUpdateCardStage"
           @row:update:due-date="handleUpdateDueDate"

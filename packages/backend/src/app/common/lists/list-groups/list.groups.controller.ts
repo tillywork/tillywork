@@ -1,6 +1,5 @@
 import { Controller, Post, Body, Param, Put, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../../auth/guards/jwt.auth.guard";
-import { ViewSortOption } from "../../views/types";
 import { UpdateListGroupDto } from "./dto/update.list.group.dto";
 import { ListGroupOptions } from "../types";
 import { ListGroupsService } from "./list.groups.service";
@@ -20,15 +19,11 @@ export class ListGroupsController {
     generateGroups(
         @Param("listId") listId: number,
         @Body()
-        {
-            groupBy,
-            sortCardsBy,
-        }: { groupBy: ListGroupOptions; sortCardsBy: ViewSortOption[] }
+        { groupBy }: { groupBy: ListGroupOptions }
     ) {
         return this.listGroupsService.generateGroups({
             listId,
             groupBy: groupBy ?? ListGroupOptions.ALL,
-            sortCardsBy,
         });
     }
 

@@ -11,6 +11,7 @@ import {
 import { ViewSortOption, ViewTypes } from "./types";
 import { List } from "../lists/list.entity";
 import { ListGroupOptions } from "../lists/types";
+import { QueryFilter } from "../filters/types";
 
 @Entity()
 export class View {
@@ -44,4 +45,6 @@ export class View {
 
     @Column({ type: "bigint" })
     listId: number;
+
+    filters?: QueryFilter;
 }

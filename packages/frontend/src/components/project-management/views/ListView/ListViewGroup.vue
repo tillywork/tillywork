@@ -12,7 +12,7 @@ import {
   type ListStage,
 } from '../../lists/types';
 import { useCardsService } from '@/composables/services/useCardsService';
-import type { TableSortOption } from '../types';
+import type { View } from '../types';
 import { useDialog } from '@/composables/useDialog';
 import type { ProjectUser } from '@/components/common/projects/types';
 import { DIALOGS } from '@/components/common/dialogs/types';
@@ -21,6 +21,9 @@ import { FlexRender } from '@tanstack/vue-table';
 import draggable from 'vuedraggable';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
+import objectUtils from '@/utils/object';
+import { cloneDeep } from 'lodash';
+import type { QueryFilter } from '../../filters/types';
 
 const emit = defineEmits([
   'toggle:group',
@@ -32,10 +35,10 @@ const emit = defineEmits([
 ]);
 const props = defineProps<{
   listGroup: Row<ListGroup>;
-  sortBy?: TableSortOption[];
   listStages: ListStage[];
   projectUsers: ProjectUser[];
   table: Table<ListGroup>;
+  view: View;
 }>();
 const rowMenuOpen = ref<Row<Card> | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
@@ -44,8 +47,10 @@ const dialog = useDialog();
 const cardsService = useCardsService();
 const { showSnackbar } = useSnackbarStore();
 
-const groupCopy = ref(props.listGroup);
-const sortBy = computed(() => props.sortBy);
+const groupCopy = ref(cloneDeep(props.listGroup));
+const sortBy = computed(() =>
+  props.view.sortBy ? [cloneDeep(props.view.sortBy)] : []
+);
 const tableSortState = computed(() =>
   sortBy.value?.map((sortOption) => {
     return { id: sortOption.key, desc: sortOption.order === 'desc' };
@@ -72,15 +77,25 @@ const users = computed(() =>
   props.projectUsers.map((projectUser) => projectUser.user)
 );
 
-const cards = ref<Card[]>(props.listGroup.original.cards?.cards ?? []);
-const total = ref(props.listGroup.original.cards?.total ?? 0);
+const filters = computed<QueryFilter>(() => {
+  if (props.view.filters) {
+    return objectUtils.deepMergeObjects(
+      cloneDeep(props.view.filters),
+      cloneDeep(props.listGroup.original.filter) ?? {}
+    );
+  } else {
+    return props.listGroup.original.filter ?? {};
+  }
+});
+
+const cards = ref<Card[]>([]);
+const total = ref(0);
 
 const { fetchNextPage, isFetching, hasNextPage, refetch, data } =
   cardsService.useGetGroupCardsInfinite({
     listId: groupCopy.value.original.listId,
     groupId: groupCopy.value.original.id,
-    filters: groupCopy.value.original.filter,
-    initialCards: groupCopy.value.original.cards,
+    filters,
     sortBy,
   });
 
@@ -273,19 +288,24 @@ function handleUserSelection({ users, card }: { users: User[]; card: Card }) {
   });
 }
 
-watch(data, (v) => {
-  if (v) {
-    cards.value = v?.pages.map((page) => page.cards).flat() ?? [];
-    total.value = v?.pages[0].total ?? 0;
-    draggableCards.value = groupTable.getCoreRowModel().rows;
-  }
-});
+watch(
+  data,
+  (v) => {
+    if (v) {
+      cards.value = v?.pages.map((page) => page.cards).flat() ?? [];
+      total.value = v?.pages[0].total ?? 0;
+      draggableCards.value = groupTable.getCoreRowModel().rows;
+    }
+  },
+  { immediate: true }
+);
 
 watch(
-  () => props.listGroup.original.cards,
+  () => props.view,
   () => {
     refetch();
-  }
+  },
+  { deep: true }
 );
 
 watchEffect(() => {
@@ -360,7 +380,7 @@ watchEffect(() => {
       rounded="0"
       :height="groupHeight"
       :max-height="maxHeight"
-      :nav="false"
+      :lines="false"
     >
       <v-infinite-scroll
         :height="groupHeight"

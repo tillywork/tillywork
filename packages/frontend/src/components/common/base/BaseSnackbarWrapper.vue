@@ -23,6 +23,17 @@ const snackbarOffsets = computed(() => {
       :style="{ bottom: `${snackbarOffsets[index]}px` }"
     >
       {{ snackbar.options.message }}
+      <template #actions>
+        <v-btn
+          variant="text"
+          class="text-capitalize"
+          v-if="snackbar.options.showConfirm"
+          @click="snackbar.options.onConfirm"
+          color="info"
+        >
+          {{ snackbar.options.confirmText ?? 'Confirm' }}
+        </v-btn>
+      </template>
     </v-snackbar>
   </div>
 </template>
