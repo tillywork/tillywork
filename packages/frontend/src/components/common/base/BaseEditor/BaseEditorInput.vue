@@ -199,7 +199,11 @@ initEditor();
 
   ul,
   ol {
-    padding: 0 24px;
+    padding: 3px 24px;
+
+    li {
+      padding: 3px 2px;
+    }
   }
 
   /* Placeholder (at the top) */
