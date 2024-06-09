@@ -85,6 +85,18 @@ watch(dateValue, (v) => {
   }
 });
 
+watch(dateModel, (v) => {
+  if (Array.isArray(v) && Array.isArray(dateValue.value)) {
+    if (!objectUtils.areArraysEqual(v, dateValue.value)) {
+      dateValue.value = v;
+    }
+  } else {
+    if (v !== dateValue.value) {
+      dateValue.value = v;
+    }
+  }
+});
+
 const textColorClass = computed(() => {
   if (!dateValue.value) {
     return 'text-default';

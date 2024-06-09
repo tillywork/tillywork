@@ -10,8 +10,11 @@ definePage({
 
 const route = useRoute('/pm/card/[cardId]');
 const cardsService = useCardsService();
+const cardId = computed(() => +route.params.cardId);
 
-const { data: card } = cardsService.useGetCardQuery(+route.params.cardId);
+const { data: card, refetch } = cardsService.useGetCardQuery({
+  cardId,
+});
 
 watch(
   card,
@@ -21,6 +24,13 @@ watch(
     }
   },
   { immediate: true }
+);
+
+watch(
+  () => route.params.cardId,
+  () => {
+    refetch();
+  }
 );
 </script>
 

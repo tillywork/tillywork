@@ -13,6 +13,7 @@ import type { ListStage } from '../lists/types';
 import BaseCardActivityTimeline from './BaseCardActivityTimeline.vue';
 import BaseCardCommentBox from './BaseCardCommentBox.vue';
 import { ActivityType, type ActivityContent, type Card } from './types';
+import { cloneDeep } from 'lodash';
 
 const props = defineProps<{
   card: Card;
@@ -20,7 +21,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits(['click:close']);
 const authStore = useAuthStore();
-const cardCopy = ref<Card>({ ...props.card });
+const cardCopy = ref<Card>(cloneDeep(props.card));
 const comment = ref<Content>();
 const isCommentEmpty = ref<boolean>();
 const cardsService = useCardsService();

@@ -133,10 +133,10 @@ export const useCardsService = () => {
     });
   }
 
-  function useGetCardQuery(cardId: number) {
+  function useGetCardQuery({ cardId }: { cardId: Ref<number> }) {
     return useQuery({
       queryKey: ['cards', cardId],
-      queryFn: () => getCard(cardId),
+      queryFn: () => getCard(cardId.value),
     });
   }
 
