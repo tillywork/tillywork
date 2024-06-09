@@ -35,6 +35,10 @@ Run the image from Docker Hub passing in the database information:
 docker run --name tillywork -e TW_DB_HOST=host.docker.internal -e TW_DB_NAME=tillywork -e TW_DB_USERNAME=postgres -e TW_DB_PASSWORD=12345678 -e TW_SECRET_KEY=tillywork -d -p 80:80 tillywork/tillywork:latest
 ```
 
+### 3. Create an account
+
+Go to `/register` on your instance to create an account. For example, `http://localhost:4200/register`
+
 ## Docker Compose
 
 For companies and production use, use Docker compose to get set up.
@@ -64,3 +68,7 @@ Run the Docker compose file:
 ```
 docker compose -p tillywork up -d
 ```
+
+### 4. Create an account
+
+Go to `/register` on your instance to create an account. For example, `http://localhost:4200/register`
