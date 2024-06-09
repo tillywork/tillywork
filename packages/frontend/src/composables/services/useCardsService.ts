@@ -4,16 +4,14 @@ import type {
   CardList,
   CreateCardDto,
 } from '@/components/project-management/cards/types';
-import type {
-  QueryFilter,
-  TableSortOption,
-} from '@/components/project-management/views/types';
+import type { TableSortOption } from '@/components/project-management/views/types';
 import {
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
 } from '@tanstack/vue-query';
+import type { QueryFilter } from '@/components/project-management/filters/types';
 
 export interface CardsData {
   cards: Card[];

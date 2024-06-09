@@ -12,7 +12,7 @@ import {
   type ListStage,
 } from '../../lists/types';
 import { useCardsService } from '@/composables/services/useCardsService';
-import type { QueryFilter, View } from '../types';
+import type { View } from '../types';
 import { useDialog } from '@/composables/useDialog';
 import type { ProjectUser } from '@/components/common/projects/types';
 import { DIALOGS } from '@/components/common/dialogs/types';
@@ -23,6 +23,7 @@ import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
+import type { QueryFilter } from '../../filters/types';
 
 const emit = defineEmits([
   'toggle:group',
@@ -85,10 +86,10 @@ const filters = computed<QueryFilter>(() => {
   if (props.view.filters) {
     return objectUtils.deepMergeObjects(
       cloneDeep(props.view.filters),
-      cloneDeep(props.listGroup.original.filter)
+      cloneDeep(props.listGroup.original.filter) ?? {}
     );
   } else {
-    return props.listGroup.original.filter;
+    return props.listGroup.original.filter ?? {};
   }
 });
 

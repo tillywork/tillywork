@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { type QueryFilter, type FieldFilter } from '../types';
 import BaseViewChip from '../BaseViewChip.vue';
 import BaseViewChipFilterItem from './BaseViewChipFilterItem.vue';
 import { PropTypes } from '../../props/types';
-import type { FieldFilterOption } from './types';
 import type { VForm } from 'vuetify/components';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
 import { useWorkspaceStore } from '@/stores/workspace';
+import type { QueryFilter, FieldFilter } from '../../filters/types';
+import type { FieldFilterOption } from './types';
 
 const props = defineProps<{
   filters?: QueryFilter;

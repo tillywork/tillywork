@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import BaseCardPropertyValueBtn from '@/components/project-management/cards/BaseCardPropertyValueBtn.vue';
 import { useDate } from '@/composables/useDate';
-import type { DateRangeSuggestion } from './types';
+import { DATE_RANGE_SUGGESTIONS, type DateRangeSuggestion } from './types';
 import objectUtils from '@/utils/object';
 
 const { dayjs } = useDate();
@@ -65,7 +65,7 @@ const processedDate = computed({
 });
 
 const selectedRangeSuggestion = computed(() => {
-  return dateRangeSuggestions.find((suggestion) => {
+  return DATE_RANGE_SUGGESTIONS.find((suggestion) => {
     return objectUtils.areArraysEqual(
       suggestion.value,
       dateValue.value as string[]
@@ -125,102 +125,6 @@ const dateToText = computed(() => {
 
   return getTextFromDate(dateValue.value);
 });
-
-/**
- * Today
- * Yesterday
- * Tomorrow
- * Next 7 days
- * Last 7 days
- * This week
- * Next week
- * Last week
- * Last month
- * This month
- * Next month
- * Today & earlier
- * Later than today
- * Last Quarter
- * This Quarter
- * Next Quarter
- * Overdue
- * Next year
- * This year
- * Last Year
- * Exact date
- * Before date
- * After date
- * Date range
- */
-//TODO update value on suggestion click
-/**
- * Suggestions for date ranges.
- * Used to set query value and operator
- * when looking for specific data, or
- * selecting a dynamic date range.
- */
-const dateRangeSuggestions: DateRangeSuggestion[] = [
-  {
-    title: 'Today',
-    value: [':startOfDay', ':endOfDay'],
-  },
-  {
-    title: 'Yesterday',
-    value: [':startOfYesterday', ':endOfYesterday'],
-  },
-  {
-    title: 'Tomorrow',
-    value: [':startOfTomorrow', ':endOfTomorrow'],
-  },
-  {
-    title: 'This week',
-    value: [':startOfWeek', ':endOfWeek'],
-  },
-  {
-    title: 'Next week',
-    value: [':startOfNextWeek', ':endOfNextWeek'],
-  },
-  {
-    title: 'Last week',
-    value: [':startOfLastWeek', ':endOfLastWeek'],
-  },
-  {
-    title: 'This month',
-    value: [':startOfMonth', ':endOfMonth'],
-  },
-  {
-    title: 'Next month',
-    value: [':startOfNextMonth', ':endOfNextMonth'],
-  },
-  {
-    title: 'Last month',
-    value: [':startOfLastMonth', ':endOfLastMonth'],
-  },
-  {
-    title: 'This year',
-    value: [':startOfYear', ':endOfYear'],
-  },
-  {
-    title: 'Next year',
-    value: [':startOfNextYear', ':endOfNextYear'],
-  },
-  {
-    title: 'Last year',
-    value: [':startOfLastYear', ':endOfLastYear'],
-  },
-  {
-    title: 'Today and earlier',
-    value: [':startOfTime', ':endOfDay'],
-  },
-  {
-    title: 'Later than today',
-    value: [':endOfDay', ':endOfTime'],
-  },
-  {
-    title: 'Overdue',
-    value: [':startOfTime', ':startOfDay'],
-  },
-];
 
 function getTextFromDate(date: string) {
   /**
@@ -288,7 +192,7 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
         class="border-e-thin overflow-scroll"
       >
         <template
-          v-for="suggestion in dateRangeSuggestions"
+          v-for="suggestion in DATE_RANGE_SUGGESTIONS"
           :key="suggestion.title"
         >
           <v-list-item

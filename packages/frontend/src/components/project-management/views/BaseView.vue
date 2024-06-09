@@ -7,7 +7,7 @@ import { type ColumnDef } from '@tanstack/vue-table';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
-import { type QueryFilter, type TableSortOption } from './types';
+import { type TableSortOption } from './types';
 import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { ViewTypes, type View } from './types';
@@ -19,7 +19,11 @@ import BoardView from './BoardView/BoardView.vue';
 import ListView from './ListView/ListView.vue';
 import BaseViewChipFilter from './BaseViewChipFilter/BaseViewChipFilter.vue';
 import { useFitlersService } from '@/composables/services/useFiltersService';
-import { FilterEntityTypes, type Filter } from '../filters/types';
+import {
+  FilterEntityTypes,
+  type Filter,
+  type QueryFilter,
+} from '../filters/types';
 import { cloneDeep } from 'lodash';
 
 const props = defineProps<{

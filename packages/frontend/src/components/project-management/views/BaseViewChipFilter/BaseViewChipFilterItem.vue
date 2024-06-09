@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import validationUtils from '@/utils/validation';
 import { PropTypes } from '../../props/types';
-import { type FieldFilter, type FilterOperator } from '../types';
 import type { FieldFilterOption } from './types';
 import type { User } from '@/components/common/users/types';
+import type { FieldFilter, FilterOperator } from '../../filters/types';
 
 const filter = defineModel<FieldFilter>({
   required: true,

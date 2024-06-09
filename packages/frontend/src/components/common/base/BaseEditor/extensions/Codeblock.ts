@@ -20,4 +20,5 @@ lowlight.register('python', python);
 
 export const Codeblock = CodeBlockLowlight.configure({
   lowlight,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }) as Extension<CodeBlockLowlightOptions, any>;
