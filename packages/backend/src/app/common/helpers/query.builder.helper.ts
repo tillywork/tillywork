@@ -26,14 +26,23 @@ export class QueryBuilderHelper {
     }
 
     static processValue(value: any) {
+        const datePlaceholders = {
+            ":startOfDay": dayjs().startOf("day").toISOString(),
+            ":endOfDay": dayjs().endOf("day").toISOString(),
+        };
+
         if (Array.isArray(value)) {
             return value.map((value) => {
                 return this.processValue(value);
             });
         } else if (typeof value === "string") {
-            return value
-                .replace(":startOfDay", dayjs().startOf("day").toISOString())
-                .replace(":endOfDay", dayjs().endOf("day").toISOString());
+            Object.keys(datePlaceholders).forEach((placeholder) => {
+                value = value.replace(
+                    placeholder,
+                    datePlaceholders[placeholder]
+                );
+            });
+            return value;
         } else {
             return value;
         }
@@ -70,11 +79,22 @@ export class QueryBuilderHelper {
             case "between":
                 mappedValue = Between(processedValue[0], processedValue[1]);
                 break;
+            case "nbetween":
+                mappedValue = Not(
+                    Between(processedValue[0], processedValue[1])
+                );
+                break;
             case "in":
                 mappedValue = In(processedValue);
                 break;
+            case "nin":
+                mappedValue = Not(In(processedValue));
+                break;
             case "isNull":
                 mappedValue = IsNull();
+                break;
+            case "isNotNull":
+                mappedValue = Not(IsNull());
                 break;
             default:
                 throw new Error(
@@ -87,23 +107,6 @@ export class QueryBuilderHelper {
             mappedValue
         );
         return queryObject;
-    }
-
-    static applyOrConditions(
-        orConditions: (FieldFilter | FilterGroup)[]
-    ): any[] {
-        return orConditions.map((condition) => {
-            if (
-                (condition as FilterGroup).and ||
-                (condition as FilterGroup).or
-            ) {
-                return QueryBuilderHelper.buildQuery(condition as FilterGroup);
-            } else {
-                return QueryBuilderHelper.fieldFilterToQuery(
-                    condition as FieldFilter
-                );
-            }
-        });
     }
 
     static buildQuery(filterGroup: FilterGroup): any {

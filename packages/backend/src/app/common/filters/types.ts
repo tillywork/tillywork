@@ -1,17 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type FilterOperator =
-    | "eq"
-    | "ne"
-    | "gt"
-    | "lt"
-    | "gte"
-    | "lte"
-    | "like"
-    | "like%"
-    | "%like"
-    | "between"
-    | "in"
-    | "isNull";
+    | "eq" // equals
+    | "ne" // not equal
+    | "gt" // greater than
+    | "lt" // less than
+    | "gte" // greater than or equal to
+    | "lte" // less than or equal to
+    | "in" // is in an array of values
+    | "nin" // is not in an array of values
+    | "like" // like (pattern matching)
+    | "like%" // starts with
+    | "%like" // ends with
+    | "between" // between two values
+    | "nbetween" // not between two values
+    | "isNull" // checks if a value is null
+    | "isNotNull"; // value is not null
 
 export interface FieldFilter {
     field: string;

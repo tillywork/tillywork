@@ -63,13 +63,15 @@ export type FilterOperator =
   | 'like%' // starts with
   | '%like' // ends with
   | 'between' // between two values
-  | 'isNull'; // checks if a value is null
+  | 'nbetween' // not between two values
+  | 'isNull' // checks if a value is null
+  | 'isNotNull'; // value is not null
 
 export interface FieldFilter {
   field: string;
   operator: FilterOperator;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  value?: any; // Value can depend on the operator, like an array for 'in' & 'nin', range for 'between', etc.
+  value?: any;
 }
 
 export interface FilterGroup {

@@ -8,11 +8,14 @@ import type { VForm } from 'vuetify/components';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
+import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { useWorkspaceStore } from '@/stores/workspace';
 
 const props = defineProps<{
   filters?: QueryFilter;
   viewId: number;
 }>();
+const emit = defineEmits(['save', 'update']);
 
 const filtersForm = ref<VForm>();
 const filtersMenu = ref(false);
@@ -22,9 +25,14 @@ const filtersCopy = ref<QueryFilter>(
 );
 const isSnackbarOpen = ref(false);
 const snackbarId = ref<number>();
-const emit = defineEmits(['save', 'update']);
 
 const { showSnackbar, closeSnackbar } = useSnackbarStore();
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const { useProjectUsersQuery } = useProjectUsersService();
+const { data: users } = useProjectUsersQuery({
+  projectId: selectedWorkspace.value!.projectId,
+  select: (projectUsers) => projectUsers.map((pj) => pj.user),
+});
 
 const fields = ref<FieldFilterOption[]>([
   {
@@ -35,14 +43,14 @@ const fields = ref<FieldFilterOption[]>([
     type: PropTypes.TEXT,
     icon: 'mdi-format-title',
   },
-  {
-    title: 'Status',
-    field: 'status',
-    operator: 'eq',
-    value: 'open',
-    type: PropTypes.DROPDOWN,
-    icon: 'mdi-list-status',
-  },
+  //   {
+  //     title: 'Status',
+  //     field: 'status',
+  //     operator: 'eq',
+  //     value: 'open',
+  //     type: PropTypes.DROPDOWN,
+  //     icon: 'mdi-list-status',
+  //   },
   {
     title: 'Due Date',
     field: 'dueAt',
@@ -55,7 +63,7 @@ const fields = ref<FieldFilterOption[]>([
     title: 'Assignee',
     field: 'users.id',
     operator: 'in',
-    value: '',
+    value: [],
     type: PropTypes.USER,
     icon: 'mdi-account',
   },
@@ -174,7 +182,7 @@ watch(
 </script>
 
 <template>
-  <v-menu v-model="filtersMenu" :close-on-content-click="false" width="500">
+  <v-menu v-model="filtersMenu" :close-on-content-click="false" width="750">
     <template #activator="{ props }">
       <base-view-chip
         v-bind="props"
@@ -210,12 +218,13 @@ watch(
           <v-form ref="filtersForm">
             <template
               v-for="(filter, index) in filtersCopy.where?.and"
-              :key="index"
+              :key="filter.type"
             >
               <base-view-chip-filter-item
                 v-model="filtersCopy.where.and[index]"
                 :index
                 :fields
+                :users="users ?? []"
                 @delete="removeFilter"
               />
             </template>

@@ -1,21 +1,26 @@
 <script setup lang="ts">
 import validationUtils from '@/utils/validation';
 import { PropTypes } from '../../props/types';
-import { type FieldFilter } from '../types';
+import { type FieldFilter, type FilterOperator } from '../types';
 import type { FieldFilterOption } from './types';
+import type { User } from '@/components/common/users/types';
 
 const filter = defineModel<FieldFilter>({
   required: true,
 });
-const selectedFilter = computed(() =>
-  props.fields.find((f) => f.field === filter.value.field)
-);
 const props = defineProps<{
   index: number;
   fields: FieldFilterOption[];
+  users: User[];
 }>();
 const emit = defineEmits(['delete']);
+
 const { rules } = validationUtils;
+const filterOption = ref<string>();
+
+const selectedFilter = computed(() =>
+  props.fields.find((f) => f.field === filter.value.field)
+);
 
 const dropdownOptions = computed(() => {
   switch (filter.value.field) {
@@ -26,6 +31,10 @@ const dropdownOptions = computed(() => {
     default:
       return [];
   }
+});
+
+const hideFilterValue = computed(() => {
+  return ['isNull', 'isNotNull'].includes(filterOption.value ?? '');
 });
 
 const textOperators = [
@@ -58,9 +67,108 @@ const statusOptions = [
   },
 ];
 
+const filteringOptions = [
+  {
+    title: 'Is',
+    value: 'between',
+  },
+  {
+    title: 'Is not',
+    value: 'nbetween',
+  },
+  {
+    title: 'Is empty',
+    value: 'isNull',
+  },
+  {
+    title: 'Is not empty',
+    value: 'isNotNull',
+  },
+];
+
 function removeFilter() {
   emit('delete', props.index);
 }
+
+/**
+ * Triggered when filteringOptions are selected
+ * @param value Value of the option selected
+ */
+function handleFilteringOptionChange(value: string) {
+  filter.value.operator = mapFilterOptionValueToOperator(value);
+}
+
+/**
+ * Returns the correct operator
+ * depending on filter type
+ * based on the incoming fitler option
+ * value.
+ * @param value Value of the option to map
+ */
+function mapFilterOptionValueToOperator(value: string): FilterOperator {
+  switch (selectedFilter.value?.type) {
+    case PropTypes.USER:
+    case PropTypes.DROPDOWN:
+      if (value === 'between') {
+        return 'in';
+      } else if (value === 'nbetween') {
+        return 'nin';
+      } else {
+        return value as FilterOperator;
+      }
+    case PropTypes.DATE:
+    default:
+      return value as FilterOperator;
+  }
+}
+
+/**
+ * Returns the correct filter option
+ * depending on filter type
+ * based on the filter operator
+ * value.
+ * @param value Value of the operator to map
+ */
+function mapFilterOperatorToFileringOption(
+  value: FilterOperator
+): FilterOperator {
+  switch (selectedFilter.value?.type) {
+    case PropTypes.USER:
+    case PropTypes.DROPDOWN:
+      if (value === 'in') {
+        return 'between';
+      } else if (value === 'nin') {
+        return 'nbetween';
+      } else {
+        return value as FilterOperator;
+      }
+    case PropTypes.DATE:
+    default:
+      return value as FilterOperator;
+  }
+}
+
+// Reset filter value and operator when field changes
+watch(selectedFilter, (v) => {
+  if (v) {
+    filter.value = {
+      ...filter.value,
+      value: v.value,
+      operator: v.operator,
+    };
+  }
+});
+
+// Set selected filter option when filter is initialized
+watch(
+  filter,
+  (v) => {
+    if (v) {
+      filterOption.value = mapFilterOperatorToFileringOption(v.operator);
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -97,16 +205,16 @@ function removeFilter() {
         label="Operator"
         single-line
         hide-details
-        max-width="120"
+        max-width="150"
         auto-select-first
         :rules="[rules.required]"
+        class="me-2"
       />
       <v-text-field
         v-model="filter.value"
         label="Value"
         hide-details
         single-line
-        width="30%"
         :rules="[rules.required]"
       />
     </template>
@@ -121,10 +229,45 @@ function removeFilter() {
       />
     </template>
     <template v-else-if="selectedFilter?.type === PropTypes.DATE">
-      <base-date-picker v-model="filter.value" text-field range />
+      <v-autocomplete
+        :items="filteringOptions"
+        v-model="filterOption"
+        @update:model-value="handleFilteringOptionChange"
+        label="Operator"
+        single-line
+        hide-details
+        max-width="150"
+        auto-select-first
+        :rules="[rules.required]"
+        class="me-2"
+      />
+      <base-date-picker
+        v-if="!hideFilterValue"
+        v-model="filter.value"
+        text-field
+        range
+      />
     </template>
     <template v-else-if="selectedFilter?.type === PropTypes.USER">
-      <base-user-selector v-model="filter.value" :users="[]" />
+      <v-autocomplete
+        :items="filteringOptions"
+        v-model="filterOption"
+        @update:model-value="handleFilteringOptionChange"
+        label="Operator"
+        single-line
+        hide-details
+        max-width="150"
+        auto-select-first
+        :rules="[rules.required]"
+        class="me-2"
+      />
+      <base-user-selector
+        v-if="!hideFilterValue"
+        v-model="filter.value"
+        :users
+        text-field
+        return-id
+      />
     </template>
     <base-icon-btn
       icon="mdi-close"

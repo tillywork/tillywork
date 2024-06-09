@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import BaseCardPropertyValueBtn from '@/components/project-management/cards/BaseCardPropertyValueBtn.vue';
 import { useDate } from '@/composables/useDate';
+import type { DateRangeSuggestion } from './types';
+import objectUtils from '@/utils/object';
 
 const { dayjs } = useDate();
 
 const dateModel = defineModel<string | string[]>();
-const dateValue = ref<string | string[] | undefined>(dateModel.value);
 
 const props = defineProps<{
   label?: string;
@@ -20,23 +21,56 @@ const dateDialog = defineModel<boolean>('dialog', {
   default: false,
 });
 
+const dateValue = ref<string | string[] | undefined>(dateModel.value);
+
 const processedDate = computed({
   get() {
     if (Array.isArray(dateValue.value)) {
-      return dateValue.value.map((dateString) => new Date(dateString));
+      /**
+       * If the date starts with :
+       * it is a placeholder, don't
+       * return a value
+       */
+      if (dateValue.value[0].startsWith(':')) {
+        return undefined;
+      } else {
+        return dateValue.value.map((dateString) => {
+          return new Date(dateString);
+        });
+      }
     }
 
-    return dateValue.value ? new Date(dateValue.value) : undefined;
+    /**
+     * If the date starts with :
+     * it is a placeholder, don't
+     * return a value
+     */
+    if (dateValue.value?.startsWith(':')) {
+      return undefined;
+    } else {
+      return dateValue.value ? new Date(dateValue.value) : undefined;
+    }
   },
   set(v) {
     if (v) {
       if (Array.isArray(v)) {
-        dateValue.value = v.map((dateObject) => dateObject.toISOString());
+        dateValue.value = v.map((dateObject) => {
+          return dateObject.toISOString();
+        });
       } else {
         dateValue.value = v.toISOString();
       }
     }
   },
+});
+
+const selectedRangeSuggestion = computed(() => {
+  return dateRangeSuggestions.find((suggestion) => {
+    return objectUtils.areArraysEqual(
+      suggestion.value,
+      dateValue.value as string[]
+    );
+  });
 });
 
 watch(dateValue, (v) => {
@@ -81,7 +115,7 @@ const dateToText = computed(() => {
   if (Array.isArray(dateValue.value)) {
     let text = getTextFromDate(dateValue.value[0]);
 
-    if (dateValue.value.length > 1) {
+    if (dateValue.value.length > 1 && !dateValue.value[0].startsWith(':')) {
       text +=
         ' ~ ' + getTextFromDate(dateValue.value[dateValue.value.length - 1]);
     }
@@ -92,16 +126,101 @@ const dateToText = computed(() => {
   return getTextFromDate(dateValue.value);
 });
 
+/**
+ * Today
+ * Yesterday
+ * Tomorrow
+ * Next 7 days
+ * Last 7 days
+ * This week
+ * Next week
+ * Last week
+ * Last month
+ * This month
+ * Next month
+ * Today & earlier
+ * Later than today
+ * Last Quarter
+ * This Quarter
+ * Next Quarter
+ * Overdue
+ * Next year
+ * This year
+ * Last Year
+ * Exact date
+ * Before date
+ * After date
+ * Date range
+ */
+//TODO update value on suggestion click
+/**
+ * Suggestions for date ranges.
+ * Used to set query value and operator
+ * when looking for specific data, or
+ * selecting a dynamic date range.
+ */
+const dateRangeSuggestions: DateRangeSuggestion[] = [
+  {
+    title: 'Today',
+    value: [':startOfDay', ':endOfDay'],
+  },
+  {
+    title: 'Yesterday',
+    value: [':startOfYesterday', ':endOfYesterday'],
+  },
+  {
+    title: 'Tomorrow',
+    value: [':startOfTomorrow', ':endOfTomorrow'],
+  },
+  {
+    title: 'This week',
+    value: [':startOfWeek', ':endOfWeek'],
+  },
+  {
+    title: 'Next week',
+    value: [':startOfNextWeek', ':endOfNextWeek'],
+  },
+  {
+    title: 'Last week',
+    value: [':startOfLastWeek', ':endOfLastWeek'],
+  },
+  {
+    title: 'Today and earlier',
+    value: [':startOfTime', ':endOfDay'],
+  },
+  {
+    title: 'Later than today',
+    value: [':endOfDay', ':endOfTime'],
+  },
+  {
+    title: 'Overdue',
+    value: [':startOftime', ':startOfDay'],
+  },
+];
+
 function getTextFromDate(date: string) {
+  /**
+   * If the date starts with :
+   * it is a placeholder, get
+   * label from dateRangeSuggestions
+   */
+  if (date.startsWith(':')) {
+    return selectedRangeSuggestion.value?.title ?? date;
+  }
+
   if (dayjs(date).isToday()) {
     return 'Today';
-  } else if (dayjs(dateValue.value).isTomorrow()) {
+  } else if (dayjs(date).isTomorrow()) {
     return 'Tomorrow';
-  } else if (dayjs(dateValue.value).isYesterday()) {
+  } else if (dayjs(date).isYesterday()) {
     return 'Yesterday';
   } else {
     return dayjs(date).format('MMM D');
   }
+}
+
+function handleSuggestionClick(suggestion: DateRangeSuggestion) {
+  dateValue.value = suggestion.value;
 }
 </script>
 
@@ -134,13 +253,37 @@ function getTextFromDate(date: string) {
         </base-card-property-value-btn>
       </template>
     </template>
-    <v-date-picker
-      v-model="processedDate"
-      show-adjacent-months
-      color="primary"
-      hide-header
-      :multiple="range ? 'range' : undefined"
-      landscape
-    />
+    <v-container
+      fluid
+      class="d-flex pa-0 border-thin rounded-md overflow-hidden"
+    >
+      <v-list
+        v-if="range"
+        width="200"
+        max-height="338"
+        class="border-e-thin overflow-scroll"
+      >
+        <template
+          v-for="suggestion in dateRangeSuggestions"
+          :key="suggestion.title"
+        >
+          <v-list-item
+            @click="handleSuggestionClick(suggestion)"
+            :active="suggestion.title === selectedRangeSuggestion?.title"
+          >
+            <v-list-item-title>{{ suggestion.title }}</v-list-item-title>
+          </v-list-item>
+        </template>
+      </v-list>
+      <v-date-picker
+        v-model="processedDate"
+        show-adjacent-months
+        color="primary"
+        border="none"
+        hide-header
+        :multiple="range ? 'range' : undefined"
+        landscape
+      />
+    </v-container>
   </v-menu>
 </template>
