@@ -189,8 +189,12 @@ initEditor();
 }
 
 .tiptap {
+  line-height: 1.5;
+
   > * + * {
-    margin-top: 0.75em;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    padding: 3px 2px;
   }
 
   ul,
