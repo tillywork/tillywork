@@ -16,6 +16,7 @@ import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import type { QueryFilter } from '../../filters/types';
+import type { TableSortOption } from '@/components/common/tables/FalconTable.vue';
 
 const emit = defineEmits([
   'toggle:group',
@@ -39,16 +40,12 @@ const cardsService = useCardsService();
 const { showSnackbar } = useSnackbarStore();
 
 const groupCopy = ref(cloneDeep(props.listGroup));
-const sortBy = computed(() =>
+const sortBy = computed<TableSortOption[]>(() =>
   props.view.sortBy ? [cloneDeep(props.view.sortBy)] : []
 );
 
 const isDraggingDisabled = computed(() => {
-  return (
-    ![ListGroupOptions.LIST_STAGE, ListGroupOptions.ALL].includes(
-      props.listGroup.type
-    ) || sortBy.value
-  );
+  return sortBy.value && sortBy.value.length > 0;
 });
 
 const users = computed(() =>
@@ -146,8 +143,7 @@ function onDragStart() {
 
   if (isDraggingDisabled.value) {
     showSnackbar({
-      message:
-        'Dragging cards is only enabled when sorting is disabled and when grouping by list stage.',
+      message: 'Dragging cards is only enabled when sorting is disabled.',
       color: 'error',
       timeout: 5000,
     });

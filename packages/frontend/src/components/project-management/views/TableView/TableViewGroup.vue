@@ -12,7 +12,7 @@ import {
   type ListStage,
 } from '../../lists/types';
 import { useCardsService } from '@/composables/services/useCardsService';
-import type { View } from '../types';
+import type { TableSortOption, View } from '../types';
 import { useDialog } from '@/composables/useDialog';
 import type { ProjectUser } from '@/components/common/projects/types';
 import { DIALOGS } from '@/components/common/dialogs/types';
@@ -53,7 +53,7 @@ const cardsService = useCardsService();
 const { showSnackbar } = useSnackbarStore();
 
 const groupCopy = ref(cloneDeep(props.listGroup));
-const sortBy = computed(() =>
+const sortBy = computed<TableSortOption[]>(() =>
   props.view.sortBy ? [cloneDeep(props.view.sortBy)] : []
 );
 const tableSortState = computed(() =>
@@ -71,11 +71,7 @@ const maxHeight = computed(() =>
 );
 
 const isDraggingDisabled = computed(() => {
-  return (
-    ![ListGroupOptions.LIST_STAGE, ListGroupOptions.ALL].includes(
-      props.listGroup.original.type
-    ) || sortBy.value
-  );
+  return sortBy.value && sortBy.value.length > 0;
 });
 
 const users = computed(() =>
