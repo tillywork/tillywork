@@ -36,7 +36,7 @@ const { data: projects } = projectsService.useGetProjectsQuery({
   enabled: projectsEnabled,
 });
 
-if (isAuthenticated()) {
+if (import.meta.env.MODE === 'production' && isAuthenticated()) {
   posthog.identify(`${user.value?.id}`, {
     email: user.value?.email,
     name: `${user.value?.firstName} ${user.value?.lastName}`,
