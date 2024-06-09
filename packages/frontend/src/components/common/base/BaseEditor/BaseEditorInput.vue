@@ -191,10 +191,13 @@ initEditor();
 .tiptap {
   line-height: 1.5;
 
+  * {
+    padding: 3px 0;
+  }
+
   > * + * {
     margin-top: 1px;
     margin-bottom: 1px;
-    padding: 3px 2px;
   }
 
   ul,
