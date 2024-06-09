@@ -15,6 +15,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useProjectsService } from '@/composables/services/useProjectsService';
 import { useThemeStore } from '@/stores/theme';
 import { useTheme } from 'vuetify';
+import posthog from 'posthog-js';
 
 const themeStore = useThemeStore();
 
@@ -24,7 +25,7 @@ const { stateStore } = useState();
 const dialog = useDialog();
 const authStore = useAuthStore();
 const { isAuthenticated, setProject } = authStore;
-const { project } = storeToRefs(authStore);
+const { project, user } = storeToRefs(authStore);
 const projectsEnabled = computed(() => !project.value && isAuthenticated());
 const workspacesEnabled = computed(() => !!project.value && isAuthenticated());
 
@@ -34,6 +35,13 @@ const { data: workspaces } = workspacesService.useGetWorkspacesQuery({
 const { data: projects } = projectsService.useGetProjectsQuery({
   enabled: projectsEnabled,
 });
+
+if (isAuthenticated()) {
+  posthog.identify(`${user.value?.id}`, {
+    email: user.value?.email,
+    name: `${user.value?.firstName} ${user.value?.lastName}`,
+  });
+}
 
 /*
  * This handles setting the user's theme mode (dark or light)
