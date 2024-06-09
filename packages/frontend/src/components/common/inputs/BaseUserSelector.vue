@@ -100,7 +100,7 @@ watch(selectedUsers, (v) => {
           hide-details
           autocomplete="off"
           multiple
-          width="100"
+          width="90"
         >
           <template #chip="{ item, props }">
             <v-chip

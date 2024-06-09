@@ -29,6 +29,75 @@ export class QueryBuilderHelper {
         const datePlaceholders = {
             ":startOfDay": dayjs().startOf("day").toISOString(),
             ":endOfDay": dayjs().endOf("day").toISOString(),
+            ":startOfYesterday": dayjs()
+                .subtract(1, "day")
+                .startOf("day")
+                .toISOString(),
+            ":endOfYesterday": dayjs()
+                .subtract(1, "day")
+                .endOf("day")
+                .toISOString(),
+            ":startOfTomorrow": dayjs()
+                .add(1, "day")
+                .startOf("day")
+                .toISOString(),
+            ":endOfTomorrow": dayjs().add(1, "day").endOf("day").toISOString(),
+            ":startOfLastWeek": dayjs()
+                .subtract(1, "week")
+                .startOf("week")
+                .toISOString(),
+            ":endOfLastWeek": dayjs()
+                .subtract(1, "week")
+                .endOf("week")
+                .toISOString(),
+            ":startOfWeek": dayjs().startOf("week").toISOString(),
+            ":endOfWeek": dayjs().endOf("week").toISOString(),
+            ":startOfNextWeek": dayjs()
+                .add(1, "week")
+                .startOf("week")
+                .toISOString(),
+            ":endOfNextWeek": dayjs()
+                .add(1, "week")
+                .endOf("week")
+                .toISOString(),
+            ":startOfLastMonth": dayjs()
+                .subtract(1, "month")
+                .startOf("month")
+                .toISOString(),
+            ":endOfLastMonth": dayjs()
+                .subtract(1, "month")
+                .endOf("month")
+                .toISOString(),
+            ":startOfMonth": dayjs().startOf("month").toISOString(),
+            ":endOfMonth": dayjs().endOf("month").toISOString(),
+            ":startOfNextMonth": dayjs()
+                .add(1, "month")
+                .startOf("month")
+                .toISOString(),
+            ":endOfNextMonth": dayjs()
+                .add(1, "month")
+                .endOf("month")
+                .toISOString(),
+            ":startOfLastYear": dayjs()
+                .subtract(1, "year")
+                .startOf("year")
+                .toISOString(),
+            ":endOfLastYear": dayjs()
+                .subtract(1, "year")
+                .endOf("year")
+                .toISOString(),
+            ":startOfYear": dayjs().startOf("year").toISOString(),
+            ":endOfYear": dayjs().endOf("year").toISOString(),
+            ":startOfNextYear": dayjs()
+                .add(1, "year")
+                .startOf("year")
+                .toISOString(),
+            ":endOfNextYear": dayjs()
+                .add(1, "year")
+                .endOf("year")
+                .toISOString(),
+            ":startOfTime": dayjs(0).toISOString(),
+            ":endOfTime": dayjs("2500").toISOString(),
         };
 
         if (Array.isArray(value)) {

@@ -186,7 +186,7 @@ watch(
       class="me-2"
       single-line
       hide-details
-      max-width="40%"
+      max-width="33%"
       auto-select-first
       :rules="[rules.required]"
     >
@@ -205,7 +205,7 @@ watch(
         label="Operator"
         single-line
         hide-details
-        max-width="150"
+        max-width="160"
         auto-select-first
         :rules="[rules.required]"
         class="me-2"
@@ -236,7 +236,7 @@ watch(
         label="Operator"
         single-line
         hide-details
-        max-width="150"
+        max-width="160"
         auto-select-first
         :rules="[rules.required]"
         class="me-2"
@@ -256,7 +256,7 @@ watch(
         label="Operator"
         single-line
         hide-details
-        max-width="150"
+        max-width="160"
         auto-select-first
         :rules="[rules.required]"
         class="me-2"

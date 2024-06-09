@@ -185,6 +185,30 @@ const dateRangeSuggestions: DateRangeSuggestion[] = [
     value: [':startOfLastWeek', ':endOfLastWeek'],
   },
   {
+    title: 'This month',
+    value: [':startOfMonth', ':endOfMonth'],
+  },
+  {
+    title: 'Next month',
+    value: [':startOfNextMonth', ':endOfNextMonth'],
+  },
+  {
+    title: 'Last month',
+    value: [':startOfLastMonth', ':endOfLastMonth'],
+  },
+  {
+    title: 'This year',
+    value: [':startOfYear', ':endOfYear'],
+  },
+  {
+    title: 'Next year',
+    value: [':startOfNextYear', ':endOfNextYear'],
+  },
+  {
+    title: 'Last year',
+    value: [':startOfLastYear', ':endOfLastYear'],
+  },
+  {
     title: 'Today and earlier',
     value: [':startOfTime', ':endOfDay'],
   },
@@ -194,7 +218,7 @@ const dateRangeSuggestions: DateRangeSuggestion[] = [
   },
   {
     title: 'Overdue',
-    value: [':startOftime', ':startOfDay'],
+    value: [':startOfTime', ':startOfDay'],
   },
 ];
 
