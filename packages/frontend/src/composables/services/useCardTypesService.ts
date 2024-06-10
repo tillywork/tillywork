@@ -1,9 +1,15 @@
-import { useQuery } from '@tanstack/vue-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import { useHttp } from '../useHttp';
-import type { CardType } from '@/components/project-management/cards/types';
+import type {
+  CardType,
+  CreateCardTypeDto,
+} from '@/components/project-management/cards/types';
+import { useWorkspaceStore } from '@/stores/workspace';
 
 export const useCardTypesService = () => {
   const { sendRequest } = useHttp();
+  const queryClient = useQueryClient();
+  const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
 
   function findAll({
     workspaceId,
@@ -30,7 +36,60 @@ export const useCardTypesService = () => {
     });
   }
 
+  function create(cardTypeDto: CreateCardTypeDto) {
+    return sendRequest('/card-types', {
+      method: 'POST',
+      data: cardTypeDto,
+    });
+  }
+
+  function useCreateMutation() {
+    return useMutation({
+      mutationFn: create,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'cardTypes',
+            {
+              workspaceId: selectedWorkspace.value?.id,
+            },
+          ],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['workspaces'],
+        });
+      },
+    });
+  }
+
+  function remove(id: number) {
+    return sendRequest(`/card-types/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  function useRemoveMutation() {
+    return useMutation({
+      mutationFn: remove,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'cardTypes',
+            {
+              workspaceId: selectedWorkspace.value?.id,
+            },
+          ],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['workspaces'],
+        });
+      },
+    });
+  }
+
   return {
     useFindAllQuery,
+    useCreateMutation,
+    useRemoveMutation,
   };
 };

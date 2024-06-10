@@ -35,7 +35,12 @@ export class CardTypesService {
     }
 
     async create(createCardTypeDto: CreateCardTypeDto): Promise<CardType> {
-        const cardType = this.cardTypesRepository.create(createCardTypeDto);
+        const cardType = this.cardTypesRepository.create({
+            ...createCardTypeDto,
+            workspace: {
+                id: createCardTypeDto.workspaceId,
+            },
+        });
         return this.cardTypesRepository.save(cardType);
     }
 
@@ -48,8 +53,9 @@ export class CardTypesService {
         return this.cardTypesRepository.save(cardType);
     }
 
+    //TODO for cards and lists that are using the removed types, we need to receive the new card type and update them
     async remove(id: number): Promise<void> {
         const cardType = await this.findOne(id);
-        await this.cardTypesRepository.remove(cardType);
+        await this.cardTypesRepository.softRemove(cardType);
     }
 }

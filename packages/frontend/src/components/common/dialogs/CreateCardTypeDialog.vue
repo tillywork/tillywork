@@ -1,0 +1,90 @@
+<script setup lang="ts">
+import { useDialog } from '@/composables/useDialog';
+import { type VForm } from 'vuetify/components';
+import validationUtils from '@/utils/validation';
+import { useSnackbarStore } from '@/stores/snackbar';
+import { useQueryClient } from '@tanstack/vue-query';
+import { useCardTypesService } from '@/composables/services/useCardTypesService';
+import { useWorkspaceStore } from '@/stores/workspace';
+import type { CreateCardTypeDto } from '@/components/project-management/cards/types';
+
+const { rules } = validationUtils;
+const dialog = useDialog();
+const queryClient = useQueryClient();
+const { showSnackbar } = useSnackbarStore();
+const { useCreateMutation } = useCardTypesService();
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+
+const cardTypeForm = ref<VForm>();
+const cardTypeDto = ref<CreateCardTypeDto>({
+  name: '',
+  workspaceId: selectedWorkspace.value!.id,
+});
+
+const { mutateAsync: createCardType, isPending } = useCreateMutation();
+
+async function handleCreate() {
+  const isValid = await cardTypeForm.value?.validate();
+  if (isValid?.valid) {
+    createCardType(cardTypeDto.value)
+      .then(() => {
+        dialog.closeDialog();
+        queryClient.invalidateQueries({
+          queryKey: [
+            'cardTypes',
+            {
+              workspaceId: selectedWorkspace.value?.id,
+            },
+          ],
+        });
+      })
+      .catch(() => {
+        showSnackbar({
+          message: 'Something went wrong, please try again.',
+          color: 'error',
+          timeout: 5000,
+        });
+      });
+  }
+}
+</script>
+
+<template>
+  <v-card color="surface" elevation="24" :loading="isPending">
+    <div class="d-flex align-center ps-0 pa-4">
+      <v-card-subtitle>Create card type</v-card-subtitle>
+      <v-spacer />
+      <base-icon-btn
+        icon="mdi-close"
+        color="default"
+        @click="dialog.closeDialog()"
+      />
+    </div>
+    <v-form
+      ref="cardTypeForm"
+      @submit.prevent="handleCreate"
+      validate-on="submit"
+    >
+      <div class="pa-4 py-0">
+        <v-text-field
+          v-model="cardTypeDto.name"
+          :rules="[rules.required]"
+          label="Name*"
+          autofocus
+        />
+      </div>
+      <v-card-actions class="d-flex justify-start align-center py-0 px-4">
+        <v-spacer />
+
+        <v-btn
+          density="comfortable"
+          variant="flat"
+          class="text-caption px-4 ms-4"
+          type="submit"
+          :loading="isPending"
+          >Create</v-btn
+        >
+      </v-card-actions>
+    </v-form>
+  </v-card>
+</template>

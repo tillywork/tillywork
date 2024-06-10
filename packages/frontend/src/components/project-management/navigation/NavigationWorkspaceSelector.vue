@@ -54,6 +54,12 @@ watch(
       if (!workspaces.length) {
         selectedWorkspace.value = null;
       }
+
+      if (workspaces.length && selectedWorkspace.value) {
+        selectedWorkspace.value =
+          workspaces.find((w) => w.id === selectedWorkspace.value?.id) ??
+          selectedWorkspace.value;
+      }
     }
   },
   { deep: true }

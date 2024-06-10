@@ -22,6 +22,7 @@ const dialogComponents = {
   [DIALOGS.CREATE_WORKSPACE]: () => import('./CreateWorkspaceDialog.vue'),
   [DIALOGS.ONBOARDING]: () => import('./OnboardingDialog.vue'),
   [DIALOGS.SETTINGS]: () => import('./SettingsDialog.vue'),
+  [DIALOGS.CREATE_CARD_TYPE]: () => import('./CreateCardTypeDialog.vue'),
 };
 
 const currentDialogComponent = computed(() => {

@@ -51,6 +51,8 @@ export class Workspace {
     @JoinTable()
     users: Relation<User[]>;
 
-    @OneToMany(() => CardType, (cardType) => cardType.workspace)
+    @OneToMany(() => CardType, (cardType) => cardType.workspace, {
+        eager: true,
+    })
     cardTypes: Relation<CardType[]>;
 }

@@ -69,3 +69,8 @@ export type CardType = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type CreateCardTypeDto = {
+  name: string;
+  workspaceId: number;
+};
