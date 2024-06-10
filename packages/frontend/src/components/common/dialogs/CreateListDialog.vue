@@ -6,17 +6,25 @@ import validationUtils from '@/utils/validation';
 import type { List } from '@/components/project-management/lists/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
+import { useCardTypesService } from '@/composables/services/useCardTypesService';
+import { useWorkspaceStore } from '@/stores/workspace';
 
 const listsService = useListsService();
 const dialog = useDialog();
 const { rules } = validationUtils;
 const { showSnackbar } = useSnackbarStore();
 const queryClient = useQueryClient();
+const { useFindAllQuery } = useCardTypesService();
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
 
 const listForm = ref<VForm>();
 const listDto = ref<Partial<List>>({
   name: '',
   spaceId: dialog.data.space.id,
+});
+
+const { data: cardTypes } = useFindAllQuery({
+  workspaceId: selectedWorkspace.value!.id,
 });
 
 const { mutateAsync: createList, isPending } =
@@ -61,6 +69,14 @@ async function handleCreate() {
           :rules="[rules.required]"
           label="Name*"
           autofocus
+        />
+        <v-autocomplete
+          v-model="listDto.defaultCardType"
+          :items="cardTypes"
+          item-title="name"
+          return-object
+          :rules="[rules.required]"
+          label="Default Entity Type*   "
         />
       </div>
       <v-card-actions class="d-flex justify-start align-center py-0 px-4">

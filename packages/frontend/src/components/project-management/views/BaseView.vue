@@ -122,6 +122,7 @@ function openCreateCardDialog() {
     dialog: DIALOGS.CREATE_CARD,
     data: {
       list: props.list,
+      type: props.list.defaultCardType,
     },
   });
 }
@@ -193,7 +194,7 @@ function handleDeleteCard(card: Card) {
     dialog: DIALOGS.CONFIRM,
     data: {
       title: 'Confirm',
-      message: 'Are you sure you want to delete this task?',
+      message: `Are you sure you want to delete this ${card.type.name.toLocaleLowerCase()}?`,
       onConfirm: () =>
         deleteCard(card.id)
           .then(() => {
@@ -328,7 +329,7 @@ watch(
         @click="openCreateCardDialog"
       >
         <v-icon icon="mdi-plus" />
-        Add task
+        Add {{ list.defaultCardType.name }}
       </v-btn>
       <div class="mx-1">
         <v-divider vertical />

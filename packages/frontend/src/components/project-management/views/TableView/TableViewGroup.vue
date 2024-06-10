@@ -67,7 +67,7 @@ const columns = computed(
 
 const groupHeight = computed(() => (cards.value.length ?? 0) * 33 + 33);
 const maxHeight = computed(() =>
-  props.listGroup.original.name === 'Tasks' ? 'calc(100vh - 230px)' : 350
+  props.listGroup.original.name === 'All' ? 'calc(100vh - 230px)' : 350
 );
 
 const isDraggingDisabled = computed(() => {

@@ -18,7 +18,7 @@ export type GenerateGroupsParams = {
 };
 
 const DEFAULT_GROUP: CreateListGroupDto = {
-    name: "Tasks",
+    name: "All",
     type: ListGroupOptions.ALL,
 };
 

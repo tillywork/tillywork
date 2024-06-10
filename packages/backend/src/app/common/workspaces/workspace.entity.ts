@@ -15,6 +15,7 @@ import { User } from "../users/user.entity";
 import { Space } from "../spaces/space.entity";
 import { Project } from "../projects/project.entity";
 import { WorkspaceTypes } from "./types";
+import { CardType } from "../card-types/card.type.entity";
 
 @Entity()
 export class Workspace {
@@ -49,4 +50,7 @@ export class Workspace {
     @ManyToMany(() => User, (user) => user.projects)
     @JoinTable()
     users: Relation<User[]>;
+
+    @OneToMany(() => CardType, (cardType) => cardType.workspace)
+    cardTypes: Relation<CardType[]>;
 }

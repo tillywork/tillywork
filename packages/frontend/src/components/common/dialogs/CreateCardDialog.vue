@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import type { CreateCardDto } from '@/components/project-management/cards/types';
+import type {
+  CardType,
+  CreateCardDto,
+} from '@/components/project-management/cards/types';
 import {
   type List,
   type ListStage,
@@ -52,12 +55,21 @@ const listStages = computed(() => {
   return listStages ?? [];
 });
 
+const cardType = computed<CardType>(() => {
+  if (dialog.data && dialog.data.type) {
+    return dialog.data.type;
+  } else {
+    return list.value?.defaultCardType;
+  }
+});
+
 const createCardMutation = cardsService.useCreateCardMutation();
 const createCardDto = ref<CreateCardDto>({
   title: '',
   listId: dialog.data.listId ?? list.value?.id,
   listStage: dialog.data.listStage ?? listStages.value[0],
   users: dialog.data.users,
+  type: cardType.value.id,
 });
 
 function closeDialog() {
@@ -96,7 +108,7 @@ function handlePostCreate() {
   createCardDto.value.description = undefined;
 
   showSnackbar({
-    message: `Task created`,
+    message: `${cardType.value.name} created`,
     color: 'success',
     timeout: 2000,
   });
@@ -114,7 +126,7 @@ function handlePostCreate() {
     :loading="createCardMutation.isPending.value"
   >
     <div class="d-flex align-center ps-0 pa-4">
-      <v-card-subtitle>Create task</v-card-subtitle>
+      <v-card-subtitle>Create {{ cardType.name }}</v-card-subtitle>
       <v-spacer />
       <base-icon-btn icon="mdi-close" color="default" @click="closeDialog()" />
     </div>
@@ -122,7 +134,7 @@ function handlePostCreate() {
       <div class="pa-4 pt-0">
         <base-editor-input
           v-model="createCardDto.title"
-          placeholder="Task title"
+          :placeholder="cardType.name + ' name'"
           autofocus
           :heading="3"
           single-line
@@ -170,7 +182,7 @@ function handlePostCreate() {
           class="text-caption px-4 ms-4"
           type="submit"
           :loading="createCardMutation.isPending.value"
-          >Create task</v-btn
+          >Create {{ cardType.name }}</v-btn
         >
       </v-card-actions>
     </v-form>

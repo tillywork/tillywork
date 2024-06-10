@@ -107,6 +107,9 @@ export class CardsService {
     async create(createCardDto: CreateCardDto): Promise<Card> {
         const initCard = this.cardsRepository.create({
             ...createCardDto,
+            type: {
+                id: createCardDto.type,
+            },
             createdBy: {
                 id: createCardDto.createdBy,
             },

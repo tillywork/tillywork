@@ -22,6 +22,10 @@ import { AddOrderColumnToCardListsTable1716798868594 } from "../migrations/17167
 import { AddCreatedAtUpdatedAtToCardListTable1716883730399 } from "../migrations/1716883730399-add-createdAt-updatedAt-to-card-list-table";
 import { AddListViewType1717363107808 } from "../migrations/1717363107808-add-list-view-type";
 import { AddStartsAtColumnToCardsTable1717406725195 } from "../migrations/1717406725195-add-starts-at-column-to-cards-table";
+import { CreateCardTypeTable1718017084847 } from "../migrations/1718017084847-create-card-type-table";
+import { AddDefaultCardTypeIdColumnToListTable1718019537173 } from "../migrations/1718019537173-add-defaultCardTypeId-column-to-list-table";
+import { AddTypeColumnToCardTable1718019963207 } from "../migrations/1718019963207-add-type-column-to-card-table";
+import { DeleteDefaultListGroups1718022901852 } from "../migrations/1718022901852-delete-default-list-groups";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -45,6 +49,10 @@ const migrations = [
     AddCreatedAtUpdatedAtToCardListTable1716883730399,
     AddListViewType1717363107808,
     AddStartsAtColumnToCardsTable1717406725195,
+    CreateCardTypeTable1718017084847,
+    AddDefaultCardTypeIdColumnToListTable1718019537173,
+    AddTypeColumnToCardTable1718019963207,
+    DeleteDefaultListGroups1718022901852,
 ];
 
 const config: TypeOrmModuleOptions = {
@@ -57,7 +65,7 @@ const config: TypeOrmModuleOptions = {
     database: `${process.env.TW_DB_NAME}`,
     migrations,
     migrationsRun: true,
-    migrationsTransactionMode: "all",
+    migrationsTransactionMode: "each",
     autoLoadEntities: true,
     logger:
         process.env.TW_ENABLE_QUERY_LOGGING !== "false"

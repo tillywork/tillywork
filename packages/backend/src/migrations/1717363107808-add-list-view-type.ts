@@ -7,7 +7,7 @@ export class AddListViewType1717363107808 implements MigrationInterface {
             SELECT unnest(enum_range(NULL::view_type_enum)) AS type
         `);
 
-        const exists = checkExistence.find((el) => el.type === "list");
+        const exists = checkExistence.find((el: any) => el.type === "list");
 
         if (!exists) {
             await queryRunner.query(`

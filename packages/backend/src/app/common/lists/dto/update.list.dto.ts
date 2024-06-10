@@ -1,3 +1,4 @@
-import { List } from '../list.entity';
+import { PartialType } from "@nestjs/mapped-types";
+import { List } from "../list.entity";
 
-export class UpdateListDto implements Partial<List> {}
+export class UpdateListDto extends PartialType(List) {}
