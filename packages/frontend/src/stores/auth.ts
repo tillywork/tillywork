@@ -77,7 +77,7 @@ export const useAuthStore = defineStore('auth', {
       const { login } = useAuthService();
 
       const user = await login({ email, password });
-
+      console.log(user)
       this.setToken(user.accessToken);
     },
 
