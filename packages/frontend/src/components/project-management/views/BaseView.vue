@@ -8,7 +8,6 @@ import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
 import { type TableSortOption } from './types';
-import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { ViewTypes, type View } from './types';
 import { useQueryClient } from '@tanstack/vue-query';
@@ -25,6 +24,7 @@ import {
   type QueryFilter,
 } from '../filters/types';
 import { cloneDeep } from 'lodash';
+import { useDialogStore } from '@/stores/dialog';
 
 const props = defineProps<{
   view: View;
@@ -37,9 +37,13 @@ const cardsService = useCardsService();
 const listGroupsService = useListGroupsService();
 const { useCreateFilterMutation, useUpdateFilterMutation } =
   useFitlersService();
-const dialog = useDialog();
+const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
 const queryClient = useQueryClient();
+
+const confirmDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.CONFIRM)
+);
 
 const groupBy = computed(() => props.view.groupBy);
 
@@ -198,7 +202,7 @@ function handleDeleteCard(card: Card) {
       onConfirm: () =>
         deleteCard(card.id)
           .then(() => {
-            dialog.closeDialog();
+            dialog.closeDialog(confirmDialogIndex.value);
           })
           .catch(() => {
             showSnackbar({
@@ -207,7 +211,7 @@ function handleDeleteCard(card: Card) {
               timeout: 5000,
             });
           }),
-      onCancel: () => dialog.closeDialog(),
+      onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
       isLoading: isDeletingCard,
     },
   });
@@ -329,7 +333,7 @@ watch(
         @click="openCreateCardDialog"
       >
         <v-icon icon="mdi-plus" />
-        Add {{ list.defaultCardType.name }}
+        Add {{ list.defaultCardType.name.toLocaleLowerCase() }}
       </v-btn>
       <div class="mx-1">
         <v-divider vertical />

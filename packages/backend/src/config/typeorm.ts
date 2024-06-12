@@ -26,6 +26,7 @@ import { CreateCardTypeTable1718017084847 } from "../migrations/1718017084847-cr
 import { AddDefaultCardTypeIdColumnToListTable1718019537173 } from "../migrations/1718019537173-add-defaultCardTypeId-column-to-list-table";
 import { AddTypeColumnToCardTable1718019963207 } from "../migrations/1718019963207-add-type-column-to-card-table";
 import { DeleteDefaultListGroups1718022901852 } from "../migrations/1718022901852-delete-default-list-groups";
+import { AddDefaultCardTypeToWorkspaceTable1718184687469 } from "../migrations/1718184687469-add-defaultCardType-to-workspace-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -53,6 +54,7 @@ const migrations = [
     AddDefaultCardTypeIdColumnToListTable1718019537173,
     AddTypeColumnToCardTable1718019963207,
     DeleteDefaultListGroups1718022901852,
+    AddDefaultCardTypeToWorkspaceTable1718184687469,
 ];
 
 const config: TypeOrmModuleOptions = {

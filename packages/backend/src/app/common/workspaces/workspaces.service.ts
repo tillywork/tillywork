@@ -48,6 +48,8 @@ export class WorkspacesService {
             workspace.spaces = [space];
         }
 
+        this.workspaceSideEffectsService.createDefaultCardTypes(workspace);
+
         return workspace;
     }
 

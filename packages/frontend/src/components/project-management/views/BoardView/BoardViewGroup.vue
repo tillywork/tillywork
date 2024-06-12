@@ -6,7 +6,6 @@ import {
 } from '../../lists/types';
 import { useCardsService } from '@/composables/services/useCardsService';
 import type { View } from '../types';
-import { useDialog } from '@/composables/useDialog';
 import type { ProjectUser } from '@/components/common/projects/types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import type { Card } from '../../cards/types';
@@ -17,6 +16,7 @@ import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import type { QueryFilter } from '../../filters/types';
 import type { TableSortOption } from '@/components/common/tables/FalconTable.vue';
+import { useDialogStore } from '@/stores/dialog';
 
 const emit = defineEmits([
   'toggle:group',
@@ -35,7 +35,7 @@ const props = defineProps<{
 const cardMenuOpen = ref<Card | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
 
-const dialog = useDialog();
+const dialog = useDialogStore();
 const cardsService = useCardsService();
 const { showSnackbar } = useSnackbarStore();
 

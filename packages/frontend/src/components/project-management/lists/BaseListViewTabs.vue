@@ -1,17 +1,21 @@
 <script setup lang="ts">
-import { useDialog } from '@/composables/useDialog';
 import { ViewTypes, type View } from '../views/types';
 import type { List } from './types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { useViewsService } from '@/composables/services/useViewsService';
 import { useSnackbarStore } from '@/stores/snackbar';
+import { useDialogStore } from '@/stores/dialog';
 
-const dialog = useDialog();
+const dialog = useDialogStore();
 const props = defineProps<{
   views: View[];
   list: List;
 }>();
+
+const currentDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.ONBOARDING)
+);
 
 const workspaceStore = useWorkspaceStore();
 const { listState } = storeToRefs(workspaceStore);
@@ -100,7 +104,7 @@ function deleteView(view: View) {
       });
     })
     .then(() => {
-      dialog.closeDialog();
+      dialog.closeDialog(currentDialogIndex.value);
 
       if (view.id === selectedView.value?.id) {
         selectViewFromListStateOrFirstView();

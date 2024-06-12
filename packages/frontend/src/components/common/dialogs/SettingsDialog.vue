@@ -1,20 +1,24 @@
 <script setup lang="ts">
-import { useDialog } from '@/composables/useDialog';
 import BaseThemeSwitch from '../base/BaseThemeSwitch.vue';
 import { useCardTypesService } from '@/composables/services/useCardTypesService';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { DIALOGS } from './types';
 import type { CardType } from '@/components/project-management/cards/types';
+import { useLogo } from '@/composables/useLogo';
+import { useDialogStore } from '@/stores/dialog';
 
-const dialog = useDialog();
+const dialog = useDialogStore();
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
-const { useFindAllQuery, useRemoveMutation } = useCardTypesService();
+const { useFindAllQuery } = useCardTypesService();
+
+const currentDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.ONBOARDING)
+);
+const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
 
 const { data: cardTypes } = useFindAllQuery({
   workspaceId: selectedWorkspace.value!.id,
 });
-
-const { mutateAsync: removeCardType, isPending } = useRemoveMutation();
 
 const tabs = ref([
   {
@@ -35,18 +39,25 @@ function openCreateCardTypeDialog() {
   });
 }
 
-//TODO we need to use a custom dialog here, so we can choose the new card type that existing cards and lists will use instead.
-function openConfirmCardTypeDeleteDialog(cardType: CardType) {
+function openRemoveCardTypeDialog(cardType: CardType) {
   dialog.openDialog({
-    dialog: DIALOGS.CONFIRM,
+    dialog: DIALOGS.REMOVE_CARD_TYPE,
     data: {
-      message: 'Are you sure you want to delete this card type?',
-      onConfirm: () =>
-        removeCardType(cardType.id).then(() => dialog.closeDialog()),
-      onCancel: dialog.closeDialog,
-      isLoading: isPending,
+      cardType,
     },
   });
+}
+
+function getCardTypeCreatedByName(cardType: CardType) {
+  return cardType.createdByType === 'system'
+    ? 'System'
+    : cardType.createdBy.firstName + ' ' + cardType.createdBy.lastName;
+}
+
+function getCardTypeCreatedByPhoto(cardType: CardType) {
+  return cardType.createdByType === 'system'
+    ? useLogo().getCheckUrl()
+    : cardType.createdBy.photo;
 }
 </script>
 
@@ -71,7 +82,7 @@ function openConfirmCardTypeDeleteDialog(cardType: CardType) {
         height="50"
         center-active
         mandatory
-        model-value="theme"
+        :model-value="currentDialog?.data.activeTab ?? 'theme'"
       >
         <template #tab="{ item }">
           <v-tab
@@ -114,33 +125,43 @@ function openConfirmCardTypeDeleteDialog(cardType: CardType) {
                     width: 50,
                   },
                   {
-                    title: 'ID',
-                    value: 'id',
-                    width: 100,
-                  },
-                  {
                     title: 'Name',
                     value: 'name',
+                  },
+                  {
+                    title: 'Created By',
+                    value: 'createdBy',
                   },
                 ]"
                 :hide-default-footer="true"
               >
+                <template #item.name="{ item }">
+                  <span>
+                    {{ item.name }}
+                    <span
+                      v-if="selectedWorkspace?.defaultCardType?.id === item.id"
+                      class="text-color-subtitle"
+                    >
+                      (default)
+                    </span>
+                  </span>
+                </template>
                 <template #item.actions="{ item }">
-                  <v-menu>
+                  <v-menu v-if="item.createdByType === 'user'">
                     <template #activator="{ props }">
                       <base-icon-btn v-bind="props" icon="mdi-dots-vertical" />
                     </template>
                     <v-card>
                       <v-list>
-                        <v-list-item>
+                        <!-- <v-list-item>
                           <template #prepend>
                             <v-icon size="x-small" icon="mdi-pencil" />
                           </template>
                           <v-list-item-title>Edit</v-list-item-title>
-                        </v-list-item>
+                        </v-list-item> -->
                         <v-list-item
                           class="text-error"
-                          @click="openConfirmCardTypeDeleteDialog(item)"
+                          @click="openRemoveCardTypeDialog(item)"
                         >
                           <template #prepend>
                             <v-icon size="x-small" icon="mdi-delete" />
@@ -150,6 +171,21 @@ function openConfirmCardTypeDeleteDialog(cardType: CardType) {
                       </v-list>
                     </v-card>
                   </v-menu>
+                </template>
+                <template #item.createdBy="{ item }">
+                  <v-card class="py-2">
+                    <base-avatar
+                      :photo="getCardTypeCreatedByPhoto(item)"
+                      :text="getCardTypeCreatedByName(item)"
+                      rounded="circle"
+                      :class="
+                        item.createdByType === 'system' ? 'pa-1 bg-accent' : ''
+                      "
+                    />
+                    <span class="text-body-2 ms-3">
+                      {{ getCardTypeCreatedByName(item) }}
+                    </span>
+                  </v-card>
                 </template>
               </v-data-table>
             </v-card-text>

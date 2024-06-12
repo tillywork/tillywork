@@ -9,17 +9,18 @@ import {
 } from '@/components/project-management/lists/types';
 import { useCardsService } from '@/composables/services/useCardsService';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
-import { useDialog } from '@/composables/useDialog';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 import type { VForm } from 'vuetify/lib/components/index.mjs';
 import BaseEditorInput from '../base/BaseEditor/BaseEditorInput.vue';
+import { useDialogStore } from '@/stores/dialog';
+import { DIALOGS } from './types';
 
 const route = useRoute();
 const authStore = useAuthStore();
 const queryClient = useQueryClient();
-const dialog = useDialog();
+const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
 const cardsService = useCardsService();
 const projectUsersService = useProjectUsersService();
@@ -31,13 +32,18 @@ const { data: users } = projectUsersService.useProjectUsersQuery({
   select: (data) => data.map((pu) => pu.user),
 });
 
+const currentDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.CREATE_CARD)
+);
+const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
+
 const list = computed(() => {
   let list: List | undefined;
 
-  if (dialog.data && dialog.data.list) {
-    list = dialog.data.list;
+  if (currentDialog.value?.data && currentDialog.value.data?.list) {
+    list = currentDialog.value.data.list;
   } else if (+route.params.listId) {
-    list = queryClient.getQueryData(['list', +route.params.listId]);
+    list = queryClient.getQueryData(['lists', +route.params.listId]);
   }
 
   return list;
@@ -46,8 +52,8 @@ const list = computed(() => {
 const listStages = computed(() => {
   let listStages: ListStage[] | undefined;
 
-  if (dialog.data && dialog.data.listStages) {
-    listStages = dialog.data.listStages;
+  if (currentDialog.value?.data && currentDialog.value.data?.listStages) {
+    listStages = currentDialog.value.data.listStages;
   } else {
     listStages = list.value?.listStages ?? [];
   }
@@ -56,8 +62,8 @@ const listStages = computed(() => {
 });
 
 const cardType = computed<CardType>(() => {
-  if (dialog.data && dialog.data.type) {
-    return dialog.data.type;
+  if (currentDialog.value?.data && currentDialog.value.data?.type) {
+    return currentDialog.value.data.type;
   } else {
     return list.value?.defaultCardType;
   }
@@ -66,14 +72,14 @@ const cardType = computed<CardType>(() => {
 const createCardMutation = cardsService.useCreateCardMutation();
 const createCardDto = ref<CreateCardDto>({
   title: '',
-  listId: dialog.data.listId ?? list.value?.id,
-  listStage: dialog.data.listStage ?? listStages.value[0],
-  users: dialog.data.users,
+  listId: currentDialog.value?.data?.listId ?? list.value?.id,
+  listStage: currentDialog.value?.data?.listStage ?? listStages.value[0],
+  users: currentDialog.value?.data?.users,
   type: cardType.value.id,
 });
 
 function closeDialog() {
-  dialog.closeDialog();
+  dialog.closeDialog(currentDialogIndex.value);
 }
 
 async function createCard() {

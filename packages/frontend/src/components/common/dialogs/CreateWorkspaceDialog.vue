@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
-import { useDialog } from '@/composables/useDialog';
 import { type Workspace } from '@/components/project-management/workspaces/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import CreateWorkspaceForm from '@/components/project-management/workspaces/CreateWorkspaceForm.vue';
+import { useDialogStore } from '@/stores/dialog';
+import { DIALOGS } from './types';
 
 const workspacesService = useWorkspacesService();
-const dialog = useDialog();
+const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
+
+const currentDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.CREATE_WORKSPACE)
+);
 
 const { mutateAsync: createWorkspace, isPending } =
   workspacesService.useCreateWorkspaceMutation();
@@ -15,7 +20,7 @@ const { mutateAsync: createWorkspace, isPending } =
 async function handleCreate(workspaceDto: Partial<Workspace>) {
   createWorkspace(workspaceDto)
     .then(() => {
-      dialog.closeDialog();
+      dialog.closeDialog(currentDialogIndex.value);
     })
     .catch(() => {
       showSnackbar({
@@ -35,7 +40,7 @@ async function handleCreate(workspaceDto: Partial<Workspace>) {
       <base-icon-btn
         icon="mdi-close"
         color="default"
-        @click="dialog.closeDialog()"
+        @click="dialog.closeDialog(currentDialogIndex)"
       />
     </div>
     <create-workspace-form

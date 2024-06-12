@@ -9,20 +9,20 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { useState } from '@/composables/useState';
 import { WorkspaceTypes } from '@/components/project-management/workspaces/types';
 import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
-import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useAuthStore } from '@/stores/auth';
 import { useProjectsService } from '@/composables/services/useProjectsService';
 import { useThemeStore } from '@/stores/theme';
 import { useTheme } from 'vuetify';
 import posthog from 'posthog-js';
+import { useDialogStore } from '@/stores/dialog';
 
 const themeStore = useThemeStore();
 
 const workspacesService = useWorkspacesService();
 const projectsService = useProjectsService();
 const { stateStore } = useState();
-const dialog = useDialog();
+const dialogStore = useDialogStore();
 const authStore = useAuthStore();
 const { isAuthenticated, setProject } = authStore;
 const { project, user } = storeToRefs(authStore);
@@ -63,7 +63,7 @@ watch(
 watch(workspaces, (v) => {
   if (v) {
     if (!v.length) {
-      dialog.openDialog({
+      dialogStore.openDialog({
         dialog: DIALOGS.ONBOARDING,
         options: {
           fullscreen: true,

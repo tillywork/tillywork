@@ -1,18 +1,23 @@
 <script setup lang="ts">
 import { useSpacesService } from '@/composables/services/useSpacesService';
-import { useDialog } from '@/composables/useDialog';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
 import type { Space } from '@/components/project-management/spaces/types';
 import { useSnackbarStore } from '@/stores/snackbar';
+import { useDialogStore } from '@/stores/dialog';
+import { DIALOGS } from './types';
 
 const workspaceStore = useWorkspaceStore();
 const { selectedWorkspace } = storeToRefs(workspaceStore);
 const spacesService = useSpacesService();
-const dialog = useDialog();
+const dialog = useDialogStore();
 const { rules } = validationUtils;
 const { showSnackbar } = useSnackbarStore();
+
+const currentDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.CREATE_SPACE)
+);
 
 const spaceForm = ref<VForm>();
 const spaceDto = ref<Partial<Space>>({
@@ -28,7 +33,7 @@ async function handleCreate() {
   if (isValid?.valid) {
     createSpace(spaceDto.value)
       .then(() => {
-        dialog.closeDialog();
+        dialog.closeDialog(currentDialogIndex.value);
       })
       .catch(() => {
         showSnackbar({
@@ -51,7 +56,7 @@ async function handleCreate() {
       <base-icon-btn
         icon="mdi-close"
         color="default"
-        @click="dialog.closeDialog()"
+        @click="dialog.closeDialog(currentDialogIndex)"
       />
     </div>
     <v-form ref="spaceForm" @submit.prevent="handleCreate" validate-on="submit">

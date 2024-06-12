@@ -55,4 +55,7 @@ export class Workspace {
         eager: true,
     })
     cardTypes: Relation<CardType[]>;
+
+    @ManyToOne(() => CardType, { eager: true })
+    defaultCardType: Relation<CardType>;
 }

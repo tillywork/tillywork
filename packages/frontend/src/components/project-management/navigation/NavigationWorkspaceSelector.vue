@@ -3,10 +3,10 @@ import { WorkspaceTypes, type Workspace } from '../workspaces/types';
 import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
 import { useWorkspaceStore } from '@/stores/workspace';
 import CreateWorkspaceBtn from './CreateWorkspaceBtn.vue';
-import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
+import { useDialogStore } from '@/stores/dialog';
 
-const dialog = useDialog();
+const dialog = useDialogStore();
 const workspacesService = useWorkspacesService();
 const selectWorkspaceMenu = ref(false);
 const workspaceStore = useWorkspaceStore();
@@ -16,6 +16,10 @@ const workspaceQuery = workspacesService.useGetWorkspacesQuery({
 });
 const { mutateAsync: deleteWorkspace, isPending: isDeleteLoading } =
   workspacesService.useDeleteWorkspaceMutation();
+
+const confirmDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.CONFIRM)
+);
 
 function closeSelectWorkspaceMenu() {
   selectWorkspaceMenu.value = false;
@@ -36,7 +40,7 @@ function handleDeleteWorkspace(workspace: Workspace) {
       onConfirm: () =>
         deleteWorkspace(workspace.id).then(() => {
           selectedWorkspace.value = null;
-          dialog.closeDialog();
+          dialog.closeDialog(confirmDialogIndex.value);
         }),
       isLoading: isDeleteLoading.value,
     },

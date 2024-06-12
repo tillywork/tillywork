@@ -23,6 +23,17 @@ export class CreateCardTypeTable1718017084847 implements MigrationInterface {
                         type: "bigint",
                     },
                     {
+                        name: "createdByType",
+                        type: "enum",
+                        enum: ["system", "user"],
+                        default: `'user'`,
+                    },
+                    {
+                        name: "createdById",
+                        type: "bigint",
+                        isNullable: true,
+                    },
+                    {
                         name: "createdAt",
                         type: "timestamp",
                         default: "now()",
@@ -51,8 +62,8 @@ export class CreateCardTypeTable1718017084847 implements MigrationInterface {
 
         // Insert 'Task' entries into the card_type table for each workspace
         await queryRunner.query(`
-            INSERT INTO "card_type" ("name", "workspaceId", "createdAt", "updatedAt")
-            SELECT 'Task', "id", NOW(), NOW()
+            INSERT INTO "card_type" ("name", "workspaceId", "createdByType", "createdAt", "updatedAt")
+            SELECT 'Task', "id", 'system', NOW(), NOW()
             FROM "workspace"
         `);
     }

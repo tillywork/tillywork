@@ -7,6 +7,7 @@ export interface Workspace {
   ownerId: number;
   projectId: number;
   type: WorkspaceTypes;
+  defaultCardType: CardType;
   spaces: Space[];
   cardTypes: CardType[];
   createdAt: string;

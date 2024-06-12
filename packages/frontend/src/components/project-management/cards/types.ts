@@ -66,6 +66,8 @@ export type CardType = {
   id: number;
   name: string;
   workspace: Workspace;
+  createdByType: 'system' | 'user';
+  createdBy: User;
   createdAt: Date;
   updatedAt: Date;
 };

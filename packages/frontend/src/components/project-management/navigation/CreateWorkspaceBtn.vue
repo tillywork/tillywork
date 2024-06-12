@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { DIALOGS } from '@/components/common/dialogs/types';
-import { useDialog } from '@/composables/useDialog';
+import { useDialogStore } from '@/stores/dialog';
 
-const dialog = useDialog();
+const dialog = useDialogStore();
 
 function openCreateWorkspaceDialog() {
   dialog.openDialog({

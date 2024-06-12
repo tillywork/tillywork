@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { DIALOGS } from '@/components/common/dialogs/types';
+import { DIALOG_WIDTHS, type DIALOGS } from '@/components/common/dialogs/types';
 
 export type DialogOptions = {
   width?: string | number;
@@ -7,13 +7,15 @@ export type DialogOptions = {
   persistent?: boolean;
 };
 
+export type Dialog = {
+  dialog: DIALOGS | null;
+  data?: any;
+  options?: DialogOptions;
+};
+
 export const useDialogStore = defineStore('dialog', {
   state: () => ({
-    currentDialog: null as null | DIALOGS,
-    width: null as null | string | number,
-    fullscreen: false as boolean,
-    data: {} as any,
-    options: {} as DialogOptions,
+    dialogs: [] as Dialog[],
   }),
 
   actions: {
@@ -27,24 +29,41 @@ export const useDialogStore = defineStore('dialog', {
       options?: DialogOptions;
     }) {
       console.debug(dialog, data, options);
-      this.currentDialog = dialog;
-      if (options) {
-        this.setOptions(options);
-      }
-      if (data) {
-        this.setData(data);
+      if (dialog && this.getDialogIndex(dialog) === -1) {
+        this.dialogs.push({
+          dialog,
+          data,
+          options: {
+            width:
+              dialog && !options?.fullscreen
+                ? DIALOG_WIDTHS[dialog]
+                : undefined,
+            ...options,
+          },
+        });
       }
     },
-    setData(data: any) {
-      if (!data) {
-        this.data = {};
-        return;
-      }
-
-      this.data = data;
+    closeDialog(index: number) {
+      this.dialogs.splice(index, 1);
     },
-    setOptions(options: DialogOptions) {
-      this.options = options;
+    closeAllDialogs() {
+      this.dialogs = [];
+    },
+    updateDialogOptions(index: number, options: DialogOptions) {
+      if (this.dialogs[index]) {
+        this.dialogs[index].options = {
+          ...this.dialogs[index].options,
+          ...options,
+        };
+      }
+    },
+    updateDialogData(index: number, data: any) {
+      if (this.dialogs[index]) {
+        this.dialogs[index].data = { ...this.dialogs[index].data, ...data };
+      }
+    },
+    getDialogIndex(dialog: DIALOGS) {
+      return this.dialogs.findIndex((d) => d.dialog === dialog);
     },
   },
 });

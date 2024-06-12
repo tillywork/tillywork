@@ -7,6 +7,7 @@ import {
     Delete,
     Put,
     UseGuards,
+    Request,
     Query,
 } from "@nestjs/common";
 import { CardTypesService } from "./card.types.service";
@@ -43,9 +44,15 @@ export class CardTypesController {
     }
 
     @Post()
-    create(@Body() createCardTypeDto: CreateCardTypeDto): Promise<CardType> {
+    create(
+        @Body() createCardTypeDto: CreateCardTypeDto,
+        @Request() req
+    ): Promise<CardType> {
+        const { user } = req;
+
         return this.cardTypesService.create({
             ...createCardTypeDto,
+            createdBy: user,
         });
     }
 
@@ -58,7 +65,13 @@ export class CardTypesController {
     }
 
     @Delete(":id")
-    remove(@Param("id") id: string): Promise<void> {
-        return this.cardTypesService.remove(+id);
+    remove(
+        @Param("id") id: number,
+        @Body() replacementCardType: CardType
+    ): Promise<void> {
+        return this.cardTypesService.remove({
+            id,
+            replacementCardType,
+        });
     }
 }

@@ -3,24 +3,29 @@ import type { List } from '../lists/types';
 import { useListsService } from '@/composables/services/useListsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
-import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useWorkspaceStore } from '@/stores/workspace';
 import type { CardType } from '../cards/types';
+import { useDialogStore } from '@/stores/dialog';
 
 const listMenu = ref(false);
-const listsService = useListsService();
+const { useDeleteListMutation, useUpdateListMutation } = useListsService();
 const { showSnackbar } = useSnackbarStore();
 const queryClient = useQueryClient();
-const dialog = useDialog();
+const dialog = useDialogStore();
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
 
-const deleteListMutation = listsService.useDeleteListMutation();
+const deleteListMutation = useDeleteListMutation();
+const { mutateAsync: updateList } = useUpdateListMutation();
 
 const props = defineProps<{
   list: List;
 }>();
 const emit = defineEmits(['hover:freeze', 'hover:unfreeze']);
+
+const confirmDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.CONFIRM)
+);
 
 function handleListMenuClick() {
   listMenu.value = !listMenu.value;
@@ -33,7 +38,7 @@ function handleDeleteList(list: List) {
     data: {
       title: 'Confirm',
       message: 'Are you sure you want to delete this list?',
-      onCancel: dialog.closeDialog,
+      onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
       onConfirm: () => deleteList(list),
       isLoading: deleteListMutation.isPending.value,
     },
@@ -46,7 +51,7 @@ function deleteList(list: List) {
     .then(() => {
       queryClient.invalidateQueries({ queryKey: ['spaces'] });
       queryClient.invalidateQueries({ queryKey: ['list', list.id] });
-      dialog.closeDialog();
+      dialog.closeDialog(confirmDialogIndex.value);
     })
     .catch((e) => {
       console.log(e);
@@ -60,6 +65,45 @@ function deleteList(list: List) {
 
 function isCardTypeSetAsListDefault(cardType: CardType) {
   return cardType.id === props.list.defaultCardType.id;
+}
+
+function handleUpdateDefaultCardType(cardType: CardType) {
+  if (!isCardTypeSetAsListDefault(cardType)) {
+    updateList({
+      id: props.list.id,
+      updateDto: {
+        defaultCardType: cardType,
+      },
+    })
+      .then(() => {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'spaces',
+            {
+              workspaceId: selectedWorkspace.value?.id,
+            },
+          ],
+        });
+      })
+      .catch(() => {
+        showSnackbar({
+          message: 'Something went wrong, please try again.',
+          color: 'error',
+        });
+      });
+  }
+}
+
+function openSettingsDialog() {
+  dialog.openDialog({
+    dialog: DIALOGS.SETTINGS,
+    data: {
+      activeTab: 'cardTypes',
+    },
+    options: {
+      fullscreen: true,
+    },
+  });
 }
 
 watch(listMenu, () => {
@@ -100,9 +144,13 @@ watch(listMenu, () => {
           </template>
           <v-card>
             <v-card-title class="d-flex align-center pt-2 pe-1">
-              <span class="text-body-2">Entity Types</span>
+              <span class="text-body-2">Card Types</span>
               <v-spacer />
-              <v-btn size="small" variant="text" class="text-capitalize"
+              <v-btn
+                size="small"
+                variant="text"
+                class="text-capitalize"
+                @click="openSettingsDialog"
                 >Edit</v-btn
               >
             </v-card-title>
@@ -111,7 +159,10 @@ watch(listMenu, () => {
                 v-for="cardType in selectedWorkspace?.cardTypes"
                 :key="cardType.id"
               >
-                <v-list-item :active="isCardTypeSetAsListDefault(cardType)">
+                <v-list-item
+                  :active="isCardTypeSetAsListDefault(cardType)"
+                  @click="handleUpdateDefaultCardType(cardType)"
+                >
                   <v-list-item-title>{{ cardType.name }}</v-list-item-title>
                   <template #append>
                     <v-icon

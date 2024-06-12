@@ -2,10 +2,14 @@ import { Injectable } from "@nestjs/common";
 import { Workspace } from "./workspace.entity";
 import { SpacesService } from "../spaces/spaces.service";
 import { DEFAULT_SPACES } from "../spaces/types";
+import { CardTypesService } from "../card-types/card.types.service";
 
 @Injectable()
 export class WorkspaceSideEffectsService {
-    constructor(private spacesService: SpacesService) {}
+    constructor(
+        private spacesService: SpacesService,
+        private cardTypesService: CardTypesService
+    ) {}
 
     async postCreate(workspace: Workspace) {
         const spacePromises = DEFAULT_SPACES.map((space) => {
@@ -23,5 +27,9 @@ export class WorkspaceSideEffectsService {
         const result = await Promise.allSettled(spacePromises);
 
         return (result[0] as any).value;
+    }
+
+    async createDefaultCardTypes(workspace: Workspace) {
+        return this.cardTypesService.createDefaultWorkspaceTypes(workspace);
     }
 }

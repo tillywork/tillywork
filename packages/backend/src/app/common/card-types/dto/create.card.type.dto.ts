@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsNumber } from "class-validator";
+import { IsInstance, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
+import { User } from "../../users/user.entity";
 
 export class CreateCardTypeDto {
     @IsNotEmpty()
@@ -7,4 +8,8 @@ export class CreateCardTypeDto {
     @IsNotEmpty()
     @IsNumber()
     workspaceId: number;
+
+    @IsOptional()
+    @IsInstance(User)
+    createdBy?: User;
 }

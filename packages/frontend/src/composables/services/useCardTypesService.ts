@@ -62,9 +62,16 @@ export const useCardTypesService = () => {
     });
   }
 
-  function remove(id: number) {
+  function remove({
+    id,
+    replacementCardType,
+  }: {
+    id: number;
+    replacementCardType: CardType;
+  }) {
     return sendRequest(`/card-types/${id}`, {
       method: 'DELETE',
+      data: replacementCardType,
     });
   }
 

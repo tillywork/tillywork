@@ -22,6 +22,12 @@ import { ViewsService } from "../app/common/views/views.service";
 import { View } from "../app/common/views/view.entity";
 import { ProjectUsersService } from "../app/common/projects/project-users/project.users.service";
 import { ProjectUser } from "../app/common/projects/project-users/project.user.entity";
+import { CardTypesService } from "../app/common/card-types/card.types.service";
+import { CardType } from "../app/common/card-types/card.type.entity";
+import { CardsService } from "../app/common/cards/cards.service";
+import { Card } from "../app/common/cards/card.entity";
+import { CardListsService } from "../app/common/cards/card-lists/card.lists.service";
+import { CardList } from "../app/common/cards/card-lists/card.list.entity";
 
 const logger = new Logger("UserSeeder");
 
@@ -44,8 +50,21 @@ export async function seedUserData(connection: Connection): Promise<void> {
         connection.getRepository(Space),
         spaceSideEffectsService
     );
+    const cardListsService = new CardListsService(
+        connection.getRepository(CardList)
+    );
+    const cardsService = new CardsService(
+        connection.getRepository(Card),
+        cardListsService
+    );
+    const cardTypesService = new CardTypesService(
+        connection.getRepository(CardType),
+        listsService,
+        cardsService
+    );
     const workspaceSideEffectsService = new WorkspaceSideEffectsService(
-        spacesService
+        spacesService,
+        cardTypesService
     );
     const workspacesService = new WorkspacesService(
         connection.getRepository(Workspace),

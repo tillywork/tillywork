@@ -9,6 +9,7 @@ import {
     UpdateDateColumn,
 } from "typeorm";
 import { Workspace } from "../workspaces/workspace.entity";
+import { User } from "../users/user.entity";
 
 /**
  * This is where entities like Task are derived from Card entity.
@@ -25,6 +26,12 @@ export class CardType {
         nullable: false,
     })
     workspace: Relation<Workspace>;
+
+    @Column({ type: "enum", enum: ["system", "user"], default: "user" })
+    createdByType: "system" | "user";
+
+    @ManyToOne(() => User, { eager: true })
+    createdBy: Relation<User>;
 
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;
