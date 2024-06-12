@@ -12,9 +12,11 @@ let axiosInstance: AxiosInstance;
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const refreshTokenInterceptor = async (error: any) => {
-  const { logout, setToken, token } = useAuthStore();
+  const authStore = useAuthStore();
+  const { login, logout } = authStore;
+  const { token } = storeToRefs(authStore)
 
-  if (error.response.status === 401 && !error.config._retry && token) {
+  if (error.response.status === 401 && !error.config._retry && token.value) {
     // try {
     //   const newToken = await refreshToken();
     //   if (newToken) {
@@ -39,15 +41,17 @@ const refreshTokenInterceptor = async (error: any) => {
  * @returns AxiosInstance
  */
 const createAxiosInstance = () => {
-  const { token } = useAuthStore();
+  const authStore = useAuthStore();
+  const { token } = storeToRefs(authStore)
+
   const instance = axios.create({
     baseURL: import.meta.env.TW_VITE_API_URL,
   });
 
   instance.interceptors.request.use(
     (config) => {
-      if (token) {
-        config.headers['Authorization'] = `Bearer ${token}`;
+      if (token.value) {
+        config.headers['Authorization'] = `Bearer ${token.value}`;
       }
       return config;
     },
