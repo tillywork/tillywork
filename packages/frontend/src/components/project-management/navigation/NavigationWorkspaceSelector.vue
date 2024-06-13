@@ -36,7 +36,7 @@ function handleDeleteWorkspace(workspace: Workspace) {
     data: {
       title: 'Confirm',
       message: 'Are you sure you want to delete this workspace?',
-      onCancel: dialog.closeDialog,
+      onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
       onConfirm: () =>
         deleteWorkspace(workspace.id).then(() => {
           selectedWorkspace.value = null;

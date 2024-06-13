@@ -12,7 +12,7 @@ const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
 const { useFindAllQuery } = useCardTypesService();
 
 const currentDialogIndex = computed(() =>
-  dialog.getDialogIndex(DIALOGS.ONBOARDING)
+  dialog.getDialogIndex(DIALOGS.SETTINGS)
 );
 const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
 
@@ -69,7 +69,7 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
       <base-icon-btn
         icon="mdi-close"
         size="default"
-        @click="dialog.closeDialog"
+        @click="dialog.closeDialog(currentDialogIndex)"
       />
     </v-card-title>
     <v-card-text class="d-flex flex-row">

@@ -21,8 +21,8 @@ const { user } = storeToRefs(authStore);
 const dialog = useDialogStore();
 const snackbar = useSnackbarStore();
 
-const currentDialogIndex = computed(() =>
-  dialog.getDialogIndex(DIALOGS.ONBOARDING)
+const confirmDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.CONFIRM)
 );
 
 const query = cardActivitiesService.useFindAllQuery(props.cardId);
@@ -38,7 +38,7 @@ function openConfirmDeleteDialog(comment: CardActivity) {
     data: {
       title: 'Confirm',
       message: 'Are you sure you want to delete this comment?',
-      onCancel: () => dialog.closeDialog(currentDialogIndex.value),
+      onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
       onConfirm: () => deleteComment(comment),
       isLoading: deleteActivity.isPending.value,
     },
@@ -59,7 +59,7 @@ function deleteComment(comment: CardActivity) {
       });
     })
     .finally(() => {
-      dialog.closeDialog(currentDialogIndex.value);
+      dialog.closeDialog(confirmDialogIndex.value);
     });
 }
 </script>
