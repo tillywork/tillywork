@@ -5,12 +5,13 @@ import {
 } from '@/components/project-management/workspaces/types';
 import { useUsersService } from '@/composables/services/useUsersService';
 import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
-import { useDialog } from '@/composables/useDialog';
 import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useWorkspaceStore } from '@/stores/workspace';
 import CreateWorkspaceForm from '@/components/project-management/workspaces/CreateWorkspaceForm.vue';
+import { useDialogStore } from '@/stores/dialog';
+import { DIALOGS } from './types';
 
 const logo = useLogo();
 const authStore = useAuthStore();
@@ -21,8 +22,12 @@ const workspacesService = useWorkspacesService();
 const usersService = useUsersService();
 const createWorkspaceMutation = workspacesService.useCreateWorkspaceMutation();
 const updateUserMutation = usersService.updateUserMutation();
-const dialog = useDialog();
+const dialog = useDialogStore();
 const router = useRouter();
+
+const currentDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.ONBOARDING)
+);
 
 const onboardingSteps = ref([
   'Get started',
@@ -60,7 +65,7 @@ async function createWorkspace(createWorkspaceDto: Partial<Workspace>) {
     .mutateAsync(createWorkspaceDto)
     .then((workspace) => {
       workspaceStore.setSelectedWorkspace(workspace);
-      dialog.closeDialog();
+      dialog.closeDialog(currentDialogIndex.value);
       workspaceStore.setSpaceExpansionState(workspace.id, [
         workspace.spaces[0].id,
       ]);

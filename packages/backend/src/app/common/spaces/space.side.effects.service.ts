@@ -1,13 +1,20 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { Space } from "./space.entity";
 import { ListsService } from "../lists/lists.service";
 import { DEFAULT_LISTS } from "../lists/types";
+import { CardType } from "../card-types/card.type.entity";
 
 @Injectable()
 export class SpaceSideEffectsService {
     constructor(private listsService: ListsService) {}
 
-    async postCreate(space: Space) {
+    async postCreate({
+        space,
+        defaultCardType,
+    }: {
+        space: Space;
+        defaultCardType: CardType;
+    }) {
         const listPromises = DEFAULT_LISTS.map((list) => {
             return new Promise((resolve) => {
                 this.listsService
@@ -15,6 +22,7 @@ export class SpaceSideEffectsService {
                         name: list.name,
                         spaceId: space.id,
                         createOnboardingData: true,
+                        defaultCardType,
                     })
                     .then((list) => resolve(list));
             });

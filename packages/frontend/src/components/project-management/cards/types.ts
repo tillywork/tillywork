@@ -2,6 +2,7 @@
 import type { User } from '@/components/common/users/types';
 import type { Content } from '@tiptap/vue-3';
 import type { List, ListStage } from '../lists/types';
+import type { Workspace } from '../workspaces/types';
 
 export interface Card {
   id: number;
@@ -10,6 +11,7 @@ export interface Card {
   cardLists: CardList[];
   users: User[];
   data: any;
+  type: CardType;
   startsAt: string;
   dueAt: string;
   createdAt: string;
@@ -28,6 +30,8 @@ export interface CardList {
 
 export interface CreateCardDto {
   title: string;
+  /** The ID of the Card Type being created. */
+  type: number;
   listId?: number;
   listStageId?: number;
   description?: Content;
@@ -54,3 +58,21 @@ export interface CardActivity {
   createdAt: Date;
   createdBy: User;
 }
+
+/**
+ * This is where entities like Task are derived from Card entity.
+ */
+export type CardType = {
+  id: number;
+  name: string;
+  workspace: Workspace;
+  createdByType: 'system' | 'user';
+  createdBy: User;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type CreateCardTypeDto = {
+  name: string;
+  workspaceId: number;
+};

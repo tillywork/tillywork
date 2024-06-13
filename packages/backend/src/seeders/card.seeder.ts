@@ -13,7 +13,7 @@ import { Card } from "../app/common/cards/card.entity";
 import { CardList } from "../app/common/cards/card-lists/card.list.entity";
 import { CardListsService } from "../app/common/cards/card-lists/card.lists.service";
 
-const logger = new Logger("UserSeeder");
+const logger = new Logger("CardSeeder");
 
 export async function seedCardsData(connection: Connection): Promise<void> {
     const cardListsService = new CardListsService(
@@ -46,6 +46,7 @@ export async function seedCardsData(connection: Connection): Promise<void> {
             listStageId: faker.helpers.arrayElement(
                 list.listStages.map((stage) => stage.id)
             ),
+            type: list.defaultCardType.id,
             createdBy: 1,
         });
         logger.log({ card });

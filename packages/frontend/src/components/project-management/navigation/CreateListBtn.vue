@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { DIALOGS } from '@/components/common/dialogs/types';
-import { useDialog } from '@/composables/useDialog';
 import type { Space } from '../spaces/types';
+import { useDialogStore } from '@/stores/dialog';
 
 const props = defineProps<{
   space: Space;
 }>();
 
-const dialog = useDialog();
+const dialog = useDialogStore();
 
 function openCreateListDialog() {
   dialog.openDialog({

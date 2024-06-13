@@ -6,10 +6,10 @@ import NavigationWorkspaceSelector from '@/components/project-management/navigat
 import UserListItem from '@/components/common/navigation/UserListItem.vue';
 import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
 import { useLogo } from '@/composables/useLogo';
-import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
+import { useDialogStore } from '@/stores/dialog';
 
-const dialog = useDialog();
+const dialog = useDialogStore();
 const { navigationDrawer } = useHideNavigationDrawer();
 const { logout, isAuthenticated } = useAuthStore();
 const logo = useLogo();

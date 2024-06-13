@@ -15,6 +15,7 @@ import { ListStage } from "./list-stages/list.stage.entity";
 import { View } from "../views/view.entity";
 import { Prop } from "../props/prop.entity";
 import { ListGroup } from "./list-groups/list.group.entity";
+import { CardType } from "../card-types/card.type.entity";
 
 @Entity()
 export class List {
@@ -49,4 +50,7 @@ export class List {
 
     @OneToMany(() => Prop, (prop) => prop.list)
     props: Relation<Prop[]>;
+
+    @ManyToOne(() => CardType, { nullable: false, eager: true })
+    defaultCardType: Relation<CardType>;
 }

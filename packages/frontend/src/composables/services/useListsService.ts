@@ -37,10 +37,16 @@ export const useListsService = () => {
     });
   }
 
-  async function updateList(list: List): Promise<List> {
-    return sendRequest(`/lists/${list.id}`, {
+  async function updateList({
+    id,
+    updateDto,
+  }: {
+    id: number;
+    updateDto: Partial<List>;
+  }): Promise<List> {
+    return sendRequest(`/lists/${id}`, {
       method: 'PUT',
-      data: list,
+      data: updateDto,
     });
   }
 
@@ -52,7 +58,12 @@ export const useListsService = () => {
 
   function useGetListsQuery(workspaceId?: number) {
     return useQuery({
-      queryKey: ['lists', workspaceId],
+      queryKey: [
+        'lists',
+        {
+          workspaceId,
+        },
+      ],
       queryFn: () => getLists({ workspaceId }),
       staleTime: 1 * 60 * 1000,
     });
@@ -60,7 +71,7 @@ export const useListsService = () => {
 
   function useGetListQuery(id: Ref<number>) {
     return useQuery({
-      queryKey: ['list', id.value],
+      queryKey: ['lists', id.value],
       queryFn: () => getList(id.value),
       retry: false,
       staleTime: 1 * 60 * 1000,

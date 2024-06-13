@@ -41,6 +41,10 @@ export class WorkspacesService {
         const workspace = this.workspacesRepository.create(createWorkspaceDto);
         await this.workspacesRepository.save(workspace);
 
+        await this.workspaceSideEffectsService.createDefaultCardTypes(
+            workspace
+        );
+
         if (createWorkspaceDto.createOnboardingData) {
             const space = await this.workspaceSideEffectsService.postCreate(
                 workspace

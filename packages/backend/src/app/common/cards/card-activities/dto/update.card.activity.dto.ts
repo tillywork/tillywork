@@ -1,3 +1,4 @@
+import { PartialType } from "@nestjs/mapped-types";
 import { CardActivity } from "../card.activity.entity";
 
-export class UpdateCardActivityDto implements Partial<CardActivity> {}
+export class UpdateCardActivityDto extends PartialType(CardActivity) {}

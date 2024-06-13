@@ -10,6 +10,7 @@ import {
     ActivityType,
     CardActivity,
 } from "./card-activities/card.activity.entity";
+import { CardType } from "../card-types/card.type.entity";
 
 @Injectable()
 @EventSubscriber()
@@ -27,14 +28,19 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
     /**
      * Called after card insertion.
      */
-    afterInsert(event: InsertEvent<Card>) {
+    async afterInsert(event: InsertEvent<Card>) {
         const activityRepo = event.manager.getRepository(CardActivity);
+        const cardTypeRepo = event.manager.getRepository(CardType);
+
+        const cardType = await cardTypeRepo.findOneBy({
+            id: event.entity.type.id,
+        });
 
         const activity = activityRepo.create({
             type: ActivityType.UPDATE,
             card: event.entity,
             content: {
-                text: "created this task",
+                text: "created this " + cardType.name.toLocaleLowerCase(),
             },
             createdBy: event.entity.createdBy,
         });

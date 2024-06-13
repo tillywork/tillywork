@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Space } from "./space.entity";
 import { CreateSpaceDto } from "./dto/create.space.dto";
 import { UpdateSpaceDto } from "./dto/update.space.dto";
 import { SpaceSideEffectsService } from "./space.side.effects.service";
+import { CardType } from "../card-types/card.type.entity";
 
 export type SpaceFindAllResult = {
     total: number;
@@ -45,7 +46,19 @@ export class SpacesService {
         await this.spacesRepository.save(space);
 
         if (createSpaceDto.createOnboardingData) {
-            const list = await this.spaceSideEffectsService.postCreate(space);
+            const cardType = await this.spacesRepository.manager
+                .getRepository(CardType)
+                .findOne({
+                    where: {
+                        workspace: {
+                            id: space.workspaceId,
+                        },
+                    },
+                });
+            const list = await this.spaceSideEffectsService.postCreate({
+                space,
+                defaultCardType: cardType,
+            });
             space.lists = [list];
         }
 

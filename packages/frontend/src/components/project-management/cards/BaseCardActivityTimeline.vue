@@ -4,10 +4,10 @@ import { DIALOGS } from '@/components/common/dialogs/types';
 import { useCardActivitiesService } from '@/composables/services/useCardActivitiesService';
 import { useUsersService } from '@/composables/services/useUsersService';
 import { useDate } from '@/composables/useDate';
-import { useDialog } from '@/composables/useDialog';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { ActivityType, type CardActivity } from './types';
+import { useDialogStore } from '@/stores/dialog';
 
 const { dayjs } = useDate();
 
@@ -18,8 +18,12 @@ const props = defineProps<{
 const cardActivitiesService = useCardActivitiesService();
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
-const dialog = useDialog();
+const dialog = useDialogStore();
 const snackbar = useSnackbarStore();
+
+const confirmDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.CONFIRM)
+);
 
 const query = cardActivitiesService.useFindAllQuery(props.cardId);
 const deleteActivity = cardActivitiesService.useDeleteActivityMutation({
@@ -34,7 +38,7 @@ function openConfirmDeleteDialog(comment: CardActivity) {
     data: {
       title: 'Confirm',
       message: 'Are you sure you want to delete this comment?',
-      onCancel: dialog.closeDialog,
+      onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
       onConfirm: () => deleteComment(comment),
       isLoading: deleteActivity.isPending.value,
     },
@@ -55,7 +59,7 @@ function deleteComment(comment: CardActivity) {
       });
     })
     .finally(() => {
-      dialog.closeDialog();
+      dialog.closeDialog(confirmDialogIndex.value);
     });
 }
 </script>

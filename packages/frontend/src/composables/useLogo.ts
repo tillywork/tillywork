@@ -11,7 +11,12 @@ export const useLogo = () => {
     }
   }
 
+  function getCheckUrl() {
+    return 'https://cdn.tilly.work/check-box.png';
+  }
+
   return {
     getLogoUrlByTheme,
+    getCheckUrl,
   };
 };

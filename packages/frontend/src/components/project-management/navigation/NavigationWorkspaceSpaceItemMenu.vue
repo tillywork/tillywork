@@ -3,14 +3,18 @@ import type { Space } from '../spaces/types';
 import { useSpacesService } from '@/composables/services/useSpacesService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
-import { useDialog } from '@/composables/useDialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
+import { useDialogStore } from '@/stores/dialog';
 
 const spaceMenu = ref(false);
 const spacesService = useSpacesService();
 const { showSnackbar } = useSnackbarStore();
 const queryClient = useQueryClient();
-const dialog = useDialog();
+const dialog = useDialogStore();
+
+const confirmDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.CONFIRM)
+);
 
 const deleteSpaceMutation = spacesService.useDeleteSpaceMutation();
 
@@ -30,7 +34,7 @@ function handleDeleteSpace(space: Space) {
     data: {
       title: 'Confirm',
       message: 'Are you sure you want to delete this space?',
-      onCancel: dialog.closeDialog,
+      onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
       onConfirm: () => deleteSpace(space),
       isLoading: deleteSpaceMutation.isPending.value,
     },
@@ -43,7 +47,7 @@ function deleteSpace(space: Space) {
     .then(() => {
       queryClient.invalidateQueries({ queryKey: ['spaces'] });
       queryClient.invalidateQueries({ queryKey: ['space', space.id] });
-      dialog.closeDialog();
+      dialog.closeDialog(confirmDialogIndex.value);
     })
     .catch((e) => {
       console.log(e);

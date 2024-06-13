@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { FindOptionsWhere, Repository, UpdateResult } from "typeorm";
 import { List } from "./list.entity";
 import { CreateListDto } from "./dto/create.list.dto";
 import { UpdateListDto } from "./dto/update.list.dto";
@@ -53,6 +53,13 @@ export class ListsService {
         const list = await this.findOne(id);
         this.listsRepository.merge(list, updateListDto);
         return this.listsRepository.save(list);
+    }
+
+    async batchUpdate(
+        where: FindOptionsWhere<List>,
+        updateListDto: UpdateListDto
+    ): Promise<UpdateResult> {
+        return this.listsRepository.update(where, updateListDto);
     }
 
     async remove(id: number): Promise<void> {

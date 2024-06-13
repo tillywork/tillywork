@@ -1,3 +1,4 @@
-import { Project } from '../project.entity';
+import { PartialType } from "@nestjs/mapped-types";
+import { Project } from "../project.entity";
 
-export class UpdateProjectDto implements Partial<Project> {}
+export class UpdateProjectDto extends PartialType(Project) {}
