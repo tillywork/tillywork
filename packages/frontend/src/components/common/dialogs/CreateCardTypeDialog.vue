@@ -1,48 +1,47 @@
 <script setup lang="ts">
-import { useListsService } from '@/composables/services/useListsService';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
-import type { List } from '@/components/project-management/lists/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useCardTypesService } from '@/composables/services/useCardTypesService';
 import { useWorkspaceStore } from '@/stores/workspace';
+import type { CreateCardTypeDto } from '@/components/project-management/cards/types';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from './types';
 
-const listsService = useListsService();
-const dialog = useDialogStore();
 const { rules } = validationUtils;
-const { showSnackbar } = useSnackbarStore();
+const dialog = useDialogStore();
 const queryClient = useQueryClient();
-const { useFindAllQuery } = useCardTypesService();
+const { showSnackbar } = useSnackbarStore();
+const { useCreateMutation } = useCardTypesService();
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
 
-const currentDialogIndex = computed(() =>
-  dialog.getDialogIndex(DIALOGS.CREATE_LIST)
-);
-const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
-
-const listForm = ref<VForm>();
-const listDto = ref<Partial<List>>({
+const cardTypeForm = ref<VForm>();
+const cardTypeDto = ref<CreateCardTypeDto>({
   name: '',
-  spaceId: currentDialog.value?.data.space.id,
-});
-
-const { data: cardTypes } = useFindAllQuery({
   workspaceId: selectedWorkspace.value!.id,
 });
 
-const { mutateAsync: createList, isPending } =
-  listsService.useCreateListMutation();
+const currentDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.CREATE_CARD_TYPE)
+);
+
+const { mutateAsync: createCardType, isPending } = useCreateMutation();
 
 async function handleCreate() {
-  const isValid = await listForm.value?.validate();
+  const isValid = await cardTypeForm.value?.validate();
   if (isValid?.valid) {
-    createList(listDto.value)
+    createCardType(cardTypeDto.value)
       .then(() => {
         dialog.closeDialog(currentDialogIndex.value);
-        queryClient.invalidateQueries({ queryKey: ['spaces'] });
+        queryClient.invalidateQueries({
+          queryKey: [
+            'cardTypes',
+            {
+              workspaceId: selectedWorkspace.value?.id,
+            },
+          ],
+        });
       })
       .catch(() => {
         showSnackbar({
@@ -58,9 +57,7 @@ async function handleCreate() {
 <template>
   <v-card color="surface" elevation="24" :loading="isPending">
     <div class="d-flex align-center ps-0 pa-4">
-      <v-card-subtitle
-        >Create list in {{ currentDialog?.data.space.name }}</v-card-subtitle
-      >
+      <v-card-subtitle>Create card type</v-card-subtitle>
       <v-spacer />
       <base-icon-btn
         icon="mdi-close"
@@ -68,21 +65,17 @@ async function handleCreate() {
         @click="dialog.closeDialog(currentDialogIndex)"
       />
     </div>
-    <v-form ref="listForm" @submit.prevent="handleCreate" validate-on="submit">
+    <v-form
+      ref="cardTypeForm"
+      @submit.prevent="handleCreate"
+      validate-on="submit"
+    >
       <div class="pa-4 py-0">
         <v-text-field
-          v-model="listDto.name"
+          v-model="cardTypeDto.name"
           :rules="[rules.required]"
           label="Name*"
           autofocus
-        />
-        <v-autocomplete
-          v-model="listDto.defaultCardType"
-          :items="cardTypes"
-          item-title="name"
-          return-object
-          :rules="[rules.required]"
-          label="Default Card Type*   "
         />
       </div>
       <v-card-actions class="d-flex justify-start align-center py-0 px-4">

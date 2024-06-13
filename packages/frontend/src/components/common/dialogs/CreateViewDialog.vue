@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useViewsService } from '@/composables/services/useViewsService';
-import { useDialog } from '@/composables/useDialog';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
 import {
@@ -9,17 +8,24 @@ import {
 } from '@/components/project-management/views/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
+import { useDialogStore } from '@/stores/dialog';
+import { DIALOGS } from './types';
 
 const viewsService = useViewsService();
-const dialog = useDialog();
+const dialog = useDialogStore();
 const { rules } = validationUtils;
 const { showSnackbar } = useSnackbarStore();
 const queryClient = useQueryClient();
 
+const currentDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.CREATE_VIEW)
+);
+const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
+
 const viewForm = ref<VForm>();
 const viewDto = ref<Partial<View>>({
   name: '',
-  listId: dialog.data.list.id,
+  listId: currentDialog.value?.data.list.id,
 });
 
 const viewTypeOptions = ref([
@@ -48,9 +54,9 @@ async function handleCreate() {
   if (isValid?.valid) {
     createView(viewDto.value)
       .then(() => {
-        dialog.closeDialog();
+        dialog.closeDialog(currentDialogIndex.value);
         queryClient.invalidateQueries({
-          queryKey: ['list', dialog.data.list.id],
+          queryKey: ['list', currentDialog.value?.data.list.id],
         });
       })
       .catch(() => {
@@ -68,13 +74,13 @@ async function handleCreate() {
   <v-card color="surface" elevation="24" :loading="isPending">
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle>
-        Create view in {{ dialog.data.list.name }}
+        Create view in {{ currentDialog?.data.list.name }}
       </v-card-subtitle>
       <v-spacer />
       <base-icon-btn
         icon="mdi-close"
         color="default"
-        @click="dialog.closeDialog()"
+        @click="dialog.closeDialog(currentDialogIndex)"
       />
     </div>
     <v-form ref="viewForm" @submit.prevent="handleCreate" validate-on="submit">

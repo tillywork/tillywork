@@ -2,6 +2,7 @@ import type { CardsData } from '@/composables/services/useCardsService';
 import type { PaginationParams } from '../views/types';
 import type { View } from '../views/types';
 import type { QueryFilter } from '../filters/types';
+import type { CardType } from '../cards/types';
 
 export interface List {
   id: number;
@@ -9,6 +10,7 @@ export interface List {
   spaceId: number;
   listStages: ListStage[];
   views: View[];
+  defaultCardType: CardType;
 }
 
 export interface ListStage {

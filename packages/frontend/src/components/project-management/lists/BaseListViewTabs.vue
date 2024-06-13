@@ -1,17 +1,21 @@
 <script setup lang="ts">
-import { useDialog } from '@/composables/useDialog';
 import { ViewTypes, type View } from '../views/types';
 import type { List } from './types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { useViewsService } from '@/composables/services/useViewsService';
 import { useSnackbarStore } from '@/stores/snackbar';
+import { useDialogStore } from '@/stores/dialog';
 
-const dialog = useDialog();
+const dialog = useDialogStore();
 const props = defineProps<{
   views: View[];
   list: List;
 }>();
+
+const confirmDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.CONFIRM)
+);
 
 const workspaceStore = useWorkspaceStore();
 const { listState } = storeToRefs(workspaceStore);
@@ -84,7 +88,7 @@ function handleDeleteView(view: View) {
     data: {
       message: 'Are you sure you want to delete this view?',
       isLoading: isDeletingView,
-      onCancel: dialog.closeDialog,
+      onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
       onConfirm: () => deleteView(view),
     },
   });
@@ -100,7 +104,7 @@ function deleteView(view: View) {
       });
     })
     .then(() => {
-      dialog.closeDialog();
+      dialog.closeDialog(confirmDialogIndex.value);
 
       if (view.id === selectedView.value?.id) {
         selectViewFromListStateOrFirstView();

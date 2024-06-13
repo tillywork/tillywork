@@ -1,6 +1,4 @@
-import { User } from "../../users/user.entity";
+import { PartialType } from "@nestjs/mapped-types";
 import { Card } from "../card.entity";
 
-export class UpdateCardDto implements Partial<Card> {
-    users?: User[];
-}
+export class UpdateCardDto extends PartialType(Card) {}

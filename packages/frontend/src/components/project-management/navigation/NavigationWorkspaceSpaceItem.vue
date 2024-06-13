@@ -10,8 +10,6 @@ defineProps<{
 
 const freezeSpaceHoverId = ref<number | null>();
 
-const createListDialog = ref(false);
-
 function setHoverFreeze(space: Space) {
   freezeSpaceHoverId.value = space.id;
 }
@@ -19,12 +17,6 @@ function setHoverFreeze(space: Space) {
 function clearHoverFreeze() {
   freezeSpaceHoverId.value = null;
 }
-
-watch(createListDialog, () => {
-  if (!createListDialog.value) {
-    freezeSpaceHoverId.value = null;
-  }
-});
 </script>
 
 <template>

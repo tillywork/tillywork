@@ -8,10 +8,8 @@ const workspaceStore = useWorkspaceStore();
 const { selectedWorkspace, spaceExpansionState } = storeToRefs(workspaceStore);
 
 const spacesService = useSpacesService();
-const createListDialog = ref(false);
 const listMenu = ref(false);
 const freezeListHoverId = ref<number | null>();
-const freezeSpaceHoverId = ref<number | null>();
 
 const enableSpacesFetch = ref(false);
 
@@ -50,12 +48,6 @@ watch(
 watch(listMenu, (isOpen) => {
   if (!isOpen) {
     freezeListHoverId.value = null;
-  }
-});
-
-watch(createListDialog, (isOpen) => {
-  if (!isOpen) {
-    freezeSpaceHoverId.value = null;
   }
 });
 </script>

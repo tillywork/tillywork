@@ -3,15 +3,7 @@ import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from './types';
 
 const dialogStore = useDialogStore();
-const { currentDialog, options } = storeToRefs(dialogStore);
 const { width: windowWidth, height: windowHeight } = useWindowSize();
-
-const isDialogOpen = computed({
-  get: () => currentDialog.value !== null,
-  set: (val) => {
-    if (!val) currentDialog.value = null;
-  },
-});
 
 const dialogComponents = {
   [DIALOGS.CONFIRM]: () => import('./ConfirmDialog.vue'),
@@ -22,50 +14,62 @@ const dialogComponents = {
   [DIALOGS.CREATE_WORKSPACE]: () => import('./CreateWorkspaceDialog.vue'),
   [DIALOGS.ONBOARDING]: () => import('./OnboardingDialog.vue'),
   [DIALOGS.SETTINGS]: () => import('./SettingsDialog.vue'),
+  [DIALOGS.CREATE_CARD_TYPE]: () => import('./CreateCardTypeDialog.vue'),
+  [DIALOGS.REMOVE_CARD_TYPE]: () => import('./RemoveCardTypeDialog.vue'),
 };
 
-const currentDialogComponent = computed(() => {
-  if (!currentDialog.value) return null;
-
-  return lazyLoadDialog(currentDialog.value);
+const currentDialogs = computed(() => {
+  return dialogStore.dialogs.map((dialog) => {
+    return {
+      component: dialog.dialog ? lazyLoadDialog(dialog.dialog) : null,
+      options: dialog.options,
+    };
+  });
 });
 
-const width = computed(() => {
-  return !options.value.fullscreen ? options.value.width ?? 750 : undefined;
-});
-
-const target = computed(() => {
-  return !options.value.fullscreen
-    ? ([windowWidth.value / 2, windowHeight.value / 3.5] as any)
-    : undefined;
-});
-
-const locationStrategy = computed(() => {
-  return !options.value.fullscreen ? 'connected' : undefined;
-});
+/**
+ * Component cache to prevent re-rendering of
+ * opened dialogs when currentDialogs changes
+ */
+const loadedComponents = new Map<DIALOGS, any>();
 
 function lazyLoadDialog(dialog: DIALOGS) {
-  return defineAsyncComponent(dialogComponents[dialog]);
+  if (!loadedComponents.has(dialog)) {
+    loadedComponents.set(
+      dialog,
+      defineAsyncComponent(dialogComponents[dialog])
+    );
+  }
+  return loadedComponents.get(dialog);
 }
 
-function handleAfterLeave() {
-  dialogStore.setData({});
-  dialogStore.setOptions({});
+function handleAfterLeave(index: number) {
+  dialogStore.closeDialog(index);
 }
 </script>
 
 <template>
-  <v-dialog
-    v-model="isDialogOpen"
-    :width
-    opacity="0.1"
-    :location-strategy="locationStrategy"
-    :target
-    :fullscreen="options.fullscreen"
-    :persistent="options.persistent"
-    :key="currentDialogComponent?.name"
-    @after-leave="handleAfterLeave"
+  <template
+    v-for="(dialog, index) in currentDialogs"
+    :key="dialog.component.name"
   >
-    <component :is="currentDialogComponent" />
-  </v-dialog>
+    <v-dialog
+      :model-value="true"
+      opacity="0.1"
+      :width="
+        dialog.options?.fullscreen ? undefined : dialog.options?.width ?? 750
+      "
+      :location-strategy="dialog.options?.fullscreen ? undefined : 'connected'"
+      :target="
+        dialog.options?.fullscreen
+          ? undefined
+          : [windowWidth / 2, windowHeight / 3.5]
+      "
+      :fullscreen="dialog.options?.fullscreen"
+      :persistent="dialog.options?.persistent"
+      @after-leave="handleAfterLeave(index)"
+    >
+      <component :is="dialog.component" />
+    </v-dialog>
+  </template>
 </template>

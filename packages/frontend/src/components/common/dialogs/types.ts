@@ -7,6 +7,8 @@ export enum DIALOGS {
   CREATE_LIST = 'CreateListDialog',
   CREATE_WORKSPACE = 'CreateWorkspaceDialog',
   CREATE_VIEW = 'CreateViewDialog',
+  CREATE_CARD_TYPE = 'CreateCardType',
+  REMOVE_CARD_TYPE = 'RemoveCardType',
 }
 
 export const DIALOG_WIDTHS = {
@@ -18,4 +20,6 @@ export const DIALOG_WIDTHS = {
   [DIALOGS.ONBOARDING]: 0,
   [DIALOGS.SETTINGS]: 0,
   [DIALOGS.CREATE_WORKSPACE]: 0,
+  [DIALOGS.CREATE_CARD_TYPE]: 400,
+  [DIALOGS.REMOVE_CARD_TYPE]: 500,
 };

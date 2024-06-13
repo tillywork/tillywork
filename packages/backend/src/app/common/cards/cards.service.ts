@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { FindOptionsWhere, Repository } from "typeorm";
+import { FindOptionsWhere, Repository, UpdateResult } from "typeorm";
 import { Card } from "./card.entity";
 import { CreateCardDto } from "./dto/create.card.dto";
 import { UpdateCardDto } from "./dto/update.card.dto";
@@ -107,6 +107,9 @@ export class CardsService {
     async create(createCardDto: CreateCardDto): Promise<Card> {
         const initCard = this.cardsRepository.create({
             ...createCardDto,
+            type: {
+                id: createCardDto.type,
+            },
             createdBy: {
                 id: createCardDto.createdBy,
             },
@@ -137,6 +140,13 @@ export class CardsService {
         }
 
         return this.cardsRepository.save(card);
+    }
+
+    async batchUpdate(
+        where: FindOptionsWhere<Card>,
+        updateCardDto: UpdateCardDto
+    ): Promise<UpdateResult> {
+        return this.cardsRepository.update(where, updateCardDto);
     }
 
     async remove(id: number): Promise<void> {

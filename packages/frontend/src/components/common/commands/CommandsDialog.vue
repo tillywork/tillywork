@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { useDialog } from '@/composables/useDialog';
+import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from '../dialogs/types';
 
 const dialogState = defineModel<boolean>();
 const keys = useMagicKeys();
 const width = ref(700);
-const dialog = useDialog();
+const dialog = useDialogStore();
 
 watch(keys.current, (v) => {
   if (openKeysClicked(v)) {

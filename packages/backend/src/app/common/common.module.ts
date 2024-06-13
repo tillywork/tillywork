@@ -13,6 +13,7 @@ import { HelpersModule } from "./helpers/helpers.module";
 import { PropsModule } from "./props/props.module";
 import { FiltersModule } from "./filters/filters.module";
 import { ClsModule } from "nestjs-cls";
+import { CardTypesModule } from "./card-types/card.types.module";
 
 @Module({
     imports: [
@@ -33,6 +34,7 @@ import { ClsModule } from "nestjs-cls";
         HelpersModule,
         PropsModule,
         FiltersModule,
+        CardTypesModule,
     ],
     controllers: [],
     providers: [

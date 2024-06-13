@@ -1,22 +1,26 @@
 <script setup lang="ts">
-import type { CreateCardDto } from '@/components/project-management/cards/types';
+import type {
+  CardType,
+  CreateCardDto,
+} from '@/components/project-management/cards/types';
 import {
   type List,
   type ListStage,
 } from '@/components/project-management/lists/types';
 import { useCardsService } from '@/composables/services/useCardsService';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
-import { useDialog } from '@/composables/useDialog';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 import type { VForm } from 'vuetify/lib/components/index.mjs';
 import BaseEditorInput from '../base/BaseEditor/BaseEditorInput.vue';
+import { useDialogStore } from '@/stores/dialog';
+import { DIALOGS } from './types';
 
 const route = useRoute();
 const authStore = useAuthStore();
 const queryClient = useQueryClient();
-const dialog = useDialog();
+const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
 const cardsService = useCardsService();
 const projectUsersService = useProjectUsersService();
@@ -28,13 +32,18 @@ const { data: users } = projectUsersService.useProjectUsersQuery({
   select: (data) => data.map((pu) => pu.user),
 });
 
+const currentDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.CREATE_CARD)
+);
+const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
+
 const list = computed(() => {
   let list: List | undefined;
 
-  if (dialog.data && dialog.data.list) {
-    list = dialog.data.list;
+  if (currentDialog.value?.data && currentDialog.value.data?.list) {
+    list = currentDialog.value.data.list;
   } else if (+route.params.listId) {
-    list = queryClient.getQueryData(['list', +route.params.listId]);
+    list = queryClient.getQueryData(['lists', +route.params.listId]);
   }
 
   return list;
@@ -43,8 +52,8 @@ const list = computed(() => {
 const listStages = computed(() => {
   let listStages: ListStage[] | undefined;
 
-  if (dialog.data && dialog.data.listStages) {
-    listStages = dialog.data.listStages;
+  if (currentDialog.value?.data && currentDialog.value.data?.listStages) {
+    listStages = currentDialog.value.data.listStages;
   } else {
     listStages = list.value?.listStages ?? [];
   }
@@ -52,16 +61,25 @@ const listStages = computed(() => {
   return listStages ?? [];
 });
 
+const cardType = computed<CardType>(() => {
+  if (currentDialog.value?.data && currentDialog.value.data?.type) {
+    return currentDialog.value.data.type;
+  } else {
+    return list.value?.defaultCardType;
+  }
+});
+
 const createCardMutation = cardsService.useCreateCardMutation();
 const createCardDto = ref<CreateCardDto>({
   title: '',
-  listId: dialog.data.listId ?? list.value?.id,
-  listStage: dialog.data.listStage ?? listStages.value[0],
-  users: dialog.data.users,
+  listId: currentDialog.value?.data?.listId ?? list.value?.id,
+  listStage: currentDialog.value?.data?.listStage ?? listStages.value[0],
+  users: currentDialog.value?.data?.users,
+  type: cardType.value.id,
 });
 
 function closeDialog() {
-  dialog.closeDialog();
+  dialog.closeDialog(currentDialogIndex.value);
 }
 
 async function createCard() {
@@ -96,7 +114,7 @@ function handlePostCreate() {
   createCardDto.value.description = undefined;
 
   showSnackbar({
-    message: `Task created`,
+    message: `${cardType.value.name} created`,
     color: 'success',
     timeout: 2000,
   });
@@ -114,7 +132,7 @@ function handlePostCreate() {
     :loading="createCardMutation.isPending.value"
   >
     <div class="d-flex align-center ps-0 pa-4">
-      <v-card-subtitle>Create task</v-card-subtitle>
+      <v-card-subtitle>Create {{ cardType.name }}</v-card-subtitle>
       <v-spacer />
       <base-icon-btn icon="mdi-close" color="default" @click="closeDialog()" />
     </div>
@@ -122,7 +140,7 @@ function handlePostCreate() {
       <div class="pa-4 pt-0">
         <base-editor-input
           v-model="createCardDto.title"
-          placeholder="Task title"
+          :placeholder="cardType.name + ' name'"
           autofocus
           :heading="3"
           single-line
@@ -170,7 +188,7 @@ function handlePostCreate() {
           class="text-caption px-4 ms-4"
           type="submit"
           :loading="createCardMutation.isPending.value"
-          >Create task</v-btn
+          >Create {{ cardType.name }}</v-btn
         >
       </v-card-actions>
     </v-form>
