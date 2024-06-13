@@ -41,7 +41,12 @@ export class ListsService {
     }
 
     async create(createListDto: CreateListDto): Promise<List> {
-        const list = this.listsRepository.create(createListDto);
+        const list = this.listsRepository.create({
+            ...createListDto,
+            defaultCardType: {
+                id: createListDto.defaultCardTypeId,
+            },
+        });
         await this.listsRepository.save(list);
 
         await this.listSideEffectsService.postCreate(list);

@@ -1,8 +1,10 @@
-import { IsEnum, IsNotEmpty } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber } from "class-validator";
 import { ActivityContent, ActivityType } from "../card.activity.entity";
 import { User } from "../../../users/user.entity";
 
 export class CreateCardActivityDto {
+    @IsNotEmpty()
+    @IsNumber()
     card: number;
 
     @IsNotEmpty()

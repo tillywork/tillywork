@@ -1,3 +1,4 @@
-import { Prop } from '../prop.entity';
+import { PartialType } from "@nestjs/mapped-types";
+import { Prop } from "../prop.entity";
 
-export class UpdatePropDto implements Partial<Prop> {}
+export class UpdatePropDto extends PartialType(Prop) {}

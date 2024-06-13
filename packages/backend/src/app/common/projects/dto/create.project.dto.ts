@@ -1,5 +1,10 @@
 import { Type } from "class-transformer";
-import { IsNotEmpty, IsOptional, ValidateNested } from "class-validator";
+import {
+    IsNotEmpty,
+    IsNumber,
+    IsOptional,
+    ValidateNested,
+} from "class-validator";
 import { CreateProjectUserDto } from "../project-users/dto/create.project.user.dto";
 
 export class CreateProjectDto {
@@ -7,6 +12,7 @@ export class CreateProjectDto {
     name: string;
 
     @IsOptional()
+    @IsNumber()
     ownerId?: number;
 
     @IsOptional()
