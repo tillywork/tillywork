@@ -7,6 +7,15 @@ definePage({
     hideNavigationDrawer: true,
   },
 });
+
+const route = useRoute();
+
+onMounted(() => {
+  if (route.query.code) {
+    // ~ Redirected from GitHub authorization.
+    console.error('todo: generate access token!');
+  }
+});
 </script>
 
 <template>

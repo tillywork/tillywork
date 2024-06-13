@@ -55,6 +55,16 @@ async function handleRegister() {
 const navigateToLoginPage = () => {
   router.push('/login');
 };
+
+const redirectToGitHubAuthorization = () => {
+  window.location.assign(
+    ' https://github.com/login/oauth/authorize?client_id=' +
+      import.meta.env.TW_VITE_GITHUB_CLIENT_ID +
+      '&redirect_uri=' +
+      import.meta.env.TW_VITE_HOST_NAME +
+      route.fullPath
+  );
+};
 </script>
 
 <template>
@@ -122,6 +132,12 @@ const navigateToLoginPage = () => {
               <v-btn type="submit" variant="flat" :loading class="text-body-2"
                 >Create</v-btn
               >
+              <v-btn
+                variant="flat"
+                @click.prevent="redirectToGitHubAuthorization"
+              >
+                <v-icon icon="mdi-github" />
+              </v-btn>
             </v-card-actions>
           </v-card>
         </v-form>
