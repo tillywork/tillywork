@@ -13,6 +13,7 @@ const errorMessage = ref<string[] | null>(null);
 const { rules } = validationUtils;
 const loading = ref(false);
 const route = useRoute('/login');
+const router = useRouter();
 
 const login = async () => {
   errorMessage.value = null;
@@ -42,25 +43,58 @@ const login = async () => {
     }
   }
 };
+
+const navigateToRegisterPage = () => {
+  router.push('/register');
+};
 </script>
 
 <template>
   <v-container class="fill-height">
     <v-row class="justify-center">
       <v-col cols="12" sm="8" md="6" class="mt-n12">
-        <v-img :src="logo.getLogoUrlByTheme()" alt="tillywork" width="225" class="mx-auto mb-3" />
+        <v-img
+          :src="logo.getLogoUrlByTheme()"
+          alt="tillywork"
+          width="225"
+          class="mx-auto mb-3"
+        />
         <v-form ref="loginForm" @submit.prevent="login">
           <v-card color="accent" class="pa-4">
             <v-card-title class="text-h5 mb-4">Welcome back!</v-card-title>
             <v-card-text>
-              <v-text-field v-model="email" label="Email" required :rules="[rules.required, rules.email]"
-                :error="!!errorMessage?.length"></v-text-field>
-              <v-text-field v-model="password" label="Password" type="password" required :rules="[rules.required]"
-                :error-messages="errorMessage"></v-text-field>
+              <v-text-field
+                v-model="email"
+                label="Email"
+                required
+                :rules="[rules.required, rules.email]"
+                :error="!!errorMessage?.length"
+              ></v-text-field>
+              <v-text-field
+                v-model="password"
+                label="Password"
+                type="password"
+                required
+                :rules="[rules.required]"
+                :error-messages="errorMessage"
+              ></v-text-field>
             </v-card-text>
             <v-card-actions class="px-4 pt-0">
+              <p>
+                Don't have an account?
+                <span class="link" @click.prevent="navigateToRegisterPage"
+                  >Register</span
+                >
+              </p>
               <v-spacer />
-              <v-btn type="submit" variant="flat" color="primary" :loading="loading" class="text-body-2">Login</v-btn>
+              <v-btn
+                type="submit"
+                variant="flat"
+                color="primary"
+                :loading="loading"
+                class="text-body-2"
+                >Login</v-btn
+              >
             </v-card-actions>
           </v-card>
         </v-form>

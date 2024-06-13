@@ -22,6 +22,7 @@ const createUserDto = ref<CreateUserDto>({
 const errorMessage = ref<string | null>(null);
 const loading = ref(false);
 const route = useRoute('/register');
+const router = useRouter();
 const { rules } = validationUtils;
 const { showSnackbar } = useSnackbarStore();
 const { register } = useAuthStore();
@@ -50,6 +51,10 @@ async function handleRegister() {
     }
   }
 }
+
+const navigateToLoginPage = () => {
+  router.push('/login');
+};
 </script>
 
 <template>
@@ -107,6 +112,12 @@ async function handleRegister() {
               /> -->
             </v-card-text>
             <v-card-actions class="px-4 pt-0">
+              <p>
+                Already have an account?
+                <span class="link" @click.prevent="navigateToLoginPage"
+                  >Login</span
+                >
+              </p>
               <v-spacer />
               <v-btn type="submit" variant="flat" :loading class="text-body-2"
                 >Create</v-btn
