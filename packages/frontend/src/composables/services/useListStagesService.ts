@@ -6,38 +6,52 @@ export const useListStagesService = () => {
   const { sendRequest } = useHttp();
   const queryClient = useQueryClient();
 
-  async function getListStages({
+  async function getListStages(
+    listStage: Pick<ListStage, 'listId'>
+  ): Promise<ListStage[]> {
+    return sendRequest(`/lists/${listStage.listId}/stages`, {
+      method: 'GET',
+    });
+  }
+
+  async function createListStage({
     listId,
+    listStage,
   }: {
     listId: number;
-  }): Promise<ListStage[]> {
+    listStage: Omit<ListStage, 'id' | 'listId'>;
+  }): Promise<ListStage> {
     return sendRequest(`/lists/${listId}/stages`, {
-      method: 'GET',
-    });
-  }
-
-  async function createListStage(list: Partial<ListStage>): Promise<ListStage> {
-    return sendRequest('/lists', {
       method: 'POST',
-      data: list,
+      data: listStage,
     });
   }
 
-  async function getListStage(id: number): Promise<ListStage> {
-    return sendRequest(`/lists/${id}`, {
+  async function getListStage(
+    listStage: Pick<ListStage, 'id' | 'listId'>
+  ): Promise<ListStage> {
+    return sendRequest(`/lists/${listStage.listId}/stages/${listStage.id}`, {
       method: 'GET',
     });
   }
 
-  async function updateListStage(list: ListStage): Promise<ListStage> {
-    return sendRequest(`/lists/${list.id}`, {
+  async function updateListStage({
+    listId,
+    listStage,
+  }: {
+    listId: number;
+    listStage: Partial<ListStage>;
+  }): Promise<ListStage> {
+    return sendRequest(`/lists/${listId}/stages/${listStage.id}`, {
       method: 'PUT',
-      data: list,
+      data: listStage,
     });
   }
 
-  async function deleteListStage(id: number): Promise<void> {
-    return sendRequest(`/lists/${id}`, {
+  async function deleteListStage(
+    listStage: Pick<ListStage, 'id' | 'listId'>
+  ): Promise<void> {
+    return sendRequest(`/lists/${listStage.listId}/stages/${listStage.id}`, {
       method: 'DELETE',
     });
   }
@@ -50,10 +64,10 @@ export const useListStagesService = () => {
     });
   }
 
-  function useGetListStageQuery(id: number) {
+  function useGetListStageQuery(listId: number, id: Ref<number>) {
     return useQuery({
       queryKey: ['listStage', id],
-      queryFn: () => getListStage(id),
+      queryFn: () => getListStage({ listId, id: unref(id) }),
     });
   }
 
@@ -69,9 +83,9 @@ export const useListStagesService = () => {
   function useUpdateListStageMutation() {
     return useMutation({
       mutationFn: updateListStage,
-      onSuccess: (newListStage) => {
+      onSuccess: (updatedListStage) => {
         queryClient.invalidateQueries({
-          queryKey: ['listStage', newListStage.id],
+          queryKey: ['listStage', updatedListStage.id],
         });
         queryClient.invalidateQueries({ queryKey: ['listStages'] });
       },
