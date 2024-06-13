@@ -50,7 +50,9 @@ export class SpacesService {
                 .getRepository(CardType)
                 .findOne({
                     where: {
-                        workspace: space.workspace,
+                        workspace: {
+                            id: space.workspaceId,
+                        },
                     },
                 });
             const list = await this.spaceSideEffectsService.postCreate({

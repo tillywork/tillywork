@@ -22,7 +22,7 @@ export class SpaceSideEffectsService {
                         name: list.name,
                         spaceId: space.id,
                         createOnboardingData: true,
-                        defaultCardTypeId: defaultCardType.id,
+                        defaultCardType,
                     })
                     .then((list) => resolve(list));
             });

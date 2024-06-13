@@ -5,6 +5,7 @@ import {
     IsOptional,
     IsString,
 } from "class-validator";
+import { CardType } from "../../card-types/card.type.entity";
 
 export class CreateListDto {
     @IsNotEmpty()
@@ -14,8 +15,7 @@ export class CreateListDto {
     @IsNumber()
     spaceId: number;
     @IsNotEmpty()
-    @IsNumber()
-    defaultCardTypeId: number;
+    defaultCardType: CardType;
     @IsBoolean()
     @IsOptional()
     createOnboardingData?: boolean;
