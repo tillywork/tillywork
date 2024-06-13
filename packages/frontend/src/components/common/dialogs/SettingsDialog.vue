@@ -82,7 +82,7 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
         height="50"
         center-active
         mandatory
-        :model-value="currentDialog?.data.activeTab ?? 'theme'"
+        :model-value="currentDialog?.data?.activeTab ?? 'theme'"
       >
         <template #tab="{ item }">
           <v-tab
