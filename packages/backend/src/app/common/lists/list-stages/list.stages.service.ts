@@ -35,6 +35,7 @@ export class ListStagesService {
     }
 
     async findOne(id: number): Promise<ListStage> {
+        // TODO Handle related list (reject Not Found) --implement in Delete `Request` too--
         const listStage = await this.listStagesRepository.findOne({
             where: {
                 id,
@@ -62,8 +63,12 @@ export class ListStagesService {
         return this.listStagesRepository.save(listStage);
     }
 
+    // TODO upsert to handle bulk processing
+    // upsert([{id: ..., order: ...}], [id]) // https://typeorm.io/repository-api#repository-api
+
     async remove(id: number): Promise<void> {
         const listStage = await this.findOne(id);
+        // TODO Handle child entities (I think we can implement it in event-subscriber)
         await this.listStagesRepository.remove(listStage);
     }
 }
