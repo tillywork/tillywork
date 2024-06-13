@@ -22,6 +22,7 @@ import { AddOrderColumnToCardListsTable1716798868594 } from "../migrations/17167
 import { AddCreatedAtUpdatedAtToCardListTable1716883730399 } from "../migrations/1716883730399-add-createdAt-updatedAt-to-card-list-table";
 import { AddListViewType1717363107808 } from "../migrations/1717363107808-add-list-view-type";
 import { AddStartsAtColumnToCardsTable1717406725195 } from "../migrations/1717406725195-add-starts-at-column-to-cards-table";
+import { AddAccountTypeColumnToUsersTable1718260588011 } from "../migrations/1718260588011-add-account-type-column-to-users-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -45,6 +46,7 @@ const migrations = [
     AddCreatedAtUpdatedAtToCardListTable1716883730399,
     AddListViewType1717363107808,
     AddStartsAtColumnToCardsTable1717406725195,
+    AddAccountTypeColumnToUsersTable1718260588011,
 ];
 
 const config: TypeOrmModuleOptions = {

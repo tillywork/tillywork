@@ -1,16 +1,17 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
     Column,
     CreateDateColumn,
-    UpdateDateColumn,
-    ManyToMany,
     DeleteDateColumn,
+    Entity,
+    ManyToMany,
     OneToMany,
+    PrimaryGeneratedColumn,
     Relation,
+    UpdateDateColumn,
 } from "typeorm";
 import { Card } from "../cards/card.entity";
 import { ProjectUser } from "../projects/project-users/project.user.entity";
+import { AccountType } from "./types";
 
 @Entity()
 export class User {
@@ -19,6 +20,16 @@ export class User {
      */
     @PrimaryGeneratedColumn("increment")
     id: number;
+
+    /**
+     * The user's account type; A.K.A. how he was registered.
+     */
+    @Column({
+        type: "enum",
+        enum: AccountType,
+        default: AccountType.EMAIL,
+    })
+    accountType: AccountType;
 
     /**
      * The user's email address. It can also be set to unique if you desire.
