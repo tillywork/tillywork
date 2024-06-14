@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { useAuthStore } from '@/stores/auth';
-import NavigationWorkspace from '@/components/project-management/navigation/NavigationWorkspace.vue';
-import type { NavigationMenuItem } from '@/components/common/navigation/types';
-import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
+import CommandPalette from '@/components/common/commands/CommandPalette.vue';
+import { DIALOGS } from '@/components/common/dialogs/types';
 import UserListItem from '@/components/common/navigation/UserListItem.vue';
+import type { NavigationMenuItem } from '@/components/common/navigation/types';
+import NavigationWorkspace from '@/components/project-management/navigation/NavigationWorkspace.vue';
+import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
 import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
 import { useLogo } from '@/composables/useLogo';
-import { DIALOGS } from '@/components/common/dialogs/types';
+import { useAuthStore } from '@/stores/auth';
 import { useDialogStore } from '@/stores/dialog';
 
 const dialog = useDialogStore();
@@ -47,69 +48,71 @@ function openSettingsDialog() {
 
 <template>
   <v-app>
-    <v-navigation-drawer app v-model="navigationDrawer" color="background">
-      <v-img :src="logo.getLogoUrlByTheme()" width="125" class="ma-2 mt-4" />
-      <v-divider />
-      <navigation-workspace-selector v-if="isAuthenticated()" />
+    <command-palette>
+      <v-navigation-drawer app v-model="navigationDrawer" color="background">
+        <v-img :src="logo.getLogoUrlByTheme()" width="125" class="ma-2 mt-4" />
+        <v-divider />
+        <navigation-workspace-selector v-if="isAuthenticated()" />
 
-      <!-- Sidebar content -->
-      <v-list v-if="navigationMenuItems.length > 0">
-        <v-list-item
-          v-for="navigationItem in navigationMenuItems"
-          :key="navigationItem.title"
-          :to="navigationItem.route"
-          @click="navigationItem.onClick"
-          :exact="navigationItem.activeOnExactMatch"
-        >
-          <template #prepend v-if="navigationItem.icon">
-            <v-icon :icon="navigationItem.icon" />
-          </template>
-          <v-list-item-title>{{ navigationItem.title }}</v-list-item-title>
-        </v-list-item>
-      </v-list>
-
-      <!-- Current Workspace Information -->
-      <navigation-workspace v-if="isAuthenticated()" />
-
-      <template v-slot:append>
-        <v-list :slim="false">
-          <v-menu v-if="isAuthenticated()" :close-on-content-click="false">
-            <template #activator="{ props }">
-              <user-list-item v-bind="props">
-                <template #append>
-                  <v-icon icon="mdi-dots-vertical" size="small" />
-                </template>
-              </user-list-item>
+        <!-- Sidebar content -->
+        <v-list v-if="navigationMenuItems.length > 0">
+          <v-list-item
+            v-for="navigationItem in navigationMenuItems"
+            :key="navigationItem.title"
+            :to="navigationItem.route"
+            @click="navigationItem.onClick"
+            :exact="navigationItem.activeOnExactMatch"
+          >
+            <template #prepend v-if="navigationItem.icon">
+              <v-icon :icon="navigationItem.icon" />
             </template>
-            <v-card class="border-thin ms-n2">
-              <v-list>
-                <v-list-item @click="openSettingsDialog">
-                  <template #prepend>
-                    <v-icon icon="mdi-cog" />
-                  </template>
-                  <v-list-item-title>Settings</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="logout()">
-                  <template #prepend>
-                    <v-icon icon="mdi-logout" />
-                  </template>
-                  <v-list-item-title>Logout</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-card>
-          </v-menu>
-          <v-list-item :to="'/login'" v-else>
-            <template #prepend>
-              <v-icon icon="mdi-login" />
-            </template>
-            <v-list-item-title>Login</v-list-item-title>
+            <v-list-item-title>{{ navigationItem.title }}</v-list-item-title>
           </v-list-item>
         </v-list>
-      </template>
-    </v-navigation-drawer>
 
-    <v-main>
-      <router-view />
-    </v-main>
+        <!-- Current Workspace Information -->
+        <navigation-workspace v-if="isAuthenticated()" />
+
+        <template v-slot:append>
+          <v-list :slim="false">
+            <v-menu v-if="isAuthenticated()" :close-on-content-click="false">
+              <template #activator="{ props }">
+                <user-list-item v-bind="props">
+                  <template #append>
+                    <v-icon icon="mdi-dots-vertical" size="small" />
+                  </template>
+                </user-list-item>
+              </template>
+              <v-card class="border-thin ms-n2">
+                <v-list>
+                  <v-list-item @click="openSettingsDialog">
+                    <template #prepend>
+                      <v-icon icon="mdi-cog" />
+                    </template>
+                    <v-list-item-title>Settings</v-list-item-title>
+                  </v-list-item>
+                  <v-list-item @click="logout()">
+                    <template #prepend>
+                      <v-icon icon="mdi-logout" />
+                    </template>
+                    <v-list-item-title>Logout</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-card>
+            </v-menu>
+            <v-list-item :to="'/login'" v-else>
+              <template #prepend>
+                <v-icon icon="mdi-login" />
+              </template>
+              <v-list-item-title>Login</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </template>
+      </v-navigation-drawer>
+
+      <v-main>
+        <router-view />
+      </v-main>
+    </command-palette>
   </v-app>
 </template>

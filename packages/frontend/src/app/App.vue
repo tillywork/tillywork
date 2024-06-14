@@ -1,21 +1,20 @@
 <script setup lang="ts">
-import { VueQueryDevtools } from '@tanstack/vue-query-devtools';
-import CommandsDialog from '@/components/common/commands/CommandsDialog.vue';
-import BaseDialog from '@/components/common/dialogs/BaseDialog.vue';
 import BaseSnackbarWrapper from '@/components/common/base/BaseSnackbarWrapper.vue';
-import CrmLayout from '@/layouts/CrmLayout.vue';
-import ProjectLayout from '@/layouts/ProjectLayout.vue';
-import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import { useState } from '@/composables/useState';
-import { WorkspaceTypes } from '@/components/project-management/workspaces/types';
-import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
+import BaseDialog from '@/components/common/dialogs/BaseDialog.vue';
 import { DIALOGS } from '@/components/common/dialogs/types';
-import { useAuthStore } from '@/stores/auth';
+import { WorkspaceTypes } from '@/components/project-management/workspaces/types';
 import { useProjectsService } from '@/composables/services/useProjectsService';
-import { useThemeStore } from '@/stores/theme';
-import { useTheme } from 'vuetify';
-import posthog from 'posthog-js';
+import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
+import { useState } from '@/composables/useState';
+import CrmLayout from '@/layouts/CrmLayout.vue';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
+import ProjectLayout from '@/layouts/ProjectLayout.vue';
+import { useAuthStore } from '@/stores/auth';
 import { useDialogStore } from '@/stores/dialog';
+import { useThemeStore } from '@/stores/theme';
+import { VueQueryDevtools } from '@tanstack/vue-query-devtools';
+import posthog from 'posthog-js';
+import { useTheme } from 'vuetify';
 
 const themeStore = useThemeStore();
 
@@ -101,7 +100,6 @@ watch(projects, (v) => {
       <router-view />
     </default-layout>
   </template>
-  <commands-dialog />
   <base-dialog />
   <base-snackbar-wrapper />
   <VueQueryDevtools />
