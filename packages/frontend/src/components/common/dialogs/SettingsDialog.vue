@@ -34,7 +34,7 @@ const tabs = ref<SettingTab[]>([
     value: 'cardTypes',
   },
   {
-    icon: 'mdi-toy-brick-outline', // TODO Change icon
+    icon: 'mdi-format-list-bulleted-type',
     text: 'List Stages',
     value: 'listStages',
   },

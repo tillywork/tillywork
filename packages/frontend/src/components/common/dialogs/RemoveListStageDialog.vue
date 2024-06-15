@@ -95,12 +95,15 @@ async function handleSubmitForm() {
 
   try {
     await deleteListStage({
-      listId: listStage.value.listId,
-      id: listStage.value.id,
-      // replacementListStage: replacementListStage.value!, // TODO Implement `replacement` logic
+      listStage: {
+        listId: listStage.value.listId,
+        id: listStage.value.id,
+      },
+      replacementListStage: replacementListStage.value!,
     });
     dialog.closeDialog(currentDialogIndex.value);
     queryClient.invalidateQueries({ queryKey: ['listGroups'] });
+    queryClient.invalidateQueries({ queryKey: ['cards'] }); // TODO: Improvement, only related groupIds (current & replacement)
     // BUG on ListGroups, need to trace
     // Why listGroups not delete data?
   } catch (err) {

@@ -48,11 +48,16 @@ export const useListStagesService = () => {
     });
   }
 
-  async function deleteListStage(
-    listStage: Pick<ListStage, 'id' | 'listId'>
-  ): Promise<void> {
+  async function deleteListStage({
+    listStage,
+    replacementListStage,
+  }: {
+    listStage: Pick<ListStage, 'id' | 'listId'>;
+    replacementListStage: ListStage;
+  }): Promise<void> {
     return sendRequest(`/lists/${listStage.listId}/stages/${listStage.id}`, {
       method: 'DELETE',
+      data: replacementListStage,
     });
   }
 
