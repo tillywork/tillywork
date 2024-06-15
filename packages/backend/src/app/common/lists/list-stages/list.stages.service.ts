@@ -30,6 +30,7 @@ export class ListStagesService {
             where,
             order: {
                 order: "ASC",
+                createdAt: "DESC",
             },
         });
     }

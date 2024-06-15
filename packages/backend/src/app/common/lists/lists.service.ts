@@ -19,9 +19,21 @@ export class ListsService {
         private listSideEffectsService: ListSideEffectsService
     ) {}
 
-    async findAll(): Promise<ListFindAllResult> {
+    async findAll(options?: { spaceId?: number }): Promise<ListFindAllResult> {
+        const { spaceId } = options;
+
         const [lists, total] = await this.listsRepository.findAndCount({
+            where: {
+                spaceId,
+            },
             relations: ["listStages"],
+            order: {
+                id: "ASC",
+                listStages: {
+                    order: "ASC",
+                    createdAt: "DESC",
+                },
+            },
         });
 
         return { lists, total };
@@ -33,6 +45,12 @@ export class ListsService {
                 id,
             },
             relations: ["listStages", "views"],
+            order: {
+                listStages: {
+                    order: "ASC",
+                    createdAt: "DESC",
+                },
+            },
         });
         if (!list) {
             throw new NotFoundException(`List with ID ${id} not found`);
