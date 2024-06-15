@@ -40,7 +40,7 @@ export const useListStagesService = () => {
     listStage,
   }: {
     listId: number;
-    listStage: Partial<ListStage>;
+    listStage: Partial<Omit<ListStage, 'listId'>>;
   }): Promise<ListStage> {
     return sendRequest(`/lists/${listId}/stages/${listStage.id}`, {
       method: 'PUT',
