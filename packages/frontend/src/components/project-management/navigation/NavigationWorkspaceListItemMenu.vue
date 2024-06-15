@@ -7,6 +7,7 @@ import { DIALOGS } from '@/components/common/dialogs/types';
 import { useWorkspaceStore } from '@/stores/workspace';
 import type { CardType } from '../cards/types';
 import { useDialogStore } from '@/stores/dialog';
+import type { SettingTabValues } from '@/components/common/tabs/types';
 
 const listMenu = ref(false);
 const { useDeleteListMutation, useUpdateListMutation } = useListsService();
@@ -94,11 +95,11 @@ function handleUpdateDefaultCardType(cardType: CardType) {
   }
 }
 
-function openSettingsDialog() {
+function openSettingsDialog(activeTab: SettingTabValues[number] = 'cardTypes') {
   dialog.openDialog({
     dialog: DIALOGS.SETTINGS,
     data: {
-      activeTab: 'cardTypes',
+      activeTab,
     },
     options: {
       fullscreen: true,
@@ -176,6 +177,15 @@ watch(listMenu, () => {
             </v-list>
           </v-card>
         </v-menu>
+        <v-list-item
+          class="text-error"
+          @click="() => openSettingsDialog('listStages')"
+        >
+          <template #prepend>
+            <v-icon icon="mdi-delete" />
+          </template>
+          <v-list-item-title>Edit Stages</v-list-item-title>
+        </v-list-item>
         <v-list-item class="text-error" @click="handleDeleteList(list)">
           <template #prepend>
             <v-icon icon="mdi-delete" />
