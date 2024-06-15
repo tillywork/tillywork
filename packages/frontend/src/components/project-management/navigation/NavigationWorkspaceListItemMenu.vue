@@ -100,6 +100,7 @@ function openSettingsDialog(activeTab: SettingTabValues[number] = 'cardTypes') {
     dialog: DIALOGS.SETTINGS,
     data: {
       activeTab,
+      dataTab: { list: props.list },
     },
     options: {
       fullscreen: true,
@@ -177,12 +178,9 @@ watch(listMenu, () => {
             </v-list>
           </v-card>
         </v-menu>
-        <v-list-item
-          class="text-error"
-          @click="() => openSettingsDialog('listStages')"
-        >
+        <v-list-item @click="() => openSettingsDialog('listStages')">
           <template #prepend>
-            <v-icon icon="mdi-delete" />
+            <v-icon icon="mdi-text-box-edit" />
           </template>
           <v-list-item-title>Edit Stages</v-list-item-title>
         </v-list-item>

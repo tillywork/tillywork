@@ -70,13 +70,22 @@
 import { DIALOGS } from '../../dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 import { useListStagesService } from '@/composables/services/useListStagesService';
-import { type ListStage } from '@/components/project-management/lists/types';
+import type {
+  List,
+  ListStage,
+} from '@/components/project-management/lists/types';
 
-const listId = ref(3); // TODO Implement Get Current/Selected ListId
-// TODO Implement Reorder Functionality
+// TODO: Implement Reorder Functionality
 
 // Dialog
 const dialog = useDialogStore();
+const currentDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.SETTINGS)
+);
+const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
+const dataTab = computed<{ list: Ref<List> }>(
+  () => currentDialog.value.data?.dataTab
+);
 function openDialogUpsert(mode: 'Add' | 'Edit', listStage?: ListStage) {
   dialog.openDialog({
     dialog: DIALOGS.UPSERT_LIST_STAGE,
@@ -98,6 +107,16 @@ function openDialogRemove(listStage: ListStage) {
     },
   });
 }
+
+const listId = computed<number>(() => {
+  if (dataTab.value) {
+    const list = toValue(dataTab.value.list);
+    return list.id;
+  }
+
+  // NOTE: If we are accessing `Setting` dialog directly, how do we retrieve the `listId`?
+  return 3; // TODO: Implement Get Current/Selected ListId
+});
 
 // Core
 const { useGetListStagesQuery } = useListStagesService();
