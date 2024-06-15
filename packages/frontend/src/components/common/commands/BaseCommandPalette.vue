@@ -140,6 +140,8 @@ function handleAfterLeave() {
         single-line
         hide-details
         variant="filled"
+        density="default"
+        autocomplete="off"
         autofocus
         class="flex-grow-0"
         @input="activeIndex = 0"
@@ -154,8 +156,23 @@ function handleAfterLeave() {
 
       <!-- ~ Grouped List of Commands -->
       <v-card-text class="pa-0">
-        <v-list v-if="searchedCommands.length" class="user-select-none">
+        <v-list nav density="comfortable" class="user-select-none">
+          <template v-if="!searchedCommands.length">
+            <v-list-item>
+              <v-list-item-title>
+                The command you're looking for doesn't exist!
+              </v-list-item-title>
+              <v-list-item-subtitle>
+                Maybe it's time to consider opening an issue on our
+                <span class="link" @click="navigateToTillyworkGitHubIssues"
+                  >GitHub!</span
+                >
+              </v-list-item-subtitle>
+            </v-list-item>
+          </template>
+
           <template
+            v-else
             v-for="(commands, section) in groupedSearchedCommands"
             :key="section"
           >
@@ -198,19 +215,6 @@ function handleAfterLeave() {
               </template>
             </v-list-item>
           </template>
-        </v-list>
-        <v-list v-else class="user-select-none">
-          <v-list-item>
-            <v-list-item-title>
-              The command you're looking for doesn't exist!
-            </v-list-item-title>
-            <v-list-item-subtitle>
-              Maybe it's time to consider opening an issue on our
-              <span class="link" @click="navigateToTillyworkGitHubIssues"
-                >GitHub.</span
-              >
-            </v-list-item-subtitle>
-          </v-list-item>
         </v-list>
       </v-card-text>
     </v-card>
