@@ -177,8 +177,8 @@ function handleAfterLeave() {
               </v-list-item-title>
               <v-list-item-subtitle>
                 Maybe it's time to consider opening an issue on our
-                <span class="link" @click="navigateToTillyworkGitHubIssues"
-                  >GitHub!</span
+                <a href="https://github.com/tillywork/tillywork/issues"
+                  >GitHub!</a
                 >
               </v-list-item-subtitle>
             </v-list-item>
