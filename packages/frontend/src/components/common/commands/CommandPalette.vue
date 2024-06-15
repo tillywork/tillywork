@@ -1,101 +1,83 @@
 <script setup lang="ts">
-import { useDialogStore } from '@/stores/dialog';
-import { VCommandPalette, createCommand } from 'v-command-palette';
-import { DIALOGS, DIALOG_WIDTHS } from '../dialogs/types';
+import { DIALOGS } from '../dialogs/types';
+import BaseCommandPalette from './BaseCommandPalette.vue';
+import type { Command } from './types';
 
-const dialog = useDialogStore();
-
-const commands = [
+const commands: Command[] = [
   // ~ Cards
-  createCommand({
+  {
+    section: 'Card',
+    icon: 'mdi-card-plus-outline',
     title: 'Create Card',
-    icon: 'mdi-plus',
-    command() {
-      dialog.openDialog({
-        dialog: DIALOGS.CREATE_CARD,
-        options: {
-          width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD],
-        },
-      });
+    dialog: {
+      kind: DIALOGS.CREATE_CARD,
     },
+  },
+  {
     section: 'Card',
-  }),
-  createCommand({
+    icon: 'mdi-toy-brick-plus-outline',
     title: 'Create Card Type',
-    icon: 'mdi-plus',
-    command() {
-      dialog.openDialog({
-        dialog: DIALOGS.CREATE_CARD_TYPE,
-        options: {
-          width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD_TYPE],
-        },
-      });
+    dialog: {
+      kind: DIALOGS.CREATE_CARD_TYPE,
     },
-    section: 'Card',
-  }),
+  },
 
   // ~ Spaces
-  createCommand({
-    title: 'Create Space',
-    icon: 'mdi-plus',
-    command() {
-      dialog.openDialog({
-        dialog: DIALOGS.CREATE_SPACE,
-        options: {
-          width: DIALOG_WIDTHS[DIALOGS.CREATE_SPACE],
-        },
-      });
-    },
+  {
     section: 'Space',
-  }),
+    icon: 'mdi-folder-plus-outline',
+    title: 'Create Space',
+    dialog: {
+      kind: DIALOGS.CREATE_SPACE,
+    },
+  },
 
   // ~ Workspaces
-  createCommand({
-    title: 'Create Workspace',
-    icon: 'mdi-plus',
-    command() {
-      dialog.openDialog({
-        dialog: DIALOGS.CREATE_CARD,
-        options: {
-          width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD],
-        },
-      });
-    },
+  {
     section: 'Workspace',
-  }),
+    icon: 'mdi-briefcase-plus-outline',
+    title: 'Create Workspace',
+    dialog: {
+      kind: DIALOGS.CREATE_WORKSPACE,
+    },
+  },
 
   // ~ Settings
-  createCommand({
-    title: 'Open Settings',
-    icon: 'mdi-cog',
-    command() {
-      dialog.openDialog({
-        dialog: DIALOGS.SETTINGS,
-        options: {
-          fullscreen: true,
-        },
-      });
-    },
+  {
     section: 'Settings',
-  }),
+    icon: 'mdi-cog',
+    title: 'Open Settings',
+    dialog: {
+      kind: DIALOGS.SETTINGS,
+    },
+  },
+  {
+    section: 'Settings',
+    icon: 'mdi-monitor-screenshot',
+    title: 'Open Settings: Theme',
+    dialog: {
+      kind: DIALOGS.SETTINGS,
+      data: {
+        activeTab: 'theme',
+      },
+    },
+  },
+  {
+    section: 'Settings',
+    icon: 'mdi-toy-brick-outline',
+    title: 'Open Settings: Card Types',
+    dialog: {
+      kind: DIALOGS.SETTINGS,
+      data: {
+        activeTab: 'cardTypes',
+      },
+    },
+  },
 ];
-
-/**
- * Set up a global event listener to prevent the default action.
- * Only add commands that have browser specific events here
- * @param event
- */
-const onKeydown = (event: KeyboardEvent) => {
-  if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
-    event.preventDefault();
-  }
-};
-onMounted(() => window.addEventListener('keydown', onKeydown));
-onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
 </script>
 
 <template>
-  <v-command-palette :commands="commands">
+  <base-command-palette :commands="commands">
     <slot />
-  </v-command-palette>
+  </base-command-palette>
 </template>
