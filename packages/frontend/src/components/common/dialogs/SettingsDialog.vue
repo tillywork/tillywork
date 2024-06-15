@@ -6,6 +6,8 @@ import { DIALOGS } from './types';
 import type { CardType } from '@/components/project-management/cards/types';
 import { useLogo } from '@/composables/useLogo';
 import { useDialogStore } from '@/stores/dialog';
+import type { SettingTab } from '../tabs/types';
+import SettingTabListStages from '../tabs/SettingTab/SettingTabListStages.vue';
 
 const dialog = useDialogStore();
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
@@ -20,7 +22,7 @@ const { data: cardTypes } = useFindAllQuery({
   workspaceId: selectedWorkspace.value!.id,
 });
 
-const tabs = ref([
+const tabs = ref<SettingTab[]>([
   {
     icon: 'mdi-monitor-screenshot',
     text: 'Theme',
@@ -30,6 +32,11 @@ const tabs = ref([
     icon: 'mdi-toy-brick-outline',
     text: 'Card Types',
     value: 'cardTypes',
+  },
+  {
+    icon: 'mdi-toy-brick-outline', // TODO Change icon
+    text: 'List Stages',
+    value: 'listStages',
   },
 ]);
 
@@ -190,6 +197,9 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
               </v-data-table>
             </v-card-text>
           </v-card>
+        </template>
+        <template #item.listStages>
+          <SettingTabListStages />
         </template>
       </v-tabs>
     </v-card-text>
