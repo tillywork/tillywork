@@ -77,7 +77,6 @@ commands.value.forEach((command) => {
   watch(keys[command.shortcut.join('+')], (v) => {
     if (v) {
       executeCommand(command.id);
-      isOpen.value = false;
     }
   });
 });
