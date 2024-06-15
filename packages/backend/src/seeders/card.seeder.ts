@@ -25,7 +25,8 @@ export async function seedCardsData(connection: Connection): Promise<void> {
     );
     const viewsService = new ViewsService(connection.getRepository(View));
     const listStagesService = new ListStagesService(
-        connection.getRepository(ListStage)
+        connection.getRepository(ListStage),
+        cardListsService
     );
     const listSideEffectsService = new ListSideEffectsService(
         listStagesService,

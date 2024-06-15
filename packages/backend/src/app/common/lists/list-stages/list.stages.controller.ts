@@ -42,11 +42,12 @@ export class ListStagesController {
         @Param("listId") listId: number,
         @Body() createListDto: Omit<CreateListStageDto, "listId">
     ): Promise<ListStage> {
-        // TODO Handle `order` value (I think we can use extra input field in FE `after/before stage`)
+        // TODO: Handle the `order` value. (Consider adding an extra input field in the front-end for `after/before` stage.)
+        // NOTE: Currently, the condition is that `order` will be prioritized (set to 1), and each GET request is sorted by `order` and `createdAt` to establish priority.
         return this.listStagesService.create({ ...createListDto, listId });
     }
 
-    // TODO Reorder Request
+    // TODO: Define Reorder Request
     // @Patch(":id/reorder")
 
     @Put(":id")
@@ -54,12 +55,15 @@ export class ListStagesController {
         @Param("id") id: number,
         @Body() updateListDto: UpdateListStageDto
     ): Promise<ListStage> {
-        // TODO Handle Authorization (I think, we can use CASL?) --implement in all Request too--
+        // TODO: Handle Authorization (I think, we can use CASL?) --implement in all Request too--
         return this.listStagesService.update(id, updateListDto);
     }
 
     @Delete(":id")
-    remove(@Param("id") id: number): Promise<void> {
-        return this.listStagesService.remove(id);
+    remove(
+        @Param("id") id: number,
+        @Body() replacementListStage: ListStage
+    ): Promise<void> {
+        return this.listStagesService.remove(id, replacementListStage);
     }
 }
