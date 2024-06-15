@@ -184,49 +184,50 @@ function handleAfterLeave() {
             </v-list-item>
           </template>
 
-          <template
-            v-else
-            v-for="(commands, section) in groupedSearchedCommands"
-            :key="section"
-          >
-            <!-- ~ Section Marker -->
-            <v-list-subheader>
-              {{ section }}
-            </v-list-subheader>
-
-            <!-- ~ List of Commands -->
-            <v-list-item
-              v-for="command in commands"
-              :key="command.id"
-              :active="command.id === activeCommandId"
-              role="option"
-              :lines="command.description ? 'two' : 'one'"
-              @click="executeCommand(command.id)"
+          <template v-else>
+            <template
+              v-for="(commands, section) in groupedSearchedCommands"
+              :key="section"
             >
-              <!-- ~ Icon -->
-              <template #prepend>
-                <v-icon> {{ command.icon }} </v-icon>
-              </template>
-              <!-- ~ Title -->
-              <v-list-item-title>
-                {{ command.title }}
-              </v-list-item-title>
-              <!-- ~ Description -->
-              <v-list-item-subtitle v-if="command.description">
-                {{ command.description }}
-              </v-list-item-subtitle>
-              <!-- ~ Shortcut Keys -->
-              <template v-if="command.shortcut" #append>
-                <v-code
-                  v-for="key in command.shortcut"
-                  :key="key"
-                  tag="kbd"
-                  class="mx-1"
-                >
-                  {{ key }}
-                </v-code>
-              </template>
-            </v-list-item>
+              <!-- ~ Section Marker -->
+              <v-list-subheader>
+                {{ section }}
+              </v-list-subheader>
+
+              <!-- ~ List of Commands -->
+              <v-list-item
+                v-for="command in commands"
+                :key="command.id"
+                :active="command.id === activeCommandId"
+                role="option"
+                :lines="command.description ? 'two' : 'one'"
+                @click="executeCommand(command.id)"
+              >
+                <!-- ~ Icon -->
+                <template #prepend>
+                  <v-icon> {{ command.icon }} </v-icon>
+                </template>
+                <!-- ~ Title -->
+                <v-list-item-title>
+                  {{ command.title }}
+                </v-list-item-title>
+                <!-- ~ Description -->
+                <v-list-item-subtitle v-if="command.description">
+                  {{ command.description }}
+                </v-list-item-subtitle>
+                <!-- ~ Shortcut Keys -->
+                <template v-if="command.shortcut" #append>
+                  <v-code
+                    v-for="key in command.shortcut"
+                    :key="key"
+                    tag="kbd"
+                    class="mx-1"
+                  >
+                    {{ key }}
+                  </v-code>
+                </template>
+              </v-list-item>
+            </template>
           </template>
         </v-list>
       </v-card-text>
