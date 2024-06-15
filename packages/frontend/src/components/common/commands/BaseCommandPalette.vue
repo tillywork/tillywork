@@ -68,6 +68,20 @@ const activeCommand = computed(() =>
 
 const dialog = useDialogStore();
 
+commands.value.forEach((command) => {
+  if (!command.shortcut) {
+    return;
+  }
+
+  // TODO: Support advanced sequences, E.g, `Cmd+C+C`
+  watch(keys[command.shortcut.join('+')], (v) => {
+    if (v) {
+      executeCommand(command.id);
+      isOpen.value = false;
+    }
+  });
+});
+
 function handleKeyDown(e: KeyboardEvent) {
   const commandsCount = searchedCommands.value.length;
 

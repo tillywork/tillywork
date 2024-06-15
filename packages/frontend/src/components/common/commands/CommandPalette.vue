@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { alternateKey, leaderKey } from '@/utils/keyboard';
 import { DIALOGS } from '../dialogs/types';
 import BaseCommandPalette from './BaseCommandPalette.vue';
 import type { Command } from './types';
@@ -12,6 +13,7 @@ const commands: Command[] = [
     dialog: {
       kind: DIALOGS.CREATE_CARD,
     },
+    shortcut: [alternateKey, 'C'],
   },
   {
     section: 'Card',
@@ -20,6 +22,7 @@ const commands: Command[] = [
     dialog: {
       kind: DIALOGS.CREATE_CARD_TYPE,
     },
+    shortcut: [alternateKey, 'T'],
   },
 
   // ~ Spaces
@@ -30,6 +33,7 @@ const commands: Command[] = [
     dialog: {
       kind: DIALOGS.CREATE_SPACE,
     },
+    shortcut: [alternateKey, 'S'],
   },
 
   // ~ Workspaces
@@ -40,6 +44,7 @@ const commands: Command[] = [
     dialog: {
       kind: DIALOGS.CREATE_WORKSPACE,
     },
+    shortcut: [alternateKey, 'W'],
   },
 
   // ~ Settings
@@ -50,6 +55,7 @@ const commands: Command[] = [
     dialog: {
       kind: DIALOGS.SETTINGS,
     },
+    shortcut: [leaderKey, ','],
   },
   {
     section: 'Settings',
