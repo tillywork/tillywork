@@ -9,6 +9,8 @@ export enum DIALOGS {
   CREATE_VIEW = 'CreateViewDialog',
   CREATE_CARD_TYPE = 'CreateCardType',
   REMOVE_CARD_TYPE = 'RemoveCardType',
+  UPSERT_LIST_STAGE = 'CreateListStage',
+  REMOVE_LIST_STAGE = 'RemoveListStage',
 }
 
 export const DIALOG_WIDTHS = {
@@ -22,4 +24,6 @@ export const DIALOG_WIDTHS = {
   [DIALOGS.CREATE_WORKSPACE]: 0,
   [DIALOGS.CREATE_CARD_TYPE]: 400,
   [DIALOGS.REMOVE_CARD_TYPE]: 500,
+  [DIALOGS.UPSERT_LIST_STAGE]: 400,
+  [DIALOGS.REMOVE_LIST_STAGE]: 500,
 };
