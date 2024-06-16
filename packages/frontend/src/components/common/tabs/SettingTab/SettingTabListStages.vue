@@ -5,8 +5,8 @@
       <base-icon-btn class="ms-4" @click="openDialogUpsert('Add')" />
     </v-card-title>
     <v-card-subtitle>
-      <strong class="text-red">TODO</strong>
-      Please Provide Concise Description!
+      List Stages are used to group cards into different stages, and they are
+      nested within a list.
     </v-card-subtitle>
     <v-card-text>
       <v-table>
@@ -111,7 +111,6 @@ import { useDialogStore } from '@/stores/dialog';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { useSpacesService } from '@/composables/services/useSpacesService';
-// import { useListsService } from '@/composables/services/useListsService';
 import { useListStagesService } from '@/composables/services/useListStagesService';
 import type { Space } from '@/components/project-management/spaces/types';
 import type {
@@ -173,8 +172,6 @@ const { data: spaces } = spacesService.useGetSpacesQuery({
   workspaceId,
   enabled: spacesEnabled,
 });
-// const listsService = useListsService();
-// const { data: lists } = listsService.useGetListsQuery();
 const listStagesService = useListStagesService();
 const { data: listStages } = listStagesService.useGetListStagesQuery({
   listId: selectedListId as Ref<number>,
