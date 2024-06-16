@@ -36,7 +36,9 @@ const usersQuery = projectUsersService.useProjectUsersQuery({
 });
 
 const listId = computed(() => props.card.cardLists[0].listStage.listId);
-const listStagesQuery = listStagesService.useGetListStagesQuery(listId.value);
+const listStagesQuery = listStagesService.useGetListStagesQuery({
+  listId: listId.value,
+});
 
 const createActivityMutation = cardActivitiesService.useCreateActivityMutation({
   cardId: props.card.id,

@@ -1,3 +1,4 @@
+import type { MaybeRef } from 'vue';
 import { useHttp } from '@/composables/useHttp';
 import type { ListStage } from '../../components/project-management/lists/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
@@ -6,10 +7,12 @@ export const useListStagesService = () => {
   const { sendRequest } = useHttp();
   const queryClient = useQueryClient();
 
-  async function getListStages(
-    listStage: Pick<ListStage, 'listId'>
-  ): Promise<ListStage[]> {
-    return sendRequest(`/lists/${listStage.listId}/stages`, {
+  async function getListStages({
+    listId,
+  }: {
+    listId: MaybeRef<number>;
+  }): Promise<ListStage[]> {
+    return sendRequest(`/lists/${listId}/stages`, {
       method: 'GET',
     });
   }
@@ -18,19 +21,23 @@ export const useListStagesService = () => {
     listId,
     listStage,
   }: {
-    listId: number;
+    listId: MaybeRef<number>;
     listStage: Omit<ListStage, 'id' | 'listId'>;
   }): Promise<ListStage> {
-    return sendRequest(`/lists/${listId}/stages`, {
+    return sendRequest(`/lists/${toValue(listId)}/stages`, {
       method: 'POST',
       data: listStage,
     });
   }
 
-  async function getListStage(
-    listStage: Pick<ListStage, 'id' | 'listId'>
-  ): Promise<ListStage> {
-    return sendRequest(`/lists/${listStage.listId}/stages/${listStage.id}`, {
+  async function getListStage({
+    listId,
+    id,
+  }: {
+    listId: MaybeRef<number>;
+    id: MaybeRef<number>;
+  }): Promise<ListStage> {
+    return sendRequest(`/lists/${toValue(listId)}/stages/${id}`, {
       method: 'GET',
     });
   }
@@ -39,10 +46,10 @@ export const useListStagesService = () => {
     listId,
     listStage,
   }: {
-    listId: number;
+    listId: MaybeRef<number>;
     listStage: Partial<Omit<ListStage, 'listId'>>;
   }): Promise<ListStage> {
-    return sendRequest(`/lists/${listId}/stages/${listStage.id}`, {
+    return sendRequest(`/lists/${toValue(listId)}/stages/${listStage.id}`, {
       method: 'PUT',
       data: listStage,
     });
@@ -52,10 +59,10 @@ export const useListStagesService = () => {
     listId,
     listStages,
   }: {
-    listId: number;
+    listId: MaybeRef<number>;
     listStages: Pick<ListStage, 'id' | 'order'>[];
   }): Promise<ListStage> {
-    return sendRequest(`/lists/${listId}/stages/reorder`, {
+    return sendRequest(`/lists/${toValue(listId)}/stages/reorder`, {
       method: 'PUT',
       data: listStages,
     });
@@ -74,18 +81,31 @@ export const useListStagesService = () => {
     });
   }
 
-  function useGetListStagesQuery(listId: number) {
+  function useGetListStagesQuery({
+    listId,
+    enabled,
+  }: {
+    listId: MaybeRef<number>;
+    enabled?: Ref<boolean>;
+  }) {
     return useQuery({
       queryKey: ['listStages', listId],
-      queryFn: () => getListStages({ listId }),
+      queryFn: () => getListStages({ listId: toValue(listId) }),
+      enabled,
       staleTime: 5 * 60 * 1000,
     });
   }
 
-  function useGetListStageQuery(listId: number, id: Ref<number>) {
+  function useGetListStageQuery({
+    listId,
+    id,
+  }: {
+    listId: MaybeRef<number>;
+    id: MaybeRef<number>;
+  }) {
     return useQuery({
       queryKey: ['listStage', id],
-      queryFn: () => getListStage({ listId, id: unref(id) }),
+      queryFn: () => getListStage({ listId: toValue(listId), id: toValue(id) }),
     });
   }
 
