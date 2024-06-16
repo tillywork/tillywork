@@ -8,12 +8,13 @@ import {
     Put,
     UseGuards,
 } from "@nestjs/common";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { InsertResult } from "typeorm";
 import { JwtAuthGuard } from "../../auth/guards/jwt.auth.guard";
 import { ListStage } from "./list.stage.entity";
 import { CreateListStageDto } from "./dto/create.list.stage.dto";
 import { UpdateListStageDto } from "./dto/update.list.stage.dto";
 import { ListStagesService } from "./list.stages.service";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 @ApiBearerAuth()
 @ApiTags("lists")
@@ -47,8 +48,15 @@ export class ListStagesController {
         return this.listStagesService.create({ ...createListDto, listId });
     }
 
-    // TODO: Define Reorder Request
-    // @Patch(":id/reorder")
+    @Put("reorder")
+    reorder(
+        @Param("listId") listId: number,
+        @Body() listStages: Pick<ListStage, "id" | "order">[]
+    ): Promise<InsertResult> {
+        return this.listStagesService.reorder(
+            listStages.map((listStage) => ({ ...listStage, listId }))
+        );
+    }
 
     @Put(":id")
     update(

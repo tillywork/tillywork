@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { InsertResult, Repository } from "typeorm";
 import { ListStage } from "./list.stage.entity";
 import { CreateListStageDto } from "./dto/create.list.stage.dto";
 import { UpdateListStageDto } from "./dto/update.list.stage.dto";
@@ -66,8 +66,16 @@ export class ListStagesService {
         return this.listStagesRepository.save(listStage);
     }
 
-    // TODO: Define upsert functionality to handle bulk processing.
-    // upsert([{id: ..., order: ...}], [id]) // https://typeorm.io/repository-api#repository-api
+    async reorder(
+        listStages: Pick<ListStage, "id" | "order">[]
+    ): Promise<InsertResult> {
+        return this.upsert(listStages);
+    }
+
+    async upsert(listStages: UpdateListStageDto[]): Promise<InsertResult> {
+        // BUG: https://github.com/typeorm/typeorm/issues/9993
+        return this.listStagesRepository.upsert(listStages, ["id"]);
+    }
 
     async remove(id: number, replacementListStage: ListStage): Promise<void> {
         const listStage = await this.findOne(id);
