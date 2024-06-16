@@ -11,7 +11,11 @@ export const useListsService = () => {
   const { sendRequest } = useHttp();
   const queryClient = useQueryClient();
 
-  async function getLists({ spaceId }: { spaceId?: number }): Promise<List[]> {
+  async function getLists({
+    spaceId,
+  }: {
+    spaceId?: number;
+  }): Promise<ListsData> {
     return sendRequest('/lists', {
       method: 'GET',
       params: {

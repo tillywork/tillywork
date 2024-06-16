@@ -92,7 +92,7 @@ const listStageDto = ref<ListStage>({
   id: listStage.value.id,
   name: listStage.value.name,
   color: listStage.value.color,
-  order: listStage.value.order ?? 1,
+  order: listStage.value.order ?? 0,
   isCompleted: listStage.value.isCompleted ?? false,
 });
 

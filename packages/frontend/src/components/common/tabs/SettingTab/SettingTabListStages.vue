@@ -1,5 +1,5 @@
 <template>
-  <v-card min-width="500">
+  <v-card v-if="selectedListId" min-width="500">
     <v-card-title class="d-flex align-center">
       List Stages
       <base-icon-btn class="ms-4" @click="openDialogUpsert('Add')" />
@@ -75,6 +75,33 @@
       </v-table>
     </v-card-text>
   </v-card>
+  <v-card v-else>
+    <v-card-title class="d-flex align-center">
+      Please select the list to edit its list stages
+    </v-card-title>
+    <v-card-text>
+      <div class="d-flex ga-2 mb-1">
+        <v-autocomplete
+          v-model="selectedSpace"
+          label="Space"
+          :items="spaces"
+          item-title="name"
+          return-object
+          @update:modelValue="onChangeSelectedSpace"
+          min-width="250"
+        />
+        <v-autocomplete
+          v-if="selectedSpace"
+          v-model="selectedListId"
+          label="List"
+          :items="lists"
+          item-title="name"
+          item-value="id"
+          min-width="250"
+        />
+      </div>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script setup lang="ts">
@@ -82,7 +109,11 @@ import { DIALOGS } from '../../dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 
 import { useQueryClient } from '@tanstack/vue-query';
+import { useWorkspaceStore } from '@/stores/workspace';
+import { useSpacesService } from '@/composables/services/useSpacesService';
+// import { useListsService } from '@/composables/services/useListsService';
 import { useListStagesService } from '@/composables/services/useListStagesService';
+import type { Space } from '@/components/project-management/spaces/types';
 import type {
   List,
   ListStage,
@@ -96,7 +127,7 @@ const currentDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.SETTINGS)
 );
 const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
-const dataTab = computed<{ list: Ref<List> }>(
+const dataTab = computed<{ list: Ref<List> } | undefined>(
   () => currentDialog.value.data?.dataTab
 );
 function openDialogUpsert(mode: 'Add' | 'Edit', listStage?: ListStage) {
@@ -106,7 +137,7 @@ function openDialogUpsert(mode: 'Add' | 'Edit', listStage?: ListStage) {
       mode,
       listStage: {
         ...listStage,
-        listId: listId.value,
+        listId: selectedListId.value,
       },
     },
   });
@@ -122,20 +153,33 @@ function openDialogRemove(listStage: ListStage) {
 }
 
 // Core
-const queryClient = useQueryClient();
-const listId = computed<number>(() => {
-  if (dataTab.value) {
-    const list = toValue(dataTab.value.list);
-    return list.id;
-  }
-
-  // NOTE: If we are accessing `Setting` dialog directly, how do we retrieve the `listId`?
-  return 3; // TODO: Implement Get Current/Selected ListId
-});
-const listStagesService = useListStagesService();
-const { data: listStages } = listStagesService.useGetListStagesQuery(
-  listId.value
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const selectedSpace = ref<Space>();
+const selectedListId = ref<number | undefined>(
+  toValue(dataTab.value?.list)?.id
 );
+const spacesEnabled = computed<boolean>(() => !selectedListId.value);
+const stagesEnabled = computed<boolean>(() => !!selectedListId.value);
+
+const workspaceId = computed(() => selectedWorkspace.value?.id);
+const lists = computed<List[]>(() => selectedSpace.value?.lists ?? []);
+function onChangeSelectedSpace() {
+  selectedListId.value = undefined;
+}
+
+const queryClient = useQueryClient();
+const spacesService = useSpacesService();
+const { data: spaces } = spacesService.useGetSpacesQuery({
+  workspaceId,
+  enabled: spacesEnabled,
+});
+// const listsService = useListsService();
+// const { data: lists } = listsService.useGetListsQuery();
+const listStagesService = useListStagesService();
+const { data: listStages } = listStagesService.useGetListStagesQuery({
+  listId: selectedListId as Ref<number>,
+  enabled: stagesEnabled,
+});
 const { mutateAsync: reorderListStage } =
   listStagesService.useReorderListStageMutation();
 
@@ -157,9 +201,9 @@ onUnmounted(() => {
     })
     .filter(Boolean) as Pick<ListStage, 'id' | 'order'>[];
 
-  if (listStagesToReorder.length) {
+  if (selectedListId.value && listStagesToReorder.length) {
     const payload = {
-      listId: listId.value,
+      listId: selectedListId.value,
       listStages: listStagesToReorder,
     };
     reorderListStage(payload).then(() =>
