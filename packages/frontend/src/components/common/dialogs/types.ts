@@ -9,7 +9,7 @@ export enum DIALOGS {
   CREATE_VIEW = 'CreateViewDialog',
   CREATE_CARD_TYPE = 'CreateCardType',
   REMOVE_CARD_TYPE = 'RemoveCardType',
-  UPSERT_LIST_STAGE = 'CreateListStage',
+  UPSERT_LIST_STAGE = 'UpsertListStage',
   REMOVE_LIST_STAGE = 'RemoveListStage',
 }
 
