@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { useCommands } from '@/composables/useCommands';
 import stringUtils from '@/utils/string';
+import type { Command } from './types';
 
 const {
   commands,
   registerCommandShortcutWatchers,
   executeCommand,
   setIsInputFocused,
+  isCommandPaletteOpen,
+  setIsCommandPaletteOpen,
   keys,
 } = useCommands();
 const { width: windowWidth, height: windowHeight } = useWindowSize();
-
-const isOpen = ref(false);
 
 const search = ref('');
 const activeCommandIndex = ref<number>(-1);
@@ -56,12 +57,12 @@ const activeCommand = computed(() =>
  */
 watch([keys['Cmd+K'], keys['Ctrl+K']], ([cmd, ctrl]) => {
   if (cmd || ctrl) {
-    isOpen.value = !isOpen.value;
+    setIsCommandPaletteOpen(!isCommandPaletteOpen.value);
   }
 });
 
 // Reset the input focus when command palette is closed
-watch(isOpen, (v) => {
+watch(isCommandPaletteOpen, (v) => {
   if (!v) {
     setIsInputFocused(false);
   }
@@ -78,7 +79,7 @@ onMounted(() => {
  * @param e The keydown event
  */
 function handleKeyDown(e: KeyboardEvent) {
-  if (!isOpen.value) {
+  if (!isCommandPaletteOpen.value) {
     return;
   }
 
@@ -104,13 +105,18 @@ function handleKeyDown(e: KeyboardEvent) {
 
   if (e.key === 'Enter' && activeCommand.value) {
     e.preventDefault();
-    executeCommand(activeCommand.value);
+    handleExecuteCommand(activeCommand.value);
   }
 }
 
 function handleAfterLeave() {
   search.value = '';
   activeCommandIndex.value = -1;
+}
+
+function handleExecuteCommand(command: Command) {
+  setIsCommandPaletteOpen(false);
+  executeCommand(command);
 }
 
 /**
@@ -138,7 +144,7 @@ onBeforeUnmount(() => {
 <template>
   <slot />
   <v-dialog
-    v-model="isOpen"
+    v-model="isCommandPaletteOpen"
     :scrim="false"
     @after-leave="handleAfterLeave"
     width="100%"
@@ -151,7 +157,7 @@ onBeforeUnmount(() => {
       <!-- TODO make clicking esc when search is focused clear the value, not close the dialog -->
       <v-text-field
         v-model="search"
-        placeholder='Search for a command. E.g, "Create Card"'
+        placeholder="Type a command or search..."
         single-line
         hide-details
         variant="filled"
@@ -179,11 +185,9 @@ onBeforeUnmount(() => {
       >
         <template v-if="!searchedCommands.length">
           <v-list-item>
-            <v-list-item-title>
-              The command you're looking for doesn't exist!
-            </v-list-item-title>
+            <v-list-item-title> No results. </v-list-item-title>
             <v-list-item-subtitle>
-              Maybe it's time to consider opening an issue on our
+              Can't find what you're looking for? Request a feature on
               <a href="https://github.com/tillywork/tillywork/issues"
                 >GitHub!</a
               >
@@ -209,7 +213,7 @@ onBeforeUnmount(() => {
               role="option"
               tabindex="-1"
               :lines="command.description ? 'two' : 'one'"
-              @click="executeCommand(command)"
+              @click="handleExecuteCommand(command)"
             >
               <!-- ~ Icon -->
               <template #prepend>

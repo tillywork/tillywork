@@ -6,6 +6,8 @@ import { useStateStore } from '@/stores/state';
 export const useCommands = () => {
   const keys = useMagicKeys();
   const dialog = useDialogStore();
+  const { setIsCommandPaletteOpen } = dialog;
+  const { isCommandPaletteOpen } = storeToRefs(dialog);
   const stateStore = useStateStore();
   const { setIsInputFocused } = stateStore;
   const { isInputFocused } = storeToRefs(stateStore);
@@ -160,6 +162,8 @@ export const useCommands = () => {
     commands,
     keys,
     isInputFocused,
+    isCommandPaletteOpen,
+    setIsCommandPaletteOpen,
     setIsInputFocused,
     registerCommandShortcutWatchers,
     handleInputBlur,
