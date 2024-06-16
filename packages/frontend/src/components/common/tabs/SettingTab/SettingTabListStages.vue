@@ -9,6 +9,16 @@
       Please Provide Concise Description!
     </v-card-subtitle>
     <v-card-text>
+      <v-fab
+        size="small"
+        extended
+        :prepend-icon="
+          isDraggableMode ? 'mdi-content-save-settings' : 'mdi-exchange'
+        "
+        :text="isDraggableMode ? 'Save Order' : 'Reorder'"
+        @click="toggleIsDraggable"
+      />
+
       <v-table>
         <thead>
           <tr>
@@ -18,10 +28,23 @@
             <th>Is Completed?</th>
           </tr>
         </thead>
-        <draggable tag="tbody" v-model="draggableListStages" item-key="id">
+        <draggable
+          tag="tbody"
+          v-model="draggableListStages"
+          item-key="id"
+          handle=".handle"
+          :disabled="!isDraggableMode"
+        >
           <template #item="{ element: row }">
             <tr>
               <td>
+                <base-icon-btn
+                  v-if="isDraggableMode"
+                  class="handle cursor-grab"
+                  icon="mdi-cursor-move"
+                  variant="text"
+                />
+
                 <v-menu>
                   <template #activator="{ props }">
                     <base-icon-btn v-bind="props" icon="mdi-dots-vertical" />
@@ -117,7 +140,37 @@ const listId = computed<number>(() => {
   // NOTE: If we are accessing `Setting` dialog directly, how do we retrieve the `listId`?
   return 3; // TODO: Implement Get Current/Selected ListId
 });
-const { useGetListStagesQuery } = useListStagesService();
-const { data: listStages } = useGetListStagesQuery(listId.value);
-const draggableListStages = ref(listStages.value || []);
+const listStagesService = useListStagesService();
+const { data: listStages } = listStagesService.useGetListStagesQuery(
+  listId.value
+);
+const { mutateAsync: reorderListStage } =
+  listStagesService.useReorderListStageMutation();
+
+// Reorder
+const draggableListStages = ref<ListStage[]>([]);
+watch(listStages, () => (draggableListStages.value = listStages.value!));
+const isDraggableMode = ref(false);
+function toggleIsDraggable() {
+  isDraggableMode.value = !isDraggableMode.value;
+
+  if (!isDraggableMode.value) {
+    // TODO: Try to implement at onBeforeUnmount/onUnmounted instead
+    const listStagesToReorder = draggableListStages.value
+      .map((listStage, idx) => {
+        if (listStage.order !== idx + 1)
+          return {
+            id: listStage.id,
+            order: idx + 1,
+          };
+      })
+      .filter(Boolean) as Pick<ListStage, 'id' | 'order'>[];
+
+    const payload = {
+      listId: listId.value,
+      listStages: listStagesToReorder,
+    };
+    reorderListStage(payload);
+  }
+}
 </script>
