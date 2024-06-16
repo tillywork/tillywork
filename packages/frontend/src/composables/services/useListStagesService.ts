@@ -48,6 +48,19 @@ export const useListStagesService = () => {
     });
   }
 
+  async function reorderListStage({
+    listId,
+    listStages,
+  }: {
+    listId: number;
+    listStages: Pick<ListStage, 'id' | 'order'>[];
+  }): Promise<ListStage> {
+    return sendRequest(`/lists/${listId}/stages/reorder`, {
+      method: 'PUT',
+      data: listStages,
+    });
+  }
+
   async function deleteListStage({
     listStage,
     replacementListStage,
@@ -106,11 +119,21 @@ export const useListStagesService = () => {
     });
   }
 
+  function useReorderListStageMutation() {
+    return useMutation({
+      mutationFn: reorderListStage,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['listStages'] });
+      },
+    });
+  }
+
   return {
     useGetListStagesQuery,
     useGetListStageQuery,
     useCreateListStageMutation,
     useUpdateListStageMutation,
     useDeleteListStageMutation,
+    useReorderListStageMutation,
   };
 };
