@@ -170,6 +170,7 @@ onBeforeUnmount(() => {
 
       <!-- ~ Grouped List of Commands -->
       <v-list
+        tabindex="-1"
         max-height="50vh"
         nav
         density="comfortable"
