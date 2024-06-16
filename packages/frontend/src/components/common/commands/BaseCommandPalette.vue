@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import stringUtils from '@/utils/string';
 import { useCommands } from '@/composables/useCommands';
+import stringUtils from '@/utils/string';
 
 const {
   commands,
@@ -170,10 +170,12 @@ onBeforeUnmount(() => {
 
       <!-- ~ Grouped List of Commands -->
       <v-list
+        max-height="50vh"
+        tabindex="-1"
         nav
         density="comfortable"
+        :selected="[activeCommand?.id]"
         class="user-select-none"
-        max-height="50vh"
       >
         <template v-if="!searchedCommands.length">
           <v-list-item>
@@ -203,7 +205,7 @@ onBeforeUnmount(() => {
             <v-list-item
               v-for="(command, index) in commands"
               :key="index"
-              :active="command.id === activeCommand?.id"
+              :value="command.id"
               role="option"
               :lines="command.description ? 'two' : 'one'"
               @click="executeCommand(command)"
