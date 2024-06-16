@@ -9,16 +9,6 @@
       Please Provide Concise Description!
     </v-card-subtitle>
     <v-card-text>
-      <v-fab
-        size="small"
-        extended
-        :prepend-icon="
-          isDraggableMode ? 'mdi-content-save-settings' : 'mdi-exchange'
-        "
-        :text="isDraggableMode ? 'Save Order' : 'Reorder'"
-        @click="toggleIsDraggable"
-      />
-
       <v-table>
         <thead>
           <tr>
@@ -33,13 +23,11 @@
           v-model="draggableListStages"
           item-key="id"
           handle=".handle"
-          :disabled="!isDraggableMode"
         >
           <template #item="{ element: row }">
             <tr>
               <td>
                 <base-icon-btn
-                  v-if="isDraggableMode"
                   class="handle cursor-grab"
                   icon="mdi-cursor-move"
                   variant="text"
@@ -92,11 +80,14 @@
 <script setup lang="ts">
 import { DIALOGS } from '../../dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
+
+import { useQueryClient } from '@tanstack/vue-query';
 import { useListStagesService } from '@/composables/services/useListStagesService';
 import type {
   List,
   ListStage,
 } from '@/components/project-management/lists/types';
+
 import draggable from 'vuedraggable';
 
 // Dialog
@@ -131,6 +122,7 @@ function openDialogRemove(listStage: ListStage) {
 }
 
 // Core
+const queryClient = useQueryClient();
 const listId = computed<number>(() => {
   if (dataTab.value) {
     const list = toValue(dataTab.value.list);
@@ -149,28 +141,31 @@ const { mutateAsync: reorderListStage } =
 
 // Reorder
 const draggableListStages = ref<ListStage[]>([]);
-watch(listStages, () => (draggableListStages.value = listStages.value!));
-const isDraggableMode = ref(false);
-function toggleIsDraggable() {
-  isDraggableMode.value = !isDraggableMode.value;
+watch(listStages, () => (draggableListStages.value = listStages.value!), {
+  immediate: true,
+});
 
-  if (!isDraggableMode.value) {
-    // TODO: Try to implement at onBeforeUnmount/onUnmounted instead
-    const listStagesToReorder = draggableListStages.value
-      .map((listStage, idx) => {
-        if (listStage.order !== idx + 1)
-          return {
-            id: listStage.id,
-            order: idx + 1,
-          };
-      })
-      .filter(Boolean) as Pick<ListStage, 'id' | 'order'>[];
+// Hooks
+onUnmounted(() => {
+  const listStagesToReorder = draggableListStages.value
+    .map((listStage, idx) => {
+      if (listStage.order !== idx + 1)
+        return {
+          id: listStage.id,
+          order: idx + 1,
+        };
+    })
+    .filter(Boolean) as Pick<ListStage, 'id' | 'order'>[];
 
+  if (listStagesToReorder.length) {
     const payload = {
       listId: listId.value,
       listStages: listStagesToReorder,
     };
-    reorderListStage(payload);
+    reorderListStage(payload).then(() =>
+      queryClient.invalidateQueries({ queryKey: ['listGroups'] })
+    );
+    // BUG order not update for ListGroups
   }
-}
+});
 </script>
