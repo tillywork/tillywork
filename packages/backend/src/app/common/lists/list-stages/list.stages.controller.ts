@@ -43,8 +43,6 @@ export class ListStagesController {
         @Param("listId") listId: number,
         @Body() createListDto: Omit<CreateListStageDto, "listId">
     ): Promise<ListStage> {
-        // TODO: Handle the `order` value. (Consider adding an extra input field in the front-end for `after/before` stage.)
-        // NOTE: Currently, the condition is that `order` will be prioritized (set to 1), and each GET request is sorted by `order` and `createdAt` to establish priority.
         return this.listStagesService.create({ ...createListDto, listId });
     }
 

@@ -31,7 +31,6 @@ export class ListsService {
                 id: "ASC",
                 listStages: {
                     order: "ASC",
-                    createdAt: "DESC",
                 },
             },
         });

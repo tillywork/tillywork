@@ -59,10 +59,7 @@ export class ListGroupsService {
                 { entityType: FilterEntityTypes.LIST_GROUP }
             )
             .where("listGroup.listId = :listId", { listId })
-            .orderBy({
-                "listGroup.order": "ASC",
-                "listGroup.createdAt": "DESC",
-            });
+            .orderBy("listGroup.order", "ASC");
 
         if (groupBy) {
             query.andWhere("listGroup.type = :groupBy", { groupBy });

@@ -27,7 +27,7 @@ export class ListsController {
     constructor(private readonly listsService: ListsService) {}
 
     @Get()
-    findAll(@Query("workspaceId") spaceId: number): Promise<ListFindAllResult> {
+    findAll(@Query("spaceId") spaceId: number): Promise<ListFindAllResult> {
         return this.listsService.findAll({ spaceId });
     }
 
