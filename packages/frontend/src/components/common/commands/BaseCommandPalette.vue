@@ -171,7 +171,6 @@ onBeforeUnmount(() => {
       <!-- ~ Grouped List of Commands -->
       <v-list
         max-height="50vh"
-        tabindex="-1"
         nav
         density="comfortable"
         :selected="[activeCommand?.id]"
@@ -207,6 +206,7 @@ onBeforeUnmount(() => {
               :key="index"
               :value="command.id"
               role="option"
+              tabindex="-1"
               :lines="command.description ? 'two' : 'one'"
               @click="executeCommand(command)"
             >
