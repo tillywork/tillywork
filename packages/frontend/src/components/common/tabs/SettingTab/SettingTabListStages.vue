@@ -9,59 +9,59 @@
       Please Provide Concise Description!
     </v-card-subtitle>
     <v-card-text>
-      <v-data-table
-        class="border-thin rounded-md"
-        :items="listStages"
-        :headers="[
-          {
-            value: 'actions',
-            width: 50,
-          },
-          {
-            title: 'Name',
-            value: 'name',
-          },
-          {
-            title: 'Color',
-            value: 'color',
-          },
-          {
-            title: 'Is Completed',
-            value: 'isCompleted',
-          },
-        ]"
-        hide-default-footer
-      >
-        <template #item.actions="{ item }">
-          <v-menu>
-            <template #activator="{ props }">
-              <base-icon-btn v-bind="props" icon="mdi-dots-vertical" />
-            </template>
-            <v-card>
-              <v-list>
-                <v-list-item @click="openDialogUpsert('Edit', item)">
-                  <template #prepend>
-                    <v-icon size="x-small" icon="mdi-pencil" />
+      <v-table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Color</th>
+            <th>Is Completed?</th>
+          </tr>
+        </thead>
+        <draggable tag="tbody" v-model="draggableListStages" item-key="id">
+          <template #item="{ element: row }">
+            <tr>
+              <td>
+                <v-menu>
+                  <template #activator="{ props }">
+                    <base-icon-btn v-bind="props" icon="mdi-dots-vertical" />
                   </template>
-                  <v-list-item-title>Edit</v-list-item-title>
-                </v-list-item>
-                <v-list-item class="text-error" @click="openDialogRemove(item)">
-                  <template #prepend>
-                    <v-icon size="x-small" icon="mdi-delete" />
-                  </template>
-                  <v-list-item-title>Delete</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-card>
-          </v-menu>
-        </template>
-        <template #item.color="{ item }">
-          <v-icon icon="mdi-circle-slice-8" :color="item.color" size="small" />
-        </template>
-        <template #item.isCompleted="{ item }">
-          <v-checkbox v-model="item.isCompleted" disabled></v-checkbox>
-        </template>
-      </v-data-table>
+                  <v-card>
+                    <v-list>
+                      <v-list-item @click="openDialogUpsert('Edit', row)">
+                        <template #prepend>
+                          <v-icon size="x-small" icon="mdi-pencil" />
+                        </template>
+                        <v-list-item-title>Edit</v-list-item-title>
+                      </v-list-item>
+                      <v-list-item
+                        class="text-error"
+                        @click="openDialogRemove(row)"
+                      >
+                        <template #prepend>
+                          <v-icon size="x-small" icon="mdi-delete" />
+                        </template>
+                        <v-list-item-title>Delete</v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-card>
+                </v-menu>
+              </td>
+              <td>{{ row.name }}</td>
+              <td>
+                <v-icon
+                  icon="mdi-circle-slice-8"
+                  :color="row.color"
+                  size="small"
+                />
+              </td>
+              <td>
+                <v-checkbox v-model="row.isCompleted" disabled></v-checkbox>
+              </td>
+            </tr>
+          </template>
+        </draggable>
+      </v-table>
     </v-card-text>
   </v-card>
 </template>
@@ -74,8 +74,7 @@ import type {
   List,
   ListStage,
 } from '@/components/project-management/lists/types';
-
-// TODO: Implement Reorder Functionality
+import draggable from 'vuedraggable';
 
 // Dialog
 const dialog = useDialogStore();
@@ -108,6 +107,7 @@ function openDialogRemove(listStage: ListStage) {
   });
 }
 
+// Core
 const listId = computed<number>(() => {
   if (dataTab.value) {
     const list = toValue(dataTab.value.list);
@@ -117,8 +117,7 @@ const listId = computed<number>(() => {
   // NOTE: If we are accessing `Setting` dialog directly, how do we retrieve the `listId`?
   return 3; // TODO: Implement Get Current/Selected ListId
 });
-
-// Core
 const { useGetListStagesQuery } = useListStagesService();
 const { data: listStages } = useGetListStagesQuery(listId.value);
+const draggableListStages = ref(listStages.value || []);
 </script>
