@@ -52,7 +52,7 @@ export class ListStagesController {
     reorder(
         @Param("listId") listId: number,
         @Body() listStages: Pick<ListStage, "id" | "order">[]
-    ): Promise<InsertResult> {
+    ): Promise<ListStage[]> {
         return this.listStagesService.reorder(
             listStages.map((listStage) => ({ ...listStage, listId }))
         );

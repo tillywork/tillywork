@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { InsertResult, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { ListStage } from "./list.stage.entity";
 import { CreateListStageDto } from "./dto/create.list.stage.dto";
 import { UpdateListStageDto } from "./dto/update.list.stage.dto";
@@ -68,13 +68,15 @@ export class ListStagesService {
 
     async reorder(
         listStages: Pick<ListStage, "id" | "order">[]
-    ): Promise<InsertResult> {
-        return this.upsert(listStages);
-    }
-
-    async upsert(listStages: UpdateListStageDto[]): Promise<InsertResult> {
-        // BUG: https://github.com/typeorm/typeorm/issues/9993
-        return this.listStagesRepository.upsert(listStages, ["id"]);
+    ): Promise<ListStage[]> {
+        const listStagesToUpdated = await Promise.all(
+            listStages.map(async ({ id, order }) => {
+                const listStage = await this.findOne(id);
+                this.listStagesRepository.merge(listStage, { order });
+                return listStage;
+            })
+        );
+        return this.listStagesRepository.save(listStagesToUpdated);
     }
 
     async remove(id: number, replacementListStage: ListStage): Promise<void> {
