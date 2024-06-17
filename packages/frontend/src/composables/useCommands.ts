@@ -18,9 +18,13 @@ export const useCommands = () => {
       section: 'Card',
       icon: 'mdi-card-plus-outline',
       title: 'Create card',
-      dialog: {
-        kind: DIALOGS.CREATE_CARD,
-      },
+      action: () =>
+        dialog.openDialog({
+          dialog: DIALOGS.CREATE_CARD,
+          options: {
+            width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD],
+          },
+        }),
       shortcut: ['N'],
     },
 
@@ -29,9 +33,13 @@ export const useCommands = () => {
       section: 'Space',
       icon: 'mdi-folder-plus-outline',
       title: 'Create space',
-      dialog: {
-        kind: DIALOGS.CREATE_SPACE,
-      },
+      action: () =>
+        dialog.openDialog({
+          dialog: DIALOGS.CREATE_SPACE,
+          options: {
+            width: DIALOG_WIDTHS[DIALOGS.CREATE_SPACE],
+          },
+        }),
       shortcut: ['S'],
     },
 
@@ -40,9 +48,13 @@ export const useCommands = () => {
       section: 'Workspace',
       icon: 'mdi-briefcase-plus-outline',
       title: 'Create workspace',
-      dialog: {
-        kind: DIALOGS.CREATE_WORKSPACE,
-      },
+      action: () =>
+        dialog.openDialog({
+          dialog: DIALOGS.CREATE_WORKSPACE,
+          options: {
+            fullscreen: true,
+          },
+        }),
       shortcut: ['W'],
     },
 
@@ -51,32 +63,44 @@ export const useCommands = () => {
       section: 'Settings',
       icon: 'mdi-cog',
       title: 'Settings',
-      dialog: {
-        kind: DIALOGS.SETTINGS,
-      },
+      action: () =>
+        dialog.openDialog({
+          dialog: DIALOGS.SETTINGS,
+          options: {
+            fullscreen: true,
+          },
+        }),
       shortcut: [','],
     },
     {
       section: 'Settings',
       icon: 'mdi-monitor-screenshot',
       title: 'Theme',
-      dialog: {
-        kind: DIALOGS.SETTINGS,
-        data: {
-          activeTab: 'theme',
-        },
-      },
+      action: () =>
+        dialog.openDialog({
+          dialog: DIALOGS.SETTINGS,
+          options: {
+            fullscreen: true,
+          },
+          data: {
+            activeTab: 'theme',
+          },
+        }),
     },
     {
       section: 'Settings',
       icon: 'mdi-toy-brick-outline',
       title: 'Card types',
-      dialog: {
-        kind: DIALOGS.SETTINGS,
-        data: {
-          activeTab: 'cardTypes',
-        },
-      },
+      action: () =>
+        dialog.openDialog({
+          dialog: DIALOGS.SETTINGS,
+          options: {
+            fullscreen: true,
+          },
+          data: {
+            activeTab: 'cardTypes',
+          },
+        }),
     },
   ];
 
@@ -122,20 +146,7 @@ export const useCommands = () => {
    * @param command The command to execute.
    */
   function executeCommand(command: Command) {
-    const activeDialog = command.dialog;
-    if (activeDialog) {
-      const dialogKind = activeDialog.kind;
-      dialog.openDialog({
-        dialog: dialogKind,
-        data: activeDialog.data,
-        options: {
-          width: DIALOG_WIDTHS[dialogKind] ?? undefined,
-          fullscreen: DIALOG_WIDTHS[dialogKind] ? undefined : true,
-        },
-      });
-    } else {
-      // TODO: Support plain actions.
-    }
+    command.action();
   }
 
   /**
