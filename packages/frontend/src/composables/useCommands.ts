@@ -102,6 +102,15 @@ export const useCommands = () => {
           },
         }),
     },
+
+    // ~ Documentation
+    {
+      section: 'Documentation',
+      icon: 'mdi-text-box-outline',
+      title: 'Documentation',
+      action: () => window.location.assign(import.meta.env.TW_VITE_DOCS_URL),
+      shortcut: ['F1'],
+    },
   ];
 
   /**
