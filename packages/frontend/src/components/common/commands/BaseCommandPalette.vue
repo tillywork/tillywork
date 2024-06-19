@@ -2,30 +2,26 @@
 import { useCommands } from '@/composables/useCommands';
 import stringUtils from '@/utils/string';
 import type { Command } from './types';
+import { type VList } from 'vuetify/components';
 
 const {
-  commands,
   registerCommandShortcutWatchers,
   executeCommand,
   setIsInputFocused,
   isCommandPaletteOpen,
   setIsCommandPaletteOpen,
   keys,
+  getCommands,
 } = useCommands();
 const { width: windowWidth, height: windowHeight } = useWindowSize();
 
 const search = ref('');
 const activeCommandIndex = ref<number>(-1);
-
-const commandsCopy = computed(() =>
-  commands.map((command, i) => ({
-    ...command,
-    id: i,
-  }))
-);
+const commands = ref(getCommands());
+const commandsList = ref<VList>();
 
 const searchedCommands = computed(() =>
-  commandsCopy.value.filter(
+  commands.value.filter(
     (command) =>
       stringUtils.fuzzySearch(search.value, command.title) ||
       (command.shortcut
@@ -42,7 +38,7 @@ const groupedSearchedCommands = computed(() =>
     }
     acc[section].push(command);
     return acc;
-  }, {} as Record<string, typeof commandsCopy.value>)
+  }, {} as Record<string, Command[]>)
 );
 
 const activeCommand = computed(() =>
@@ -69,7 +65,7 @@ watch(isCommandPaletteOpen, (v) => {
 });
 
 onMounted(() => {
-  registerCommandShortcutWatchers(commands);
+  registerCommandShortcutWatchers(commands.value);
 });
 
 /**
@@ -92,6 +88,7 @@ function handleKeyDown(e: KeyboardEvent) {
     } else {
       activeCommandIndex.value = 0;
     }
+    ensureSelectedCommandIsVisible();
   }
 
   if (e.key === 'ArrowUp') {
@@ -101,12 +98,32 @@ function handleKeyDown(e: KeyboardEvent) {
     } else {
       activeCommandIndex.value = commandsCount - 1;
     }
+    ensureSelectedCommandIsVisible();
   }
 
   if (e.key === 'Enter' && activeCommand.value) {
     e.preventDefault();
     handleExecuteCommand(activeCommand.value);
   }
+}
+
+function ensureSelectedCommandIsVisible() {
+  nextTick(() => {
+    const list = commandsList.value;
+
+    if (list && list.$el) {
+      const selectedItem = list.$el.querySelector(`.v-list-item--active`);
+
+      const scrollOption = {
+        behavior: 'smooth',
+        block: 'nearest',
+      };
+
+      if (selectedItem) {
+        selectedItem.scrollIntoView(scrollOption);
+      }
+    }
+  });
 }
 
 function handleAfterLeave() {
@@ -179,6 +196,7 @@ onBeforeUnmount(() => {
 
       <!-- ~ Grouped List of Commands -->
       <v-list
+        ref="commandsList"
         tabindex="-1"
         max-height="50vh"
         nav
@@ -213,10 +231,9 @@ onBeforeUnmount(() => {
               v-for="(command, index) in commands"
               :key="index"
               :value="command.id"
-              role="option"
-              tabindex="-1"
               :lines="command.description ? 'two' : 'one'"
               @click="handleExecuteCommand(command)"
+              tabindex="-1"
             >
               <!-- ~ Icon -->
               <template #prepend>
@@ -251,3 +268,12 @@ onBeforeUnmount(() => {
     </v-card>
   </v-dialog>
 </template>
+
+<style scoped lang="scss">
+.v-list {
+  .v-list-item {
+    scroll-margin-top: 8px;
+    scroll-margin-bottom: 8px;
+  }
+}
+</style>

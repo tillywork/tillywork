@@ -1,4 +1,5 @@
 export type Command = {
+  id: number;
   section: string;
   icon: string;
   title: string;
@@ -6,3 +7,5 @@ export type Command = {
   action: () => void;
   shortcut?: string[];
 };
+
+export type CommandDto = Omit<Command, 'id'>;

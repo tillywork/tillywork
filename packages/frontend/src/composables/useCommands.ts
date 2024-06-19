@@ -1,4 +1,4 @@
-import type { Command } from '@/components/common/commands/types';
+import type { Command, CommandDto } from '@/components/common/commands/types';
 import { DIALOGS, DIALOG_WIDTHS } from '@/components/common/dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 import { useStateStore } from '@/stores/state';
@@ -11,107 +11,121 @@ export const useCommands = () => {
   const stateStore = useStateStore();
   const { setIsInputFocused } = stateStore;
   const { isInputFocused } = storeToRefs(stateStore);
+  const router = useRouter();
 
-  const commands: Command[] = [
-    // ~ Cards
-    {
-      section: 'Card',
-      icon: 'mdi-card-plus-outline',
-      title: 'Create card',
-      action: () =>
-        dialog.openDialog({
-          dialog: DIALOGS.CREATE_CARD,
-          options: {
-            width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD],
-          },
-        }),
-      shortcut: ['N'],
-    },
+  /**
+   * Handles building the commands array.
+   * @returns An array of commands
+   */
+  function getCommands(): Command[] {
+    let commands: CommandDto[] = [
+      // ~ Cards
+      {
+        section: 'Card',
+        icon: 'mdi-card-plus-outline',
+        title: 'Create card',
+        action: () =>
+          dialog.openDialog({
+            dialog: DIALOGS.CREATE_CARD,
+            options: {
+              width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD],
+            },
+          }),
+        shortcut: ['N'],
+      },
 
-    // ~ Spaces
-    {
-      section: 'Space',
-      icon: 'mdi-folder-plus-outline',
-      title: 'Create space',
-      action: () =>
-        dialog.openDialog({
-          dialog: DIALOGS.CREATE_SPACE,
-          options: {
-            width: DIALOG_WIDTHS[DIALOGS.CREATE_SPACE],
-          },
-        }),
-      shortcut: ['S'],
-    },
+      // ~ Spaces
+      {
+        section: 'Space',
+        icon: 'mdi-folder-plus-outline',
+        title: 'Create space',
+        action: () =>
+          dialog.openDialog({
+            dialog: DIALOGS.CREATE_SPACE,
+            options: {
+              width: DIALOG_WIDTHS[DIALOGS.CREATE_SPACE],
+            },
+          }),
+        shortcut: ['S'],
+      },
 
-    // ~ Workspaces
-    {
-      section: 'Workspace',
-      icon: 'mdi-briefcase-plus-outline',
-      title: 'Create workspace',
-      action: () =>
-        dialog.openDialog({
-          dialog: DIALOGS.CREATE_WORKSPACE,
-          options: {
-            fullscreen: true,
-          },
-        }),
-      shortcut: ['W'],
-    },
+      // ~ Workspaces
+      {
+        section: 'Workspace',
+        icon: 'mdi-briefcase-plus-outline',
+        title: 'Create workspace',
+        action: () =>
+          dialog.openDialog({
+            dialog: DIALOGS.CREATE_WORKSPACE,
+            options: {
+              fullscreen: true,
+            },
+          }),
+        shortcut: ['W'],
+      },
 
-    // ~ Settings
-    {
-      section: 'Settings',
-      icon: 'mdi-cog',
-      title: 'Settings',
-      action: () =>
-        dialog.openDialog({
-          dialog: DIALOGS.SETTINGS,
-          options: {
-            fullscreen: true,
-          },
-        }),
-      shortcut: [','],
-    },
-    {
-      section: 'Settings',
-      icon: 'mdi-monitor-screenshot',
-      title: 'Theme',
-      action: () =>
-        dialog.openDialog({
-          dialog: DIALOGS.SETTINGS,
-          options: {
-            fullscreen: true,
-          },
-          data: {
-            activeTab: 'theme',
-          },
-        }),
-    },
-    {
-      section: 'Settings',
-      icon: 'mdi-toy-brick-outline',
-      title: 'Card types',
-      action: () =>
-        dialog.openDialog({
-          dialog: DIALOGS.SETTINGS,
-          options: {
-            fullscreen: true,
-          },
-          data: {
-            activeTab: 'cardTypes',
-          },
-        }),
-    },
+      // ~ Settings
+      {
+        section: 'Settings',
+        icon: 'mdi-cog',
+        title: 'Settings',
+        action: () =>
+          dialog.openDialog({
+            dialog: DIALOGS.SETTINGS,
+            options: {
+              fullscreen: true,
+            },
+          }),
+        shortcut: [','],
+      },
+      {
+        section: 'Settings',
+        icon: 'mdi-monitor-screenshot',
+        title: 'Theme',
+        action: () =>
+          dialog.openDialog({
+            dialog: DIALOGS.SETTINGS,
+            options: {
+              fullscreen: true,
+            },
+            data: {
+              activeTab: 'theme',
+            },
+          }),
+      },
+      {
+        section: 'Settings',
+        icon: 'mdi-toy-brick-outline',
+        title: 'Card types',
+        action: () =>
+          dialog.openDialog({
+            dialog: DIALOGS.SETTINGS,
+            options: {
+              fullscreen: true,
+            },
+            data: {
+              activeTab: 'cardTypes',
+            },
+          }),
+      },
+    ];
 
     // ~ Documentation
-    {
-      section: 'Documentation',
-      icon: 'mdi-text-box-outline',
-      title: 'Documentation',
-      action: () => window.location.assign(import.meta.env.TW_VITE_DOCS_URL),
-      shortcut: ['F1'],
-    },
-  ];
+    if (import.meta.env.TW_VITE_DOCS_URL) {
+      commands.push({
+        section: 'Documentation',
+        icon: 'mdi-text-box-outline',
+        title: 'Documentation',
+        action: () => window.open(import.meta.env.TW_VITE_DOCS_URL, '_blank'),
+        shortcut: ['F1'],
+      });
+    }
+
+    return commands.map((command, index) => {
+      (command as Command).id = index;
+      return command;
+    }) as Command[];
+  }
 
   /**
    * If the elemnt is input, textarea, or has class
@@ -179,7 +193,6 @@ export const useCommands = () => {
   }
 
   return {
-    commands,
     keys,
     isInputFocused,
     isCommandPaletteOpen,
@@ -189,5 +202,6 @@ export const useCommands = () => {
     handleInputBlur,
     handleInputFocus,
     executeCommand,
+    getCommands,
   };
 };
