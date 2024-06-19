@@ -120,8 +120,6 @@ async function handleSubmitForm() {
 
     dialog.closeDialog(currentDialogIndex.value);
     queryClient.invalidateQueries({ queryKey: ['listGroups'] });
-    // BUG on ListGroups, need to trace
-    // Why listGroups always add data?
   } catch (err) {
     showSnackbar({
       message: 'Something went wrong, please try again.',

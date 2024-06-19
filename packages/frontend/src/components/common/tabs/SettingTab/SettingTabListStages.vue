@@ -206,7 +206,6 @@ onUnmounted(() => {
     reorderListStage(payload).then(() =>
       queryClient.invalidateQueries({ queryKey: ['listGroups'] })
     );
-    // BUG order not update for ListGroups
   }
 });
 </script>

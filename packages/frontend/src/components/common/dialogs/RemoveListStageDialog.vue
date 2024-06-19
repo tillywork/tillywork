@@ -104,8 +104,6 @@ async function handleSubmitForm() {
     dialog.closeDialog(currentDialogIndex.value);
     queryClient.invalidateQueries({ queryKey: ['listGroups'] });
     queryClient.invalidateQueries({ queryKey: ['cards'] }); // TODO: Improvement, only related groupIds (current & replacement)
-    // BUG on ListGroups, need to trace
-    // Why listGroups not delete data?
   } catch (err) {
     showSnackbar({
       message: 'Something went wrong, please try again.',
