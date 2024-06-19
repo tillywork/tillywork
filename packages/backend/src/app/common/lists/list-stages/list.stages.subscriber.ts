@@ -39,7 +39,7 @@ export class ListStagesSubscriber
         listGroupRepo.save(listGroup);
     }
 
-    async afterRemove(event: RemoveEvent<ListStage>) {
+    async beforeRemove(event: RemoveEvent<ListStage>) {
         const listGroupRepo = event.manager.getRepository(ListGroup);
         const listGroup = await listGroupRepo.findOneBy({
             entityType: ListGroupEntityTypes.LIST_STAGE,
