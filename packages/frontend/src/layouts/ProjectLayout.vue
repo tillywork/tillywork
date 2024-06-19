@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { useAuthStore } from '@/stores/auth';
-import NavigationWorkspace from '@/components/project-management/navigation/NavigationWorkspace.vue';
-import type { NavigationMenuItem } from '@/components/common/navigation/types';
-import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
+import BaseCommandPalette from '@/components/common/commands/BaseCommandPalette.vue';
+import { DIALOGS } from '@/components/common/dialogs/types';
 import UserListItem from '@/components/common/navigation/UserListItem.vue';
+import type { NavigationMenuItem } from '@/components/common/navigation/types';
+import NavigationWorkspace from '@/components/project-management/navigation/NavigationWorkspace.vue';
+import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
 import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
 import { useLogo } from '@/composables/useLogo';
-import { DIALOGS } from '@/components/common/dialogs/types';
+import { useAuthStore } from '@/stores/auth';
 import { useDialogStore } from '@/stores/dialog';
 
 const dialog = useDialogStore();
@@ -111,5 +112,7 @@ function openSettingsDialog() {
     <v-main>
       <router-view />
     </v-main>
+
+    <base-command-palette />
   </v-app>
 </template>

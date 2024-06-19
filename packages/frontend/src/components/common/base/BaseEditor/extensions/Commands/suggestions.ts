@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { alternateKey, leaderKey } from '@/utils/keyboard';
 import { Editor, VueRenderer, type Range } from '@tiptap/vue-3';
 import tippy from 'tippy.js';
 import BaseEditorCommands from './BaseEditorCommands.vue';
-
-const leaderKey = navigator.userAgent.includes('Mac OS') ? 'Cmd' : 'Ctrl';
-const alternateKey = navigator.userAgent.includes('Mac OS') ? 'Option' : 'Alt';
 
 export default {
   items: ({ query }: { query: string }) => {

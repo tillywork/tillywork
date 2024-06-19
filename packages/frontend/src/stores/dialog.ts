@@ -16,6 +16,7 @@ export type Dialog = {
 export const useDialogStore = defineStore('dialog', {
   state: () => ({
     dialogs: [] as Dialog[],
+    isCommandPaletteOpen: false,
   }),
 
   actions: {
@@ -64,6 +65,10 @@ export const useDialogStore = defineStore('dialog', {
     },
     getDialogIndex(dialog: DIALOGS) {
       return this.dialogs.findIndex((d) => d.dialog === dialog);
+    },
+
+    setIsCommandPaletteOpen(isOpen: boolean) {
+      this.isCommandPaletteOpen = isOpen;
     },
   },
 });
