@@ -5,11 +5,16 @@ export const useStateStore = defineStore('state', {
   state: () => {
     return {
       selectedModule: null as null | WorkspaceTypes,
+      /** Is an input currently focused */
+      isInputFocused: false,
     };
   },
   actions: {
     setSelectedModule(module: WorkspaceTypes) {
       this.selectedModule = module;
+    },
+    setIsInputFocused(v: boolean) {
+      this.isInputFocused = v;
     },
   },
 });

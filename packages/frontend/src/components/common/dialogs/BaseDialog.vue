@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from './types';
+import { useCommands } from '@/composables/useCommands';
 
 const dialogStore = useDialogStore();
 const { width: windowWidth, height: windowHeight } = useWindowSize();
+const { setIsInputFocused } = useCommands();
 
 const dialogComponents = {
   [DIALOGS.CONFIRM]: () => import('./ConfirmDialog.vue'),
@@ -48,6 +50,8 @@ function lazyLoadDialog(dialog: DIALOGS) {
 
 function handleAfterLeave(index: number) {
   dialogStore.closeDialog(index);
+  // Reset input focus
+  setIsInputFocused(false);
 }
 </script>
 
