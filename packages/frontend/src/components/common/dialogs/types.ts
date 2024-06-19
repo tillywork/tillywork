@@ -11,6 +11,7 @@ export enum DIALOGS {
   REMOVE_CARD_TYPE = 'RemoveCardType',
   UPSERT_LIST_STAGE = 'UpsertListStage',
   REMOVE_LIST_STAGE = 'RemoveListStage',
+  EDIT_LIST_STAGES = 'EditListStages',
 }
 
 export const DIALOG_WIDTHS = {
@@ -26,4 +27,16 @@ export const DIALOG_WIDTHS = {
   [DIALOGS.REMOVE_CARD_TYPE]: 500,
   [DIALOGS.UPSERT_LIST_STAGE]: 400,
   [DIALOGS.REMOVE_LIST_STAGE]: 500,
+  [DIALOGS.EDIT_LIST_STAGES]: 400,
 };
+
+export type SettingsTab = {
+  icon: string;
+  text: string;
+  value: SettingsTabs;
+};
+
+export enum SettingsTabs {
+  THEME = 'theme',
+  CARD_TYPES = 'cardTypes',
+}

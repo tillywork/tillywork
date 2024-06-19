@@ -1,64 +1,8 @@
-<template>
-  <v-card color="surface" elevation="24" :loading="isCreating || isUpdating">
-    <div class="d-flex align-center ps-0 pa-4">
-      <v-card-subtitle>
-        {{ currentDialog.data.mode }} list stage
-      </v-card-subtitle>
-      <v-spacer />
-      <base-icon-btn
-        icon="mdi-close"
-        color="default"
-        @click="dialog.closeDialog(currentDialogIndex)"
-      />
-    </div>
-    <v-form
-      ref="listStageForm"
-      @submit.prevent="handleSubmitForm"
-      validate-on="submit"
-    >
-      <div class="pa-4 py-0">
-        <v-text-field
-          v-model="listStageDto.name"
-          :rules="[rules.required]"
-          label="Name*"
-          autofocus
-        />
-        <v-checkbox
-          v-model="listStageDto.isCompleted"
-          color="primary"
-          label="Is Completed?"
-        />
-        <div>
-          <v-color-picker v-model="listStageDto.color" rounded />
-          <v-text-field
-            v-model="listStageDto.color"
-            :rules="[rules.required]"
-            label="Color*"
-            disabled
-          />
-        </div>
-      </div>
-      <v-card-actions class="d-flex justify-start align-center py-0 px-4">
-        <v-spacer />
-
-        <v-btn
-          density="comfortable"
-          variant="flat"
-          class="text-caption px-4 ms-4"
-          type="submit"
-          :loading="isCreating || isUpdating"
-        >
-          Save
-        </v-btn>
-      </v-card-actions>
-    </v-form>
-  </v-card>
-</template>
-
 <script setup lang="ts">
 import type { VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
 import { useSnackbarStore } from '@/stores/snackbar';
+import BaseColorPicker from '../inputs/BaseColorPicker.vue';
 
 import { DIALOGS } from './types';
 import { useDialogStore } from '@/stores/dialog';
@@ -129,3 +73,58 @@ async function handleSubmitForm() {
   }
 }
 </script>
+
+<template>
+  <v-card color="surface" elevation="24" :loading="isCreating || isUpdating">
+    <div class="d-flex align-center ps-0 pa-4">
+      <v-card-subtitle>
+        {{ currentDialog.data.mode }} list stage
+      </v-card-subtitle>
+      <v-spacer />
+      <base-icon-btn
+        icon="mdi-close"
+        color="default"
+        @click="dialog.closeDialog(currentDialogIndex)"
+      />
+    </div>
+    <v-form
+      ref="listStageForm"
+      @submit.prevent="handleSubmitForm"
+      validate-on="submit"
+    >
+      <v-card-text>
+        <v-text-field
+          v-model="listStageDto.name"
+          :rules="[rules.required]"
+          label="Name*"
+          autofocus
+        />
+        <base-color-picker
+          v-model="listStageDto.color"
+          label="Color*"
+          :rules="[rules.required]"
+        />
+        <v-checkbox
+          v-model="listStageDto.isCompleted"
+          color="primary"
+          label="Mark card as completed"
+          hide-details
+          density="compact"
+        />
+      </v-card-text>
+      <v-card-actions class="d-flex justify-start align-center py-0 px-4">
+        <v-spacer />
+
+        <v-btn
+          density="comfortable"
+          variant="flat"
+          class="text-caption px-4 ms-4"
+          type="submit"
+          :loading="isCreating || isUpdating"
+        >
+          Save
+        </v-btn>
+      </v-card-actions>
+    </v-form>
+  </v-card>
+</template>

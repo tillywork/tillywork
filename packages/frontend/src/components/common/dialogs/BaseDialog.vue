@@ -18,6 +18,7 @@ const dialogComponents = {
   [DIALOGS.SETTINGS]: () => import('./SettingsDialog.vue'),
   [DIALOGS.CREATE_CARD_TYPE]: () => import('./CreateCardTypeDialog.vue'),
   [DIALOGS.REMOVE_CARD_TYPE]: () => import('./RemoveCardTypeDialog.vue'),
+  [DIALOGS.EDIT_LIST_STAGES]: () => import('./EditListStagesDialog.vue'),
 };
 
 const currentDialogs = computed(() => {

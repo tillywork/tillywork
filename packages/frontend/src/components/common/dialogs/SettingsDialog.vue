@@ -2,12 +2,10 @@
 import BaseThemeSwitch from '../base/BaseThemeSwitch.vue';
 import { useCardTypesService } from '@/composables/services/useCardTypesService';
 import { useWorkspaceStore } from '@/stores/workspace';
-import { DIALOGS } from './types';
+import { DIALOGS, SettingsTabs, type SettingsTab } from './types';
 import type { CardType } from '@/components/project-management/cards/types';
 import { useLogo } from '@/composables/useLogo';
 import { useDialogStore } from '@/stores/dialog';
-import type { SettingTab } from '../tabs/types';
-import SettingTabListStages from '../tabs/SettingTab/SettingTabListStages.vue';
 
 const dialog = useDialogStore();
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
@@ -22,21 +20,16 @@ const { data: cardTypes } = useFindAllQuery({
   workspaceId: selectedWorkspace.value!.id,
 });
 
-const tabs = ref<SettingTab[]>([
+const tabs = ref<SettingsTab[]>([
   {
     icon: 'mdi-monitor-screenshot',
     text: 'Theme',
-    value: 'theme',
+    value: SettingsTabs.THEME,
   },
   {
     icon: 'mdi-toy-brick-outline',
     text: 'Card Types',
-    value: 'cardTypes',
-  },
-  {
-    icon: 'mdi-format-list-bulleted-type',
-    text: 'List Stages',
-    value: 'listStages',
+    value: SettingsTabs.CARD_TYPES,
   },
 ]);
 
@@ -197,9 +190,6 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
               </v-data-table>
             </v-card-text>
           </v-card>
-        </template>
-        <template #item.listStages>
-          <SettingTabListStages />
         </template>
       </v-tabs>
     </v-card-text>
