@@ -76,9 +76,12 @@ onUnmounted(() => {
       listId: selectedListId.value,
       listStages: listStagesToReorder,
     };
-    reorderListStage(payload).then(() =>
-      queryClient.invalidateQueries({ queryKey: ['listGroups'] })
-    );
+    reorderListStage(payload).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['listGroups'] });
+      queryClient.invalidateQueries({
+        queryKey: ['lists', selectedListId.value],
+      });
+    });
   }
 });
 </script>

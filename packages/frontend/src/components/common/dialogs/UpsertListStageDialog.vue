@@ -64,6 +64,10 @@ async function handleSubmitForm() {
 
     dialog.closeDialog(currentDialogIndex.value);
     queryClient.invalidateQueries({ queryKey: ['listGroups'] });
+    // NOTE: Already declared in `unMounted` hooks.
+    // queryClient.invalidateQueries({
+    //   queryKey: ['lists', listStageDto.value.listId],
+    // });
   } catch (err) {
     showSnackbar({
       message: 'Something went wrong, please try again.',

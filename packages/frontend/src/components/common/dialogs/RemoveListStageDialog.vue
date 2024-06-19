@@ -103,6 +103,10 @@ async function handleSubmitForm() {
     });
     dialog.closeDialog(currentDialogIndex.value);
     queryClient.invalidateQueries({ queryKey: ['listGroups'] });
+    // NOTE: Already declared in `unMounted` hooks.
+    // queryClient.invalidateQueries({
+    //   queryKey: ['lists', listStage.value.listId],
+    // });
     queryClient.invalidateQueries({ queryKey: ['cards'] }); // TODO: Improvement, only related groupIds (current & replacement)
   } catch (err) {
     showSnackbar({
