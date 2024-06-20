@@ -6,21 +6,24 @@ import type { View } from '../views/types';
 import { useViewsService } from '@/composables/services/useViewsService';
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
 import { useListsService } from '@/composables/services/useListsService';
-import { cloneDeep } from 'lodash';
 import { useSnackbarStore } from '@/stores/snackbar';
 
 const props = defineProps<{
   list: List;
 }>();
-const listCopy = ref(cloneDeep(props.list));
 const listsService = useListsService();
 const updateListMutation = listsService.useUpdateListMutation();
 
 const snackbar = useSnackbarStore();
 
-const listId = computed(() => listCopy.value.id);
+const listId = computed(() => props.list.id);
 
-const listName = ref(listCopy.value.name);
+// Populates default value on mount.
+const listName = ref(props.list.name);
+// Populates a different default value whenever the user switches between lists.
+watch(listId, () => {
+  listName.value = props.list.name;
+});
 const debouncedName = useDebounce(listName, 2000);
 watch(debouncedName, () => {
   updateName();
@@ -29,9 +32,8 @@ watch(debouncedName, () => {
 function updateName() {
   const newName = listName.value.trim();
   if (newName !== '' && newName !== props.list.name) {
-    listCopy.value.name = newName;
     updateListMutation
-      .mutateAsync({ id: props.list.id, updateDto: listCopy.value })
+      .mutateAsync({ id: props.list.id, updateDto: { name: newName } })
       .then(() => {
         snackbar.showSnackbar({
           message: 'List name updated.',
