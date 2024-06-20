@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { type List } from '../lists/types';
 import NavigationWorkspaceListItemMenu from './NavigationWorkspaceListItemMenu.vue';
+import RenameListPopover from '../popovers/RenameListPopover.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -40,6 +41,11 @@ function clearHoverFreeze() {
         v-slot:append
         v-if="isListHovering || freezeListHoverId === list.id"
       >
+        <rename-list-popover
+          :list
+          @hover:freeze="setHoverFreeze(list)"
+          @hover:unfreeze="clearHoverFreeze"
+        />
         <navigation-workspace-list-item-menu
           @hover:freeze="setHoverFreeze(list)"
           @hover:unfreeze="clearHoverFreeze"

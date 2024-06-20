@@ -61,7 +61,7 @@ const view = ref<View>();
             rounded="md"
             class="mr-1"
           />
-          <!-- TODO: Figure out why autofocus cannot be disabled. -->
+          <!-- TODO: Figure out why autofocus cannot be disabled on refresh. -->
           <base-editor-input
             v-model="listName"
             placeholder="List name"
