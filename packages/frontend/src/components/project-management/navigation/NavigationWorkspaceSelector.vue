@@ -5,6 +5,7 @@ import { useWorkspaceStore } from '@/stores/workspace';
 import CreateWorkspaceBtn from './CreateWorkspaceBtn.vue';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
+import RenameWorkspacePopover from '../popovers/RenameWorkspacePopover.vue';
 
 const dialog = useDialogStore();
 const workspacesService = useWorkspacesService();
@@ -99,6 +100,11 @@ watch(
         </v-icon>
       </v-card-title>
     </v-card>
+
+    <rename-workspace-popover
+      v-show="selectedWorkspace"
+      :workspace="selectedWorkspace!"
+    />
 
     <base-icon-btn
       id="workspace-menu-btn"
