@@ -24,6 +24,6 @@ function openCreateListDialog() {
     icon="mdi-plus"
     density="compact"
     v-tooltip:bottom="'Create list'"
-    @click="openCreateListDialog"
+    @click.stop="openCreateListDialog"
   />
 </template>

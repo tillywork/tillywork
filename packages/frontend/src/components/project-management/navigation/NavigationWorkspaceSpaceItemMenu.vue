@@ -70,8 +70,7 @@ watch(spaceMenu, () => {
   <base-icon-btn
     id="space-menu-btn"
     icon="mdi-dots-vertical"
-    @click.stop
-    @click="handleSpaceMenuClick"
+    @click.stop="handleSpaceMenuClick"
     density="compact"
   />
 

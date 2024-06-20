@@ -117,8 +117,7 @@ watch(listMenu, () => {
   <base-icon-btn
     id="list-menu-btn"
     icon="mdi-dots-vertical"
-    @click.stop
-    @click="handleListMenuClick"
+    @click.stop="handleListMenuClick"
     density="compact"
   />
 

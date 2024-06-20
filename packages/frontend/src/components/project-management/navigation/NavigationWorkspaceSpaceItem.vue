@@ -3,6 +3,7 @@ import { type Space } from '../spaces/types';
 import NavigationWorkspaceListItem from './NavigationWorkspaceListItem.vue';
 import NavigationWorkspaceSpaceItemMenu from './NavigationWorkspaceSpaceItemMenu.vue';
 import CreateListBtn from './CreateListBtn.vue';
+import RenameSpacePopover from '../popovers/RenameSpacePopover.vue';
 
 defineProps<{
   space: Space;
@@ -35,7 +36,12 @@ function clearHoverFreeze() {
             v-if="isHovering || freezeSpaceHoverId === space.id"
           >
             <div class="d-flex ga-1">
-              <create-list-btn :space="space" @click.stop />
+              <create-list-btn :space="space" />
+              <rename-space-popover
+                :space
+                @hover:freeze="setHoverFreeze(space)"
+                @hover:unfreeze="clearHoverFreeze"
+              />
               <navigation-workspace-space-item-menu
                 :space
                 @hover:freeze="setHoverFreeze(space)"
