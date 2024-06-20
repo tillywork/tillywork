@@ -6,12 +6,17 @@ import { useWorkspaceStore } from '@/stores/workspace';
 import { useViewsService } from '@/composables/services/useViewsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
+import ViewSettingsPopover from '../popovers/ViewSettingsPopover.vue';
 
 const dialog = useDialogStore();
 const props = defineProps<{
   views: View[];
   list: List;
 }>();
+
+const settingsPopover = ref(false);
+const settingsPopoverView = ref<View>();
+const settingsPopoverTarget = ref<string>();
 
 const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
@@ -30,6 +35,18 @@ const selectedView = defineModel<View | null>();
 const freezeHoverViewId = ref<number>();
 
 const listCopy = computed(() => props.list);
+
+function openViewSettingsPopover(view: View) {
+  settingsPopover.value = true;
+  settingsPopoverView.value = view;
+  settingsPopoverTarget.value = '#list-view-tab-' + view.id;
+}
+
+function closeAnyViewSettingsPopover() {
+  settingsPopover.value = false;
+  settingsPopoverView.value = undefined;
+  settingsPopoverTarget.value = undefined;
+}
 
 function handleTabSelection(view: View) {
   selectedView.value = view;
@@ -126,6 +143,7 @@ watch(
     <template v-for="view in views" :key="view.id">
       <v-hover #="{ isHovering, props }">
         <v-btn
+          :id="'list-view-tab-' + view.id"
           v-bind="props"
           rounded="0"
           variant="text"
@@ -177,6 +195,12 @@ watch(
                     </template>
                     <v-list-item-title>Delete</v-list-item-title>
                   </v-list-item>
+                  <v-list-item @click="openViewSettingsPopover(view)">
+                    <template #prepend>
+                      <v-icon icon="mdi-cog-outline" />
+                    </template>
+                    <v-list-item-title>Settings</v-list-item-title>
+                  </v-list-item>
                 </v-list>
               </v-card>
             </v-menu>
@@ -196,6 +220,12 @@ watch(
       </template>
       View
     </v-btn>
+    <view-settings-popover
+      :model-value="settingsPopover"
+      :target="settingsPopoverTarget!"
+      :view="settingsPopoverView!"
+      @after-leave="closeAnyViewSettingsPopover()"
+    />
   </div>
 </template>
 
