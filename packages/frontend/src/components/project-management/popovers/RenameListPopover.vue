@@ -11,13 +11,13 @@ const updateListMutation = listsService.useUpdateListMutation();
 
 const snackbar = useSnackbarStore();
 
-const isOpen = ref(false);
+const popover = ref(false);
 const emit = defineEmits(['hover:freeze', 'hover:unfreeze']);
 
 const listName = ref(props.list.name);
 
 function handleRenameListPopoverClick() {
-  isOpen.value = !isOpen.value;
+  popover.value = !popover.value;
   emit('hover:freeze');
 }
 
@@ -36,8 +36,8 @@ function handleKeyEnter() {
   }
 }
 
-watch(isOpen, () => {
-  if (!isOpen.value) {
+watch(popover, () => {
+  if (!popover.value) {
     emit('hover:unfreeze');
   }
 });
@@ -52,7 +52,7 @@ watch(isOpen, () => {
   />
 
   <v-menu
-    v-model="isOpen"
+    v-model="popover"
     target="#rename-list-popover-btn"
     :width="250"
     :close-on-content-click="false"
