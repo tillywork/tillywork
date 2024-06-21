@@ -34,8 +34,16 @@ const logger = new Logger("UserSeeder");
 export async function seedUserData(connection: Connection): Promise<void> {
     const usersService = new UsersService(connection.getRepository(User));
     const viewsService = new ViewsService(connection.getRepository(View));
+    const cardListsService = new CardListsService(
+        connection.getRepository(CardList)
+    );
+    const cardsService = new CardsService(
+        connection.getRepository(Card),
+        cardListsService
+    );
     const listStagesService = new ListStagesService(
-        connection.getRepository(ListStage)
+        connection.getRepository(ListStage),
+        cardListsService
     );
     const listSideEffectsService = new ListSideEffectsService(
         listStagesService,
@@ -49,13 +57,6 @@ export async function seedUserData(connection: Connection): Promise<void> {
     const spacesService = new SpacesService(
         connection.getRepository(Space),
         spaceSideEffectsService
-    );
-    const cardListsService = new CardListsService(
-        connection.getRepository(CardList)
-    );
-    const cardsService = new CardsService(
-        connection.getRepository(Card),
-        cardListsService
     );
     const cardTypesService = new CardTypesService(
         connection.getRepository(CardType),

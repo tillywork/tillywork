@@ -1,3 +1,4 @@
+import type { MaybeRef } from 'vue';
 import { useHttp } from '@/composables/useHttp';
 import type { ListStage } from '../../components/project-management/lists/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
@@ -9,51 +10,102 @@ export const useListStagesService = () => {
   async function getListStages({
     listId,
   }: {
-    listId: number;
+    listId: MaybeRef<number>;
   }): Promise<ListStage[]> {
     return sendRequest(`/lists/${listId}/stages`, {
       method: 'GET',
     });
   }
 
-  async function createListStage(list: Partial<ListStage>): Promise<ListStage> {
-    return sendRequest('/lists', {
+  async function createListStage({
+    listId,
+    listStage,
+  }: {
+    listId: MaybeRef<number>;
+    listStage: Omit<ListStage, 'id' | 'listId'>;
+  }): Promise<ListStage> {
+    return sendRequest(`/lists/${toValue(listId)}/stages`, {
       method: 'POST',
-      data: list,
+      data: listStage,
     });
   }
 
-  async function getListStage(id: number): Promise<ListStage> {
-    return sendRequest(`/lists/${id}`, {
+  async function getListStage({
+    listId,
+    id,
+  }: {
+    listId: MaybeRef<number>;
+    id: MaybeRef<number>;
+  }): Promise<ListStage> {
+    return sendRequest(`/lists/${toValue(listId)}/stages/${id}`, {
       method: 'GET',
     });
   }
 
-  async function updateListStage(list: ListStage): Promise<ListStage> {
-    return sendRequest(`/lists/${list.id}`, {
+  async function updateListStage({
+    listId,
+    listStage,
+  }: {
+    listId: MaybeRef<number>;
+    listStage: Partial<Omit<ListStage, 'listId'>>;
+  }): Promise<ListStage> {
+    return sendRequest(`/lists/${toValue(listId)}/stages/${listStage.id}`, {
       method: 'PUT',
-      data: list,
+      data: listStage,
     });
   }
 
-  async function deleteListStage(id: number): Promise<void> {
-    return sendRequest(`/lists/${id}`, {
+  async function reorderListStage({
+    listId,
+    listStages,
+  }: {
+    listId: MaybeRef<number>;
+    listStages: Pick<ListStage, 'id' | 'order'>[];
+  }): Promise<ListStage> {
+    return sendRequest(`/lists/${toValue(listId)}/stages/reorder`, {
+      method: 'PUT',
+      data: listStages,
+    });
+  }
+
+  async function deleteListStage({
+    listStage,
+    replacementListStage,
+  }: {
+    listStage: Pick<ListStage, 'id' | 'listId'>;
+    replacementListStage: ListStage;
+  }): Promise<void> {
+    return sendRequest(`/lists/${listStage.listId}/stages/${listStage.id}`, {
       method: 'DELETE',
+      data: replacementListStage,
     });
   }
 
-  function useGetListStagesQuery(listId: number) {
+  function useGetListStagesQuery({
+    listId,
+    enabled,
+  }: {
+    listId: MaybeRef<number>;
+    enabled?: Ref<boolean>;
+  }) {
     return useQuery({
       queryKey: ['listStages', listId],
-      queryFn: () => getListStages({ listId }),
+      queryFn: () => getListStages({ listId: toValue(listId) }),
+      enabled,
       staleTime: 5 * 60 * 1000,
     });
   }
 
-  function useGetListStageQuery(id: number) {
+  function useGetListStageQuery({
+    listId,
+    id,
+  }: {
+    listId: MaybeRef<number>;
+    id: MaybeRef<number>;
+  }) {
     return useQuery({
       queryKey: ['listStage', id],
-      queryFn: () => getListStage(id),
+      queryFn: () => getListStage({ listId: toValue(listId), id: toValue(id) }),
     });
   }
 
@@ -69,9 +121,9 @@ export const useListStagesService = () => {
   function useUpdateListStageMutation() {
     return useMutation({
       mutationFn: updateListStage,
-      onSuccess: (newListStage) => {
+      onSuccess: (updatedListStage) => {
         queryClient.invalidateQueries({
-          queryKey: ['listStage', newListStage.id],
+          queryKey: ['listStage', updatedListStage.id],
         });
         queryClient.invalidateQueries({ queryKey: ['listStages'] });
       },
@@ -87,11 +139,21 @@ export const useListStagesService = () => {
     });
   }
 
+  function useReorderListStageMutation() {
+    return useMutation({
+      mutationFn: reorderListStage,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['listStages'] });
+      },
+    });
+  }
+
   return {
     useGetListStagesQuery,
     useGetListStageQuery,
     useCreateListStageMutation,
     useUpdateListStageMutation,
     useDeleteListStageMutation,
+    useReorderListStageMutation,
   };
 };

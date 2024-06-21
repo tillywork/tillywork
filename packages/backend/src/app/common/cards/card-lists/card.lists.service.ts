@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { FindOptionsWhere, Repository, UpdateResult } from "typeorm";
 import { CardList } from "./card.list.entity";
 import { CreateCardListDto } from "./dto/create.card.list.dto";
 import { UpdateCardListDto } from "./dto/update.card.list.dto";
@@ -92,6 +92,13 @@ export class CardListsService {
         }
 
         return this.cardListsRepository.save(cardList);
+    }
+
+    async batchUpdate(
+        where: FindOptionsWhere<CardList>,
+        updateCardListDto: UpdateCardListDto
+    ): Promise<UpdateResult> {
+        return this.cardListsRepository.update(where, updateCardListDto);
     }
 
     async remove(id: number): Promise<void> {

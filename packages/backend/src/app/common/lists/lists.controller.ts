@@ -7,6 +7,7 @@ import {
     Delete,
     Put,
     UseGuards,
+    Query,
 } from "@nestjs/common";
 import { ListFindAllResult, ListsService } from "./lists.service";
 import { List } from "./list.entity";
@@ -26,8 +27,8 @@ export class ListsController {
     constructor(private readonly listsService: ListsService) {}
 
     @Get()
-    findAll(): Promise<ListFindAllResult> {
-        return this.listsService.findAll();
+    findAll(@Query("spaceId") spaceId: number): Promise<ListFindAllResult> {
+        return this.listsService.findAll({ spaceId });
     }
 
     @Get(":id")

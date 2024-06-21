@@ -2,7 +2,7 @@
 import BaseThemeSwitch from '../base/BaseThemeSwitch.vue';
 import { useCardTypesService } from '@/composables/services/useCardTypesService';
 import { useWorkspaceStore } from '@/stores/workspace';
-import { DIALOGS } from './types';
+import { DIALOGS, SettingsTabs, type SettingsTab } from './types';
 import type { CardType } from '@/components/project-management/cards/types';
 import { useLogo } from '@/composables/useLogo';
 import { useDialogStore } from '@/stores/dialog';
@@ -20,16 +20,16 @@ const { data: cardTypes } = useFindAllQuery({
   workspaceId: selectedWorkspace.value!.id,
 });
 
-const tabs = ref([
+const tabs = ref<SettingsTab[]>([
   {
     icon: 'mdi-monitor-screenshot',
     text: 'Theme',
-    value: 'theme',
+    value: SettingsTabs.THEME,
   },
   {
     icon: 'mdi-toy-brick-outline',
     text: 'Card Types',
-    value: 'cardTypes',
+    value: SettingsTabs.CARD_TYPES,
   },
 ]);
 
