@@ -12,14 +12,14 @@ export const useListsService = () => {
   const queryClient = useQueryClient();
 
   async function getLists({
-    workspaceId,
+    spaceId,
   }: {
-    workspaceId?: number;
-  }): Promise<List[]> {
+    spaceId?: number;
+  }): Promise<ListsData> {
     return sendRequest('/lists', {
       method: 'GET',
       params: {
-        workspaceId,
+        spaceId,
       },
     });
   }
@@ -56,15 +56,15 @@ export const useListsService = () => {
     });
   }
 
-  function useGetListsQuery(workspaceId?: number) {
+  function useGetListsQuery(spaceId?: number) {
     return useQuery({
       queryKey: [
         'lists',
         {
-          workspaceId,
+          spaceId,
         },
       ],
-      queryFn: () => getLists({ workspaceId }),
+      queryFn: () => getLists({ spaceId }),
       staleTime: 1 * 60 * 1000,
     });
   }

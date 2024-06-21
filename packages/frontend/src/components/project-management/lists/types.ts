@@ -15,9 +15,11 @@ export interface List {
 
 export interface ListStage {
   id: number;
-  name: string;
   listId: number;
+  name: string;
   color: string;
+  order: number;
+  isCompleted?: boolean;
 }
 
 export enum ListGroupOptions {

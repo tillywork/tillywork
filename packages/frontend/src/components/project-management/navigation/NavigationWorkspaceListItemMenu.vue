@@ -7,6 +7,7 @@ import { DIALOGS } from '@/components/common/dialogs/types';
 import { useWorkspaceStore } from '@/stores/workspace';
 import type { CardType } from '../cards/types';
 import { useDialogStore } from '@/stores/dialog';
+import { SettingsTabs } from '@/components/common/dialogs/types';
 
 const listMenu = ref(false);
 const { useDeleteListMutation, useUpdateListMutation } = useListsService();
@@ -94,14 +95,24 @@ function handleUpdateDefaultCardType(cardType: CardType) {
   }
 }
 
-function openSettingsDialog() {
+function openSettingsDialog(activeTab: SettingsTabs) {
   dialog.openDialog({
     dialog: DIALOGS.SETTINGS,
     data: {
-      activeTab: 'cardTypes',
+      activeTab,
     },
     options: {
       fullscreen: true,
+    },
+  });
+}
+
+function openEditStagesDialog(list: List) {
+  listMenu.value = false;
+  dialog.openDialog({
+    dialog: DIALOGS.EDIT_LIST_STAGES,
+    data: {
+      list,
     },
   });
 }
@@ -149,7 +160,7 @@ watch(listMenu, () => {
                 size="small"
                 variant="text"
                 class="text-capitalize"
-                @click="openSettingsDialog"
+                @click="openSettingsDialog(SettingsTabs.CARD_TYPES)"
                 >Edit</v-btn
               >
             </v-card-title>
@@ -175,6 +186,12 @@ watch(listMenu, () => {
             </v-list>
           </v-card>
         </v-menu>
+        <v-list-item @click="openEditStagesDialog(list)">
+          <template #prepend>
+            <v-icon icon="mdi-text-box-edit" />
+          </template>
+          <v-list-item-title>Edit Stages</v-list-item-title>
+        </v-list-item>
         <v-list-item class="text-error" @click="handleDeleteList(list)">
           <template #prepend>
             <v-icon icon="mdi-delete" />

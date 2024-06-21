@@ -4,6 +4,7 @@ import { Repository } from "typeorm";
 import { ListStage } from "./list.stage.entity";
 import { CreateListStageDto } from "./dto/create.list.stage.dto";
 import { UpdateListStageDto } from "./dto/update.list.stage.dto";
+import { CardListsService } from "../../cards/card-lists/card.lists.service";
 
 export type ListStageFindAllResult = {
     total: number;
@@ -18,7 +19,8 @@ export type FindAllParams = {
 export class ListStagesService {
     constructor(
         @InjectRepository(ListStage)
-        private listStagesRepository: Repository<ListStage>
+        private listStagesRepository: Repository<ListStage>,
+        private cardListsService: CardListsService
     ) {}
 
     async findAll({ listId }: FindAllParams): Promise<ListStage[]> {
@@ -35,6 +37,7 @@ export class ListStagesService {
     }
 
     async findOne(id: number): Promise<ListStage> {
+        // TODO: Handle related lists (handle "Not Found" rejections). Implement in Delete requests as well.
         const listStage = await this.listStagesRepository.findOne({
             where: {
                 id,
@@ -62,8 +65,32 @@ export class ListStagesService {
         return this.listStagesRepository.save(listStage);
     }
 
-    async remove(id: number): Promise<void> {
+    async reorder(
+        listStages: Pick<ListStage, "id" | "order">[]
+    ): Promise<ListStage[]> {
+        const listStagesToUpdated = await Promise.all(
+            listStages.map(async ({ id, order }) => {
+                const listStage = await this.findOne(id);
+                this.listStagesRepository.merge(listStage, { order });
+                return listStage;
+            })
+        );
+        return this.listStagesRepository.save(listStagesToUpdated);
+    }
+
+    async remove(id: number, replacementListStage: ListStage): Promise<void> {
         const listStage = await this.findOne(id);
+
+        // Update cards that have this list stage
+        await this.cardListsService.batchUpdate(
+            {
+                listStage,
+            },
+            {
+                listStage: replacementListStage,
+            }
+        );
+
         await this.listStagesRepository.remove(listStage);
     }
 }

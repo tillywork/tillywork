@@ -46,9 +46,9 @@ const { mutateAsync: updateListGroup } =
   listGroupsService.useUpdateListGroupMutation();
 
 const listsStagesService = useListStagesService();
-const { data: listStages } = listsStagesService.useGetListStagesQuery(
-  props.view.listId
-);
+const { data: listStages } = listsStagesService.useGetListStagesQuery({
+  listId: props.view.listId,
+});
 
 const projectUsersService = useProjectUsersService();
 const { data: projectUsers } = projectUsersService.useProjectUsersQuery({
