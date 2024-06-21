@@ -1,5 +1,9 @@
 import type { Command, CommandDto } from '@/components/common/commands/types';
-import { DIALOGS, DIALOG_WIDTHS } from '@/components/common/dialogs/types';
+import {
+  DIALOGS,
+  DIALOG_WIDTHS,
+  SettingsTabs,
+} from '@/components/common/dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 import { useStateStore } from '@/stores/state';
 
@@ -18,7 +22,7 @@ export const useCommands = () => {
    * @returns An array of commands
    */
   function getCommands(): Command[] {
-    let commands: CommandDto[] = [
+    const commands: CommandDto[] = [
       // ~ Cards
       {
         section: 'Card',
@@ -89,9 +93,25 @@ export const useCommands = () => {
               fullscreen: true,
             },
             data: {
-              activeTab: 'theme',
+              activeTab: SettingsTabs.THEME,
             },
           }),
+      },
+      {
+        section: 'Settings',
+        icon: 'mdi-briefcase-outline',
+        title: 'Workspace',
+        action: () =>
+          dialog.openDialog({
+            dialog: DIALOGS.SETTINGS,
+            options: {
+              fullscreen: true,
+            },
+            data: {
+              activeTab: SettingsTabs.WORKSPACE,
+            },
+          }),
+        shortcut: ['F2'],
       },
       {
         section: 'Settings',
@@ -104,7 +124,7 @@ export const useCommands = () => {
               fullscreen: true,
             },
             data: {
-              activeTab: 'cardTypes',
+              activeTab: SettingsTabs.CARD_TYPES,
             },
           }),
       },

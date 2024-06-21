@@ -6,9 +6,18 @@ import { DIALOGS, SettingsTabs, type SettingsTab } from './types';
 import type { CardType } from '@/components/project-management/cards/types';
 import { useLogo } from '@/composables/useLogo';
 import { useDialogStore } from '@/stores/dialog';
+import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
+import { cloneDeep } from 'lodash';
+import { useSnackbarStore } from '@/stores/snackbar';
 
 const dialog = useDialogStore();
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const selectedWorkspaceCopy = cloneDeep(selectedWorkspace.value);
+const workspacesService = useWorkspacesService();
+const updateWorkspaceMutation = workspacesService.useUpdateWorkspaceMutation();
+
+const snackbar = useSnackbarStore();
+
 const { useFindAllQuery } = useCardTypesService();
 
 const currentDialogIndex = computed(() =>
@@ -20,6 +29,8 @@ const { data: cardTypes } = useFindAllQuery({
   workspaceId: selectedWorkspace.value!.id,
 });
 
+const workspaceName = ref(selectedWorkspace.value?.name);
+
 const tabs = ref<SettingsTab[]>([
   {
     icon: 'mdi-monitor-screenshot',
@@ -27,11 +38,30 @@ const tabs = ref<SettingsTab[]>([
     value: SettingsTabs.THEME,
   },
   {
+    icon: 'mdi-briefcase-outline',
+    text: 'Workspace',
+    value: SettingsTabs.WORKSPACE,
+  },
+  {
     icon: 'mdi-toy-brick-outline',
     text: 'Card Types',
     value: SettingsTabs.CARD_TYPES,
   },
 ]);
+
+function saveNewWorkspaceName() {
+  const newName = workspaceName.value!.trim();
+  if (newName !== '' && newName !== selectedWorkspace.value!.name) {
+    selectedWorkspaceCopy!.name = newName;
+    updateWorkspaceMutation.mutateAsync(selectedWorkspaceCopy!).then(() => {
+      snackbar.showSnackbar({
+        message: 'Workspace name updated.',
+        color: 'success',
+        timeout: 2000,
+      });
+    });
+  }
+}
 
 function openCreateCardTypeDialog() {
   dialog.openDialog({
@@ -82,7 +112,7 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
         height="50"
         center-active
         mandatory
-        :model-value="currentDialog?.data?.activeTab ?? 'theme'"
+        :model-value="currentDialog?.data?.activeTab ?? SettingsTabs.THEME"
       >
         <template #tab="{ item }">
           <v-tab
@@ -90,7 +120,7 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
             :text="item.text"
             :value="item.value"
             class="text-none"
-          ></v-tab>
+          />
         </template>
         <template #item.theme>
           <v-card>
@@ -102,6 +132,26 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
                   <base-theme-switch />
                 </v-list-item>
               </v-list>
+            </v-card-text>
+          </v-card>
+        </template>
+        <!-- TODO: Warn user when he closes the dialog without saving. -->
+        <template #item.workspace>
+          <v-card min-width="500">
+            <v-card-title class="d-flex align-center">
+              {{ selectedWorkspace?.name }}
+            </v-card-title>
+            <v-card-text>
+              <v-text-field
+                v-model="workspaceName"
+                label="Name"
+                hide-details
+                variant="filled"
+                @keyup.enter="saveNewWorkspaceName"
+              />
+              <v-btn variant="flat" class="mt-1" @click="saveNewWorkspaceName">
+                Save
+              </v-btn>
             </v-card-text>
           </v-card>
         </template>
