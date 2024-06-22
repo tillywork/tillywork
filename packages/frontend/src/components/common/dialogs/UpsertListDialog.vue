@@ -19,48 +19,84 @@ const { useFindAllQuery } = useCardTypesService();
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
 
 const currentDialogIndex = computed(() =>
-  dialog.getDialogIndex(DIALOGS.CREATE_LIST)
+  dialog.getDialogIndex(DIALOGS.UPSERT_LIST)
 );
 const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
+const list = computed<List>(() => currentDialog.value.data.list);
 
 const listForm = ref<VForm>();
 const listDto = ref<Partial<List>>({
-  name: '',
-  spaceId: currentDialog.value?.data.space.id,
+  name: list.value?.name,
+  // TODO: Allow to update space?
+  spaceId: list.value?.spaceId ?? currentDialog.value?.data.space.id,
+  defaultCardType: list.value?.defaultCardType,
 });
 
 const { data: cardTypes } = useFindAllQuery({
   workspaceId: selectedWorkspace.value!.id,
 });
 
-const { mutateAsync: createList, isPending } =
+const { mutateAsync: createList, isPending: isCreating } =
   listsService.useCreateListMutation();
+const { mutateAsync: updateList, isPending: isUpdating } =
+  listsService.useUpdateListMutation();
 
-async function handleCreate() {
+async function handleSubmitForm() {
   const isValid = await listForm.value?.validate();
-  if (isValid?.valid) {
-    createList(listDto.value)
-      .then(() => {
-        dialog.closeDialog(currentDialogIndex.value);
-        queryClient.invalidateQueries({ queryKey: ['spaces'] });
-      })
-      .catch(() => {
-        showSnackbar({
-          message: 'Something went wrong, please try again.',
-          color: 'error',
-          timeout: 5000,
+  if (!isValid?.valid) return;
+
+  try {
+    switch (currentDialog.value.data.mode) {
+      case 'Create':
+        createList(listDto.value).then(() => {
+          dialog.closeDialog(currentDialogIndex.value);
+          queryClient.invalidateQueries({ queryKey: ['spaces'] });
         });
-      });
+        break;
+      case 'Update':
+        // - nothing has changed
+        if (
+          listDto.value.name === list.value.name &&
+          listDto.value.defaultCardType === listDto.value.defaultCardType
+        ) {
+          dialog.closeDialog(currentDialogIndex.value);
+          break;
+        }
+
+        updateList({
+          id: list.value.id,
+          updateDto: listDto.value,
+        }).then(() => {
+          dialog.closeDialog(currentDialogIndex.value);
+          queryClient.invalidateQueries({ queryKey: ['spaces'] });
+          showSnackbar({
+            message: 'List updated.',
+            color: 'success',
+            timeout: 2000,
+          });
+        });
+        break;
+    }
+  } catch {
+    showSnackbar({
+      message: 'Something went wrong, please try again.',
+      color: 'error',
+      timeout: 5000,
+    });
   }
 }
 </script>
 
 <template>
-  <v-card color="surface" elevation="24" :loading="isPending">
+  <v-card color="surface" elevation="24" :loading="isCreating || isUpdating">
     <div class="d-flex align-center ps-0 pa-4">
-      <v-card-subtitle
-        >Create list in {{ currentDialog?.data.space.name }}</v-card-subtitle
-      >
+      <v-card-subtitle>
+        {{ currentDialog?.data.mode }}
+        List
+        {{
+          currentDialog?.data.space ? 'in ' + currentDialog.data.space.name : ''
+        }}
+      </v-card-subtitle>
       <v-spacer />
       <base-icon-btn
         icon="mdi-close"
@@ -68,7 +104,11 @@ async function handleCreate() {
         @click="dialog.closeDialog(currentDialogIndex)"
       />
     </div>
-    <v-form ref="listForm" @submit.prevent="handleCreate" validate-on="submit">
+    <v-form
+      ref="listForm"
+      @submit.prevent="handleSubmitForm"
+      validate-on="submit"
+    >
       <div class="pa-4 py-0">
         <v-text-field
           v-model="listDto.name"
@@ -82,7 +122,7 @@ async function handleCreate() {
           item-title="name"
           return-object
           :rules="[rules.required]"
-          label="Default Card Type*   "
+          label="Default Card Type*"
         />
       </div>
       <v-card-actions class="d-flex justify-start align-center py-0 px-4">
@@ -93,9 +133,10 @@ async function handleCreate() {
           variant="flat"
           class="text-caption px-4 ms-4"
           type="submit"
-          :loading="isPending"
-          >Create</v-btn
+          :loading="isCreating || isUpdating"
         >
+          {{ currentDialog?.data.mode }}
+        </v-btn>
       </v-card-actions>
     </v-form>
   </v-card>

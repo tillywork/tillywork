@@ -11,9 +11,11 @@ const dialog = useDialogStore();
 
 function openCreateListDialog() {
   dialog.openDialog({
-    dialog: DIALOGS.CREATE_LIST,
+    dialog: DIALOGS.UPSERT_LIST,
     data: {
       space: props.space,
+      // ~ Upsertion
+      mode: 'Create',
     },
   });
 }

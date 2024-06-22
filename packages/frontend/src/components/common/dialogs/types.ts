@@ -4,7 +4,7 @@ export enum DIALOGS {
   ONBOARDING = 'OnboardingDialog',
   SETTINGS = 'SettingsDialog',
   CREATE_SPACE = 'CreateSpaceDialog',
-  CREATE_LIST = 'CreateListDialog',
+  UPSERT_LIST = 'UpsertListDialog',
   CREATE_WORKSPACE = 'CreateWorkspaceDialog',
   CREATE_VIEW = 'CreateViewDialog',
   CREATE_CARD_TYPE = 'CreateCardType',
@@ -17,7 +17,7 @@ export enum DIALOGS {
 export const DIALOG_WIDTHS = {
   [DIALOGS.CREATE_CARD]: 700,
   [DIALOGS.CREATE_SPACE]: 400,
-  [DIALOGS.CREATE_LIST]: 400,
+  [DIALOGS.UPSERT_LIST]: 400,
   [DIALOGS.CREATE_VIEW]: 400,
   [DIALOGS.CONFIRM]: 500,
   [DIALOGS.ONBOARDING]: undefined,

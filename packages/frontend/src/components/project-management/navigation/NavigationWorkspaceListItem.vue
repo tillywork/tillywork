@@ -1,18 +1,33 @@
 <script setup lang="ts">
 import { type List } from '../lists/types';
 import NavigationWorkspaceListItemMenu from './NavigationWorkspaceListItemMenu.vue';
-import RenameListPopover from '../popovers/RenameListPopover.vue';
+import { useDialogStore } from '@/stores/dialog';
+import { DIALOGS } from '@/components/common/dialogs/types';
 
 const route = useRoute();
 const router = useRouter();
 
-defineProps<{
+const props = defineProps<{
   list: List;
 }>();
+
+const dialog = useDialogStore();
+
 const freezeListHoverId = ref<number | null>();
 
 function handleListClick(list: List) {
   router.push(`/pm/list/${list.id}`);
+}
+
+function openUpdateListDialog() {
+  dialog.openDialog({
+    dialog: DIALOGS.UPSERT_LIST,
+    data: {
+      list: props.list,
+      // ~ Upsertion
+      mode: 'Update',
+    },
+  });
 }
 
 function setHoverFreeze(list: List) {
@@ -41,11 +56,13 @@ function clearHoverFreeze() {
         v-slot:append
         v-if="isListHovering || freezeListHoverId === list.id"
       >
-        <rename-list-popover
-          :list
-          @hover:freeze="setHoverFreeze(list)"
-          @hover:unfreeze="clearHoverFreeze"
+        <base-icon-btn
+          icon="mdi-text-box-edit-outline"
+          density="compact"
+          v-tooltip:bottom="'Update'"
+          @click.stop="openUpdateListDialog"
         />
+
         <navigation-workspace-list-item-menu
           @hover:freeze="setHoverFreeze(list)"
           @hover:unfreeze="clearHoverFreeze"
