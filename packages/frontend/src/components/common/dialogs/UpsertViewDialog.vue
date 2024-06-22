@@ -101,7 +101,7 @@ async function handleCreate() {
 </script>
 
 <template>
-  <v-card color="surface" elevation="24" :loading="isCreating">
+  <v-card color="surface" elevation="24" :loading="isCreating || isUpdating">
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle>
         {{ currentDialog?.data.mode }} View
@@ -154,7 +154,7 @@ async function handleCreate() {
           variant="flat"
           class="text-caption px-4 ms-4"
           type="submit"
-          :loading="isCreating"
+          :loading="isCreating || isUpdating"
         >
           {{ currentDialog?.data.mode }}
         </v-btn>
