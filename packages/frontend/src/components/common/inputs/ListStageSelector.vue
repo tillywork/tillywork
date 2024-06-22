@@ -48,7 +48,11 @@ function isStageSelected(stage: ListStage) {
           :color="mainChipColor"
           @click.prevent
         >
-          <v-icon size="16" :color="mainChipColor" start v-if="theme !== 'text'"
+          <v-icon
+            size="small"
+            :color="mainChipColor"
+            start
+            v-if="theme !== 'text'"
             >mdi-circle-slice-8</v-icon
           >
           <span class="text-caption">{{
@@ -58,14 +62,16 @@ function isStageSelected(stage: ListStage) {
       </template>
     </template>
     <v-card>
-      <v-list class="mt-1 text-align-left" rounded="md">
+      <v-list class="text-align-left" rounded="md">
         <template v-for="stage in listStages" :key="stage.id">
           <v-list-item
             @click="handleStageClick(stage)"
             :active="isStageSelected(stage)"
           >
             <template #prepend>
-              <v-icon size="16" :color="stage.color">mdi-circle-slice-8</v-icon>
+              <v-icon size="x-small" :color="stage.color"
+                >mdi-circle-slice-8</v-icon
+              >
             </template>
             <template #append v-if="isStageSelected(stage)">
               <v-icon size="12" class="ms-2">mdi-check</v-icon>

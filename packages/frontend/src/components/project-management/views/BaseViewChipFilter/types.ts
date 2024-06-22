@@ -1,8 +1,8 @@
 import type { FieldFilter } from '../../filters/types';
-import type { PropTypes } from '../../props/types';
+import type { FieldTypes } from '../../fields/types';
 
 export type FieldFilterOption = FieldFilter & {
   title: string;
-  type: PropTypes;
+  type: FieldTypes;
   icon: string;
 };

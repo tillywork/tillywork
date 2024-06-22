@@ -33,7 +33,6 @@ const searchedUsers = computed(() =>
       // Searches for a matching name.
       stringUtils.fuzzySearch(searchTerm.value, getUserFullName(user)) ||
       // Searches for a matching email.
-      // HMMM: What should we prioritize, name or email searching?
       stringUtils.fuzzySearch(searchTerm.value, user.email)
   )
 );
@@ -147,14 +146,14 @@ watch(selectedUsers, (v) => {
       </template>
       <template v-else>
         <div
-          class="d-flex align-center justify-start rounded-md px-1 cursor-pointer fill-height"
+          class="d-flex align-center justify-start rounded-md cursor-pointer fill-height"
           :class="`${contentClass ? contentClass : ''} ${
             fill ? 'flex-fill' : ''
           }`"
           v-bind="menuProps"
           @click.prevent
         >
-          <div class="me-n1" v-if="selectedUsers.length === 0">
+          <div v-if="selectedUsers.length === 0">
             <base-icon-btn
               v-bind="menuProps"
               icon="mdi-account"
@@ -177,7 +176,7 @@ watch(selectedUsers, (v) => {
             </v-btn>
           </div>
           <template v-else>
-            <div class="ms-3 mt-1" @click.prevent>
+            <div @click.prevent>
               <template
                 v-for="(selectedUser, index) in selectedUsers"
                 :key="selectedUser.email + 'selected-user'"
@@ -188,8 +187,9 @@ watch(selectedUsers, (v) => {
                       v-bind="tooltipProps"
                       :photo="selectedUser.photo"
                       :text="getUserFullName(selectedUser)"
-                      class="ms-n1 text-caption"
-                      :size="size ?? 20"
+                      class="text-xs"
+                      :class="index > 0 ? 'ms-n1' : ''"
+                      :size
                       :style="`z-index: ${100 - index}`"
                     />
                   </template>
@@ -197,11 +197,6 @@ watch(selectedUsers, (v) => {
                     getUserFullName(selectedUser)
                   }}</span>
                 </v-tooltip>
-              </template>
-              <template v-if="showFirstNames">
-                <span class="ms-2 text-body-2 user-select-none">
-                  {{ selectedUsers.map((user) => user.firstName).join(', ') }}
-                </span>
               </template>
             </div>
           </template>

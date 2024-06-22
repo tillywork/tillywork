@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import BaseViewChip from '../BaseViewChip.vue';
 import BaseViewChipFilterItem from './BaseViewChipFilterItem.vue';
-import { PropTypes } from '../../props/types';
+import { FieldTypes } from '../../fields/types';
 import type { VForm } from 'vuetify/components';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
@@ -40,7 +40,7 @@ const fields = ref<FieldFilterOption[]>([
     field: 'title',
     operator: 'eq',
     value: '',
-    type: PropTypes.TEXT,
+    type: FieldTypes.TEXT,
     icon: 'mdi-format-title',
   },
   //   {
@@ -48,7 +48,7 @@ const fields = ref<FieldFilterOption[]>([
   //     field: 'status',
   //     operator: 'eq',
   //     value: 'open',
-  //     type: PropTypes.DROPDOWN,
+  //     type: FieldTypes.DROPDOWN,
   //     icon: 'mdi-list-status',
   //   },
   {
@@ -56,7 +56,7 @@ const fields = ref<FieldFilterOption[]>([
     field: 'dueAt',
     operator: 'between',
     value: '',
-    type: PropTypes.DATE,
+    type: FieldTypes.DATE,
     icon: 'mdi-calendar-range',
   },
   {
@@ -64,7 +64,7 @@ const fields = ref<FieldFilterOption[]>([
     field: 'users.id',
     operator: 'in',
     value: [],
-    type: PropTypes.USER,
+    type: FieldTypes.USER,
     icon: 'mdi-account',
   },
 ]);

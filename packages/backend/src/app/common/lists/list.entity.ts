@@ -13,7 +13,6 @@ import { Space } from "../spaces/space.entity";
 import { CardList } from "../cards/card-lists/card.list.entity";
 import { ListStage } from "./list-stages/list.stage.entity";
 import { View } from "../views/view.entity";
-import { Prop } from "../props/prop.entity";
 import { ListGroup } from "./list-groups/list.group.entity";
 import { CardType } from "../card-types/card.type.entity";
 
@@ -47,9 +46,6 @@ export class List {
 
     @OneToMany(() => View, (view) => view.list)
     views: Relation<View[]>;
-
-    @OneToMany(() => Prop, (prop) => prop.list)
-    props: Relation<Prop[]>;
 
     @ManyToOne(() => CardType, { nullable: false, eager: true })
     defaultCardType: Relation<CardType>;

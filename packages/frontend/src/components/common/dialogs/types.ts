@@ -39,4 +39,5 @@ export type SettingsTab = {
 export enum SettingsTabs {
   THEME = 'theme',
   CARD_TYPES = 'cardTypes',
+  FIELDS = 'fields',
 }

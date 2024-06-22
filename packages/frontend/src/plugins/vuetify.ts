@@ -91,6 +91,14 @@ const vuetify = createVuetify({
     VAutocomplete: {
       density: 'compact',
     },
+    VCombobox: {
+      density: 'compact',
+    },
+    VCheckbox: {
+      density: 'compact',
+      color: 'primary',
+      hideDetails: true,
+    },
   },
 });
 
