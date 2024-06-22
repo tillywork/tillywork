@@ -6,17 +6,12 @@ import { useWorkspaceStore } from '@/stores/workspace';
 import { useViewsService } from '@/composables/services/useViewsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
-import ViewSettingsPopover from '../popovers/ViewSettingsPopover.vue';
 
 const dialog = useDialogStore();
 const props = defineProps<{
   views: View[];
   list: List;
 }>();
-
-const settingsPopover = ref(false);
-const settingsPopoverView = ref<View>();
-const settingsPopoverTarget = ref<string>();
 
 const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
@@ -35,18 +30,6 @@ const selectedView = defineModel<View | null>();
 const freezeHoverViewId = ref<number>();
 
 const listCopy = computed(() => props.list);
-
-function openViewSettingsPopover(view: View) {
-  settingsPopover.value = true;
-  settingsPopoverView.value = view;
-  settingsPopoverTarget.value = '#list-view-tab-' + view.id;
-}
-
-function closeAnyViewSettingsPopover() {
-  settingsPopover.value = false;
-  settingsPopoverView.value = undefined;
-  settingsPopoverTarget.value = undefined;
-}
 
 function handleTabSelection(view: View) {
   selectedView.value = view;
@@ -74,9 +57,22 @@ function getViewIconByType(type: ViewTypes) {
 
 function openCreateViewDialog() {
   dialog.openDialog({
-    dialog: DIALOGS.CREATE_VIEW,
+    dialog: DIALOGS.UPSERT_VIEW,
     data: {
       list: listCopy,
+      // ~ Upsertion
+      mode: 'Create',
+    },
+  });
+}
+
+function openUpdateViewDialog(view: View) {
+  dialog.openDialog({
+    dialog: DIALOGS.UPSERT_VIEW,
+    data: {
+      view,
+      // ~ Upsertion
+      mode: 'Update',
     },
   });
 }
@@ -195,11 +191,11 @@ watch(
                     </template>
                     <v-list-item-title>Delete</v-list-item-title>
                   </v-list-item>
-                  <v-list-item @click="openViewSettingsPopover(view)">
+                  <v-list-item @click="openUpdateViewDialog(view)">
                     <template #prepend>
-                      <v-icon icon="mdi-cog-outline" />
+                      <v-icon icon="mdi-text-box-edit-outline" />
                     </template>
-                    <v-list-item-title>Settings</v-list-item-title>
+                    <v-list-item-title>Update</v-list-item-title>
                   </v-list-item>
                 </v-list>
               </v-card>
@@ -220,12 +216,6 @@ watch(
       </template>
       View
     </v-btn>
-    <view-settings-popover
-      :model-value="settingsPopover"
-      :target="settingsPopoverTarget!"
-      :view="settingsPopoverView!"
-      @after-leave="closeAnyViewSettingsPopover()"
-    />
   </div>
 </template>
 
