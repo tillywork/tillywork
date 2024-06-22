@@ -2,6 +2,7 @@ import type { Command, CommandDto } from '@/components/common/commands/types';
 import { DIALOGS, DIALOG_WIDTHS } from '@/components/common/dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 import { useStateStore } from '@/stores/state';
+import { useThemeStore } from '@/stores/theme';
 
 export const useCommands = () => {
   const keys = useMagicKeys();
@@ -11,7 +12,7 @@ export const useCommands = () => {
   const stateStore = useStateStore();
   const { setIsInputFocused } = stateStore;
   const { isInputFocused } = storeToRefs(stateStore);
-  const router = useRouter();
+  const themeStore = useThemeStore();
 
   /**
    * Handles building the commands array.
@@ -92,6 +93,12 @@ export const useCommands = () => {
               activeTab: 'theme',
             },
           }),
+      },
+      {
+        section: 'Settings',
+        icon: 'mdi-theme-light-dark',
+        title: 'Toggle Dark Mode',
+        action: () => themeStore.toggleTheme(),
       },
       {
         section: 'Settings',
