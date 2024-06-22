@@ -55,6 +55,7 @@ async function handleSubmitForm() {
         break;
       case 'Update':
         // - nothing has changed
+        // NOTE: Thanks to validation, we already know we aren't getting an empty values.
         if (
           listDto.value.name === list.value.name &&
           listDto.value.defaultCardType === listDto.value.defaultCardType

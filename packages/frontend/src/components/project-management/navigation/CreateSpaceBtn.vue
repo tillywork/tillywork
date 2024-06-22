@@ -6,7 +6,11 @@ const dialog = useDialogStore();
 
 function openCreateSpaceDialog() {
   dialog.openDialog({
-    dialog: DIALOGS.CREATE_SPACE,
+    dialog: DIALOGS.UPSERT_SPACE,
+    data: {
+      // ~ Upsertion
+      mode: 'Create',
+    },
   });
 }
 </script>

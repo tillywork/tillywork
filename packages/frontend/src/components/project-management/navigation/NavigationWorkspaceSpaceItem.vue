@@ -3,13 +3,26 @@ import { type Space } from '../spaces/types';
 import NavigationWorkspaceListItem from './NavigationWorkspaceListItem.vue';
 import NavigationWorkspaceSpaceItemMenu from './NavigationWorkspaceSpaceItemMenu.vue';
 import CreateListBtn from './CreateListBtn.vue';
-import RenameSpacePopover from '../popovers/RenameSpacePopover.vue';
+import { DIALOGS } from '@/components/common/dialogs/types';
+import { useDialogStore } from '@/stores/dialog';
 
-defineProps<{
+const props = defineProps<{
   space: Space;
 }>();
+const dialog = useDialogStore();
 
 const freezeSpaceHoverId = ref<number | null>();
+
+function openUpdateSpaceDialog() {
+  dialog.openDialog({
+    dialog: DIALOGS.UPSERT_SPACE,
+    data: {
+      space: props.space,
+      // ~ Upsertion
+      mode: 'Update',
+    },
+  });
+}
 
 function setHoverFreeze(space: Space) {
   freezeSpaceHoverId.value = space.id;
@@ -37,10 +50,11 @@ function clearHoverFreeze() {
           >
             <div class="d-flex ga-1">
               <create-list-btn :space="space" />
-              <rename-space-popover
-                :space
-                @hover:freeze="setHoverFreeze(space)"
-                @hover:unfreeze="clearHoverFreeze"
+              <base-icon-btn
+                icon="mdi-text-box-edit-outline"
+                density="compact"
+                v-tooltip:bottom="'Update'"
+                @click.stop="openUpdateSpaceDialog"
               />
               <navigation-workspace-space-item-menu
                 :space

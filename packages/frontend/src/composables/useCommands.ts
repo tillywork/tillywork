@@ -45,9 +45,13 @@ export const useCommands = () => {
         title: 'Create space',
         action: () =>
           dialog.openDialog({
-            dialog: DIALOGS.CREATE_SPACE,
+            dialog: DIALOGS.UPSERT_SPACE,
             options: {
-              width: DIALOG_WIDTHS[DIALOGS.CREATE_SPACE],
+              width: DIALOG_WIDTHS[DIALOGS.UPSERT_SPACE],
+            },
+            data: {
+              // ~ Upsertion
+              mode: 'Create',
             },
           }),
         shortcut: ['S'],
