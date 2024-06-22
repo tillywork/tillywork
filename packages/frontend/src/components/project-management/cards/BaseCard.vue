@@ -364,7 +364,9 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
                     item-value="item"
                     hide-details
                     :placeholder="field.name"
-                    @update:model-value="(v) => updateFieldValue({ field, v })"
+                    @update:model-value="
+                      (v) => updateFieldValue({ field, v: v.item })
+                    "
                   />
                 </template>
               </div>

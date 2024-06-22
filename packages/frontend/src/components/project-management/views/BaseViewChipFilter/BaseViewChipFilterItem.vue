@@ -29,7 +29,12 @@ const dropdownOptions = computed(() => {
       return statusOptions;
 
     default:
-      return [];
+      return selectedFilter.value?.options?.map((option) => {
+        return {
+          title: option.item,
+          value: option.item,
+        };
+      });
   }
 });
 

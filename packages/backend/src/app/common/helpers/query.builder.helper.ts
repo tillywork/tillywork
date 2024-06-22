@@ -1,29 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Logger } from "@nestjs/common";
-import {
-    Not,
-    MoreThan,
-    LessThan,
-    IsNull,
-    Between,
-    In,
-    Like,
-    And,
-    Equal,
-    FindOperator,
-} from "typeorm";
+import { WhereExpressionBuilder, Brackets, SelectQueryBuilder } from "typeorm";
 import { FieldFilter, FilterGroup } from "../filters/types";
 import dayjs from "dayjs";
 
 @Injectable()
 export class QueryBuilderHelper {
     private static readonly logger = new Logger("QueryBuilderHelper");
-
-    static createNestedObjectFromPath(pathArray: string[], value: any): any {
-        return pathArray.reverse().reduce((acc, key) => {
-            return { [key]: acc };
-        }, value);
-    }
 
     static processValue(value: any) {
         const datePlaceholders = {
@@ -117,115 +100,118 @@ export class QueryBuilderHelper {
         }
     }
 
-    static fieldFilterToQuery(fieldFilter: FieldFilter) {
+    static fieldFilterToQuery(
+        queryBuilder: WhereExpressionBuilder,
+        fieldFilter: FieldFilter
+    ): WhereExpressionBuilder {
         const { field, operator, value } = fieldFilter;
-        const pathArray = field.split(".");
         const processedValue = this.processValue(value);
 
-        let mappedValue;
         switch (operator) {
             case "eq":
-                mappedValue = Equal(processedValue);
-                break;
+                return queryBuilder.andWhere(`${field} = :${field}`, {
+                    [field]: processedValue,
+                });
             case "ne":
-                mappedValue = Not(processedValue);
-                break;
+                return queryBuilder.andWhere(`${field} != :${field}`, {
+                    [field]: processedValue,
+                });
             case "gt":
-                mappedValue = MoreThan(processedValue);
-                break;
+                return queryBuilder.andWhere(`${field} > :${field}`, {
+                    [field]: processedValue,
+                });
             case "lt":
-                mappedValue = LessThan(processedValue);
-                break;
-            case "like":
-                mappedValue = Like(`%${processedValue}%`);
-                break;
-            case "like%":
-                mappedValue = Like(`${processedValue}%`);
-                break;
-            case "%like":
-                mappedValue = Like(`%${processedValue}`);
-                break;
-            case "between":
-                mappedValue = Between(processedValue[0], processedValue[1]);
-                break;
-            case "nbetween":
-                mappedValue = Not(
-                    Between(processedValue[0], processedValue[1])
-                );
-                break;
+                return queryBuilder.andWhere(`${field} < :${field}`, {
+                    [field]: processedValue,
+                });
+            case "gte":
+                return queryBuilder.andWhere(`${field} >= :${field}`, {
+                    [field]: processedValue,
+                });
+            case "lte":
+                return queryBuilder.andWhere(`${field} <= :${field}`, {
+                    [field]: processedValue,
+                });
             case "in":
-                mappedValue = In(processedValue);
-                break;
+                return queryBuilder.andWhere(`${field} IN (:...${field})`, {
+                    [field]: processedValue,
+                });
             case "nin":
-                mappedValue = Not(In(processedValue));
-                break;
+                return queryBuilder.andWhere(`${field} NOT IN (:...${field})`, {
+                    [field]: processedValue,
+                });
+            case "like":
+                return queryBuilder.andWhere(`${field} LIKE :${field}`, {
+                    [field]: `%${processedValue}%`,
+                });
+            case "like%":
+                return queryBuilder.andWhere(`${field} LIKE :${field}`, {
+                    [field]: `${processedValue}%`,
+                });
+            case "%like":
+                return queryBuilder.andWhere(`${field} LIKE :${field}`, {
+                    [field]: `%${processedValue}`,
+                });
+            case "between":
+                return queryBuilder.andWhere(
+                    `${field} BETWEEN :${field}1 AND :${field}2`,
+                    {
+                        [`${field}1`]: processedValue[0],
+                        [`${field}2`]: processedValue[1],
+                    }
+                );
+            case "nbetween":
+                return queryBuilder.andWhere(
+                    `${field} NOT BETWEEN :${field}1 AND :${field}2`,
+                    {
+                        [`${field}1`]: processedValue[0],
+                        [`${field}2`]: processedValue[1],
+                    }
+                );
             case "isNull":
-                mappedValue = IsNull();
-                break;
+                this.logger.debug({ field });
+                return queryBuilder.andWhere(`${field} IS NULL`);
             case "isNotNull":
-                mappedValue = Not(IsNull());
-                break;
+                return queryBuilder.andWhere(`${field} IS NOT NULL`);
             default:
                 throw new Error(
-                    `[QueryBuilderHelper#fieldFilterToQuery] No mapping for operator: ${operator}`
+                    `[QueryBuilderHelper] Unsupported operator: ${operator}`
                 );
         }
-
-        const queryObject = QueryBuilderHelper.createNestedObjectFromPath(
-            pathArray,
-            mappedValue
-        );
-        return queryObject;
     }
 
-    static buildQuery(filterGroup: FilterGroup): any {
-        if (filterGroup.and) {
-            return filterGroup.and.reduce((whereClause, condition) => {
-                if (QueryBuilderHelper.isFilterGroup(condition)) {
-                    const subQuery = QueryBuilderHelper.buildQuery(condition);
-                    return { ...whereClause, ...subQuery };
-                } else {
-                    const queryPart = QueryBuilderHelper.fieldFilterToQuery(
-                        condition as FieldFilter
-                    );
-
-                    return Object.entries(queryPart).reduce(
-                        (acc, [key, value]) => {
-                            const current = acc[key];
-                            if (
-                                !!current &&
-                                this.isObject(current) &&
-                                this.isObject(value)
-                            ) {
-                                /**
-                                 * If key exists and both are objects, merge them
-                                 */
-                                acc[key] = { ...current, ...(value as object) };
-                            } else if (!!current && !this.isObject(value)) {
-                                /**
-                                 * If key exists, and the incoming value is not an object,
-                                 * multiple filters exist on the same property, merge them
-                                 * with And operator
-                                 */
-                                acc[key] = And(
-                                    current,
-                                    value as FindOperator<any>
-                                );
-                            } else {
-                                /**
-                                 * If key doesn't exist, set it
-                                 */
-                                acc[key] = value;
-                            }
-                            return acc;
-                        },
-                        whereClause
-                    );
-                }
-            }, {});
+    static buildQuery(
+        queryBuilder: SelectQueryBuilder<any>,
+        filterGroup: FilterGroup
+    ): SelectQueryBuilder<any> {
+        if (filterGroup.and && filterGroup.and.length > 0) {
+            queryBuilder.andWhere(
+                new Brackets((qb) => {
+                    filterGroup.and.forEach((condition) => {
+                        if (!this.isFilterGroup(condition)) {
+                            this.fieldFilterToQuery(qb, condition);
+                        } else {
+                            //TODO support filter groups inside of filter groups
+                        }
+                    });
+                })
+            );
+        }
+        if (filterGroup.or && filterGroup.or.length > 0) {
+            queryBuilder.orWhere(
+                new Brackets((qb) => {
+                    filterGroup.or.forEach((condition) => {
+                        if (!this.isFilterGroup(condition)) {
+                            this.fieldFilterToQuery(qb, condition);
+                        } else {
+                            //TODO support filter groups inside of filter groups
+                        }
+                    });
+                })
+            );
         }
 
-        return {};
+        return queryBuilder;
     }
 
     static isFilterGroup(

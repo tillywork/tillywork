@@ -10,6 +10,7 @@ import { useProjectUsersService } from '@/composables/services/useProjectUsersSe
 import { useWorkspaceStore } from '@/stores/workspace';
 import type { QueryFilter, FieldFilter } from '../../filters/types';
 import type { FieldFilterOption } from './types';
+import { useFieldsService } from '@/composables/services/useFieldsService';
 
 const props = defineProps<{
   filters?: QueryFilter;
@@ -26,18 +27,24 @@ const filtersCopy = ref<QueryFilter>(
 const isSnackbarOpen = ref(false);
 const snackbarId = ref<number>();
 
+const { useFieldsQuery } = useFieldsService();
 const { showSnackbar, closeSnackbar } = useSnackbarStore();
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
 const { useProjectUsersQuery } = useProjectUsersService();
+
 const { data: users } = useProjectUsersQuery({
   projectId: selectedWorkspace.value!.projectId,
   select: (projectUsers) => projectUsers.map((pj) => pj.user),
 });
 
-const fields = ref<FieldFilterOption[]>([
+const { data: workspaceFields } = useFieldsQuery({
+  workspaceId: selectedWorkspace.value!.id,
+});
+
+const defaultFields = ref<FieldFilterOption[]>([
   {
     title: 'Title',
-    field: 'title',
+    field: 'card.title',
     operator: 'eq',
     value: '',
     type: FieldTypes.TEXT,
@@ -53,7 +60,7 @@ const fields = ref<FieldFilterOption[]>([
   //   },
   {
     title: 'Due Date',
-    field: 'dueAt',
+    field: 'card.dueAt',
     operator: 'between',
     value: '',
     type: FieldTypes.DATE,
@@ -68,6 +75,25 @@ const fields = ref<FieldFilterOption[]>([
     icon: 'mdi-account',
   },
 ]);
+
+const fields = computed(() => {
+  const fields: FieldFilterOption[] = [...defaultFields.value];
+
+  //   if (workspaceFields.value) {
+  //     workspaceFields.value.forEach((field) => {
+  //       fields.push({
+  //         field: `card.data.${field.id}`,
+  //         title: field.name,
+  //         type: field.type,
+  //         operator: '@>',
+  //         icon: 'mdi-account',
+  //         options: field.items,
+  //       });
+  //     });
+  //   }
+
+  return fields;
+});
 
 const isFiltersFilled = computed(
   () => !!filtersCopy.value?.where && !!filtersCopy.value?.where?.and?.length
