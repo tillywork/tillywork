@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useSnackbarStore } from '@/stores/snackbar';
-const { snackbars } = useSnackbarStore();
+const { snackbars, closeSnackbar } = useSnackbarStore();
 
 const snackbarHeight = 48;
 const snackbarMargin = 8;
@@ -21,6 +21,7 @@ const snackbarOffsets = computed(() => {
       :color="snackbar.options.color"
       :timeout="snackbar.options.timeout ?? 4000"
       :style="{ bottom: `${snackbarOffsets[index]}px` }"
+      @after-leave="closeSnackbar(snackbar.id)"
     >
       {{ snackbar.options.message }}
       <template #actions>
