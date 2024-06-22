@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { useTheme } from 'vuetify';
+import colors from 'vuetify/util/colors';
 
 const colorModel = defineModel<string>();
 defineProps<{
   label?: string;
   rules?: ((v: any) => true | string)[];
 }>();
+
+const swatches = computed(() =>
+  Object.values(colors).map((color) => [color.base ?? '#DEFAFFFF'])
+);
 
 const menu = ref(false);
 
@@ -53,6 +58,9 @@ watch(
       v-model="colorModel"
       rounded
       mode="hexa"
+      show-swatches
+      :swatches="swatches"
+      position="relative"
       v-click-outside="closePickerMenu"
     />
   </v-menu>
