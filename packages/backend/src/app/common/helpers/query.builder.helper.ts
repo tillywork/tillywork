@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Logger } from "@nestjs/common";
 import { WhereExpressionBuilder, Brackets, SelectQueryBuilder } from "typeorm";
-import { FieldFilter, FilterGroup } from "../filters/types";
+import { FieldFilter, FilterGroup, FilterOperator } from "../filters/types";
 import dayjs from "dayjs";
 
 @Injectable()
@@ -108,14 +108,60 @@ export class QueryBuilderHelper {
      * @param prefix The prefix to look for that is a jsonb column (card.data)
      * @returns the field name to use in the SQL query (e.g card.data ->> 1)
      */
-    static processFieldName(name: string, prefix: string) {
-        const pathArray = name.split(".");
-        // If path starts with prefix (e.g card.data), it is a JSONB column, so we parse it differently
-        if (name.startsWith(prefix)) {
-            return `${prefix} ->> '${pathArray[pathArray.length - 1]}'`;
+    static processFieldName({
+        fieldFilter,
+        prefix,
+    }: {
+        fieldFilter: FieldFilter;
+        prefix: string;
+    }) {
+        const { field, operator } = fieldFilter;
+        const pathArray = field.split(".");
+        let extractionOperator: "->>" | "->";
+
+        if (["in", "nin"].includes(operator)) {
+            extractionOperator = "->";
         } else {
-            return name;
+            extractionOperator = "->>";
         }
+
+        // If path starts with prefix (e.g card.data), it is a JSONB column, so we parse it differently
+        if (field.startsWith(prefix)) {
+            return `${prefix} ${extractionOperator} '${
+                pathArray[pathArray.length - 1]
+            }'`;
+        } else {
+            return field;
+        }
+    }
+
+    /**
+     * Prevents running queries that will throw
+     * errors due to invalid values. E.g querying
+     * on an empty array, or a string with null value.
+     * @param fieldFilter The field filter to validate.
+     * @returns boolean indicating if field value is valid.
+     */
+    static validateFieldFilter(fieldFilter: FieldFilter) {
+        const textOperators: FilterOperator[] = ["eq", "ne"];
+        const arrayOperators: FilterOperator[] = [
+            "in",
+            "nin",
+            "between",
+            "nbetween",
+        ];
+
+        if (textOperators.includes(fieldFilter.operator)) {
+            if (!fieldFilter.value) {
+                return false;
+            }
+        } else if (arrayOperators.includes(fieldFilter.operator)) {
+            if (!fieldFilter.value || !fieldFilter.value.length) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     static fieldFilterToQuery(
@@ -123,8 +169,16 @@ export class QueryBuilderHelper {
         fieldFilter: FieldFilter
     ): WhereExpressionBuilder {
         const { field, operator, value } = fieldFilter;
+        const cardPrefix = "card.data";
+        const fieldName = this.processFieldName({
+            fieldFilter,
+            prefix: cardPrefix,
+        });
         const processedValue = this.processValue(value);
-        const fieldName = this.processFieldName(field, "card.data");
+
+        if (!this.validateFieldFilter(fieldFilter)) {
+            return;
+        }
 
         switch (operator) {
             case "eq":
@@ -151,17 +205,32 @@ export class QueryBuilderHelper {
                 return queryBuilder.andWhere(`${fieldName} <= :${field}`, {
                     [field]: processedValue,
                 });
-            case "in":
-                return queryBuilder.andWhere(`${fieldName} IN (:...${field})`, {
-                    [field]: processedValue,
-                });
-            case "nin":
+            case "in": {
+                let operator: "in" | "@>";
+
+                let value = `(${processedValue.join(",")})`;
+                if (fieldName.startsWith(cardPrefix)) {
+                    operator = "@>";
+                    value = `'["${processedValue.join('","')}"]'`;
+                } else operator = "in";
+
                 return queryBuilder.andWhere(
-                    `${fieldName} NOT IN (:...${field})`,
-                    {
-                        [field]: processedValue,
-                    }
+                    `${fieldName} ${operator} ${value}`
                 );
+            }
+            case "nin": {
+                let operator: "not in" | "@>" = "not in";
+                let value = `(${processedValue.join(",")})`;
+                let query = `${fieldName} ${operator} ${value}`;
+
+                if (fieldName.startsWith(cardPrefix)) {
+                    operator = "@>";
+                    value = `'["${processedValue.join('","')}"]'`;
+                    query = `NOT (${fieldName} ${operator} ${value})`;
+                }
+
+                return queryBuilder.andWhere(query);
+            }
             case "like":
                 return queryBuilder.andWhere(`${fieldName} LIKE :${field}`, {
                     [field]: `%${processedValue}%`,

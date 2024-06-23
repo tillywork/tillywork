@@ -216,11 +216,12 @@ function updateCardListStage(listStage: ListStage) {
 }
 
 function updateFieldValue({ field, v }: { field: Field; v: any }) {
+  console.log(v);
   cardCopy.value = {
     ...cardCopy.value,
     data: {
       ...cardCopy.value.data,
-      [field.id]: v,
+      [field.id]: Array.isArray(v) ? (v.length && !!v[0] ? v : undefined) : v,
     },
   };
 
@@ -238,6 +239,7 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
     v-if="cardCopy"
     :loading="isCardLoading"
     class="d-flex flex-sm-row flex-column"
+    min-height="100vh"
   >
     <template #loader="{ isActive }">
       <v-progress-linear
@@ -365,7 +367,65 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
                     hide-details
                     :placeholder="field.name"
                     @update:model-value="
-                      (v) => updateFieldValue({ field, v: v.item })
+                      (v) =>
+                        updateFieldValue({
+                          field,
+                          v: Array.isArray(v)
+                            ? v.map((item) => item.item)
+                            : [v.item],
+                        })
+                    "
+                  />
+                </template>
+                <template v-else-if="field.type === FieldTypes.LABEL">
+                  <v-autocomplete
+                    v-model="cardCopy.data[field.id]"
+                    :items="field.items"
+                    item-title="item"
+                    item-value="item"
+                    hide-details
+                    :placeholder="field.name"
+                    :multiple="field.multiple"
+                    @update:model-value="
+                      (v) =>
+                        updateFieldValue({
+                          field,
+                          v: Array.isArray(v) ? v : [v],
+                        })
+                    "
+                    autocomplete="off"
+                    chips
+                    persistent-clear
+                    :closable-chips="field.multiple || !field.required"
+                  />
+                </template>
+                <template v-else-if="field.type === FieldTypes.DATE">
+                  <base-date-picker
+                    v-model="cardCopy.data[field.id]"
+                    icon="mdi-calendar"
+                    text-field
+                    :label="field.name"
+                    @update:model-value="
+                      (v: string | string[]) =>
+                        updateFieldValue({
+                          field,
+                          v,
+                        })
+                    "
+                  />
+                </template>
+                <template v-else-if="field.type === FieldTypes.USER">
+                  <base-user-selector
+                    :model-value="cardCopy.data[field.id] ? cardCopy.data[field.id].map((userIdAsString: string) => +userIdAsString) : []"
+                    :users
+                    :label="field.name"
+                    return-id
+                    @update:model-value="
+                      (users: number[]) => 
+                        updateFieldValue({
+                          field,
+                          v: users.map((userIdAsNumber) => userIdAsNumber.toString()),
+                        })
                     "
                   />
                 </template>

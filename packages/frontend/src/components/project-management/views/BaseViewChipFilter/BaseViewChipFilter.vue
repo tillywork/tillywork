@@ -185,6 +185,7 @@ function closeSaveSnackbar() {
 
 function getOperatorFromFieldType(field: Field): FilterOperator {
   switch (field.type) {
+    case FieldTypes.USER:
     case FieldTypes.DROPDOWN:
       return 'in';
     case FieldTypes.DATE:

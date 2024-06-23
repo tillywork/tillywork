@@ -3,7 +3,6 @@ type Item = string | { [key: string]: any };
 
 const props = defineProps<{
   label?: string;
-  initialValue?: Item[];
   itemType: 'string' | 'object';
   /** If array of objects, define the key to use as value */
   itemValue?: string;
@@ -13,9 +12,9 @@ const value = defineModel<Item[]>();
 
 const isLastItemEmpty = computed<boolean>(() => {
   if (props.itemType === 'string') {
-    return !!value.value?.find((v: Item) => v === '');
+    return !!value.value && value.value[value.value.length - 1] === '';
   } else if (props.itemType === 'object' && props.itemValue) {
-    return !!value.value?.find((v: Item) => {
+    return !!value.value?.find((v) => {
       if (typeof v === 'object') {
         return v[props.itemValue!] === '';
       }
@@ -47,11 +46,9 @@ function removeItem(index: number) {
 watch(
   value,
   (v) => {
-    if (v) {
+    if (!v || !v.length) {
       // Maintain an empty text field if no items exist
-      if (!v.length) {
-        addItem();
-      }
+      addItem();
     }
   },
   { immediate: true }

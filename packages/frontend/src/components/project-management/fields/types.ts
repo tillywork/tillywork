@@ -42,6 +42,18 @@ export const FIELD_TYPE_OPTIONS = [
     title: 'Dropdown',
     value: FieldTypes.DROPDOWN,
   },
+  {
+    title: 'Label',
+    value: FieldTypes.LABEL,
+  },
+  {
+    title: 'Date',
+    value: FieldTypes.DATE,
+  },
+  {
+    title: 'User',
+    value: FieldTypes.USER,
+  },
 ];
 
 export const DEFAULT_CARD_FIELDS: Partial<Field>[] = [

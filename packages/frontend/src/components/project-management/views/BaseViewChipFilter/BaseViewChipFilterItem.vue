@@ -220,6 +220,7 @@ watch(
         label="Value"
         hide-details
         single-line
+        clearable
         :rules="[rules.required]"
       />
     </template>
@@ -247,6 +248,8 @@ watch(
         multiple
         width="160"
         autocomplete="off"
+        chips
+        closable-chips
       />
     </template>
     <template v-else-if="selectedFilter?.type === FieldTypes.DATE">

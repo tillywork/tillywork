@@ -70,7 +70,7 @@ function getSelectedUsersFromModel() {
 
 watch(selectedUsers, (v) => {
   if (props.returnId) {
-    value.value = v.map((user) => user.id);
+    value.value = [...v.map((user) => user.id)];
   } else {
     value.value = [...v];
   }
@@ -102,19 +102,13 @@ watch(selectedUsers, (v) => {
           width="90"
         >
           <template #chip="{ item, props }">
-            <v-chip
-              v-bind="props"
-              rounded="large"
-              density="comfortable"
-              color="primary"
-              closable
-            >
+            <v-chip v-bind="props" rounded="large" color="primary" closable>
               <template #prepend>
                 <base-avatar
                   :photo="item.raw.photo"
                   :text="getUserFullName(item.raw)"
-                  class="text-xs"
-                  size="16"
+                  class="text-xs ms-n1"
+                  size="x-small"
                 />
               </template>
               <span class="text-caption ms-2">{{

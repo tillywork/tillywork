@@ -84,6 +84,7 @@ const vuetify = createVuetify({
     },
     VIcon: {
       size: 'small',
+      style: 'opacity: 0.9',
     },
     VSelect: {
       density: 'compact',

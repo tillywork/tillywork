@@ -23,7 +23,9 @@ const isCreatingOrEditing = computed(
 );
 
 const showIsMultiple = computed(() =>
-  [FieldTypes.DROPDOWN].includes(fieldDto.value?.type as FieldTypes)
+  [FieldTypes.DROPDOWN, FieldTypes.LABEL].includes(
+    fieldDto.value?.type as FieldTypes
+  )
 );
 
 const { showSnackbar } = useSnackbarStore();
@@ -157,6 +159,14 @@ watch(selectedField, (v) => {
               v-model="fieldDto.items"
               item-type="object"
               item-value="item"
+              label="Options"
+            />
+          </template>
+          <template v-else-if="fieldDto.type === FieldTypes.LABEL">
+            <v-divider class="mb-2" />
+            <base-array-input
+              v-model="fieldDto.items"
+              item-type="string"
               label="Options"
             />
           </template>

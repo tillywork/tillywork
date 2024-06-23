@@ -23,6 +23,9 @@ export class FieldsService {
                     id: workspaceId,
                 },
             },
+            order: {
+                createdAt: "asc",
+            },
         });
     }
 
