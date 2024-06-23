@@ -100,61 +100,83 @@ export class QueryBuilderHelper {
         }
     }
 
+    /**
+     * Processes the field name to extract
+     * the value from jsonb columns defined
+     * in the prefix.
+     * @param name The field name (e.g card.data.1)
+     * @param prefix The prefix to look for that is a jsonb column (card.data)
+     * @returns the field name to use in the SQL query (e.g card.data ->> 1)
+     */
+    static processFieldName(name: string, prefix: string) {
+        const pathArray = name.split(".");
+        // If path starts with prefix (e.g card.data), it is a JSONB column, so we parse it differently
+        if (name.startsWith(prefix)) {
+            return `${prefix} ->> '${pathArray[pathArray.length - 1]}'`;
+        } else {
+            return name;
+        }
+    }
+
     static fieldFilterToQuery(
         queryBuilder: WhereExpressionBuilder,
         fieldFilter: FieldFilter
     ): WhereExpressionBuilder {
         const { field, operator, value } = fieldFilter;
         const processedValue = this.processValue(value);
+        const fieldName = this.processFieldName(field, "card.data");
 
         switch (operator) {
             case "eq":
-                return queryBuilder.andWhere(`${field} = :${field}`, {
+                return queryBuilder.andWhere(`${fieldName} = :${field}`, {
                     [field]: processedValue,
                 });
             case "ne":
-                return queryBuilder.andWhere(`${field} != :${field}`, {
+                return queryBuilder.andWhere(`${fieldName} != :${field}`, {
                     [field]: processedValue,
                 });
             case "gt":
-                return queryBuilder.andWhere(`${field} > :${field}`, {
+                return queryBuilder.andWhere(`${fieldName} > :${field}`, {
                     [field]: processedValue,
                 });
             case "lt":
-                return queryBuilder.andWhere(`${field} < :${field}`, {
+                return queryBuilder.andWhere(`${fieldName} < :${field}`, {
                     [field]: processedValue,
                 });
             case "gte":
-                return queryBuilder.andWhere(`${field} >= :${field}`, {
+                return queryBuilder.andWhere(`${fieldName} >= :${field}`, {
                     [field]: processedValue,
                 });
             case "lte":
-                return queryBuilder.andWhere(`${field} <= :${field}`, {
+                return queryBuilder.andWhere(`${fieldName} <= :${field}`, {
                     [field]: processedValue,
                 });
             case "in":
-                return queryBuilder.andWhere(`${field} IN (:...${field})`, {
+                return queryBuilder.andWhere(`${fieldName} IN (:...${field})`, {
                     [field]: processedValue,
                 });
             case "nin":
-                return queryBuilder.andWhere(`${field} NOT IN (:...${field})`, {
-                    [field]: processedValue,
-                });
+                return queryBuilder.andWhere(
+                    `${fieldName} NOT IN (:...${field})`,
+                    {
+                        [field]: processedValue,
+                    }
+                );
             case "like":
-                return queryBuilder.andWhere(`${field} LIKE :${field}`, {
+                return queryBuilder.andWhere(`${fieldName} LIKE :${field}`, {
                     [field]: `%${processedValue}%`,
                 });
             case "like%":
-                return queryBuilder.andWhere(`${field} LIKE :${field}`, {
+                return queryBuilder.andWhere(`${fieldName} LIKE :${field}`, {
                     [field]: `${processedValue}%`,
                 });
             case "%like":
-                return queryBuilder.andWhere(`${field} LIKE :${field}`, {
+                return queryBuilder.andWhere(`${fieldName} LIKE :${field}`, {
                     [field]: `%${processedValue}`,
                 });
             case "between":
                 return queryBuilder.andWhere(
-                    `${field} BETWEEN :${field}1 AND :${field}2`,
+                    `${fieldName} BETWEEN :${field}1 AND :${field}2`,
                     {
                         [`${field}1`]: processedValue[0],
                         [`${field}2`]: processedValue[1],
@@ -162,17 +184,16 @@ export class QueryBuilderHelper {
                 );
             case "nbetween":
                 return queryBuilder.andWhere(
-                    `${field} NOT BETWEEN :${field}1 AND :${field}2`,
+                    `${fieldName} NOT BETWEEN :${field}1 AND :${field}2`,
                     {
                         [`${field}1`]: processedValue[0],
                         [`${field}2`]: processedValue[1],
                     }
                 );
             case "isNull":
-                this.logger.debug({ field });
-                return queryBuilder.andWhere(`${field} IS NULL`);
+                return queryBuilder.andWhere(`${fieldName} IS NULL`);
             case "isNotNull":
-                return queryBuilder.andWhere(`${field} IS NOT NULL`);
+                return queryBuilder.andWhere(`${fieldName} IS NOT NULL`);
             default:
                 throw new Error(
                     `[QueryBuilderHelper] Unsupported operator: ${operator}`

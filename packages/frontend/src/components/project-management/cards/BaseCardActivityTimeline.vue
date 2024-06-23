@@ -80,6 +80,7 @@ function deleteComment(comment: CardActivity) {
             <base-avatar
               :text="getUserFullName(activity.createdBy)"
               :photo="activity.createdBy.photo"
+              class="text-xs"
             />
           </template>
           <span>
@@ -101,6 +102,7 @@ function deleteComment(comment: CardActivity) {
             <base-avatar
               :text="getUserFullName(activity.createdBy)"
               :photo="activity.createdBy.photo"
+              class="text-xs"
               size="small"
             />
           </template>

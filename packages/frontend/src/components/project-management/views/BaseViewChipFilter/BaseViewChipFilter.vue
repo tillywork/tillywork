@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import BaseViewChip from '../BaseViewChip.vue';
 import BaseViewChipFilterItem from './BaseViewChipFilterItem.vue';
-import { FieldTypes } from '../../fields/types';
+import { FieldTypes, type Field } from '../../fields/types';
 import type { VForm } from 'vuetify/components';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
 import { useWorkspaceStore } from '@/stores/workspace';
-import type { QueryFilter, FieldFilter } from '../../filters/types';
+import type {
+  QueryFilter,
+  FieldFilter,
+  FilterOperator,
+} from '../../filters/types';
 import type { FieldFilterOption } from './types';
 import { useFieldsService } from '@/composables/services/useFieldsService';
 
@@ -79,18 +83,18 @@ const defaultFields = ref<FieldFilterOption[]>([
 const fields = computed(() => {
   const fields: FieldFilterOption[] = [...defaultFields.value];
 
-  //   if (workspaceFields.value) {
-  //     workspaceFields.value.forEach((field) => {
-  //       fields.push({
-  //         field: `card.data.${field.id}`,
-  //         title: field.name,
-  //         type: field.type,
-  //         operator: '@>',
-  //         icon: 'mdi-account',
-  //         options: field.items,
-  //       });
-  //     });
-  //   }
+  if (workspaceFields.value) {
+    workspaceFields.value.forEach((field) => {
+      fields.push({
+        field: `card.data.${field.id}`,
+        title: field.name,
+        type: field.type,
+        operator: getOperatorFromFieldType(field),
+        icon: 'mdi-account',
+        options: field.items,
+      });
+    });
+  }
 
   return fields;
 });
@@ -176,6 +180,18 @@ function closeSaveSnackbar() {
   if (snackbarId.value !== undefined) {
     closeSnackbar(snackbarId.value);
     snackbarId.value = undefined;
+  }
+}
+
+function getOperatorFromFieldType(field: Field): FilterOperator {
+  switch (field.type) {
+    case FieldTypes.DROPDOWN:
+      return 'in';
+    case FieldTypes.DATE:
+      return 'between';
+
+    default:
+      return 'eq';
   }
 }
 

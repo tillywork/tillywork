@@ -225,12 +225,28 @@ watch(
     </template>
     <template v-else-if="selectedFilter?.type === FieldTypes.DROPDOWN">
       <v-autocomplete
+        :items="filteringOptions"
+        v-model="filterOption"
+        @update:model-value="handleFilteringOptionChange"
+        label="Operator"
+        single-line
+        hide-details
+        max-width="160"
+        auto-select-first
+        :rules="[rules.required]"
+        class="me-2"
+      />
+      <v-autocomplete
+        v-if="!hideFilterValue"
         v-model="filter.value"
         single-line
         hide-details
         :items="dropdownOptions"
         auto-select-first
         :rules="[rules.array.required]"
+        multiple
+        width="160"
+        autocomplete="off"
       />
     </template>
     <template v-else-if="selectedFilter?.type === FieldTypes.DATE">

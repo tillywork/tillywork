@@ -83,7 +83,7 @@ watch(selectedUsers, (v) => {
       <template v-if="textField">
         <v-autocomplete
           :label="label ?? 'Select'"
-          placeholder="Search by name"
+          placeholder="Search..."
           v-model="selectedUsers"
           :items="
             users.map((user) => {
@@ -206,7 +206,7 @@ watch(selectedUsers, (v) => {
     <v-card width="250">
       <v-text-field
         v-if="!textField"
-        placeholder="Search"
+        placeholder="Search..."
         hide-details
         single-line
         autofocus
@@ -227,14 +227,11 @@ watch(selectedUsers, (v) => {
                 <base-avatar
                   :photo="user.photo"
                   :text="getUserFullName(user)"
-                  class="ms-1 text-caption"
+                  class="text-xs"
                 />
               </v-list-item-action>
             </template>
-            <v-list-item-title
-              class="user-select-none"
-              :class="isUserSelected(user) ? 'font-weight-bold' : ''"
-            >
+            <v-list-item-title class="user-select-none">
               {{ getUserFullName(user) }}
             </v-list-item-title>
             <template #append>
