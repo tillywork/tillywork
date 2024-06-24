@@ -14,6 +14,7 @@ import { UpdateListGroupDto } from "./dto/update.list.group.dto";
 
 export type GenerateGroupsParams = {
     listId: number;
+    ignoreCompleted: boolean;
     groupBy: ListGroupOptions;
 };
 
@@ -43,9 +44,11 @@ export class ListGroupsService {
 
     findAll({
         listId,
+        ignoreCompleted,
         groupBy,
     }: {
         listId: number;
+        ignoreCompleted?: boolean;
         groupBy?: ListGroupOptions;
     }): Promise<ListGroup[]> {
         const query = this.listGroupsRepository
@@ -61,6 +64,14 @@ export class ListGroupsService {
             .where("listGroup.listId = :listId", { listId })
             .orderBy("listGroup.order", "ASC");
 
+        if (ignoreCompleted) {
+            query.innerJoinAndSelect(
+                "list.listStages",
+                "listStages",
+                "listStages.isCompleted = :isCompleted",
+                { isCompleted: false }
+            );
+        }
         if (groupBy) {
             query.andWhere("listGroup.type = :groupBy", { groupBy });
         }
@@ -70,9 +81,13 @@ export class ListGroupsService {
 
     async generateGroups({
         listId,
+        ignoreCompleted,
         groupBy,
     }: GenerateGroupsParams): Promise<ListGroup[]> {
-        const existingGroups = await this.findAll({ listId, groupBy });
+        const existingGroups = await this.findAll({
+            listId,
+            groupBy,
+        });
 
         let cardGroups: CreateListGroupDto[];
 
@@ -132,7 +147,20 @@ export class ListGroupsService {
 
         await Promise.allSettled(checkIfGroupsExist);
 
-        const finalGroups = await this.findAll({ listId, groupBy });
+        let finalGroups = await this.findAll({
+            listId,
+            ignoreCompleted,
+            groupBy,
+        });
+
+        if (finalGroups.length && ignoreCompleted) {
+            const listStagesName = finalGroups[0].list.listStages.map(
+                (listStage) => listStage.name
+            );
+            finalGroups = finalGroups.filter((group) =>
+                listStagesName.includes(group.name)
+            );
+        }
 
         return finalGroups;
     }
