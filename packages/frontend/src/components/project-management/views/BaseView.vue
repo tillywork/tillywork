@@ -4,6 +4,7 @@ import { useViewsService } from '@/composables/services/useViewsService';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import type { Card } from '../cards/types';
 import { type ColumnDef } from '@tanstack/vue-table';
+import BaseViewChip from './BaseViewChip.vue';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
@@ -45,6 +46,7 @@ const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
 );
 
+const ignoreCompleted = computed(() => props.view.ignoreCompleted);
 const groupBy = computed(() => props.view.groupBy);
 
 const isViewLoading = ref(false);
@@ -94,6 +96,7 @@ const {
   refetch: refetchListGroups,
 } = listGroupsService.useGetListGroupsByOptionQuery({
   listId,
+  ignoreCompleted,
   groupBy,
 });
 
@@ -106,6 +109,13 @@ const { mutateAsync: updateCardList } =
 
 const { mutateAsync: createFilter } = useCreateFilterMutation();
 const { mutateAsync: updateFilter } = useUpdateFilterMutation();
+
+function handleToggleCompleted() {
+  updateViewMutation.mutateAsync({
+    ...viewCopy.value,
+    ignoreCompleted: !viewCopy.value.ignoreCompleted,
+  });
+}
 
 function handleGroupBySelection(option: ListGroupOptions) {
   updateViewMutation.mutateAsync({
@@ -339,6 +349,16 @@ watch(
         <v-divider vertical />
       </div>
       <div class="d-flex align-center ga-2">
+        <base-view-chip
+          v-bind="props"
+          :icon="viewCopy.ignoreCompleted ? 'mdi-eye' : 'mdi-eye-off-outline'"
+          :label="
+            viewCopy.ignoreCompleted ? 'Show Completed' : 'Hide Completed'
+          "
+          :is-filled="viewCopy.ignoreCompleted"
+          :color="viewCopy.ignoreCompleted ? 'info' : 'warning'"
+          @click="handleToggleCompleted"
+        />
         <base-view-chip-group-by
           v-model="viewCopy.groupBy"
           @update:model-value="handleGroupBySelection"
