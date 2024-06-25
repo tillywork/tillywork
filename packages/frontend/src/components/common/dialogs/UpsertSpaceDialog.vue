@@ -6,7 +6,7 @@ import validationUtils from '@/utils/validation';
 import type { Space } from '@/components/project-management/spaces/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
-import { DIALOGS } from './types';
+import { DIALOGS, UpsertDialogMode } from './types';
 
 const workspaceStore = useWorkspaceStore();
 const { selectedWorkspace } = storeToRefs(workspaceStore);
@@ -16,42 +16,60 @@ const { rules } = validationUtils;
 const { showSnackbar } = useSnackbarStore();
 
 const currentDialogIndex = computed(() =>
-  dialog.getDialogIndex(DIALOGS.CREATE_SPACE)
+  dialog.getDialogIndex(DIALOGS.UPSERT_SPACE)
 );
+const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
+const space = computed<Space>(() => currentDialog.value.data.space);
 
 const spaceForm = ref<VForm>();
 const spaceDto = ref<Partial<Space>>({
-  name: '',
+  name: space.value?.name,
+  // TODO: Allow to update workspace?
   workspaceId: selectedWorkspace.value?.id,
 });
 
-const { mutateAsync: createSpace, isPending } =
+const { mutateAsync: createSpace, isPending: isCreating } =
   spacesService.useCreateSpaceMutation();
+const { mutateAsync: updateSpace, isPending: isUpdating } =
+  spacesService.useUpdateSpaceMutation();
 
-async function handleCreate() {
+async function handleSubmitForm() {
   const isValid = await spaceForm.value?.validate();
-  if (isValid?.valid) {
-    createSpace(spaceDto.value)
-      .then(() => {
-        dialog.closeDialog(currentDialogIndex.value);
-      })
-      .catch(() => {
-        showSnackbar({
-          message: 'Something went wrong, please try again.',
-          color: 'error',
-          timeout: 5000,
+  if (!isValid?.valid) return;
+
+  try {
+    switch (currentDialog.value.data.mode) {
+      case UpsertDialogMode.CREATE:
+        await createSpace(spaceDto.value);
+        break;
+
+      case UpsertDialogMode.UPDATE: {
+        await updateSpace({
+          ...space.value,
+          ...spaceDto.value,
         });
-      });
+        break;
+      }
+    }
+
+    dialog.closeDialog(currentDialogIndex.value);
+  } catch {
+    showSnackbar({
+      message: 'Something went wrong, please try again.',
+      color: 'error',
+      timeout: 5000,
+    });
   }
 }
 </script>
 
 <template>
-  <v-card color="surface" elevation="24" :loading="isPending">
+  <v-card color="surface" elevation="24" :loading="isCreating || isUpdating">
     <div class="d-flex align-center ps-0 pa-4">
-      <v-card-subtitle
-        >Create space in {{ selectedWorkspace?.name }}</v-card-subtitle
-      >
+      <v-card-subtitle>
+        <span class="text-capitalize">{{ currentDialog?.data.mode }}</span>
+        space
+      </v-card-subtitle>
       <v-spacer />
       <base-icon-btn
         icon="mdi-close"
@@ -59,7 +77,11 @@ async function handleCreate() {
         @click="dialog.closeDialog(currentDialogIndex)"
       />
     </div>
-    <v-form ref="spaceForm" @submit.prevent="handleCreate" validate-on="submit">
+    <v-form
+      ref="spaceForm"
+      @submit.prevent="handleSubmitForm"
+      validate-on="submit"
+    >
       <div class="pa-4 py-0">
         <v-text-field
           v-model="spaceDto.name"
@@ -76,9 +98,14 @@ async function handleCreate() {
           variant="flat"
           class="text-caption px-4 ms-4"
           type="submit"
-          :loading="isPending"
-          >Create</v-btn
+          :loading="isCreating || isUpdating"
         >
+          {{
+            currentDialog?.data.mode === UpsertDialogMode.CREATE
+              ? 'Create'
+              : 'Save'
+          }}
+        </v-btn>
       </v-card-actions>
     </v-form>
   </v-card>

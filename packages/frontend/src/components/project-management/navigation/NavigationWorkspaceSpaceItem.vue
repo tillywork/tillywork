@@ -35,7 +35,7 @@ function clearHoverFreeze() {
             v-if="isHovering || freezeSpaceHoverId === space.id"
           >
             <div class="d-flex ga-1">
-              <create-list-btn :space="space" @click.stop />
+              <create-list-btn :space="space" />
               <navigation-workspace-space-item-menu
                 :space
                 @hover:freeze="setHoverFreeze(space)"

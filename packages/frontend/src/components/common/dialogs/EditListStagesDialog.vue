@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { DIALOGS } from './types';
+import { DIALOGS, UpsertDialogMode } from './types';
 import { useDialogStore } from '@/stores/dialog';
 
 import { useQueryClient } from '@tanstack/vue-query';
@@ -15,7 +15,7 @@ const currentDialogIndex = computed(() =>
 
 const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
 
-function openDialogUpsert(mode: 'Add' | 'Edit', listStage?: ListStage) {
+function openDialogUpsert(mode: UpsertDialogMode, listStage?: ListStage) {
   dialog.openDialog({
     dialog: DIALOGS.UPSERT_LIST_STAGE,
     data: {
@@ -111,7 +111,9 @@ onUnmounted(() => {
           <tr>
             <th>Current stages</th>
             <th style="width: 25px">
-              <base-icon-btn @click="openDialogUpsert('Add')" />
+              <base-icon-btn
+                @click="openDialogUpsert(UpsertDialogMode.CREATE)"
+              />
             </th>
           </tr>
         </thead>
@@ -134,7 +136,9 @@ onUnmounted(() => {
                   </template>
                   <v-card>
                     <v-list>
-                      <v-list-item @click="openDialogUpsert('Edit', row)">
+                      <v-list-item
+                        @click="openDialogUpsert(UpsertDialogMode.UPDATE, row)"
+                      >
                         <template #prepend>
                           <v-icon size="x-small" icon="mdi-pencil" />
                         </template>

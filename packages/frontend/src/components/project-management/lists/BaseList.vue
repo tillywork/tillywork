@@ -23,11 +23,12 @@ const view = ref<View>();
         <div class="d-flex align-center mb-3">
           <base-avatar
             :text="list.name"
-            color="rgb(116, 140, 7)"
+            color="secondary"
             size="x-small"
             rounded="md"
+            class="mr-1 text-caption"
           />
-          <p class="text-h5 ms-2 mt-1">{{ list.name }}</p>
+          <span class="text-h5 ms-2">{{ list.name }}</span>
         </div>
         <base-list-view-tabs v-if="views" v-model="view" :list :views />
       </div>

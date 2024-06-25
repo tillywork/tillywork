@@ -4,7 +4,7 @@ import validationUtils from '@/utils/validation';
 import { useSnackbarStore } from '@/stores/snackbar';
 import BaseColorPicker from '../inputs/BaseColorPicker.vue';
 
-import { DIALOGS } from './types';
+import { DIALOGS, UpsertDialogMode } from './types';
 import { useDialogStore } from '@/stores/dialog';
 
 import { useQueryClient } from '@tanstack/vue-query';
@@ -51,10 +51,10 @@ async function handleSubmitForm() {
     };
 
     switch (currentDialog.value.data.mode) {
-      case 'Add':
+      case UpsertDialogMode.CREATE:
         await createListStage(payload);
         break;
-      case 'Edit':
+      case UpsertDialogMode.UPDATE:
         await updateListStage(payload);
         break;
 
@@ -78,7 +78,8 @@ async function handleSubmitForm() {
   <v-card color="surface" elevation="24" :loading="isCreating || isUpdating">
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle>
-        {{ currentDialog.data.mode }} list stage
+        <span class="text-capitalize">{{ currentDialog?.data.mode }}</span>
+        list stage
       </v-card-subtitle>
       <v-spacer />
       <base-icon-btn
@@ -122,7 +123,11 @@ async function handleSubmitForm() {
           type="submit"
           :loading="isCreating || isUpdating"
         >
-          Save
+          {{
+            currentDialog?.data.mode === UpsertDialogMode.CREATE
+              ? 'Create'
+              : 'Save'
+          }}
         </v-btn>
       </v-card-actions>
     </v-form>

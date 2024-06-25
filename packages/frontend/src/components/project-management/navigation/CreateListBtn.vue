@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { DIALOGS } from '@/components/common/dialogs/types';
+import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
 import type { Space } from '../spaces/types';
 import { useDialogStore } from '@/stores/dialog';
 
@@ -11,9 +11,10 @@ const dialog = useDialogStore();
 
 function openCreateListDialog() {
   dialog.openDialog({
-    dialog: DIALOGS.CREATE_LIST,
+    dialog: DIALOGS.UPSERT_LIST,
     data: {
       space: props.space,
+      mode: UpsertDialogMode.CREATE,
     },
   });
 }
@@ -24,6 +25,6 @@ function openCreateListDialog() {
     icon="mdi-plus"
     density="compact"
     v-tooltip:bottom="'Create list'"
-    @click="openCreateListDialog"
+    @click.stop="openCreateListDialog"
   />
 </template>
