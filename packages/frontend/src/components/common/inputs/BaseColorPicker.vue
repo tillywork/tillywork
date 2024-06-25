@@ -70,6 +70,7 @@ watch(
       :swatches="swatches"
       position="relative"
       v-click-outside="closePickerMenu"
+      hide-inputs
     />
   </v-menu>
 </template>
