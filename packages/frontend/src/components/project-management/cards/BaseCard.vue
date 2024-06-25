@@ -489,7 +489,7 @@ function openSettingsDialog(activeTab: SettingsTabs) {
 }
 
 .base-card-content {
-  width: 600px;
+  width: 650px;
   max-width: 100%;
 }
 

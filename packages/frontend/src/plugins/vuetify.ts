@@ -106,6 +106,9 @@ const vuetify = createVuetify({
       color: 'primary',
       hideDetails: true,
     },
+    VChip: {
+      rounded: 'md',
+    },
   },
 });
 
