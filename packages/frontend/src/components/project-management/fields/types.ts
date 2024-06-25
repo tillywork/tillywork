@@ -1,3 +1,5 @@
+import type { User } from '@/components/common/users/types';
+
 export interface Field {
   id: number;
   name: string;
@@ -7,6 +9,8 @@ export interface Field {
   required: boolean;
   multiple: boolean;
   items?: FieldItem[];
+  createdByType: 'system' | 'user';
+  createdBy?: User;
 }
 
 export interface CreateFieldDto {

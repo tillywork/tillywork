@@ -7,6 +7,7 @@ import {
     IsString,
 } from "class-validator";
 import { FieldItem, FieldTypes } from "../types";
+import { User } from "../../users/user.entity";
 
 export class CreateFieldDto {
     @IsNotEmpty()
@@ -34,4 +35,10 @@ export class CreateFieldDto {
 
     @IsOptional()
     items?: FieldItem[];
+
+    @IsOptional()
+    createdByType?: "system" | "user";
+
+    @IsOptional()
+    createdBy?: User;
 }

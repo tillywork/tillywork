@@ -17,8 +17,8 @@ defineProps<{
     :image="photo"
     :text="text ? stringUtils.getInitials(text) : undefined"
     :color="!photo ? color ?? 'secondary' : undefined"
-    :size="size ?? 28"
+    :size="size ?? 'x-small'"
     :rounded="rounded"
-    class="user-select-none"
+    class="user-select-none text-xs"
   />
 </template>

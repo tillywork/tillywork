@@ -7,6 +7,8 @@ import {
     Delete,
     Put,
     UseGuards,
+    Query,
+    Request,
 } from "@nestjs/common";
 import { FieldsService } from "./fields.service";
 import { Field } from "./field.entity";
@@ -26,7 +28,7 @@ export class FieldsController {
     constructor(private readonly fieldsService: FieldsService) {}
 
     @Get()
-    findAll(@Param("workspaceId") workspaceId: number): Promise<Field[]> {
+    findAll(@Query("workspaceId") workspaceId: number): Promise<Field[]> {
         return this.fieldsService.findAll({ workspaceId });
     }
 
@@ -36,8 +38,16 @@ export class FieldsController {
     }
 
     @Post()
-    create(@Body() createFieldDto: CreateFieldDto): Promise<Field> {
-        return this.fieldsService.create(createFieldDto);
+    create(
+        @Body() createFieldDto: CreateFieldDto,
+        @Request() req
+    ): Promise<Field> {
+        const { user } = req;
+        return this.fieldsService.create({
+            ...createFieldDto,
+            createdByType: "user",
+            createdBy: user,
+        });
     }
 
     @Put(":id")

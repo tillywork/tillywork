@@ -10,6 +10,7 @@ import {
 } from "typeorm";
 import { Workspace } from "../workspaces/workspace.entity";
 import { FieldItem, FieldTypes } from "./types";
+import { User } from "../users/user.entity";
 
 /**
  * This contains card fields.
@@ -37,6 +38,12 @@ export class Field {
     /** Contains the items for dropdown fields. */
     @Column({ type: "jsonb", nullable: true })
     items?: FieldItem[];
+
+    @Column({ type: "enum", enum: ["system", "user"], default: "system" })
+    createdByType: "system" | "user";
+
+    @ManyToOne(() => User, { eager: true })
+    createdBy: Relation<User>;
 
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;

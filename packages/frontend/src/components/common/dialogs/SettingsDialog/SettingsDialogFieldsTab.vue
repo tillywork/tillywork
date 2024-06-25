@@ -12,11 +12,13 @@ import { FieldTypes } from '@/components/project-management/fields/types';
 import BaseArrayInput from '../../inputs/BaseArrayInput.vue';
 import BaseIconSelector from '../../inputs/BaseIconSelector/BaseIconSelector.vue';
 import { useSnackbarStore } from '@/stores/snackbar';
+import { useLogo } from '@/composables/useLogo';
+import { UpsertDialogMode } from '../types';
 
 const selectedField = ref<Field>();
 const fieldDto = ref<Partial<Field>>();
 const upsertFieldForm = ref<VForm>();
-const upsertMode = ref<'Create' | 'Edit'>();
+const upsertMode = ref<UpsertDialogMode>();
 const isCreating = ref(false);
 
 const isCreatingOrEditing = computed(
@@ -24,7 +26,7 @@ const isCreatingOrEditing = computed(
 );
 
 const showIsMultiple = computed(() =>
-  [FieldTypes.DROPDOWN, FieldTypes.LABEL].includes(
+  [FieldTypes.DROPDOWN, FieldTypes.LABEL, FieldTypes.USER].includes(
     fieldDto.value?.type as FieldTypes
   )
 );
@@ -42,7 +44,7 @@ const { mutateAsync: createField } = createFieldMutation();
 
 function handleFieldClick(field: Field) {
   selectedField.value = cloneDeep(field);
-  upsertMode.value = 'Edit';
+  upsertMode.value = UpsertDialogMode.UPDATE;
 }
 
 function clearSelectedField() {
@@ -52,38 +54,54 @@ function clearSelectedField() {
 }
 
 function saveField() {
-  if (upsertMode.value === 'Edit') {
-    updateField(fieldDto.value)
-      .then((field) => {
-        selectedField.value = field;
-      })
-      .catch(() =>
-        showSnackbar({
-          message: 'Something went wrong, please try again.',
-          color: 'error',
+  switch (upsertMode.value) {
+    case UpsertDialogMode.UPDATE:
+      updateField(fieldDto.value)
+        .then(() => {
+          clearSelectedField();
         })
-      );
-  } else {
-    createField(fieldDto.value)
-      .then(() => {
-        clearSelectedField();
-      })
-      .catch(() =>
-        showSnackbar({
-          message: 'Something went wrong, please try again.',
-          color: 'error',
+        .catch(() =>
+          showSnackbar({
+            message: 'Something went wrong, please try again.',
+            color: 'error',
+          })
+        );
+      break;
+
+    case UpsertDialogMode.CREATE:
+      createField(fieldDto.value)
+        .then(() => {
+          clearSelectedField();
         })
-      );
+        .catch(() =>
+          showSnackbar({
+            message: 'Something went wrong, please try again.',
+            color: 'error',
+          })
+        );
+      break;
   }
 }
 
 function handleCreateField() {
-  upsertMode.value = 'Create';
+  upsertMode.value = UpsertDialogMode.CREATE;
   isCreating.value = true;
   fieldDto.value = {
     name: '',
     workspaceId: selectedWorkspace.value!.id,
   };
+}
+
+function getFieldCreatedByName(field: Field) {
+  return field.createdByType === 'system'
+    ? 'System'
+    : field.createdBy?.firstName + ' ' + field.createdBy?.lastName;
+}
+
+function getFieldCreatedByPhoto(field: Field) {
+  return field.createdByType === 'system'
+    ? useLogo().getCheckUrl()
+    : field.createdBy?.photo;
 }
 
 watch(selectedField, (v) => {
@@ -110,12 +128,45 @@ watch(selectedField, (v) => {
               id: 'name',
               accessorKey: 'name',
             },
+            {
+              header: 'Type',
+              id: 'type',
+              accessorKey: 'type',
+            },
+            {
+              id: 'createdBy',
+              header: 'Created By',
+              accessorKey: 'createdBy',
+              size: 300,
+            },
           ]"
           @click:row="handleFieldClick"
         >
           <template #name="{ row }">
             <v-icon :icon="row.original.icon" class="me-4" />
             <span class="text-body-2">{{ row.original.name }}</span>
+          </template>
+          <template #createdBy="{ row }">
+            <v-card class="py-2">
+              <base-avatar
+                :photo="getFieldCreatedByPhoto(row.original)"
+                :text="getFieldCreatedByName(row.original)"
+                rounded="circle"
+                :class="
+                  row.original.createdByType === 'system'
+                    ? 'pa-1 bg-accent'
+                    : ''
+                "
+              />
+              <span class="text-body-2 ms-3">
+                {{ getFieldCreatedByName(row.original) }}
+              </span>
+            </v-card>
+          </template>
+          <template #type="{ row }">
+            <span class="text-body-2 text-capitalize">
+              {{ row.original.type }}
+            </span>
           </template>
         </base-table>
       </v-card-text>
@@ -131,7 +182,10 @@ watch(selectedField, (v) => {
             density="comfortable"
             @click="clearSelectedField"
           />
-          {{ upsertMode }} {{ selectedField?.name ?? 'field' }}
+          <span>
+            <span class="text-capitalize">{{ upsertMode }}</span>
+            field
+          </span>
         </v-card-title>
         <v-card-item>
           <v-card-subtitle class="mb-2">General</v-card-subtitle>
@@ -146,6 +200,13 @@ watch(selectedField, (v) => {
             v-model="fieldDto.type"
             :items="FIELD_TYPE_OPTIONS"
             label="Field type*"
+            auto-select-first
+            :readonly="upsertMode !== UpsertDialogMode.CREATE"
+            :hint="
+              upsertMode === UpsertDialogMode.UPDATE
+                ? 'Field type cannot be changed'
+                : ''
+            "
           />
 
           <div class="mb-2">
@@ -176,7 +237,8 @@ watch(selectedField, (v) => {
             <v-divider class="mb-2" />
             <base-array-input
               v-model="fieldDto.items"
-              item-type="string"
+              item-type="object"
+              item-value="item"
               label="Options"
             />
           </template>
@@ -186,7 +248,7 @@ watch(selectedField, (v) => {
         <v-card-actions class="d-flex justify-end">
           <v-btn
             class="text-capitalize"
-            :text="upsertMode === 'Create' ? 'Create' : 'Save'"
+            :text="upsertMode === UpsertDialogMode.CREATE ? 'Create' : 'Save'"
             variant="flat"
             type="submit"
           />

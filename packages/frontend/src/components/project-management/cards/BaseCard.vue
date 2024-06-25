@@ -74,14 +74,15 @@ const createActivityMutation = cardActivitiesService.useCreateActivityMutation({
 
 const updateCardListMutation = cardsService.useUpdateCardListMutation();
 
-const users = computed(() =>
-  usersQuery.data.value?.map((projectUser) => {
-    const user = projectUser.user;
-    return {
-      ...user,
-      fullName: `${user.firstName} ${user.lastName}`,
-    };
-  })
+const users = computed(
+  () =>
+    usersQuery.data.value?.map((projectUser) => {
+      const user = projectUser.user;
+      return {
+        ...user,
+        fullName: `${user.firstName} ${user.lastName}`,
+      };
+    }) ?? []
 );
 
 const isCardLoading = computed(() => {
@@ -377,12 +378,15 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
                     hide-details
                     :placeholder="field.name"
                     :prepend-inner-icon="field.icon"
+                    :multiple="field.multiple"
+                    autocomplete="off"
+                    auto-select-first
                     @update:model-value="
                       (v) =>
                         updateFieldValue({
                           field,
                           v: Array.isArray(v)
-                            ? v.map((item) => item.item)
+                            ? v.map((item) => (item.item ? item.item : item))
                             : [v.item],
                         })
                     "
@@ -402,7 +406,9 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
                       (v) =>
                         updateFieldValue({
                           field,
-                          v: Array.isArray(v) ? v : [v],
+                          v: Array.isArray(v)
+                            ? v.map((item) => (item.item ? item.item : item))
+                            : [v.item],
                         })
                     "
                     autocomplete="off"

@@ -47,6 +47,17 @@ export class RenamePropTableToFields1718818041867
                         isNullable: true,
                     },
                     {
+                        name: "createdByType",
+                        type: "enum",
+                        enum: ["system", "user"],
+                        default: `'system'`,
+                    },
+                    {
+                        name: "createdById",
+                        type: "bigint",
+                        isNullable: true,
+                    },
+                    {
                         name: "createdAt",
                         type: "timestamp",
                         default: "now()",
@@ -71,6 +82,12 @@ export class RenamePropTableToFields1718818041867
                     {
                         columnNames: ["workspaceId"],
                         referencedTableName: "workspace",
+                        referencedColumnNames: ["id"],
+                        onDelete: "CASCADE",
+                    },
+                    {
+                        columnNames: ["createdById"],
+                        referencedTableName: "user",
                         referencedColumnNames: ["id"],
                         onDelete: "CASCADE",
                     },
