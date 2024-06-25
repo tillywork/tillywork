@@ -71,6 +71,9 @@ const vuetify = createVuetify({
         VListItemTitle: {
           class: 'text-body-2',
         },
+        VIcon: {
+          size: 'x-small',
+        },
       },
     },
     VNavigationDrawer: {

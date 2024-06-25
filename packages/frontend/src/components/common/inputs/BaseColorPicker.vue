@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { useThemeStore } from '@/stores/theme';
 import { useTheme } from 'vuetify';
+import colors from 'vuetify/util/colors';
 
 const colorModel = defineModel<string>();
 defineProps<{
@@ -10,6 +12,17 @@ defineProps<{
 const menu = ref(false);
 
 const theme = useTheme();
+const themeStore = useThemeStore();
+
+const swatches = computed(() =>
+  Object.values(colors).map((color) => [
+    color.base ??
+      // - `shades`, we replace it with black or white.
+      // NOTE: Corresponds to `default`, although it doesn't get selected when `colorModel`
+      // is set to `default`
+      (themeStore.theme === 'dark' ? '#FFFFFF' : '#000000'),
+  ])
+);
 
 function closePickerMenu() {
   menu.value = false;
@@ -53,7 +66,11 @@ watch(
       v-model="colorModel"
       rounded
       mode="hexa"
+      show-swatches
+      :swatches="swatches"
+      position="relative"
       v-click-outside="closePickerMenu"
+      hide-inputs
     />
   </v-menu>
 </template>

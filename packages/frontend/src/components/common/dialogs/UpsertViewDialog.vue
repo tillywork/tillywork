@@ -7,25 +7,25 @@ import {
   type View,
 } from '@/components/project-management/views/types';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { useQueryClient } from '@tanstack/vue-query';
 import { useDialogStore } from '@/stores/dialog';
-import { DIALOGS } from './types';
+import { DIALOGS, UpsertDialogMode } from './types';
 
 const viewsService = useViewsService();
 const dialog = useDialogStore();
 const { rules } = validationUtils;
 const { showSnackbar } = useSnackbarStore();
-const queryClient = useQueryClient();
 
 const currentDialogIndex = computed(() =>
-  dialog.getDialogIndex(DIALOGS.CREATE_VIEW)
+  dialog.getDialogIndex(DIALOGS.UPSERT_VIEW)
 );
 const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
+const view = computed<View>(() => currentDialog.value.data.view);
 
 const viewForm = ref<VForm>();
 const viewDto = ref<Partial<View>>({
-  name: '',
-  listId: currentDialog.value?.data.list.id,
+  name: view.value?.name,
+  type: view.value?.type,
+  listId: view.value?.listId ?? currentDialog.value?.data.list.id,
 });
 
 const viewTypeOptions = ref([
@@ -46,35 +46,47 @@ const viewTypeOptions = ref([
   },
 ]);
 
-const { mutateAsync: createView, isPending } =
+const { mutateAsync: createView, isPending: isCreating } =
   viewsService.useCreateViewMutation();
+const { mutateAsync: updateView, isPending: isUpdating } =
+  viewsService.useUpdateViewMutation();
 
 async function handleCreate() {
   const isValid = await viewForm.value?.validate();
-  if (isValid?.valid) {
-    createView(viewDto.value)
-      .then(() => {
-        dialog.closeDialog(currentDialogIndex.value);
-        queryClient.invalidateQueries({
-          queryKey: ['list', currentDialog.value?.data.list.id],
+  if (!isValid?.valid) return;
+
+  try {
+    switch (currentDialog.value.data.mode) {
+      case UpsertDialogMode.CREATE:
+        await createView(viewDto.value);
+        break;
+
+      case UpsertDialogMode.UPDATE: {
+        await updateView({
+          ...view.value,
+          ...viewDto.value,
         });
-      })
-      .catch(() => {
-        showSnackbar({
-          message: 'Something went wrong, please try again.',
-          color: 'error',
-          timeout: 5000,
-        });
-      });
+        break;
+      }
+    }
+
+    dialog.closeDialog(currentDialogIndex.value);
+  } catch {
+    showSnackbar({
+      message: 'Something went wrong, please try again.',
+      color: 'error',
+      timeout: 5000,
+    });
   }
 }
 </script>
 
 <template>
-  <v-card color="surface" elevation="24" :loading="isPending">
+  <v-card color="surface" elevation="24" :loading="isCreating || isUpdating">
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle>
-        Create view in {{ currentDialog?.data.list.name }}
+        <span class="text-capitalize">{{ currentDialog?.data.mode }}</span>
+        view
       </v-card-subtitle>
       <v-spacer />
       <base-icon-btn
@@ -94,7 +106,6 @@ async function handleCreate() {
         <v-select
           v-model="viewDto.type"
           label="Type*"
-          density="compact"
           :items="viewTypeOptions"
           :rules="[rules.required]"
         >
@@ -121,9 +132,14 @@ async function handleCreate() {
           variant="flat"
           class="text-caption px-4 ms-4"
           type="submit"
-          :loading="isPending"
-          >Create</v-btn
+          :loading="isCreating || isUpdating"
         >
+          {{
+            currentDialog?.data.mode === UpsertDialogMode.CREATE
+              ? 'Create'
+              : 'Save'
+          }}
+        </v-btn>
       </v-card-actions>
     </v-form>
   </v-card>
