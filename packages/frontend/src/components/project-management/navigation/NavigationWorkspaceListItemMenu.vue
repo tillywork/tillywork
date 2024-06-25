@@ -157,6 +157,12 @@ watch(listMenu, () => {
           </template>
           <v-list-item-title>Rename</v-list-item-title>
         </v-list-item>
+        <v-list-item @click="openSettingsDialog(SettingsTabs.FIELDS)">
+          <template #prepend>
+            <v-icon icon="mdi-form-select" />
+          </template>
+          <v-list-item-title>Custom fields</v-list-item-title>
+        </v-list-item>
         <v-menu location="end" :close-on-content-click="false">
           <template #activator="{ props }">
             <v-list-item v-bind="props">

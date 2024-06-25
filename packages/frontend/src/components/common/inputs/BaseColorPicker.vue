@@ -7,6 +7,7 @@ const colorModel = defineModel<string>();
 defineProps<{
   label?: string;
   rules?: ((v: any) => true | string)[];
+  icon?: boolean;
 }>();
 
 const menu = ref(false);
@@ -51,16 +52,27 @@ watch(
 <template>
   <v-menu v-model="menu" :close-on-content-click="false">
     <template #activator="{ props }">
-      <v-text-field
-        v-model="colorModel"
-        v-bind="props"
-        :label="label ?? 'Color'"
-        :rules
-      >
-        <template #prepend-inner>
-          <v-icon icon="mdi-circle-slice-8" :color="colorModel" />
-        </template>
-      </v-text-field>
+      <template v-if="icon">
+        <base-icon-btn
+          v-bind="props"
+          icon="mdi-circle"
+          size="default"
+          density="compact"
+          :color="colorModel"
+        />
+      </template>
+      <template v-else>
+        <v-text-field
+          v-model="colorModel"
+          v-bind="props"
+          :label="label ?? 'Color'"
+          :rules
+        >
+          <template #prepend-inner>
+            <v-icon icon="mdi-circle-slice-8" :color="colorModel" />
+          </template>
+        </v-text-field>
+      </template>
     </template>
     <v-color-picker
       v-model="colorModel"

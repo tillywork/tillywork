@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import validationUtils from '@/utils/validation';
-import { PropTypes } from '../../props/types';
+import { FieldTypes } from '../../fields/types';
 import type { FieldFilterOption } from './types';
 import type { User } from '@/components/common/users/types';
 import type { FieldFilter, FilterOperator } from '../../filters/types';
@@ -29,7 +29,12 @@ const dropdownOptions = computed(() => {
       return statusOptions;
 
     default:
-      return [];
+      return selectedFilter.value?.options?.map((option) => {
+        return {
+          title: option.item,
+          value: option.item,
+        };
+      });
   }
 });
 
@@ -107,8 +112,9 @@ function handleFilteringOptionChange(value: string) {
  */
 function mapFilterOptionValueToOperator(value: string): FilterOperator {
   switch (selectedFilter.value?.type) {
-    case PropTypes.USER:
-    case PropTypes.DROPDOWN:
+    case FieldTypes.USER:
+    case FieldTypes.DROPDOWN:
+    case FieldTypes.LABEL:
       if (value === 'between') {
         return 'in';
       } else if (value === 'nbetween') {
@@ -116,7 +122,7 @@ function mapFilterOptionValueToOperator(value: string): FilterOperator {
       } else {
         return value as FilterOperator;
       }
-    case PropTypes.DATE:
+    case FieldTypes.DATE:
     default:
       return value as FilterOperator;
   }
@@ -133,8 +139,9 @@ function mapFilterOperatorToFileringOption(
   value: FilterOperator
 ): FilterOperator {
   switch (selectedFilter.value?.type) {
-    case PropTypes.USER:
-    case PropTypes.DROPDOWN:
+    case FieldTypes.USER:
+    case FieldTypes.DROPDOWN:
+    case FieldTypes.LABEL:
       if (value === 'in') {
         return 'between';
       } else if (value === 'nin') {
@@ -142,7 +149,7 @@ function mapFilterOperatorToFileringOption(
       } else {
         return value as FilterOperator;
       }
-    case PropTypes.DATE:
+    case FieldTypes.DATE:
     default:
       return value as FilterOperator;
   }
@@ -198,7 +205,7 @@ watch(
         </v-list-item>
       </template>
     </v-autocomplete>
-    <template v-if="selectedFilter?.type === PropTypes.TEXT">
+    <template v-if="selectedFilter?.type === FieldTypes.TEXT">
       <v-autocomplete
         :items="textOperators"
         v-model="filter.operator"
@@ -215,20 +222,41 @@ watch(
         label="Value"
         hide-details
         single-line
+        clearable
         :rules="[rules.required]"
       />
     </template>
-    <template v-else-if="selectedFilter?.type === PropTypes.DROPDOWN">
+    <template
+      v-else-if="[FieldTypes.DROPDOWN, FieldTypes.LABEL].includes(selectedFilter!.type)"
+    >
       <v-autocomplete
+        :items="filteringOptions"
+        v-model="filterOption"
+        @update:model-value="handleFilteringOptionChange"
+        label="Operator"
+        single-line
+        hide-details
+        max-width="160"
+        auto-select-first
+        :rules="[rules.required]"
+        class="me-2"
+      />
+      <v-autocomplete
+        v-if="!hideFilterValue"
         v-model="filter.value"
         single-line
         hide-details
         :items="dropdownOptions"
         auto-select-first
         :rules="[rules.array.required]"
+        multiple
+        width="160"
+        autocomplete="off"
+        chips
+        closable-chips
       />
     </template>
-    <template v-else-if="selectedFilter?.type === PropTypes.DATE">
+    <template v-else-if="selectedFilter?.type === FieldTypes.DATE">
       <v-autocomplete
         :items="filteringOptions"
         v-model="filterOption"
@@ -248,7 +276,7 @@ watch(
         range
       />
     </template>
-    <template v-else-if="selectedFilter?.type === PropTypes.USER">
+    <template v-else-if="selectedFilter?.type === FieldTypes.USER">
       <v-autocomplete
         :items="filteringOptions"
         v-model="filterOption"

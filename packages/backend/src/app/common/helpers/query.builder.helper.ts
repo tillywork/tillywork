@@ -1,29 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Logger } from "@nestjs/common";
-import {
-    Not,
-    MoreThan,
-    LessThan,
-    IsNull,
-    Between,
-    In,
-    Like,
-    And,
-    Equal,
-    FindOperator,
-} from "typeorm";
-import { FieldFilter, FilterGroup } from "../filters/types";
+import { WhereExpressionBuilder, Brackets, SelectQueryBuilder } from "typeorm";
+import { FieldFilter, FilterGroup, FilterOperator } from "../filters/types";
 import dayjs from "dayjs";
 
 @Injectable()
 export class QueryBuilderHelper {
     private static readonly logger = new Logger("QueryBuilderHelper");
-
-    static createNestedObjectFromPath(pathArray: string[], value: any): any {
-        return pathArray.reverse().reduce((acc, key) => {
-            return { [key]: acc };
-        }, value);
-    }
 
     static processValue(value: any) {
         const datePlaceholders = {
@@ -117,115 +100,208 @@ export class QueryBuilderHelper {
         }
     }
 
-    static fieldFilterToQuery(fieldFilter: FieldFilter) {
-        const { field, operator, value } = fieldFilter;
+    /**
+     * Processes the field name to extract
+     * the value from jsonb columns defined
+     * in the prefix.
+     * @param name The field name (e.g card.data.1)
+     * @param prefix The prefix to look for that is a jsonb column (card.data)
+     * @returns the field name to use in the SQL query (e.g card.data ->> 1)
+     */
+    static processFieldName({
+        fieldFilter,
+        prefix,
+    }: {
+        fieldFilter: FieldFilter;
+        prefix: string;
+    }) {
+        const { field, operator } = fieldFilter;
         const pathArray = field.split(".");
-        const processedValue = this.processValue(value);
+        let extractionOperator: "->>" | "->";
 
-        let mappedValue;
-        switch (operator) {
-            case "eq":
-                mappedValue = Equal(processedValue);
-                break;
-            case "ne":
-                mappedValue = Not(processedValue);
-                break;
-            case "gt":
-                mappedValue = MoreThan(processedValue);
-                break;
-            case "lt":
-                mappedValue = LessThan(processedValue);
-                break;
-            case "like":
-                mappedValue = Like(`%${processedValue}%`);
-                break;
-            case "like%":
-                mappedValue = Like(`${processedValue}%`);
-                break;
-            case "%like":
-                mappedValue = Like(`%${processedValue}`);
-                break;
-            case "between":
-                mappedValue = Between(processedValue[0], processedValue[1]);
-                break;
-            case "nbetween":
-                mappedValue = Not(
-                    Between(processedValue[0], processedValue[1])
-                );
-                break;
-            case "in":
-                mappedValue = In(processedValue);
-                break;
-            case "nin":
-                mappedValue = Not(In(processedValue));
-                break;
-            case "isNull":
-                mappedValue = IsNull();
-                break;
-            case "isNotNull":
-                mappedValue = Not(IsNull());
-                break;
-            default:
-                throw new Error(
-                    `[QueryBuilderHelper#fieldFilterToQuery] No mapping for operator: ${operator}`
-                );
+        if (["in", "nin"].includes(operator)) {
+            extractionOperator = "->";
+        } else {
+            extractionOperator = "->>";
         }
 
-        const queryObject = QueryBuilderHelper.createNestedObjectFromPath(
-            pathArray,
-            mappedValue
-        );
-        return queryObject;
+        // If path starts with prefix (e.g card.data), it is a JSONB column, so we parse it differently
+        if (field.startsWith(prefix)) {
+            return `${prefix} ${extractionOperator} '${
+                pathArray[pathArray.length - 1]
+            }'`;
+        } else {
+            return field;
+        }
     }
 
-    static buildQuery(filterGroup: FilterGroup): any {
-        if (filterGroup.and) {
-            return filterGroup.and.reduce((whereClause, condition) => {
-                if (QueryBuilderHelper.isFilterGroup(condition)) {
-                    const subQuery = QueryBuilderHelper.buildQuery(condition);
-                    return { ...whereClause, ...subQuery };
-                } else {
-                    const queryPart = QueryBuilderHelper.fieldFilterToQuery(
-                        condition as FieldFilter
-                    );
+    /**
+     * Prevents running queries that will throw
+     * errors due to invalid values. E.g querying
+     * on an empty array, or a string with null value.
+     * @param fieldFilter The field filter to validate.
+     * @returns boolean indicating if field value is valid.
+     */
+    static validateFieldFilter(fieldFilter: FieldFilter) {
+        const textOperators: FilterOperator[] = ["eq", "ne"];
+        const arrayOperators: FilterOperator[] = [
+            "in",
+            "nin",
+            "between",
+            "nbetween",
+        ];
 
-                    return Object.entries(queryPart).reduce(
-                        (acc, [key, value]) => {
-                            const current = acc[key];
-                            if (
-                                !!current &&
-                                this.isObject(current) &&
-                                this.isObject(value)
-                            ) {
-                                /**
-                                 * If key exists and both are objects, merge them
-                                 */
-                                acc[key] = { ...current, ...(value as object) };
-                            } else if (!!current && !this.isObject(value)) {
-                                /**
-                                 * If key exists, and the incoming value is not an object,
-                                 * multiple filters exist on the same property, merge them
-                                 * with And operator
-                                 */
-                                acc[key] = And(
-                                    current,
-                                    value as FindOperator<any>
-                                );
-                            } else {
-                                /**
-                                 * If key doesn't exist, set it
-                                 */
-                                acc[key] = value;
-                            }
-                            return acc;
-                        },
-                        whereClause
-                    );
-                }
-            }, {});
+        if (textOperators.includes(fieldFilter.operator)) {
+            if (!fieldFilter.value) {
+                return false;
+            }
+        } else if (arrayOperators.includes(fieldFilter.operator)) {
+            if (!fieldFilter.value || !fieldFilter.value.length) {
+                return false;
+            }
         }
 
-        return {};
+        return true;
+    }
+
+    static fieldFilterToQuery(
+        queryBuilder: WhereExpressionBuilder,
+        fieldFilter: FieldFilter
+    ): WhereExpressionBuilder {
+        const { field, operator, value } = fieldFilter;
+        const cardPrefix = "card.data";
+        const fieldName = this.processFieldName({
+            fieldFilter,
+            prefix: cardPrefix,
+        });
+        const processedValue = this.processValue(value);
+
+        if (!this.validateFieldFilter(fieldFilter)) {
+            return;
+        }
+
+        switch (operator) {
+            case "eq":
+                return queryBuilder.andWhere(`${fieldName} = :${field}`, {
+                    [field]: processedValue,
+                });
+            case "ne":
+                return queryBuilder.andWhere(`${fieldName} != :${field}`, {
+                    [field]: processedValue,
+                });
+            case "gt":
+                return queryBuilder.andWhere(`${fieldName} > :${field}`, {
+                    [field]: processedValue,
+                });
+            case "lt":
+                return queryBuilder.andWhere(`${fieldName} < :${field}`, {
+                    [field]: processedValue,
+                });
+            case "gte":
+                return queryBuilder.andWhere(`${fieldName} >= :${field}`, {
+                    [field]: processedValue,
+                });
+            case "lte":
+                return queryBuilder.andWhere(`${fieldName} <= :${field}`, {
+                    [field]: processedValue,
+                });
+            case "in": {
+                let operator: "in" | "@>";
+
+                let value = `(${processedValue.join(",")})`;
+                if (fieldName.startsWith(cardPrefix)) {
+                    operator = "@>";
+                    value = `'["${processedValue.join('","')}"]'`;
+                } else operator = "in";
+
+                return queryBuilder.andWhere(
+                    `${fieldName} ${operator} ${value}`
+                );
+            }
+            case "nin": {
+                let operator: "not in" | "@>" = "not in";
+                let value = `(${processedValue.join(",")})`;
+                let query = `${fieldName} ${operator} ${value}`;
+
+                if (fieldName.startsWith(cardPrefix)) {
+                    operator = "@>";
+                    value = `'["${processedValue.join('","')}"]'`;
+                    query = `NOT (${fieldName} ${operator} ${value})`;
+                }
+
+                return queryBuilder.andWhere(query);
+            }
+            case "like":
+                return queryBuilder.andWhere(`${fieldName} LIKE :${field}`, {
+                    [field]: `%${processedValue}%`,
+                });
+            case "like%":
+                return queryBuilder.andWhere(`${fieldName} LIKE :${field}`, {
+                    [field]: `${processedValue}%`,
+                });
+            case "%like":
+                return queryBuilder.andWhere(`${fieldName} LIKE :${field}`, {
+                    [field]: `%${processedValue}`,
+                });
+            case "between":
+                return queryBuilder.andWhere(
+                    `${fieldName} BETWEEN :${field}1 AND :${field}2`,
+                    {
+                        [`${field}1`]: processedValue[0],
+                        [`${field}2`]: processedValue[1],
+                    }
+                );
+            case "nbetween":
+                return queryBuilder.andWhere(
+                    `${fieldName} NOT BETWEEN :${field}1 AND :${field}2`,
+                    {
+                        [`${field}1`]: processedValue[0],
+                        [`${field}2`]: processedValue[1],
+                    }
+                );
+            case "isNull":
+                return queryBuilder.andWhere(`${fieldName} IS NULL`);
+            case "isNotNull":
+                return queryBuilder.andWhere(`${fieldName} IS NOT NULL`);
+            default:
+                throw new Error(
+                    `[QueryBuilderHelper] Unsupported operator: ${operator}`
+                );
+        }
+    }
+
+    static buildQuery(
+        queryBuilder: SelectQueryBuilder<any>,
+        filterGroup: FilterGroup
+    ): SelectQueryBuilder<any> {
+        if (filterGroup.and && filterGroup.and.length > 0) {
+            queryBuilder.andWhere(
+                new Brackets((qb) => {
+                    filterGroup.and.forEach((condition) => {
+                        if (!this.isFilterGroup(condition)) {
+                            this.fieldFilterToQuery(qb, condition);
+                        } else {
+                            //TODO support filter groups inside of filter groups
+                        }
+                    });
+                })
+            );
+        }
+        if (filterGroup.or && filterGroup.or.length > 0) {
+            queryBuilder.orWhere(
+                new Brackets((qb) => {
+                    filterGroup.or.forEach((condition) => {
+                        if (!this.isFilterGroup(condition)) {
+                            this.fieldFilterToQuery(qb, condition);
+                        } else {
+                            //TODO support filter groups inside of filter groups
+                        }
+                    });
+                })
+            );
+        }
+
+        return queryBuilder;
     }
 
     static isFilterGroup(

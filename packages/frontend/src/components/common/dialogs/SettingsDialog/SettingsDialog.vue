@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import BaseThemeSwitch from '../base/BaseThemeSwitch.vue';
+import BaseThemeSwitch from '../../base/BaseThemeSwitch.vue';
 import { useCardTypesService } from '@/composables/services/useCardTypesService';
 import { useWorkspaceStore } from '@/stores/workspace';
-import { DIALOGS, SettingsTabs, type SettingsTab } from './types';
+import { DIALOGS, SettingsTabs, type SettingsTab } from '../types';
 import type { CardType } from '@/components/project-management/cards/types';
 import { useLogo } from '@/composables/useLogo';
 import { useDialogStore } from '@/stores/dialog';
+import SettingsDialogFieldsTab from './SettingsDialogFieldsTab.vue';
+import BaseTable from '../../tables/BaseTable/BaseTable.vue';
 import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
 import { cloneDeep } from 'lodash';
 import { useSnackbarStore } from '@/stores/snackbar';
@@ -31,6 +33,11 @@ const tabs = ref<SettingsTab[]>([
     icon: 'mdi-toy-brick-outline',
     text: 'Card Types',
     value: SettingsTabs.CARD_TYPES,
+  },
+  {
+    icon: 'mdi-form-select',
+    text: 'Custom Fields',
+    value: SettingsTabs.FIELDS,
   },
 ]);
 
@@ -186,38 +193,42 @@ watch(selectedWorkspace, (v) => {
               contacts, or whatever you need them to be.</v-card-subtitle
             >
             <v-card-text>
-              <v-data-table
-                class="border-thin rounded-md"
-                :items="cardTypes"
-                :headers="[
+              <base-table
+                :data="cardTypes ?? []"
+                :columns="[
                   {
-                    value: 'actions',
-                    width: 50,
+                    id: 'actions',
+                    size: 50,
                   },
                   {
-                    title: 'Name',
-                    value: 'name',
+                    id: 'name',
+                    header: 'Name',
+                    accessorKey: 'name',
                   },
                   {
-                    title: 'Created By',
-                    value: 'createdBy',
+                    id: 'createdBy',
+                    header: 'Created By',
+                    accessorKey: 'createdBy',
+                    size: 300,
                   },
                 ]"
-                :hide-default-footer="true"
               >
-                <template #item.name="{ item }">
+                <template #name="{ row }">
                   <span>
-                    {{ item.name }}
+                    {{ row.original.name }}
                     <span
-                      v-if="selectedWorkspace?.defaultCardType?.id === item.id"
+                      v-if="
+                        selectedWorkspace?.defaultCardType?.id ===
+                        row.original.id
+                      "
                       class="text-color-subtitle"
                     >
                       (default)
                     </span>
                   </span>
                 </template>
-                <template #item.actions="{ item }">
-                  <v-menu v-if="item.createdByType === 'user'">
+                <template #actions="{ row }">
+                  <v-menu v-if="row.original.createdByType === 'user'">
                     <template #activator="{ props }">
                       <base-icon-btn v-bind="props" icon="mdi-dots-vertical" />
                     </template>
@@ -231,7 +242,7 @@ watch(selectedWorkspace, (v) => {
                         </v-list-item> -->
                         <v-list-item
                           class="text-error"
-                          @click="openRemoveCardTypeDialog(item)"
+                          @click="openRemoveCardTypeDialog(row.original)"
                         >
                           <template #prepend>
                             <v-icon size="x-small" icon="mdi-delete" />
@@ -242,24 +253,29 @@ watch(selectedWorkspace, (v) => {
                     </v-card>
                   </v-menu>
                 </template>
-                <template #item.createdBy="{ item }">
+                <template #createdBy="{ row }">
                   <v-card class="py-2">
                     <base-avatar
-                      :photo="getCardTypeCreatedByPhoto(item)"
-                      :text="getCardTypeCreatedByName(item)"
+                      :photo="getCardTypeCreatedByPhoto(row.original)"
+                      :text="getCardTypeCreatedByName(row.original)"
                       rounded="circle"
                       :class="
-                        item.createdByType === 'system' ? 'pa-1 bg-accent' : ''
+                        row.original.createdByType === 'system'
+                          ? 'pa-1 bg-accent'
+                          : ''
                       "
                     />
                     <span class="text-body-2 ms-3">
-                      {{ getCardTypeCreatedByName(item) }}
+                      {{ getCardTypeCreatedByName(row.original) }}
                     </span>
                   </v-card>
                 </template>
-              </v-data-table>
+              </base-table>
             </v-card-text>
           </v-card>
+        </template>
+        <template #item.fields>
+          <settings-dialog-fields-tab />
         </template>
       </v-tabs>
     </v-card-text>
