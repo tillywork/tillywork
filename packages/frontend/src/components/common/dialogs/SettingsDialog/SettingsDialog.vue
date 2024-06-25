@@ -35,7 +35,7 @@ const tabs = ref<SettingsTab[]>([
     value: SettingsTabs.CARD_TYPES,
   },
   {
-    icon: 'mdi-toy-brick',
+    icon: 'mdi-form-select',
     text: 'Custom Fields',
     value: SettingsTabs.FIELDS,
   },
