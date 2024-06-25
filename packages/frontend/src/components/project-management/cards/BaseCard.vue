@@ -20,6 +20,7 @@ import { FieldTypes, type Field } from '../fields/types';
 import { useStateStore } from '@/stores/state';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS, SettingsTabs } from '@/components/common/dialogs/types';
+import BaseLabelSelector from '@/components/common/inputs/BaseLabelSelector.vue';
 
 const props = defineProps<{
   card: Card;
@@ -416,36 +417,20 @@ function openSettingsDialog(activeTab: SettingsTabs) {
                   />
                 </template>
                 <template v-else-if="field.type === FieldTypes.LABEL">
-                  <v-autocomplete
+                  <base-label-selector
                     v-model="cardCopy.data[field.id]"
                     :items="field.items"
-                    item-title="item"
-                    item-value="item"
-                    hide-details
+                    :icon="field.icon"
                     :placeholder="field.name"
                     :multiple="field.multiple"
-                    :prepend-inner-icon="field.icon"
                     @update:model-value="
                       (v) =>
                         updateFieldValue({
                           field,
-                          v: Array.isArray(v)
-                            ? v.map((item) => (item.item ? item.item : item))
-                            : [v.item],
+                          v,
                         })
                     "
-                    autocomplete="off"
-                    chips
-                    auto-select-first
-                  >
-                    <template #chip="{ item, props }">
-                      <v-chip
-                        v-bind="props"
-                        :color="item.raw.color"
-                        variant="flat"
-                      />
-                    </template>
-                  </v-autocomplete>
+                  />
                 </template>
                 <template v-else-if="field.type === FieldTypes.DATE">
                   <base-date-picker
