@@ -12,6 +12,7 @@ import {
   useQueryClient,
 } from '@tanstack/vue-query';
 import type { QueryFilter } from '@/components/project-management/filters/types';
+import type { MaybeRef } from 'vue';
 
 export interface CardsData {
   cards: Card[];
@@ -20,6 +21,7 @@ export interface CardsData {
 
 export interface GetCardsParams {
   listId: number;
+  ignoreCompleted: boolean;
   page: number;
   limit: number;
   sortBy?: TableSortOption[];
@@ -29,6 +31,7 @@ export interface GetCardsParams {
 export interface GetGroupCardsInfiniteQueryParams {
   listId: number;
   groupId: number;
+  ignoreCompleted: MaybeRef<boolean>;
   initialCards?: CardsData;
   filters?: Ref<QueryFilter>;
   sortBy?: Ref<TableSortOption[] | undefined>;
@@ -40,6 +43,7 @@ export const useCardsService = () => {
 
   async function getCards({
     listId,
+    ignoreCompleted,
     page = 1,
     limit = 10,
     sortBy = [
@@ -54,6 +58,7 @@ export const useCardsService = () => {
       method: 'POST',
       data: {
         listId,
+        ignoreCompleted,
         page,
         limit,
         sortBy: sortBy[0]?.key,
@@ -93,6 +98,7 @@ export const useCardsService = () => {
     listId,
     groupId,
     initialCards,
+    ignoreCompleted,
     filters,
     sortBy,
   }: GetGroupCardsInfiniteQueryParams) {
@@ -100,6 +106,7 @@ export const useCardsService = () => {
       queryFn: ({ pageParam = 1 }) =>
         getCards({
           listId: listId,
+          ignoreCompleted: toValue(ignoreCompleted),
           page: pageParam,
           limit: 15,
           filters: filters?.value,
