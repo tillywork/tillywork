@@ -114,6 +114,7 @@ function mapFilterOptionValueToOperator(value: string): FilterOperator {
   switch (selectedFilter.value?.type) {
     case FieldTypes.USER:
     case FieldTypes.DROPDOWN:
+    case FieldTypes.LABEL:
       if (value === 'between') {
         return 'in';
       } else if (value === 'nbetween') {
@@ -140,6 +141,7 @@ function mapFilterOperatorToFileringOption(
   switch (selectedFilter.value?.type) {
     case FieldTypes.USER:
     case FieldTypes.DROPDOWN:
+    case FieldTypes.LABEL:
       if (value === 'in') {
         return 'between';
       } else if (value === 'nin') {
@@ -224,7 +226,9 @@ watch(
         :rules="[rules.required]"
       />
     </template>
-    <template v-else-if="selectedFilter?.type === FieldTypes.DROPDOWN">
+    <template
+      v-else-if="[FieldTypes.DROPDOWN, FieldTypes.LABEL].includes(selectedFilter!.type)"
+    >
       <v-autocomplete
         :items="filteringOptions"
         v-model="filterOption"
