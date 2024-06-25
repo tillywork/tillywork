@@ -44,11 +44,9 @@ export class ListGroupsService {
 
     findAll({
         listId,
-        ignoreCompleted,
         groupBy,
     }: {
         listId: number;
-        ignoreCompleted?: boolean;
         groupBy?: ListGroupOptions;
     }): Promise<ListGroup[]> {
         const query = this.listGroupsRepository
@@ -64,14 +62,6 @@ export class ListGroupsService {
             .where("listGroup.listId = :listId", { listId })
             .orderBy("listGroup.order", "ASC");
 
-        if (ignoreCompleted) {
-            query.innerJoinAndSelect(
-                "list.listStages",
-                "listStages",
-                "listStages.isCompleted = :isCompleted",
-                { isCompleted: false }
-            );
-        }
         if (groupBy) {
             query.andWhere("listGroup.type = :groupBy", { groupBy });
         }
@@ -149,16 +139,18 @@ export class ListGroupsService {
 
         let finalGroups = await this.findAll({
             listId,
-            ignoreCompleted,
             groupBy,
         });
 
-        if (finalGroups.length && ignoreCompleted) {
-            const listStagesName = finalGroups[0].list.listStages.map(
-                (listStage) => listStage.name
-            );
+        if (groupBy === ListGroupOptions.LIST_STAGE && ignoreCompleted) {
+            const listStages = await this.listStagesService.findBy({
+                where: { listId, isCompleted: false },
+            });
+
             finalGroups = finalGroups.filter((group) =>
-                listStagesName.includes(group.name)
+                listStages
+                    .map((listStage) => listStage.name)
+                    .includes(group.name)
             );
         }
 
