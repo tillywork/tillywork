@@ -139,6 +139,21 @@ export const useCommands = () => {
             },
           }),
       },
+      {
+        section: 'Settings',
+        icon: 'mdi-form-select',
+        title: 'Custom fields',
+        action: () =>
+          dialog.openDialog({
+            dialog: DIALOGS.SETTINGS,
+            options: {
+              fullscreen: true,
+            },
+            data: {
+              activeTab: SettingsTabs.FIELDS,
+            },
+          }),
+      },
     ];
 
     // ~ Documentation

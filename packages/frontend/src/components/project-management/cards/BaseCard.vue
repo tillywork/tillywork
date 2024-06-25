@@ -18,6 +18,8 @@ import { useFieldsService } from '@/composables/services/useFieldsService';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { FieldTypes, type Field } from '../fields/types';
 import { useStateStore } from '@/stores/state';
+import { useDialogStore } from '@/stores/dialog';
+import { DIALOGS, SettingsTabs } from '@/components/common/dialogs/types';
 
 const props = defineProps<{
   card: Card;
@@ -38,6 +40,7 @@ const { useFieldsQuery } = useFieldsService();
 const snackbar = useSnackbarStore();
 const stateStore = useStateStore();
 const { isInfoDrawerOpen } = storeToRefs(stateStore);
+const dialog = useDialogStore();
 
 const { mutateAsync: updateCard, isPending: isUpdating } =
   cardsService.useUpdateCardMutation();
@@ -239,6 +242,18 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
     });
   });
 }
+
+function openSettingsDialog(activeTab: SettingsTabs) {
+  dialog.openDialog({
+    dialog: DIALOGS.SETTINGS,
+    data: {
+      activeTab,
+    },
+    options: {
+      fullscreen: true,
+    },
+  });
+}
 </script>
 
 <template>
@@ -313,7 +328,15 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
     </div>
     <v-navigation-drawer v-model="isInfoDrawerOpen" width="350" location="end">
       <v-card>
-        <v-card-text>Properties</v-card-text>
+        <div class="pa-4 d-flex align-center">
+          Properties
+          <v-spacer />
+          <base-icon-btn
+            @click="openSettingsDialog(SettingsTabs.FIELDS)"
+            icon="mdi-pencil"
+            v-tooltip="'Edit fields'"
+          />
+        </div>
         <v-card-text>
           <div class="d-flex align-center mb-4">
             <p class="field-label text-caption">Stage</p>
