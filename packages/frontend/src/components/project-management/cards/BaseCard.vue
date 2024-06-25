@@ -414,7 +414,15 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
                     autocomplete="off"
                     chips
                     auto-select-first
-                  />
+                  >
+                    <template #chip="{ item, props }">
+                      <v-chip
+                        v-bind="props"
+                        :color="item.raw.color"
+                        variant="flat"
+                      />
+                    </template>
+                  </v-autocomplete>
                 </template>
                 <template v-else-if="field.type === FieldTypes.DATE">
                   <base-date-picker

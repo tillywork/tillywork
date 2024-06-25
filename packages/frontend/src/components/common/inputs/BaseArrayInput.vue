@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import BaseColorPicker from './BaseColorPicker.vue';
+
 type Item = string | { [key: string]: any };
 
 const props = defineProps<{
@@ -6,6 +8,7 @@ const props = defineProps<{
   itemType: 'string' | 'object';
   /** If array of objects, define the key to use as value */
   itemValue?: string;
+  itemColor?: boolean;
 }>();
 
 const value = defineModel<Item[]>();
@@ -83,7 +86,11 @@ watch(
               v-model="value[index][props.itemValue]"
               hide-details
               :placeholder="`Item ${index + 1}`"
-            />
+            >
+              <template #prepend-inner>
+                <base-color-picker v-model="value[index].color" icon />
+              </template>
+            </v-text-field>
           </template>
           <template #append>
             <base-icon-btn
