@@ -8,6 +8,7 @@ const router = useRouter();
 defineProps<{
   list: List;
 }>();
+
 const freezeListHoverId = ref<number | null>();
 
 function handleListClick(list: List) {

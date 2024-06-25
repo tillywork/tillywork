@@ -6,19 +6,15 @@ import { DIALOGS, SettingsTabs, type SettingsTab } from './types';
 import type { CardType } from '@/components/project-management/cards/types';
 import { useLogo } from '@/composables/useLogo';
 import { useDialogStore } from '@/stores/dialog';
+import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
+import { cloneDeep } from 'lodash';
+import { useSnackbarStore } from '@/stores/snackbar';
+import { VForm } from 'vuetify/components';
+import objectUtils from '@/utils/object';
 
 const dialog = useDialogStore();
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
-const { useFindAllQuery } = useCardTypesService();
-
-const currentDialogIndex = computed(() =>
-  dialog.getDialogIndex(DIALOGS.SETTINGS)
-);
-const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
-
-const { data: cardTypes } = useFindAllQuery({
-  workspaceId: selectedWorkspace.value!.id,
-});
+const snackbar = useSnackbarStore();
 
 const tabs = ref<SettingsTab[]>([
   {
@@ -27,11 +23,50 @@ const tabs = ref<SettingsTab[]>([
     value: SettingsTabs.THEME,
   },
   {
+    icon: 'mdi-briefcase-outline',
+    text: 'Workspace',
+    value: SettingsTabs.WORKSPACE,
+  },
+  {
     icon: 'mdi-toy-brick-outline',
     text: 'Card Types',
     value: SettingsTabs.CARD_TYPES,
   },
 ]);
+
+const currentDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.SETTINGS)
+);
+const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
+
+const { useFindAllQuery } = useCardTypesService();
+const { data: cardTypes } = useFindAllQuery({
+  workspaceId: selectedWorkspace.value!.id,
+});
+
+const selectedWorkspaceCopy = ref(cloneDeep(selectedWorkspace.value));
+const workspaceForm = ref<VForm>();
+const workspacesService = useWorkspacesService();
+const updateWorkspaceMutation = workspacesService.useUpdateWorkspaceMutation();
+const isWorkspaceFormDisabled = computed(() =>
+  objectUtils.isEqual(selectedWorkspace.value!, selectedWorkspaceCopy.value!)
+);
+
+async function saveWorkspace() {
+  const isValid = await workspaceForm.value?.validate();
+
+  if (!isValid?.valid) {
+    return;
+  }
+
+  updateWorkspaceMutation.mutateAsync(selectedWorkspaceCopy.value!).then(() => {
+    snackbar.showSnackbar({
+      message: 'Workspace updated.',
+      color: 'success',
+      timeout: 2000,
+    });
+  });
+}
 
 function openCreateCardTypeDialog() {
   dialog.openDialog({
@@ -59,6 +94,12 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
     ? useLogo().getCheckUrl()
     : cardType.createdBy.photo;
 }
+
+watch(selectedWorkspace, (v) => {
+  if (v) {
+    selectedWorkspaceCopy.value = cloneDeep(v);
+  }
+});
 </script>
 
 <template>
@@ -82,7 +123,7 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
         height="50"
         center-active
         mandatory
-        :model-value="currentDialog?.data?.activeTab ?? 'theme'"
+        :model-value="currentDialog?.data?.activeTab ?? SettingsTabs.THEME"
       >
         <template #tab="{ item }">
           <v-tab
@@ -90,7 +131,7 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
             :text="item.text"
             :value="item.value"
             class="text-none"
-          ></v-tab>
+          />
         </template>
         <template #item.theme>
           <v-card>
@@ -102,6 +143,35 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
                   <base-theme-switch />
                 </v-list-item>
               </v-list>
+            </v-card-text>
+          </v-card>
+        </template>
+        <!-- TODO: Warn user when he closes the dialog without saving. -->
+        <template #item.workspace>
+          <v-card min-width="300">
+            <v-card-title class="d-flex align-center">
+              Workspace settings
+            </v-card-title>
+            <v-card-subtitle>Update your current workspace.</v-card-subtitle>
+            <v-card-text>
+              <v-form ref="workspaceForm" @submit.prevent="saveWorkspace">
+                <v-text-field
+                  v-model="selectedWorkspaceCopy!.name"
+                  label="Name"
+                  hide-details
+                  variant="filled"
+                />
+                <div class="d-flex justify-end">
+                  <v-btn
+                    variant="flat"
+                    class="mt-4"
+                    type="submit"
+                    :disabled="isWorkspaceFormDisabled"
+                  >
+                    Save
+                  </v-btn>
+                </div>
+              </v-form>
             </v-card-text>
           </v-card>
         </template>
