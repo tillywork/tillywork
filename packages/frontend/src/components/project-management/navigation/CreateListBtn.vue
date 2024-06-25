@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { DIALOGS } from '@/components/common/dialogs/types';
+import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
 import type { Space } from '../spaces/types';
 import { useDialogStore } from '@/stores/dialog';
 
@@ -14,8 +14,7 @@ function openCreateListDialog() {
     dialog: DIALOGS.UPSERT_LIST,
     data: {
       space: props.space,
-      // ~ Upsertion
-      mode: 'Create',
+      mode: UpsertDialogMode.CREATE,
     },
   });
 }

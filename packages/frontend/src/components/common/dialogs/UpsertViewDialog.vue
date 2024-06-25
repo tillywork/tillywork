@@ -7,16 +7,13 @@ import {
   type View,
 } from '@/components/project-management/views/types';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { useQueryClient } from '@tanstack/vue-query';
 import { useDialogStore } from '@/stores/dialog';
-import { DIALOGS } from './types';
-import { cloneDeep } from 'lodash';
+import { DIALOGS, UpsertDialogMode } from './types';
 
 const viewsService = useViewsService();
 const dialog = useDialogStore();
 const { rules } = validationUtils;
 const { showSnackbar } = useSnackbarStore();
-const queryClient = useQueryClient();
 
 const currentDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.UPSERT_VIEW)
@@ -60,36 +57,20 @@ async function handleCreate() {
 
   try {
     switch (currentDialog.value.data.mode) {
-      case 'Create':
-        createView(viewDto.value).then(() => {
-          dialog.closeDialog(currentDialogIndex.value);
-          queryClient.invalidateQueries({
-            queryKey: ['list', currentDialog.value?.data.list.id],
-          });
+      case UpsertDialogMode.CREATE:
+        await createView(viewDto.value);
+        break;
+
+      case UpsertDialogMode.UPDATE: {
+        await updateView({
+          ...view.value,
+          ...viewDto.value,
         });
         break;
-
-      case 'Update':
-        // - nothing has changed
-        // NOTE: Thanks to validation, we already know we aren't getting an empty values.
-        if (
-          viewDto.value.name === view.value.name &&
-          viewDto.value.type === view.value.type
-        ) {
-          dialog.closeDialog(currentDialogIndex.value);
-          break;
-        }
-
-        {
-          const viewCopy = cloneDeep(view.value);
-          viewCopy.name = viewDto.value.name!;
-          viewCopy.type = viewDto.value.type!;
-          updateView(viewCopy).then(() => {
-            dialog.closeDialog(currentDialogIndex.value);
-          });
-        }
-        break;
+      }
     }
+
+    dialog.closeDialog(currentDialogIndex.value);
   } catch {
     showSnackbar({
       message: 'Something went wrong, please try again.',
@@ -104,10 +85,8 @@ async function handleCreate() {
   <v-card color="surface" elevation="24" :loading="isCreating || isUpdating">
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle>
-        {{ currentDialog?.data.mode }} View
-        {{
-          !currentDialog?.data.view ? 'in ' + currentDialog?.data.list.name : ''
-        }}
+        <span class="text-capitalize">{{ currentDialog?.data.mode }}</span>
+        view
       </v-card-subtitle>
       <v-spacer />
       <base-icon-btn
@@ -127,7 +106,6 @@ async function handleCreate() {
         <v-select
           v-model="viewDto.type"
           label="Type*"
-          density="compact"
           :items="viewTypeOptions"
           :rules="[rules.required]"
         >
@@ -156,7 +134,11 @@ async function handleCreate() {
           type="submit"
           :loading="isCreating || isUpdating"
         >
-          {{ currentDialog?.data.mode }}
+          {{
+            currentDialog?.data.mode === UpsertDialogMode.CREATE
+              ? 'Create'
+              : 'Save'
+          }}
         </v-btn>
       </v-card-actions>
     </v-form>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ViewTypes, type View } from '../views/types';
 import type { List } from './types';
-import { DIALOGS } from '@/components/common/dialogs/types';
+import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { useViewsService } from '@/composables/services/useViewsService';
 import { useSnackbarStore } from '@/stores/snackbar';
@@ -60,8 +60,7 @@ function openCreateViewDialog() {
     dialog: DIALOGS.UPSERT_VIEW,
     data: {
       list: listCopy,
-      // ~ Upsertion
-      mode: 'Create',
+      mode: UpsertDialogMode.CREATE,
     },
   });
 }
@@ -71,8 +70,7 @@ function openUpdateViewDialog(view: View) {
     dialog: DIALOGS.UPSERT_VIEW,
     data: {
       view,
-      // ~ Upsertion
-      mode: 'Update',
+      mode: UpsertDialogMode.UPDATE,
     },
   });
 }

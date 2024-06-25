@@ -3,6 +3,7 @@ import {
   DIALOGS,
   DIALOG_WIDTHS,
   SettingsTabs,
+  UpsertDialogMode,
 } from '@/components/common/dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 import { useStateStore } from '@/stores/state';
@@ -15,7 +16,6 @@ export const useCommands = () => {
   const stateStore = useStateStore();
   const { setIsInputFocused } = stateStore;
   const { isInputFocused } = storeToRefs(stateStore);
-  const router = useRouter();
 
   /**
    * Handles building the commands array.
@@ -50,8 +50,7 @@ export const useCommands = () => {
               width: DIALOG_WIDTHS[DIALOGS.UPSERT_SPACE],
             },
             data: {
-              // ~ Upsertion
-              mode: 'Create',
+              mode: UpsertDialogMode.CREATE,
             },
           }),
         shortcut: ['S'],
@@ -70,6 +69,22 @@ export const useCommands = () => {
             },
           }),
         shortcut: ['W'],
+      },
+      {
+        section: 'Workspace',
+        icon: 'mdi-briefcase-edit',
+        title: 'Update current workspace',
+        action: () =>
+          dialog.openDialog({
+            dialog: DIALOGS.SETTINGS,
+            options: {
+              fullscreen: true,
+            },
+            data: {
+              activeTab: SettingsTabs.WORKSPACE,
+            },
+          }),
+        shortcut: ['F2'],
       },
 
       // ~ Settings
@@ -100,22 +115,6 @@ export const useCommands = () => {
               activeTab: SettingsTabs.THEME,
             },
           }),
-      },
-      {
-        section: 'Settings',
-        icon: 'mdi-briefcase-outline',
-        title: 'Workspace',
-        action: () =>
-          dialog.openDialog({
-            dialog: DIALOGS.SETTINGS,
-            options: {
-              fullscreen: true,
-            },
-            data: {
-              activeTab: SettingsTabs.WORKSPACE,
-            },
-          }),
-        shortcut: ['F2'],
       },
       {
         section: 'Settings',

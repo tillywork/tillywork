@@ -41,3 +41,8 @@ export enum SettingsTabs {
   WORKSPACE = 'workspace',
   CARD_TYPES = 'cardTypes',
 }
+
+export enum UpsertDialogMode {
+  CREATE = 'create',
+  UPDATE = 'update',
+}

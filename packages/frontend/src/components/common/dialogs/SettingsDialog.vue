@@ -9,27 +9,12 @@ import { useDialogStore } from '@/stores/dialog';
 import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
 import { cloneDeep } from 'lodash';
 import { useSnackbarStore } from '@/stores/snackbar';
+import { VForm } from 'vuetify/components';
+import objectUtils from '@/utils/object';
 
 const dialog = useDialogStore();
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
-const selectedWorkspaceCopy = cloneDeep(selectedWorkspace.value);
-const workspacesService = useWorkspacesService();
-const updateWorkspaceMutation = workspacesService.useUpdateWorkspaceMutation();
-
 const snackbar = useSnackbarStore();
-
-const { useFindAllQuery } = useCardTypesService();
-
-const currentDialogIndex = computed(() =>
-  dialog.getDialogIndex(DIALOGS.SETTINGS)
-);
-const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
-
-const { data: cardTypes } = useFindAllQuery({
-  workspaceId: selectedWorkspace.value!.id,
-});
-
-const workspaceName = ref(selectedWorkspace.value?.name);
 
 const tabs = ref<SettingsTab[]>([
   {
@@ -49,18 +34,38 @@ const tabs = ref<SettingsTab[]>([
   },
 ]);
 
-function saveNewWorkspaceName() {
-  const newName = workspaceName.value!.trim();
-  if (newName !== '' && newName !== selectedWorkspace.value!.name) {
-    selectedWorkspaceCopy!.name = newName;
-    updateWorkspaceMutation.mutateAsync(selectedWorkspaceCopy!).then(() => {
-      snackbar.showSnackbar({
-        message: 'Workspace name updated.',
-        color: 'success',
-        timeout: 2000,
-      });
-    });
+const currentDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.SETTINGS)
+);
+const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
+
+const { useFindAllQuery } = useCardTypesService();
+const { data: cardTypes } = useFindAllQuery({
+  workspaceId: selectedWorkspace.value!.id,
+});
+
+const selectedWorkspaceCopy = ref(cloneDeep(selectedWorkspace.value));
+const workspaceForm = ref<VForm>();
+const workspacesService = useWorkspacesService();
+const updateWorkspaceMutation = workspacesService.useUpdateWorkspaceMutation();
+const isWorkspaceFormDisabled = computed(() =>
+  objectUtils.isEqual(selectedWorkspace.value!, selectedWorkspaceCopy.value!)
+);
+
+async function saveWorkspace() {
+  const isValid = await workspaceForm.value?.validate();
+
+  if (!isValid?.valid) {
+    return;
   }
+
+  updateWorkspaceMutation.mutateAsync(selectedWorkspaceCopy.value!).then(() => {
+    snackbar.showSnackbar({
+      message: 'Workspace updated.',
+      color: 'success',
+      timeout: 2000,
+    });
+  });
 }
 
 function openCreateCardTypeDialog() {
@@ -89,6 +94,12 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
     ? useLogo().getCheckUrl()
     : cardType.createdBy.photo;
 }
+
+watch(selectedWorkspace, (v) => {
+  if (v) {
+    selectedWorkspaceCopy.value = cloneDeep(v);
+  }
+});
 </script>
 
 <template>
@@ -137,21 +148,30 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
         </template>
         <!-- TODO: Warn user when he closes the dialog without saving. -->
         <template #item.workspace>
-          <v-card min-width="500">
+          <v-card min-width="300">
             <v-card-title class="d-flex align-center">
-              {{ selectedWorkspace?.name }}
+              Workspace settings
             </v-card-title>
+            <v-card-subtitle>Update your current workspace.</v-card-subtitle>
             <v-card-text>
-              <v-text-field
-                v-model="workspaceName"
-                label="Name"
-                hide-details
-                variant="filled"
-                @keyup.enter="saveNewWorkspaceName"
-              />
-              <v-btn variant="flat" class="mt-1" @click="saveNewWorkspaceName">
-                Save
-              </v-btn>
+              <v-form ref="workspaceForm" @submit.prevent="saveWorkspace">
+                <v-text-field
+                  v-model="selectedWorkspaceCopy!.name"
+                  label="Name"
+                  hide-details
+                  variant="filled"
+                />
+                <div class="d-flex justify-end">
+                  <v-btn
+                    variant="flat"
+                    class="mt-4"
+                    type="submit"
+                    :disabled="isWorkspaceFormDisabled"
+                  >
+                    Save
+                  </v-btn>
+                </div>
+              </v-form>
             </v-card-text>
           </v-card>
         </template>

@@ -6,8 +6,7 @@ import validationUtils from '@/utils/validation';
 import type { Space } from '@/components/project-management/spaces/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
-import { DIALOGS } from './types';
-import { cloneDeep } from 'lodash';
+import { DIALOGS, UpsertDialogMode } from './types';
 
 const workspaceStore = useWorkspaceStore();
 const { selectedWorkspace } = storeToRefs(workspaceStore);
@@ -40,29 +39,20 @@ async function handleSubmitForm() {
 
   try {
     switch (currentDialog.value.data.mode) {
-      case 'Create':
-        createSpace(spaceDto.value).then(() => {
-          dialog.closeDialog(currentDialogIndex.value);
+      case UpsertDialogMode.CREATE:
+        await createSpace(spaceDto.value);
+        break;
+
+      case UpsertDialogMode.UPDATE: {
+        await updateSpace({
+          ...space.value,
+          ...spaceDto.value,
         });
         break;
-
-      case 'Update':
-        // - nothing has changed
-        // NOTE: Thanks to validation, we already know we aren't getting an empty string.
-        if (spaceDto.value.name === space.value.name) {
-          dialog.closeDialog(currentDialogIndex.value);
-          break;
-        }
-
-        {
-          const spaceCopy = cloneDeep(space.value);
-          spaceCopy.name = spaceDto.value.name!;
-          updateSpace(spaceCopy).then(() => {
-            dialog.closeDialog(currentDialogIndex.value);
-          });
-        }
-        break;
+      }
     }
+
+    dialog.closeDialog(currentDialogIndex.value);
   } catch {
     showSnackbar({
       message: 'Something went wrong, please try again.',
@@ -77,9 +67,8 @@ async function handleSubmitForm() {
   <v-card color="surface" elevation="24" :loading="isCreating || isUpdating">
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle>
-        {{ currentDialog?.data.mode }}
-        Space
-        {{ !currentDialog?.data.space ? 'in ' + selectedWorkspace?.name : '' }}
+        <span class="text-capitalize">{{ currentDialog?.data.mode }}</span>
+        space
       </v-card-subtitle>
       <v-spacer />
       <base-icon-btn
@@ -111,7 +100,11 @@ async function handleSubmitForm() {
           type="submit"
           :loading="isCreating || isUpdating"
         >
-          {{ currentDialog?.data.mode }}
+          {{
+            currentDialog?.data.mode === UpsertDialogMode.CREATE
+              ? 'Create'
+              : 'Save'
+          }}
         </v-btn>
       </v-card-actions>
     </v-form>

@@ -8,7 +8,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { useCardTypesService } from '@/composables/services/useCardTypesService';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { useDialogStore } from '@/stores/dialog';
-import { DIALOGS } from './types';
+import { DIALOGS, UpsertDialogMode } from './types';
 
 const listsService = useListsService();
 const dialog = useDialogStore();
@@ -47,37 +47,19 @@ async function handleSubmitForm() {
 
   try {
     switch (currentDialog.value.data.mode) {
-      case 'Create':
-        createList(listDto.value).then(() => {
-          dialog.closeDialog(currentDialogIndex.value);
-          queryClient.invalidateQueries({ queryKey: ['spaces'] });
-        });
+      case UpsertDialogMode.CREATE:
+        await createList(listDto.value);
         break;
-      case 'Update':
-        // - nothing has changed
-        // NOTE: Thanks to validation, we already know we aren't getting an empty values.
-        if (
-          listDto.value.name === list.value.name &&
-          listDto.value.defaultCardType === listDto.value.defaultCardType
-        ) {
-          dialog.closeDialog(currentDialogIndex.value);
-          break;
-        }
-
-        updateList({
+      case UpsertDialogMode.UPDATE:
+        await updateList({
           id: list.value.id,
           updateDto: listDto.value,
-        }).then(() => {
-          dialog.closeDialog(currentDialogIndex.value);
-          queryClient.invalidateQueries({ queryKey: ['spaces'] });
-          showSnackbar({
-            message: 'List updated.',
-            color: 'success',
-            timeout: 2000,
-          });
         });
         break;
     }
+
+    queryClient.invalidateQueries({ queryKey: ['spaces'] });
+    dialog.closeDialog(currentDialogIndex.value);
   } catch {
     showSnackbar({
       message: 'Something went wrong, please try again.',
@@ -92,11 +74,8 @@ async function handleSubmitForm() {
   <v-card color="surface" elevation="24" :loading="isCreating || isUpdating">
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle>
-        {{ currentDialog?.data.mode }}
-        List
-        {{
-          currentDialog?.data.space ? 'in ' + currentDialog.data.space.name : ''
-        }}
+        <span class="text-capitalize">{{ currentDialog?.data.mode }}</span>
+        list
       </v-card-subtitle>
       <v-spacer />
       <base-icon-btn
@@ -136,7 +115,11 @@ async function handleSubmitForm() {
           type="submit"
           :loading="isCreating || isUpdating"
         >
-          {{ currentDialog?.data.mode }}
+          {{
+            currentDialog?.data.mode === UpsertDialogMode.CREATE
+              ? 'Create'
+              : 'Save'
+          }}
         </v-btn>
       </v-card-actions>
     </v-form>

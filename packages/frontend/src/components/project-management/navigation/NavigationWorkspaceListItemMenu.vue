@@ -3,7 +3,7 @@ import type { List } from '../lists/types';
 import { useListsService } from '@/composables/services/useListsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
-import { DIALOGS } from '@/components/common/dialogs/types';
+import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
 import { useWorkspaceStore } from '@/stores/workspace';
 import type { CardType } from '../cards/types';
 import { useDialogStore } from '@/stores/dialog';
@@ -117,6 +117,17 @@ function openEditStagesDialog(list: List) {
   });
 }
 
+function openUpdateListDialog(list: List) {
+  dialog.openDialog({
+    dialog: DIALOGS.UPSERT_LIST,
+    data: {
+      list,
+      mode: UpsertDialogMode.UPDATE,
+    },
+  });
+  listMenu.value = false;
+}
+
 watch(listMenu, () => {
   if (!listMenu.value) {
     emit('hover:unfreeze');
@@ -136,10 +147,16 @@ watch(listMenu, () => {
     v-model="listMenu"
     target="#list-menu-btn"
     :close-on-content-click="false"
-    width="250"
+    width="220"
   >
     <v-card :loading="deleteListMutation.isPending.value">
       <v-list>
+        <v-list-item @click="openUpdateListDialog(list)">
+          <template #prepend>
+            <v-icon icon="mdi-playlist-edit" />
+          </template>
+          <v-list-item-title>Rename</v-list-item-title>
+        </v-list-item>
         <v-menu location="end" :close-on-content-click="false">
           <template #activator="{ props }">
             <v-list-item v-bind="props">
@@ -190,7 +207,7 @@ watch(listMenu, () => {
           <template #prepend>
             <v-icon icon="mdi-text-box-edit" />
           </template>
-          <v-list-item-title>Edit Stages</v-list-item-title>
+          <v-list-item-title>Edit stages</v-list-item-title>
         </v-list-item>
         <v-list-item class="text-error" @click="handleDeleteList(list)">
           <template #prepend>

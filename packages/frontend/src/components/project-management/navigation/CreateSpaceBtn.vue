@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { DIALOGS } from '@/components/common/dialogs/types';
+import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 
 const dialog = useDialogStore();
@@ -8,8 +8,7 @@ function openCreateSpaceDialog() {
   dialog.openDialog({
     dialog: DIALOGS.UPSERT_SPACE,
     data: {
-      // ~ Upsertion
-      mode: 'Create',
+      mode: UpsertDialogMode.CREATE,
     },
   });
 }
