@@ -4,6 +4,7 @@ import {
     IsNotEmpty,
     IsNumber,
     IsOptional,
+    IsString,
 } from "class-validator";
 import { FieldItem, FieldTypes } from "../types";
 
@@ -14,6 +15,10 @@ export class CreateFieldDto {
     @IsNotEmpty()
     @IsEnum(FieldTypes)
     type: FieldTypes;
+
+    @IsNotEmpty()
+    @IsString()
+    icon: string;
 
     @IsNotEmpty()
     @IsNumber()

@@ -75,7 +75,13 @@ const createActivityMutation = cardActivitiesService.useCreateActivityMutation({
 const updateCardListMutation = cardsService.useUpdateCardListMutation();
 
 const users = computed(() =>
-  usersQuery.data.value?.map((projectUser) => projectUser.user)
+  usersQuery.data.value?.map((projectUser) => {
+    const user = projectUser.user;
+    return {
+      ...user,
+      fullName: `${user.firstName} ${user.lastName}`,
+    };
+  })
 );
 
 const isCardLoading = computed(() => {
@@ -324,6 +330,7 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
               :users="users ?? []"
               @update:model-value="updateCardAssignees"
               label="Assign"
+              size="24"
             />
           </div>
           <div class="d-flex align-center my-4">
@@ -349,13 +356,16 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
           <template v-if="fields">
             <template v-for="field in fields" :key="field.id">
               <div class="d-flex align-center my-4">
-                <p class="field-label text-caption">{{ field.name }}</p>
+                <p class="field-label text-caption">
+                  {{ field.name }}
+                </p>
                 <template v-if="field.type === FieldTypes.TEXT">
                   <v-text-field
                     v-model="cardCopy.data[field.id]"
                     hide-details
                     :placeholder="field.name"
                     @update:model-value="(v) => updateFieldValue({ field, v })"
+                    :prepend-inner-icon="field.icon"
                   />
                 </template>
                 <template v-else-if="field.type === FieldTypes.DROPDOWN">
@@ -366,6 +376,7 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
                     item-value="item"
                     hide-details
                     :placeholder="field.name"
+                    :prepend-inner-icon="field.icon"
                     @update:model-value="
                       (v) =>
                         updateFieldValue({
@@ -386,6 +397,7 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
                     hide-details
                     :placeholder="field.name"
                     :multiple="field.multiple"
+                    :prepend-inner-icon="field.icon"
                     @update:model-value="
                       (v) =>
                         updateFieldValue({
@@ -395,15 +407,14 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
                     "
                     autocomplete="off"
                     chips
-                    persistent-clear
-                    :closable-chips="field.multiple || !field.required"
+                    auto-select-first
                   />
                 </template>
                 <template v-else-if="field.type === FieldTypes.DATE">
                   <base-date-picker
                     v-model="cardCopy.data[field.id]"
-                    icon="mdi-calendar"
-                    text-field
+                    class="text-body-2"
+                    :icon="field.icon ?? 'mdi-calendar'"
                     :label="field.name"
                     @update:model-value="
                       (v: string | string[]) =>
@@ -416,10 +427,12 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
                 </template>
                 <template v-else-if="field.type === FieldTypes.USER">
                   <base-user-selector
-                    :model-value="cardCopy.data[field.id] ? cardCopy.data[field.id].map((userIdAsString: string) => +userIdAsString) : []"
+                    :model-value="cardCopy.data[field.id]?.map((userIdAsString: string) => +userIdAsString)"
                     :users
                     :label="field.name"
                     return-id
+                    :icon="field.icon"
+                    size="24"
                     @update:model-value="
                       (users: number[]) => 
                         updateFieldValue({
@@ -459,7 +472,7 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
 }
 
 .field-label {
-  width: 120px;
+  width: 100px;
   flex-shrink: 0;
 }
 </style>

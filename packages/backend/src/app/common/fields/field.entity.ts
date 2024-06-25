@@ -25,6 +25,9 @@ export class Field {
     @Column({ type: "enum", enum: FieldTypes })
     type: FieldTypes;
 
+    @Column({ type: "varchar", length: 255 })
+    icon: string;
+
     @Column({ type: "boolean", default: false })
     required: boolean;
 

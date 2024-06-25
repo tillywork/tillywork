@@ -90,7 +90,7 @@ const fields = computed(() => {
         title: field.name,
         type: field.type,
         operator: getOperatorFromFieldType(field),
-        icon: 'mdi-account',
+        icon: field.icon,
         options: field.items,
       });
     });

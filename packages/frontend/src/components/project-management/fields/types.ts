@@ -2,6 +2,7 @@ export interface Field {
   id: number;
   name: string;
   type: FieldTypes;
+  icon: string;
   workspaceId: number;
   required: boolean;
   multiple: boolean;
@@ -11,6 +12,7 @@ export interface Field {
 export interface CreateFieldDto {
   name: string;
   type: FieldTypes;
+  icon: string;
   workspaceId: number;
   required?: boolean;
   multiple?: boolean;

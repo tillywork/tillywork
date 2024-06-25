@@ -27,6 +27,11 @@ export class RenamePropTableToFields1718818041867
                         enum: Object.values(FieldTypes),
                     },
                     {
+                        name: "icon",
+                        type: "varchar",
+                        length: "255",
+                    },
+                    {
                         name: "required",
                         type: "boolean",
                         default: false,

@@ -2,6 +2,7 @@
 import { useUsersService } from '@/composables/services/useUsersService';
 import stringUtils from '@/utils/string';
 import { type User } from '../users/types';
+import { cloneDeep } from 'lodash';
 
 const userMenu = defineModel('menu', {
   default: false,
@@ -23,6 +24,7 @@ const props = defineProps<{
   fill?: boolean;
   textField?: boolean;
   returnId?: boolean;
+  icon?: string;
 }>();
 
 const { getUserFullName } = useUsersService();
@@ -39,12 +41,12 @@ const searchedUsers = computed(() =>
 const selectedUsers = ref<User[]>(getSelectedUsersFromModel());
 
 const toggleUserSelection = (user: User) => {
-  const index = selectedUsers.value.findIndex((u) => u.id === user.id);
-
-  if (index === -1) {
+  if (!isUserSelected(user)) {
     // User is not in the array, add them
     selectedUsers.value = [...selectedUsers.value, user];
   } else {
+    const index = selectedUsers.value.findIndex((u) => u.id === user.id);
+
     // User is in the array, remove them
     selectedUsers.value = [
       ...selectedUsers.value.slice(0, index),
@@ -60,19 +62,21 @@ const isUserSelected = (user: User) => {
 
 function getSelectedUsersFromModel() {
   if (props.returnId) {
-    return value.value.map((id) =>
-      props.users.find((user) => user.id === id)
-    ) as User[];
+    return cloneDeep(
+      value.value.map((id) =>
+        props.users.find((user) => user.id === id)
+      ) as User[]
+    );
   } else {
-    return value.value as User[];
+    return cloneDeep(value.value as User[]);
   }
 }
 
 watch(selectedUsers, (v) => {
   if (props.returnId) {
-    value.value = [...v.map((user) => user.id)];
+    value.value = [...v.map((user) => cloneDeep(user.id))];
   } else {
-    value.value = [...v];
+    value.value = cloneDeep(v);
   }
 });
 </script>
@@ -100,9 +104,12 @@ watch(selectedUsers, (v) => {
           autocomplete="off"
           multiple
           width="90"
+          :prepend-inner-icon="icon"
+          chips
+          auto-select-first
         >
           <template #chip="{ item, props }">
-            <v-chip v-bind="props" rounded="large" color="primary" closable>
+            <v-chip v-bind="props" rounded="large">
               <template #prepend>
                 <base-avatar
                   :photo="item.raw.photo"
@@ -123,7 +130,8 @@ watch(selectedUsers, (v) => {
                   <base-avatar
                     :photo="item.raw.photo"
                     :text="getUserFullName(item.raw)"
-                    class="ms-1 text-caption"
+                    class="ms-1 text-xs"
+                    size="x-small"
                   />
                 </v-list-item-action>
               </template>
@@ -150,7 +158,7 @@ watch(selectedUsers, (v) => {
           <div v-if="selectedUsers.length === 0">
             <base-icon-btn
               v-bind="menuProps"
-              icon="mdi-account"
+              :icon="icon ?? 'mdi-account'"
               v-if="!label"
               @click.prevent
             />
@@ -164,7 +172,7 @@ watch(selectedUsers, (v) => {
               @click.prevent
             >
               <template #prepend>
-                <v-icon icon="mdi-account" :size="size ?? 'small'" />
+                <v-icon :icon="icon ?? 'mdi-account'" size="small" />
               </template>
               {{ label }}
             </v-btn>

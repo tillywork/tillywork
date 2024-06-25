@@ -10,6 +10,7 @@ import { cloneDeep } from 'lodash';
 import { VForm } from 'vuetify/components';
 import { FieldTypes } from '@/components/project-management/fields/types';
 import BaseArrayInput from '../../inputs/BaseArrayInput.vue';
+import BaseIconSelector from '../../inputs/BaseIconSelector/BaseIconSelector.vue';
 import { useSnackbarStore } from '@/stores/snackbar';
 
 const selectedField = ref<Field>();
@@ -111,7 +112,12 @@ watch(selectedField, (v) => {
             },
           ]"
           @click:row="handleFieldClick"
-        />
+        >
+          <template #name="{ row }">
+            <v-icon :icon="row.original.icon" class="me-4" />
+            <span class="text-body-2">{{ row.original.name }}</span>
+          </template>
+        </base-table>
       </v-card-text>
     </template>
     <template v-else>
@@ -130,7 +136,11 @@ watch(selectedField, (v) => {
         <v-card-item>
           <v-card-subtitle class="mb-2">General</v-card-subtitle>
 
-          <v-text-field v-model="fieldDto.name" label="Field name*" />
+          <v-text-field v-model="fieldDto.name" label="Field name*">
+            <template #prepend-inner>
+              <base-icon-selector v-model="fieldDto.icon" />
+            </template>
+          </v-text-field>
 
           <v-autocomplete
             v-model="fieldDto.type"
