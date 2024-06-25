@@ -20,6 +20,7 @@ export interface FindAllParams {
     limit?: number;
     sortBy?: string;
     sortOrder?: "ASC" | "DESC";
+    ignoreCompleted?: boolean;
     filters?: QueryFilter;
 }
 
@@ -38,6 +39,7 @@ export class CardsService {
         limit = 10,
         sortBy = "cardLists.order",
         sortOrder = "ASC",
+        ignoreCompleted,
         filters,
     }: FindAllParams): Promise<CardFindAllResult> {
         const skip = (page - 1) * limit;
@@ -70,6 +72,13 @@ export class CardsService {
                 ],
             },
         };
+        if (ignoreCompleted) {
+            listFilter.where.and.push({
+                field: "cardLists.listStage.isCompleted",
+                operator: "eq",
+                value: false,
+            });
+        }
 
         let where: FindOptionsWhere<Card>;
         if (filters) {
