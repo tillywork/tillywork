@@ -84,6 +84,8 @@ const filters = computed<QueryFilter>(() => {
   }
 });
 
+const ignoreCompleted = computed<boolean>(() => props.view.ignoreCompleted);
+
 const cards = ref<Card[]>([]);
 const total = ref(0);
 
@@ -91,6 +93,7 @@ const { fetchNextPage, isFetching, hasNextPage, refetch, data } =
   cardsService.useGetGroupCardsInfinite({
     listId: groupCopy.value.original.listId,
     groupId: groupCopy.value.original.id,
+    ignoreCompleted,
     filters,
     sortBy,
   });
