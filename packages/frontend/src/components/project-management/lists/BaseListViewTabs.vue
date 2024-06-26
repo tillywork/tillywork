@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ViewTypes, type View } from '../views/types';
 import type { List } from './types';
-import { DIALOGS } from '@/components/common/dialogs/types';
+import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { useViewsService } from '@/composables/services/useViewsService';
 import { useSnackbarStore } from '@/stores/snackbar';
@@ -57,9 +57,20 @@ function getViewIconByType(type: ViewTypes) {
 
 function openCreateViewDialog() {
   dialog.openDialog({
-    dialog: DIALOGS.CREATE_VIEW,
+    dialog: DIALOGS.UPSERT_VIEW,
     data: {
       list: listCopy,
+      mode: UpsertDialogMode.CREATE,
+    },
+  });
+}
+
+function openUpdateViewDialog(view: View) {
+  dialog.openDialog({
+    dialog: DIALOGS.UPSERT_VIEW,
+    data: {
+      view,
+      mode: UpsertDialogMode.UPDATE,
     },
   });
 }
@@ -126,6 +137,7 @@ watch(
     <template v-for="view in views" :key="view.id">
       <v-hover #="{ isHovering, props }">
         <v-btn
+          :id="'list-view-tab-' + view.id"
           v-bind="props"
           rounded="0"
           variant="text"
@@ -176,6 +188,12 @@ watch(
                       <v-icon icon="mdi-delete" />
                     </template>
                     <v-list-item-title>Delete</v-list-item-title>
+                  </v-list-item>
+                  <v-list-item @click="openUpdateViewDialog(view)">
+                    <template #prepend>
+                      <v-icon icon="mdi-text-box-edit-outline" />
+                    </template>
+                    <v-list-item-title>Update</v-list-item-title>
                   </v-list-item>
                 </v-list>
               </v-card>

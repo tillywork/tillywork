@@ -38,14 +38,14 @@ export const DEFAULT_SORT_OPTIONS: ListSortOption[] = [
   {
     label: 'Creation Date',
     value: {
-      key: 'createdAt',
+      key: 'card.createdAt',
       order: 'ASC',
     },
   },
   {
     label: 'Due Date',
     value: {
-      key: 'dueAt',
+      key: 'card.dueAt',
       order: 'ASC',
     },
   },

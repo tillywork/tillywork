@@ -54,6 +54,9 @@ const vuetify = createVuetify({
     VTextField: {
       color: 'primary',
       density: 'compact',
+      VIcon: {
+        size: 'x-small',
+      },
     },
     VDataTable: {
       density: 'compact',
@@ -67,6 +70,9 @@ const vuetify = createVuetify({
       VListItem: {
         VListItemTitle: {
           class: 'text-body-2',
+        },
+        VIcon: {
+          size: 'x-small',
         },
       },
     },
@@ -84,12 +90,24 @@ const vuetify = createVuetify({
     },
     VIcon: {
       size: 'small',
+      style: 'opacity: 0.9',
     },
     VSelect: {
       density: 'compact',
     },
     VAutocomplete: {
       density: 'compact',
+    },
+    VCombobox: {
+      density: 'compact',
+    },
+    VCheckbox: {
+      density: 'compact',
+      color: 'primary',
+      hideDetails: true,
+    },
+    VChip: {
+      rounded: 'md',
     },
   },
 });

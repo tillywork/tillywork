@@ -37,7 +37,7 @@ export class Card {
     type: Relation<CardType>;
 
     @Column({ type: "jsonb", default: {} })
-    data: any;
+    data: Record<number, any>;
 
     @OneToMany(() => CardList, (cardList) => cardList.card)
     cardLists: Relation<CardList[]>;

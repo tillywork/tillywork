@@ -1,24 +1,22 @@
 <script setup lang="ts">
-import BaseThemeSwitch from '../base/BaseThemeSwitch.vue';
+import BaseThemeSwitch from '../../base/BaseThemeSwitch.vue';
 import { useCardTypesService } from '@/composables/services/useCardTypesService';
 import { useWorkspaceStore } from '@/stores/workspace';
-import { DIALOGS, SettingsTabs, type SettingsTab } from './types';
+import { DIALOGS, SettingsTabs, type SettingsTab } from '../types';
 import type { CardType } from '@/components/project-management/cards/types';
 import { useLogo } from '@/composables/useLogo';
 import { useDialogStore } from '@/stores/dialog';
+import SettingsDialogFieldsTab from './SettingsDialogFieldsTab.vue';
+import BaseTable from '../../tables/BaseTable/BaseTable.vue';
+import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
+import { cloneDeep } from 'lodash';
+import { useSnackbarStore } from '@/stores/snackbar';
+import { VForm } from 'vuetify/components';
+import objectUtils from '@/utils/object';
 
 const dialog = useDialogStore();
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
-const { useFindAllQuery } = useCardTypesService();
-
-const currentDialogIndex = computed(() =>
-  dialog.getDialogIndex(DIALOGS.SETTINGS)
-);
-const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
-
-const { data: cardTypes } = useFindAllQuery({
-  workspaceId: selectedWorkspace.value!.id,
-});
+const snackbar = useSnackbarStore();
 
 const tabs = ref<SettingsTab[]>([
   {
@@ -27,11 +25,55 @@ const tabs = ref<SettingsTab[]>([
     value: SettingsTabs.THEME,
   },
   {
+    icon: 'mdi-briefcase-outline',
+    text: 'Workspace',
+    value: SettingsTabs.WORKSPACE,
+  },
+  {
     icon: 'mdi-toy-brick-outline',
     text: 'Card Types',
     value: SettingsTabs.CARD_TYPES,
   },
+  {
+    icon: 'mdi-form-select',
+    text: 'Custom Fields',
+    value: SettingsTabs.FIELDS,
+  },
 ]);
+
+const currentDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.SETTINGS)
+);
+const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
+
+const { useFindAllQuery } = useCardTypesService();
+const { data: cardTypes } = useFindAllQuery({
+  workspaceId: selectedWorkspace.value!.id,
+});
+
+const selectedWorkspaceCopy = ref(cloneDeep(selectedWorkspace.value));
+const workspaceForm = ref<VForm>();
+const workspacesService = useWorkspacesService();
+const updateWorkspaceMutation = workspacesService.useUpdateWorkspaceMutation();
+const isWorkspaceFormDisabled = computed(() =>
+  objectUtils.isEqual(selectedWorkspace.value!, selectedWorkspaceCopy.value!)
+);
+
+async function saveWorkspace() {
+  const isValid = await workspaceForm.value?.validate();
+
+  if (!isValid?.valid) {
+    return;
+  }
+
+  updateWorkspaceMutation.mutateAsync(selectedWorkspaceCopy.value!).then(() => {
+    snackbar.showSnackbar({
+      message: 'Workspace updated.',
+      color: 'success',
+      timeout: 2000,
+    });
+  });
+}
 
 function openCreateCardTypeDialog() {
   dialog.openDialog({
@@ -59,6 +101,12 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
     ? useLogo().getCheckUrl()
     : cardType.createdBy.photo;
 }
+
+watch(selectedWorkspace, (v) => {
+  if (v) {
+    selectedWorkspaceCopy.value = cloneDeep(v);
+  }
+});
 </script>
 
 <template>
@@ -82,7 +130,7 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
         height="50"
         center-active
         mandatory
-        :model-value="currentDialog?.data?.activeTab ?? 'theme'"
+        :model-value="currentDialog?.data?.activeTab ?? SettingsTabs.THEME"
       >
         <template #tab="{ item }">
           <v-tab
@@ -90,7 +138,7 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
             :text="item.text"
             :value="item.value"
             class="text-none"
-          ></v-tab>
+          />
         </template>
         <template #item.theme>
           <v-card>
@@ -105,6 +153,35 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
             </v-card-text>
           </v-card>
         </template>
+        <!-- TODO: Warn user when he closes the dialog without saving. -->
+        <template #item.workspace>
+          <v-card min-width="300">
+            <v-card-title class="d-flex align-center">
+              Workspace settings
+            </v-card-title>
+            <v-card-subtitle>Update your current workspace.</v-card-subtitle>
+            <v-card-text>
+              <v-form ref="workspaceForm" @submit.prevent="saveWorkspace">
+                <v-text-field
+                  v-model="selectedWorkspaceCopy!.name"
+                  label="Name"
+                  hide-details
+                  variant="filled"
+                />
+                <div class="d-flex justify-end">
+                  <v-btn
+                    variant="flat"
+                    class="mt-4"
+                    type="submit"
+                    :disabled="isWorkspaceFormDisabled"
+                  >
+                    Save
+                  </v-btn>
+                </div>
+              </v-form>
+            </v-card-text>
+          </v-card>
+        </template>
         <template #item.cardTypes>
           <v-card min-width="500">
             <v-card-title class="d-flex align-center">
@@ -116,38 +193,42 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
               contacts, or whatever you need them to be.</v-card-subtitle
             >
             <v-card-text>
-              <v-data-table
-                class="border-thin rounded-md"
-                :items="cardTypes"
-                :headers="[
+              <base-table
+                :data="cardTypes ?? []"
+                :columns="[
                   {
-                    value: 'actions',
-                    width: 50,
+                    id: 'actions',
+                    size: 50,
                   },
                   {
-                    title: 'Name',
-                    value: 'name',
+                    id: 'name',
+                    header: 'Name',
+                    accessorKey: 'name',
                   },
                   {
-                    title: 'Created By',
-                    value: 'createdBy',
+                    id: 'createdBy',
+                    header: 'Created By',
+                    accessorKey: 'createdBy',
+                    size: 300,
                   },
                 ]"
-                :hide-default-footer="true"
               >
-                <template #item.name="{ item }">
+                <template #name="{ row }">
                   <span>
-                    {{ item.name }}
+                    {{ row.original.name }}
                     <span
-                      v-if="selectedWorkspace?.defaultCardType?.id === item.id"
+                      v-if="
+                        selectedWorkspace?.defaultCardType?.id ===
+                        row.original.id
+                      "
                       class="text-color-subtitle"
                     >
                       (default)
                     </span>
                   </span>
                 </template>
-                <template #item.actions="{ item }">
-                  <v-menu v-if="item.createdByType === 'user'">
+                <template #actions="{ row }">
+                  <v-menu v-if="row.original.createdByType === 'user'">
                     <template #activator="{ props }">
                       <base-icon-btn v-bind="props" icon="mdi-dots-vertical" />
                     </template>
@@ -161,7 +242,7 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
                         </v-list-item> -->
                         <v-list-item
                           class="text-error"
-                          @click="openRemoveCardTypeDialog(item)"
+                          @click="openRemoveCardTypeDialog(row.original)"
                         >
                           <template #prepend>
                             <v-icon size="x-small" icon="mdi-delete" />
@@ -172,24 +253,29 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
                     </v-card>
                   </v-menu>
                 </template>
-                <template #item.createdBy="{ item }">
+                <template #createdBy="{ row }">
                   <v-card class="py-2">
                     <base-avatar
-                      :photo="getCardTypeCreatedByPhoto(item)"
-                      :text="getCardTypeCreatedByName(item)"
+                      :photo="getCardTypeCreatedByPhoto(row.original)"
+                      :text="getCardTypeCreatedByName(row.original)"
                       rounded="circle"
                       :class="
-                        item.createdByType === 'system' ? 'pa-1 bg-accent' : ''
+                        row.original.createdByType === 'system'
+                          ? 'pa-1 bg-accent'
+                          : ''
                       "
                     />
                     <span class="text-body-2 ms-3">
-                      {{ getCardTypeCreatedByName(item) }}
+                      {{ getCardTypeCreatedByName(row.original) }}
                     </span>
                   </v-card>
                 </template>
-              </v-data-table>
+              </base-table>
             </v-card-text>
           </v-card>
+        </template>
+        <template #item.fields>
+          <settings-dialog-fields-tab />
         </template>
       </v-tabs>
     </v-card-text>

@@ -2,6 +2,7 @@
 import { useUsersService } from '@/composables/services/useUsersService';
 import stringUtils from '@/utils/string';
 import { type User } from '../users/types';
+import { cloneDeep } from 'lodash';
 
 const userMenu = defineModel('menu', {
   default: false,
@@ -23,6 +24,7 @@ const props = defineProps<{
   fill?: boolean;
   textField?: boolean;
   returnId?: boolean;
+  icon?: string;
 }>();
 
 const { getUserFullName } = useUsersService();
@@ -33,19 +35,18 @@ const searchedUsers = computed(() =>
       // Searches for a matching name.
       stringUtils.fuzzySearch(searchTerm.value, getUserFullName(user)) ||
       // Searches for a matching email.
-      // HMMM: What should we prioritize, name or email searching?
       stringUtils.fuzzySearch(searchTerm.value, user.email)
   )
 );
 const selectedUsers = ref<User[]>(getSelectedUsersFromModel());
 
 const toggleUserSelection = (user: User) => {
-  const index = selectedUsers.value.findIndex((u) => u.id === user.id);
-
-  if (index === -1) {
+  if (!isUserSelected(user)) {
     // User is not in the array, add them
     selectedUsers.value = [...selectedUsers.value, user];
   } else {
+    const index = selectedUsers.value.findIndex((u) => u.id === user.id);
+
     // User is in the array, remove them
     selectedUsers.value = [
       ...selectedUsers.value.slice(0, index),
@@ -61,19 +62,21 @@ const isUserSelected = (user: User) => {
 
 function getSelectedUsersFromModel() {
   if (props.returnId) {
-    return value.value.map((id) =>
-      props.users.find((user) => user.id === id)
-    ) as User[];
+    return cloneDeep(
+      value.value.map((id) =>
+        props.users.find((user) => user.id === id)
+      ) as User[]
+    );
   } else {
-    return value.value as User[];
+    return cloneDeep(value.value as User[]);
   }
 }
 
 watch(selectedUsers, (v) => {
   if (props.returnId) {
-    value.value = v.map((user) => user.id);
+    value.value = [...v.map((user) => cloneDeep(user.id))];
   } else {
-    value.value = [...v];
+    value.value = cloneDeep(v);
   }
 });
 </script>
@@ -84,7 +87,7 @@ watch(selectedUsers, (v) => {
       <template v-if="textField">
         <v-autocomplete
           :label="label ?? 'Select'"
-          placeholder="Search by name"
+          placeholder="Search..."
           v-model="selectedUsers"
           :items="
             users.map((user) => {
@@ -101,21 +104,18 @@ watch(selectedUsers, (v) => {
           autocomplete="off"
           multiple
           width="90"
+          :prepend-inner-icon="icon"
+          chips
+          auto-select-first
         >
           <template #chip="{ item, props }">
-            <v-chip
-              v-bind="props"
-              rounded="large"
-              density="comfortable"
-              color="primary"
-              closable
-            >
+            <v-chip v-bind="props" rounded="large">
               <template #prepend>
                 <base-avatar
                   :photo="item.raw.photo"
                   :text="getUserFullName(item.raw)"
-                  class="text-xs"
-                  size="16"
+                  class="text-xs ms-n1"
+                  size="x-small"
                 />
               </template>
               <span class="text-caption ms-2">{{
@@ -130,7 +130,8 @@ watch(selectedUsers, (v) => {
                   <base-avatar
                     :photo="item.raw.photo"
                     :text="getUserFullName(item.raw)"
-                    class="ms-1 text-caption"
+                    class="ms-1 text-xs"
+                    size="x-small"
                   />
                 </v-list-item-action>
               </template>
@@ -147,17 +148,17 @@ watch(selectedUsers, (v) => {
       </template>
       <template v-else>
         <div
-          class="d-flex align-center justify-start rounded-md px-1 cursor-pointer fill-height"
+          class="d-flex align-center justify-start rounded-md cursor-pointer fill-height"
           :class="`${contentClass ? contentClass : ''} ${
             fill ? 'flex-fill' : ''
           }`"
           v-bind="menuProps"
           @click.prevent
         >
-          <div class="me-n1" v-if="selectedUsers.length === 0">
+          <div v-if="selectedUsers.length === 0">
             <base-icon-btn
               v-bind="menuProps"
-              icon="mdi-account"
+              :icon="icon ?? 'mdi-account'"
               v-if="!label"
               @click.prevent
             />
@@ -171,13 +172,13 @@ watch(selectedUsers, (v) => {
               @click.prevent
             >
               <template #prepend>
-                <v-icon icon="mdi-account" :size="size ?? 'small'" />
+                <v-icon :icon="icon ?? 'mdi-account'" size="small" />
               </template>
               {{ label }}
             </v-btn>
           </div>
           <template v-else>
-            <div class="ms-3 mt-1" @click.prevent>
+            <div @click.prevent>
               <template
                 v-for="(selectedUser, index) in selectedUsers"
                 :key="selectedUser.email + 'selected-user'"
@@ -188,8 +189,9 @@ watch(selectedUsers, (v) => {
                       v-bind="tooltipProps"
                       :photo="selectedUser.photo"
                       :text="getUserFullName(selectedUser)"
-                      class="ms-n1 text-caption"
-                      :size="size ?? 20"
+                      class="text-xs"
+                      :class="index > 0 ? 'ms-n1' : ''"
+                      :size
                       :style="`z-index: ${100 - index}`"
                     />
                   </template>
@@ -197,11 +199,6 @@ watch(selectedUsers, (v) => {
                     getUserFullName(selectedUser)
                   }}</span>
                 </v-tooltip>
-              </template>
-              <template v-if="showFirstNames">
-                <span class="ms-2 text-body-2 user-select-none">
-                  {{ selectedUsers.map((user) => user.firstName).join(', ') }}
-                </span>
               </template>
             </div>
           </template>
@@ -211,7 +208,7 @@ watch(selectedUsers, (v) => {
     <v-card width="250">
       <v-text-field
         v-if="!textField"
-        placeholder="Search"
+        placeholder="Search..."
         hide-details
         single-line
         autofocus
@@ -232,14 +229,11 @@ watch(selectedUsers, (v) => {
                 <base-avatar
                   :photo="user.photo"
                   :text="getUserFullName(user)"
-                  class="ms-1 text-caption"
+                  class="text-xs"
                 />
               </v-list-item-action>
             </template>
-            <v-list-item-title
-              class="user-select-none"
-              :class="isUserSelected(user) ? 'font-weight-bold' : ''"
-            >
+            <v-list-item-title class="user-select-none">
               {{ getUserFullName(user) }}
             </v-list-item-title>
             <template #append>

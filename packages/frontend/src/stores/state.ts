@@ -7,6 +7,8 @@ export const useStateStore = defineStore('state', {
       selectedModule: null as null | WorkspaceTypes,
       /** Is an input currently focused */
       isInputFocused: false,
+      /** Is information navigation drawer open */
+      isInfoDrawerOpen: true,
     };
   },
   actions: {
@@ -15,6 +17,9 @@ export const useStateStore = defineStore('state', {
     },
     setIsInputFocused(v: boolean) {
       this.isInputFocused = v;
+    },
+    toggleInfoDrawer() {
+      this.isInfoDrawerOpen = !this.isInfoDrawerOpen;
     },
   },
 });

@@ -68,7 +68,7 @@ const selectedRangeSuggestion = computed(() => {
   return DATE_RANGE_SUGGESTIONS.find((suggestion) => {
     return objectUtils.areArraysEqual(
       suggestion.value,
-      dateValue.value as string[]
+      (dateValue.value as string[]) ?? []
     );
   });
 });
@@ -178,11 +178,20 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
           readonly
           single-line
           hide-details
-        />
+        >
+          <template #prepend-inner v-if="icon">
+            <v-icon
+              size="x-small"
+              :icon
+              :color="dateDialog ? 'primary-darken-1' : ''"
+            />
+          </template>
+        </v-text-field>
       </template>
       <template v-else>
         <base-card-property-value-btn
           v-bind="props"
+          class="text-capitalize"
           :class="textClass"
           @click.prevent
         >

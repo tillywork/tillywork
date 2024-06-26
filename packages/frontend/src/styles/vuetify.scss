@@ -2,8 +2,10 @@
   padding: 2px 8px;
 }
 
-.v-field--focused .v-field__outline {
-  --v-field-border-width: 1px !important;
+.v-field--focused {
+  .v-field__outline {
+    --v-field-border-width: 1px !important;
+  }
 }
 
 .v-menu {

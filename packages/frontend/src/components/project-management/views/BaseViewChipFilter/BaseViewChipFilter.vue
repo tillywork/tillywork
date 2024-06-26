@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import BaseViewChip from '../BaseViewChip.vue';
 import BaseViewChipFilterItem from './BaseViewChipFilterItem.vue';
-import { PropTypes } from '../../props/types';
+import { FieldTypes, type Field } from '../../fields/types';
 import type { VForm } from 'vuetify/components';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
 import { useWorkspaceStore } from '@/stores/workspace';
-import type { QueryFilter, FieldFilter } from '../../filters/types';
+import type {
+  QueryFilter,
+  FieldFilter,
+  FilterOperator,
+} from '../../filters/types';
 import type { FieldFilterOption } from './types';
+import { useFieldsService } from '@/composables/services/useFieldsService';
 
 const props = defineProps<{
   filters?: QueryFilter;
@@ -26,21 +31,27 @@ const filtersCopy = ref<QueryFilter>(
 const isSnackbarOpen = ref(false);
 const snackbarId = ref<number>();
 
+const { useFieldsQuery } = useFieldsService();
 const { showSnackbar, closeSnackbar } = useSnackbarStore();
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
 const { useProjectUsersQuery } = useProjectUsersService();
+
 const { data: users } = useProjectUsersQuery({
   projectId: selectedWorkspace.value!.projectId,
   select: (projectUsers) => projectUsers.map((pj) => pj.user),
 });
 
-const fields = ref<FieldFilterOption[]>([
+const { data: workspaceFields } = useFieldsQuery({
+  workspaceId: selectedWorkspace.value!.id,
+});
+
+const defaultFields = ref<FieldFilterOption[]>([
   {
     title: 'Title',
-    field: 'title',
+    field: 'card.title',
     operator: 'eq',
     value: '',
-    type: PropTypes.TEXT,
+    type: FieldTypes.TEXT,
     icon: 'mdi-format-title',
   },
   //   {
@@ -48,15 +59,15 @@ const fields = ref<FieldFilterOption[]>([
   //     field: 'status',
   //     operator: 'eq',
   //     value: 'open',
-  //     type: PropTypes.DROPDOWN,
+  //     type: FieldTypes.DROPDOWN,
   //     icon: 'mdi-list-status',
   //   },
   {
     title: 'Due Date',
-    field: 'dueAt',
+    field: 'card.dueAt',
     operator: 'between',
     value: '',
-    type: PropTypes.DATE,
+    type: FieldTypes.DATE,
     icon: 'mdi-calendar-range',
   },
   {
@@ -64,10 +75,29 @@ const fields = ref<FieldFilterOption[]>([
     field: 'users.id',
     operator: 'in',
     value: [],
-    type: PropTypes.USER,
+    type: FieldTypes.USER,
     icon: 'mdi-account',
   },
 ]);
+
+const fields = computed(() => {
+  const fields: FieldFilterOption[] = [...defaultFields.value];
+
+  if (workspaceFields.value) {
+    workspaceFields.value.forEach((field) => {
+      fields.push({
+        field: `card.data.${field.id}`,
+        title: field.name,
+        type: field.type,
+        operator: getOperatorFromFieldType(field),
+        icon: field.icon,
+        options: field.items,
+      });
+    });
+  }
+
+  return fields;
+});
 
 const isFiltersFilled = computed(
   () => !!filtersCopy.value?.where && !!filtersCopy.value?.where?.and?.length
@@ -150,6 +180,20 @@ function closeSaveSnackbar() {
   if (snackbarId.value !== undefined) {
     closeSnackbar(snackbarId.value);
     snackbarId.value = undefined;
+  }
+}
+
+function getOperatorFromFieldType(field: Field): FilterOperator {
+  switch (field.type) {
+    case FieldTypes.USER:
+    case FieldTypes.DROPDOWN:
+    case FieldTypes.LABEL:
+      return 'in';
+    case FieldTypes.DATE:
+      return 'between';
+
+    default:
+      return 'eq';
   }
 }
 

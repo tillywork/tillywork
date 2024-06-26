@@ -3,7 +3,7 @@ import type { Space } from '../spaces/types';
 import { useSpacesService } from '@/composables/services/useSpacesService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
-import { DIALOGS } from '@/components/common/dialogs/types';
+import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 
 const spaceMenu = ref(false);
@@ -59,6 +59,17 @@ function deleteSpace(space: Space) {
     });
 }
 
+function openUpdateSpaceDialog(space: Space) {
+  dialog.openDialog({
+    dialog: DIALOGS.UPSERT_SPACE,
+    data: {
+      space,
+      mode: UpsertDialogMode.UPDATE,
+    },
+  });
+  spaceMenu.value = false;
+}
+
 watch(spaceMenu, () => {
   if (!spaceMenu.value) {
     emit('hover:unfreeze');
@@ -70,8 +81,7 @@ watch(spaceMenu, () => {
   <base-icon-btn
     id="space-menu-btn"
     icon="mdi-dots-vertical"
-    @click.stop
-    @click="handleSpaceMenuClick"
+    @click.stop="handleSpaceMenuClick"
     density="compact"
   />
 
@@ -82,6 +92,12 @@ watch(spaceMenu, () => {
   >
     <v-card :loading="deleteSpaceMutation.isPending.value">
       <v-list>
+        <v-list-item @click="openUpdateSpaceDialog(space)">
+          <template #prepend>
+            <v-icon icon="mdi-playlist-edit" />
+          </template>
+          <v-list-item-title>Rename</v-list-item-title>
+        </v-list-item>
         <v-list-item class="text-error" @click="handleDeleteSpace(space)">
           <template #prepend>
             <v-icon icon="mdi-delete" />

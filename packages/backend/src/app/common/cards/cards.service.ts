@@ -44,60 +44,33 @@ export class CardsService {
     }: FindAllParams): Promise<CardFindAllResult> {
         const skip = (page - 1) * limit;
         const take = limit != -1 ? limit : undefined;
-        let order;
 
-        if (sortBy && sortOrder) {
-            /**
-             * If the sortBy is e.g cardLists.order we want it to be:
-             * cardLists: {
-             *   order: 'ASC'
-             * }
-             */
-            const builtOrder = QueryBuilderHelper.createNestedObjectFromPath(
-                sortBy.split("."),
-                sortOrder
-            );
+        // Start building the query
+        const queryBuilder = this.cardsRepository
+            .createQueryBuilder("card")
+            .leftJoinAndSelect("card.cardLists", "cardLists")
+            .leftJoinAndSelect("cardLists.listStage", "listStage")
+            .leftJoinAndSelect("card.users", "users")
+            .where("cardLists.list.id = :listId", { listId });
 
-            order = builtOrder;
-        }
-
-        const listFilter: QueryFilter = {
-            where: {
-                and: [
-                    {
-                        field: "cardLists.list.id",
-                        operator: "eq",
-                        value: listId,
-                    },
-                ],
-            },
-        };
         if (ignoreCompleted) {
-            listFilter.where.and.push({
-                field: "cardLists.listStage.isCompleted",
-                operator: "eq",
-                value: false,
+            queryBuilder.andWhere("listStage.isCompleted = :isCompleted", {
+                isCompleted: false,
             });
         }
 
-        let where: FindOptionsWhere<Card>;
         if (filters) {
-            const combinedFilters: QueryFilter = ObjectHelper.deepMergeObjects(
-                listFilter,
-                filters
-            );
-            where = QueryBuilderHelper.buildQuery(combinedFilters.where);
-        } else {
-            where = QueryBuilderHelper.buildQuery(listFilter.where);
+            QueryBuilderHelper.buildQuery(queryBuilder, filters.where);
         }
 
-        const [cards, total] = await this.cardsRepository.findAndCount({
-            where,
-            relations: ["cardLists", "cardLists.listStage", "users"],
-            take: take,
-            skip: skip,
-            order: order,
-        });
+        if (sortBy && sortOrder) {
+            queryBuilder.addOrderBy(sortBy, sortOrder);
+        }
+
+        const [cards, total] = await queryBuilder
+            .take(take)
+            .skip(skip)
+            .getManyAndCount();
 
         return { cards, total };
     }

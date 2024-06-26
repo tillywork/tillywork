@@ -14,6 +14,13 @@ import BaseCardActivityTimeline from './BaseCardActivityTimeline.vue';
 import BaseCardCommentBox from './BaseCardCommentBox.vue';
 import { ActivityType, type ActivityContent, type Card } from './types';
 import { cloneDeep } from 'lodash';
+import { useFieldsService } from '@/composables/services/useFieldsService';
+import { useWorkspaceStore } from '@/stores/workspace';
+import { FieldTypes, type Field } from '../fields/types';
+import { useStateStore } from '@/stores/state';
+import { useDialogStore } from '@/stores/dialog';
+import { DIALOGS, SettingsTabs } from '@/components/common/dialogs/types';
+import BaseLabelSelector from '@/components/common/inputs/BaseLabelSelector.vue';
 
 const props = defineProps<{
   card: Card;
@@ -21,19 +28,44 @@ const props = defineProps<{
 }>();
 const emit = defineEmits(['click:close']);
 const authStore = useAuthStore();
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
 const cardCopy = ref<Card>(cloneDeep(props.card));
+const fields = ref<Field[]>([]);
 const comment = ref<Content>();
 const isCommentEmpty = ref<boolean>();
 const cardsService = useCardsService();
 const cardActivitiesService = useCardActivitiesService();
 const projectUsersService = useProjectUsersService();
 const listStagesService = useListStagesService();
+const { useFieldsQuery } = useFieldsService();
 const snackbar = useSnackbarStore();
+const stateStore = useStateStore();
+const { isInfoDrawerOpen } = storeToRefs(stateStore);
+const dialog = useDialogStore();
 
-const updateCardMutation = cardsService.useUpdateCardMutation();
+const { mutateAsync: updateCard, isPending: isUpdating } =
+  cardsService.useUpdateCardMutation();
 const usersQuery = projectUsersService.useProjectUsersQuery({
   projectId: authStore.project!.id,
 });
+const { data: workspaceFields } = useFieldsQuery({
+  workspaceId: selectedWorkspace.value!.id,
+});
+
+watch(
+  workspaceFields,
+  (v) => {
+    if (v) {
+      v.forEach(async (field) => {
+        const exists = fields.value.find((f) => f.id === field.id);
+        if (!exists) {
+          fields.value = [...fields.value, field];
+        }
+      });
+    }
+  },
+  { immediate: true }
+);
 
 const listId = computed(() => props.card.cardLists[0].listStage.listId);
 const listStagesQuery = listStagesService.useGetListStagesQuery({
@@ -46,13 +78,20 @@ const createActivityMutation = cardActivitiesService.useCreateActivityMutation({
 
 const updateCardListMutation = cardsService.useUpdateCardListMutation();
 
-const users = computed(() =>
-  usersQuery.data.value?.map((projectUser) => projectUser.user)
+const users = computed(
+  () =>
+    usersQuery.data.value?.map((projectUser) => {
+      const user = projectUser.user;
+      return {
+        ...user,
+        fullName: `${user.firstName} ${user.lastName}`,
+      };
+    }) ?? []
 );
 
 const isCardLoading = computed(() => {
   return (
-    updateCardMutation.isPending.value ||
+    isUpdating.value ||
     createActivityMutation.isPending.value ||
     updateCardListMutation.isPending.value
   );
@@ -76,7 +115,7 @@ function updateTitle() {
   const newTitle = cardTitle.value.trim();
   if (newTitle !== '' && newTitle !== props.card.title) {
     cardCopy.value.title = newTitle;
-    updateCardMutation.mutateAsync(cardCopy.value).then(() => {
+    updateCard(cardCopy.value).then(() => {
       snackbar.showSnackbar({
         message: 'Task title updated.',
         color: 'success',
@@ -96,7 +135,7 @@ function updateDescription() {
       ))
   ) {
     cardCopy.value.description = cardDescription.value;
-    updateCardMutation.mutateAsync(cardCopy.value).then(() => {
+    updateCard(cardCopy.value).then(() => {
       snackbar.showSnackbar({
         message: 'Task description updated.',
         color: 'success',
@@ -108,7 +147,7 @@ function updateDescription() {
 
 function updateCardAssignees(assignees: User[]) {
   cardCopy.value.users = assignees;
-  updateCardMutation.mutateAsync(cardCopy.value).then(() => {
+  updateCard(cardCopy.value).then(() => {
     snackbar.showSnackbar({
       message: 'Task assignees updated.',
       color: 'success',
@@ -116,6 +155,7 @@ function updateCardAssignees(assignees: User[]) {
     });
   });
 }
+
 function createComment(content: ActivityContent) {
   if (!isCommentEmpty.value) {
     createActivityMutation
@@ -141,7 +181,20 @@ function createComment(content: ActivityContent) {
 
 function updateCardDueAt(newDueAt: string) {
   if (props.card.dueAt !== newDueAt) {
-    updateCardMutation.mutateAsync(cardCopy.value).catch((e) => {
+    updateCard(cardCopy.value).catch((e) => {
+      snackbar.showSnackbar({
+        color: 'error',
+        message:
+          e.response.data.message ?? 'Something went wrong, please try again.',
+        timeout: 5000,
+      });
+    });
+  }
+}
+
+function updateCardStartsAt(newStartsAt: string) {
+  if (props.card.startsAt !== newStartsAt) {
+    updateCard(cardCopy.value).catch((e) => {
       snackbar.showSnackbar({
         color: 'error',
         message:
@@ -172,6 +225,36 @@ function updateCardListStage(listStage: ListStage) {
       cardListStage.value = props.card.cardLists[0].listStage;
     });
 }
+
+function updateFieldValue({ field, v }: { field: Field; v: any }) {
+  console.log(v);
+  cardCopy.value = {
+    ...cardCopy.value,
+    data: {
+      ...cardCopy.value.data,
+      [field.id]: Array.isArray(v) ? (v.length && !!v[0] ? v : undefined) : v,
+    },
+  };
+
+  updateCard(cardCopy.value).catch(() => {
+    snackbar.showSnackbar({
+      message: 'Something went wrong, please try again.',
+      color: 'error',
+    });
+  });
+}
+
+function openSettingsDialog(activeTab: SettingsTabs) {
+  dialog.openDialog({
+    dialog: DIALOGS.SETTINGS,
+    data: {
+      activeTab,
+    },
+    options: {
+      fullscreen: true,
+    },
+  });
+}
 </script>
 
 <template>
@@ -179,6 +262,7 @@ function updateCardListStage(listStage: ListStage) {
     v-if="cardCopy"
     :loading="isCardLoading"
     class="d-flex flex-sm-row flex-column"
+    min-height="100vh"
   >
     <template #loader="{ isActive }">
       <v-progress-linear
@@ -204,6 +288,12 @@ function updateCardListStage(listStage: ListStage) {
           />
           <v-spacer />
           <div class="d-flex align-center ga-2">
+            <base-icon-btn
+              icon="mdi-dock-right"
+              density="compact"
+              size="default"
+              @click="stateStore.toggleInfoDrawer"
+            />
             <v-btn
               v-if="props.showCloseButton"
               variant="text"
@@ -237,49 +327,149 @@ function updateCardListStage(listStage: ListStage) {
         </v-card>
       </div>
     </div>
-    <v-card class="border-s-thin h-100vh pa-4" width="400">
-      <v-card-text class="ps-2 text-color-subtitle pb-0"
-        >Properties</v-card-text
-      >
-      <v-card-text>
-        <div class="mb-4">
-          <list-stage-selector
-            v-model="cardListStage"
-            :listStages="listStagesQuery.data.value ?? []"
-            size="default"
-            @update:model-value="updateCardListStage"
+    <v-navigation-drawer v-model="isInfoDrawerOpen" width="350" location="end">
+      <v-card>
+        <div class="pa-4 d-flex align-center">
+          Properties
+          <v-spacer />
+          <base-icon-btn
+            @click="openSettingsDialog(SettingsTabs.FIELDS)"
+            icon="mdi-pencil"
+            v-tooltip="'Edit fields'"
           />
         </div>
-        <div class="my-4">
-          <base-user-selector
-            v-model="cardCopy.users"
-            :users="users ?? []"
-            @update:model-value="updateCardAssignees"
-            content-class="ms-n3"
-            show-first-names
-            label="Assign"
-          />
-        </div>
-        <div class="my-4">
-          <base-date-picker
-            class="text-body-2 ms-n2"
-            label="Start date"
-            icon="mdi-calendar"
-            v-model="cardCopy.startsAt"
-            @update:model-value="updateCardDueAt"
-          />
-        </div>
-        <div class="my-4">
-          <base-date-picker
-            class="text-body-2 ms-n2"
-            label="Due date"
-            icon="mdi-calendar"
-            v-model="cardCopy.dueAt"
-            @update:model-value="updateCardDueAt"
-          />
-        </div>
-      </v-card-text>
-    </v-card>
+        <v-card-text>
+          <div class="d-flex align-center mb-4">
+            <p class="field-label text-caption">Stage</p>
+            <list-stage-selector
+              v-model="cardListStage"
+              :listStages="listStagesQuery.data.value ?? []"
+              size="default"
+              @update:model-value="updateCardListStage"
+            />
+          </div>
+          <div class="d-flex align-center my-4">
+            <p class="field-label text-caption">Assigned to</p>
+            <base-user-selector
+              v-model="cardCopy.users"
+              :users="users ?? []"
+              @update:model-value="updateCardAssignees"
+              label="Assign"
+              size="24"
+            />
+          </div>
+          <div class="d-flex align-center my-4">
+            <p class="field-label text-caption">Start date</p>
+            <base-date-picker
+              class="text-body-2"
+              label="Start date"
+              icon="mdi-calendar"
+              v-model="cardCopy.startsAt"
+              @update:model-value="updateCardStartsAt"
+            />
+          </div>
+          <div class="d-flex align-center my-4">
+            <p class="field-label text-caption">Due date</p>
+            <base-date-picker
+              class="text-body-2"
+              label="Due date"
+              icon="mdi-calendar"
+              v-model="cardCopy.dueAt"
+              @update:model-value="updateCardDueAt"
+            />
+          </div>
+          <template v-if="fields">
+            <template v-for="field in fields" :key="field.id">
+              <div class="d-flex align-center my-4">
+                <p class="field-label text-caption">
+                  {{ field.name }}
+                </p>
+                <template v-if="field.type === FieldTypes.TEXT">
+                  <v-text-field
+                    v-model="cardCopy.data[field.id]"
+                    hide-details
+                    :placeholder="field.name"
+                    @update:model-value="(v) => updateFieldValue({ field, v })"
+                    :prepend-inner-icon="field.icon"
+                  />
+                </template>
+                <template v-else-if="field.type === FieldTypes.DROPDOWN">
+                  <v-combobox
+                    v-model="cardCopy.data[field.id]"
+                    :items="field.items"
+                    item-title="item"
+                    item-value="item"
+                    hide-details
+                    :placeholder="field.name"
+                    :prepend-inner-icon="field.icon"
+                    :multiple="field.multiple"
+                    autocomplete="off"
+                    auto-select-first
+                    @update:model-value="
+                      (v) =>
+                        updateFieldValue({
+                          field,
+                          v: Array.isArray(v)
+                            ? v.map((item) => (item.item ? item.item : item))
+                            : [v.item],
+                        })
+                    "
+                  />
+                </template>
+                <template v-else-if="field.type === FieldTypes.LABEL">
+                  <base-label-selector
+                    v-model="cardCopy.data[field.id]"
+                    :items="field.items"
+                    :icon="field.icon"
+                    :placeholder="field.name"
+                    :multiple="field.multiple"
+                    @update:model-value="
+                      (v) =>
+                        updateFieldValue({
+                          field,
+                          v,
+                        })
+                    "
+                  />
+                </template>
+                <template v-else-if="field.type === FieldTypes.DATE">
+                  <base-date-picker
+                    v-model="cardCopy.data[field.id]"
+                    class="text-body-2"
+                    :icon="field.icon ?? 'mdi-calendar'"
+                    :label="field.name"
+                    @update:model-value="
+                      (v: string | string[]) =>
+                        updateFieldValue({
+                          field,
+                          v,
+                        })
+                    "
+                  />
+                </template>
+                <template v-else-if="field.type === FieldTypes.USER">
+                  <base-user-selector
+                    :model-value="cardCopy.data[field.id]?.map((userIdAsString: string) => +userIdAsString)"
+                    :users
+                    :label="field.name"
+                    return-id
+                    :icon="field.icon"
+                    size="24"
+                    @update:model-value="
+                      (users: number[]) => 
+                        updateFieldValue({
+                          field,
+                          v: users.map((userIdAsNumber) => userIdAsNumber.toString()),
+                        })
+                    "
+                  />
+                </template>
+              </div>
+            </template>
+          </template>
+        </v-card-text>
+      </v-card>
+    </v-navigation-drawer>
   </v-card>
 </template>
 
@@ -299,7 +489,12 @@ function updateCardListStage(listStage: ListStage) {
 }
 
 .base-card-content {
-  width: 600px;
+  width: 650px;
   max-width: 100%;
+}
+
+.field-label {
+  width: 100px;
+  flex-shrink: 0;
 }
 </style>

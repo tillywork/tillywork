@@ -10,7 +10,7 @@ import { ViewsModule } from "./views/views.module";
 import { WorkspacesModule } from "./workspaces/workspaces.module";
 import { ListsModule } from "./lists/lists.module";
 import { HelpersModule } from "./helpers/helpers.module";
-import { PropsModule } from "./props/props.module";
+import { FieldsModule } from "./fields/fields.module";
 import { FiltersModule } from "./filters/filters.module";
 import { ClsModule } from "nestjs-cls";
 import { CardTypesModule } from "./card-types/card.types.module";
@@ -32,7 +32,7 @@ import { CardTypesModule } from "./card-types/card.types.module";
         UsersModule,
         ViewsModule,
         HelpersModule,
-        PropsModule,
+        FieldsModule,
         FiltersModule,
         CardTypesModule,
     ],
