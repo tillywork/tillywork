@@ -163,14 +163,30 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <slot />
-  <v-dialog v-model="isCommandPaletteOpen" :scrim="false" @after-leave="handleAfterLeave" width="100%" max-width="600"
-    location-strategy="connected" :target="[windowWidth / 2, windowHeight / 2.3]">
+  <v-dialog
+    v-model="isCommandPaletteOpen"
+    :scrim="false"
+    @after-leave="handleAfterLeave"
+    width="100%"
+    max-width="600"
+    location-strategy="connected"
+    :target="[windowWidth / 2, windowHeight / 2.3]"
+  >
     <v-card elevation="8">
       <!-- ~ Search Field -->
       <!-- TODO make clicking esc when search is focused clear the value, not close the dialog -->
-      <v-text-field v-model="search" placeholder="Type a command or search..." single-line hide-details variant="filled"
-        density="default" autocomplete="off" autofocus class="flex-grow-0" @input="activeCommandIndex = 0">
+      <v-text-field
+        v-model="search"
+        placeholder="Type a command or search..."
+        single-line
+        hide-details
+        variant="filled"
+        density="default"
+        autocomplete="off"
+        autofocus
+        class="flex-grow-0"
+        @input="activeCommandIndex = 0"
+      >
         <template #append-inner>
           <v-btn border variant="text" size="small">
             <span class="text-caption text-disabled">Esc</span>
@@ -179,28 +195,46 @@ onBeforeUnmount(() => {
       </v-text-field>
 
       <!-- ~ Grouped List of Commands -->
-      <v-list ref="commandsList" tabindex="-1" max-height="50vh" nav density="comfortable"
-        :selected="[activeCommand?.id]" class="user-select-none">
+      <v-list
+        ref="commandsList"
+        tabindex="-1"
+        max-height="50vh"
+        nav
+        density="comfortable"
+        :selected="[activeCommand?.id]"
+        class="user-select-none"
+      >
         <template v-if="!searchedCommands.length">
           <v-list-item>
             <v-list-item-title> No results. </v-list-item-title>
             <v-list-item-subtitle>
               Can't find what you're looking for? Request a feature on
-              <a href="https://github.com/tillywork/tillywork/issues">GitHub!</a>
+              <a href="https://github.com/tillywork/tillywork/issues"
+                >GitHub!</a
+              >
             </v-list-item-subtitle>
           </v-list-item>
         </template>
 
         <template v-else>
-          <template v-for="(commands, section) in groupedSearchedCommands" :key="section">
+          <template
+            v-for="(commands, section) in groupedSearchedCommands"
+            :key="section"
+          >
             <!-- ~ Section Marker -->
             <v-list-subheader>
               {{ section }}
             </v-list-subheader>
 
             <!-- ~ List of Commands -->
-            <v-list-item v-for="(command, index) in commands" :key="index" :value="command.id"
-              :lines="command.description ? 'two' : 'one'" @click="handleExecuteCommand(command)" tabindex="-1">
+            <v-list-item
+              v-for="(command, index) in commands"
+              :key="index"
+              :value="command.id"
+              :lines="command.description ? 'two' : 'one'"
+              @click="handleExecuteCommand(command)"
+              tabindex="-1"
+            >
               <!-- ~ Icon -->
               <template #prepend>
                 <v-icon size="x-small" class="px-3">
@@ -217,7 +251,12 @@ onBeforeUnmount(() => {
               </v-list-item-subtitle>
               <!-- ~ Shortcut Keys -->
               <template v-if="command.shortcut" #append>
-                <v-code v-for="key in command.shortcut" :key="key" tag="kbd" class="mx-1 text-xs">
+                <v-code
+                  v-for="key in command.shortcut"
+                  :key="key"
+                  tag="kbd"
+                  class="mx-1 text-xs"
+                >
                   {{ key }}
                 </v-code>
               </template>

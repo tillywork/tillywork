@@ -8,8 +8,9 @@ import {
     Put,
     UseGuards,
     Query,
+    BadRequestException,
 } from "@nestjs/common";
-import { ListFindAllResult, ListsService } from "./lists.service";
+import { ListsService } from "./lists.service";
 import { List } from "./list.entity";
 import { CreateListDto } from "./dto/create.list.dto";
 import { UpdateListDto } from "./dto/update.list.dto";
@@ -27,8 +28,17 @@ export class ListsController {
     constructor(private readonly listsService: ListsService) {}
 
     @Get()
-    findAll(@Query("spaceId") spaceId: number): Promise<ListFindAllResult> {
-        return this.listsService.findAll({ spaceId });
+    findAll(
+        @Query("spaceId") spaceId: number,
+        @Query("workspaceId") workspaceId: number
+    ): Promise<List[]> {
+        if (!spaceId && !workspaceId) {
+            throw new BadRequestException(
+                "spaceId or workspaceId are required"
+            );
+        }
+
+        return this.listsService.findAll({ spaceId, workspaceId });
     }
 
     @Get(":id")

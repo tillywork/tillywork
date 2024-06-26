@@ -19,23 +19,27 @@ export class ListsService {
         private listSideEffectsService: ListSideEffectsService
     ) {}
 
-    async findAll(options?: { spaceId?: number }): Promise<ListFindAllResult> {
-        const { spaceId } = options;
+    async findAll(options?: {
+        spaceId?: number;
+        workspaceId?: number;
+    }): Promise<List[]> {
+        const { spaceId, workspaceId } = options;
 
-        const [lists, total] = await this.listsRepository.findAndCount({
+        return this.listsRepository.find({
             where: {
                 spaceId,
+                space: {
+                    workspaceId,
+                },
             },
             relations: ["listStages"],
             order: {
-                id: "ASC",
+                createdAt: "ASC",
                 listStages: {
                     order: "ASC",
                 },
             },
         });
-
-        return { lists, total };
     }
 
     async findOne(id: number): Promise<List> {

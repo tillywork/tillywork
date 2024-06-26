@@ -1,11 +1,7 @@
 import { useHttp } from '@/composables/useHttp';
 import type { List } from '../../components/project-management/lists/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
-
-export interface ListsData {
-  lists: List[];
-  total: number;
-}
+import type { MaybeRef } from 'vue';
 
 export const useListsService = () => {
   const { sendRequest } = useHttp();
@@ -13,13 +9,16 @@ export const useListsService = () => {
 
   async function getLists({
     spaceId,
+    workspaceId,
   }: {
     spaceId?: number;
-  }): Promise<ListsData> {
+    workspaceId?: number;
+  }): Promise<List[]> {
     return sendRequest('/lists', {
       method: 'GET',
       params: {
         spaceId,
+        workspaceId,
       },
     });
   }
@@ -31,8 +30,8 @@ export const useListsService = () => {
     });
   }
 
-  async function getList(id: number): Promise<List> {
-    return sendRequest(`/lists/${id}`, {
+  async function getList(id: MaybeRef<number>): Promise<List> {
+    return sendRequest(`/lists/${toValue(id)}`, {
       method: 'GET',
     });
   }
@@ -56,23 +55,32 @@ export const useListsService = () => {
     });
   }
 
-  function useGetListsQuery(spaceId?: number) {
+  function useGetListsQuery({
+    spaceId,
+    workspaceId,
+  }: {
+    spaceId?: number;
+    workspaceId?: number;
+  }) {
     return useQuery({
       queryKey: [
         'lists',
         {
           spaceId,
+          workspaceId,
         },
       ],
-      queryFn: () => getLists({ spaceId }),
+      queryFn: () => getLists({ spaceId, workspaceId }),
       staleTime: 1 * 60 * 1000,
     });
   }
 
-  function useGetListQuery(id: Ref<number>) {
+  function useGetListQuery(id: MaybeRef<number>) {
+    const idValue = toValue(id);
+    console.log('id', idValue);
     return useQuery({
-      queryKey: ['lists', id.value],
-      queryFn: () => getList(id.value),
+      queryKey: ['lists', toValue(id)],
+      queryFn: () => getList(toValue(id)),
       retry: false,
       staleTime: 1 * 60 * 1000,
     });
@@ -106,6 +114,7 @@ export const useListsService = () => {
   }
 
   return {
+    getList,
     useGetListsQuery,
     useGetListQuery,
     useCreateListMutation,
