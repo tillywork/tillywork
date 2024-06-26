@@ -64,9 +64,9 @@ async function handleRegister() {
         />
         <v-form ref="registerForm" @submit.prevent="handleRegister">
           <v-card color="accent" class="px-4 py-2" :loading>
-            <v-card-title class="text-h5 mb-2"
-              >Create a free account</v-card-title
-            >
+            <v-card-title class="text-h5 mb-2">
+              Create a free account
+            </v-card-title>
             <v-card-text class="pb-0">
               <div class="d-flex ga-2 mb-1">
                 <v-text-field
@@ -88,14 +88,14 @@ async function handleRegister() {
                 required
                 :rules="[rules.required, rules.email]"
                 class="mb-1"
-              ></v-text-field>
+              />
               <v-text-field
                 v-model="createUserDto.password"
                 label="Password*"
                 type="password"
                 required
                 :rules="[rules.required]"
-              ></v-text-field>
+              />
               <!-- <v-phone-input
                 v-model="createUserDto.phoneNumber"
                 v-model:country="createUserDto.country"
@@ -107,10 +107,14 @@ async function handleRegister() {
               /> -->
             </v-card-text>
             <v-card-actions class="px-4 pt-0">
+              <p>
+                Already have an account?
+                <router-link to="/login">Login</router-link>
+              </p>
               <v-spacer />
-              <v-btn type="submit" variant="flat" :loading class="text-body-2"
-                >Create</v-btn
-              >
+              <v-btn type="submit" variant="flat" :loading class="text-body-2">
+                Create
+              </v-btn>
             </v-card-actions>
           </v-card>
         </v-form>
