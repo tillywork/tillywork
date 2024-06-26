@@ -46,21 +46,23 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup("docs", app, document);
 
-    const serverAdapter = new BullFastifyAdapter();
-    serverAdapter.setBasePath("/bullmq");
+    if (configService.get("TW_MAIL_ENABLE")) {
+        const serverAdapter = new BullFastifyAdapter();
+        serverAdapter.setBasePath("/bullmq");
 
-    const emailQueue = app.get(getQueueToken("email"));
-    createBullBoard({
-        queues: [new BullAdapter(emailQueue)],
-        serverAdapter,
-    });
-
-    app.getHttpAdapter()
-        .getInstance()
-        .register(serverAdapter.registerPlugin(), {
-            basePath: "/bullmq",
-            prefix: "/bullmq",
+        const emailQueue = app.get(getQueueToken("email"));
+        createBullBoard({
+            queues: [new BullAdapter(emailQueue)],
+            serverAdapter,
         });
+
+        app.getHttpAdapter()
+            .getInstance()
+            .register(serverAdapter.registerPlugin(), {
+                basePath: "/bullmq",
+                prefix: "/bullmq",
+            });
+    }
 
     await app.listen(port, "0.0.0.0");
 
