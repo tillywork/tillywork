@@ -29,6 +29,7 @@ import { DeleteDefaultListGroups1718022901852 } from "../migrations/171802290185
 import { AddDefaultCardTypeToWorkspaceTable1718184687469 } from "../migrations/1718184687469-add-defaultCardType-to-workspace-table";
 import { RenamePropTableToFields1718818041867 } from "../migrations/1718818041867-rename-prop-table-to-fields";
 import { AddIgnoreCompletedColumnToViewTable1719224538052 } from "../migrations/1719224538052-add-ignoreCompleted-column-to-view-table";
+import { CreateIndices1719422621473 } from "../migrations/1719422621473-create-indices";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -59,6 +60,7 @@ const migrations = [
     AddDefaultCardTypeToWorkspaceTable1718184687469,
     RenamePropTableToFields1718818041867,
     AddIgnoreCompletedColumnToViewTable1719224538052,
+    CreateIndices1719422621473,
 ];
 
 const config: TypeOrmModuleOptions = {
