@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import BaseList from '@/components/project-management/lists/BaseList.vue';
 import { useListsService } from '@/composables/services/useListsService';
+import { useStateStore } from '@/stores/state';
 
 definePage({
   meta: {
     requiresAuth: true,
   },
 });
+
+const { setCurrentList } = useStateStore();
 
 const route = useRoute('/pm/list/[listId]/');
 const router = useRouter();
@@ -27,6 +30,7 @@ watch(
     if (v) {
       document.title = `${v.name} - tillywork`;
     }
+    setCurrentList(v);
   },
   {
     immediate: true,

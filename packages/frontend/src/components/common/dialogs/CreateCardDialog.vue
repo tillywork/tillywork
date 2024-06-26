@@ -3,29 +3,31 @@ import type {
   CardType,
   CreateCardDto,
 } from '@/components/project-management/cards/types';
-import {
-  type List,
-  type ListStage,
-} from '@/components/project-management/lists/types';
+import { type List } from '@/components/project-management/lists/types';
 import { useCardsService } from '@/composables/services/useCardsService';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { useQueryClient } from '@tanstack/vue-query';
 import type { VForm } from 'vuetify/lib/components/index.mjs';
 import BaseEditorInput from '../base/BaseEditor/BaseEditorInput.vue';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from './types';
+import { useWorkspaceStore } from '@/stores/workspace';
+import BaseListSelector from '../inputs/BaseListSelector.vue';
+import { cloneDeep } from 'lodash';
+import { useStateStore } from '@/stores/state';
 
-const route = useRoute();
 const authStore = useAuthStore();
-const queryClient = useQueryClient();
 const dialog = useDialogStore();
+const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
 const { showSnackbar } = useSnackbarStore();
-const cardsService = useCardsService();
-const projectUsersService = useProjectUsersService();
+const { currentList } = storeToRefs(useStateStore());
+
 const createForm = ref<VForm>();
 const isCreatingMore = ref(false);
+
+const cardsService = useCardsService();
+const projectUsersService = useProjectUsersService();
 
 const { data: users } = projectUsersService.useProjectUsersQuery({
   projectId: authStore.project!.id,
@@ -38,34 +40,20 @@ const currentDialogIndex = computed(() =>
 const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
 
 const list = computed(() => {
-  let list: List | undefined;
-
-  if (currentDialog.value?.data && currentDialog.value.data?.list) {
-    list = currentDialog.value.data.list;
-  } else if (+route.params.listId) {
-    list = queryClient.getQueryData(['lists', +route.params.listId]);
-  }
-
-  return list;
-});
-
-const listStages = computed(() => {
-  let listStages: ListStage[] | undefined;
-
-  if (currentDialog.value?.data && currentDialog.value.data?.listStages) {
-    listStages = currentDialog.value.data.listStages;
+  if (currentDialog.value?.data?.list) {
+    return currentDialog.value.data.list;
   } else {
-    listStages = list.value?.listStages ?? [];
+    return currentList.value;
   }
-
-  return listStages ?? [];
 });
 
 const cardType = computed<CardType>(() => {
   if (currentDialog.value?.data && currentDialog.value.data?.type) {
     return currentDialog.value.data.type;
-  } else {
+  } else if (list.value) {
     return list.value?.defaultCardType;
+  } else {
+    return selectedWorkspace.value?.defaultCardType;
   }
 });
 
@@ -73,9 +61,17 @@ const createCardMutation = cardsService.useCreateCardMutation();
 const createCardDto = ref<CreateCardDto>({
   title: '',
   listId: currentDialog.value?.data?.listId ?? list.value?.id,
-  listStage: currentDialog.value?.data?.listStage ?? listStages.value[0],
+  listStage: currentDialog.value?.data?.listStage ?? list.value?.listStages[0],
   users: currentDialog.value?.data?.users,
-  type: cardType.value.id,
+  type: cardType.value?.id,
+});
+
+const selectedList = ref<List>(cloneDeep(list.value));
+watch(selectedList, (v) => {
+  if (v) {
+    createCardDto.value.listStage = v.listStages[0];
+    createCardDto.value.listId = v.id;
+  }
 });
 
 function closeDialog() {
@@ -114,7 +110,7 @@ function handlePostCreate() {
   createCardDto.value.description = undefined;
 
   showSnackbar({
-    message: `${cardType.value.name} created`,
+    message: `${cardType.value?.name} created`,
     color: 'success',
     timeout: 2000,
   });
@@ -132,7 +128,11 @@ function handlePostCreate() {
     :loading="createCardMutation.isPending.value"
   >
     <div class="d-flex align-center ps-0 pa-4">
-      <v-card-subtitle>Create {{ cardType.name }}</v-card-subtitle>
+      <v-card-subtitle>
+        <base-list-selector v-model="selectedList" />
+        <v-icon icon="mdi-arrow-right-thin" class="ms-1" />
+        Create {{ cardType.name }}
+      </v-card-subtitle>
       <v-spacer />
       <base-icon-btn icon="mdi-close" color="default" @click="closeDialog()" />
     </div>
@@ -156,10 +156,13 @@ function handlePostCreate() {
       </div>
       <v-card-actions class="d-flex justify-start align-center py-0 px-4">
         <div class="d-flex ga-2 align-center">
-          <list-stage-selector v-model="createCardDto.listStage" :listStages />
+          <list-stage-selector
+            v-model="createCardDto.listStage"
+            :listStages="list?.listStages ?? []"
+          />
           <base-user-selector
             v-model="createCardDto.users"
-            :users
+            :users="users ?? []"
             activator-hover-text="Assignee"
           />
           <base-date-picker

@@ -1,3 +1,4 @@
+import type { List } from '@/components/project-management/lists/types';
 import type { WorkspaceTypes } from '@/components/project-management/workspaces/types';
 
 export const useStateStore = defineStore('state', {
@@ -9,6 +10,8 @@ export const useStateStore = defineStore('state', {
       isInputFocused: false,
       /** Is information navigation drawer open */
       isInfoDrawerOpen: true,
+      /** Sets the latest active list */
+      currentList: undefined as undefined | List,
     };
   },
   actions: {
@@ -20,6 +23,9 @@ export const useStateStore = defineStore('state', {
     },
     toggleInfoDrawer() {
       this.isInfoDrawerOpen = !this.isInfoDrawerOpen;
+    },
+    setCurrentList(list: undefined | List) {
+      this.currentList = list;
     },
   },
 });
