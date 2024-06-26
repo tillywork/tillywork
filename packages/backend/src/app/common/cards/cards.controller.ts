@@ -42,10 +42,19 @@ export class CardsController {
             limit?: number;
             sortBy?: string;
             sortOrder?: "ASC" | "DESC";
+            ignoreCompleted?: boolean;
             filters?: QueryFilter;
         }
     ): Promise<CardFindAllResult> {
-        const { listId, page, limit, sortBy, sortOrder, filters } = body;
+        const {
+            listId,
+            page,
+            limit,
+            sortBy,
+            sortOrder,
+            ignoreCompleted,
+            filters,
+        } = body;
 
         return this.cardsService.findAll({
             listId,
@@ -53,6 +62,7 @@ export class CardsController {
             limit,
             sortBy,
             sortOrder,
+            ignoreCompleted,
             filters,
         });
     }

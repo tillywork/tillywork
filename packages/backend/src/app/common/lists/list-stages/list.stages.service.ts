@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { FindOptionsWhere, Repository } from "typeorm";
 import { ListStage } from "./list.stage.entity";
 import { CreateListStageDto } from "./dto/create.list.stage.dto";
 import { UpdateListStageDto } from "./dto/update.list.stage.dto";
@@ -47,6 +47,14 @@ export class ListStagesService {
             throw new NotFoundException(`ListStage with ID ${id} not found`);
         }
         return listStage;
+    }
+
+    async findBy({
+        where,
+    }: {
+        where: FindOptionsWhere<ListStage>;
+    }): Promise<ListStage[]> {
+        return this.listStagesRepository.find({ where });
     }
 
     async create(createListStageDto: CreateListStageDto): Promise<ListStage> {

@@ -14,6 +14,7 @@ import { UpdateListGroupDto } from "./dto/update.list.group.dto";
 
 export type GenerateGroupsParams = {
     listId: number;
+    ignoreCompleted: boolean;
     groupBy: ListGroupOptions;
 };
 
@@ -70,9 +71,13 @@ export class ListGroupsService {
 
     async generateGroups({
         listId,
+        ignoreCompleted,
         groupBy,
     }: GenerateGroupsParams): Promise<ListGroup[]> {
-        const existingGroups = await this.findAll({ listId, groupBy });
+        const existingGroups = await this.findAll({
+            listId,
+            groupBy,
+        });
 
         let cardGroups: CreateListGroupDto[];
 
@@ -132,7 +137,22 @@ export class ListGroupsService {
 
         await Promise.allSettled(checkIfGroupsExist);
 
-        const finalGroups = await this.findAll({ listId, groupBy });
+        let finalGroups = await this.findAll({
+            listId,
+            groupBy,
+        });
+
+        if (groupBy === ListGroupOptions.LIST_STAGE && ignoreCompleted) {
+            const listStages = await this.listStagesService.findBy({
+                where: { listId, isCompleted: false },
+            });
+
+            finalGroups = finalGroups.filter((group) =>
+                listStages
+                    .map((listStage) => listStage.name)
+                    .includes(group.name)
+            );
+        }
 
         return finalGroups;
     }

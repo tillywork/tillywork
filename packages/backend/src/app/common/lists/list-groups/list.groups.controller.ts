@@ -19,10 +19,14 @@ export class ListGroupsController {
     generateGroups(
         @Param("listId") listId: number,
         @Body()
-        { groupBy }: { groupBy: ListGroupOptions }
+        {
+            ignoreCompleted,
+            groupBy,
+        }: { ignoreCompleted: boolean; groupBy: ListGroupOptions }
     ) {
         return this.listGroupsService.generateGroups({
             listId,
+            ignoreCompleted,
             groupBy: groupBy ?? ListGroupOptions.ALL,
         });
     }

@@ -7,6 +7,7 @@ export interface View {
   type: ViewTypes;
   listId: number;
   list: List;
+  ignoreCompleted: boolean;
   groupBy: ListGroupOptions;
   sortBy?: TableSortOption;
   updatedAt: string;

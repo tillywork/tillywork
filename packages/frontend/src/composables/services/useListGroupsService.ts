@@ -1,3 +1,4 @@
+import type { MaybeRef } from 'vue';
 import { useHttp } from '@/composables/useHttp';
 import type {
   ListGroup,
@@ -7,15 +8,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import type { TableSortOption } from '@/components/project-management/views/types';
 
 export interface GetListGroupsByOptionParams {
-  listId: number;
-  groupBy: ListGroupOptions;
-  sortCardsBy?: TableSortOption[];
+  listId: MaybeRef<number>;
+  ignoreCompleted: MaybeRef<boolean>;
+  groupBy: MaybeRef<ListGroupOptions>;
+  sortCardsBy?: MaybeRef<TableSortOption[]>;
 }
 
-export type GetListGroupsQueryParams = {
-  listId: Ref<number>;
-  groupBy: Ref<ListGroupOptions>;
-  sortCardsBy?: Ref<TableSortOption[] | undefined>;
+export type GetListGroupsQueryParams = GetListGroupsByOptionParams & {
   enabled?: Ref<boolean>;
 };
 
@@ -27,12 +26,14 @@ export const useListGroupsService = () => {
     listId,
     groupBy,
     sortCardsBy,
+    ignoreCompleted,
   }: GetListGroupsByOptionParams): Promise<ListGroup[]> {
-    return sendRequest(`/lists/${listId}/groups`, {
+    return sendRequest(`/lists/${toValue(listId)}/groups`, {
       method: 'POST',
       data: {
-        groupBy,
-        sortCardsBy,
+        ignoreCompleted: toValue(ignoreCompleted),
+        groupBy: toValue(groupBy),
+        sortCardsBy: toValue(sortCardsBy),
       },
     });
   }
@@ -45,13 +46,15 @@ export const useListGroupsService = () => {
   }
 
   function useGetListGroupsByOptionQuery(params: GetListGroupsQueryParams) {
+    const { listId, ignoreCompleted, groupBy, sortCardsBy } = params;
     const getListGroupsQuery = useQuery({
-      queryKey: ['listGroups', { listId: params.listId.value }],
+      queryKey: ['listGroups', { listId }],
       queryFn: () =>
         getListGroupsByOption({
-          listId: params.listId.value,
-          groupBy: params.groupBy.value,
-          sortCardsBy: params.sortCardsBy?.value,
+          listId,
+          ignoreCompleted,
+          groupBy,
+          sortCardsBy,
         }),
       enabled: params.enabled,
       staleTime: 1 * 60 * 1000,

@@ -9,7 +9,6 @@ import {
     UseGuards,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { InsertResult } from "typeorm";
 import { JwtAuthGuard } from "../../auth/guards/jwt.auth.guard";
 import { ListStage } from "./list.stage.entity";
 import { CreateListStageDto } from "./dto/create.list.stage.dto";

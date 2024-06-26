@@ -24,6 +24,9 @@ export class View {
     @Column({ type: "enum", enum: ViewTypes, default: ViewTypes.TABLE })
     type: ViewTypes;
 
+    @Column({ type: "boolean", default: false })
+    ignoreCompleted: boolean;
+
     @Column({
         type: "enum",
         enum: ListGroupOptions,

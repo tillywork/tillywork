@@ -3,6 +3,7 @@ defineProps<{
   isFilled?: boolean;
   label: string;
   icon: string;
+  color?: string;
 }>();
 </script>
 
@@ -12,11 +13,11 @@ defineProps<{
     rounded="xl"
     density="comfortable"
     :variant="isFilled ? 'tonal' : 'outlined'"
-    color="primary"
+    :color="color ?? 'primary'"
   >
     <v-icon :icon="icon" size="14" start />
     <span class="text-caption user-select-none">
-        {{ label }}
+      {{ label }}
     </span>
     <template #append>
       <slot name="append" />
