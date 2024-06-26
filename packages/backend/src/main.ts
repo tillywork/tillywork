@@ -9,10 +9,13 @@ import { Connection } from "typeorm";
 import { seedUserData } from "./seeders/user.seeder";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import metadata from "./metadata";
+import { FastifyAdapter as BullFastifyAdapter } from "@bull-board/fastify";
+import { getQueueToken } from "@nestjs/bull";
+import { createBullBoard } from "@bull-board/api";
+import { BullAdapter } from "@bull-board/api/bullAdapter";
+import { ConfigService } from "@nestjs/config";
 
 async function bootstrap() {
-    const port = process.env.PORT || 3000;
-    const environment = process.env.NODE_ENV || "development";
     const logger = new Logger("main.ts");
     const app = await NestFactory.create<NestFastifyApplication>(
         AppModule,
@@ -21,6 +24,9 @@ async function bootstrap() {
             cors: true,
         }
     );
+    const configService = app.get(ConfigService);
+    const port = configService.get("PORT");
+    const environment = configService.get("NODE_ENV");
 
     // Enable API URI Versioning
     app.enableVersioning({
@@ -39,6 +45,22 @@ async function bootstrap() {
         .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup("docs", app, document);
+
+    const serverAdapter = new BullFastifyAdapter();
+    serverAdapter.setBasePath("/bullmq");
+
+    const emailQueue = app.get(getQueueToken("email"));
+    createBullBoard({
+        queues: [new BullAdapter(emailQueue)],
+        serverAdapter,
+    });
+
+    app.getHttpAdapter()
+        .getInstance()
+        .register(serverAdapter.registerPlugin(), {
+            basePath: "/bullmq",
+            prefix: "/bullmq",
+        });
 
     await app.listen(port, "0.0.0.0");
 
