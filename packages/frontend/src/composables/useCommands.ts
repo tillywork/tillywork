@@ -60,6 +60,20 @@ export const useCommands = () => {
 
     const commandsDtos: CommandDto[] = [
       // ~ Cards
+      {
+        section: 'Card',
+        icon: 'mdi-card-plus-outline',
+        title: 'Create card',
+        description: 'Create default list card.',
+        action: () =>
+          dialog.openDialog({
+            dialog: DIALOGS.CREATE_CARD,
+            options: {
+              width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD],
+            },
+          }),
+        shortcut: ['N'],
+      },
       ...getCardCommandsDtos(),
 
       // ~ Spaces
