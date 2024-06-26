@@ -11,13 +11,12 @@ const {
   isCommandPaletteOpen,
   setIsCommandPaletteOpen,
   keys,
-  getCommands,
+  commands,
 } = useCommands();
 const { width: windowWidth, height: windowHeight } = useWindowSize();
 
 const search = ref('');
 const activeCommandIndex = ref<number>(-1);
-const commands = ref(getCommands());
 const commandsList = ref<VList>();
 
 const searchedCommands = computed(() =>
