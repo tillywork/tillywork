@@ -58,7 +58,6 @@ export class CardsService {
             });
         }
 
-        this.logger.debug({ filters });
         if (filters && filters.where) {
             QueryBuilderHelper.buildQuery(queryBuilder, filters.where);
         }
