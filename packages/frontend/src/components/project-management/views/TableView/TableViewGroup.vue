@@ -404,6 +404,14 @@ watchEffect(() => {
               height="33"
               :to="`/pm/card/${row.original.id}`"
               :ripple="false"
+              :base-color="
+                row.original.cardLists[0].listStage.isCompleted ? 'success' : ''
+              "
+              :variant="
+                row.original.cardLists[0].listStage.isCompleted
+                  ? 'tonal'
+                  : undefined
+              "
             >
               <v-hover
                 #="{ isHovering: isRowHovering, props: rowProps }"
@@ -509,6 +517,11 @@ watchEffect(() => {
                             newDueDate: newValue,
                           })"
                           class="text-caption d-flex flex-fill h-100 justify-start rounded-0"
+                          :color="
+                            row.original.cardLists[0].listStage.isCompleted
+                              ? 'success'
+                              : undefined
+                          "
                           label="Set due date"
                           @click.prevent
                         />

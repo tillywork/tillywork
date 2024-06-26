@@ -324,6 +324,10 @@ watchEffect(() => {
             class="board-card"
             :to="`/pm/card/${card.id}`"
             :ripple="false"
+            :color="card.cardLists[0].listStage.isCompleted ? 'success' : ''"
+            :variant="
+              card.cardLists[0].listStage.isCompleted ? 'tonal' : undefined
+            "
           >
             <v-card-item class="pa-2 align-start">
               <template #prepend>
@@ -374,6 +378,11 @@ watchEffect(() => {
                       newDueDate: newValue,
                     })"
                 class="text-caption"
+                :color="
+                  card.cardLists[0].listStage.isCompleted
+                    ? 'success'
+                    : undefined
+                "
                 label="Set due date"
                 @click.prevent
               />
