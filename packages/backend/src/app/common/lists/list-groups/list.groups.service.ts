@@ -242,7 +242,7 @@ export class ListGroupsService {
                     where: {
                         and: [
                             {
-                                field: "dueAt",
+                                field: "card.dueAt",
                                 operator: "lt",
                                 value: ":startOfDay",
                             },
@@ -260,7 +260,7 @@ export class ListGroupsService {
                     where: {
                         and: [
                             {
-                                field: "dueAt",
+                                field: "card.dueAt",
                                 operator: "between",
                                 value: [":startOfDay", ":endOfDay"],
                             },
@@ -278,7 +278,7 @@ export class ListGroupsService {
                     where: {
                         and: [
                             {
-                                field: "dueAt",
+                                field: "card.dueAt",
                                 operator: "gt",
                                 value: ":endOfDay",
                             },
@@ -296,7 +296,7 @@ export class ListGroupsService {
                     where: {
                         and: [
                             {
-                                field: "dueAt",
+                                field: "card.dueAt",
                                 operator: "isNull",
                                 value: null,
                             },
