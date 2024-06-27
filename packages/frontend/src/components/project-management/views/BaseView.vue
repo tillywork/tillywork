@@ -116,19 +116,6 @@ const { mutateAsync: createFilter } = useCreateFilterMutation();
 const { mutateAsync: updateFilter } = useUpdateFilterMutation();
 
 function handleToggleCompleted() {
-  sortByOptions.value = DEFAULT_SORT_OPTIONS;
-  if (viewCopy.value.ignoreCompleted)
-    sortByOptions.value = [
-      {
-        label: 'Completed Cards',
-        value: {
-          key: 'listStage.isCompleted',
-          order: 'ASC',
-        },
-      },
-      ...DEFAULT_SORT_OPTIONS,
-    ];
-
   updateViewMutation.mutateAsync({
     ...viewCopy.value,
     ignoreCompleted: !viewCopy.value.ignoreCompleted,
@@ -339,6 +326,24 @@ watch(
       refetchListGroups();
     }
   }
+);
+watch(
+  () => viewCopy.value.ignoreCompleted,
+  (val) => {
+    sortByOptions.value = DEFAULT_SORT_OPTIONS;
+    if (!val)
+      sortByOptions.value = [
+        {
+          label: 'Completed Cards',
+          value: {
+            key: 'listStage.isCompleted',
+            order: 'ASC',
+          },
+        },
+        ...DEFAULT_SORT_OPTIONS,
+      ];
+  },
+  { immediate: true }
 );
 </script>
 
