@@ -34,10 +34,7 @@ export class ViewsService {
     }
 
     async create(createViewDto: CreateViewDto): Promise<View> {
-        const view = this.viewsRepository.create({
-            ...createViewDto,
-            sortBy: { key: "listStage.isCompleted", order: "ASC" },
-        });
+        const view = this.viewsRepository.create(createViewDto);
         return this.viewsRepository.save(view);
     }
 
