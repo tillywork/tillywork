@@ -42,7 +42,7 @@ export const useCommands = () => {
               icon: 'mdi-card-plus-outline',
               title:
                 'Create ' +
-                cardType.name[0].toLowerCase() +
+                cardType.name[0].toLocaleLowerCase() +
                 cardType.name.slice(1),
               action: () =>
                 dialog.openDialog({

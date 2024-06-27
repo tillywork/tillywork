@@ -33,8 +33,8 @@ const stringUtils = {
     if (!string) return false;
 
     // NOTE: Both strings are lowered for the case-insensitive search.
-    query = query.toLowerCase();
-    string = string.toLowerCase();
+    query = query.toLocaleLowerCase();
+    string = string.toLocaleLowerCase();
 
     let i = 0;
     for (const c of string) {

@@ -126,7 +126,9 @@ export default {
         },
       },
     ]
-      .filter((item) => item.title.toLowerCase().includes(query.toLowerCase()))
+      .filter((item) =>
+        item.title.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+      )
       .slice(0, 20);
   },
 
