@@ -24,6 +24,7 @@ export const useCommands = () => {
   const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
   const cardTypesService = useCardTypesService();
   const { data: allCardTypes } = cardTypesService.useFindAllQuery({
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     workspaceId: selectedWorkspace.value!.id,
   });
 
@@ -37,7 +38,7 @@ export const useCommands = () => {
         allCardTypes.value?.map(
           (cardType) =>
             ({
-              section: 'Card',
+              section: cardType.name,
               icon: 'mdi-card-plus-outline',
               title:
                 'Create ' +
@@ -60,20 +61,6 @@ export const useCommands = () => {
 
     const commandsDtos: CommandDto[] = [
       // ~ Cards
-      {
-        section: 'Card',
-        icon: 'mdi-card-plus-outline',
-        title: 'Create card',
-        description: 'Create default list card.',
-        action: () =>
-          dialog.openDialog({
-            dialog: DIALOGS.CREATE_CARD,
-            options: {
-              width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD],
-            },
-          }),
-        shortcut: ['N'],
-      },
       ...getCardCommandsDtos(),
 
       // ~ Spaces
