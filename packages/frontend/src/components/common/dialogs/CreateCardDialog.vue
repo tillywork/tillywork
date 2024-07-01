@@ -11,13 +11,13 @@ import type { VForm } from 'vuetify/lib/components/index.mjs';
 import BaseEditorInput from '../base/BaseEditor/BaseEditorInput.vue';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from './types';
-import { useWorkspaceStore } from '@/stores/workspace';
 import BaseListSelector from '../inputs/BaseListSelector.vue';
 import { cloneDeep } from 'lodash';
 import { useStateStore } from '@/stores/state';
+import { useAuthStore } from '@/stores/auth';
 
 const dialog = useDialogStore();
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const { workspace, project } = storeToRefs(useAuthStore());
 const { showSnackbar } = useSnackbarStore();
 const { currentList } = storeToRefs(useStateStore());
 
@@ -28,7 +28,7 @@ const cardsService = useCardsService();
 const projectUsersService = useProjectUsersService();
 
 const { data: users } = projectUsersService.useProjectUsersQuery({
-  projectId: selectedWorkspace.value!.projectId,
+  projectId: project.value!.id,
   select: (data) => data.map((pu) => pu.user),
 });
 
@@ -51,7 +51,7 @@ const cardType = computed<CardType>(() => {
   } else if (list.value) {
     return list.value?.defaultCardType;
   } else {
-    return selectedWorkspace.value?.defaultCardType;
+    return workspace.value?.defaultCardType;
   }
 });
 

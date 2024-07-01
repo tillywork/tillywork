@@ -12,8 +12,14 @@ import { useDialogStore } from '@/stores/dialog';
 
 const dialog = useDialogStore();
 const { navigationDrawer } = useHideNavigationDrawer();
-const { logout, isAuthenticated } = useAuthStore();
+const authStore = useAuthStore();
+const { logout, isAuthenticated } = authStore;
+const { workspace } = storeToRefs(authStore);
 const logo = useLogo();
+
+const isCommandsEnabled = computed(() => {
+  return isAuthenticated() && !!workspace;
+});
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
   //   {
@@ -113,6 +119,6 @@ function openSettingsDialog() {
       <router-view />
     </v-main>
 
-    <base-command-palette />
+    <base-command-palette v-if="isCommandsEnabled" />
   </v-app>
 </template>

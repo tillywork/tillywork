@@ -4,13 +4,13 @@ import type {
   CardType,
   CreateCardTypeDto,
 } from '@/components/project-management/cards/types';
-import { useWorkspaceStore } from '@/stores/workspace';
 import type { MaybeRef } from 'vue';
+import { useAuthStore } from '@/stores/auth';
 
 export const useCardTypesService = () => {
   const { sendRequest } = useHttp();
   const queryClient = useQueryClient();
-  const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+  const { workspace } = storeToRefs(useAuthStore());
 
   function findAll({
     workspaceId,
@@ -59,7 +59,7 @@ export const useCardTypesService = () => {
           queryKey: [
             'cardTypes',
             {
-              workspaceId: selectedWorkspace.value?.id,
+              workspaceId: workspace.value?.id,
             },
           ],
         });
@@ -91,7 +91,7 @@ export const useCardTypesService = () => {
           queryKey: [
             'cardTypes',
             {
-              workspaceId: selectedWorkspace.value?.id,
+              workspaceId: workspace.value?.id,
             },
           ],
         });

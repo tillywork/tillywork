@@ -4,22 +4,22 @@ import validationUtils from '@/utils/validation';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useCardTypesService } from '@/composables/services/useCardTypesService';
-import { useWorkspaceStore } from '@/stores/workspace';
 import type { CreateCardTypeDto } from '@/components/project-management/cards/types';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from './types';
+import { useAuthStore } from '@/stores/auth';
 
 const { rules } = validationUtils;
 const dialog = useDialogStore();
 const queryClient = useQueryClient();
 const { showSnackbar } = useSnackbarStore();
 const { useCreateMutation } = useCardTypesService();
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const { workspace } = storeToRefs(useAuthStore());
 
 const cardTypeForm = ref<VForm>();
 const cardTypeDto = ref<CreateCardTypeDto>({
   name: '',
-  workspaceId: selectedWorkspace.value!.id,
+  workspaceId: workspace.value!.id,
 });
 
 const currentDialogIndex = computed(() =>
@@ -38,7 +38,7 @@ async function handleCreate() {
           queryKey: [
             'cardTypes',
             {
-              workspaceId: selectedWorkspace.value?.id,
+              workspaceId: workspace.value?.id,
             },
           ],
         });

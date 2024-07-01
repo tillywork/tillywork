@@ -6,9 +6,9 @@ import type { List } from '@/components/project-management/lists/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useCardTypesService } from '@/composables/services/useCardTypesService';
-import { useWorkspaceStore } from '@/stores/workspace';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS, UpsertDialogMode } from './types';
+import { useAuthStore } from '@/stores/auth';
 
 const listsService = useListsService();
 const dialog = useDialogStore();
@@ -16,7 +16,7 @@ const { rules } = validationUtils;
 const { showSnackbar } = useSnackbarStore();
 const queryClient = useQueryClient();
 const { useFindAllQuery } = useCardTypesService();
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const { workspace } = storeToRefs(useAuthStore());
 
 const currentDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.UPSERT_LIST)
@@ -27,13 +27,12 @@ const list = computed<List>(() => currentDialog.value.data.list);
 const listForm = ref<VForm>();
 const listDto = ref<Partial<List>>({
   name: list.value?.name,
-  // TODO: Allow to update space?
   spaceId: list.value?.spaceId ?? currentDialog.value?.data.space.id,
   defaultCardType: list.value?.defaultCardType,
 });
 
 const { data: cardTypes } = useFindAllQuery({
-  workspaceId: selectedWorkspace.value!.id,
+  workspaceId: workspace.value!.id,
 });
 
 const { mutateAsync: createList, isPending: isCreating } =

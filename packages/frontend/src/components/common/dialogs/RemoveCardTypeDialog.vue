@@ -4,17 +4,17 @@ import validationUtils from '@/utils/validation';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useCardTypesService } from '@/composables/services/useCardTypesService';
-import { useWorkspaceStore } from '@/stores/workspace';
 import { type CardType } from '@/components/project-management/cards/types';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from './types';
+import { useAuthStore } from '@/stores/auth';
 
 const { rules } = validationUtils;
 const dialog = useDialogStore();
 const queryClient = useQueryClient();
 const { showSnackbar } = useSnackbarStore();
 const { useRemoveMutation } = useCardTypesService();
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const { workspace } = storeToRefs(useAuthStore());
 
 const currentDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.REMOVE_CARD_TYPE)
@@ -23,7 +23,7 @@ const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
 
 const cardType = computed<CardType>(() => currentDialog.value?.data.cardType);
 const replacementOptions = computed(() =>
-  selectedWorkspace.value?.cardTypes.filter((ct) => ct.id !== cardType.value.id)
+  workspace.value?.cardTypes.filter((ct) => ct.id !== cardType.value.id)
 );
 
 const removeCardTypeForm = ref<VForm>();
@@ -46,7 +46,7 @@ async function handleCreate() {
           queryKey: [
             'cardTypes',
             {
-              workspaceId: selectedWorkspace.value?.id,
+              workspaceId: workspace.value?.id,
             },
           ],
         });

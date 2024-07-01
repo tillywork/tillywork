@@ -14,9 +14,10 @@ import { useSnackbarStore } from '@/stores/snackbar';
 import { VForm } from 'vuetify/components';
 import objectUtils from '@/utils/object';
 import SettingsDialogProjectMembersTab from './SettingsDialogProjectMembersTab.vue';
+import { useAuthStore } from '@/stores/auth';
 
 const dialog = useDialogStore();
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const { workspace } = storeToRefs(useAuthStore());
 const snackbar = useSnackbarStore();
 
 const tabs = ref<SettingsTab[]>([
@@ -54,15 +55,15 @@ const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
 
 const { useFindAllQuery } = useCardTypesService();
 const { data: cardTypes } = useFindAllQuery({
-  workspaceId: selectedWorkspace.value!.id,
+  workspaceId: workspace.value!.id,
 });
 
-const selectedWorkspaceCopy = ref(cloneDeep(selectedWorkspace.value));
+const selectedWorkspaceCopy = ref(cloneDeep(workspace.value));
 const workspaceForm = ref<VForm>();
 const workspacesService = useWorkspacesService();
 const updateWorkspaceMutation = workspacesService.useUpdateWorkspaceMutation();
 const isWorkspaceFormDisabled = computed(() =>
-  objectUtils.isEqual(selectedWorkspace.value!, selectedWorkspaceCopy.value!)
+  objectUtils.isEqual(workspace.value!, selectedWorkspaceCopy.value!)
 );
 
 async function saveWorkspace() {
@@ -108,7 +109,7 @@ function getCardTypeCreatedByPhoto(cardType: CardType) {
     : cardType.createdBy.photo;
 }
 
-watch(selectedWorkspace, (v) => {
+watch(workspace, (v) => {
   if (v) {
     selectedWorkspaceCopy.value = cloneDeep(v);
   }
@@ -223,10 +224,7 @@ watch(selectedWorkspace, (v) => {
                   <span>
                     {{ row.original.name }}
                     <span
-                      v-if="
-                        selectedWorkspace?.defaultCardType?.id ===
-                        row.original.id
-                      "
+                      v-if="workspace?.defaultCardType?.id === row.original.id"
                       class="text-color-subtitle"
                     >
                       (default)

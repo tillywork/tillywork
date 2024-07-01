@@ -14,19 +14,19 @@ import BaseCardCommentBox from './BaseCardCommentBox.vue';
 import { ActivityType, type ActivityContent, type Card } from './types';
 import { cloneDeep } from 'lodash';
 import { useFieldsService } from '@/composables/services/useFieldsService';
-import { useWorkspaceStore } from '@/stores/workspace';
 import { FieldTypes, type Field } from '../fields/types';
 import { useStateStore } from '@/stores/state';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS, SettingsTabs } from '@/components/common/dialogs/types';
 import BaseLabelSelector from '@/components/common/inputs/BaseLabelSelector.vue';
+import { useAuthStore } from '@/stores/auth';
 
 const props = defineProps<{
   card: Card;
   showCloseButton?: boolean;
 }>();
 const emit = defineEmits(['click:close']);
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const { workspace, project } = storeToRefs(useAuthStore());
 const cardCopy = ref<Card>(cloneDeep(props.card));
 const fields = ref<Field[]>([]);
 const comment = ref<Content>();
@@ -44,10 +44,10 @@ const dialog = useDialogStore();
 const { mutateAsync: updateCard, isPending: isUpdating } =
   cardsService.useUpdateCardMutation();
 const usersQuery = projectUsersService.useProjectUsersQuery({
-  projectId: selectedWorkspace.value!.projectId,
+  projectId: project.value!.id,
 });
 const { data: workspaceFields } = useFieldsQuery({
-  workspaceId: selectedWorkspace.value!.id,
+  workspaceId: workspace.value!.id,
 });
 
 watch(

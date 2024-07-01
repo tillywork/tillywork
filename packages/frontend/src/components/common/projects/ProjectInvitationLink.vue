@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { useProjectsService } from '@/composables/services/useProjectsService';
+import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { useWorkspaceStore } from '@/stores/workspace';
 
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const { project: selectedProject } = storeToRefs(useAuthStore());
 const { useGetProject } = useProjectsService();
 const { copy } = useClipboard();
 const { showSnackbar } = useSnackbarStore();
 
 const { data: project } = useGetProject({
-  projectId: selectedWorkspace.value!.projectId,
+  projectId: selectedProject.value!.id,
 });
 
 const inviteLink = computed(

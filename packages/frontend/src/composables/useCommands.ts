@@ -8,7 +8,6 @@ import {
 import { useDialogStore } from '@/stores/dialog';
 import { useStateStore } from '@/stores/state';
 import { useThemeStore } from '@/stores/theme';
-import { useWorkspaceStore } from '@/stores/workspace';
 import { useCardTypesService } from './services/useCardTypesService';
 import { useAuthStore } from '@/stores/auth';
 
@@ -21,13 +20,13 @@ export const useCommands = () => {
   const { setIsInputFocused } = stateStore;
   const { isInputFocused } = storeToRefs(stateStore);
   const themeStore = useThemeStore();
-  const { isAuthenticated } = useAuthStore();
-
-  const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+  const authStore = useAuthStore();
+  const { isAuthenticated } = authStore;
+  const { workspace } = storeToRefs(authStore);
   const cardTypesService = useCardTypesService();
   const { data: allCardTypes } = cardTypesService.useFindAllQuery({
-    workspaceId: selectedWorkspace.value?.id ?? 0,
-    enabled: isAuthenticated() && !!selectedWorkspace.value,
+    workspaceId: workspace.value?.id ?? 0,
+    enabled: isAuthenticated() && !!workspace.value,
   });
 
   /**
@@ -270,13 +269,25 @@ export const useCommands = () => {
                 },
               }),
             shortcut:
-              cardType.id === selectedWorkspace.value?.defaultCardType.id
+              cardType.id === workspace.value?.defaultCardType.id
                 ? ['N']
                 : undefined,
           } as CommandDto)
       ) ?? []
     );
   }
+
+  // Listen to focus events to disable command shortcuts when user is typing
+  onMounted(() => {
+    window.addEventListener('focusin', handleInputFocus);
+    window.addEventListener('focusout', handleInputBlur);
+  });
+
+  // Always clear listeners before unmount
+  onBeforeUnmount(() => {
+    window.removeEventListener('focusin', handleInputFocus);
+    window.removeEventListener('focusout', handleInputBlur);
+  });
 
   return {
     keys,

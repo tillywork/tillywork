@@ -7,7 +7,6 @@ import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
-import { useWorkspaceStore } from '@/stores/workspace';
 import type {
   QueryFilter,
   FieldFilter,
@@ -15,6 +14,7 @@ import type {
 } from '../../filters/types';
 import type { FieldFilterOption } from './types';
 import { useFieldsService } from '@/composables/services/useFieldsService';
+import { useAuthStore } from '@/stores/auth';
 
 const props = defineProps<{
   filters?: QueryFilter;
@@ -33,16 +33,16 @@ const snackbarId = ref<number>();
 
 const { useFieldsQuery } = useFieldsService();
 const { showSnackbar, closeSnackbar } = useSnackbarStore();
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const { workspace, project } = storeToRefs(useAuthStore());
 const { useProjectUsersQuery } = useProjectUsersService();
 
 const { data: users } = useProjectUsersQuery({
-  projectId: selectedWorkspace.value!.projectId,
+  projectId: project.value!.id,
   select: (projectUsers) => projectUsers.map((pj) => pj.user),
 });
 
 const { data: workspaceFields } = useFieldsQuery({
-  workspaceId: selectedWorkspace.value!.id,
+  workspaceId: workspace.value!.id,
 });
 
 const defaultFields = ref<FieldFilterOption[]>([

@@ -16,7 +16,7 @@ import { useProjectUsersService } from '@/composables/services/useProjectUsersSe
 import ListViewGroup from './ListViewGroup.vue';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { useWorkspaceStore } from '@/stores/workspace';
+import { useAuthStore } from '@/stores/auth';
 
 const isLoading = defineModel<boolean>('loading');
 
@@ -40,7 +40,7 @@ const emit = defineEmits([
 const expandedState = ref<Record<string, boolean>>();
 
 const { showSnackbar } = useSnackbarStore();
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const { project } = storeToRefs(useAuthStore());
 
 const listGroupsService = useListGroupsService();
 const { mutateAsync: updateListGroup } =
@@ -53,7 +53,7 @@ const { data: listStages } = listsStagesService.useGetListStagesQuery({
 
 const projectUsersService = useProjectUsersService();
 const { data: projectUsers } = projectUsersService.useProjectUsersQuery({
-  projectId: selectedWorkspace.value!.projectId,
+  projectId: project.value!.id,
 });
 
 const table = useVueTable({

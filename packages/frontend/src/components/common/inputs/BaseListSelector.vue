@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { type List } from '@/components/project-management/lists/types';
 import { useListsService } from '@/composables/services/useListsService';
-import { useWorkspaceStore } from '@/stores/workspace';
+import { useAuthStore } from '@/stores/auth';
 
 const selectedList = defineModel<List>();
 
 const menu = ref(false);
 
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const { workspace } = storeToRefs(useAuthStore());
 
 const { useGetListsQuery } = useListsService();
 const { data: lists } = useGetListsQuery({
-  workspaceId: selectedWorkspace.value!.id,
+  workspaceId: workspace.value!.id,
 });
 
 watch(lists, (v) => {

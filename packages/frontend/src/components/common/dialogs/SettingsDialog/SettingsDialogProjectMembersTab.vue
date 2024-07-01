@@ -2,17 +2,15 @@
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
 import ProjectInvitationLink from '../../projects/ProjectInvitationLink.vue';
 import { useDate } from '@/composables/useDate';
-import { useWorkspaceStore } from '@/stores/workspace';
+import { useAuthStore } from '@/stores/auth';
 
 const { dayjs } = useDate();
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const { workspace } = storeToRefs(useAuthStore());
 const { useProjectUsersQuery } = useProjectUsersService();
 
 const { data: projectUsers } = useProjectUsersQuery({
-  projectId: selectedWorkspace.value!.projectId,
+  projectId: workspace.value!.projectId,
 });
-
-console.log('selectedWorkspace', selectedWorkspace.value);
 </script>
 
 <template>

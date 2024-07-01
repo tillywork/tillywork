@@ -132,7 +132,7 @@ export class AuthService {
         await this.projectUsersService.create({
             user: createdUser,
             project: inviteCodeCheck,
-            role: "owner",
+            role: "admin",
         });
 
         const accessToken = await this.login(createdUser);

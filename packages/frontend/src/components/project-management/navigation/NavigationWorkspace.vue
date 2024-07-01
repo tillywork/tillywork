@@ -3,9 +3,11 @@ import CreateSpaceBtn from './CreateSpaceBtn.vue';
 import { useSpacesService } from '../../../composables/services/useSpacesService';
 import { useWorkspaceStore } from '@/stores/workspace';
 import NavigationWorkspaceSpaceItem from './NavigationWorkspaceSpaceItem.vue';
+import { useAuthStore } from '@/stores/auth';
 
 const workspaceStore = useWorkspaceStore();
-const { selectedWorkspace, spaceExpansionState } = storeToRefs(workspaceStore);
+const { spaceExpansionState } = storeToRefs(workspaceStore);
+const { workspace } = storeToRefs(useAuthStore());
 
 const spacesService = useSpacesService();
 const listMenu = ref(false);
@@ -13,7 +15,7 @@ const freezeListHoverId = ref<number | null>();
 
 const enableSpacesFetch = ref(false);
 
-const workspaceId = computed(() => selectedWorkspace.value?.id);
+const workspaceId = computed(() => workspace.value?.id);
 
 const spacesQuery = spacesService.useGetSpacesQuery({
   workspaceId: workspaceId,
@@ -22,24 +24,20 @@ const spacesQuery = spacesService.useGetSpacesQuery({
 
 const currentSpaceExpansionState = computed({
   get: () =>
-    selectedWorkspace.value
-      ? spaceExpansionState.value[selectedWorkspace.value.id]
-      : [],
+    workspace.value ? spaceExpansionState.value[workspace.value.id] : [],
   set: (state) => {
-    if (selectedWorkspace.value) {
-      workspaceStore.setSpaceExpansionState(selectedWorkspace.value.id, state);
+    if (workspace.value) {
+      workspaceStore.setSpaceExpansionState(workspace.value.id, state);
     }
   },
 });
 
 watch(
-  selectedWorkspace,
+  workspace,
   async (workspace) => {
     if (workspace) {
       enableSpacesFetch.value = true;
       spacesQuery.refetch();
-
-      // TODO: Navigate to workspace on change
     }
   },
   { immediate: true }
@@ -58,7 +56,7 @@ watch(listMenu, (isOpen) => {
     <v-list
       v-model:opened="currentSpaceExpansionState"
       open-strategy="multiple"
-      v-if="selectedWorkspace"
+      v-if="workspace"
     >
       <template
         v-if="spacesQuery.data.value && spacesQuery.data.value.length > 0"

@@ -4,6 +4,7 @@ import type { RouteLocation } from 'vue-router/auto';
 import { useAuthService } from '@/composables/services/useAuthService';
 import { useSnackbarStore } from './snackbar';
 import type { Project } from '@/components/common/projects/types';
+import type { Workspace } from '@/components/project-management/workspaces/types';
 import { useWorkspaceStore } from './workspace';
 
 export const useAuthStore = defineStore('auth', {
@@ -14,6 +15,7 @@ export const useAuthStore = defineStore('auth', {
       user: null as User | null,
       token: null as string | null,
       project: null as Project | null,
+      workspace: null as Workspace | null,
     };
   },
 
@@ -52,17 +54,26 @@ export const useAuthStore = defineStore('auth', {
       this.project = project;
     },
 
+    setWorkspace(workspace: Workspace) {
+      const workspaceStore = useWorkspaceStore();
+      this.workspace = workspace;
+
+      // Ensure that this workspace's expansion state exists in the store
+      if (!workspaceStore.spaceExpansionState[workspace.id]) {
+        workspaceStore.$patch({ spaceExpansionState: { [workspace.id]: [] } });
+      }
+    },
+
     /**
      * Logs the user out by
      * clearing the token and user object values
      * saved in store
      */
     logout(go?: RouteLocation) {
-      const { clearSelectedWorkspace } = useWorkspaceStore();
       this.token = null;
       this.user = null;
       this.project = null;
-      clearSelectedWorkspace();
+      this.workspace = null;
       this.$router.go(go ?? '/');
     },
 
