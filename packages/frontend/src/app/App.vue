@@ -5,6 +5,7 @@ import { DIALOGS } from '@/components/common/dialogs/types';
 import { WorkspaceTypes } from '@/components/project-management/workspaces/types';
 import { useProjectsService } from '@/composables/services/useProjectsService';
 import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
+import { useCommands } from '@/composables/useCommands';
 import { useState } from '@/composables/useState';
 import CrmLayout from '@/layouts/CrmLayout.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
@@ -17,7 +18,7 @@ import posthog from 'posthog-js';
 import { useTheme } from 'vuetify';
 
 const themeStore = useThemeStore();
-
+const { registerInputFocusAndBlurListeners } = useCommands();
 const workspacesService = useWorkspacesService();
 const projectsService = useProjectsService();
 const { stateStore } = useState();
@@ -85,6 +86,8 @@ watch(projects, (v) => {
     setProject(v[0]);
   }
 });
+
+registerInputFocusAndBlurListeners();
 </script>
 
 <template>

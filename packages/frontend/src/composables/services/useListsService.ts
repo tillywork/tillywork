@@ -76,8 +76,6 @@ export const useListsService = () => {
   }
 
   function useGetListQuery(id: MaybeRef<number>) {
-    const idValue = toValue(id);
-    console.log('id', idValue);
     return useQuery({
       queryKey: ['lists', toValue(id)],
       queryFn: () => getList(toValue(id)),

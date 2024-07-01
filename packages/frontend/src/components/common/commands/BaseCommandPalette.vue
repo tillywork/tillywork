@@ -12,6 +12,7 @@ const {
   setIsCommandPaletteOpen,
   keys,
   commands,
+  watchForCommandChanges,
 } = useCommands();
 const { width: windowWidth, height: windowHeight } = useWindowSize();
 
@@ -66,6 +67,7 @@ watch(isCommandPaletteOpen, (v) => {
 
 onMounted(() => {
   registerCommandShortcutWatchers();
+  watchForCommandChanges();
 });
 
 /**

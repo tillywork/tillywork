@@ -29,6 +29,8 @@ export const useCommands = () => {
     enabled: isAuthenticated() && !!workspace.value,
   });
 
+  const watchers = ref(new Map());
+
   /**
    * Handles building the commands array.
    * @returns An array of commands
@@ -222,28 +224,28 @@ export const useCommands = () => {
    * @param commands The commands to listen to.
    */
   function registerCommandShortcutWatchers() {
-    // Re-register shortcut watchers when commands change
-    watch(
-      commands,
-      (v) => {
-        if (v) {
-          registerCommandShortcutWatchers();
-        }
-      },
-      { deep: true }
-    );
+    clearCommandShortcutWatchers();
 
-    commands.value.forEach((command) => {
+    commands.value.forEach((command, index) => {
       if (!command.shortcut) {
         return;
       }
 
-      watch(keys[command.shortcut.join('+')], (v) => {
+      const stop = watch(keys[command.shortcut.join('+')], (v) => {
         if (v && !isInputFocused.value) {
           executeCommand(command);
         }
       });
+
+      watchers.value.set(index, stop);
     });
+  }
+
+  function clearCommandShortcutWatchers() {
+    watchers.value.forEach((stop) => {
+      stop();
+    });
+    watchers.value.clear();
   }
 
   /** Returns an array of commands for each card type in the workspace */
@@ -277,17 +279,29 @@ export const useCommands = () => {
     );
   }
 
-  // Listen to focus events to disable command shortcuts when user is typing
-  onMounted(() => {
-    window.addEventListener('focusin', handleInputFocus);
-    window.addEventListener('focusout', handleInputBlur);
-  });
+  function watchForCommandChanges() {
+    // Re-register shortcut watchers when commands change
+    watch(commands, (v) => {
+      if (v) {
+        registerCommandShortcutWatchers();
+      }
+    });
+  }
 
-  // Always clear listeners before unmount
-  onBeforeUnmount(() => {
-    window.removeEventListener('focusin', handleInputFocus);
-    window.removeEventListener('focusout', handleInputBlur);
-  });
+  function registerInputFocusAndBlurListeners() {
+    // Listen to focus events to disable command shortcuts when user is typing
+    onMounted(() => {
+      window.addEventListener('focusin', handleInputFocus);
+      window.addEventListener('focusout', handleInputBlur);
+    });
+
+    // Always clear listeners before unmount
+    onBeforeUnmount(() => {
+      window.removeEventListener('focusin', handleInputFocus);
+      window.removeEventListener('focusout', handleInputBlur);
+      clearCommandShortcutWatchers();
+    });
+  }
 
   return {
     keys,
@@ -296,9 +310,9 @@ export const useCommands = () => {
     setIsCommandPaletteOpen,
     setIsInputFocused,
     registerCommandShortcutWatchers,
-    handleInputBlur,
-    handleInputFocus,
     executeCommand,
     commands,
+    watchForCommandChanges,
+    registerInputFocusAndBlurListeners,
   };
 };
