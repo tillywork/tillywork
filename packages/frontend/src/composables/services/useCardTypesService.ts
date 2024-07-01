@@ -4,27 +4,34 @@ import type {
   CardType,
   CreateCardTypeDto,
 } from '@/components/project-management/cards/types';
-import { useWorkspaceStore } from '@/stores/workspace';
+import type { MaybeRef } from 'vue';
+import { useAuthStore } from '@/stores/auth';
 
 export const useCardTypesService = () => {
   const { sendRequest } = useHttp();
   const queryClient = useQueryClient();
-  const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+  const { workspace } = storeToRefs(useAuthStore());
 
   function findAll({
     workspaceId,
   }: {
-    workspaceId: number;
+    workspaceId: MaybeRef<number>;
   }): Promise<CardType[]> {
     return sendRequest(`/card-types`, {
       method: 'GET',
       params: {
-        workspaceId,
+        workspaceId: toValue(workspaceId),
       },
     });
   }
 
-  function useFindAllQuery({ workspaceId }: { workspaceId: number }) {
+  function useFindAllQuery({
+    workspaceId,
+    enabled,
+  }: {
+    workspaceId: MaybeRef<number>;
+    enabled?: MaybeRef<boolean>;
+  }) {
     return useQuery({
       queryKey: [
         'cardTypes',
@@ -33,6 +40,7 @@ export const useCardTypesService = () => {
         },
       ],
       queryFn: () => findAll({ workspaceId }),
+      enabled,
     });
   }
 
@@ -51,7 +59,7 @@ export const useCardTypesService = () => {
           queryKey: [
             'cardTypes',
             {
-              workspaceId: selectedWorkspace.value?.id,
+              workspaceId: workspace.value?.id,
             },
           ],
         });
@@ -83,7 +91,7 @@ export const useCardTypesService = () => {
           queryKey: [
             'cardTypes',
             {
-              workspaceId: selectedWorkspace.value?.id,
+              workspaceId: workspace.value?.id,
             },
           ],
         });

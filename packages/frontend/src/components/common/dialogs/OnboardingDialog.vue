@@ -64,7 +64,7 @@ async function createWorkspace(createWorkspaceDto: Partial<Workspace>) {
   createWorkspaceMutation
     .mutateAsync(createWorkspaceDto)
     .then((workspace) => {
-      workspaceStore.setSelectedWorkspace(workspace);
+      authStore.setWorkspace(workspace);
       dialog.closeDialog(currentDialogIndex.value);
       workspaceStore.setSpaceExpansionState(workspace.id, [
         workspace.spaces[0].id,

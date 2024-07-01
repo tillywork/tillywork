@@ -8,8 +8,8 @@ import {
 import { useDialogStore } from '@/stores/dialog';
 import { useStateStore } from '@/stores/state';
 import { useThemeStore } from '@/stores/theme';
-import { useWorkspaceStore } from '@/stores/workspace';
 import { useCardTypesService } from './services/useCardTypesService';
+import { useAuthStore } from '@/stores/auth';
 
 export const useCommands = () => {
   const keys = useMagicKeys();
@@ -20,13 +20,53 @@ export const useCommands = () => {
   const { setIsInputFocused } = stateStore;
   const { isInputFocused } = storeToRefs(stateStore);
   const themeStore = useThemeStore();
-
-  const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+  const authStore = useAuthStore();
+  const { isAuthenticated } = authStore;
+  const { workspace } = storeToRefs(authStore);
   const cardTypesService = useCardTypesService();
-  const { data: allCardTypes } = cardTypesService.useFindAllQuery({
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    workspaceId: selectedWorkspace.value!.id,
+
+  const isCommandsEnabled = computed(() => {
+    return isAuthenticated() && !!workspace.value;
   });
+
+  const workspaceId = computed(() => workspace.value?.id ?? 0);
+
+  const { data: cardTypes } = cardTypesService.useFindAllQuery({
+    workspaceId,
+    enabled: isCommandsEnabled,
+  });
+
+  const cardTypeCommands = computed(() => {
+    return (
+      cardTypes.value?.map(
+        (cardType) =>
+          ({
+            section: cardType.name,
+            icon: 'mdi-card-plus-outline',
+            title:
+              'Create ' +
+              cardType.name[0].toLocaleLowerCase() +
+              cardType.name.slice(1),
+            action: () =>
+              dialog.openDialog({
+                dialog: DIALOGS.CREATE_CARD,
+                options: {
+                  width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD],
+                },
+                data: {
+                  type: cardType,
+                },
+              }),
+            shortcut:
+              cardType.id === workspace.value?.defaultCardType.id
+                ? ['N']
+                : undefined,
+          } as CommandDto)
+      ) ?? []
+    );
+  });
+
+  const watchers = ref(new Map());
 
   /**
    * Handles building the commands array.
@@ -35,7 +75,7 @@ export const useCommands = () => {
   const commands = computed(() => {
     const commandsDtos: CommandDto[] = [
       // ~ Cards
-      ...getCardCommandsDtos(),
+      ...cardTypeCommands.value,
 
       // ~ Spaces
       {
@@ -84,6 +124,23 @@ export const useCommands = () => {
             },
           }),
         shortcut: ['F2'],
+      },
+
+      // Project
+      {
+        section: 'Project',
+        icon: 'mdi-account-multiple',
+        title: 'Invite and manage members',
+        action: () =>
+          dialog.openDialog({
+            dialog: DIALOGS.SETTINGS,
+            options: {
+              fullscreen: true,
+            },
+            data: {
+              activeTab: SettingsTabs.MEMBERS,
+            },
+          }),
       },
 
       // ~ Settings
@@ -221,59 +278,55 @@ export const useCommands = () => {
    * @param commands The commands to listen to.
    */
   function registerCommandShortcutWatchers() {
+    commands.value.forEach((command, index) => {
+      if (!command.shortcut) {
+        return;
+      }
+
+      const stop = watch(keys[command.shortcut.join('+')], (v) => {
+        if (v && !isInputFocused.value) {
+          executeCommand(command);
+        }
+      });
+
+      watchers.value.set(index, stop);
+    });
+  }
+
+  function clearCommandShortcutWatchers() {
+    watchers.value.forEach((stop) => {
+      stop();
+    });
+    watchers.value.clear();
+  }
+
+  function watchForCommandChanges() {
     // Re-register shortcut watchers when commands change
     watch(
       commands,
       (v) => {
+        clearCommandShortcutWatchers();
         if (v) {
           registerCommandShortcutWatchers();
         }
       },
       { deep: true }
     );
-
-    commands.value.forEach((command) => {
-      if (!command.shortcut) {
-        return;
-      }
-
-      watch(keys[command.shortcut.join('+')], (v) => {
-        if (v && !isInputFocused.value) {
-          executeCommand(command);
-        }
-      });
-    });
   }
 
-  /** Returns an array of commands for each card type in the workspace */
-  function getCardCommandsDtos(): CommandDto[] {
-    return (
-      allCardTypes.value?.map(
-        (cardType) =>
-          ({
-            section: cardType.name,
-            icon: 'mdi-card-plus-outline',
-            title:
-              'Create ' +
-              cardType.name[0].toLocaleLowerCase() +
-              cardType.name.slice(1),
-            action: () =>
-              dialog.openDialog({
-                dialog: DIALOGS.CREATE_CARD,
-                options: {
-                  width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD],
-                },
-                data: {
-                  type: cardType,
-                },
-              }),
-            shortcut:
-              cardType.id === selectedWorkspace.value?.defaultCardType.id
-                ? ['N']
-                : undefined,
-          } as CommandDto)
-      ) ?? []
-    );
+  function registerInputFocusAndBlurListeners() {
+    // Listen to focus events to disable command shortcuts when user is typing
+    onMounted(() => {
+      window.addEventListener('focusin', handleInputFocus);
+      window.addEventListener('focusout', handleInputBlur);
+    });
+
+    // Always clear listeners before unmount
+    onBeforeUnmount(() => {
+      window.removeEventListener('focusin', handleInputFocus);
+      window.removeEventListener('focusout', handleInputBlur);
+      clearCommandShortcutWatchers();
+    });
   }
 
   return {
@@ -283,9 +336,10 @@ export const useCommands = () => {
     setIsCommandPaletteOpen,
     setIsInputFocused,
     registerCommandShortcutWatchers,
-    handleInputBlur,
-    handleInputFocus,
     executeCommand,
     commands,
+    watchForCommandChanges,
+    registerInputFocusAndBlurListeners,
+    isCommandsEnabled,
   };
 };

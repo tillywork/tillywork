@@ -54,6 +54,22 @@ export class AuthController {
 
         return response;
     }
+
+    @Post("invite/:inviteCode")
+    async registerWithInvite(
+        @Body() createUserDto: CreateUserDto,
+        @Res({ passthrough: true }) res
+    ): Promise<RegisterResponse> {
+        const response = await this.authService.registerWithInvite(
+            createUserDto
+        );
+
+        if (response["error"]) {
+            res.status(200);
+        }
+
+        return response;
+    }
 }
 
 type LoginResponse = {

@@ -5,10 +5,10 @@ import type { Card } from '../../cards/types';
 import { type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/composables/services/useListStagesService';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
-import { useAuthStore } from '@/stores/auth';
 import BoardViewGroup from './BoardViewGroup.vue';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
+import { useAuthStore } from '@/stores/auth';
 
 const isLoading = defineModel<boolean>('loading');
 
@@ -28,7 +28,7 @@ const emit = defineEmits([
 ]);
 
 const { showSnackbar } = useSnackbarStore();
-const authStore = useAuthStore();
+const { project } = storeToRefs(useAuthStore());
 
 const listGroupsService = useListGroupsService();
 const { mutateAsync: updateListGroup } =
@@ -41,7 +41,7 @@ const { data: listStages } = listsStagesService.useGetListStagesQuery({
 
 const projectUsersService = useProjectUsersService();
 const { data: projectUsers } = projectUsersService.useProjectUsersQuery({
-  projectId: authStore.project!.id,
+  projectId: project.value!.id,
 });
 
 function toggleGroupExpansion(listGroup: ListGroup) {

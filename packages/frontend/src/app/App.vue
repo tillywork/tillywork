@@ -16,17 +16,22 @@ import { useThemeStore } from '@/stores/theme';
 import { VueQueryDevtools } from '@tanstack/vue-query-devtools';
 import posthog from 'posthog-js';
 import { useTheme } from 'vuetify';
+import BaseCommandPalette from '@/components/common/commands/BaseCommandPalette.vue';
 
 const themeStore = useThemeStore();
-const { handleInputBlur, handleInputFocus } = useCommands();
-
+const {
+  registerInputFocusAndBlurListeners,
+  registerCommandShortcutWatchers,
+  watchForCommandChanges,
+  isCommandsEnabled,
+} = useCommands();
 const workspacesService = useWorkspacesService();
 const projectsService = useProjectsService();
 const { stateStore } = useState();
 const dialogStore = useDialogStore();
 const authStore = useAuthStore();
 const { isAuthenticated, setProject } = authStore;
-const { project, user } = storeToRefs(authStore);
+const { project, user, workspace } = storeToRefs(authStore);
 const projectsEnabled = computed(() => !project.value && isAuthenticated());
 const workspacesEnabled = computed(() => !!project.value && isAuthenticated());
 
@@ -71,8 +76,13 @@ watch(workspaces, (v) => {
           persistent: true,
         },
       });
-    } else if (v.length && !stateStore.selectedModule) {
-      stateStore.setSelectedModule(v[0].type);
+    } else if (v.length) {
+      if (!stateStore.selectedModule) {
+        stateStore.setSelectedModule(v[0].type);
+      }
+      if (!workspace) {
+        authStore.setWorkspace(v[0]);
+      }
     }
   }
 });
@@ -83,17 +93,18 @@ watch(projects, (v) => {
   }
 });
 
-// Listen to focus events to disable command shortcuts when user is typing
-onMounted(() => {
-  window.addEventListener('focusin', handleInputFocus);
-  window.addEventListener('focusout', handleInputBlur);
-});
+watch(
+  isCommandsEnabled,
+  (v) => {
+    if (v) {
+      registerCommandShortcutWatchers();
+      watchForCommandChanges();
+    }
+  },
+  { immediate: true }
+);
 
-// Always clear listeners before unmount
-onBeforeUnmount(() => {
-  window.removeEventListener('focusin', handleInputFocus);
-  window.removeEventListener('focusout', handleInputBlur);
-});
+registerInputFocusAndBlurListeners();
 </script>
 
 <template>
@@ -116,5 +127,6 @@ onBeforeUnmount(() => {
   </template>
   <base-dialog />
   <base-snackbar-wrapper />
+  <base-command-palette v-if="isCommandsEnabled" />
   <VueQueryDevtools />
 </template>

@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { useSpacesService } from '@/composables/services/useSpacesService';
-import { useWorkspaceStore } from '@/stores/workspace';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
 import type { Space } from '@/components/project-management/spaces/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS, UpsertDialogMode } from './types';
+import { useAuthStore } from '@/stores/auth';
 
-const workspaceStore = useWorkspaceStore();
-const { selectedWorkspace } = storeToRefs(workspaceStore);
+const { workspace } = storeToRefs(useAuthStore());
 const spacesService = useSpacesService();
 const dialog = useDialogStore();
 const { rules } = validationUtils;
@@ -24,8 +23,7 @@ const space = computed<Space>(() => currentDialog.value.data.space);
 const spaceForm = ref<VForm>();
 const spaceDto = ref<Partial<Space>>({
   name: space.value?.name,
-  // TODO: Allow to update workspace?
-  workspaceId: selectedWorkspace.value?.id,
+  workspaceId: workspace.value!.id,
 });
 
 const { mutateAsync: createSpace, isPending: isCreating } =

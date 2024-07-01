@@ -2,7 +2,7 @@ export const useThemeStore = defineStore('theme', {
   persist: true,
   state: () => {
     return {
-      theme: 'light',
+      theme: usePreferredDark() ? 'dark' : 'light',
     };
   },
   actions: {

@@ -18,8 +18,16 @@ export const useAuthService = () => {
     });
   }
 
+  function registerWithInvite(createUserDto: CreateUserDto) {
+    return sendRequest(`/auth/invite/${createUserDto.inviteCode}`, {
+      method: 'POST',
+      data: createUserDto,
+    });
+  }
+
   return {
     login,
     register,
+    registerWithInvite,
   };
 };

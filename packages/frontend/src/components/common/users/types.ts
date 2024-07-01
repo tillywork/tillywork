@@ -16,4 +16,5 @@ export interface CreateUserDto {
   lastName: string;
   phoneNumber: string;
   country?: string;
+  inviteCode?: string;
 }

@@ -21,6 +21,9 @@ export class Project {
     @Column({ type: "bigint" })
     ownerId: number;
 
+    @Column({ type: "varchar", length: 32, nullable: true })
+    inviteCode: string;
+
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;
     @UpdateDateColumn({ type: "timestamp" })

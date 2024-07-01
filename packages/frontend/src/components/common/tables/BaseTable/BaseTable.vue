@@ -129,7 +129,7 @@ function generateColumnDefs(): ColumnDef<any, any>[] {
 </script>
 
 <template>
-  <div class="table-container px-6 position-relative overflow-hidden">
+  <div class="table-container position-relative overflow-hidden">
     <v-card
       class="table d-flex flex-column my-2"
       :width="width ?? '100%'"

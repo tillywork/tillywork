@@ -5,7 +5,6 @@ import type { Command } from './types';
 import { type VList } from 'vuetify/components';
 
 const {
-  registerCommandShortcutWatchers,
   executeCommand,
   setIsInputFocused,
   isCommandPaletteOpen,
@@ -62,10 +61,6 @@ watch(isCommandPaletteOpen, (v) => {
   if (!v) {
     setIsInputFocused(false);
   }
-});
-
-onMounted(() => {
-  registerCommandShortcutWatchers();
 });
 
 /**

@@ -7,13 +7,14 @@ import { CreateUserDto } from "../users/dto/create.user.dto";
 import { ProjectsService } from "../projects/projects.service";
 import { CreateProjectDto } from "../projects/dto/create.project.dto";
 import { Project } from "../projects/project.entity";
+import { ProjectUsersService } from "../projects/project-users/project.users.service";
 
 export type RegisterResponse =
     | (User & {
           accessToken: string;
       })
     | {
-          error: "EMAIL_EXISTS";
+          error: "EMAIL_EXISTS" | "INVALID_INVITE_CODE";
       };
 
 @Injectable()
@@ -22,7 +23,8 @@ export class AuthService {
     constructor(
         private usersService: UsersService,
         private jwtService: JwtService,
-        private projectsService: ProjectsService
+        private projectsService: ProjectsService,
+        private projectUsersService: ProjectUsersService
     ) {}
 
     async login(user: User): Promise<string> {
@@ -42,7 +44,7 @@ export class AuthService {
     async validateUser(
         email: string,
         password: string
-    ): Promise<Omit<User, "password"> | null> {
+    ): Promise<{ user: Omit<User, "password">; project: Project } | null> {
         try {
             const user = await this.usersService.findOneByEmailWithPassword(
                 email
@@ -52,7 +54,17 @@ export class AuthService {
                 user &&
                 (await this.validatePassword(password, user.password))
             ) {
-                return user;
+                const project = await this.projectsService.findOneBy({
+                    where: {
+                        users: {
+                            user: {
+                                id: user.id,
+                            },
+                        },
+                    },
+                });
+
+                return { user, project };
             }
 
             return null;
@@ -86,6 +98,41 @@ export class AuthService {
                     project: projectDto as Project,
                 },
             ],
+        });
+
+        const accessToken = await this.login(createdUser);
+
+        return { ...createdUser, accessToken };
+    }
+
+    async registerWithInvite(
+        createUserDto: CreateUserDto
+    ): Promise<RegisterResponse> {
+        const inviteCodeCheck = await this.projectsService.findOneBy({
+            where: { inviteCode: createUserDto.inviteCode },
+        });
+
+        if (!inviteCodeCheck) {
+            return {
+                error: "INVALID_INVITE_CODE",
+            };
+        }
+
+        const emailCheck = await this.usersService.findOneByEmail(
+            createUserDto.email
+        );
+
+        if (emailCheck) {
+            return {
+                error: "EMAIL_EXISTS",
+            };
+        }
+
+        const createdUser = await this.usersService.create(createUserDto);
+        await this.projectUsersService.create({
+            user: createdUser,
+            project: inviteCodeCheck,
+            role: "admin",
         });
 
         const accessToken = await this.login(createdUser);

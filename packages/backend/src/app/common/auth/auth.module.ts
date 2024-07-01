@@ -9,6 +9,7 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
 import { LocalStrategy } from "./strategies/local.strategy";
 import { ConfigModule } from "@nestjs/config";
 import { ProjectsModule } from "../projects/projects.module";
+import { ProjectUsersModule } from "../projects/project-users/project.users.module";
 
 @Module({
     imports: [
@@ -19,6 +20,7 @@ import { ProjectsModule } from "../projects/projects.module";
         }),
         ConfigModule.forRoot(),
         forwardRef(() => ProjectsModule),
+        forwardRef(() => ProjectUsersModule),
     ],
     providers: [
         AuthService,

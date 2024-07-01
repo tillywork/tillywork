@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { WorkspaceTypes, type Workspace } from '../workspaces/types';
 import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
-import { useWorkspaceStore } from '@/stores/workspace';
 import CreateWorkspaceBtn from './CreateWorkspaceBtn.vue';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
+import { useAuthStore } from '@/stores/auth';
 
 const dialog = useDialogStore();
 const workspacesService = useWorkspacesService();
 const selectWorkspaceMenu = ref(false);
-const workspaceStore = useWorkspaceStore();
-const { selectedWorkspace } = storeToRefs(workspaceStore);
+const authStore = useAuthStore();
+const { workspace: selectedWorkspace } = storeToRefs(authStore);
 const workspaceQuery = workspacesService.useGetWorkspacesQuery({
   type: WorkspaceTypes.PROJECT_MANAGEMENT,
 });
@@ -26,7 +26,7 @@ function closeSelectWorkspaceMenu() {
 }
 
 function handleSelectWorkspace(workspace: Workspace) {
-  workspaceStore.setSelectedWorkspace(workspace);
+  authStore.setWorkspace(workspace);
   closeSelectWorkspaceMenu();
 }
 

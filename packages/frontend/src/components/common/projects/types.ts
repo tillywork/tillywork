@@ -5,6 +5,7 @@ export interface Project {
   name: string;
   ownerId: string;
   users: ProjectUser[];
+  inviteCode?: string;
 }
 
 export interface ProjectUser {
@@ -12,4 +13,5 @@ export interface ProjectUser {
   role: string;
   user: User;
   project: Project;
+  inviteCode?: string;
 }

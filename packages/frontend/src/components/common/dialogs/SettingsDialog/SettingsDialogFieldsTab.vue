@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useFieldsService } from '@/composables/services/useFieldsService';
-import { useWorkspaceStore } from '@/stores/workspace';
 import BaseTable from '../../tables/BaseTable/BaseTable.vue';
 import {
   FIELD_TYPE_OPTIONS,
@@ -14,6 +13,7 @@ import BaseIconSelector from '../../inputs/BaseIconSelector/BaseIconSelector.vue
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useLogo } from '@/composables/useLogo';
 import { UpsertDialogMode } from '../types';
+import { useAuthStore } from '@/stores/auth';
 
 const selectedField = ref<Field>();
 const fieldDto = ref<Partial<Field>>();
@@ -32,12 +32,12 @@ const showIsMultiple = computed(() =>
 );
 
 const { showSnackbar } = useSnackbarStore();
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const { workspace } = storeToRefs(useAuthStore());
 
 const { useFieldsQuery, updateFieldMutation, createFieldMutation } =
   useFieldsService();
 const { data: fields } = useFieldsQuery({
-  workspaceId: selectedWorkspace.value!.id,
+  workspaceId: workspace.value!.id,
 });
 const { mutateAsync: updateField } = updateFieldMutation();
 const { mutateAsync: createField } = createFieldMutation();
@@ -88,7 +88,7 @@ function handleCreateField() {
   isCreating.value = true;
   fieldDto.value = {
     name: '',
-    workspaceId: selectedWorkspace.value!.id,
+    workspaceId: workspace.value!.id,
   };
 }
 

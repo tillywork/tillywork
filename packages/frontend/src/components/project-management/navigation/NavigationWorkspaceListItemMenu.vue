@@ -4,17 +4,17 @@ import { useListsService } from '@/composables/services/useListsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
-import { useWorkspaceStore } from '@/stores/workspace';
 import type { CardType } from '../cards/types';
 import { useDialogStore } from '@/stores/dialog';
 import { SettingsTabs } from '@/components/common/dialogs/types';
+import { useAuthStore } from '@/stores/auth';
 
 const listMenu = ref(false);
 const { useDeleteListMutation, useUpdateListMutation } = useListsService();
 const { showSnackbar } = useSnackbarStore();
 const queryClient = useQueryClient();
 const dialog = useDialogStore();
-const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+const { workspace } = storeToRefs(useAuthStore());
 
 const deleteListMutation = useDeleteListMutation();
 const { mutateAsync: updateList } = useUpdateListMutation();
@@ -81,7 +81,7 @@ function handleUpdateDefaultCardType(cardType: CardType) {
           queryKey: [
             'spaces',
             {
-              workspaceId: selectedWorkspace.value?.id,
+              workspaceId: workspace.value?.id,
             },
           ],
         });
@@ -189,7 +189,7 @@ watch(listMenu, () => {
             </v-card-title>
             <v-list min-height="200">
               <template
-                v-for="cardType in selectedWorkspace?.cardTypes"
+                v-for="cardType in workspace?.cardTypes"
                 :key="cardType.id"
               >
                 <v-list-item

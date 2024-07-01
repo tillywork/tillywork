@@ -41,6 +41,7 @@ export enum SettingsTabs {
   WORKSPACE = 'workspace',
   CARD_TYPES = 'cardTypes',
   FIELDS = 'fields',
+  MEMBERS = 'members',
 }
 
 export enum UpsertDialogMode {

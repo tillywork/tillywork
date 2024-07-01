@@ -5,4 +5,5 @@ export class CreateUserDto {
     password: string;
     phoneNumber?: string;
     country?: string;
+    inviteCode?: string;
 }

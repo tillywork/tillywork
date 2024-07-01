@@ -106,15 +106,22 @@ export class CardTypesService {
                 defaultTypes.push("Issue");
         }
 
-        return defaultTypes.map(async (type) => {
-            const cardType = this.cardTypesRepository.create({
-                name: type,
-                createdByType: "system",
-                workspace,
-            });
+        const cardTypes = defaultTypes.map((type) => {
+            return new Promise((resolve) => {
+                const cardType = this.cardTypesRepository.create({
+                    name: type,
+                    createdByType: "system",
+                    workspace,
+                });
 
-            await this.cardTypesRepository.save(cardType);
-            return cardType;
+                this.cardTypesRepository.save(cardType).then((cardType) => {
+                    resolve(cardType);
+                });
+            });
         });
+
+        const promiseResults = await Promise.allSettled(cardTypes);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return promiseResults.map((pr) => (pr as any).value);
     }
 }
