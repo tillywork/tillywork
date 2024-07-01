@@ -13,6 +13,7 @@ import { cloneDeep } from 'lodash';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { VForm } from 'vuetify/components';
 import objectUtils from '@/utils/object';
+import SettingsDialogProjectMembersTab from './SettingsDialogProjectMembersTab.vue';
 
 const dialog = useDialogStore();
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
@@ -38,6 +39,11 @@ const tabs = ref<SettingsTab[]>([
     icon: 'mdi-form-select',
     text: 'Custom Fields',
     value: SettingsTabs.FIELDS,
+  },
+  {
+    icon: 'mdi-account-multiple',
+    text: 'Project Members',
+    value: SettingsTabs.MEMBERS,
   },
 ]);
 
@@ -276,6 +282,9 @@ watch(selectedWorkspace, (v) => {
         </template>
         <template #item.fields>
           <settings-dialog-fields-tab />
+        </template>
+        <template #item.members>
+          <settings-dialog-project-members-tab />
         </template>
       </v-tabs>
     </v-card-text>

@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    Logger,
     Post,
     Request,
     Res,
@@ -38,6 +39,7 @@ export class AuthController {
     @Post("login")
     async login(@Request() req): Promise<LoginResponse> {
         const accessToken = await this.authService.login(req.user);
+        Logger.debug({ user: req.user });
         return { accessToken };
     }
 
@@ -47,6 +49,22 @@ export class AuthController {
         @Res({ passthrough: true }) res
     ): Promise<RegisterResponse> {
         const response = await this.authService.register(createUserDto);
+
+        if (response["error"]) {
+            res.status(200);
+        }
+
+        return response;
+    }
+
+    @Post("invite/:inviteCode")
+    async registerWithInvite(
+        @Body() createUserDto: CreateUserDto,
+        @Res({ passthrough: true }) res
+    ): Promise<RegisterResponse> {
+        const response = await this.authService.registerWithInvite(
+            createUserDto
+        );
 
         if (response["error"]) {
             res.status(200);

@@ -1,11 +1,12 @@
 import type { List } from '@/components/project-management/lists/types';
-import type { WorkspaceTypes } from '@/components/project-management/workspaces/types';
+import { WorkspaceTypes } from '@/components/project-management/workspaces/types';
 
 export const useStateStore = defineStore('state', {
   persist: true,
   state: () => {
     return {
-      selectedModule: null as null | WorkspaceTypes,
+      selectedModule:
+        WorkspaceTypes.PROJECT_MANAGEMENT as null | WorkspaceTypes,
       /** Is an input currently focused */
       isInputFocused: false,
       /** Is information navigation drawer open */

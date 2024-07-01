@@ -6,7 +6,6 @@ import type {
 import { type List } from '@/components/project-management/lists/types';
 import { useCardsService } from '@/composables/services/useCardsService';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
-import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
 import type { VForm } from 'vuetify/lib/components/index.mjs';
 import BaseEditorInput from '../base/BaseEditor/BaseEditorInput.vue';
@@ -17,7 +16,6 @@ import BaseListSelector from '../inputs/BaseListSelector.vue';
 import { cloneDeep } from 'lodash';
 import { useStateStore } from '@/stores/state';
 
-const authStore = useAuthStore();
 const dialog = useDialogStore();
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
 const { showSnackbar } = useSnackbarStore();
@@ -30,7 +28,7 @@ const cardsService = useCardsService();
 const projectUsersService = useProjectUsersService();
 
 const { data: users } = projectUsersService.useProjectUsersQuery({
-  projectId: authStore.project!.id,
+  projectId: selectedWorkspace.value!.projectId,
   select: (data) => data.map((pu) => pu.user),
 });
 

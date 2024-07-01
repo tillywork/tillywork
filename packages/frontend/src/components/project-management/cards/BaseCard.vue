@@ -5,7 +5,6 @@ import { useCardActivitiesService } from '@/composables/services/useCardActiviti
 import { useCardsService } from '@/composables/services/useCardsService';
 import { useListStagesService } from '@/composables/services/useListStagesService';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
-import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { type Content } from '@tiptap/vue-3';
@@ -27,7 +26,6 @@ const props = defineProps<{
   showCloseButton?: boolean;
 }>();
 const emit = defineEmits(['click:close']);
-const authStore = useAuthStore();
 const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
 const cardCopy = ref<Card>(cloneDeep(props.card));
 const fields = ref<Field[]>([]);
@@ -46,7 +44,7 @@ const dialog = useDialogStore();
 const { mutateAsync: updateCard, isPending: isUpdating } =
   cardsService.useUpdateCardMutation();
 const usersQuery = projectUsersService.useProjectUsersQuery({
-  projectId: authStore.project!.id,
+  projectId: selectedWorkspace.value!.projectId,
 });
 const { data: workspaceFields } = useFieldsQuery({
   workspaceId: selectedWorkspace.value!.id,

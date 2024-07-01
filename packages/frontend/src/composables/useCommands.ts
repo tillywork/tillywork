@@ -10,6 +10,7 @@ import { useStateStore } from '@/stores/state';
 import { useThemeStore } from '@/stores/theme';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { useCardTypesService } from './services/useCardTypesService';
+import { useAuthStore } from '@/stores/auth';
 
 export const useCommands = () => {
   const keys = useMagicKeys();
@@ -20,12 +21,13 @@ export const useCommands = () => {
   const { setIsInputFocused } = stateStore;
   const { isInputFocused } = storeToRefs(stateStore);
   const themeStore = useThemeStore();
+  const { isAuthenticated } = useAuthStore();
 
   const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
   const cardTypesService = useCardTypesService();
   const { data: allCardTypes } = cardTypesService.useFindAllQuery({
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    workspaceId: selectedWorkspace.value!.id,
+    workspaceId: selectedWorkspace.value?.id ?? 0,
+    enabled: isAuthenticated() && !!selectedWorkspace.value,
   });
 
   /**

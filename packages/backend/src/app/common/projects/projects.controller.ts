@@ -16,9 +16,7 @@ import { UpdateProjectDto } from "./dto/update.project.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
-@ApiBearerAuth()
 @ApiTags("projects")
-@UseGuards(JwtAuthGuard)
 @Controller({
     path: "projects",
     version: "1",
@@ -26,6 +24,8 @@ import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 export class ProjectsController {
     constructor(private readonly projectsService: ProjectsService) {}
 
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
     @Get()
     findAll(@Request() req): Promise<Project[]> {
         const { user } = req;
@@ -38,11 +38,15 @@ export class ProjectsController {
         });
     }
 
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
     @Get(":id")
     findOne(@Param("id") id: string): Promise<Project> {
         return this.projectsService.findOne(+id);
     }
 
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
     @Post()
     create(
         @Body() createProjectDto: CreateProjectDto,
@@ -61,6 +65,8 @@ export class ProjectsController {
         });
     }
 
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
     @Put(":id")
     update(
         @Param("id") id: string,
@@ -69,8 +75,19 @@ export class ProjectsController {
         return this.projectsService.update(+id, updateProjectDto);
     }
 
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
     @Delete(":id")
     remove(@Param("id") id: string): Promise<void> {
         return this.projectsService.remove(+id);
+    }
+
+    @Get("/invite/:inviteCode")
+    findOneByInviteCode(@Param("inviteCode") inviteCode: string) {
+        return this.projectsService.findOneBy({
+            where: {
+                inviteCode,
+            },
+        });
     }
 }

@@ -5,6 +5,7 @@ import type {
   CreateCardTypeDto,
 } from '@/components/project-management/cards/types';
 import { useWorkspaceStore } from '@/stores/workspace';
+import type { MaybeRef } from 'vue';
 
 export const useCardTypesService = () => {
   const { sendRequest } = useHttp();
@@ -24,7 +25,13 @@ export const useCardTypesService = () => {
     });
   }
 
-  function useFindAllQuery({ workspaceId }: { workspaceId: number }) {
+  function useFindAllQuery({
+    workspaceId,
+    enabled,
+  }: {
+    workspaceId: number;
+    enabled?: MaybeRef<boolean>;
+  }) {
     return useQuery({
       queryKey: [
         'cardTypes',
@@ -33,6 +40,7 @@ export const useCardTypesService = () => {
         },
       ],
       queryFn: () => findAll({ workspaceId }),
+      enabled,
     });
   }
 

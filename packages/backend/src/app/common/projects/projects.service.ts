@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { FindManyOptions, Repository } from "typeorm";
+import { FindManyOptions, FindOptionsWhere, Repository } from "typeorm";
 import { Project } from "./project.entity";
 import { CreateProjectDto } from "./dto/create.project.dto";
 import { UpdateProjectDto } from "./dto/update.project.dto";
@@ -33,7 +33,11 @@ export class ProjectsService {
         return project;
     }
 
-    async findOneBy({ where }: { where: object }): Promise<Project> {
+    async findOneBy({
+        where,
+    }: {
+        where: FindOptionsWhere<Project>;
+    }): Promise<Project> {
         return this.projectsRepository.findOne({ where });
     }
 

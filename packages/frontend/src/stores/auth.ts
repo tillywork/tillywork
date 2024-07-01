@@ -4,6 +4,7 @@ import type { RouteLocation } from 'vue-router/auto';
 import { useAuthService } from '@/composables/services/useAuthService';
 import { useSnackbarStore } from './snackbar';
 import type { Project } from '@/components/common/projects/types';
+import { useWorkspaceStore } from './workspace';
 
 export const useAuthStore = defineStore('auth', {
   persist: true,
@@ -37,7 +38,9 @@ export const useAuthStore = defineStore('auth', {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const decodedToken: any = jwtDecode(token);
-      this.setUser(decodedToken);
+      const { project, ...user } = decodedToken;
+      this.setUser(user);
+      this.setProject(project);
     },
 
     /**
@@ -55,8 +58,11 @@ export const useAuthStore = defineStore('auth', {
      * saved in store
      */
     logout(go?: RouteLocation) {
+      const { clearSelectedWorkspace } = useWorkspaceStore();
       this.token = null;
       this.user = null;
+      this.project = null;
+      clearSelectedWorkspace();
       this.$router.go(go ?? '/');
     },
 
@@ -83,23 +89,56 @@ export const useAuthStore = defineStore('auth', {
 
     async register(user: CreateUserDto) {
       const { register } = useAuthService();
-      const { showSnackbar } = useSnackbarStore();
 
       const response = await register(user);
 
       if (response.error) {
-        if (response.error === 'EMAIL_EXISTS') {
-          showSnackbar({
-            message: 'An account with this email already exists.',
-            color: 'error',
-            timeout: 5000,
-          });
-        }
+        this.handleRegistrationError(response);
       } else {
         this.setToken(response.accessToken);
       }
 
       return response;
+    },
+
+    async registerWithInvite(user: CreateUserDto) {
+      const { registerWithInvite } = useAuthService();
+
+      const response = await registerWithInvite(user);
+
+      if (response.error) {
+        this.handleRegistrationError(response);
+      } else {
+        this.setToken(response.accessToken);
+      }
+
+      return response;
+    },
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    handleRegistrationError(response: any) {
+      const { showSnackbar } = useSnackbarStore();
+
+      switch (response.error) {
+        case 'EMAIL_EXISTS':
+          showSnackbar({
+            message: 'An account with this email already exists.',
+            color: 'error',
+          });
+          break;
+        case 'INVALID_INVITE_CODE':
+          showSnackbar({
+            message: 'The invitation code provided is invalid.',
+            color: 'error',
+          });
+          break;
+        default:
+          showSnackbar({
+            message: 'Something went wrong, please try again.',
+            color: 'error',
+          });
+          break;
+      }
     },
   },
 });

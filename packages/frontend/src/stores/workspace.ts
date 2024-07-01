@@ -22,6 +22,9 @@ export const useWorkspaceStore = defineStore('workspace', {
         this.$patch({ spaceExpansionState: { [workspace.id]: [] } });
       }
     },
+    clearSelectedWorkspace() {
+      this.selectedWorkspace = null;
+    },
     setSpaceExpansionState(workspaceId: number, spaceExpansionState: number[]) {
       this.spaceExpansionState[workspaceId] = spaceExpansionState;
     },
