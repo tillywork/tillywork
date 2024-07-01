@@ -54,7 +54,7 @@ const ignoreCompleted = computed(() => props.view.ignoreCompleted);
 const groupBy = computed(() => props.view.groupBy);
 
 const isViewLoading = ref(false);
-const sortByOptions = ref<ListSortOption[]>([]);
+const sortByOptions = DEFAULT_SORT_OPTIONS;
 
 const isPageLoading = computed(() => {
   return (
@@ -326,24 +326,6 @@ watch(
       refetchListGroups();
     }
   }
-);
-watch(
-  () => viewCopy.value.ignoreCompleted,
-  (val) => {
-    sortByOptions.value = DEFAULT_SORT_OPTIONS;
-    if (!val)
-      sortByOptions.value = [
-        {
-          label: 'Completed Cards',
-          value: {
-            key: 'listStage.isCompleted',
-            order: 'ASC',
-          },
-        },
-        ...DEFAULT_SORT_OPTIONS,
-      ];
-  },
-  { immediate: true }
 );
 </script>
 
