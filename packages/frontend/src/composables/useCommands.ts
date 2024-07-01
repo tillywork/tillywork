@@ -33,32 +33,6 @@ export const useCommands = () => {
    * @returns An array of commands
    */
   const commands = computed(() => {
-    function getCardCommandsDtos(): CommandDto[] {
-      return (
-        allCardTypes.value?.map(
-          (cardType) =>
-            ({
-              section: cardType.name,
-              icon: 'mdi-card-plus-outline',
-              title:
-                'Create ' +
-                cardType.name[0].toLocaleLowerCase() +
-                cardType.name.slice(1),
-              action: () =>
-                dialog.openDialog({
-                  dialog: DIALOGS.CREATE_CARD,
-                  options: {
-                    width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD],
-                  },
-                  data: {
-                    type: cardType,
-                  },
-                }),
-            } as CommandDto)
-        ) ?? []
-      );
-    }
-
     const commandsDtos: CommandDto[] = [
       // ~ Cards
       ...getCardCommandsDtos(),
@@ -246,19 +220,60 @@ export const useCommands = () => {
    * shortcuts.
    * @param commands The commands to listen to.
    */
-  function registerCommandShortcutWatchers(commands: Command[]) {
-    commands.forEach((command) => {
+  function registerCommandShortcutWatchers() {
+    // Re-register shortcut watchers when commands change
+    watch(
+      commands,
+      (v) => {
+        if (v) {
+          registerCommandShortcutWatchers();
+        }
+      },
+      { deep: true }
+    );
+
+    commands.value.forEach((command) => {
       if (!command.shortcut) {
         return;
       }
 
-      // TODO: Support advanced sequences, E.g, `Cmd+C+C`
       watch(keys[command.shortcut.join('+')], (v) => {
         if (v && !isInputFocused.value) {
           executeCommand(command);
         }
       });
     });
+  }
+
+  /** Returns an array of commands for each card type in the workspace */
+  function getCardCommandsDtos(): CommandDto[] {
+    return (
+      allCardTypes.value?.map(
+        (cardType) =>
+          ({
+            section: cardType.name,
+            icon: 'mdi-card-plus-outline',
+            title:
+              'Create ' +
+              cardType.name[0].toLocaleLowerCase() +
+              cardType.name.slice(1),
+            action: () =>
+              dialog.openDialog({
+                dialog: DIALOGS.CREATE_CARD,
+                options: {
+                  width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD],
+                },
+                data: {
+                  type: cardType,
+                },
+              }),
+            shortcut:
+              cardType.id === selectedWorkspace.value?.defaultCardType.id
+                ? ['N']
+                : undefined,
+          } as CommandDto)
+      ) ?? []
+    );
   }
 
   return {

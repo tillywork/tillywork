@@ -65,7 +65,7 @@ watch(isCommandPaletteOpen, (v) => {
 });
 
 onMounted(() => {
-  registerCommandShortcutWatchers(commands.value);
+  registerCommandShortcutWatchers();
 });
 
 /**
