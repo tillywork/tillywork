@@ -5,7 +5,7 @@ export class ResetListGroups1719846270867 implements MigrationInterface {
         await queryRunner.clearTable("list_group");
         await queryRunner.query(`
             DELETE FROM filter
-            WHERE entityType = 'LIST_GROUP';    
+            WHERE "entityType" = 'LIST_GROUP';    
         `);
     }
 
