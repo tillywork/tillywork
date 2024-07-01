@@ -8,6 +8,8 @@ import {
 import { useDialogStore } from '@/stores/dialog';
 import { useStateStore } from '@/stores/state';
 import { useThemeStore } from '@/stores/theme';
+import { useWorkspaceStore } from '@/stores/workspace';
+import { useCardTypesService } from './services/useCardTypesService';
 
 export const useCommands = () => {
   const keys = useMagicKeys();
@@ -19,26 +21,21 @@ export const useCommands = () => {
   const { isInputFocused } = storeToRefs(stateStore);
   const themeStore = useThemeStore();
 
+  const { selectedWorkspace } = storeToRefs(useWorkspaceStore());
+  const cardTypesService = useCardTypesService();
+  const { data: allCardTypes } = cardTypesService.useFindAllQuery({
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    workspaceId: selectedWorkspace.value!.id,
+  });
+
   /**
    * Handles building the commands array.
    * @returns An array of commands
    */
-  function getCommands(): Command[] {
-    const commands: CommandDto[] = [
+  const commands = computed(() => {
+    const commandsDtos: CommandDto[] = [
       // ~ Cards
-      {
-        section: 'Card',
-        icon: 'mdi-card-plus-outline',
-        title: 'Create card',
-        action: () =>
-          dialog.openDialog({
-            dialog: DIALOGS.CREATE_CARD,
-            options: {
-              width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD],
-            },
-          }),
-        shortcut: ['N'],
-      },
+      ...getCardCommandsDtos(),
 
       // ~ Spaces
       {
@@ -158,7 +155,7 @@ export const useCommands = () => {
 
     // ~ Documentation
     if (import.meta.env.TW_VITE_DOCS_URL) {
-      commands.push({
+      commandsDtos.push({
         section: 'Documentation',
         icon: 'mdi-text-box-outline',
         title: 'Documentation',
@@ -167,14 +164,14 @@ export const useCommands = () => {
       });
     }
 
-    return commands.map((command, index) => {
+    return commandsDtos.map((command, index) => {
       (command as Command).id = index;
       return command;
     }) as Command[];
-  }
+  });
 
   /**
-   * If the elemnt is input, textarea, or has class
+   * If the element is input, textarea, or has class
    * .ProseMirror, it is an input.
    * @param target the HTMLElement to check
    */
@@ -223,19 +220,60 @@ export const useCommands = () => {
    * shortcuts.
    * @param commands The commands to listen to.
    */
-  function registerCommandShortcutWatchers(commands: Command[]) {
-    commands.forEach((command) => {
+  function registerCommandShortcutWatchers() {
+    // Re-register shortcut watchers when commands change
+    watch(
+      commands,
+      (v) => {
+        if (v) {
+          registerCommandShortcutWatchers();
+        }
+      },
+      { deep: true }
+    );
+
+    commands.value.forEach((command) => {
       if (!command.shortcut) {
         return;
       }
 
-      // TODO: Support advanced sequences, E.g, `Cmd+C+C`
       watch(keys[command.shortcut.join('+')], (v) => {
         if (v && !isInputFocused.value) {
           executeCommand(command);
         }
       });
     });
+  }
+
+  /** Returns an array of commands for each card type in the workspace */
+  function getCardCommandsDtos(): CommandDto[] {
+    return (
+      allCardTypes.value?.map(
+        (cardType) =>
+          ({
+            section: cardType.name,
+            icon: 'mdi-card-plus-outline',
+            title:
+              'Create ' +
+              cardType.name[0].toLocaleLowerCase() +
+              cardType.name.slice(1),
+            action: () =>
+              dialog.openDialog({
+                dialog: DIALOGS.CREATE_CARD,
+                options: {
+                  width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD],
+                },
+                data: {
+                  type: cardType,
+                },
+              }),
+            shortcut:
+              cardType.id === selectedWorkspace.value?.defaultCardType.id
+                ? ['N']
+                : undefined,
+          } as CommandDto)
+      ) ?? []
+    );
   }
 
   return {
@@ -248,6 +286,6 @@ export const useCommands = () => {
     handleInputBlur,
     handleInputFocus,
     executeCommand,
-    getCommands,
+    commands,
   };
 };

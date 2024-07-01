@@ -15,7 +15,9 @@ const searchLabels = ref<string>();
 const searchedLabels = computed(() => {
   if (searchLabels.value) {
     return props.items?.filter((item) =>
-      item.item.toLowerCase().includes(searchLabels.value!.toLowerCase())
+      item.item
+        .toLocaleLowerCase()
+        .includes(searchLabels.value!.toLocaleLowerCase())
     );
   }
 
