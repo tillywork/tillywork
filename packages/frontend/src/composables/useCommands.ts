@@ -24,9 +24,46 @@ export const useCommands = () => {
   const { isAuthenticated } = authStore;
   const { workspace } = storeToRefs(authStore);
   const cardTypesService = useCardTypesService();
-  const { data: allCardTypes } = cardTypesService.useFindAllQuery({
-    workspaceId: workspace.value?.id ?? 0,
-    enabled: isAuthenticated() && !!workspace.value,
+
+  const isCommandsEnabled = computed(() => {
+    return isAuthenticated() && !!workspace.value;
+  });
+
+  const workspaceId = computed(() => workspace.value?.id ?? 0);
+
+  const { data: cardTypes } = cardTypesService.useFindAllQuery({
+    workspaceId,
+    enabled: isCommandsEnabled,
+  });
+
+  const cardTypeCommands = computed(() => {
+    return (
+      cardTypes.value?.map(
+        (cardType) =>
+          ({
+            section: cardType.name,
+            icon: 'mdi-card-plus-outline',
+            title:
+              'Create ' +
+              cardType.name[0].toLocaleLowerCase() +
+              cardType.name.slice(1),
+            action: () =>
+              dialog.openDialog({
+                dialog: DIALOGS.CREATE_CARD,
+                options: {
+                  width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD],
+                },
+                data: {
+                  type: cardType,
+                },
+              }),
+            shortcut:
+              cardType.id === workspace.value?.defaultCardType.id
+                ? ['N']
+                : undefined,
+          } as CommandDto)
+      ) ?? []
+    );
   });
 
   const watchers = ref(new Map());
@@ -38,7 +75,7 @@ export const useCommands = () => {
   const commands = computed(() => {
     const commandsDtos: CommandDto[] = [
       // ~ Cards
-      ...getCardCommandsDtos(),
+      ...cardTypeCommands.value,
 
       // ~ Spaces
       {
@@ -87,6 +124,23 @@ export const useCommands = () => {
             },
           }),
         shortcut: ['F2'],
+      },
+
+      // Project
+      {
+        section: 'Project',
+        icon: 'mdi-account-multiple',
+        title: 'Invite and manage members',
+        action: () =>
+          dialog.openDialog({
+            dialog: DIALOGS.SETTINGS,
+            options: {
+              fullscreen: true,
+            },
+            data: {
+              activeTab: SettingsTabs.MEMBERS,
+            },
+          }),
       },
 
       // ~ Settings
@@ -224,8 +278,6 @@ export const useCommands = () => {
    * @param commands The commands to listen to.
    */
   function registerCommandShortcutWatchers() {
-    clearCommandShortcutWatchers();
-
     commands.value.forEach((command, index) => {
       if (!command.shortcut) {
         return;
@@ -248,44 +300,18 @@ export const useCommands = () => {
     watchers.value.clear();
   }
 
-  /** Returns an array of commands for each card type in the workspace */
-  function getCardCommandsDtos(): CommandDto[] {
-    return (
-      allCardTypes.value?.map(
-        (cardType) =>
-          ({
-            section: cardType.name,
-            icon: 'mdi-card-plus-outline',
-            title:
-              'Create ' +
-              cardType.name[0].toLocaleLowerCase() +
-              cardType.name.slice(1),
-            action: () =>
-              dialog.openDialog({
-                dialog: DIALOGS.CREATE_CARD,
-                options: {
-                  width: DIALOG_WIDTHS[DIALOGS.CREATE_CARD],
-                },
-                data: {
-                  type: cardType,
-                },
-              }),
-            shortcut:
-              cardType.id === workspace.value?.defaultCardType.id
-                ? ['N']
-                : undefined,
-          } as CommandDto)
-      ) ?? []
-    );
-  }
-
   function watchForCommandChanges() {
     // Re-register shortcut watchers when commands change
-    watch(commands, (v) => {
-      if (v) {
-        registerCommandShortcutWatchers();
-      }
-    });
+    watch(
+      commands,
+      (v) => {
+        clearCommandShortcutWatchers();
+        if (v) {
+          registerCommandShortcutWatchers();
+        }
+      },
+      { deep: true }
+    );
   }
 
   function registerInputFocusAndBlurListeners() {
@@ -314,5 +340,6 @@ export const useCommands = () => {
     commands,
     watchForCommandChanges,
     registerInputFocusAndBlurListeners,
+    isCommandsEnabled,
   };
 };

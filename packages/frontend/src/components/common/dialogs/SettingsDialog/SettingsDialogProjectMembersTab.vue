@@ -48,7 +48,7 @@ const { data: projectUsers } = useProjectUsersQuery({
               Joined
               {{ dayjs(user.createdAt).fromNow() }}
             </v-list-item-subtitle>
-            <template #append>
+            <template #append v-if="false">
               <base-icon-btn icon="mdi-dots-vertical" />
             </template>
           </v-list-item>

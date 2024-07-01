@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import BaseCommandPalette from '@/components/common/commands/BaseCommandPalette.vue';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import UserListItem from '@/components/common/navigation/UserListItem.vue';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
@@ -14,12 +13,7 @@ const dialog = useDialogStore();
 const { navigationDrawer } = useHideNavigationDrawer();
 const authStore = useAuthStore();
 const { logout, isAuthenticated } = authStore;
-const { workspace } = storeToRefs(authStore);
 const logo = useLogo();
-
-const isCommandsEnabled = computed(() => {
-  return isAuthenticated() && !!workspace;
-});
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
   //   {
@@ -118,7 +112,5 @@ function openSettingsDialog() {
     <v-main>
       <router-view />
     </v-main>
-
-    <base-command-palette v-if="isCommandsEnabled" />
   </v-app>
 </template>

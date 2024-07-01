@@ -15,12 +15,12 @@ export const useCardTypesService = () => {
   function findAll({
     workspaceId,
   }: {
-    workspaceId: number;
+    workspaceId: MaybeRef<number>;
   }): Promise<CardType[]> {
     return sendRequest(`/card-types`, {
       method: 'GET',
       params: {
-        workspaceId,
+        workspaceId: toValue(workspaceId),
       },
     });
   }
@@ -29,7 +29,7 @@ export const useCardTypesService = () => {
     workspaceId,
     enabled,
   }: {
-    workspaceId: number;
+    workspaceId: MaybeRef<number>;
     enabled?: MaybeRef<boolean>;
   }) {
     return useQuery({

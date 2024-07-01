@@ -16,9 +16,15 @@ import { useThemeStore } from '@/stores/theme';
 import { VueQueryDevtools } from '@tanstack/vue-query-devtools';
 import posthog from 'posthog-js';
 import { useTheme } from 'vuetify';
+import BaseCommandPalette from '@/components/common/commands/BaseCommandPalette.vue';
 
 const themeStore = useThemeStore();
-const { registerInputFocusAndBlurListeners } = useCommands();
+const {
+  registerInputFocusAndBlurListeners,
+  registerCommandShortcutWatchers,
+  watchForCommandChanges,
+  isCommandsEnabled,
+} = useCommands();
 const workspacesService = useWorkspacesService();
 const projectsService = useProjectsService();
 const { stateStore } = useState();
@@ -87,6 +93,17 @@ watch(projects, (v) => {
   }
 });
 
+watch(
+  isCommandsEnabled,
+  (v) => {
+    if (v) {
+      registerCommandShortcutWatchers();
+      watchForCommandChanges();
+    }
+  },
+  { immediate: true }
+);
+
 registerInputFocusAndBlurListeners();
 </script>
 
@@ -110,5 +127,6 @@ registerInputFocusAndBlurListeners();
   </template>
   <base-dialog />
   <base-snackbar-wrapper />
+  <base-command-palette v-if="isCommandsEnabled" />
   <VueQueryDevtools />
 </template>
