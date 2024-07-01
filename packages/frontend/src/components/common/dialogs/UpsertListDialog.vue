@@ -28,7 +28,8 @@ const listForm = ref<VForm>();
 const listDto = ref<Partial<List>>({
   name: list.value?.name,
   spaceId: list.value?.spaceId ?? currentDialog.value?.data.space.id,
-  defaultCardType: list.value?.defaultCardType,
+  defaultCardType:
+    list.value?.defaultCardType ?? workspace.value?.defaultCardType,
 });
 
 const { data: cardTypes } = useFindAllQuery({
