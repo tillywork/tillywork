@@ -19,14 +19,15 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
             project: Project;
         }
     > {
-        const { user, project } = await this.authService.validateUser(
+        const userAndProject = await this.authService.validateUser(
             email,
             password
         );
-        if (!user) {
+
+        if (!userAndProject) {
             throw new UnauthorizedException();
         }
 
-        return { ...user, project };
+        return { ...userAndProject.user, project: userAndProject.project };
     }
 }

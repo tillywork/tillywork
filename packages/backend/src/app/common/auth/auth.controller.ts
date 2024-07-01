@@ -1,7 +1,6 @@
 import {
     Body,
     Controller,
-    Logger,
     Post,
     Request,
     Res,
@@ -39,7 +38,6 @@ export class AuthController {
     @Post("login")
     async login(@Request() req): Promise<LoginResponse> {
         const accessToken = await this.authService.login(req.user);
-        Logger.debug({ user: req.user });
         return { accessToken };
     }
 
