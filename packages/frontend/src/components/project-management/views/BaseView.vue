@@ -8,7 +8,11 @@ import BaseViewChip from './BaseViewChip.vue';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
-import { type TableSortOption } from './types';
+import {
+  DEFAULT_SORT_OPTIONS,
+  type TableSortOption,
+  type ListSortOption,
+} from './types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { ViewTypes, type View } from './types';
 import { useQueryClient } from '@tanstack/vue-query';
@@ -50,6 +54,7 @@ const ignoreCompleted = computed(() => props.view.ignoreCompleted);
 const groupBy = computed(() => props.view.groupBy);
 
 const isViewLoading = ref(false);
+const sortByOptions = DEFAULT_SORT_OPTIONS;
 
 const isPageLoading = computed(() => {
   return (
@@ -372,6 +377,7 @@ watch(
         <base-view-chip-sort
           v-model="viewCopy.sortBy"
           @update:model-value="handleSortBySelection"
+          :sort-by-options="sortByOptions"
         />
       </div>
     </div>

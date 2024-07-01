@@ -8,8 +8,8 @@ export class AddIgnoreCompletedColumnToViewTable1719224538052
             "view",
             new TableColumn({
                 name: "ignoreCompleted",
-                type: "bool",
-                default: false,
+                type: "boolean",
+                default: true,
             })
         );
     }

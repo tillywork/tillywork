@@ -1,18 +1,24 @@
 <script setup lang="ts">
-import { DEFAULT_SORT_OPTIONS, type ListSortOption } from './types';
 import BaseViewChip from './BaseViewChip.vue';
-import type { TableSortOption } from './types';
+import type { TableSortOption, ListSortOption } from './types';
+
+const props = defineProps<{
+  sortByOptions: ListSortOption[];
+}>();
 
 const sortBy = defineModel<TableSortOption>();
-const sortByOptions = ref(DEFAULT_SORT_OPTIONS);
+const sortByOptions = computed(() => props.sortByOptions);
 const selectedOption = computed(() =>
   sortByOptions.value.find((option) => isOptionSelected(option))
 );
 const isSortByFilled = computed(() => !!sortBy.value);
 const sortDirectionIcon = computed(() => {
+  if (!selectedOption.value) return 'mdi-swap-vertical';
+
   if (sortBy.value?.order === 'ASC') return 'mdi-arrow-up';
-  else if (sortBy.value?.order === 'DESC') return 'mdi-arrow-down';
-  else return 'mdi-swap-vertical';
+  if (sortBy.value?.order === 'DESC') return 'mdi-arrow-down';
+
+  return 'mdi-swap-vertical';
 });
 
 function handleSortBySelection(option: ListSortOption) {
@@ -48,10 +54,13 @@ function toggleSortDirection() {
       <base-view-chip
         v-bind="props"
         :icon="sortDirectionIcon"
-        :label="'Sort' + (isSortByFilled ? ': ' + selectedOption?.label : '')"
-        :is-filled="isSortByFilled"
+        :label="
+          'Sort' +
+          (isSortByFilled && selectedOption ? ': ' + selectedOption.label : '')
+        "
+        :is-filled="isSortByFilled && !!selectedOption"
       >
-        <template #append v-if="isSortByFilled">
+        <template #append v-if="isSortByFilled && !!selectedOption">
           <v-btn
             class="ms-1 me-n2"
             icon="mdi-close"

@@ -24,7 +24,7 @@ export class View {
     @Column({ type: "enum", enum: ViewTypes, default: ViewTypes.TABLE })
     type: ViewTypes;
 
-    @Column({ type: "boolean", default: false })
+    @Column({ type: "boolean", default: true })
     ignoreCompleted: boolean;
 
     @Column({
