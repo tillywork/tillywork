@@ -90,6 +90,8 @@ async function handleGroupCardsLoad({
     } else {
       done('empty');
     }
+  } else {
+    done('ok');
   }
 }
 
