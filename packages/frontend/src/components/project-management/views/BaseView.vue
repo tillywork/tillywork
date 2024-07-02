@@ -8,11 +8,7 @@ import BaseViewChip from './BaseViewChip.vue';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
-import {
-  DEFAULT_SORT_OPTIONS,
-  type TableSortOption,
-  type ListSortOption,
-} from './types';
+import { DEFAULT_SORT_OPTIONS, type TableSortOption } from './types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { ViewTypes, type View } from './types';
 import { useQueryClient } from '@tanstack/vue-query';
@@ -354,16 +350,6 @@ watch(
         <v-divider vertical />
       </div>
       <div class="d-flex align-center ga-2">
-        <base-view-chip
-          v-bind="props"
-          :icon="viewCopy.ignoreCompleted ? 'mdi-eye' : 'mdi-eye-off-outline'"
-          :label="
-            viewCopy.ignoreCompleted ? 'Show Completed' : 'Hide Completed'
-          "
-          :is-filled="viewCopy.ignoreCompleted"
-          :color="viewCopy.ignoreCompleted ? 'info' : 'warning'"
-          @click="handleToggleCompleted"
-        />
         <base-view-chip-group-by
           v-model="viewCopy.groupBy"
           @update:model-value="handleGroupBySelection"
@@ -378,6 +364,15 @@ watch(
           v-model="viewCopy.sortBy"
           @update:model-value="handleSortBySelection"
           :sort-by-options="sortByOptions"
+        />
+        <base-view-chip
+          v-bind="props"
+          :icon="viewCopy.ignoreCompleted ? 'mdi-eye' : 'mdi-eye-off-outline'"
+          :label="
+            viewCopy.ignoreCompleted ? 'Show Completed' : 'Hide Completed'
+          "
+          :is-filled="viewCopy.ignoreCompleted"
+          @click="handleToggleCompleted"
         />
       </div>
     </div>
