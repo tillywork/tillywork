@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { ListGroupOptions, type List, type ListGroup } from '../lists/types';
+import {
+  ListGroupOptions,
+  ListGroupDueDate,
+  type List,
+  type ListGroup,
+} from '../lists/types';
 import { useViewsService } from '@/composables/services/useViewsService';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import type { Card } from '../cards/types';
@@ -26,6 +31,7 @@ import {
 } from '../filters/types';
 import { cloneDeep } from 'lodash';
 import { useDialogStore } from '@/stores/dialog';
+import { useDate } from '@/composables/useDate';
 
 const props = defineProps<{
   view: View;
@@ -173,6 +179,23 @@ function handleUpdateDueDate({
   updateCard(updatedCard);
 }
 
+const { dayjs } = useDate();
+function getClassificationDate(date?: string) {
+  if (date) {
+    if (dayjs(date) < dayjs().startOf('day')) return ListGroupDueDate.PAST_DUE;
+    else if (dayjs(date) > dayjs().endOf('day'))
+      return ListGroupDueDate.UPCOMING;
+    else return ListGroupDueDate.TODAY;
+  }
+}
+function transformDateToDayjs(date: string | null) {
+  let dateInDayjs = date ? dayjs(date) : dayjs();
+  return dayjs()
+    .hour(dateInDayjs.hour())
+    .minute(dateInDayjs.minute())
+    .second(dateInDayjs.second());
+}
+
 async function handleUpdateCardStage({
   card,
   listStageId,
@@ -184,6 +207,45 @@ async function handleUpdateCardStage({
   name?: string;
   order?: number;
 }) {
+  if (viewCopy.value.groupBy === ListGroupOptions.DUE_DATE) {
+    let newDueDate;
+    let shouldUpdateDueAt =
+      !card.dueAt || getClassificationDate(card.dueAt) !== name;
+
+    switch (name) {
+      case ListGroupDueDate.PAST_DUE:
+        if (shouldUpdateDueAt) {
+          newDueDate = transformDateToDayjs(card.dueAt)
+            .subtract(1, 'day')
+            .toISOString();
+        }
+        break;
+      case ListGroupDueDate.TODAY:
+        if (shouldUpdateDueAt) {
+          newDueDate = transformDateToDayjs(card.dueAt).toISOString();
+        }
+        break;
+      case ListGroupDueDate.UPCOMING:
+        if (shouldUpdateDueAt) {
+          newDueDate = transformDateToDayjs(card.dueAt)
+            .add(1, 'day')
+            .toISOString();
+        }
+        break;
+      case ListGroupDueDate.NO_DUE_DATE:
+        newDueDate = null;
+        break;
+
+      default:
+        break;
+    }
+
+    handleUpdateDueDate({
+      card,
+      newDueDate,
+    });
+  }
+
   updateCardList({
     cardId: card.id,
     cardListId: card.cardLists[0].id,
