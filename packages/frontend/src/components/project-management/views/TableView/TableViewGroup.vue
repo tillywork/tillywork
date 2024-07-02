@@ -467,11 +467,6 @@ watchEffect(() => {
                               </v-list>
                             </v-card>
                           </v-menu>
-                          <base-icon-btn
-                            class="cursor-grab"
-                            icon="mdi-cursor-move"
-                            variant="text"
-                          />
                         </div>
                       </v-card>
                     </template>

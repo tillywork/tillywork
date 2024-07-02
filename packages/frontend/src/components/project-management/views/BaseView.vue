@@ -67,7 +67,7 @@ const columns = ref<ColumnDef<ListGroup, any>[]>([
     id: 'actions',
     enableResizing: false,
     enableSorting: false,
-    size: 80,
+    size: 50,
   },
   {
     id: 'title',
