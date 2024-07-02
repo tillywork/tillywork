@@ -164,12 +164,6 @@ function handlePostCreate() {
             activator-hover-text="Assignee"
           />
           <base-date-picker
-            v-model="createCardDto.startsAt"
-            icon="mdi-calendar"
-            class="text-caption"
-            label="Start Date"
-          />
-          <base-date-picker
             v-model="createCardDto.dueAt"
             icon="mdi-calendar"
             class="text-caption"
