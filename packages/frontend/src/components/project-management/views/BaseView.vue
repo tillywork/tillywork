@@ -165,7 +165,7 @@ function handleUpdateDueDate({
 }) {
   const updatedCard = {
     ...card,
-    dueAt: newDueDate,
+    dueAt: newDueDate ?? null,
   };
   updateCard(updatedCard);
 }
