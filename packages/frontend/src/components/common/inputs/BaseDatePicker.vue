@@ -64,6 +64,10 @@ const processedDate = computed({
   },
 });
 
+function clearDate() {
+  dateValue.value = undefined;
+}
+
 const selectedRangeSuggestion = computed(() => {
   return DATE_RANGE_SUGGESTIONS.find((suggestion) => {
     return objectUtils.areArraysEqual(
@@ -186,6 +190,17 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
               :color="dateDialog ? 'primary-darken-1' : ''"
             />
           </template>
+          <template #append-inner>
+            <base-icon-btn
+              v-if="dateValue"
+              icon="mdi-close"
+              color="error"
+              class="ms-2 align-self-center"
+              size="x-small"
+              variant="tonal"
+              @click.prevent="clearDate"
+            />
+          </template>
         </v-text-field>
       </template>
       <template v-else>
@@ -200,6 +215,15 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
           </template>
           {{ dateToText }}
         </base-card-property-value-btn>
+        <base-icon-btn
+          v-if="dateValue"
+          icon="mdi-close"
+          color="error"
+          class="ms-2 align-self-center"
+          size="x-small"
+          variant="tonal"
+          @click.prevent="clearDate"
+        />
       </template>
     </template>
     <v-container
