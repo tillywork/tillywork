@@ -29,6 +29,13 @@ export enum ListGroupOptions {
   DUE_DATE = 'DUE_DATE',
 }
 
+export enum ListGroupDueDate {
+  PAST_DUE = 'Past Due',
+  TODAY = 'Today',
+  UPCOMING = 'Upcoming',
+  NO_DUE_DATE = 'No Due Date',
+}
+
 export interface ListGroup {
   id: number;
   name: string;
