@@ -7,6 +7,8 @@ import {
 } from '../lists/types';
 import { useViewsService } from '@/composables/services/useViewsService';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
+import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import type { ProjectUser } from '@/components/common/projects/types';
 import type { Card } from '../cards/types';
 import { type ColumnDef } from '@tanstack/vue-table';
 import BaseViewChip from './BaseViewChip.vue';
@@ -32,6 +34,7 @@ import {
 import { cloneDeep } from 'lodash';
 import { useDialogStore } from '@/stores/dialog';
 import { useDate } from '@/composables/useDate';
+import { useAuthStore } from '@/stores/auth';
 
 const props = defineProps<{
   view: View;
@@ -148,6 +151,12 @@ function openCreateCardDialog() {
   });
 }
 
+const { project } = storeToRefs(useAuthStore());
+const projectUsersService = useProjectUsersService();
+const { data: projectUsers } = projectUsersService.useProjectUsersQuery({
+  projectId: project.value!.id,
+});
+
 function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
   const updatedCard: Card = {
     ...card,
@@ -207,6 +216,18 @@ async function handleUpdateCardStage({
   name?: string;
   order?: number;
 }) {
+  if (viewCopy.value.groupBy === ListGroupOptions.ASSIGNEES) {
+    const listGroup = (listGroups.value ?? []).find(
+      (listGroup) => listGroup.name === name
+    );
+    const userId = listGroup?.entityId ?? null;
+    const user = (projectUsers.value ?? []).find((user: ProjectUser) => {
+      return user.user.id == userId;
+    })?.user;
+
+    handleUpdateAssignees({ users: user ? [user] : [], card });
+  }
+
   if (viewCopy.value.groupBy === ListGroupOptions.DUE_DATE) {
     let newDueDate;
     let shouldUpdateDueAt =
