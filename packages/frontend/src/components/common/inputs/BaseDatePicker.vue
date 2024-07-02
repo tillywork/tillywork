@@ -11,6 +11,7 @@ const dateModel = defineModel<string | string[]>();
 const props = defineProps<{
   label?: string;
   closeOnContentClick?: boolean;
+  color?: string;
   class?: string;
   icon?: string;
   activatorColor?: string;
@@ -98,6 +99,10 @@ watch(dateModel, (v) => {
 });
 
 const textColorClass = computed(() => {
+  if (props.color) {
+    return `text-${props.color}`;
+  }
+
   if (!dateValue.value) {
     return 'text-default';
   }

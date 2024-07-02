@@ -5,7 +5,7 @@ import {
   type ListStage,
 } from '../../lists/types';
 import { useCardsService } from '@/composables/services/useCardsService';
-import type { View } from '../types';
+import type { TableSortOption, View } from '../types';
 import type { ProjectUser } from '@/components/common/projects/types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import type { Card } from '../../cards/types';
@@ -15,7 +15,6 @@ import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import type { QueryFilter } from '../../filters/types';
-import type { TableSortOption } from '@/components/common/tables/FalconTable.vue';
 import { useDialogStore } from '@/stores/dialog';
 
 const emit = defineEmits([
@@ -374,6 +373,11 @@ watchEffect(() => {
                       newDueDate: newValue,
                     })"
                 class="text-caption"
+                :color="
+                  card.cardLists[0].listStage.isCompleted
+                    ? 'success'
+                    : undefined
+                "
                 label="Set due date"
                 @click.prevent
               />

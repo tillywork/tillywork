@@ -49,6 +49,13 @@ export const DEFAULT_SORT_OPTIONS: ListSortOption[] = [
       order: 'ASC',
     },
   },
+  {
+    label: 'Completed',
+    value: {
+      key: 'listStage.isCompleted',
+      order: 'ASC',
+    },
+  },
 ];
 
 export interface PaginationParams {
