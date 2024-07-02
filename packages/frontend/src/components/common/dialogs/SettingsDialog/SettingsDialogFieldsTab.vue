@@ -240,6 +240,7 @@ watch(selectedField, (v) => {
               item-type="object"
               item-value="item"
               label="Options"
+              item-color
             />
           </template>
 
