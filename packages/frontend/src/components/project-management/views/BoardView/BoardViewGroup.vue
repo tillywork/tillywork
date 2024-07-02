@@ -371,7 +371,7 @@ watchEffect(() => {
                 :model-value="card.dueAt"
                 @update:model-value="(newValue: string) => handleUpdateDueDate({
                       card: card,
-                      newDueDate: newValue,
+                      newDueDate: newValue ?? null,
                     })"
                 class="text-caption"
                 label="Set due date"

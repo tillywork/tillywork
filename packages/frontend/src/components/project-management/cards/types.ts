@@ -13,7 +13,7 @@ export interface Card {
   data: Record<number, any>;
   type: CardType;
   startsAt: string;
-  dueAt: string;
+  dueAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
