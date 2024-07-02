@@ -4,6 +4,7 @@ import { FieldTypes } from '../../fields/types';
 import type { FieldFilterOption } from './types';
 import type { User } from '@/components/common/users/types';
 import type { FieldFilter, FilterOperator } from '../../filters/types';
+import { useStateStore } from '@/stores/state';
 
 const filter = defineModel<FieldFilter>({
   required: true,
@@ -15,6 +16,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits(['delete']);
 
+const { currentList } = storeToRefs(useStateStore());
 const { rules } = validationUtils;
 const filterOption = ref<string>();
 
@@ -23,10 +25,17 @@ const selectedFilter = computed(() =>
 );
 
 const dropdownOptions = computed(() => {
+  // Add specific field options here
   switch (filter.value.field) {
-    // Add specific field options here
-    case 'status':
-      return statusOptions;
+    case 'listStage.id':
+      return (
+        currentList.value?.listStages.map((listStage) => {
+          return {
+            title: listStage.name,
+            value: listStage.id,
+          };
+        }) ?? []
+      );
 
     default:
       return selectedFilter.value?.options?.map((option) => {
@@ -58,17 +67,6 @@ const textOperators = [
   {
     title: 'Ends With',
     value: '%like',
-  },
-];
-
-const statusOptions = [
-  {
-    title: 'Open',
-    value: 'open',
-  },
-  {
-    title: 'Closed',
-    value: 'closed',
   },
 ];
 

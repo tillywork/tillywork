@@ -54,14 +54,6 @@ const defaultFields = ref<FieldFilterOption[]>([
     type: FieldTypes.TEXT,
     icon: 'mdi-format-title',
   },
-  //   {
-  //     title: 'Status',
-  //     field: 'status',
-  //     operator: 'eq',
-  //     value: 'open',
-  //     type: FieldTypes.DROPDOWN,
-  //     icon: 'mdi-list-status',
-  //   },
   {
     title: 'Due Date',
     field: 'card.dueAt',
@@ -77,6 +69,14 @@ const defaultFields = ref<FieldFilterOption[]>([
     value: [],
     type: FieldTypes.USER,
     icon: 'mdi-account',
+  },
+  {
+    title: 'Stage',
+    field: 'listStage.id',
+    operator: 'in',
+    value: [],
+    type: FieldTypes.DROPDOWN,
+    icon: 'mdi-circle-slice-8',
   },
 ]);
 
