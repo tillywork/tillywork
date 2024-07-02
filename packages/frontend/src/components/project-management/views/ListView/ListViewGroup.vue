@@ -218,8 +218,7 @@ function onDragAdd(event: any) {
   const newOrder = cardsService.calculateCardOrder({ previousCard, nextCard });
 
   handleUpdateCardStage({
-    cardId: currentCard.id,
-    cardListId: currentCard.cardLists[0].id,
+    card: currentCard,
     listStageId: props.listGroup.original.entityId!,
     order: newOrder,
   });
@@ -258,8 +257,7 @@ function handleDeleteCard(card: Card) {
 }
 
 function handleUpdateCardStage(data: {
-  cardId: number;
-  cardListId: number;
+  card: Card;
   listStageId: number;
   order?: number;
 }) {
@@ -487,8 +485,7 @@ watchEffect(() => {
                           @update:modelValue="
                         (modelValue: ListStage) =>
                         handleUpdateCardStage({
-                            cardId: row.original.id,
-                            cardListId: row.original.cardLists[0].id,
+                            card: row.original,
                             listStageId: modelValue.id,
                         })
                     "

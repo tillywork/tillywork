@@ -162,31 +162,36 @@ function handleUpdateDueDate({
   newDueDate,
 }: {
   card: Card;
-  newDueDate: string | null;
+  newDueDate?: string | null;
 }) {
-  const updatedCard = {
-    ...card,
-    dueAt: newDueDate,
-  };
+  const updatedCard = { ...card };
+
+  if (typeof newDueDate !== 'undefined') {
+    updatedCard['dueAt'] = newDueDate;
+  }
+
   updateCard(updatedCard);
 }
 
-function handleUpdateCardStage({
-  cardId,
-  cardListId,
+async function handleUpdateCardStage({
+  card,
   listStageId,
+  name,
   order,
 }: {
-  cardId: number;
-  cardListId: number;
+  card: Card;
   listStageId: number;
+  name?: string;
   order?: number;
 }) {
   updateCardList({
-    cardId,
-    cardListId,
+    cardId: card.id,
+    cardListId: card.cardLists[0].id,
     updateCardListDto: {
-      listStageId,
+      listStageId:
+        viewCopy.value.groupBy === ListGroupOptions.LIST_STAGE
+          ? listStageId
+          : undefined,
       order,
     },
   })
