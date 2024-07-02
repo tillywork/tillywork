@@ -36,13 +36,6 @@ export interface ListSortOption {
 
 export const DEFAULT_SORT_OPTIONS: ListSortOption[] = [
   {
-    label: 'Completed Cards',
-    value: {
-      key: 'listStage.isCompleted',
-      order: 'ASC',
-    },
-  },
-  {
     label: 'Creation Date',
     value: {
       key: 'card.createdAt',
@@ -53,6 +46,13 @@ export const DEFAULT_SORT_OPTIONS: ListSortOption[] = [
     label: 'Due Date',
     value: {
       key: 'card.dueAt',
+      order: 'ASC',
+    },
+  },
+  {
+    label: 'Completed',
+    value: {
+      key: 'listStage.isCompleted',
       order: 'ASC',
     },
   },

@@ -5,7 +5,7 @@ import {
   type ListStage,
 } from '../../lists/types';
 import { useCardsService } from '@/composables/services/useCardsService';
-import type { View } from '../types';
+import type { TableSortOption, View } from '../types';
 import type { ProjectUser } from '@/components/common/projects/types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import type { Card } from '../../cards/types';
@@ -15,7 +15,6 @@ import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import type { QueryFilter } from '../../filters/types';
-import type { TableSortOption } from '@/components/common/tables/FalconTable.vue';
 import { useDialogStore } from '@/stores/dialog';
 
 const emit = defineEmits([
@@ -324,10 +323,6 @@ watchEffect(() => {
             class="board-card"
             :to="`/pm/card/${card.id}`"
             :ripple="false"
-            :color="card.cardLists[0].listStage.isCompleted ? 'success' : ''"
-            :variant="
-              card.cardLists[0].listStage.isCompleted ? 'tonal' : undefined
-            "
           >
             <v-card-item class="pa-2 align-start">
               <template #prepend>
