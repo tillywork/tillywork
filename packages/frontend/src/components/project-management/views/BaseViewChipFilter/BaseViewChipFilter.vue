@@ -213,6 +213,8 @@ watch(
       if (!objectUtils.isEqual(filtersCopy.value, v)) {
         filtersCopy.value = cloneDeep(v);
       }
+    } else {
+      filtersCopy.value = {};
     }
   }
 );
