@@ -6,7 +6,7 @@ import objectUtils from '@/utils/object';
 
 const { dayjs } = useDate();
 
-const dateModel = defineModel<string | string[]>();
+const dateModel = defineModel<string | string[] | null>();
 
 const props = defineProps<{
   label?: string;
@@ -22,7 +22,7 @@ const dateDialog = defineModel<boolean>('dialog', {
   default: false,
 });
 
-const dateValue = ref<string | string[] | undefined>(dateModel.value);
+const dateValue = ref<string | string[] | null | undefined>(dateModel.value);
 
 const processedDate = computed({
   get() {
@@ -64,6 +64,10 @@ const processedDate = computed({
     }
   },
 });
+
+function clearDate() {
+  dateValue.value = null;
+}
 
 const selectedRangeSuggestion = computed(() => {
   return DATE_RANGE_SUGGESTIONS.find((suggestion) => {
@@ -191,12 +195,21 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
               :color="dateDialog ? 'primary-darken-1' : ''"
             />
           </template>
+          <template #append-inner v-if="dateValue">
+            <base-icon-btn
+              icon="mdi-close"
+              class="ms-2 align-self-center"
+              variant="text"
+              rounded="circle"
+              @click.prevent="clearDate"
+            />
+          </template>
         </v-text-field>
       </template>
       <template v-else>
         <base-card-property-value-btn
           v-bind="props"
-          class="text-capitalize"
+          class="text-capitalize justify-space-between"
           :class="textClass"
           @click.prevent
         >
@@ -204,6 +217,16 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
             <v-icon :icon color="default" />
           </template>
           {{ dateToText }}
+          <template #append v-if="dateValue">
+            <base-icon-btn
+              icon="mdi-close"
+              class="ms-2 align-self-center"
+              variant="text"
+              rounded="circle"
+              size="x-small"
+              @click.prevent="clearDate"
+            />
+          </template>
         </base-card-property-value-btn>
       </template>
     </template>

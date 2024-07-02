@@ -54,9 +54,6 @@ const vuetify = createVuetify({
     VTextField: {
       color: 'primary',
       density: 'compact',
-      VIcon: {
-        size: 'x-small',
-      },
     },
     VDataTable: {
       density: 'compact',

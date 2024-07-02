@@ -8,5 +8,8 @@ const slots = defineSlots();
       <slot name="prepend" />
     </template>
     <slot />
+    <template #append v-if="slots.append">
+      <slot name="append" />
+    </template>
   </v-btn>
 </template>
