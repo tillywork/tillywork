@@ -192,7 +192,6 @@ onFilesChange(async (files) => {
   if (editor.value && files) {
     const fileArray = Array.from(files);
     const fileUploads = await uploadFiles(fileArray);
-    console.log(fileUploads);
 
     fileUploads.forEach((file: TWFile) => {
       switch (file.type) {
