@@ -196,24 +196,20 @@ onFilesChange(async (files) => {
     fileUploads.forEach((file: TWFile) => {
       switch (file.type) {
         case TWFileType.IMAGE:
-          editor.value
-            ?.chain()
-            .focus('end')
-            .createParagraphNear()
-            .insertContent('')
-            .setImage({ src: file.url })
-            .run();
+          editor.value?.commands.insertContent({
+            type: 'image',
+            attrs: {
+              src: file.url,
+            },
+          });
           break;
 
         case TWFileType.FILE:
         default:
-          editor.value
-            ?.chain()
-            .focus('end')
-            .createParagraphNear()
-            .insertContent('')
-            .setFile(file)
-            .run();
+          editor.value?.commands.insertContent({
+            type: 'file',
+            attrs: file,
+          });
           break;
       }
     });
