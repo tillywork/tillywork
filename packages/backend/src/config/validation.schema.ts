@@ -68,4 +68,12 @@ export const validationSchema = Joi.object({
         then: Joi.number().port().required(),
         otherwise: Joi.number().port().allow("").optional(),
     }),
+
+    TW_AWS_ACCESS_KEY_ID: Joi.string().optional(),
+
+    TW_AWS_SECRET_ACCESS_KEY: Joi.string().optional(),
+
+    TW_AWS_REGION: Joi.string().optional(),
+
+    TW_AWS_S3_ENDPOINT: Joi.string().optional(),
 });

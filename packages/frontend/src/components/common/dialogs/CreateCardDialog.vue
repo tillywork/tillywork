@@ -23,6 +23,7 @@ const { currentList } = storeToRefs(useStateStore());
 
 const createForm = ref<VForm>();
 const isCreatingMore = ref(false);
+const descriptionEditor = ref();
 
 const cardsService = useCardsService();
 const projectUsersService = useProjectUsersService();
@@ -117,6 +118,10 @@ function handlePostCreate() {
     closeDialog();
   }
 }
+
+function openBaseEditorFileDialog() {
+  descriptionEditor.value.openFileDialog();
+}
 </script>
 
 <template>
@@ -135,24 +140,25 @@ function handlePostCreate() {
       <base-icon-btn icon="mdi-close" color="default" @click="closeDialog()" />
     </div>
     <v-form ref="createForm" @submit.prevent="createCard">
-      <div class="pa-4 pt-0">
+      <div class="px-4 pb-2">
         <base-editor-input
           v-model="createCardDto.title"
           :placeholder="cardType.name + ' name'"
           autofocus
           :heading="3"
           single-line
-          class="mb-3"
+          class="mb-2"
           editable
           disable-commands
         />
         <base-editor-input
+          ref="descriptionEditor"
           v-model:json="createCardDto.description"
           placeholder="Enter description.."
           editable
+          min-height="80px"
         />
-      </div>
-      <v-card-actions class="d-flex justify-start align-center py-0 px-4">
+
         <div class="d-flex ga-2 align-center">
           <list-stage-selector
             v-model="createCardDto.listStage"
@@ -170,6 +176,15 @@ function handlePostCreate() {
             label="Due date"
           />
         </div>
+      </div>
+      <v-card-actions
+        class="d-flex justify-start align-center py-0 px-4 border-t-thin"
+      >
+        <base-icon-btn
+          icon="mdi-paperclip"
+          rounded="circle"
+          @click="openBaseEditorFileDialog"
+        />
         <v-spacer />
         <v-switch v-model="isCreatingMore" hide-details inset>
           <template #label>

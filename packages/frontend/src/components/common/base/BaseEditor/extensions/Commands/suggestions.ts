@@ -10,7 +10,7 @@ export default {
       {
         title: 'Heading 1',
         icon: 'mdi-format-header-1',
-        shortcut: `${leaderKey} + ${alternateKey} + 1`,
+        shortcut: `${leaderKey} ${alternateKey} 1`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor
             .chain()
@@ -23,7 +23,7 @@ export default {
       {
         title: 'Heading 2',
         icon: 'mdi-format-header-2',
-        shortcut: `${leaderKey} + ${alternateKey} + 2`,
+        shortcut: `${leaderKey} ${alternateKey} 2`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor
             .chain()
@@ -36,7 +36,7 @@ export default {
       {
         title: 'Heading 3',
         icon: 'mdi-format-header-3',
-        shortcut: `${leaderKey} + ${alternateKey} + 3`,
+        shortcut: `${leaderKey} ${alternateKey} 3`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor
             .chain()
@@ -49,7 +49,7 @@ export default {
       {
         title: 'Bold',
         icon: 'mdi-format-bold',
-        shortcut: `${leaderKey} + B`,
+        shortcut: `${leaderKey} B`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).setBold().run();
         },
@@ -57,7 +57,7 @@ export default {
       {
         title: 'Italic',
         icon: 'mdi-format-italic',
-        shortcut: `${leaderKey} + I`,
+        shortcut: `${leaderKey} I`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).setItalic().run();
         },
@@ -65,7 +65,7 @@ export default {
       {
         title: 'Underline',
         icon: 'mdi-format-underline',
-        shortcut: `${leaderKey} + U`,
+        shortcut: `${leaderKey} U`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).setUnderline().run();
         },
@@ -73,7 +73,7 @@ export default {
       {
         title: 'Strike',
         icon: 'mdi-format-strikethrough',
-        shortcut: `${leaderKey} + Shift X`,
+        shortcut: `${leaderKey} Shift X`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).setStrike().run();
         },
@@ -81,7 +81,7 @@ export default {
       {
         title: 'Blockquote',
         icon: 'mdi-format-quote-open',
-        shortcut: `${leaderKey} + Shift B`,
+        shortcut: `${leaderKey} Shift B`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).setBlockquote().run();
         },
@@ -89,7 +89,7 @@ export default {
       {
         title: 'Bullet List',
         icon: 'mdi-format-list-bulleted',
-        shortcut: `${leaderKey} + Shift 8`,
+        shortcut: `${leaderKey} Shift 8`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).toggleBulletList().run();
         },
@@ -97,7 +97,7 @@ export default {
       {
         title: 'Ordered List',
         icon: 'mdi-format-list-numbered',
-        shortcut: `${leaderKey} + Shift 7`,
+        shortcut: `${leaderKey} Shift 7`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).toggleOrderedList().run();
         },
@@ -105,7 +105,7 @@ export default {
       {
         title: 'Code',
         icon: 'mdi-code-tags',
-        shortcut: `${leaderKey} + E`,
+        shortcut: `${leaderKey} E`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).setCode().run();
         },
@@ -113,7 +113,7 @@ export default {
       {
         title: 'Code Block',
         icon: 'mdi-code-brackets',
-        shortcut: `${leaderKey} + ${alternateKey} + C`,
+        shortcut: `${leaderKey} ${alternateKey} C`,
         command: ({ editor, range }: { editor: Editor; range: Range }) => {
           editor.chain().focus().deleteRange(range).setCodeBlock().run();
         },

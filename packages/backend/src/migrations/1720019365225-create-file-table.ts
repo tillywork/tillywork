@@ -1,0 +1,75 @@
+import { MigrationInterface, QueryRunner, Table, TableIndex } from "typeorm";
+import { TWFileType } from "../app/common/files/types";
+
+export class CreateFileTable1720019365225 implements MigrationInterface {
+    public async up(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.createTable(
+            new Table({
+                name: "file",
+                columns: [
+                    {
+                        name: "id",
+                        type: "bigint",
+                        isPrimary: true,
+                        isGenerated: true,
+                        generationStrategy: "increment",
+                    },
+                    {
+                        name: "name",
+                        type: "varchar",
+                    },
+                    {
+                        name: "url",
+                        type: "varchar",
+                    },
+                    {
+                        name: "size",
+                        type: "bigint",
+                    },
+                    {
+                        name: "type",
+                        type: "enum",
+                        enum: Object.values(TWFileType),
+                    },
+                    {
+                        name: "createdById",
+                        type: "bigint",
+                    },
+                    {
+                        name: "createdAt",
+                        type: "timestamp",
+                        default: "now()",
+                    },
+                    {
+                        name: "updatedAt",
+                        type: "timestamp",
+                        default: "now()",
+                    },
+                    {
+                        name: "deletedAt",
+                        type: "timestamp",
+                        isNullable: true,
+                    },
+                ],
+                foreignKeys: [
+                    {
+                        columnNames: ["createdById"],
+                        referencedTableName: "user",
+                        referencedColumnNames: ["id"],
+                        onDelete: "CASCADE",
+                    },
+                ],
+                indices: [
+                    new TableIndex({
+                        name: "IDX_FILE_CREATED_BY",
+                        columnNames: ["createdById"],
+                    }),
+                ],
+            })
+        );
+    }
+
+    public async down(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.dropTable("file");
+    }
+}

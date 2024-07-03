@@ -9,6 +9,14 @@ import { Indent } from './extensions/Indent';
 import { TextDirection } from './extensions/TextDirection';
 import { Codeblock } from './extensions/Codeblock';
 import { Underline } from '@tiptap/extension-underline';
+import { Image } from './extensions/Image';
+import { FileHandler } from './extensions/FileHandler';
+import {
+  TWFileType,
+  useFilesService,
+  type TWFile,
+} from '@/composables/services/useFilesService';
+import { File } from './extensions/File';
 
 const props = defineProps<{
   autofocus?: boolean;
@@ -17,7 +25,18 @@ const props = defineProps<{
   singleLine?: boolean;
   editable?: boolean;
   disableCommands?: boolean;
+  minHeight?: string | number;
 }>();
+
+const { uploadFiles } = useFilesService();
+const {
+  open: openFileDialog,
+  reset: resetFileDialog,
+  onChange: onFilesChange,
+} = useFileDialog({
+  accept:
+    '.pdf,.doc,.docx,.xls,.xlsx,image/jpeg,image/png,image/gif,application/zip,application/json',
+});
 
 const extensions = computed(() => {
   const extensions: any[] = [
@@ -32,6 +51,9 @@ const extensions = computed(() => {
     }),
     Codeblock,
     Underline,
+    Image,
+    FileHandler.configure({ uploadFn: uploadFiles }),
+    File,
   ];
 
   if (props.singleLine) {
@@ -52,7 +74,6 @@ const extensions = computed(() => {
 });
 
 const textValue = defineModel<string>();
-const htmlValue = defineModel<Content>('html');
 const jsonValue = defineModel<Content>('json');
 const isEmpty = defineModel<boolean>('empty');
 
@@ -74,7 +95,6 @@ function initEditor() {
     onUpdate: () => {
       enforceHeading();
       textValue.value = editor.value?.getText();
-      htmlValue.value = editor.value?.getHTML();
       jsonValue.value = editor.value?.getJSON();
       isEmpty.value = editor.value?.isEmpty;
     },
@@ -84,16 +104,13 @@ function initEditor() {
 /**
  * Fills the initial content of the editor
  * from the v-model values when the editor
- * is created. Priority: Text -> HTML -> JSON
+ * is created. Priority: Text -> JSON
  */
 function fillEditorFromModelValues() {
   if (textValue.value) {
     setEditorText(textValue.value);
-  } else if (htmlValue.value || jsonValue.value) {
-    editor.value?.commands.setContent(
-      (htmlValue.value ?? jsonValue.value) as Content,
-      true
-    );
+  } else if (jsonValue.value) {
+    editor.value?.commands.setContent(jsonValue.value as Content, true);
   }
 }
 
@@ -154,13 +171,6 @@ watch(textValue, (newText) => {
   }
 });
 
-// Watch for changes to htmlValue and update the editor content
-watch(htmlValue, (newHtml) => {
-  if (editor.value && newHtml !== editor.value.getHTML()) {
-    editor.value.commands.setContent(newHtml as string, true);
-  }
-});
-
 // Watch for changes to jsonValue and update the editor content
 watch(jsonValue, (newJson) => {
   if (editor.value) {
@@ -177,27 +187,66 @@ onBeforeUnmount(() => {
 });
 
 initEditor();
+
+onFilesChange(async (files) => {
+  if (editor.value && files) {
+    const fileArray = Array.from(files);
+    const fileUploads = await uploadFiles(fileArray);
+    console.log(fileUploads);
+
+    fileUploads.forEach((file: TWFile) => {
+      switch (file.type) {
+        case TWFileType.IMAGE:
+          editor.value
+            ?.chain()
+            .focus('end')
+            .createParagraphNear()
+            .insertContent('')
+            .setImage({ src: file.url })
+            .run();
+          break;
+
+        case TWFileType.FILE:
+        default:
+          editor.value
+            ?.chain()
+            .focus('end')
+            .createParagraphNear()
+            .insertContent('')
+            .setFile(file)
+            .run();
+          break;
+      }
+    });
+
+    resetFileDialog();
+  }
+});
+
+defineExpose({
+  openFileDialog,
+});
 </script>
 
 <template>
-  <editor-content :editor="editor" />
+  <editor-content
+    :editor="editor"
+    :style="props.minHeight ? `min-height: ${props.minHeight}` : undefined"
+  />
 </template>
 
 <style lang="scss">
-.ProseMirror-focused {
-  outline: none;
-}
-
 .tiptap {
   line-height: 1.5;
 
-  * {
+  > * {
     padding: 3px 0;
-  }
-
-  > * + * {
     margin-top: 1px;
     margin-bottom: 1px;
+  }
+
+  &.ProseMirror-focused {
+    outline: none;
   }
 
   ul,
