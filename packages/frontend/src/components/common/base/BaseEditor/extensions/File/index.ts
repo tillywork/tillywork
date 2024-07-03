@@ -1,5 +1,5 @@
 import { Node, nodeInputRule } from '@tiptap/core';
-import { VueNodeViewRenderer } from '@tiptap/vue-3';
+import { VueNodeViewRenderer, mergeAttributes } from '@tiptap/vue-3';
 import BaseEditorFile from './BaseEditorFile.vue';
 
 export interface FileOptions {
@@ -88,6 +88,14 @@ export const File = Node.create<FileOptions>({
         },
       }),
     ];
+  },
+
+  parseHTML() {
+    return [{ tag: 'file' }];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['file', mergeAttributes(HTMLAttributes)];
   },
 
   addNodeView() {

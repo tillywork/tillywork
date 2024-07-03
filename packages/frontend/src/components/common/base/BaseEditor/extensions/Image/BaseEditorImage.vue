@@ -32,6 +32,8 @@ function downloadImage() {
       class="image-wrapper rounded-md position-relative"
       :onmouseenter="showMenu"
       :onmouseleave="hideMenu"
+      draggable="true"
+      data-drag-handle
     >
       <v-img v-bind="node.attrs" class="rounded-md" />
       <div class="image-bubble-menu" v-show="menu">

@@ -35,6 +35,8 @@ function downloadFile() {
       class="file-wrapper rounded-md position-relative"
       :onmouseenter="showMenu"
       :onmouseleave="hideMenu"
+      draggable="true"
+      data-drag-handle
     >
       <v-chip color="primary" size="small">
         {{ node.attrs.name }}

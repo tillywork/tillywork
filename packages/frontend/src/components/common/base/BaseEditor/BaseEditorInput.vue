@@ -35,7 +35,7 @@ const {
   onChange: onFilesChange,
 } = useFileDialog({
   accept:
-    '.pdf,.doc,.docx,.xls,.xlsx,image/jpeg,image/png,image/gif,application/zip,application/json',
+    '.pdf,.doc,.docx,.csv,.xls,.xlsx,image/jpeg,image/png,image/gif,application/zip,application/json',
 });
 
 const extensions = computed(() => {
@@ -196,20 +196,30 @@ onFilesChange(async (files) => {
     fileUploads.forEach((file: TWFile) => {
       switch (file.type) {
         case TWFileType.IMAGE:
-          editor.value?.commands.insertContent({
-            type: 'image',
-            attrs: {
-              src: file.url,
-            },
-          });
+          editor.value
+            ?.chain()
+            .focus()
+            .createParagraphNear()
+            .insertContent({
+              type: 'image',
+              attrs: {
+                src: file.url,
+              },
+            })
+            .run();
           break;
 
         case TWFileType.FILE:
         default:
-          editor.value?.commands.insertContent({
-            type: 'file',
-            attrs: file,
-          });
+          editor.value
+            ?.chain()
+            .focus()
+            .createParagraphNear()
+            .insertContent({
+              type: 'file',
+              attrs: file,
+            })
+            .run();
           break;
       }
     });

@@ -1,5 +1,5 @@
 import { Node, nodeInputRule } from '@tiptap/core';
-import { VueNodeViewRenderer } from '@tiptap/vue-3';
+import { VueNodeViewRenderer, mergeAttributes } from '@tiptap/vue-3';
 import BaseEditorImage from './BaseEditorImage.vue';
 
 export interface ImageOptions {
@@ -73,6 +73,14 @@ export const Image = Node.create<ImageOptions>({
         },
       }),
     ];
+  },
+
+  parseHTML() {
+    return [{ tag: 'image' }];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['image', mergeAttributes(HTMLAttributes)];
   },
 
   addNodeView() {
