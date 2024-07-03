@@ -36,11 +36,9 @@ function downloadFile() {
       :onmouseenter="showMenu"
       :onmouseleave="hideMenu"
     >
-      <v-chip color="primary">
+      <v-chip color="primary" size="small">
         {{ node.attrs.name }}
-        <span class="text-caption ms-1"
-          >({{ formatBytes(node.attrs.size) }})</span
-        >
+        <span class="ms-1">({{ formatBytes(node.attrs.size) }})</span>
         <template #append>
           <div class="d-flex align-start ga-1 ms-2">
             <base-icon-btn
