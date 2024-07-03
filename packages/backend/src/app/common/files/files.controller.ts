@@ -1,5 +1,7 @@
 import {
     Controller,
+    MaxFileSizeValidator,
+    ParseFilePipe,
     Post,
     Request,
     UploadedFile,
@@ -24,7 +26,20 @@ export class FilesController {
 
     @UseInterceptors(FileInterceptor("file"))
     @Post()
-    async uploadFile(@Request() req, @UploadedFile() file: FileDto) {
+    async uploadFile(
+        @Request() req,
+        @UploadedFile(
+            new ParseFilePipe({
+                validators: [
+                    new MaxFileSizeValidator({
+                        maxSize: 5 * 1024 * 1024,
+                        message: "FILE_SIZE_LIMIT",
+                    }),
+                ],
+            })
+        )
+        file: FileDto
+    ) {
         const { user } = req;
         return this.filesService.uploadFileToS3({
             file,

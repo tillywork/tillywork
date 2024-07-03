@@ -40,8 +40,10 @@ export const useFilesService = () => {
       } catch (e: any) {
         showSnackbar({
           message:
-            e.response.data.message ??
-            'Something went wrong, please try again.',
+            e.response.data.message &&
+            e.response.data.message === 'FILE_SIZE_LIMIT'
+              ? 'File size exceeds allowed limit (5MB)'
+              : 'Something went wrong, please try again.',
           color: 'error',
         });
       }
