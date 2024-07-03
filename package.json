@@ -3,10 +3,12 @@
     "version": "0.0.2",
     "license": "MIT",
     "scripts": {
-        "dev": "nx run-many -t serve -p frontend backend",
-        "lint": "nx run-many -t lint -p frontend backend",
-        "format": "nx run-many -t format -p frontend backend",
         "build": "nx run-many -t build -p frontend backend -c production",
+        "dev": "nx run-many -t serve -p frontend backend",
+        "dev:reset": "npm run reset && npm run dev",
+        "format": "nx run-many -t format -p frontend backend",
+        "lint": "nx run-many -t lint -p frontend backend",
+        "reset": "nx run backend:db:reset",
         "swagger": "nx run backend:metadata"
     },
     "private": true,

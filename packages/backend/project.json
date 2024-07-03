@@ -22,7 +22,13 @@
         "metadata": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "ts-node packages/backend/src/scripts/generate-metadata.ts",
+                "command": "ts-node packages/backend/src/scripts/generate-metadata.ts"
+            }
+        },
+        "db:reset": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "ts-node packages/backend/src/scripts/reset-db.ts"
             }
         },
         "migration:run": {
