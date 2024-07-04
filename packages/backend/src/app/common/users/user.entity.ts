@@ -8,9 +8,11 @@ import {
     DeleteDateColumn,
     OneToMany,
     Relation,
+    ManyToOne,
 } from "typeorm";
 import { Card } from "../cards/card.entity";
 import { ProjectUser } from "../projects/project-users/project.user.entity";
+import { Project } from "../projects/project.entity";
 
 @Entity()
 export class User {
@@ -101,4 +103,10 @@ export class User {
      */
     @ManyToMany(() => Card, (card) => card.users)
     cards: Relation<Card[]>;
+
+    /**
+     * The user's current active project.
+     */
+    @ManyToOne(() => Project, { onDelete: "CASCADE" })
+    project: Relation<Project>;
 }

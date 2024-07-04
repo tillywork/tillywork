@@ -29,13 +29,13 @@ function downloadImage() {
 <template>
   <node-view-wrapper>
     <div
-      class="image-wrapper rounded-md position-relative"
+      class="image-wrapper rounded-sm position-relative"
       :onmouseenter="showMenu"
       :onmouseleave="hideMenu"
       draggable="true"
       data-drag-handle
     >
-      <v-img v-bind="node.attrs" class="rounded-md" />
+      <v-img v-bind="node.attrs" class="rounded-sm" />
       <div class="image-bubble-menu" v-show="menu">
         <div class="v-card bg-accent border-thin d-flex pa-1 ga-1">
           <base-icon-btn

@@ -10,6 +10,7 @@ import {
 } from "typeorm";
 import { User } from "../users/user.entity";
 import { TWFileType } from "./types";
+import { Project } from "../projects/project.entity";
 
 @Entity("file")
 export class TWFile {
@@ -29,8 +30,11 @@ export class TWFile {
     @Column({ type: "bigint" })
     size: number;
 
-    @ManyToOne(() => User)
+    @ManyToOne(() => User, { nullable: false })
     createdBy: Relation<User>;
+
+    @ManyToOne(() => Project, { nullable: false })
+    project: Relation<Project>;
 
     @CreateDateColumn({ type: "timestamp", default: "now()" })
     createdAt: Date;

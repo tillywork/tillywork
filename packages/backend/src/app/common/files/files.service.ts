@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import * as AWS from "aws-sdk";
+import AWS from "aws-sdk";
 import { TWFile } from "./file.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
@@ -51,6 +51,9 @@ export class FilesService {
                 : TWFileType.FILE,
             size: file.size,
             createdBy,
+            project: {
+                id: createdBy.project.id,
+            },
         });
 
         await this.filesRepository.save(fileEntity);

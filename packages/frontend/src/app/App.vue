@@ -17,6 +17,7 @@ import { VueQueryDevtools } from '@tanstack/vue-query-devtools';
 import posthog from 'posthog-js';
 import { useTheme } from 'vuetify';
 import BaseCommandPalette from '@/components/common/commands/BaseCommandPalette.vue';
+import { useUsersService } from '@/composables/services/useUsersService';
 
 const themeStore = useThemeStore();
 const {
@@ -27,6 +28,7 @@ const {
 } = useCommands();
 const workspacesService = useWorkspacesService();
 const projectsService = useProjectsService();
+const { updateUserMutation } = useUsersService();
 const { stateStore } = useState();
 const dialogStore = useDialogStore();
 const authStore = useAuthStore();
@@ -41,6 +43,8 @@ const { data: workspaces } = workspacesService.useGetWorkspacesQuery({
 const { data: projects } = projectsService.useGetProjectsQuery({
   enabled: projectsEnabled,
 });
+
+const { mutateAsync: updateUser } = updateUserMutation();
 
 if (import.meta.env.MODE === 'production' && isAuthenticated()) {
   posthog.identify(`${user.value?.id}`, {
@@ -99,6 +103,19 @@ watch(
     if (v) {
       registerCommandShortcutWatchers();
       watchForCommandChanges();
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  project,
+  (v) => {
+    if (v && user.value) {
+      updateUser({
+        ...user.value,
+        project: v,
+      });
     }
   },
   { immediate: true }

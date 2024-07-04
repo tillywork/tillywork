@@ -37,7 +37,9 @@ export class AuthController {
     })
     @Post("login")
     async login(@Request() req): Promise<LoginResponse> {
-        const accessToken = await this.authService.login(req.user);
+        const accessToken = await this.authService.login({
+            user: req.user,
+        });
         return { accessToken };
     }
 

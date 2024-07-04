@@ -38,12 +38,24 @@ export const useFilesService = () => {
         fileUploads.push(fileUpload);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
+        let message: string;
+
+        switch (e.response.data.message) {
+          case 'FILE_SIZE_LIMIT':
+            message = 'File size exceeds allowed limit (5MB)';
+            break;
+
+          case 'UPLOAD_LIMIT_EXCEEDED':
+            message = `You have reached your project's upload limit.`;
+            break;
+
+          default:
+            message = 'Something went wrong, please try again.';
+            break;
+        }
+
         showSnackbar({
-          message:
-            e.response.data.message &&
-            e.response.data.message === 'FILE_SIZE_LIMIT'
-              ? 'File size exceeds allowed limit (5MB)'
-              : 'Something went wrong, please try again.',
+          message,
           color: 'error',
         });
       }

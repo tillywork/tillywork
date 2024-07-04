@@ -24,6 +24,9 @@ export class Project {
     @Column({ type: "varchar", length: 32, nullable: true })
     inviteCode: string;
 
+    @Column({ type: "bigint", default: 1024 * 1024 * 1024 })
+    userUploadLimit: number;
+
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;
     @UpdateDateColumn({ type: "timestamp" })

@@ -13,6 +13,7 @@ import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
 import { FileInterceptor } from "@nest-lab/fastify-multer";
 import { FileDto } from "./types";
+import { UploadLimitInterceptor } from "./interceptors/upload.limit.interceptor";
 
 @ApiBearerAuth()
 @ApiTags("files")
@@ -24,7 +25,7 @@ import { FileDto } from "./types";
 export class FilesController {
     constructor(private readonly filesService: FilesService) {}
 
-    @UseInterceptors(FileInterceptor("file"))
+    @UseInterceptors(FileInterceptor("file"), UploadLimitInterceptor)
     @Post()
     async uploadFile(
         @Request() req,

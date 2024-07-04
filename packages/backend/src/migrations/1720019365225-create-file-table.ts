@@ -36,6 +36,10 @@ export class CreateFileTable1720019365225 implements MigrationInterface {
                         type: "bigint",
                     },
                     {
+                        name: "projectId",
+                        type: "bigint",
+                    },
+                    {
                         name: "createdAt",
                         type: "timestamp",
                         default: "now()",
@@ -58,11 +62,21 @@ export class CreateFileTable1720019365225 implements MigrationInterface {
                         referencedColumnNames: ["id"],
                         onDelete: "CASCADE",
                     },
+                    {
+                        columnNames: ["projectId"],
+                        referencedTableName: "project",
+                        referencedColumnNames: ["id"],
+                        onDelete: "CASCADE",
+                    },
                 ],
                 indices: [
                     new TableIndex({
                         name: "IDX_FILE_CREATED_BY",
                         columnNames: ["createdById"],
+                    }),
+                    new TableIndex({
+                        name: "IDX_FILE_PROJECT",
+                        columnNames: ["projectId"],
                     }),
                 ],
             })
