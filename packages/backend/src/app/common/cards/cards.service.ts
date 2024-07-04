@@ -77,7 +77,13 @@ export class CardsService {
     async findOne(id: number): Promise<Card> {
         const card = await this.cardsRepository.findOne({
             where: { id },
-            relations: ["cardLists", "cardLists.listStage", "users"],
+            relations: [
+                "cardLists",
+                "cardLists.listStage",
+                "users",
+                "parentCard",
+                "childCards",
+            ],
         });
         if (!card) {
             throw new NotFoundException(`Card with ID ${id} not found`);

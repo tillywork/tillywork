@@ -302,6 +302,14 @@ function openSettingsDialog(activeTab: SettingsTabs) {
             />
           </div>
         </div>
+
+        <template v-if="cardCopy.parentCard">
+          <div class="flex">
+            <v-icon>mdi-arrow-up</v-icon>
+            <span>{{ cardCopy.parentCard.title }}</span>
+          </div>
+        </template>
+
         <div class="mt-8">
           <base-editor-input
             v-model:json="cardDescription"
@@ -310,6 +318,16 @@ function openSettingsDialog(activeTab: SettingsTabs) {
           />
         </div>
         <v-divider class="my-8" />
+
+        <template v-if="cardCopy.childCards.length !== 0">
+          <ul class="px-8">
+            <li v-for="card in cardCopy.childCards" :key="card.id">
+              {{ card.title }}
+            </li>
+          </ul>
+          <v-divider class="my-8" />
+        </template>
+
         <v-card>
           <v-card-subtitle class="text-body-2 ps-1">Activity</v-card-subtitle>
           <v-card-text class="pa-0">
@@ -454,7 +472,7 @@ function openSettingsDialog(activeTab: SettingsTabs) {
                     :icon="field.icon"
                     size="24"
                     @update:model-value="
-                      (users: number[]) => 
+                      (users: number[]) =>
                         updateFieldValue({
                           field,
                           v: users.map((userIdAsNumber) => userIdAsNumber.toString()),

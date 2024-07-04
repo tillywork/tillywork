@@ -33,6 +33,7 @@ import { CreateIndices1719422621473 } from "../migrations/1719422621473-create-i
 import { AddInviteCodeToProjectTable1719829250591 } from "../migrations/1719829250591-add-invite-code-to-project-table";
 import { FillDefaultCardTypeIdInNewWorkspaces1719841537242 } from "../migrations/1719841537242-fill-defaultCardTypeId-in-new-workspaces";
 import { ResetListGroups1719846270867 } from "../migrations/1719846270867-reset-list-groups";
+import { AddParentAndChildrenColumnsToCardsTable1720077323722 } from "../migrations/1720077323722-add-parent-and-children-columns-to-cards-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -67,6 +68,7 @@ const migrations = [
     AddInviteCodeToProjectTable1719829250591,
     FillDefaultCardTypeIdInNewWorkspaces1719841537242,
     ResetListGroups1719846270867,
+    AddParentAndChildrenColumnsToCardsTable1720077323722,
 ];
 
 const config: TypeOrmModuleOptions = {

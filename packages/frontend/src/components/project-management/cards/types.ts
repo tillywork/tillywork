@@ -16,6 +16,8 @@ export interface Card {
   dueAt: string | null;
   createdAt: string;
   updatedAt: string;
+  parentCard?: Card;
+  childCards: Card[];
 }
 
 export interface CardList {

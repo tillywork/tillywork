@@ -4,6 +4,7 @@ import {
     CreateDateColumn,
     DeleteDateColumn,
     Entity,
+    JoinColumn,
     JoinTable,
     ManyToMany,
     ManyToOne,
@@ -58,4 +59,10 @@ export class Card {
     updatedAt: Date;
     @DeleteDateColumn({ type: "timestamp" })
     deletedAt: Date;
+
+    @ManyToOne(() => Card, (card) => card.childCards)
+    @JoinColumn({ name: "parentCardId" })
+    parentCard?: Relation<Card>;
+    @OneToMany(() => Card, (card) => card.parentCard)
+    childCards: Relation<Card[]>;
 }
