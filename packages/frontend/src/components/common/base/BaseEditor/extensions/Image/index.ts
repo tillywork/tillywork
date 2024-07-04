@@ -12,7 +12,11 @@ export interface ImageOptions {
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     image: {
-      setImage: (options: { src: string }) => ReturnType;
+      setImage: (options: {
+        src: string;
+        width?: number;
+        height?: number;
+      }) => ReturnType;
     };
   }
 }
@@ -46,6 +50,12 @@ export const Image = Node.create<ImageOptions>({
       src: {
         default: null,
       },
+      height: {
+        default: null,
+      },
+      width: {
+        default: null,
+      },
     };
   },
 
@@ -68,8 +78,8 @@ export const Image = Node.create<ImageOptions>({
         find: inputRegex,
         type: this.type,
         getAttributes: (match) => {
-          const [src] = match;
-          return { src };
+          const [src, width, height] = match;
+          return { src, width, height };
         },
       }),
     ];

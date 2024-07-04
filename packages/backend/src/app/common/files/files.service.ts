@@ -60,4 +60,12 @@ export class FilesService {
 
         return fileEntity;
     }
+
+    async getUserStorageUsage(userId: number): Promise<number> {
+        return this.filesRepository.sum("size", {
+            createdBy: {
+                id: userId,
+            },
+        });
+    }
 }

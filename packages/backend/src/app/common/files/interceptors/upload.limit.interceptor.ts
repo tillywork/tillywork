@@ -8,12 +8,14 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Project } from "../../projects/project.entity";
+import { FilesService } from "../files.service";
 
 @Injectable()
 export class UploadLimitInterceptor implements NestInterceptor {
     constructor(
         @InjectRepository(Project)
-        private readonly projectsRepository: Repository<Project>
+        private readonly projectsRepository: Repository<Project>,
+        private filesService: FilesService
     ) {}
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -26,16 +28,19 @@ export class UploadLimitInterceptor implements NestInterceptor {
             throw new BadRequestException("User not found");
         }
 
-        // Fetch the total size of uploaded files for the user
-        const uploadedFiles = await this.projectsRepository.query(
-            `SELECT SUM(size) as "totalSize" FROM file WHERE "createdById" = ${user.id} AND "deletedAt" IS NULL`
+        const project = await this.projectsRepository.findOneByOrFail({
+            id: user.project.id,
+        });
+
+        const userStorageUsage = await this.filesService.getUserStorageUsage(
+            user.id
         );
 
-        const totalUploadedSize = uploadedFiles[0]?.totalSize || 0;
-        const newSize = +totalUploadedSize + file.size;
+        const newSize = +userStorageUsage + file.size;
+        const limit = project.userUploadLimit;
 
         // Check if the new size exceeds the user's upload limit
-        if (newSize >= user.project.userUploadLimit) {
+        if (newSize >= limit) {
             throw new BadRequestException("UPLOAD_LIMIT_EXCEEDED");
         }
 
