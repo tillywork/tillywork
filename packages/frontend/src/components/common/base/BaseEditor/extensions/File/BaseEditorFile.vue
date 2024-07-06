@@ -24,6 +24,7 @@ function copyFileLink() {
 function downloadFile() {
   const link = document.createElement('a');
   link.href = props.node.attrs.url;
+  link.target = '_blank';
   link.download = 'file';
   link.click();
 }
@@ -32,7 +33,7 @@ function downloadFile() {
 <template>
   <node-view-wrapper>
     <div
-      class="file-wrapper rounded-md position-relative"
+      class="file-wrapper rounded-md position-relative mb-2"
       :onmouseenter="showMenu"
       :onmouseleave="hideMenu"
       draggable="true"

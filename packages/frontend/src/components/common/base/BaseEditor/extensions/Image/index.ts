@@ -4,7 +4,6 @@ import BaseEditorImage from './BaseEditorImage.vue';
 
 export interface ImageOptions {
   inline: boolean;
-  allowBase64: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   HTMLAttributes: Record<string, any>;
 }
@@ -30,7 +29,6 @@ export const Image = Node.create<ImageOptions>({
   addOptions() {
     return {
       inline: false,
-      allowBase64: false,
       HTMLAttributes: {},
     };
   },

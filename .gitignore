@@ -50,3 +50,6 @@ Thumbs.db
 # Environment files
 **/.env
 **/.env.**
+
+# Local file storage
+/uploads

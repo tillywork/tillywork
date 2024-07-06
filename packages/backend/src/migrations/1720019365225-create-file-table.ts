@@ -9,18 +9,23 @@ export class CreateFileTable1720019365225 implements MigrationInterface {
                 columns: [
                     {
                         name: "id",
-                        type: "bigint",
+                        type: "uuid",
                         isPrimary: true,
-                        isGenerated: true,
-                        generationStrategy: "increment",
+                        default: "uuid_generate_v4()",
                     },
                     {
                         name: "name",
                         type: "varchar",
                     },
                     {
+                        name: "key",
+                        type: "varchar",
+                        isUnique: true,
+                    },
+                    {
                         name: "url",
                         type: "varchar",
+                        isNullable: true,
                     },
                     {
                         name: "size",

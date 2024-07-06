@@ -24,6 +24,7 @@ function copyImageLink() {
 function downloadImage() {
   const link = document.createElement('a');
   link.href = props.node.attrs.src;
+  link.target = '_blank';
   link.download = 'image';
   link.click();
 }
@@ -39,7 +40,7 @@ watch([imageWidth, imageHeight], ([newWidth, newHeight]) => {
 <template>
   <node-view-wrapper>
     <div
-      class="image-wrapper rounded-sm position-relative"
+      class="image-wrapper rounded-md position-relative mb-2"
       :onmouseenter="showMenu"
       :onmouseleave="hideMenu"
       draggable="true"
@@ -52,7 +53,7 @@ watch([imageWidth, imageHeight], ([newWidth, newHeight]) => {
       >
         <v-img
           v-bind="node.attrs"
-          class="image rounded-sm"
+          class="image rounded-md"
           :width="imageWidth"
           :height="imageHeight"
         />

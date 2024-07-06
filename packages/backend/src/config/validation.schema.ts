@@ -69,11 +69,21 @@ export const validationSchema = Joi.object({
         otherwise: Joi.number().port().allow("").optional(),
     }),
 
-    TW_AWS_ACCESS_KEY_ID: Joi.string().optional(),
+    TW_FILE_STORAGE_TYPE: Joi.string().valid("s3", "local").default("local"),
 
-    TW_AWS_SECRET_ACCESS_KEY: Joi.string().optional(),
+    TW_AWS_ACCESS_KEY_ID: Joi.string().allow("").optional(),
 
-    TW_AWS_REGION: Joi.string().optional(),
+    TW_AWS_SECRET_ACCESS_KEY: Joi.string().allow("").optional(),
 
-    TW_AWS_S3_ENDPOINT: Joi.string().optional(),
+    TW_AWS_REGION: Joi.string().allow("").optional(),
+
+    TW_AWS_S3_ENDPOINT: Joi.string().allow("").optional(),
+
+    TW_AWS_S3_BUCKET: Joi.when("TW_FILE_STORAGE_TYPE", {
+        is: "s3",
+        then: Joi.string().required(),
+        otherwise: Joi.string().optional(),
+    }),
+
+    TW_CDN_URL: Joi.string().optional(),
 });
