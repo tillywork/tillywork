@@ -61,7 +61,6 @@ export class FilesService {
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async uploadFileToS3({
         file,
         createdBy,
@@ -143,11 +142,9 @@ export class FilesService {
 
     /**
      * Returns the URL to the file depending
-     * on project setup. We use the TW_CDN_URL
-     * env variable as the default link to the
-     * S3 bucket if we're not using a custom endpoint.
+     * on project setup.
      * @param fileName The key of the file uploaded
-     * @returns The full URL to the file or the file name if no custom endpoint and no TW_CDN_URL.
+     * @returns The full URL to the file.
      */
     getFullFileUrl(fileName: string) {
         if (this.storageType === "s3") {
