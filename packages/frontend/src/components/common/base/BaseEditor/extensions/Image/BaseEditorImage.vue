@@ -3,7 +3,6 @@ import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3';
 import BaseResizable from '../../../BaseResizable.vue';
 
 const props = defineProps(nodeViewProps);
-
 const menu = ref(false);
 const imageWidth = ref<number>(props.node.attrs.width);
 const imageHeight = ref<number>(props.node.attrs.height);
@@ -47,7 +46,7 @@ watch([imageWidth, imageHeight], ([newWidth, newHeight]) => {
       data-drag-handle
     >
       <base-resizable
-        :disabled="!menu"
+        :disabled="!menu || !editor.isEditable"
         v-model:width="imageWidth"
         v-model:height="imageHeight"
       >

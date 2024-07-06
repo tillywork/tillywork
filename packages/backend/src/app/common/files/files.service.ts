@@ -148,14 +148,14 @@ export class FilesService {
      */
     getFullFileUrl(fileName: string) {
         if (this.storageType === "s3") {
-            if (this.endpoint !== "") {
-                return `${this.endpoint}/${this.bucket}/${
-                    this.localStoragePath
-                }/${encodeURI(fileName)}`;
-            } else if (this.cdnUrl) {
+            if (this.cdnUrl && this.cdnUrl !== "") {
                 return `${this.cdnUrl}/${this.localStoragePath}/${encodeURI(
                     fileName
                 )}`;
+            } else if (this.endpoint && this.endpoint !== "") {
+                return `${this.endpoint}/${this.bucket}/${
+                    this.localStoragePath
+                }/${encodeURI(fileName)}`;
             } else {
                 return encodeURI(fileName);
             }
