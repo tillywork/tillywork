@@ -17,6 +17,7 @@ import {
   type TWFile,
 } from '@/composables/services/useFilesService';
 import { File } from './extensions/File';
+import { TrailingNode } from './extensions/TrailingNode';
 
 const props = defineProps<{
   autofocus?: boolean;
@@ -68,6 +69,10 @@ const extensions = computed(() => {
         suggestion,
       })
     );
+  }
+
+  if (props.editable) {
+    extensions.push(TrailingNode);
   }
 
   return extensions;
