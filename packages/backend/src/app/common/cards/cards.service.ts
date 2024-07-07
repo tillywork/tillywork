@@ -50,6 +50,12 @@ export class CardsService {
             .leftJoinAndSelect("card.cardLists", "cardLists")
             .leftJoinAndSelect("cardLists.listStage", "listStage")
             .leftJoinAndSelect("card.users", "users")
+            .leftJoinAndSelect("card.children", "children")
+            .leftJoinAndSelect("children.cardLists", "childrenCardLists")
+            .leftJoinAndSelect(
+                "childrenCardLists.listStage",
+                "childrenListStage"
+            )
             .where("cardLists.list.id = :listId", { listId });
 
         if (ignoreCompleted) {

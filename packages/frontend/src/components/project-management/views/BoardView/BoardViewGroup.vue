@@ -349,12 +349,41 @@ watchEffect(() => {
                   @click.prevent
                 />
               </template>
-              <v-card-title
-                class="text-wrap text-body-2"
-                style="line-height: 1.2"
-              >
-                {{ card.title }}
-              </v-card-title>
+
+              <div class="d-flex align-center">
+                <v-card-title
+                  class="text-wrap text-body-2"
+                  style="line-height: 1.2"
+                >
+                  {{ card.title }}
+                </v-card-title>
+
+                <!-- ~ Progress -->
+                <div
+                  v-if="card.children.length > 0"
+                  class="d-flex align-center ga-1 ms-2 text-caption"
+                >
+                  <v-progress-circular
+                    :model-value="
+                      (card.children.filter(
+                        (child) => child.cardLists[0].listStage.isCompleted
+                      ).length /
+                        card.children.length) *
+                      100
+                    "
+                    size="16"
+                    width="3"
+                  />
+                  <span>{{
+                    card.children.filter(
+                      (child) => child.cardLists[0].listStage.isCompleted
+                    ).length +
+                    '/' +
+                    card.children.length
+                  }}</span>
+                </div>
+              </div>
+
               <template #append>
                 <base-user-selector
                   :model-value="card.users"

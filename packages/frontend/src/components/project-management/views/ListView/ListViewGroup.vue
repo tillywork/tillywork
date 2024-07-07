@@ -504,6 +504,33 @@ watchEffect(() => {
                         <span class="line-height-1 ms-2">
                           {{ row.original.title }}
                         </span>
+
+                        <!-- ~ Progress -->
+                        <div
+                          v-if="row.original.children.length > 0"
+                          class="d-flex align-center ga-1 ms-2"
+                        >
+                          <v-progress-circular
+                            :model-value="
+                              (row.original.children.filter(
+                                (child) =>
+                                  child.cardLists[0].listStage.isCompleted
+                              ).length /
+                                row.original.children.length) *
+                              100
+                            "
+                            size="16"
+                            width="3"
+                          />
+                          <span>{{
+                            row.original.children.filter(
+                              (child) =>
+                                child.cardLists[0].listStage.isCompleted
+                            ).length +
+                            '/' +
+                            row.original.children.length
+                          }}</span>
+                        </div>
                       </v-card>
                     </template>
                     <template v-else-if="cell.column.columnDef.id === 'dueAt'">
