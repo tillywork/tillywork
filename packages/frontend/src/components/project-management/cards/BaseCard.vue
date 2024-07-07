@@ -21,6 +21,7 @@ import { DIALOGS, SettingsTabs } from '@/components/common/dialogs/types';
 import BaseLabelSelector from '@/components/common/inputs/BaseLabelSelector.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useUsersService } from '@/composables/services/useUsersService';
+import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 
 const props = defineProps<{
   card: Card;
@@ -217,11 +218,11 @@ function updateCardStartsAt(newStartsAt: string) {
   }
 }
 
-function updateCardListStage(listStage: ListStage) {
+function updateCardListStage(card: Card, listStage: ListStage) {
   updateCardListMutation
     .mutateAsync({
-      cardId: cardCopy.value.id,
-      cardListId: cardCopy.value.cardLists[0].id,
+      cardId: card.id,
+      cardListId: card.cardLists[0].id,
       updateCardListDto: {
         listStageId: listStage.id,
       },
@@ -402,18 +403,14 @@ function openDescriptionFileDialog() {
                   </div>
 
                   <!-- ~ Stage -->
-                  <v-chip :color="child.cardLists[0].listStage.color">
-                    <v-icon
-                      size="small"
-                      :color="child.cardLists[0].listStage.color"
-                      start
-                    >
-                      mdi-circle-slice-8
-                    </v-icon>
-                    <span class="text-caption">
-                      {{ child.cardLists[0].listStage.name }}
-                    </span>
-                  </v-chip>
+                  <list-stage-selector
+                    v-model="child.cardLists[0].listStage"
+                    :listStages="listStagesQuery.data.value ?? []"
+                    size="default"
+                    @update:model-value="
+                      (listStage) => updateCardListStage(child, listStage)
+                    "
+                  />
                 </div>
               </template>
             </v-list-item>
@@ -454,7 +451,9 @@ function openDescriptionFileDialog() {
               v-model="cardListStage"
               :listStages="listStagesQuery.data.value ?? []"
               size="default"
-              @update:model-value="updateCardListStage"
+              @update:model-value="
+                (listStage) => updateCardListStage(cardCopy, listStage)
+              "
             />
           </div>
           <div class="d-flex align-center my-4">
