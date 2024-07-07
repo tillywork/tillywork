@@ -360,25 +360,27 @@ function openDescriptionFileDialog() {
             <span>Sub-{{ lowerFirst(cardCopy.type.name) + 's' }}</span>
           </div>
 
-          <v-progress-circular
-            :model-value="
-              (cardCopy.children.filter(
+          <template v-if="cardCopy.children.length > 0">
+            <v-progress-circular
+              :model-value="
+                (cardCopy.children.filter(
+                  (child) => child.cardLists[0].listStage.isCompleted
+                ).length /
+                  cardCopy.children.length) *
+                100
+              "
+              size="16"
+              width="3"
+              class="ml-1"
+            />
+            <span>{{
+              cardCopy.children.filter(
                 (child) => child.cardLists[0].listStage.isCompleted
-              ).length /
-                cardCopy.children.length) *
-              100
-            "
-            size="16"
-            width="3"
-            class="ml-1"
-          />
-          <span>{{
-            cardCopy.children.filter(
-              (child) => child.cardLists[0].listStage.isCompleted
-            ).length +
-            '/' +
-            cardCopy.children.length
-          }}</span>
+              ).length +
+              '/' +
+              cardCopy.children.length
+            }}</span>
+          </template>
 
           <v-spacer />
           <base-icon-btn
