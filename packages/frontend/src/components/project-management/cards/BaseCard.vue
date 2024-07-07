@@ -402,7 +402,7 @@ function openDescriptionFileDialog() {
               v-for="child in cardCopy.children"
               :key="child.id"
               rounded="md"
-              @click="router.push('/pm/card/' + child.id)"
+              :to="'/pm/card/' + child.id"
             >
               <!-- ~ Title -->
               <v-list-item-title>
