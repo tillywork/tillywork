@@ -71,7 +71,7 @@ const extensions = computed(() => {
     );
   }
 
-  if (props.editable) {
+  if (props.editable && !props.singleLine) {
     extensions.push(TrailingNode);
   }
 
