@@ -12,7 +12,7 @@ import type { ListStage } from '../lists/types';
 import BaseCardActivityTimeline from './BaseCardActivityTimeline.vue';
 import BaseCardCommentBox from './BaseCardCommentBox.vue';
 import { ActivityType, type ActivityContent, type Card } from './types';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, lowerFirst } from 'lodash';
 import { useFieldsService } from '@/composables/services/useFieldsService';
 import { FieldTypes, type Field } from '../fields/types';
 import { useStateStore } from '@/stores/state';
@@ -20,6 +20,7 @@ import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS, SettingsTabs } from '@/components/common/dialogs/types';
 import BaseLabelSelector from '@/components/common/inputs/BaseLabelSelector.vue';
 import { useAuthStore } from '@/stores/auth';
+import { useUsersService } from '@/composables/services/useUsersService';
 
 const props = defineProps<{
   card: Card;
@@ -31,6 +32,7 @@ const cardCopy = ref<Card>(cloneDeep(props.card));
 const fields = ref<Field[]>([]);
 const comment = ref<Content>();
 const isCommentEmpty = ref<boolean>();
+const { getUserFullName } = useUsersService();
 const cardsService = useCardsService();
 const cardActivitiesService = useCardActivitiesService();
 const projectUsersService = useProjectUsersService();
@@ -40,6 +42,7 @@ const snackbar = useSnackbarStore();
 const stateStore = useStateStore();
 const { isInfoDrawerOpen } = storeToRefs(stateStore);
 const dialog = useDialogStore();
+const router = useRouter();
 
 const { mutateAsync: updateCard, isPending: isUpdating } =
   cardsService.useUpdateCardMutation();
@@ -303,12 +306,21 @@ function openSettingsDialog(activeTab: SettingsTabs) {
           </div>
         </div>
 
-        <template v-if="cardCopy.parent">
-          <div class="flex">
-            <v-icon>mdi-arrow-up</v-icon>
-            <span>{{ cardCopy.parent.title }}</span>
-          </div>
-        </template>
+        <!-- ~ Parent -->
+        <div
+          v-if="cardCopy.parent"
+          class="d-flex ga-1 align-center text-caption"
+        >
+          <span>
+            Sub-{{ lowerFirst(cardCopy.type.name) }} of
+            <span
+              class="clickable-span"
+              @click="router.push('/pm/card/' + cardCopy.parent!.id)"
+            >
+              {{ cardCopy.parent!.title }}
+            </span>
+          </span>
+        </div>
 
         <div class="mt-8">
           <base-editor-input
@@ -319,12 +331,50 @@ function openSettingsDialog(activeTab: SettingsTabs) {
         </div>
         <v-divider class="my-8" />
 
+        <!-- ~ Children -->
         <template v-if="cardCopy.children.length !== 0">
-          <ul class="px-8">
-            <li v-for="card in cardCopy.children" :key="card.id">
-              {{ card.title }}
-            </li>
-          </ul>
+          <v-list class="user-select-none">
+            <v-list-item
+              v-for="child in cardCopy.children"
+              :key="child.id"
+              rounded="md"
+              @click="router.push('/pm/card/' + child.id)"
+            >
+              <!-- ~ Title -->
+              <v-list-item-title>
+                {{ child.title }}
+              </v-list-item-title>
+
+              <template #append>
+                <div class="d-flex ga-2 align-center">
+                  <!-- ~ Users -->
+                  <div v-if="child.users.length > 0">
+                    <base-avatar
+                      v-for="user in child.users"
+                      :key="user.id"
+                      :photo="user.photo"
+                      :text="getUserFullName(user)"
+                      class="ms-n1"
+                    />
+                  </div>
+
+                  <!-- ~ Stage -->
+                  <v-chip :color="child.cardLists[0].listStage.color">
+                    <v-icon
+                      size="small"
+                      :color="child.cardLists[0].listStage.color"
+                      start
+                    >
+                      mdi-circle-slice-8
+                    </v-icon>
+                    <span class="text-caption">
+                      {{ child.cardLists[0].listStage.name }}
+                    </span>
+                  </v-chip>
+                </div>
+              </template>
+            </v-list-item>
+          </v-list>
           <v-divider class="my-8" />
         </template>
 
@@ -507,6 +557,11 @@ function openSettingsDialog(activeTab: SettingsTabs) {
 .base-card-content {
   width: 650px;
   max-width: 100%;
+}
+
+.clickable-span {
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .field-label {
