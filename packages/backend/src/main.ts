@@ -14,6 +14,7 @@ import { getQueueToken } from "@nestjs/bull";
 import { createBullBoard } from "@bull-board/api";
 import { BullAdapter } from "@bull-board/api/bullAdapter";
 import { ConfigService } from "@nestjs/config";
+import { contentParser } from "fastify-multer";
 
 async function bootstrap() {
     const logger = new Logger("main.ts");
@@ -35,6 +36,8 @@ async function bootstrap() {
 
     // Add Global Validation Pipe
     app.useGlobalPipes(new ValidationPipe());
+
+    app.register(contentParser);
 
     await SwaggerModule.loadPluginMetadata(metadata);
     const config = new DocumentBuilder()

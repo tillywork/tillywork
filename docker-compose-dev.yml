@@ -14,9 +14,13 @@ services:
     depends_on:
       - db
       - redis
+    volumes:
+      - tillywork:/app/uploads
 
   db:
     image: postgres:16.3-bullseye
+    ports:
+      - '5432:5432'
     volumes:
       - tillywork:/var/lib/postgresql/data
     environment:

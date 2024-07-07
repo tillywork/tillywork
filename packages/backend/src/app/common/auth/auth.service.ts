@@ -27,10 +27,14 @@ export class AuthService {
         private projectUsersService: ProjectUsersService
     ) {}
 
-    async login(user: User): Promise<string> {
+    async login({ user }: { user: User }): Promise<string> {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password, ...userWithoutPassword } = user;
-        const payload = { ...userWithoutPassword, sub: user.id };
+
+        const payload = {
+            ...userWithoutPassword,
+            sub: user.id,
+        };
         return this.jwtService.sign(payload);
     }
 
@@ -100,7 +104,9 @@ export class AuthService {
             ],
         });
 
-        const accessToken = await this.login(createdUser);
+        const accessToken = await this.login({
+            user: createdUser,
+        });
 
         return { ...createdUser, accessToken };
     }
@@ -135,7 +141,9 @@ export class AuthService {
             role: "admin",
         });
 
-        const accessToken = await this.login(createdUser);
+        const accessToken = await this.login({
+            user: createdUser,
+        });
 
         return { ...createdUser, accessToken };
     }

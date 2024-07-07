@@ -102,7 +102,7 @@ export default {
 <template>
   <v-card
     class="items border-thin overflow-scroll"
-    width="200"
+    width="230"
     max-height="305"
   >
     <v-list class="pb-1" ref="suggestionsList">
@@ -116,12 +116,12 @@ export default {
             <template #prepend>
               <v-icon size="14" :icon="item.icon" />
             </template>
-            <v-list-item-title class="text-body-2">
+            <v-list-item-title class="text-caption">
               {{ item.title }}
             </v-list-item-title>
-            <v-list-item-subtitle>
-              {{ item.shortcut }}
-            </v-list-item-subtitle>
+            <template #append v-if="item.shortcut">
+              <v-code class="text-xs">{{ item.shortcut }}</v-code>
+            </template>
           </v-list-item>
         </template>
       </template>
@@ -132,7 +132,7 @@ export default {
 
 <style lang="scss">
 .v-list-item__prepend > .v-icon ~ .v-list-item__spacer {
-  width: 10px;
+  width: 10px !important;
 }
 .v-list-item {
   scroll-margin-top: 8px;

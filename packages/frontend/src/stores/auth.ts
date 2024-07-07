@@ -20,6 +20,10 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
+    decodeToken(token: string): any {
+      return jwtDecode(token);
+    },
+
     /**
      * Sets the user object
      * for display on UI
@@ -38,9 +42,7 @@ export const useAuthStore = defineStore('auth', {
     setToken(token: string) {
       this.token = token;
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const decodedToken: any = jwtDecode(token);
-      const { project, ...user } = decodedToken;
+      const { project, ...user } = this.decodeToken(token);
       this.setUser(user);
       this.setProject(project);
     },
