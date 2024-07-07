@@ -209,7 +209,7 @@ function handleDeleteCard(card: Card) {
     dialog: DIALOGS.CONFIRM,
     data: {
       title: 'Confirm',
-      message: `Are you sure you want to delete ${card.title.toLocaleLowerCase()}?`,
+      message: `Are you sure you want to delete ${card.title}?`,
       onConfirm: () =>
         deleteCard(card.id)
           .then(() => {
