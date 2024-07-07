@@ -113,6 +113,8 @@ watch(debouncedDescription, () => {
 
 const cardListStage = ref(cardCopy.value.cardLists[0].listStage);
 
+const isChildrenToggled = ref(false);
+
 function updateTitle() {
   const newTitle = cardTitle.value.trim();
   if (newTitle !== '' && newTitle !== props.card.title) {
@@ -345,8 +347,34 @@ function openDescriptionFileDialog() {
         <v-divider class="my-8" />
 
         <!-- ~ Children -->
-        <template v-if="cardCopy.children.length !== 0">
-          <v-list class="user-select-none">
+        <div class="text-caption align-center d-flex ga-1 user-select-none">
+          <div
+            class="cursor-pointer"
+            @click="isChildrenToggled = !isChildrenToggled"
+          >
+            <v-icon v-if="isChildrenToggled">mdi-triangle-small-up</v-icon>
+            <v-icon v-else>mdi-triangle-small-down</v-icon>
+            <span>Sub-{{ lowerFirst(cardCopy.type.name) + 's' }}</span>
+          </div>
+
+          <v-spacer />
+          <base-icon-btn
+            icon="mdi-plus"
+            density="compact"
+            class="mr-3"
+            @click="
+              dialog.openDialog({
+                dialog: DIALOGS.CREATE_CARD,
+                data: {
+                  type: cardCopy.type,
+                  parent: cardCopy,
+                },
+              })
+            "
+          />
+        </div>
+        <template v-if="cardCopy.children.length > 0">
+          <v-list v-if="isChildrenToggled" class="user-select-none">
             <v-list-item
               v-for="child in cardCopy.children"
               :key="child.id"
@@ -388,8 +416,8 @@ function openDescriptionFileDialog() {
               </template>
             </v-list-item>
           </v-list>
-          <v-divider class="my-8" />
         </template>
+        <v-divider class="my-8" />
 
         <v-card>
           <v-card-subtitle class="text-body-2 ps-1">Activity</v-card-subtitle>

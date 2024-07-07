@@ -41,6 +41,7 @@ export interface CreateCardDto {
   dueAt?: string;
   users?: User[];
   listStage?: ListStage;
+  parent?: Card;
 }
 
 export enum ActivityType {
