@@ -330,12 +330,9 @@ function openDescriptionFileDialog() {
         >
           <span>
             Sub-{{ lowerFirst(cardCopy.type.name) }} of
-            <span
-              class="clickable-span"
-              @click="router.push('/pm/card/' + cardCopy.parent!.id)"
-            >
+            <router-link :to="'/pm/card/' + cardCopy.parent!.id">
               {{ cardCopy.parent!.title }}
-            </span>
+            </router-link>
           </span>
         </div>
 
