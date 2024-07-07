@@ -105,6 +105,16 @@ watch(debouncedTitle, () => {
   updateTitle();
 });
 
+watch(
+  () => props.card,
+  (v) => {
+    if (v) {
+      cardCopy.value = cloneDeep(v);
+      cardTitle.value = cardCopy.value.title;
+    }
+  }
+);
+
 const cardDescription = ref(cardCopy.value.description);
 const debouncedDescription = useDebounce(cardDescription, 2000);
 watch(debouncedDescription, () => {
