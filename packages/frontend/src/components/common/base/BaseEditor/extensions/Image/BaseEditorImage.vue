@@ -6,6 +6,7 @@ const props = defineProps(nodeViewProps);
 const menu = ref(false);
 const imageWidth = ref<number>(props.node.attrs.width);
 const imageHeight = ref<number>(props.node.attrs.height);
+const imageWrapper = ref<HTMLElement>();
 
 function showMenu() {
   menu.value = true;
@@ -44,11 +45,13 @@ watch([imageWidth, imageHeight], ([newWidth, newHeight]) => {
       :onmouseleave="hideMenu"
       draggable="true"
       data-drag-handle
+      ref="imageWrapper"
     >
       <base-resizable
-        :disabled="!menu || !editor.isEditable"
         v-model:width="imageWidth"
         v-model:height="imageHeight"
+        :disabled="!menu || !editor.isEditable"
+        :max-width="imageWrapper?.clientWidth"
       >
         <v-img
           v-bind="node.attrs"

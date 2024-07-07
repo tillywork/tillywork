@@ -6,10 +6,12 @@ const height = defineModel<number>('height');
 
 const props = defineProps<{
   disabled?: boolean;
+  maxWidth?: number;
 }>();
 
 const resizing = ref<'right' | 'left' | null>(null);
 const resizableElement = ref<VSheet | null>(null);
+const minWidth = ref(150);
 
 function initResize(direction: 'right' | 'left') {
   if (props.disabled) {
@@ -27,41 +29,21 @@ function resize(event: MouseEvent) {
   }
 
   const boundingRect = resizableElement.value.$el.getBoundingClientRect();
-  // Maintain aspect ratio
   const ratio = boundingRect.width / boundingRect.height;
+  let deltaX: number = boundingRect.width;
 
   if (resizing.value === 'left') {
-    const deltaX = boundingRect.right - event.clientX + 5;
-    const deltaY = event.clientY - boundingRect.top;
-
-    if (!width.value) {
-      width.value = deltaX;
-    }
-    if (!height.value) {
-      height.value = deltaY;
-    }
-
-    // Maintain aspect ratio
-    const ratio = width.value / height.value;
-    if (deltaX / deltaY > ratio) {
-      width.value = deltaX;
-      height.value = deltaX / ratio;
-    } else {
-      height.value = deltaY;
-      width.value = deltaY * ratio;
-    }
+    deltaX = boundingRect.right - event.clientX + 5;
   } else if (resizing.value === 'right') {
-    const deltaX = event.clientX - boundingRect.left + 5;
-    const deltaY = event.clientY - boundingRect.top;
-
-    if (deltaX / deltaY > ratio) {
-      width.value = deltaX;
-      height.value = deltaX / ratio;
-    } else {
-      height.value = deltaY;
-      width.value = deltaY * ratio;
-    }
+    deltaX = event.clientX - boundingRect.left + 5;
   }
+
+  const newWidth = Math.max(
+    Math.min(deltaX, props.maxWidth ?? deltaX),
+    minWidth.value
+  );
+  width.value = newWidth;
+  height.value = newWidth / ratio;
 }
 
 function stopResize() {
@@ -69,6 +51,12 @@ function stopResize() {
   window.removeEventListener('mousemove', resize);
   window.removeEventListener('mouseup', stopResize);
 }
+
+onMounted(() => {
+  if (!width.value) {
+    width.value = resizableElement.value?.$el.getBoundingClientRect().width;
+  }
+});
 </script>
 
 <template>
@@ -79,14 +67,16 @@ function stopResize() {
       class="resizable position-relative"
       :width="width ?? '100%'"
       :height
+      :min-width="minWidth"
+      :max-width="maxWidth"
     >
       <template v-if="resizing || !disabled">
         <div
-          class="resizer resizer-right"
+          class="resizer resizer-right elevation-6"
           @mousedown.stop.prevent="initResize('right')"
         ></div>
         <div
-          class="resizer resizer-left"
+          class="resizer resizer-left elevation-6"
           @mousedown.stop.prevent="initResize('left')"
         ></div>
       </template>
