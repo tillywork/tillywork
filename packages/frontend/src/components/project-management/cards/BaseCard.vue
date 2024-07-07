@@ -353,12 +353,32 @@ function openDescriptionFileDialog() {
         <v-divider class="my-8" />
 
         <!-- ~ Children -->
-        <div class="text-caption align-center d-flex ga-1 user-select-none">
+        <div class="text-caption align-center d-flex user-select-none ga-1">
           <div class="cursor-pointer" @click="stateStore.toggleChildCards">
             <v-icon v-if="areChildCardsExpanded">mdi-triangle-small-up</v-icon>
             <v-icon v-else>mdi-triangle-small-down</v-icon>
             <span>Sub-{{ lowerFirst(cardCopy.type.name) + 's' }}</span>
           </div>
+
+          <v-progress-circular
+            :model-value="
+              (cardCopy.children.filter(
+                (child) => child.cardLists[0].listStage.isCompleted
+              ).length /
+                cardCopy.children.length) *
+              100
+            "
+            size="16"
+            width="3"
+            class="ml-1"
+          />
+          <span>{{
+            cardCopy.children.filter(
+              (child) => child.cardLists[0].listStage.isCompleted
+            ).length +
+            '/' +
+            cardCopy.children.length
+          }}</span>
 
           <v-spacer />
           <base-icon-btn
