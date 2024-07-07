@@ -41,7 +41,7 @@ const listStagesService = useListStagesService();
 const { useFieldsQuery } = useFieldsService();
 const snackbar = useSnackbarStore();
 const stateStore = useStateStore();
-const { isInfoDrawerOpen } = storeToRefs(stateStore);
+const { areChildCardsExpanded, isInfoDrawerOpen } = storeToRefs(stateStore);
 const dialog = useDialogStore();
 const router = useRouter();
 
@@ -122,8 +122,6 @@ watch(debouncedDescription, () => {
 });
 
 const cardListStage = ref(cardCopy.value.cardLists[0].listStage);
-
-const isChildrenToggled = ref(false);
 
 function updateTitle() {
   const newTitle = cardTitle.value.trim();
@@ -355,11 +353,8 @@ function openDescriptionFileDialog() {
 
         <!-- ~ Children -->
         <div class="text-caption align-center d-flex ga-1 user-select-none">
-          <div
-            class="cursor-pointer"
-            @click="isChildrenToggled = !isChildrenToggled"
-          >
-            <v-icon v-if="isChildrenToggled">mdi-triangle-small-up</v-icon>
+          <div class="cursor-pointer" @click="stateStore.toggleChildCards">
+            <v-icon v-if="areChildCardsExpanded">mdi-triangle-small-up</v-icon>
             <v-icon v-else>mdi-triangle-small-down</v-icon>
             <span>Sub-{{ lowerFirst(cardCopy.type.name) + 's' }}</span>
           </div>
@@ -381,7 +376,7 @@ function openDescriptionFileDialog() {
           />
         </div>
         <template v-if="cardCopy.children.length > 0">
-          <v-list v-if="isChildrenToggled" class="user-select-none">
+          <v-list v-if="areChildCardsExpanded" class="user-select-none">
             <v-list-item
               v-for="child in cardCopy.children"
               :key="child.id"
