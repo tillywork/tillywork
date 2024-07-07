@@ -102,6 +102,7 @@ export const FileHandler = Extension.create<FileHandlerOptions>({
             drop: (view: EditorView, event: DragEvent) => {
               const files = Array.from(event.dataTransfer?.files || []);
               if (files.length) {
+                event.preventDefault();
                 uploadFiles(view, files);
                 return true;
               }

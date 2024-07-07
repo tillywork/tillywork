@@ -1,6 +1,7 @@
 import { Node, nodeInputRule } from '@tiptap/core';
 import { VueNodeViewRenderer, mergeAttributes } from '@tiptap/vue-3';
 import BaseEditorFile from './BaseEditorFile.vue';
+import { Plugin, PluginKey } from '@tiptap/pm/state';
 
 export interface FileOptions {
   inline: boolean;
@@ -100,5 +101,68 @@ export const File = Node.create<FileOptions>({
 
   addNodeView() {
     return VueNodeViewRenderer(BaseEditorFile);
+  },
+
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        key: new PluginKey('file'),
+        props: {
+          handleDOMEvents: {
+            copy(view, event) {
+              const { state } = view;
+              const { selection } = state;
+              const selectedNode = (selection as any).node;
+
+              if (selectedNode && selectedNode.type.name === 'file') {
+                const clipboardData = event.clipboardData;
+                if (!clipboardData) {
+                  return false;
+                }
+
+                clipboardData.clearData();
+                clipboardData.setData(
+                  'application/x-prosemirror',
+                  JSON.stringify({
+                    type: 'file',
+                    attrs: selectedNode.attrs,
+                  })
+                );
+                event.preventDefault();
+              }
+
+              return false;
+            },
+            paste(view, event) {
+              const clipboardData = event.clipboardData;
+              if (!clipboardData) {
+                return false;
+              }
+
+              const content = clipboardData.getData(
+                'application/x-prosemirror'
+              );
+
+              if (content) {
+                const fileNode = JSON.parse(content);
+                if (fileNode.type === 'file') {
+                  const { state, dispatch } = view;
+                  const { tr, schema } = state;
+                  const node = schema.nodes.file.create(fileNode.attrs);
+                  const insertPosition = state.selection.$to.pos;
+
+                  const transaction = tr.insert(insertPosition, node);
+                  dispatch(transaction);
+                  event.preventDefault();
+                  return true;
+                }
+              }
+
+              return false;
+            },
+          },
+        },
+      }),
+    ];
   },
 });
