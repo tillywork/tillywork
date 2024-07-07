@@ -44,9 +44,7 @@ export class WorkspacesController {
 
         const where: FindOptionsWhere<Workspace> = {
             project: {
-                users: {
-                    user,
-                },
+                id: user.project.id,
             },
         };
 

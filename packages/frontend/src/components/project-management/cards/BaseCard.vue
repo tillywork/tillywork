@@ -33,6 +33,7 @@ const fields = ref<Field[]>([]);
 const comment = ref<Content>();
 const isCommentEmpty = ref<boolean>();
 const { getUserFullName } = useUsersService();
+const descriptionInput = ref();
 const cardsService = useCardsService();
 const cardActivitiesService = useCardActivitiesService();
 const projectUsersService = useProjectUsersService();
@@ -256,6 +257,10 @@ function openSettingsDialog(activeTab: SettingsTabs) {
     },
   });
 }
+
+function openDescriptionFileDialog() {
+  descriptionInput.value.openFileDialog();
+}
 </script>
 
 <template>
@@ -275,9 +280,9 @@ function openSettingsDialog(activeTab: SettingsTabs) {
         location="top"
       />
     </template>
-    <div class="base-card-content-wrapper pa-md-12 pa-6 flex-fill">
+    <div class="base-card-content-wrapper pa-md-12 pa-6 flex-fill align-start">
       <div class="base-card-content mx-auto">
-        <div class="d-flex align-top">
+        <div class="d-flex align-start">
           <base-editor-input
             v-model="cardTitle"
             placeholder="Task title"
@@ -325,8 +330,16 @@ function openSettingsDialog(activeTab: SettingsTabs) {
         <div class="mt-8">
           <base-editor-input
             v-model:json="cardDescription"
+            ref="descriptionInput"
             placeholder="Enter description.. (/ for commands)"
             editable
+          />
+        </div>
+        <div class="mt-8">
+          <base-icon-btn
+            icon="mdi-paperclip"
+            rounded="circle"
+            @click="openDescriptionFileDialog"
           />
         </div>
         <v-divider class="my-8" />

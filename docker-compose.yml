@@ -12,6 +12,8 @@ services:
     depends_on:
       - db
       - redis
+    volumes:
+      - tillywork:/app/uploads
 
   db:
     image: postgres:16.3-bullseye

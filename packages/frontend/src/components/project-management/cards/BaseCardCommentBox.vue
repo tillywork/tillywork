@@ -4,6 +4,7 @@ import { type Content } from '@tiptap/vue-3';
 
 const value = defineModel<Content>();
 const isEmpty = defineModel<boolean>('empty');
+const baseEditor = ref();
 
 defineProps<{
   placeholder?: string;
@@ -14,19 +15,30 @@ const emit = defineEmits(['submit']);
 function handleSubmit() {
   emit('submit', value.value);
 }
+
+function openBaseEditorFileDialog() {
+  baseEditor.value.openFileDialog();
+}
 </script>
 
 <template>
   <v-card rounded="md" border="thin" class="mt-6">
     <v-card-text>
       <base-editor-input
+        ref="baseEditor"
         v-model:json="value"
         editable
         :placeholder
         v-model:empty="isEmpty"
       />
     </v-card-text>
-    <v-card-actions class="justify-end px-4">
+    <v-card-actions class="align-start px-4">
+      <base-icon-btn
+        icon="mdi-paperclip"
+        rounded="circle"
+        @click="openBaseEditorFileDialog"
+      />
+      <v-spacer />
       <base-icon-btn
         icon="mdi-send-variant"
         color="surface-variant"
