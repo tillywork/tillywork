@@ -154,6 +154,10 @@ function onDragStart() {
   }
 }
 
+function onDragEnd() {
+  isDragging.value = false;
+}
+
 function onDragUpdate(event: any) {
   const { newIndex } = event;
   isDragging.value = false;
@@ -312,6 +316,7 @@ watchEffect(() => {
         v-model="cards"
         :move="onDragMove"
         @start="onDragStart"
+        @end="onDragEnd"
         @add="onDragAdd"
         @update="onDragUpdate"
         item-key="id"
