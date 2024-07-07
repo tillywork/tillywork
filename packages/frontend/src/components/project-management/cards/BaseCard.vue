@@ -303,10 +303,10 @@ function openSettingsDialog(activeTab: SettingsTabs) {
           </div>
         </div>
 
-        <template v-if="cardCopy.parentCard">
+        <template v-if="cardCopy.parent">
           <div class="flex">
             <v-icon>mdi-arrow-up</v-icon>
-            <span>{{ cardCopy.parentCard.title }}</span>
+            <span>{{ cardCopy.parent.title }}</span>
           </div>
         </template>
 
@@ -319,9 +319,9 @@ function openSettingsDialog(activeTab: SettingsTabs) {
         </div>
         <v-divider class="my-8" />
 
-        <template v-if="cardCopy.childCards.length !== 0">
+        <template v-if="cardCopy.children.length !== 0">
           <ul class="px-8">
-            <li v-for="card in cardCopy.childCards" :key="card.id">
+            <li v-for="card in cardCopy.children" :key="card.id">
               {{ card.title }}
             </li>
           </ul>

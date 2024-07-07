@@ -18,5 +18,5 @@ export class CreateCardDto {
     users?: User[];
     createdBy: number;
 
-    parentCardId?: number;
+    parentId?: number;
 }

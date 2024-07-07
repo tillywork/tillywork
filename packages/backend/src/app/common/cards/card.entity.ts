@@ -60,9 +60,9 @@ export class Card {
     @DeleteDateColumn({ type: "timestamp" })
     deletedAt: Date;
 
-    @ManyToOne(() => Card, (card) => card.childCards)
-    @JoinColumn({ name: "parentCardId" })
-    parentCard?: Relation<Card>;
-    @OneToMany(() => Card, (card) => card.parentCard)
-    childCards: Relation<Card[]>;
+    @ManyToOne(() => Card, (card) => card.children)
+    @JoinColumn({ name: "parentId" })
+    parent?: Relation<Card>;
+    @OneToMany(() => Card, (card) => card.parent)
+    children: Relation<Card[]>;
 }

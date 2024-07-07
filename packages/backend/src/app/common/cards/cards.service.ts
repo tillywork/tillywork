@@ -81,8 +81,8 @@ export class CardsService {
                 "cardLists",
                 "cardLists.listStage",
                 "users",
-                "parentCard",
-                "childCards",
+                "parent",
+                "children",
             ],
         });
         if (!card) {
