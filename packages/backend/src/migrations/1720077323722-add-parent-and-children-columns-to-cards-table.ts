@@ -14,7 +14,7 @@ export class AddParentAndChildrenColumnsToCardsTable1720077323722
             "card",
             new TableColumn({
                 name: "parentId",
-                type: "int",
+                type: "bigint",
                 isNullable: true,
             })
         );
