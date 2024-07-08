@@ -631,11 +631,6 @@ function openDescriptionFileDialog() {
   max-width: 100%;
 }
 
-.clickable-span {
-  cursor: pointer;
-  text-decoration: underline;
-}
-
 .field-label {
   width: 100px;
   flex-shrink: 0;
