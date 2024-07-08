@@ -16,6 +16,7 @@ import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import type { QueryFilter } from '../../filters/types';
 import { useDialogStore } from '@/stores/dialog';
+import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 
 const emit = defineEmits([
   'toggle:group',
@@ -357,31 +358,6 @@ watchEffect(() => {
                 >
                   {{ card.title }}
                 </v-card-title>
-
-                <!-- ~ Progress -->
-                <div
-                  v-if="card.children.length > 0"
-                  class="d-flex align-center ga-1 ms-2 text-caption"
-                >
-                  <v-progress-circular
-                    :model-value="
-                      (card.children.filter(
-                        (child) => child.cardLists[0].listStage.isCompleted
-                      ).length /
-                        card.children.length) *
-                      100
-                    "
-                    size="16"
-                    width="3"
-                  />
-                  <span>{{
-                    card.children.filter(
-                      (child) => child.cardLists[0].listStage.isCompleted
-                    ).length +
-                    '/' +
-                    card.children.length
-                  }}</span>
-                </div>
               </div>
 
               <template #append>
@@ -416,6 +392,17 @@ watchEffect(() => {
                 "
                 label="Set due date"
                 @click.prevent
+              />
+
+              <v-spacer />
+              <!-- Progress -->
+              <base-card-children-progress
+                v-if="card.children.length > 0"
+                :card
+                border="thin"
+                density="compact"
+                style="padding: 2px !important"
+                class="text-caption mb-1"
               />
             </v-card-actions>
           </v-card>

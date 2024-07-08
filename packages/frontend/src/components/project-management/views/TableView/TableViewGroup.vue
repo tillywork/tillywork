@@ -24,6 +24,7 @@ import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import type { QueryFilter } from '../../filters/types';
 import { useDialogStore } from '@/stores/dialog';
+import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 
 const emit = defineEmits([
   'toggle:group',
@@ -503,32 +504,18 @@ watchEffect(() => {
                           {{ row.original.title }}
                         </span>
 
-                        <!-- ~ Progress -->
-                        <div
+                        <!-- Progress -->
+                        <base-card-children-progress
                           v-if="row.original.children.length > 0"
-                          class="d-flex align-center ga-1 ms-2"
-                        >
-                          <v-progress-circular
-                            :model-value="
-                              (row.original.children.filter(
-                                (child) =>
-                                  child.cardLists[0].listStage.isCompleted
-                              ).length /
-                                row.original.children.length) *
-                              100
-                            "
-                            size="16"
-                            width="3"
-                          />
-                          <span>{{
-                            row.original.children.filter(
-                              (child) =>
-                                child.cardLists[0].listStage.isCompleted
-                            ).length +
-                            '/' +
-                            row.original.children.length
-                          }}</span>
-                        </div>
+                          :card="row.original"
+                          border="thin"
+                          rounded="pill"
+                          class="text-caption ms-2"
+                          style="
+                            padding-top: 2px !important;
+                            padding-bottom: 2px !important;
+                          "
+                        />
                       </v-card>
                     </template>
                     <template v-else-if="cell.column.columnDef.id === 'dueAt'">

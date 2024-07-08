@@ -20,8 +20,9 @@ import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS, SettingsTabs } from '@/components/common/dialogs/types';
 import BaseLabelSelector from '@/components/common/inputs/BaseLabelSelector.vue';
 import { useAuthStore } from '@/stores/auth';
-import { useUsersService } from '@/composables/services/useUsersService';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
+import BaseCardChildrenProgress from './BaseCardChildrenProgress.vue';
+import BaseCardChip from './BaseCardChip.vue';
 
 const props = defineProps<{
   card: Card;
@@ -33,7 +34,6 @@ const cardCopy = ref<Card>(cloneDeep(props.card));
 const fields = ref<Field[]>([]);
 const comment = ref<Content>();
 const isCommentEmpty = ref<boolean>();
-const { getUserFullName } = useUsersService();
 const descriptionInput = ref();
 const cardsService = useCardsService();
 const cardActivitiesService = useCardActivitiesService();
@@ -44,7 +44,6 @@ const snackbar = useSnackbarStore();
 const stateStore = useStateStore();
 const { areChildCardsExpanded, isInfoDrawerOpen } = storeToRefs(stateStore);
 const dialog = useDialogStore();
-const router = useRouter();
 
 const { mutateAsync: updateCard, isPending: isUpdating } =
   cardsService.useUpdateCardMutation();
@@ -112,6 +111,7 @@ watch(
     if (v) {
       cardCopy.value = cloneDeep(v);
       cardTitle.value = cardCopy.value.title;
+      cardListStage.value = cardCopy.value.cardLists[0].listStage;
     }
   }
 );
@@ -158,9 +158,9 @@ function updateDescription() {
   }
 }
 
-function updateCardAssignees(assignees: User[]) {
-  cardCopy.value.users = assignees;
-  updateCard(cardCopy.value).then(() => {
+function updateCardAssignees(card: Card, assignees: User[]) {
+  card.users = assignees;
+  updateCard(card).then(() => {
     snackbar.showSnackbar({
       message: 'Task assignees updated.',
       color: 'success',
@@ -240,7 +240,6 @@ function updateCardListStage(card: Card, listStage: ListStage) {
 }
 
 function updateFieldValue({ field, v }: { field: Field; v: any }) {
-  console.log(v);
   cardCopy.value = {
     ...cardCopy.value,
     data: {
@@ -322,17 +321,13 @@ function openDescriptionFileDialog() {
           </div>
         </div>
 
-        <!-- ~ Parent -->
+        <!-- Parent -->
         <div
           v-if="cardCopy.parent"
           class="d-flex ga-1 align-center text-caption"
         >
-          <span>
-            Sub-{{ lowerFirst(cardCopy.type.name) }} of
-            <router-link :to="'/pm/card/' + cardCopy.parent!.id">
-              {{ cardCopy.parent!.title }}
-            </router-link>
-          </span>
+          Sub-{{ lowerFirst(cardCopy.type.name) }} of
+          <base-card-chip :card="cardCopy.parent" class="ms-1" />
         </div>
 
         <div class="mt-8">
@@ -350,81 +345,74 @@ function openDescriptionFileDialog() {
             @click="openDescriptionFileDialog"
           />
         </div>
-        <v-divider class="my-8" />
 
-        <!-- ~ Children -->
-        <div class="text-caption align-center d-flex user-select-none ga-1">
-          <div class="cursor-pointer" @click="stateStore.toggleChildCards">
-            <v-icon v-if="areChildCardsExpanded">mdi-triangle-small-up</v-icon>
-            <v-icon v-else>mdi-triangle-small-down</v-icon>
-            <span>Sub-{{ lowerFirst(cardCopy.type.name) + 's' }}</span>
+        <!-- Children -->
+        <div class="text-caption user-select-none mt-4">
+          <template v-if="!cardCopy.children.length">
+            <v-btn
+              class="text-none"
+              size="small"
+              prepend-icon="mdi-plus"
+              variant="text"
+              color="default"
+              @click="
+                dialog.openDialog({
+                  dialog: DIALOGS.CREATE_CARD,
+                  data: {
+                    type: cardCopy.type,
+                    parent: cardCopy,
+                  },
+                })
+              "
+            >
+              Add sub {{ lowerFirst(cardCopy.type.name) + 's' }}
+            </v-btn>
+          </template>
+          <div
+            class="cursor-pointer d-flex align-center pb-1"
+            @click="stateStore.toggleChildCards"
+            v-else
+          >
+            <v-icon
+              :icon="
+                areChildCardsExpanded
+                  ? 'mdi-triangle-small-down'
+                  : 'mdi-triangle-small-up'
+              "
+              size="22"
+              style="margin-top: -2px"
+            />
+            <span class="ms-1"
+              >Sub {{ lowerFirst(cardCopy.type.name) + 's' }}</span
+            >
+            <base-card-children-progress :card="cardCopy" class="ms-2" />
+            <v-spacer />
+            <base-icon-btn
+              icon="mdi-plus"
+              density="comfortable"
+              @click.stop="
+                dialog.openDialog({
+                  dialog: DIALOGS.CREATE_CARD,
+                  data: {
+                    type: cardCopy.type,
+                    parent: cardCopy,
+                  },
+                })
+              "
+            />
           </div>
 
-          <template v-if="cardCopy.children.length > 0">
-            <v-progress-circular
-              :model-value="
-                (cardCopy.children.filter(
-                  (child) => child.cardLists[0].listStage.isCompleted
-                ).length /
-                  cardCopy.children.length) *
-                100
-              "
-              size="16"
-              width="3"
-              class="ml-1"
-            />
-            <span>{{
-              cardCopy.children.filter(
-                (child) => child.cardLists[0].listStage.isCompleted
-              ).length +
-              '/' +
-              cardCopy.children.length
-            }}</span>
-          </template>
+          <template v-if="areChildCardsExpanded">
+            <v-divider v-if="cardCopy.children.length > 0" />
 
-          <v-spacer />
-          <base-icon-btn
-            icon="mdi-plus"
-            density="compact"
-            class="mr-3"
-            @click="
-              dialog.openDialog({
-                dialog: DIALOGS.CREATE_CARD,
-                data: {
-                  type: cardCopy.type,
-                  parent: cardCopy,
-                },
-              })
-            "
-          />
-        </div>
-        <template v-if="cardCopy.children.length > 0">
-          <v-list v-if="areChildCardsExpanded" class="user-select-none">
-            <v-list-item
-              v-for="child in cardCopy.children"
-              :key="child.id"
-              rounded="md"
-              :to="'/pm/card/' + child.id"
-            >
-              <!-- ~ Title -->
-              <v-list-item-title>
-                {{ child.title }}
-              </v-list-item-title>
-
-              <template #append>
-                <div class="d-flex ga-2 align-center">
-                  <!-- ~ Users -->
-                  <div v-if="child.users.length > 0">
-                    <base-avatar
-                      v-for="user in child.users"
-                      :key="user.id"
-                      :photo="user.photo"
-                      :text="getUserFullName(user)"
-                      class="ms-n1"
-                    />
-                  </div>
-
-                  <!-- ~ Stage -->
+            <v-list class="user-select-none" :lines="false" nav>
+              <v-list-item
+                v-for="child in cardCopy.children"
+                :key="child.id"
+                :to="'/pm/card/' + child.id"
+              >
+                <!-- Title -->
+                <v-list-item-title>
                   <list-stage-selector
                     v-model="child.cardLists[0].listStage"
                     :listStages="listStagesQuery.data.value ?? []"
@@ -432,12 +420,27 @@ function openDescriptionFileDialog() {
                     @update:model-value="
                       (listStage) => updateCardListStage(child, listStage)
                     "
+                    theme="icon"
                   />
-                </div>
-              </template>
-            </v-list-item>
-          </v-list>
-        </template>
+                  {{ child.title }}
+                </v-list-item-title>
+
+                <template #append>
+                  <div class="d-flex ga-2 align-center">
+                    <!-- Users -->
+                    <base-user-selector
+                      v-model="child.users"
+                      :users="users ?? []"
+                      size="x-small"
+                      @update:model-value="(v: User[]) => updateCardAssignees(child, v)"
+                    />
+                  </div>
+                </template>
+              </v-list-item>
+            </v-list>
+          </template>
+        </div>
+
         <v-divider class="my-8" />
 
         <v-card>
@@ -455,7 +458,12 @@ function openDescriptionFileDialog() {
         </v-card>
       </div>
     </div>
-    <v-navigation-drawer v-model="isInfoDrawerOpen" width="350" location="end">
+    <v-navigation-drawer
+      v-model="isInfoDrawerOpen"
+      width="350"
+      location="end"
+      :key="cardCopy.id"
+    >
       <v-card>
         <div class="pa-4 d-flex align-center">
           Properties
@@ -483,7 +491,7 @@ function openDescriptionFileDialog() {
             <base-user-selector
               v-model="cardCopy.users"
               :users="users ?? []"
-              @update:model-value="updateCardAssignees"
+              @update:model-value="(v: User[]) => updateCardAssignees(cardCopy, v)"
               label="Assign"
               size="24"
             />
