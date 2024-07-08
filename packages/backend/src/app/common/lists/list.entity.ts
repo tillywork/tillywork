@@ -22,6 +22,9 @@ export class List {
     id: number;
 
     @Column({ type: "varchar", length: 255 })
+    icon: string;
+
+    @Column({ type: "varchar", length: 255 })
     name: string;
 
     @CreateDateColumn({ type: "timestamp" })
