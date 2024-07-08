@@ -376,8 +376,8 @@ function openDescriptionFileDialog() {
             <v-icon
               :icon="
                 areChildCardsExpanded
-                  ? 'mdi-triangle-small-down'
-                  : 'mdi-triangle-small-up'
+                  ? 'mdi-triangle-small-up'
+                  : 'mdi-triangle-small-down'
               "
               size="22"
               style="margin-top: -2px"
