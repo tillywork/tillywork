@@ -166,7 +166,7 @@ function handleUpdateCardOrder(data: {
 </script>
 
 <template>
-  <div class="table-container px-6 position-relative overflow-hidden">
+  <div class="table-container px-6 position-relative overflow-auto">
     <div
       class="table d-flex flex-column my-2"
       :style="`max-height: calc(100vh - 180px${

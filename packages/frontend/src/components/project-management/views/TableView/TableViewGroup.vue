@@ -502,7 +502,7 @@ watchEffect(() => {
                     "
                           @click.prevent
                         />
-                        <span class="line-height-1 ms-2">
+                        <span class="line-height-1 text-truncate ms-2">
                           {{ row.original.title }}
                         </span>
 
@@ -512,6 +512,7 @@ watchEffect(() => {
                           :card="row.original"
                           border="thin"
                           rounded="pill"
+                          min-width="fit-content"
                           class="text-caption ms-2"
                           style="
                             padding-top: 2px !important;

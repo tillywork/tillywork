@@ -355,14 +355,12 @@ watchEffect(() => {
                 />
               </template>
 
-              <div class="d-flex align-center">
-                <v-card-title
-                  class="text-wrap text-body-2"
-                  style="line-height: 1.2"
-                >
-                  {{ card.title }}
-                </v-card-title>
-              </div>
+              <v-card-title
+                class="text-wrap text-body-2"
+                style="line-height: 1.2"
+              >
+                {{ card.title }}
+              </v-card-title>
 
               <template #append>
                 <base-user-selector

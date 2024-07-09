@@ -504,7 +504,7 @@ watchEffect(() => {
                     "
                           @click.prevent
                         />
-                        <span class="line-height-1 ms-2">
+                        <span class="line-height-1 text-truncate ms-2">
                           {{ row.original.title }}
                         </span>
 
@@ -515,6 +515,7 @@ watchEffect(() => {
                           border="thin"
                           rounded="pill"
                           class="text-caption ms-2"
+                          min-width="fit-content"
                           style="
                             padding-top: 2px !important;
                             padding-bottom: 2px !important;

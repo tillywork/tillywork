@@ -74,18 +74,21 @@ const columns = ref<ColumnDef<ListGroup, any>[]>([
     accessorKey: 'title',
     header: 'Title',
     size: 800,
+    minSize: 150,
   },
   {
     id: 'users',
     accessorKey: 'users',
     header: 'Assignee',
     size: 100,
+    minSize: 100,
   },
   {
     id: 'dueAt',
     accessorKey: 'dueAt',
     header: 'Due Date',
     size: 100,
+    minSize: 100,
   },
 ]);
 
