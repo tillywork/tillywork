@@ -36,7 +36,7 @@ function handleToggleChildren() {
           <v-list-item @click="handleToggleCompleted">
             <template #append>
               <v-switch
-                :model-value="view.ignoreCompleted"
+                :model-value="!view.ignoreCompleted"
                 readonly
                 inset
                 hide-details
@@ -44,14 +44,12 @@ function handleToggleChildren() {
                 class="ms-2"
               />
             </template>
-            <v-list-item-title>
-              {{ view.ignoreCompleted ? 'Show' : 'Hide' }} completed
-            </v-list-item-title>
+            <v-list-item-title> Show completed </v-list-item-title>
           </v-list-item>
           <v-list-item @click="handleToggleChildren">
             <template #append>
               <v-switch
-                :model-value="view.ignoreChildren"
+                :model-value="!view.ignoreChildren"
                 readonly
                 inset
                 hide-details
@@ -60,8 +58,7 @@ function handleToggleChildren() {
               />
             </template>
             <v-list-item-title>
-              {{ view.ignoreChildren ? 'Show' : 'Hide' }}
-              sub {{ currentList?.defaultCardType.name.toLowerCase() }}s
+              Show sub {{ currentList?.defaultCardType.name.toLowerCase() }}s
             </v-list-item-title>
           </v-list-item>
         </v-list>
