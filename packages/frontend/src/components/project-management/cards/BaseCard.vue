@@ -74,9 +74,8 @@ const listStagesQuery = listStagesService.useGetListStagesQuery({
   listId: listId.value,
 });
 
-const createActivityMutation = cardActivitiesService.useCreateActivityMutation({
-  cardId: props.card.id,
-});
+const createActivityMutation =
+  cardActivitiesService.useCreateActivityMutation();
 
 const updateCardListMutation = cardsService.useUpdateCardListMutation();
 
@@ -112,6 +111,7 @@ watch(
       cardCopy.value = cloneDeep(v);
       cardTitle.value = cardCopy.value.title;
       cardListStage.value = cardCopy.value.cardLists[0].listStage;
+      cardDescription.value = cardCopy.value.description;
     }
   }
 );
@@ -173,7 +173,7 @@ function createComment(content: ActivityContent) {
   if (!isCommentEmpty.value) {
     createActivityMutation
       .mutateAsync({
-        cardId: props.card.id,
+        cardId: cardCopy.value.id,
         type: ActivityType.COMMENT,
         content,
       })
