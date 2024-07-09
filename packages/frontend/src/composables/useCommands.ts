@@ -10,6 +10,7 @@ import { useStateStore } from '@/stores/state';
 import { useThemeStore } from '@/stores/theme';
 import { useCardTypesService } from './services/useCardTypesService';
 import { useAuthStore } from '@/stores/auth';
+import { leaderKey } from '@/utils/keyboard';
 
 export const useCommands = () => {
   const keys = useMagicKeys();
@@ -141,6 +142,17 @@ export const useCommands = () => {
               activeTab: SettingsTabs.MEMBERS,
             },
           }),
+      },
+
+      // ~ Drawers
+      {
+        section: 'Drawer',
+        icon: 'mdi-dock-right',
+        title: 'Toggle information drawer',
+        action: () => {
+          stateStore.toggleInfoDrawer();
+        },
+        shortcut: [leaderKey, 'I'],
       },
 
       // ~ Settings
