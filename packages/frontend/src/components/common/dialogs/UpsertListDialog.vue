@@ -2,6 +2,7 @@
 import { useListsService } from '@/composables/services/useListsService';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
+import BaseIconSelector from '../../common/inputs/BaseIconSelector/BaseIconSelector.vue';
 import type { List } from '@/components/project-management/lists/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
@@ -26,6 +27,7 @@ const list = computed<List>(() => currentDialog.value.data.list);
 
 const listForm = ref<VForm>();
 const listDto = ref<Partial<List>>({
+  icon: list.value?.icon ?? 'mdi-list-box-outline',
   name: list.value?.name,
   spaceId: list.value?.spaceId ?? currentDialog.value?.data.space.id,
   defaultCardType:
@@ -95,7 +97,11 @@ async function handleSubmitForm() {
           :rules="[rules.required]"
           label="Name*"
           autofocus
-        />
+        >
+          <template #prepend-inner>
+            <base-icon-selector v-model="listDto.icon" />
+          </template>
+        </v-text-field>
         <v-autocomplete
           v-model="listDto.defaultCardType"
           :items="cardTypes"

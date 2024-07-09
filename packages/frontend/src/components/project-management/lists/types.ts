@@ -6,6 +6,7 @@ import type { CardType } from '../cards/types';
 
 export interface List {
   id: number;
+  icon: string;
   name: string;
   spaceId: number;
   listStages: ListStage[];
