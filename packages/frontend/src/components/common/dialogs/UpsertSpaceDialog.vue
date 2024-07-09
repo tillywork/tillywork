@@ -2,6 +2,7 @@
 import { useSpacesService } from '@/composables/services/useSpacesService';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
+import BaseIconSelector from '../../common/inputs/BaseIconSelector/BaseIconSelector.vue';
 import type { Space } from '@/components/project-management/spaces/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
@@ -22,6 +23,7 @@ const space = computed<Space>(() => currentDialog.value.data.space);
 
 const spaceForm = ref<VForm>();
 const spaceDto = ref<Partial<Space>>({
+  icon: space.value?.icon ?? 'mdi-folder-outline',
   name: space.value?.name,
   workspaceId: workspace.value!.id,
 });
@@ -86,7 +88,11 @@ async function handleSubmitForm() {
           :rules="[rules.required]"
           label="Name*"
           autofocus
-        />
+        >
+          <template #prepend-inner>
+            <base-icon-selector v-model="spaceDto.icon" />
+          </template>
+        </v-text-field>
       </div>
       <v-card-actions class="d-flex justify-start align-center py-0 px-4">
         <v-spacer />

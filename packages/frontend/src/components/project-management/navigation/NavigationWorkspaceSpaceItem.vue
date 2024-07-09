@@ -25,7 +25,7 @@ function clearHoverFreeze() {
       <template v-slot:activator="{ props: groupProps }">
         <v-list-item rounded="md" v-bind="groupProps" slim>
           <template v-slot:prepend v-if="!isHovering">
-            <v-icon>mdi-folder-outline</v-icon>
+            <v-icon :icon="space.icon ?? 'mdi-folder-outline'" />
           </template>
           <v-list-item-title class="user-select-none">
             {{ space.name }}
