@@ -49,10 +49,10 @@ function openSettingsDialog() {
 <template>
   <v-app>
     <v-app-bar
+      v-if="$vuetify.display.mdAndDown"
       color="accent"
       density="compact"
       elevation="24"
-      class="d-lg-none"
     >
       <v-app-bar-nav-icon
         variant="text"
