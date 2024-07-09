@@ -48,6 +48,22 @@ function openSettingsDialog() {
 
 <template>
   <v-app>
+    <v-app-bar
+      color="accent"
+      density="compact"
+      elevation="24"
+      class="d-lg-none"
+    >
+      <v-app-bar-nav-icon
+        variant="text"
+        @click.stop="navigationDrawer = !navigationDrawer"
+      />
+
+      <v-toolbar-title>
+        <v-img :src="logo.getLogoUrlByTheme()" width="125" />
+      </v-toolbar-title>
+    </v-app-bar>
+
     <v-navigation-drawer app v-model="navigationDrawer" color="background">
       <v-img :src="logo.getLogoUrlByTheme()" width="125" class="ma-2 mt-4" />
       <v-divider />
