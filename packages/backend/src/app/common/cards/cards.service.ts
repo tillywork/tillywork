@@ -66,7 +66,6 @@ export class CardsService {
             });
         }
 
-        console.log("ignoreChildren", ignoreChildren);
         if (ignoreChildren) {
             queryBuilder.andWhere("card.parentId IS NULL");
         }
