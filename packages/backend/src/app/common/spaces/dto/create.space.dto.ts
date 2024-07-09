@@ -7,6 +7,9 @@ import {
 } from "class-validator";
 
 export class CreateSpaceDto {
+    @IsOptional()
+    @IsString()
+    icon?: string;
     @IsNotEmpty()
     @IsString()
     name: string;
