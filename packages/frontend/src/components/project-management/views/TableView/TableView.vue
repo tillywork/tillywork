@@ -167,7 +167,12 @@ function handleUpdateCardOrder(data: {
 
 <template>
   <div class="table-container px-6 position-relative overflow-hidden">
-    <div class="table d-flex flex-column my-2">
+    <div
+      class="table d-flex flex-column my-2"
+      :style="`max-height: calc(100vh - 180px${
+        $vuetify.display.mdAndDown ? ' - 56px' : ''
+      })`"
+    >
       <div class="table-header">
         <template
           v-for="headerGroup in table.getHeaderGroups()"
@@ -270,7 +275,6 @@ $table-border-opacity: var(--v-border-opacity);
 .table-container {
   .table {
     max-height: calc(100vh - 180px);
-    // overflow: auto;
     min-width: 100%;
     width: fit-content;
     border: 0.25px solid rgba($table-border-color, $table-border-opacity);

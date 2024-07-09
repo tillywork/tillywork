@@ -408,10 +408,3 @@ watch(
     </div>
   </div>
 </template>
-
-<style lang="scss" scoped>
-.view {
-  max-height: calc(100vh - (40px + 113px));
-  overflow: auto;
-}
-</style>

@@ -311,7 +311,9 @@ watchEffect(() => {
     </v-banner>
     <v-infinite-scroll
       @load="handleGroupCardsLoad"
-      height="calc(100vh - (40px + 113px + 48px))"
+      :height="`calc(100vh - 205px${
+        $vuetify.display.mdAndDown ? ' - 40px' : ''
+      })`"
     >
       <template #empty></template>
       <template #loading></template>
@@ -326,7 +328,7 @@ watchEffect(() => {
         animation="100"
         class="d-flex flex-column flex-0-0 ga-2 pa-2"
         group="cards"
-        style="min-height: calc(100vh - (40px + 113px + 77px))"
+        :style="`min-height: calc(100vh - (40px + 113px + 77px))`"
       >
         <template #item="{ element: card }">
           <v-card

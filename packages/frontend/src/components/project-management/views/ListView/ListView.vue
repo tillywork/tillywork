@@ -156,7 +156,12 @@ function handleUpdateCardOrder(data: {
 
 <template>
   <div class="list-container">
-    <div class="list d-flex flex-column">
+    <div
+      class="list d-flex flex-column"
+      :style="`max-height: calc(100vh - 160px${
+        $vuetify.display.mdAndDown ? ' - 40px' : ''
+      })`"
+    >
       <div class="list-header">
         <template
           v-for="headerGroup in table.getHeaderGroups()"
@@ -267,8 +272,6 @@ $list-cell-padding-y: 0;
   position: relative;
 
   .list {
-    max-height: calc(100vh - (40px + 113px));
-    // overflow: auto;
     min-width: 100%;
     width: fit-content;
   }

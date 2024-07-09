@@ -48,9 +48,29 @@ function openSettingsDialog() {
 
 <template>
   <v-app>
+    <v-app-bar
+      v-if="$vuetify.display.mdAndDown"
+      color="accent"
+      height="40"
+      class="border-b-thin"
+    >
+      <v-app-bar-nav-icon
+        variant="text"
+        @click.stop="navigationDrawer = !navigationDrawer"
+      />
+
+      <v-toolbar-title>
+        <v-img :src="logo.getLogoUrlByTheme()" width="125" />
+      </v-toolbar-title>
+    </v-app-bar>
+
     <v-navigation-drawer app v-model="navigationDrawer" color="background">
-      <v-img :src="logo.getLogoUrlByTheme()" width="125" class="ma-2 mt-4" />
-      <v-divider />
+      <v-img
+        :src="logo.getLogoUrlByTheme()"
+        width="125"
+        class="ma-2 mt-4 hidden-md-and-down"
+      />
+      <v-divider class="hidden-md-and-down" />
       <navigation-workspace-selector v-if="isAuthenticated()" />
 
       <!-- Sidebar content -->
