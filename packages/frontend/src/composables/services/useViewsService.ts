@@ -33,7 +33,7 @@ export const useViewsService = () => {
     });
   }
 
-  async function updateView(view: View): Promise<View> {
+  async function updateView(view: Partial<View>): Promise<View> {
     return sendRequest(`/views/${view.id}`, {
       method: 'PUT',
       data: view,

@@ -21,6 +21,7 @@ export interface FindAllParams {
     sortOrder?: "ASC" | "DESC";
     ignoreCompleted?: boolean;
     filters?: QueryFilter;
+    ignoreChildren?: boolean;
 }
 
 @Injectable()
@@ -40,6 +41,7 @@ export class CardsService {
         sortOrder = "ASC",
         ignoreCompleted,
         filters,
+        ignoreChildren,
     }: FindAllParams): Promise<CardFindAllResult> {
         const skip = (page - 1) * limit;
         const take = limit != -1 ? limit : undefined;
@@ -62,6 +64,11 @@ export class CardsService {
             queryBuilder.andWhere("listStage.isCompleted = :isCompleted", {
                 isCompleted: false,
             });
+        }
+
+        console.log("ignoreChildren", ignoreChildren);
+        if (ignoreChildren) {
+            queryBuilder.andWhere("card.parentId IS NULL");
         }
 
         if (filters && filters.where) {

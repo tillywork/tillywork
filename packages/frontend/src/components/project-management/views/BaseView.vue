@@ -4,7 +4,6 @@ import { useViewsService } from '@/composables/services/useViewsService';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
 import type { Card } from '../cards/types';
 import { type ColumnDef } from '@tanstack/vue-table';
-import BaseViewChip from './BaseViewChip.vue';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
@@ -26,6 +25,7 @@ import {
 } from '../filters/types';
 import { cloneDeep } from 'lodash';
 import { useDialogStore } from '@/stores/dialog';
+import BaseViewChipDisplay from './BaseViewChipDisplay.vue';
 
 const props = defineProps<{
   view: View;
@@ -110,13 +110,6 @@ const { mutateAsync: updateCardList } =
 
 const { mutateAsync: createFilter } = useCreateFilterMutation();
 const { mutateAsync: updateFilter } = useUpdateFilterMutation();
-
-function handleToggleCompleted() {
-  updateViewMutation.mutateAsync({
-    ...viewCopy.value,
-    ignoreCompleted: !viewCopy.value.ignoreCompleted,
-  });
-}
 
 function handleGroupBySelection(option: ListGroupOptions) {
   updateViewMutation.mutateAsync({
@@ -365,15 +358,7 @@ watch(
           @update:model-value="handleSortBySelection"
           :sort-by-options="sortByOptions"
         />
-        <base-view-chip
-          v-bind="props"
-          :icon="viewCopy.ignoreCompleted ? 'mdi-eye' : 'mdi-eye-off-outline'"
-          :label="
-            viewCopy.ignoreCompleted ? 'Show Completed' : 'Hide Completed'
-          "
-          :is-filled="viewCopy.ignoreCompleted"
-          @click="handleToggleCompleted"
-        />
+        <base-view-chip-display :view="viewCopy" />
       </div>
     </div>
 
