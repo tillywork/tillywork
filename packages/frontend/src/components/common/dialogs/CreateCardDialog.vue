@@ -15,6 +15,7 @@ import BaseListSelector from '../inputs/BaseListSelector.vue';
 import { cloneDeep } from 'lodash';
 import { useStateStore } from '@/stores/state';
 import { useAuthStore } from '@/stores/auth';
+import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
 
 const dialog = useDialogStore();
 const { workspace, project } = storeToRefs(useAuthStore());
@@ -63,6 +64,7 @@ const createCardDto = ref<CreateCardDto>({
   listStage: currentDialog.value?.data?.listStage ?? list.value?.listStages[0],
   users: currentDialog.value?.data?.users,
   type: cardType.value?.id,
+  parent: currentDialog.value?.data?.parent,
 });
 
 const selectedList = ref<List>(cloneDeep(list.value));
@@ -131,9 +133,13 @@ function openBaseEditorFileDialog() {
     :loading="createCardMutation.isPending.value"
   >
     <div class="d-flex align-center ps-0 pa-4">
-      <v-card-subtitle>
+      <v-card-subtitle class="d-flex align-center">
         <base-list-selector v-model="selectedList" />
-        <v-icon icon="mdi-arrow-right-thin" class="ms-1" />
+        <template v-if="createCardDto.parent">
+          <v-icon icon="mdi-arrow-right-thin" class="mx-1" />
+          <base-card-chip :card="createCardDto.parent" />
+        </template>
+        <v-icon icon="mdi-arrow-right-thin" class="mx-1" />
         Create {{ cardType.name }}
       </v-card-subtitle>
       <v-spacer />

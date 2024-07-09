@@ -12,6 +12,7 @@ defineProps<{
   theme?: 'icon' | 'text' | 'default';
   label?: string;
   size?: 'x-small' | 'small' | 'default';
+  readonly?: boolean;
 }>();
 
 const mainChipColor = computed(() => {
@@ -32,15 +33,16 @@ function isStageSelected(stage: ListStage) {
     <template #activator="{ props }">
       <template v-if="theme === 'icon'">
         <base-icon-btn
-          v-bind="props"
+          v-bind="!readonly ? props : undefined"
           icon="mdi-circle-slice-8"
           :color="mainChipColor"
           @click.prevent
+          :readonly
         />
       </template>
       <template v-else>
         <v-chip
-          v-bind="props"
+          v-bind="!readonly ? props : undefined"
           link
           rounded="md"
           :size="size ?? 'small'"

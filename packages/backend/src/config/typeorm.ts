@@ -33,9 +33,11 @@ import { CreateIndices1719422621473 } from "../migrations/1719422621473-create-i
 import { AddInviteCodeToProjectTable1719829250591 } from "../migrations/1719829250591-add-invite-code-to-project-table";
 import { FillDefaultCardTypeIdInNewWorkspaces1719841537242 } from "../migrations/1719841537242-fill-defaultCardTypeId-in-new-workspaces";
 import { ResetListGroups1719846270867 } from "../migrations/1719846270867-reset-list-groups";
+import { AddParentAndChildrenColumnsToCardsTable1720077323722 } from "../migrations/1720077323722-add-parent-and-children-columns-to-cards-table";
 import { CreateFileTable1720019365225 } from "../migrations/1720019365225-create-file-table";
 import { AddUserUploadLimitToProjectTable1720038998374 } from "../migrations/1720038998374-add-user-upload-limit-to-project-table";
 import { AddProjectIdToUserTable1720082507515 } from "../migrations/1720082507515-add-projectId-to-user-table";
+import { AddIgnoreChildrenToViewTable1720514522438 } from "../migrations/1720514522438-add-ignore-children-to-view-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -70,9 +72,11 @@ const migrations = [
     AddInviteCodeToProjectTable1719829250591,
     FillDefaultCardTypeIdInNewWorkspaces1719841537242,
     ResetListGroups1719846270867,
+    AddParentAndChildrenColumnsToCardsTable1720077323722,
     CreateFileTable1720019365225,
     AddUserUploadLimitToProjectTable1720038998374,
     AddProjectIdToUserTable1720082507515,
+    AddIgnoreChildrenToViewTable1720514522438,
 ];
 
 const config: TypeOrmModuleOptions = {

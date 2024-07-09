@@ -10,13 +10,16 @@ import {
     Logger,
     Request,
 } from "@nestjs/common";
-import { CardFindAllResult, CardsService } from "./cards.service";
+import {
+    CardFindAllResult,
+    CardsService,
+    FindAllParams,
+} from "./cards.service";
 import { Card } from "./card.entity";
 import { CreateCardDto } from "./dto/create.card.dto";
 import { UpdateCardDto } from "./dto/update.card.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
 import { CardListsService } from "./card-lists/card.lists.service";
-import { QueryFilter } from "../filters/types";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 @ApiBearerAuth()
@@ -36,35 +39,9 @@ export class CardsController {
     @Post("search")
     findAll(
         @Body()
-        body: {
-            listId: number;
-            page?: number;
-            limit?: number;
-            sortBy?: string;
-            sortOrder?: "ASC" | "DESC";
-            ignoreCompleted?: boolean;
-            filters?: QueryFilter;
-        }
+        body: FindAllParams
     ): Promise<CardFindAllResult> {
-        const {
-            listId,
-            page,
-            limit,
-            sortBy,
-            sortOrder,
-            ignoreCompleted,
-            filters,
-        } = body;
-
-        return this.cardsService.findAll({
-            listId,
-            page,
-            limit,
-            sortBy,
-            sortOrder,
-            ignoreCompleted,
-            filters,
-        });
+        return this.cardsService.findAll(body);
     }
 
     @Get(":id")

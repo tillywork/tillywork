@@ -17,4 +17,6 @@ export class CreateCardDto {
     dueAt?: Date;
     users?: User[];
     createdBy: number;
+
+    parentId?: number;
 }

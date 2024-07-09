@@ -16,6 +16,8 @@ export interface Card {
   dueAt: string | null;
   createdAt: string;
   updatedAt: string;
+  parent?: Card;
+  children: Card[];
 }
 
 export interface CardList {
@@ -39,6 +41,7 @@ export interface CreateCardDto {
   dueAt?: string;
   users?: User[];
   listStage?: ListStage;
+  parent?: Card;
 }
 
 export enum ActivityType {

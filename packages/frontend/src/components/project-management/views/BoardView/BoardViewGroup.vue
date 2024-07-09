@@ -16,6 +16,7 @@ import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import type { QueryFilter } from '../../filters/types';
 import { useDialogStore } from '@/stores/dialog';
+import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 
 const emit = defineEmits([
   'toggle:group',
@@ -63,6 +64,7 @@ const filters = computed<QueryFilter>(() => {
 });
 
 const ignoreCompleted = computed<boolean>(() => props.view.ignoreCompleted);
+const ignoreChildren = computed<boolean>(() => props.view.ignoreChildren);
 
 const cards = ref<Card[]>([]);
 const total = ref(0);
@@ -73,6 +75,7 @@ const { fetchNextPage, isFetching, hasNextPage, refetch, data } =
     listId: groupCopy.value.listId,
     groupId: groupCopy.value.id,
     ignoreCompleted,
+    ignoreChildren,
     filters,
     sortBy,
   });
@@ -349,12 +352,16 @@ watchEffect(() => {
                   @click.prevent
                 />
               </template>
-              <v-card-title
-                class="text-wrap text-body-2"
-                style="line-height: 1.2"
-              >
-                {{ card.title }}
-              </v-card-title>
+
+              <div class="d-flex align-center">
+                <v-card-title
+                  class="text-wrap text-body-2"
+                  style="line-height: 1.2"
+                >
+                  {{ card.title }}
+                </v-card-title>
+              </div>
+
               <template #append>
                 <base-user-selector
                   :model-value="card.users"
@@ -387,6 +394,17 @@ watchEffect(() => {
                 "
                 label="Set due date"
                 @click.prevent
+              />
+
+              <v-spacer />
+              <!-- Progress -->
+              <base-card-children-progress
+                v-if="card.children.length > 0"
+                :card
+                border="thin"
+                density="compact"
+                style="padding: 2px !important"
+                class="text-caption mb-1"
               />
             </v-card-actions>
           </v-card>

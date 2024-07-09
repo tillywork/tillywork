@@ -24,6 +24,7 @@ import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import type { QueryFilter } from '../../filters/types';
 import { useDialogStore } from '@/stores/dialog';
+import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 
 const emit = defineEmits([
   'toggle:group',
@@ -90,6 +91,7 @@ const filters = computed<QueryFilter>(() => {
 });
 
 const ignoreCompleted = computed<boolean>(() => props.view.ignoreCompleted);
+const ignoreChildren = computed<boolean>(() => props.view.ignoreChildren);
 
 const cards = ref<Card[]>([]);
 const total = ref(0);
@@ -99,6 +101,7 @@ const { fetchNextPage, isFetching, hasNextPage, refetch, data } =
     listId: groupCopy.value.original.listId,
     groupId: groupCopy.value.original.id,
     ignoreCompleted,
+    ignoreChildren,
     filters,
     sortBy,
   });
@@ -502,6 +505,19 @@ watchEffect(() => {
                         <span class="line-height-1 ms-2">
                           {{ row.original.title }}
                         </span>
+
+                        <!-- Progress -->
+                        <base-card-children-progress
+                          v-if="row.original.children.length > 0"
+                          :card="row.original"
+                          border="thin"
+                          rounded="pill"
+                          class="text-caption ms-2"
+                          style="
+                            padding-top: 2px !important;
+                            padding-bottom: 2px !important;
+                          "
+                        />
                       </v-card>
                     </template>
                     <template v-else-if="cell.column.columnDef.id === 'dueAt'">
