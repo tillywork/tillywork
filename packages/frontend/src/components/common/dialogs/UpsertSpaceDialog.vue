@@ -23,7 +23,8 @@ const space = computed<Space>(() => currentDialog.value.data.space);
 
 const spaceForm = ref<VForm>();
 const spaceDto = ref<Partial<Space>>({
-  icon: space.value?.icon ?? 'mdi-folder-outline',
+  icon: space.value?.icon,
+  iconColor: space.value?.iconColor,
   name: space.value?.name,
   workspaceId: workspace.value!.id,
 });
@@ -90,7 +91,11 @@ async function handleSubmitForm() {
           autofocus
         >
           <template #prepend-inner>
-            <base-icon-selector v-model="spaceDto.icon" />
+            <base-icon-selector
+              with-color
+              v-model="spaceDto.icon"
+              v-model:color="spaceDto.iconColor"
+            />
           </template>
         </v-text-field>
       </div>
