@@ -8,7 +8,6 @@ import {
     Put,
     UseGuards,
     Request,
-    Logger,
     Query,
 } from "@nestjs/common";
 import { WorkspacesService } from "./workspaces.service";
@@ -28,7 +27,6 @@ import { FindOptionsWhere } from "typeorm";
     version: "1",
 })
 export class WorkspacesController {
-    private readonly logger = new Logger(WorkspacesController.name);
     constructor(private readonly workspacesService: WorkspacesService) {}
 
     @Get()
@@ -44,7 +42,7 @@ export class WorkspacesController {
 
         const where: FindOptionsWhere<Workspace> = {
             project: {
-                id: user.project.id,
+                id: user.project?.id,
             },
         };
 
