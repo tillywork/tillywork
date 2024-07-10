@@ -19,6 +19,7 @@ defineProps<{
     <span class="text-caption user-select-none">
       {{ label }}
     </span>
+    <slot />
     <template #append>
       <slot name="append" />
     </template>

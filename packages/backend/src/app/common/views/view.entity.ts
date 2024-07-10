@@ -27,6 +27,9 @@ export class View {
     @Column({ type: "boolean", default: true })
     ignoreCompleted: boolean;
 
+    @Column({ type: "boolean", default: false })
+    ignoreChildren: boolean;
+
     @Column({
         type: "enum",
         enum: ListGroupOptions,

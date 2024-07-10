@@ -5,23 +5,28 @@ import type {
   ActivityType,
   CardActivity,
 } from '@/components/project-management/cards/types';
+import type { MaybeRef } from 'vue';
 
 export const useCardActivitiesService = () => {
   const { sendRequest } = useHttp();
   const queryClient = useQueryClient();
 
-  function findAll({ cardId }: { cardId: number }): Promise<CardActivity[]> {
-    return sendRequest(`/cards/${cardId}/activities`, {
+  function findAll({
+    cardId,
+  }: {
+    cardId: MaybeRef<number>;
+  }): Promise<CardActivity[]> {
+    return sendRequest(`/cards/${toValue(cardId)}/activities`, {
       method: 'GET',
     });
   }
 
-  function useFindAllQuery(cardId: number) {
+  function useFindAllQuery(cardId: MaybeRef<number>) {
     return useQuery({
       queryKey: [
         'cardActivities',
         {
-          cardId,
+          cardId: toValue(cardId),
         },
       ],
       queryFn: () => findAll({ cardId }),
@@ -46,12 +51,12 @@ export const useCardActivitiesService = () => {
     });
   }
 
-  function useCreateActivityMutation({ cardId }: { cardId: number }) {
+  function useCreateActivityMutation() {
     return useMutation({
       mutationFn: create,
       onSuccess: () =>
         queryClient.invalidateQueries({
-          queryKey: ['cardActivities', { cardId }],
+          queryKey: ['cardActivities'],
         }),
     });
   }
@@ -68,12 +73,12 @@ export const useCardActivitiesService = () => {
     });
   }
 
-  function useDeleteActivityMutation({ cardId }: { cardId: number }) {
+  function useDeleteActivityMutation() {
     return useMutation({
       mutationFn: deleteActivity,
       onSuccess: () =>
         queryClient.invalidateQueries({
-          queryKey: ['cardActivities', { cardId }],
+          queryKey: ['cardActivities'],
         }),
     });
   }

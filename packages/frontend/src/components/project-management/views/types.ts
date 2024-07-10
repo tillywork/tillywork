@@ -8,6 +8,7 @@ export interface View {
   listId: number;
   list: List;
   ignoreCompleted: boolean;
+  ignoreChildren: boolean;
   groupBy: ListGroupOptions;
   sortBy?: TableSortOption;
   updatedAt: string;

@@ -109,7 +109,6 @@ function handleUpdateCardOrder(data: {
       <v-sheet
         class="board-groups d-flex ga-4 overflow-scroll px-2"
         color="transparent"
-        height="calc(100vh - (40px + 120px))"
         width="fit-content"
       >
         <template v-for="listGroup in listGroups" :key="listGroup.id">

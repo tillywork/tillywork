@@ -22,6 +22,7 @@ export interface CardsData {
 export interface GetCardsParams {
   listId: number;
   ignoreCompleted: boolean;
+  ignoreChildren?: MaybeRef<boolean>;
   page: number;
   limit: number;
   sortBy?: TableSortOption[];
@@ -32,6 +33,7 @@ export interface GetGroupCardsInfiniteQueryParams {
   listId: number;
   groupId: number;
   ignoreCompleted: MaybeRef<boolean>;
+  ignoreChildren?: MaybeRef<boolean>;
   initialCards?: CardsData;
   filters?: Ref<QueryFilter>;
   sortBy?: Ref<TableSortOption[] | undefined>;
@@ -44,6 +46,7 @@ export const useCardsService = () => {
   async function getCards({
     listId,
     ignoreCompleted,
+    ignoreChildren,
     page = 1,
     limit = 10,
     sortBy = [
@@ -59,6 +62,7 @@ export const useCardsService = () => {
       data: {
         listId,
         ignoreCompleted,
+        ignoreChildren: toValue(ignoreChildren),
         page,
         limit,
         sortBy: sortBy[0]?.key,
@@ -99,6 +103,7 @@ export const useCardsService = () => {
     groupId,
     initialCards,
     ignoreCompleted,
+    ignoreChildren,
     filters,
     sortBy,
   }: GetGroupCardsInfiniteQueryParams) {
@@ -107,6 +112,7 @@ export const useCardsService = () => {
         getCards({
           listId: listId,
           ignoreCompleted: toValue(ignoreCompleted),
+          ignoreChildren,
           page: pageParam,
           limit: 15,
           filters: filters?.value,
