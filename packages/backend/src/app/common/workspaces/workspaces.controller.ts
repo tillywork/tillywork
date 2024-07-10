@@ -40,9 +40,15 @@ export class WorkspacesController {
         const { user } = req;
         const { type } = query;
 
+        if (!user.project) {
+            return new Promise((resolve) => {
+                resolve([]);
+            });
+        }
+
         const where: FindOptionsWhere<Workspace> = {
             project: {
-                id: user.project?.id,
+                id: user.project.id,
             },
         };
 
