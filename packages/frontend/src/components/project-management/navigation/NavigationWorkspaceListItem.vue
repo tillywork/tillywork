@@ -28,12 +28,14 @@ function clearHoverFreeze() {
   <v-hover v-slot="{ isHovering: isListHovering, props: listHoverProps }">
     <v-list-item
       rounded="md"
-      :prepend-icon="list.icon ?? 'mdi-list-box-outline'"
       slim
       v-bind="listHoverProps"
       @click="handleListClick(list)"
       :active="+route.params.listId === list.id"
     >
+      <template v-slot:prepend>
+        <v-icon :icon="list.icon" :color="list.iconColor" />
+      </template>
       <v-list-item-title class="user-select-none">
         {{ list.name }}
       </v-list-item-title>

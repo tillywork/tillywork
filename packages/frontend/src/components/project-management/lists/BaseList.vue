@@ -21,12 +21,7 @@ const view = ref<View>();
     <div class="pa-4 pb-0">
       <div class="px-9">
         <div class="d-flex align-center mb-3">
-          <v-icon
-            :icon="list.icon ?? 'mdi-list-box-outline'"
-            disabled
-            start
-            color="secondary"
-          />
+          <v-icon :icon="list.icon" :color="list.iconColor" disabled start />
           <span class="text-h5 ms-2">{{ list.name }}</span>
         </div>
         <base-list-view-tabs v-if="views" v-model="view" :list :views />

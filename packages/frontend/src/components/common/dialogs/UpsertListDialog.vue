@@ -27,7 +27,8 @@ const list = computed<List>(() => currentDialog.value.data.list);
 
 const listForm = ref<VForm>();
 const listDto = ref<Partial<List>>({
-  icon: list.value?.icon ?? 'mdi-list-box-outline',
+  icon: list.value?.icon,
+  iconColor: list.value?.iconColor,
   name: list.value?.name,
   spaceId: list.value?.spaceId ?? currentDialog.value?.data.space.id,
   defaultCardType:
@@ -99,7 +100,11 @@ async function handleSubmitForm() {
           autofocus
         >
           <template #prepend-inner>
-            <base-icon-selector v-model="listDto.icon" />
+            <base-icon-selector
+              with-color
+              v-model="listDto.icon"
+              v-model:color="listDto.iconColor"
+            />
           </template>
         </v-text-field>
         <v-autocomplete
