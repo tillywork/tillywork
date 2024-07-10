@@ -1,3 +1,4 @@
-import { View } from '../view.entity';
+import { PartialType } from "@nestjs/mapped-types";
+import { View } from "../view.entity";
 
-export class UpdateViewDto implements Partial<View> {}
+export class UpdateViewDto extends PartialType(View) {}

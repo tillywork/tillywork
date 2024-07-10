@@ -27,6 +27,7 @@ const themes = {
       accent: '#17191A',
       secondary: '#88FA9D',
       error: '#EF5350',
+      'surface-variant': '#FEFEFE',
     },
   },
 };

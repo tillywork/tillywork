@@ -11,6 +11,8 @@ export const useStateStore = defineStore('state', {
       isInputFocused: false,
       /** Is information navigation drawer open */
       isInfoDrawerOpen: true,
+      /** Are child cards expanded. */
+      areChildCardsExpanded: false,
       /** Sets the latest active list */
       currentList: undefined as undefined | List,
     };
@@ -24,6 +26,9 @@ export const useStateStore = defineStore('state', {
     },
     toggleInfoDrawer() {
       this.isInfoDrawerOpen = !this.isInfoDrawerOpen;
+    },
+    toggleChildCards() {
+      this.areChildCardsExpanded = !this.areChildCardsExpanded;
     },
     setCurrentList(list: undefined | List) {
       this.currentList = list;

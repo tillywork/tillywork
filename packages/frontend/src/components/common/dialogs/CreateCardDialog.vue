@@ -15,6 +15,7 @@ import BaseListSelector from '../inputs/BaseListSelector.vue';
 import { cloneDeep } from 'lodash';
 import { useStateStore } from '@/stores/state';
 import { useAuthStore } from '@/stores/auth';
+import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
 
 const dialog = useDialogStore();
 const { workspace, project } = storeToRefs(useAuthStore());
@@ -23,6 +24,7 @@ const { currentList } = storeToRefs(useStateStore());
 
 const createForm = ref<VForm>();
 const isCreatingMore = ref(false);
+const descriptionEditor = ref();
 
 const cardsService = useCardsService();
 const projectUsersService = useProjectUsersService();
@@ -62,6 +64,7 @@ const createCardDto = ref<CreateCardDto>({
   listStage: currentDialog.value?.data?.listStage ?? list.value?.listStages[0],
   users: currentDialog.value?.data?.users,
   type: cardType.value?.id,
+  parent: currentDialog.value?.data?.parent,
 });
 
 const selectedList = ref<List>(cloneDeep(list.value));
@@ -117,6 +120,10 @@ function handlePostCreate() {
     closeDialog();
   }
 }
+
+function openBaseEditorFileDialog() {
+  descriptionEditor.value.openFileDialog();
+}
 </script>
 
 <template>
@@ -126,33 +133,38 @@ function handlePostCreate() {
     :loading="createCardMutation.isPending.value"
   >
     <div class="d-flex align-center ps-0 pa-4">
-      <v-card-subtitle>
+      <v-card-subtitle class="d-flex align-center">
         <base-list-selector v-model="selectedList" />
-        <v-icon icon="mdi-arrow-right-thin" class="ms-1" />
+        <template v-if="createCardDto.parent">
+          <v-icon icon="mdi-arrow-right-thin" class="mx-1" />
+          <base-card-chip :card="createCardDto.parent" />
+        </template>
+        <v-icon icon="mdi-arrow-right-thin" class="mx-1" />
         Create {{ cardType.name }}
       </v-card-subtitle>
       <v-spacer />
       <base-icon-btn icon="mdi-close" color="default" @click="closeDialog()" />
     </div>
     <v-form ref="createForm" @submit.prevent="createCard">
-      <div class="pa-4 pt-0">
+      <div class="px-4 pb-2">
         <base-editor-input
           v-model="createCardDto.title"
           :placeholder="cardType.name + ' name'"
           autofocus
           :heading="3"
           single-line
-          class="mb-3"
+          class="mb-2"
           editable
           disable-commands
         />
         <base-editor-input
+          ref="descriptionEditor"
           v-model:json="createCardDto.description"
           placeholder="Enter description.."
           editable
+          min-height="80px"
         />
-      </div>
-      <v-card-actions class="d-flex justify-start align-center py-0 px-4">
+
         <div class="d-flex ga-2 align-center">
           <list-stage-selector
             v-model="createCardDto.listStage"
@@ -164,18 +176,21 @@ function handlePostCreate() {
             activator-hover-text="Assignee"
           />
           <base-date-picker
-            v-model="createCardDto.startsAt"
-            icon="mdi-calendar"
-            class="text-caption"
-            label="Start Date"
-          />
-          <base-date-picker
             v-model="createCardDto.dueAt"
             icon="mdi-calendar"
             class="text-caption"
             label="Due date"
           />
         </div>
+      </div>
+      <v-card-actions
+        class="d-flex justify-start align-center py-0 px-4 border-t-thin"
+      >
+        <base-icon-btn
+          icon="mdi-paperclip"
+          rounded="circle"
+          @click="openBaseEditorFileDialog"
+        />
         <v-spacer />
         <v-switch v-model="isCreatingMore" hide-details inset>
           <template #label>

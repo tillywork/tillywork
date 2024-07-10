@@ -1,3 +1,4 @@
-import { Workspace } from '../workspace.entity';
+import { PartialType } from "@nestjs/mapped-types";
+import { Workspace } from "../workspace.entity";
 
-export class UpdateWorkspaceDto implements Partial<Workspace> {}
+export class UpdateWorkspaceDto extends PartialType(Workspace) {}

@@ -27,10 +27,14 @@ export class AuthService {
         private projectUsersService: ProjectUsersService
     ) {}
 
-    async login(user: User): Promise<string> {
+    async login({ user }: { user: User }): Promise<string> {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password, ...userWithoutPassword } = user;
-        const payload = { ...userWithoutPassword, sub: user.id };
+
+        const payload = {
+            ...userWithoutPassword,
+            sub: user.id,
+        };
         return this.jwtService.sign(payload);
     }
 
@@ -89,7 +93,7 @@ export class AuthService {
             name: `${createdUser.firstName}'s Project`,
             ownerId: createdUser.id,
         };
-        await this.projectsService.create({
+        const project = await this.projectsService.create({
             ...projectDto,
             users: [
                 {
@@ -100,7 +104,9 @@ export class AuthService {
             ],
         });
 
-        const accessToken = await this.login(createdUser);
+        const accessToken = await this.login({
+            user: { ...createdUser, project },
+        });
 
         return { ...createdUser, accessToken };
     }
@@ -108,11 +114,11 @@ export class AuthService {
     async registerWithInvite(
         createUserDto: CreateUserDto
     ): Promise<RegisterResponse> {
-        const inviteCodeCheck = await this.projectsService.findOneBy({
+        const project = await this.projectsService.findOneBy({
             where: { inviteCode: createUserDto.inviteCode },
         });
 
-        if (!inviteCodeCheck) {
+        if (!project) {
             return {
                 error: "INVALID_INVITE_CODE",
             };
@@ -131,11 +137,13 @@ export class AuthService {
         const createdUser = await this.usersService.create(createUserDto);
         await this.projectUsersService.create({
             user: createdUser,
-            project: inviteCodeCheck,
+            project,
             role: "admin",
         });
 
-        const accessToken = await this.login(createdUser);
+        const accessToken = await this.login({
+            user: { ...createdUser, project },
+        });
 
         return { ...createdUser, accessToken };
     }

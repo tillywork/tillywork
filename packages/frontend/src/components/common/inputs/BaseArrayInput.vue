@@ -88,7 +88,11 @@ watch(
               :placeholder="`Item ${index + 1}`"
             >
               <template #prepend-inner>
-                <base-color-picker v-model="value[index].color" icon />
+                <base-color-picker
+                  v-model="value[index].color"
+                  icon
+                  v-if="itemColor"
+                />
               </template>
             </v-text-field>
           </template>

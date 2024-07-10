@@ -11,7 +11,6 @@ import { useProjectUsersService } from '@/composables/services/useProjectUsersSe
 import type { ProjectUser } from '@/components/common/projects/types';
 import type { Card } from '../cards/types';
 import { type ColumnDef } from '@tanstack/vue-table';
-import BaseViewChip from './BaseViewChip.vue';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
@@ -35,6 +34,7 @@ import { cloneDeep } from 'lodash';
 import { useDialogStore } from '@/stores/dialog';
 import { useDate } from '@/composables/useDate';
 import { useAuthStore } from '@/stores/auth';
+import BaseViewChipDisplay from './BaseViewChipDisplay.vue';
 
 const props = defineProps<{
   view: View;
@@ -83,18 +83,21 @@ const columns = ref<ColumnDef<ListGroup, any>[]>([
     accessorKey: 'title',
     header: 'Title',
     size: 800,
+    minSize: 150,
   },
   {
     id: 'users',
     accessorKey: 'users',
     header: 'Assignee',
     size: 100,
+    minSize: 100,
   },
   {
     id: 'dueAt',
     accessorKey: 'dueAt',
     header: 'Due Date',
     size: 100,
+    minSize: 100,
   },
 ]);
 
@@ -119,13 +122,6 @@ const { mutateAsync: updateCardList } =
 
 const { mutateAsync: createFilter } = useCreateFilterMutation();
 const { mutateAsync: updateFilter } = useUpdateFilterMutation();
-
-function handleToggleCompleted() {
-  updateViewMutation.mutateAsync({
-    ...viewCopy.value,
-    ignoreCompleted: !viewCopy.value.ignoreCompleted,
-  });
-}
 
 function handleGroupBySelection(option: ListGroupOptions) {
   updateViewMutation.mutateAsync({
@@ -297,7 +293,7 @@ function handleDeleteCard(card: Card) {
     dialog: DIALOGS.CONFIRM,
     data: {
       title: 'Confirm',
-      message: `Are you sure you want to delete this ${card.type.name.toLocaleLowerCase()}?`,
+      message: `Are you sure you want to delete ${card.title}?`,
       onConfirm: () =>
         deleteCard(card.id)
           .then(() => {
@@ -453,15 +449,7 @@ watch(
           @update:model-value="handleSortBySelection"
           :sort-by-options="sortByOptions"
         />
-        <base-view-chip
-          v-bind="props"
-          :icon="viewCopy.ignoreCompleted ? 'mdi-eye' : 'mdi-eye-off-outline'"
-          :label="
-            viewCopy.ignoreCompleted ? 'Show Completed' : 'Hide Completed'
-          "
-          :is-filled="viewCopy.ignoreCompleted"
-          @click="handleToggleCompleted"
-        />
+        <base-view-chip-display :view="viewCopy" />
       </div>
     </div>
 
@@ -511,10 +499,3 @@ watch(
     </div>
   </div>
 </template>
-
-<style lang="scss" scoped>
-.view {
-  max-height: calc(100vh - (40px + 113px));
-  overflow: auto;
-}
-</style>

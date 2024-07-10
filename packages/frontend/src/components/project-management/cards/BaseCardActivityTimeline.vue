@@ -25,10 +25,10 @@ const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
 );
 
-const query = cardActivitiesService.useFindAllQuery(props.cardId);
-const deleteActivity = cardActivitiesService.useDeleteActivityMutation({
-  cardId: props.cardId,
-});
+const cardId = computed(() => props.cardId);
+
+const query = cardActivitiesService.useFindAllQuery(cardId);
+const deleteActivity = cardActivitiesService.useDeleteActivityMutation();
 
 const { getUserFullName } = useUsersService();
 
@@ -62,6 +62,10 @@ function deleteComment(comment: CardActivity) {
       dialog.closeDialog(confirmDialogIndex.value);
     });
 }
+
+watch(cardId, () => {
+  query.refetch();
+});
 </script>
 
 <template>

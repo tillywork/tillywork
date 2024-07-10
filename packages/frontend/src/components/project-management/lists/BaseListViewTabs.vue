@@ -180,6 +180,12 @@ watch(
               </template>
               <v-card class="border-thin">
                 <v-list>
+                  <v-list-item @click="openUpdateViewDialog(view)">
+                    <template #prepend>
+                      <v-icon icon="mdi-playlist-edit" />
+                    </template>
+                    <v-list-item-title>Edit</v-list-item-title>
+                  </v-list-item>
                   <v-list-item
                     class="text-error"
                     @click="handleDeleteView(view)"
@@ -188,12 +194,6 @@ watch(
                       <v-icon icon="mdi-delete" />
                     </template>
                     <v-list-item-title>Delete</v-list-item-title>
-                  </v-list-item>
-                  <v-list-item @click="openUpdateViewDialog(view)">
-                    <template #prepend>
-                      <v-icon icon="mdi-text-box-edit-outline" />
-                    </template>
-                    <v-list-item-title>Update</v-list-item-title>
                   </v-list-item>
                 </v-list>
               </v-card>
