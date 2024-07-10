@@ -36,7 +36,7 @@ import { ResetListGroups1719846270867 } from "../migrations/1719846270867-reset-
 import { CreateFileTable1720019365225 } from "../migrations/1720019365225-create-file-table";
 import { AddUserUploadLimitToProjectTable1720038998374 } from "../migrations/1720038998374-add-user-upload-limit-to-project-table";
 import { AddProjectIdToUserTable1720082507515 } from "../migrations/1720082507515-add-projectId-to-user-table";
-import { AddIconColumnToSpaceAndListTables1720414956770 } from "../migrations/1720414956770-add-icon-column-to-space-and-list-tables";
+import { AddIconAndIconColorColumnsToSpaceAndListTables1720414956770 } from "../migrations/1720414956770-add-icon-and-iconColor-columns-to-space-and-list-tables";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -74,7 +74,7 @@ const migrations = [
     CreateFileTable1720019365225,
     AddUserUploadLimitToProjectTable1720038998374,
     AddProjectIdToUserTable1720082507515,
-    AddIconColumnToSpaceAndListTables1720414956770,
+    AddIconAndIconColorColumnsToSpaceAndListTables1720414956770,
 ];
 
 const config: TypeOrmModuleOptions = {
