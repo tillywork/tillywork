@@ -10,6 +10,9 @@ export class CreateSpaceDto {
     @IsOptional()
     @IsString()
     icon?: string;
+    @IsOptional()
+    @IsString()
+    iconColor?: string;
     @IsNotEmpty()
     @IsString()
     name: string;
