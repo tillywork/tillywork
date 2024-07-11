@@ -234,6 +234,7 @@ function onDragAdd(event: any) {
   handleUpdateCardStage({
     card: currentCard,
     listStageId: props.listGroup.original.entityId!,
+    name: props.listGroup.original.name,
     order: newOrder,
   });
 }
@@ -273,6 +274,7 @@ function handleDeleteCard(card: Card) {
 function handleUpdateCardStage(data: {
   card: Card;
   listStageId: number;
+  name?: string;
   order?: number;
 }) {
   emit('row:update:stage', data);
