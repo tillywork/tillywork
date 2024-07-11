@@ -144,17 +144,6 @@ export const useCommands = () => {
           }),
       },
 
-      // ~ Drawers
-      {
-        section: 'Drawer',
-        icon: 'mdi-dock-right',
-        title: 'Toggle information drawer',
-        action: () => {
-          stateStore.toggleInfoDrawer();
-        },
-        shortcut: [leaderKey, 'I'],
-      },
-
       // ~ Settings
       {
         section: 'Settings',

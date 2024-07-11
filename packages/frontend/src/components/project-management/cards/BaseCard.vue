@@ -23,6 +23,7 @@ import { useAuthStore } from '@/stores/auth';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import BaseCardChildrenProgress from './BaseCardChildrenProgress.vue';
 import BaseCardChip from './BaseCardChip.vue';
+import { leaderKey } from '@/utils/keyboard';
 
 const props = defineProps<{
   card: Card;
@@ -123,6 +124,13 @@ watch(debouncedDescription, () => {
 });
 
 const cardListStage = ref(cardCopy.value.cardLists[0].listStage);
+
+const keys = useMagicKeys();
+watch(keys[[leaderKey, 'I'].join('+')], (v) => {
+  if (v && !stateStore.isInputFocused) {
+    stateStore.toggleInfoDrawer();
+  }
+});
 
 function updateTitle() {
   const newTitle = cardTitle.value.trim();
