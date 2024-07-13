@@ -353,6 +353,7 @@ watch(
         <base-view-chip-filter
           :filters="viewCopy.filters"
           :view-id="viewCopy.id"
+          :list-id="viewCopy.listId"
           @update="handleUpdateFilters"
           @save="handleSaveFilters"
         />

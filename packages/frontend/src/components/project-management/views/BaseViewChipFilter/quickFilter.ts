@@ -1,7 +1,7 @@
 import type { FieldFilterOption } from './types';
 import { FieldTypes } from '../../fields/types';
 
-const availableGroups = [
+export const quickFilterGroups = [
   'date',
   'assignee',
   'stage',
@@ -9,7 +9,7 @@ const availableGroups = [
   'label',
 ] as const;
 
-export type QuickFilterGroup = (typeof availableGroups)[number];
+export type QuickFilterGroup = (typeof quickFilterGroups)[number];
 
 const dateItems: FieldFilterOption[] = [
   {
@@ -45,7 +45,7 @@ const assigneeItems: FieldFilterOption[] = [
   },
 ];
 
-export const defaultGroupedItems: Record<
+export const defaultQuickFilterGroupedItems: Record<
   QuickFilterGroup,
   FieldFilterOption[]
 > = {

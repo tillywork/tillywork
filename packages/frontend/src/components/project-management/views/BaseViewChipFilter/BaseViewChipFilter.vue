@@ -15,13 +15,19 @@ import type {
 } from '../../filters/types';
 import type { FieldFilterOption } from './types';
 import { useFieldsService } from '@/composables/services/useFieldsService';
+import { useListStagesService } from '@/composables/services/useListStagesService';
 import { useAuthStore } from '@/stores/auth';
 
-import { defaultGroupedItems, type QuickFilterGroup } from './quickFilter';
+import {
+  quickFilterGroups,
+  defaultQuickFilterGroupedItems,
+  type QuickFilterGroup,
+} from './quickFilter';
 
 const props = defineProps<{
   filters?: QueryFilter;
   viewId: number;
+  listId: number;
 }>();
 const emit = defineEmits(['save', 'update']);
 
@@ -153,7 +159,10 @@ const filtersQuery = computed<{
 
   return filters;
 });
-const quickFilters = ref<Record<QuickFilterGroup, string[]>>({
+const quickFilterGroupedItems = ref<
+  Record<QuickFilterGroup, FieldFilterOption[]>
+>(defaultQuickFilterGroupedItems);
+const quickFilters = ref<Record<QuickFilterGroup, FieldFilterOption[]>>({
   date: [],
   assignee: [],
   stage: [],
@@ -161,20 +170,54 @@ const quickFilters = ref<Record<QuickFilterGroup, string[]>>({
   label: [],
 });
 function handleQuickFilter() {
-  const filters: FilterGroup[] = Object.entries(quickFilters.value)
-    .map(([group, titles]) => {
-      const orFilters = titles.map((title) =>
-        defaultGroupedItems[group as QuickFilterGroup].find(
-          (item) => item.title === title
-        )
-      );
-      if (orFilters.length) {
+  function transformFilter(filter: FieldFilterOption) {
+    return {
+      field: filter.field,
+      operator: filter.operator,
+      value: filter.value,
+    };
+  }
+
+  const filters: FilterGroup[] = quickFilterGroups
+    .map((group: QuickFilterGroup) => {
+      let filters: FieldFilterOption[] = [];
+
+      switch (group) {
+        case 'date':
+          filters = quickFilters.value[group].filter((filter) =>
+            quickFilterGroupedItems.value[group].find(
+              (item) => item.title === filter.title
+            )
+          );
+          break;
+        case 'stage': {
+          const stages = quickFilters.value[group].map(
+            (filter) => filter.value
+          );
+          filters = [
+            {
+              field: 'listStage.id',
+              operator: 'in',
+              value: stages,
+              title: 'stage',
+              type: FieldTypes.DROPDOWN,
+            },
+          ];
+          break;
+        }
+
+        default:
+          break;
+      }
+
+      if (filters.length) {
         return {
-          or: orFilters,
+          or: filters.map(transformFilter),
         };
       }
     })
     .filter(Boolean) as FilterGroup[]; // NOTES: https://devblogs.microsoft.com/typescript/announcing-typescript-5-5/#inferred-type-predicates
+
   filtersCopy.value = {
     where: {
       and: [...filters, ...filtersQuery.value.advanced],
@@ -248,6 +291,25 @@ function getOperatorFromFieldType(field: Field): FilterOperator {
       return 'eq';
   }
 }
+
+const listStagesService = useListStagesService();
+const { data: listStages } = listStagesService.useGetListStagesQuery({
+  listId: props.listId,
+});
+
+watch(listStages, (stages) => {
+  if (stages) {
+    quickFilterGroupedItems.value.stage = stages.map((stage) => {
+      return {
+        field: 'listStage.id',
+        operator: 'eq',
+        value: stage.id,
+        title: stage.name,
+        type: FieldTypes.DROPDOWN,
+      };
+    });
+  }
+});
 
 //TODO debounce changes
 watch(
@@ -337,7 +399,7 @@ watch(
             </v-menu>
           </div>
           <div
-            v-for="(items, group) in defaultGroupedItems"
+            v-for="(items, group) in quickFilterGroupedItems"
             :key="group"
             class="d-flex align-center"
           >
@@ -354,7 +416,7 @@ watch(
                 v-for="item in items"
                 :key="item.title"
                 :text="item.title"
-                :value="item.title"
+                :value="item"
                 size="small"
               />
             </v-chip-group>
