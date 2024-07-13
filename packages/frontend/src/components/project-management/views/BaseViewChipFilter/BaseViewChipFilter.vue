@@ -174,17 +174,36 @@ const quickFilters = ref<Record<QuickFilterGroup, FieldFilterOption[]>>({
   label: [],
 });
 function handleQuickFilter() {
-  function transformFilter(filter: FieldFilterOption) {
+  function transformFilter(filter: FieldFilter) {
     return {
       field: filter.field,
       operator: filter.operator,
       value: filter.value,
     };
   }
+  function handleInOperator(
+    group: QuickFilterGroup,
+    field: string
+  ): FieldFilter[] {
+    const values = quickFilters.value[group]
+      .filter((filter) => !['isNull', 'isNotNull'].includes(filter.operator))
+      .map((filter: FieldFilter) => filter.value);
+
+    if (values.length) {
+      return [
+        {
+          field,
+          operator: 'in',
+          value: values,
+        },
+      ];
+    }
+    return [];
+  }
 
   const filters: FilterGroup[] = quickFilterGroups
     .map((group: QuickFilterGroup) => {
-      let filters: FieldFilterOption[] = [];
+      let filters: FieldFilter[] = [];
 
       switch (group) {
         case 'date':
@@ -194,58 +213,22 @@ function handleQuickFilter() {
             )
           );
           break;
-        case 'stage': {
-          const stages = quickFilters.value[group].map(
-            (filter) => filter.value
-          );
-          if (stages.length) {
-            filters = [
-              {
-                field: 'listStage.id',
-                operator: 'in',
-                value: stages,
-                title: 'stage',
-                type: FieldTypes.DROPDOWN,
-              },
-            ];
-          }
-          break;
-        }
+        case 'stage':
         case 'assignee': {
-          let assignees: { isNull: boolean; userIds: number[] } = {
-            isNull: false,
-            userIds: [],
-          };
-          assignees = quickFilters.value[group].reduce((prev, curr) => {
-            if (curr.operator === 'isNull') {
-              prev.isNull = true;
-            } else {
-              prev.userIds.push(curr.value);
-            }
+          const field = group === 'stage' ? 'listStage.id' : 'users.id';
+          filters = handleInOperator(group, field);
 
-            return prev;
-          }, assignees);
-
-          if (assignees.userIds.length) {
-            filters = [
-              {
-                field: 'users.id',
-                operator: 'in',
-                value: assignees.userIds,
-                title: 'assignee',
-                type: FieldTypes.DROPDOWN,
-              },
-            ];
-          }
-          if (assignees.isNull) {
-            filters.push({
-              field: 'users.id',
-              operator: 'isNull',
-              value: [],
-              title: 'assignee',
-              type: FieldTypes.DROPDOWN,
-            });
-          }
+          quickFilters.value[group]
+            .filter((filter) =>
+              ['isNull', 'isNotNull'].includes(filter.operator)
+            )
+            .map((filter) =>
+              filters.push({
+                field,
+                operator: filter.operator,
+                value: [],
+              })
+            );
           break;
         }
 
