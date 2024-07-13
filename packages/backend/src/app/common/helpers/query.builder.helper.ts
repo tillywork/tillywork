@@ -271,41 +271,30 @@ export class QueryBuilderHelper {
     }
 
     static buildQuery(
-        queryBuilder: SelectQueryBuilder<any>,
-        filterGroup: FilterGroup
-    ): SelectQueryBuilder<any> {
-        if (filterGroup.and && filterGroup.and.length > 0) {
-            queryBuilder.andWhere(
-                new Brackets((qb) => {
-                    filterGroup.and.forEach((condition) => {
-                        if (!this.isFilterGroup(condition)) {
-                            this.fieldFilterToQuery(qb, condition);
-                        } else {
-                            //TODO support filter groups inside of filter groups
-                        }
+        queryBuilder: SelectQueryBuilder<any> | WhereExpressionBuilder,
+        filterGroup: FilterGroup | FieldFilter,
+        whereOperator: "and" | "or" = "and"
+    ): SelectQueryBuilder<any> | WhereExpressionBuilder {
+        queryBuilder[`${whereOperator}Where`](
+            new Brackets((qb) => {
+                if (this.isFilterGroup(filterGroup)) {
+                    (filterGroup.and ?? []).forEach((condition) => {
+                        this.buildQuery(qb, condition, "and");
                     });
-                })
-            );
-        }
-        if (filterGroup.or && filterGroup.or.length > 0) {
-            queryBuilder.orWhere(
-                new Brackets((qb) => {
-                    filterGroup.or.forEach((condition) => {
-                        if (!this.isFilterGroup(condition)) {
-                            this.fieldFilterToQuery(qb, condition);
-                        } else {
-                            //TODO support filter groups inside of filter groups
-                        }
+                    (filterGroup.or ?? []).forEach((condition) => {
+                        this.buildQuery(qb, condition, "or");
                     });
-                })
-            );
-        }
+                } else {
+                    this.fieldFilterToQuery(qb, filterGroup);
+                }
+            })
+        );
 
         return queryBuilder;
     }
 
     static isFilterGroup(
-        condition: FieldFilter | FilterGroup
+        condition: FilterGroup | FieldFilter
     ): condition is FilterGroup {
         return "and" in condition || "or" in condition;
     }
