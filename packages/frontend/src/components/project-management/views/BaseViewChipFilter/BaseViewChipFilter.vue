@@ -8,13 +8,16 @@ import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
 import type {
-  QueryFilter,
   FieldFilter,
+  FilterGroup,
   FilterOperator,
+  QueryFilter,
 } from '../../filters/types';
 import type { FieldFilterOption } from './types';
 import { useFieldsService } from '@/composables/services/useFieldsService';
 import { useAuthStore } from '@/stores/auth';
+
+import { defaultGroupedItems, type QuickFilterGroup } from './quickFilter';
 
 const props = defineProps<{
   filters?: QueryFilter;
@@ -104,7 +107,7 @@ const isFiltersFilled = computed(
 );
 
 function clearFilters() {
-  filtersCopy.value = { where: {} };
+  filtersCopy.value = { where: { and: [] } };
 }
 
 function applyFilters() {
@@ -129,6 +132,54 @@ function applyFilters() {
       isSnackbarOpen.value = true;
     }
   }
+}
+
+const filtersQuery = computed<{
+  advanced: FieldFilter[];
+  quick: FilterGroup[];
+}>(() => {
+  const queryFilters = filtersCopy.value.where?.and;
+
+  let filters: { advanced: FieldFilter[]; quick: FilterGroup[] } = {
+    advanced: [],
+    quick: [],
+  };
+  if (queryFilters)
+    filters = queryFilters.reduce((prev, curr) => {
+      if ('or' in curr) prev.quick.push(curr);
+      else if ('value' in curr) prev.advanced.push(curr);
+      return prev;
+    }, filters);
+
+  return filters;
+});
+const quickFilters = ref<Record<QuickFilterGroup, string[]>>({
+  date: [],
+  assignee: [],
+  stage: [],
+  dropdown: [],
+  label: [],
+});
+function handleQuickFilter() {
+  const filters: FilterGroup[] = Object.entries(quickFilters.value)
+    .map(([group, titles]) => {
+      const orFilters = titles.map((title) =>
+        defaultGroupedItems[group as QuickFilterGroup].find(
+          (item) => item.title === title
+        )
+      );
+      if (orFilters.length) {
+        return {
+          or: orFilters,
+        };
+      }
+    })
+    .filter(Boolean) as FilterGroup[]; // NOTES: https://devblogs.microsoft.com/typescript/announcing-typescript-5-5/#inferred-type-predicates
+  filtersCopy.value = {
+    where: {
+      and: [...filters, ...filtersQuery.value.advanced],
+    },
+  };
 }
 
 function addFilter(filterOption: FieldFilterOption) {
@@ -158,8 +209,9 @@ function removeFilter(index: number) {
   filtersCopy.value = {
     where: {
       and: [
-        ...filtersCopy.value.where!.and!.slice(0, index),
-        ...filtersCopy.value.where!.and!.slice(index + 1),
+        ...filtersQuery.value.quick,
+        ...filtersQuery.value.advanced.slice(0, index),
+        ...filtersQuery.value.advanced.slice(index + 1),
       ],
     },
   };
@@ -252,22 +304,70 @@ watch(
       </base-view-chip>
     </template>
     <v-card>
-      <v-card-title class="text-body-2"> Filter Builder </v-card-title>
       <v-card-text class="pa-0">
-        <!--TODO-->
-        <!-- <v-card-item>
-          Quick Filters
-        </v-card-item> -->
-        <v-card-item
-          v-if="filtersCopy.where?.and && filtersCopy.where.and.length > 0"
-        >
+        <v-card-item>
+          <div class="d-flex">
+            <v-card-title> Quick Filters </v-card-title>
+            <v-spacer />
+            <v-menu v-model="addFilterMenu" :close-on-content-click="false">
+              <template #activator="{ props: addFilterProps }">
+                <v-btn
+                  v-bind="addFilterProps"
+                  prepend-icon="mdi-plus"
+                  class="text-capitalize"
+                  color="default"
+                  size="small"
+                  variant="tonal"
+                >
+                  Advanced Filtering
+                </v-btn>
+              </template>
+              <v-card>
+                <v-list>
+                  <template v-for="field in fields" :key="field.field">
+                    <v-list-item @click="addFilter(field)" class="text-body-2">
+                      <template #prepend>
+                        <v-icon :icon="field.icon" />
+                      </template>
+                      {{ field.title }}
+                    </v-list-item>
+                  </template>
+                </v-list>
+              </v-card>
+            </v-menu>
+          </div>
+          <div
+            v-for="(items, group) in defaultGroupedItems"
+            :key="group"
+            class="d-flex align-center"
+          >
+            <v-card-subtitle class="text-capitalize pa-1 mr-2">
+              {{ group }}
+            </v-card-subtitle>
+            <v-chip-group
+              v-model="quickFilters[group]"
+              multiple
+              selected-class="text-primary"
+              @click="handleQuickFilter"
+            >
+              <v-chip
+                v-for="item in items"
+                :key="item.title"
+                :text="item.title"
+                :value="item.title"
+                size="small"
+              />
+            </v-chip-group>
+          </div>
+        </v-card-item>
+        <v-card-item>
           <v-form ref="filtersForm">
             <template
-              v-for="(filter, index) in filtersCopy.where?.and"
+              v-for="(filter, index) in filtersQuery.advanced"
               :key="filter.type"
             >
               <base-view-chip-filter-item
-                v-model="filtersCopy.where.and[index]"
+                v-model="filtersQuery.advanced[index]"
                 :index
                 :fields
                 :users="users ?? []"
@@ -275,32 +375,6 @@ watch(
               />
             </template>
           </v-form>
-        </v-card-item>
-        <v-card-item>
-          <v-menu v-model="addFilterMenu" :close-on-content-click="false">
-            <template #activator="{ props: addFilterProps }">
-              <v-btn
-                v-bind="addFilterProps"
-                prepend-icon="mdi-plus"
-                class="text-capitalize mt-3"
-                color="default"
-                size="small"
-                >Filter</v-btn
-              >
-            </template>
-            <v-card>
-              <v-list>
-                <template v-for="field in fields" :key="field.field">
-                  <v-list-item @click="addFilter(field)" class="text-body-2">
-                    <template #prepend>
-                      <v-icon :icon="field.icon" />
-                    </template>
-                    {{ field.title }}
-                  </v-list-item>
-                </template>
-              </v-list>
-            </v-card>
-          </v-menu>
         </v-card-item>
       </v-card-text>
       <v-card-actions>

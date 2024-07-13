@@ -13,39 +13,42 @@ export type QuickFilterGroup = (typeof availableGroups)[number];
 
 const dateItems: FieldFilterOption[] = [
   {
-    title: 'No Due Date',
     field: 'card.dueAt',
     operator: 'isNull',
     value: [],
+    title: 'No Due Date',
     type: FieldTypes.DATE,
-    icon: 'mdi-clock-time-twelve',
+  },
+  {
+    field: 'card.dueAt',
+    operator: 'isNotNull',
+    value: [],
+    title: 'Due Date',
+    type: FieldTypes.DATE,
   },
   {
     title: 'Today',
+    type: FieldTypes.DATE,
     field: 'card.dueAt',
     operator: 'between',
     value: [':startOfDay', ':endOfDay'],
-    type: FieldTypes.DATE,
-    icon: 'mdi-clock-time-six-outline',
   },
   {
-    title: 'Past Due',
     field: 'card.dueAt',
     operator: 'between',
     value: [':startOfTime', ':endOfDay'],
+    title: 'Past Due',
     type: FieldTypes.DATE,
-    icon: 'mdi-clock-time-eight',
   },
 ];
 
 const assigneeItems: FieldFilterOption[] = [
   {
-    title: 'No Assignee',
     field: 'users.id',
     operator: 'isNull',
     value: [],
+    title: 'No Assignee',
     type: FieldTypes.USER,
-    icon: 'mdi-account',
   },
 ];
 
