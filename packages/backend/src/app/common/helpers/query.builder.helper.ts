@@ -100,6 +100,16 @@ export class QueryBuilderHelper {
         }
     }
 
+    static getRandomInt(max = Number.MAX_SAFE_INTEGER) {
+        return Math.floor(Math.random() * max);
+    }
+
+    static getRandomArbitrary(min = 1, max = Number.MAX_SAFE_INTEGER) {
+        const minCeiled = Math.ceil(min);
+        const maxFloored = Math.floor(max);
+        return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+    }
+
     /**
      * Processes the field name to extract
      * the value from jsonb columns defined
@@ -244,21 +254,21 @@ export class QueryBuilderHelper {
                     [field]: `%${processedValue}`,
                 });
             case "between":
+            case "nbetween": {
+                const randomNumber1 = this.getRandomInt();
+                const randomNumber2 = this.getRandomArbitrary(randomNumber1);
+
+                const betweenOperator = `${
+                    operator[0] === "n" ? "NOT " : ""
+                }BETWEEN`;
                 return queryBuilder.andWhere(
-                    `${fieldName} BETWEEN :${field}1 AND :${field}2`,
+                    `${fieldName} ${betweenOperator} :${field}${randomNumber1} AND :${field}${randomNumber2}`,
                     {
-                        [`${field}1`]: processedValue[0],
-                        [`${field}2`]: processedValue[1],
+                        [`${field}${randomNumber1}`]: processedValue[0],
+                        [`${field}${randomNumber2}`]: processedValue[1],
                     }
                 );
-            case "nbetween":
-                return queryBuilder.andWhere(
-                    `${fieldName} NOT BETWEEN :${field}1 AND :${field}2`,
-                    {
-                        [`${field}1`]: processedValue[0],
-                        [`${field}2`]: processedValue[1],
-                    }
-                );
+            }
             case "isNull":
                 return queryBuilder.andWhere(`${fieldName} IS NULL`);
             case "isNotNull":
