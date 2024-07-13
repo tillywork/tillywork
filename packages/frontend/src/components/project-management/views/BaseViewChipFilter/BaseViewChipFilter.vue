@@ -45,6 +45,7 @@ const { showSnackbar, closeSnackbar } = useSnackbarStore();
 const { workspace, project } = storeToRefs(useAuthStore());
 const { useProjectUsersQuery } = useProjectUsersService();
 
+// TODO-Refactor: After MR 110 merged, should be handle on parent and pass with props or provide/inject
 const { data: users } = useProjectUsersQuery({
   projectId: project.value!.id,
   select: (projectUsers) => projectUsers.map((pj) => pj.user),
@@ -152,8 +153,11 @@ const filtersQuery = computed<{
   };
   if (queryFilters)
     filters = queryFilters.reduce((prev, curr) => {
-      if ('or' in curr) prev.quick.push(curr);
-      else if ('value' in curr) prev.advanced.push(curr);
+      if ('or' in curr) {
+        prev.quick.push(curr);
+      } else if ('value' in curr) {
+        prev.advanced.push(curr);
+      }
       return prev;
     }, filters);
 
@@ -194,15 +198,54 @@ function handleQuickFilter() {
           const stages = quickFilters.value[group].map(
             (filter) => filter.value
           );
-          filters = [
-            {
-              field: 'listStage.id',
-              operator: 'in',
-              value: stages,
-              title: 'stage',
+          if (stages.length) {
+            filters = [
+              {
+                field: 'listStage.id',
+                operator: 'in',
+                value: stages,
+                title: 'stage',
+                type: FieldTypes.DROPDOWN,
+              },
+            ];
+          }
+          break;
+        }
+        case 'assignee': {
+          let assignees: { isNull: boolean; userIds: number[] } = {
+            isNull: false,
+            userIds: [],
+          };
+          assignees = quickFilters.value[group].reduce((prev, curr) => {
+            if (curr.operator === 'isNull') {
+              prev.isNull = true;
+            } else {
+              prev.userIds.push(curr.value);
+            }
+
+            return prev;
+          }, assignees);
+
+          if (assignees.userIds.length) {
+            filters = [
+              {
+                field: 'users.id',
+                operator: 'in',
+                value: assignees.userIds,
+                title: 'assignee',
+                type: FieldTypes.DROPDOWN,
+              },
+            ];
+          }
+          if (assignees.isNull) {
+            filters.push({
+              field: 'users.id',
+              operator: 'isNull',
+              value: [],
+              title: 'assignee',
               type: FieldTypes.DROPDOWN,
-            },
-          ];
+            });
+          }
           break;
         }
 
@@ -308,6 +351,23 @@ watch(listStages, (stages) => {
         type: FieldTypes.DROPDOWN,
       };
     });
+  }
+});
+
+watch(users, (assignees) => {
+  if (assignees) {
+    quickFilterGroupedItems.value.assignee =
+      defaultQuickFilterGroupedItems.assignee;
+
+    assignees.forEach((assignee) =>
+      quickFilterGroupedItems.value.assignee.push({
+        field: 'users.id',
+        operator: 'eq',
+        value: assignee.id,
+        title: `${assignee.firstName} ${assignee.lastName}`,
+        type: FieldTypes.USER,
+      })
+    );
   }
 });
 
