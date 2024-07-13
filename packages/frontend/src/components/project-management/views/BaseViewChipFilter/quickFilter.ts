@@ -20,13 +20,6 @@ const dateItems: FieldFilterOption[] = [
     type: FieldTypes.DATE,
   },
   {
-    field: 'card.dueAt',
-    operator: 'isNotNull',
-    value: [],
-    title: 'Due Date',
-    type: FieldTypes.DATE,
-  },
-  {
     title: 'Today',
     type: FieldTypes.DATE,
     field: 'card.dueAt',
@@ -36,7 +29,7 @@ const dateItems: FieldFilterOption[] = [
   {
     field: 'card.dueAt',
     operator: 'between',
-    value: [':startOfTime', ':endOfDay'],
+    value: [':startOfTime', ':startOfDay'],
     title: 'Past Due',
     type: FieldTypes.DATE,
   },
