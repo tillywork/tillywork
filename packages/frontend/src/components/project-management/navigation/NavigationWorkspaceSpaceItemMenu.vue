@@ -96,7 +96,7 @@ watch(spaceMenu, () => {
           <template #prepend>
             <v-icon icon="mdi-playlist-edit" />
           </template>
-          <v-list-item-title>Rename</v-list-item-title>
+          <v-list-item-title>Edit</v-list-item-title>
         </v-list-item>
         <v-list-item class="text-error" @click="handleDeleteSpace(space)">
           <template #prepend>

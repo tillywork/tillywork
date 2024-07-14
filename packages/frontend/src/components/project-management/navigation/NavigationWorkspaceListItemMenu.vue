@@ -155,7 +155,7 @@ watch(listMenu, () => {
           <template #prepend>
             <v-icon icon="mdi-playlist-edit" />
           </template>
-          <v-list-item-title>Rename</v-list-item-title>
+          <v-list-item-title>Edit</v-list-item-title>
         </v-list-item>
         <v-list-item @click="openSettingsDialog(SettingsTabs.FIELDS)">
           <template #prepend>

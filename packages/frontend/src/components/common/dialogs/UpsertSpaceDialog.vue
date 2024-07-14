@@ -2,6 +2,7 @@
 import { useSpacesService } from '@/composables/services/useSpacesService';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
+import BaseIconSelector from '../../common/inputs/BaseIconSelector/BaseIconSelector.vue';
 import type { Space } from '@/components/project-management/spaces/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
@@ -22,6 +23,8 @@ const space = computed<Space>(() => currentDialog.value.data.space);
 
 const spaceForm = ref<VForm>();
 const spaceDto = ref<Partial<Space>>({
+  icon: space.value?.icon,
+  iconColor: space.value?.iconColor,
   name: space.value?.name,
   workspaceId: workspace.value!.id,
 });
@@ -86,7 +89,15 @@ async function handleSubmitForm() {
           :rules="[rules.required]"
           label="Name*"
           autofocus
-        />
+        >
+          <template #prepend-inner>
+            <base-icon-selector
+              with-color
+              v-model="spaceDto.icon"
+              v-model:color="spaceDto.iconColor"
+            />
+          </template>
+        </v-text-field>
       </div>
       <v-card-actions class="d-flex justify-start align-center py-0 px-4">
         <v-spacer />

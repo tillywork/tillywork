@@ -18,6 +18,12 @@ export class Space {
     @PrimaryGeneratedColumn("increment")
     id: number;
 
+    @Column({ type: "varchar", length: 255, default: "mdi-folder-outline" })
+    icon: string;
+
+    @Column({ type: "varchar", length: 255, default: "default" })
+    iconColor: string;
+
     @Column({ type: "varchar", length: 255 })
     name: string;
 

@@ -8,6 +8,12 @@ import {
 import { CardType } from "../../card-types/card.type.entity";
 
 export class CreateListDto {
+    @IsOptional()
+    @IsString()
+    icon?: string;
+    @IsOptional()
+    @IsString()
+    iconColor?: string;
     @IsNotEmpty()
     @IsString()
     name: string;
