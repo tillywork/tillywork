@@ -34,10 +34,12 @@ export class AddParentAndChildrenColumnsToCardsTable1720077323722
     public async down(queryRunner: QueryRunner): Promise<void> {
         // Drops the foreign key.
         const table = await queryRunner.getTable("card");
-        const foreignKey = table.foreignKeys.find(
+        const foreignKey = table?.foreignKeys.find(
             (fk) => fk.columnNames.indexOf("parentId") !== -1
         );
-        await queryRunner.dropForeignKey("card", foreignKey);
+        if (foreignKey) {
+            await queryRunner.dropForeignKey("card", foreignKey);
+        }
 
         // Drops the `parentId` column.
         await queryRunner.dropColumn("card", "parentId");

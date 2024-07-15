@@ -1,4 +1,5 @@
 import type { User } from '@/components/common/users/types';
+import type { List } from '../lists/types';
 
 export interface Field {
   id: number;
@@ -11,6 +12,7 @@ export interface Field {
   items?: FieldItem[];
   createdByType: 'system' | 'user';
   createdBy?: User;
+  lists?: List[];
 }
 
 export interface CreateFieldDto {

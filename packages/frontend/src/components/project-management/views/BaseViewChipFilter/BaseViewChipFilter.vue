@@ -15,6 +15,7 @@ import type {
 import type { FieldFilterOption } from './types';
 import { useFieldsService } from '@/composables/services/useFieldsService';
 import { useAuthStore } from '@/stores/auth';
+import { useStateStore } from '@/stores/state';
 
 const props = defineProps<{
   filters?: QueryFilter;
@@ -33,16 +34,19 @@ const snackbarId = ref<number>();
 
 const { useFieldsQuery } = useFieldsService();
 const { showSnackbar, closeSnackbar } = useSnackbarStore();
-const { workspace, project } = storeToRefs(useAuthStore());
+const { project } = storeToRefs(useAuthStore());
+const { currentList } = storeToRefs(useStateStore());
 const { useProjectUsersQuery } = useProjectUsersService();
+
+const listId = computed(() => currentList.value!.id);
 
 const { data: users } = useProjectUsersQuery({
   projectId: project.value!.id,
   select: (projectUsers) => projectUsers.map((pj) => pj.user),
 });
 
-const { data: workspaceFields } = useFieldsQuery({
-  workspaceId: workspace.value!.id,
+const { data: listFields, refetch: refetchListFields } = useFieldsQuery({
+  listId,
 });
 
 const defaultFields = ref<FieldFilterOption[]>([
@@ -83,8 +87,8 @@ const defaultFields = ref<FieldFilterOption[]>([
 const fields = computed(() => {
   const fields: FieldFilterOption[] = [...defaultFields.value];
 
-  if (workspaceFields.value) {
-    workspaceFields.value.forEach((field) => {
+  if (listFields.value) {
+    listFields.value.forEach((field) => {
       fields.push({
         field: `card.data.${field.id}`,
         title: field.name,
@@ -225,6 +229,10 @@ watch(
     closeSaveSnackbar();
   }
 );
+
+watch(listId, () => {
+  refetchListFields();
+});
 </script>
 
 <template>

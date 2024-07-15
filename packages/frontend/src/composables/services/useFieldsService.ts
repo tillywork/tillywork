@@ -1,6 +1,12 @@
 import type { Field, CreateFieldDto } from '@/components/common/fields/types';
 import { useHttp } from '@/composables/useHttp';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import type { MaybeRef } from 'vue';
+
+export type GetFieldsParams = {
+  workspaceId?: MaybeRef<number>;
+  listId?: MaybeRef<number>;
+};
 
 export const useFieldsService = () => {
   const { sendRequest } = useHttp();
@@ -8,23 +14,22 @@ export const useFieldsService = () => {
 
   async function getFields({
     workspaceId,
-  }: {
-    workspaceId: number;
-  }): Promise<Field[]> {
+    listId,
+  }: GetFieldsParams): Promise<Field[]> {
     return sendRequest('/fields', {
       method: 'GET',
       params: {
-        workspaceId,
+        workspaceId: toValue(workspaceId),
+        listId: toValue(listId),
       },
     });
   }
 
-  function useFieldsQuery({ workspaceId }: { workspaceId: number }) {
+  function useFieldsQuery(params: GetFieldsParams) {
     return useQuery({
       queryKey: ['fields'],
-      queryFn: () => getFields({ workspaceId }),
+      queryFn: () => getFields(params),
       refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000,
     });
   }
 

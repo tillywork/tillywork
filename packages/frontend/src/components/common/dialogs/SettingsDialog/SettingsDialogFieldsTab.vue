@@ -14,6 +14,7 @@ import { useSnackbarStore } from '@/stores/snackbar';
 import { useLogo } from '@/composables/useLogo';
 import { UpsertDialogMode } from '../types';
 import { useAuthStore } from '@/stores/auth';
+import { useListsService } from '@/composables/services/useListsService';
 
 const selectedField = ref<Field>();
 const fieldDto = ref<Partial<Field>>();
@@ -41,6 +42,11 @@ const { data: fields } = useFieldsQuery({
 });
 const { mutateAsync: updateField } = updateFieldMutation();
 const { mutateAsync: createField } = createFieldMutation();
+
+const { useGetListsQuery } = useListsService();
+const { data: lists } = useGetListsQuery({
+  workspaceId: workspace.value!.id,
+});
 
 function handleFieldClick(field: Field) {
   selectedField.value = cloneDeep(field);
@@ -134,6 +140,11 @@ watch(selectedField, (v) => {
               accessorKey: 'type',
             },
             {
+              header: 'Lists',
+              id: 'lists',
+              accessorKey: 'lists',
+            },
+            {
               id: 'createdBy',
               header: 'Created By',
               accessorKey: 'createdBy',
@@ -145,6 +156,11 @@ watch(selectedField, (v) => {
           <template #name="{ row }">
             <v-icon :icon="row.original.icon" class="me-4" />
             <span class="text-body-2">{{ row.original.name }}</span>
+          </template>
+          <template #lists="{ row }">
+            <template v-for="list in row.original.lists" :key="list.id">
+              <v-chip class="me-1" density="compact">{{ list.name }}</v-chip>
+            </template>
           </template>
           <template #createdBy="{ row }">
             <v-card class="py-2">
@@ -207,6 +223,19 @@ watch(selectedField, (v) => {
                 ? 'Field type cannot be changed'
                 : ''
             "
+          />
+
+          <v-autocomplete
+            v-model="fieldDto.lists"
+            :items="lists"
+            item-title="name"
+            label="Lists"
+            auto-select-first
+            multiple
+            autocomplete="off"
+            return-object
+            chips
+            closable-chips
           />
 
           <div class="mb-2">

@@ -10,7 +10,7 @@ import {
     Query,
     Request,
 } from "@nestjs/common";
-import { FieldsService } from "./fields.service";
+import { FieldsService, FindAllParams } from "./fields.service";
 import { Field } from "./field.entity";
 import { CreateFieldDto } from "./dto/create.field.dto";
 import { UpdateFieldDto } from "./dto/update.field.dto";
@@ -28,8 +28,8 @@ export class FieldsController {
     constructor(private readonly fieldsService: FieldsService) {}
 
     @Get()
-    findAll(@Query("workspaceId") workspaceId: number): Promise<Field[]> {
-        return this.fieldsService.findAll({ workspaceId });
+    findAll(@Query() query: FindAllParams): Promise<Field[]> {
+        return this.fieldsService.findAll(query);
     }
 
     @Get(":id")
