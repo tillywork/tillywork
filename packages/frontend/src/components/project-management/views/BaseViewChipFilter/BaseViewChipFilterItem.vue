@@ -5,6 +5,7 @@ import type { FieldFilterOption } from './types';
 import type { User } from '@/components/common/users/types';
 import type { FieldFilter, FilterOperator } from '../../filters/types';
 import { useStateStore } from '@/stores/state';
+import { cloneDeep } from 'lodash';
 
 const filter = defineModel<FieldFilter>({
   required: true,
@@ -14,6 +15,7 @@ const props = defineProps<{
   fields: FieldFilterOption[];
   users: User[];
 }>();
+const filterCopy = ref<FieldFilter>(cloneDeep(filter.value));
 const emit = defineEmits(['delete']);
 
 const { currentList } = storeToRefs(useStateStore());
@@ -289,10 +291,12 @@ watch(
       />
       <base-user-selector
         v-if="!hideFilterValue"
-        v-model="filter.value"
+        v-model="filterCopy.value"
         :users
         text-field
-        return-id
+        @update:model-value="
+          filter.value = filterCopy.value.map((user: User) => user.id)
+        "
       />
     </template>
     <base-icon-btn
