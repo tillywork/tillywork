@@ -551,7 +551,7 @@ watchEffect(() => {
                     <template v-else-if="cell.column.columnDef.id === 'users'">
                       <v-card
                         :width="cell.column.getSize()"
-                        class="list-cell d-flex align-center fill-height"
+                        class="list-cell d-flex align-center fill-height px-1"
                         rounded="0"
                         color="transparent"
                         link
