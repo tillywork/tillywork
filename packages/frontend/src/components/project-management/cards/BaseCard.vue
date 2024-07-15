@@ -595,17 +595,18 @@ function openDescriptionFileDialog() {
                 </template>
                 <template v-else-if="field.type === FieldTypes.USER">
                   <base-user-selector
-                    :model-value="cardCopy.data[field.id]?.map((userIdAsString: string) => +userIdAsString)"
+                    :model-value="cardCopy.data[field.id]"
                     :users
                     :label="field.name"
-                    return-id
                     :icon="field.icon"
                     size="24"
                     @update:model-value="
-                      (users: number[]) =>
+                      (v: User | User[]) =>
                         updateFieldValue({
                           field,
-                          v: users.map((userIdAsNumber) => userIdAsNumber.toString()),
+                          v: Array.isArray(v)
+                            ? v.map((user) => user.id)
+                            : [v.id],
                         })
                     "
                   />
