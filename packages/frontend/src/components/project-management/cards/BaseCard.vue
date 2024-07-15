@@ -28,22 +28,31 @@ const props = defineProps<{
   card: Card;
   showCloseButton?: boolean;
 }>();
+
 const emit = defineEmits(['click:close']);
-const { project } = storeToRefs(useAuthStore());
+
 const cardCopy = ref<Card>(cloneDeep(props.card));
-const fields = ref<Field[]>([]);
 const comment = ref<Content>();
 const isCommentEmpty = ref<boolean>();
 const descriptionInput = ref();
+const cardTitle = ref(cardCopy.value.title);
+const debouncedTitle = useDebounce(cardTitle, 2000);
+const cardDescription = ref(cardCopy.value.description);
+const debouncedDescription = useDebounce(cardDescription, 2000);
+
+const cardListStage = ref(cardCopy.value.cardLists[0].listStage);
+
+const { project } = storeToRefs(useAuthStore());
+const snackbar = useSnackbarStore();
+const stateStore = useStateStore();
+const { areChildCardsExpanded, isInfoDrawerOpen } = storeToRefs(stateStore);
+const dialog = useDialogStore();
+
 const cardsService = useCardsService();
 const cardActivitiesService = useCardActivitiesService();
 const projectUsersService = useProjectUsersService();
 const listStagesService = useListStagesService();
 const { useFieldsQuery } = useFieldsService();
-const snackbar = useSnackbarStore();
-const stateStore = useStateStore();
-const { areChildCardsExpanded, isInfoDrawerOpen } = storeToRefs(stateStore);
-const dialog = useDialogStore();
 
 const { mutateAsync: updateCard, isPending: isUpdating } =
   cardsService.useUpdateCardMutation();
@@ -60,17 +69,14 @@ const { data: listFields } = useFieldsQuery({
   listId,
 });
 
-watch(
-  listFields,
-  (v) => {
-    if (v) {
-      fields.value = [...v];
-    } else {
-      fields.value = [];
-    }
-  },
-  { immediate: true }
-);
+const fields = computed(() => {
+  let arr: Field[] = [];
+  if (listFields.value) {
+    arr = listFields.value;
+  }
+
+  return arr;
+});
 
 const createActivityMutation =
   cardActivitiesService.useCreateActivityMutation();
@@ -96,12 +102,6 @@ const isCardLoading = computed(() => {
   );
 });
 
-const cardTitle = ref(cardCopy.value.title);
-const debouncedTitle = useDebounce(cardTitle, 2000);
-watch(debouncedTitle, () => {
-  updateTitle();
-});
-
 watch(
   () => props.card,
   (v) => {
@@ -114,13 +114,13 @@ watch(
   }
 );
 
-const cardDescription = ref(cardCopy.value.description);
-const debouncedDescription = useDebounce(cardDescription, 2000);
 watch(debouncedDescription, () => {
   updateDescription();
 });
 
-const cardListStage = ref(cardCopy.value.cardLists[0].listStage);
+watch(debouncedTitle, () => {
+  updateTitle();
+});
 
 function updateTitle() {
   const newTitle = cardTitle.value.trim();
