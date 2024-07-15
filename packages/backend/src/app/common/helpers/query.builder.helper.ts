@@ -100,11 +100,7 @@ export class QueryBuilderHelper {
         }
     }
 
-    static getRandomInt(max = Number.MAX_SAFE_INTEGER) {
-        return Math.floor(Math.random() * max);
-    }
-
-    static getRandomArbitrary({ min = 1, max = Number.MAX_SAFE_INTEGER }) {
+    static getRandomInt({ min = 1, max = Number.MAX_SAFE_INTEGER }) {
         const minCeiled = Math.ceil(min);
         const maxFloored = Math.floor(max);
         return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
@@ -255,7 +251,7 @@ export class QueryBuilderHelper {
                 });
             case "between":
             case "nbetween": {
-                const randomNumber1 = this.getRandomInt();
+                const randomNumber1 = this.getRandomInt({});
                 const randomNumber2 = randomNumber1 + 1;
 
                 const betweenOperator = `${
