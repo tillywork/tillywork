@@ -8,6 +8,7 @@ import {
     JoinTable,
     OneToMany,
     Relation,
+    ManyToMany,
 } from "typeorm";
 import { Space } from "../spaces/space.entity";
 import { CardList } from "../cards/card-lists/card.list.entity";
@@ -15,6 +16,7 @@ import { ListStage } from "./list-stages/list.stage.entity";
 import { View } from "../views/view.entity";
 import { ListGroup } from "./list-groups/list.group.entity";
 import { CardType } from "../card-types/card.type.entity";
+import { Field } from "../fields/field.entity";
 
 @Entity()
 export class List {
@@ -49,4 +51,7 @@ export class List {
 
     @ManyToOne(() => CardType, { nullable: false, eager: true })
     defaultCardType: Relation<CardType>;
+
+    @ManyToMany(() => Field, { onDelete: "CASCADE" })
+    fields: Relation<Field[]>;
 }

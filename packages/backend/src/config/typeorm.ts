@@ -38,6 +38,7 @@ import { CreateFileTable1720019365225 } from "../migrations/1720019365225-create
 import { AddUserUploadLimitToProjectTable1720038998374 } from "../migrations/1720038998374-add-user-upload-limit-to-project-table";
 import { AddProjectIdToUserTable1720082507515 } from "../migrations/1720082507515-add-projectId-to-user-table";
 import { AddIgnoreChildrenToViewTable1720514522438 } from "../migrations/1720514522438-add-ignore-children-to-view-table";
+import { CreateListFieldsTable1720527075305 } from "../migrations/1720527075305-create-list-fields-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -77,6 +78,7 @@ const migrations = [
     AddUserUploadLimitToProjectTable1720038998374,
     AddProjectIdToUserTable1720082507515,
     AddIgnoreChildrenToViewTable1720514522438,
+    CreateListFieldsTable1720527075305,
 ];
 
 const config: TypeOrmModuleOptions = {

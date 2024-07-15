@@ -7,10 +7,13 @@ import {
     ManyToOne,
     Relation,
     DeleteDateColumn,
+    ManyToMany,
+    JoinTable,
 } from "typeorm";
 import { Workspace } from "../workspaces/workspace.entity";
 import { FieldItem, FieldTypes } from "./types";
 import { User } from "../users/user.entity";
+import { List } from "../lists/list.entity";
 
 /**
  * This contains card fields.
@@ -56,4 +59,8 @@ export class Field {
         nullable: false,
     })
     workspace: Relation<Workspace>;
+
+    @ManyToMany(() => List)
+    @JoinTable({ name: "list_fields" })
+    lists: Relation<List[]>;
 }

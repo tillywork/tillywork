@@ -29,7 +29,7 @@ const props = defineProps<{
   showCloseButton?: boolean;
 }>();
 const emit = defineEmits(['click:close']);
-const { workspace, project } = storeToRefs(useAuthStore());
+const { project } = storeToRefs(useAuthStore());
 const cardCopy = ref<Card>(cloneDeep(props.card));
 const fields = ref<Field[]>([]);
 const comment = ref<Content>();
@@ -50,29 +50,27 @@ const { mutateAsync: updateCard, isPending: isUpdating } =
 const usersQuery = projectUsersService.useProjectUsersQuery({
   projectId: project.value!.id,
 });
-const { data: workspaceFields } = useFieldsQuery({
-  workspaceId: workspace.value!.id,
+
+const listId = computed(() => props.card.cardLists[0].listId);
+const listStagesQuery = listStagesService.useGetListStagesQuery({
+  listId: listId.value,
+});
+
+const { data: listFields } = useFieldsQuery({
+  listId,
 });
 
 watch(
-  workspaceFields,
+  listFields,
   (v) => {
     if (v) {
-      v.forEach(async (field) => {
-        const exists = fields.value.find((f) => f.id === field.id);
-        if (!exists) {
-          fields.value = [...fields.value, field];
-        }
-      });
+      fields.value = [...v];
+    } else {
+      fields.value = [];
     }
   },
   { immediate: true }
 );
-
-const listId = computed(() => props.card.cardLists[0].listStage.listId);
-const listStagesQuery = listStagesService.useGetListStagesQuery({
-  listId: listId.value,
-});
 
 const createActivityMutation =
   cardActivitiesService.useCreateActivityMutation();
