@@ -2,12 +2,11 @@
 import { useUsersService } from '@/composables/services/useUsersService';
 import stringUtils from '@/utils/string';
 import { type User } from '../users/types';
-import { cloneDeep } from 'lodash';
 
 const userMenu = defineModel('menu', {
   default: false,
 });
-const value = defineModel<User[] | number[]>({
+const selectedUsers = defineModel<User[]>({
   default: [],
 });
 
@@ -23,7 +22,6 @@ const props = defineProps<{
   label?: string;
   fill?: boolean;
   textField?: boolean;
-  returnId?: boolean;
   icon?: string;
 }>();
 
@@ -38,7 +36,6 @@ const searchedUsers = computed(() =>
       stringUtils.fuzzySearch(searchTerm.value, user.email)
   )
 );
-const selectedUsers = ref<User[]>(getSelectedUsersFromModel());
 
 const toggleUserSelection = (user: User) => {
   if (!isUserSelected(user)) {
@@ -59,26 +56,6 @@ const isUserSelected = (user: User) => {
   const index = selectedUsers.value.findIndex((u) => u.id === user.id);
   return index !== -1;
 };
-
-function getSelectedUsersFromModel() {
-  if (props.returnId) {
-    return cloneDeep(
-      value.value.map((id) =>
-        props.users.find((user) => user.id === id)
-      ) as User[]
-    );
-  } else {
-    return cloneDeep(value.value as User[]);
-  }
-}
-
-watch(selectedUsers, (v) => {
-  if (props.returnId) {
-    value.value = [...v.map((user) => cloneDeep(user.id))];
-  } else {
-    value.value = cloneDeep(v);
-  }
-});
 </script>
 
 <template>
@@ -118,9 +95,9 @@ watch(selectedUsers, (v) => {
                   size="x-small"
                 />
               </template>
-              <span class="text-caption ms-2">{{
-                getUserFullName(item.raw)
-              }}</span>
+              <span class="text-caption ms-2">
+                {{ getUserFullName(item.raw) }}
+              </span>
             </v-chip>
           </template>
           <template #item="{ item, props }">
