@@ -48,6 +48,7 @@ const snackbar = useSnackbarStore();
 const stateStore = useStateStore();
 const { areChildCardsExpanded, isInfoDrawerOpen } = storeToRefs(stateStore);
 const dialog = useDialogStore();
+const keys = useMagicKeys();
 
 const cardsService = useCardsService();
 const cardActivitiesService = useCardActivitiesService();
@@ -123,7 +124,6 @@ watch(debouncedTitle, () => {
   updateTitle();
 });
 
-const keys = useMagicKeys();
 watch(keys[[leaderKey, 'I'].join('+')], (v) => {
   if (v && !stateStore.isInputFocused) {
     stateStore.toggleInfoDrawer();

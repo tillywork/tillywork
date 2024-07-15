@@ -138,7 +138,7 @@ function handleExecuteCommand(command: Command) {
  */
 const onKeydown = (event: KeyboardEvent) => {
   // WARN: Pay attention to capitalization.
-  if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+  if ((event.metaKey || event.ctrlKey) && ['k', 'i'].includes(event.key)) {
     event.preventDefault();
   } else if (event.key === 'F1') {
     event.preventDefault();
