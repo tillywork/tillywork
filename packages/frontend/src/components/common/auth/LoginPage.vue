@@ -85,7 +85,7 @@ const login = async () => {
                 variant="flat"
                 color="primary"
                 :loading="loading"
-                class="text-body-2"
+                class="text-body-3"
               >
                 Login
               </v-btn>

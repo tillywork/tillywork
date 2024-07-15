@@ -27,7 +27,7 @@ const { data: projectUsers } = useProjectUsersQuery({
       <v-divider class="my-4" />
     </v-card-item>
     <v-card-item v-if="projectUsers">
-      <v-card-title class="text-body-2"> Manage members </v-card-title>
+      <v-card-title class="text-body-3"> Manage members </v-card-title>
       <v-card-subtitle class="text-caption">
         {{ projectUsers.length }} active member{{
           projectUsers.length > 1 ? 's' : ''

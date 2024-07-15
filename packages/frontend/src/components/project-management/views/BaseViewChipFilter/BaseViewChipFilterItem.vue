@@ -196,7 +196,7 @@ watch(
       :rules="[rules.required]"
     >
       <template #item="{ item, props }">
-        <v-list-item class="text-body-2" v-bind="props" slim>
+        <v-list-item class="text-body-3" v-bind="props" slim>
           <template #prepend>
             <v-icon :icon="item.raw.icon" />
           </template>

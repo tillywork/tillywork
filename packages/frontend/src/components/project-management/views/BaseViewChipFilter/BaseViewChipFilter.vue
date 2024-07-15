@@ -260,7 +260,7 @@ watch(listId, () => {
       </base-view-chip>
     </template>
     <v-card>
-      <v-card-title class="text-body-2"> Filter Builder </v-card-title>
+      <v-card-title class="text-body-3"> Filter Builder </v-card-title>
       <v-card-text class="pa-0">
         <!--TODO-->
         <!-- <v-card-item>
@@ -299,7 +299,7 @@ watch(listId, () => {
             <v-card>
               <v-list>
                 <template v-for="field in fields" :key="field.field">
-                  <v-list-item @click="addFilter(field)" class="text-body-2">
+                  <v-list-item @click="addFilter(field)" class="text-body-3">
                     <template #prepend>
                       <v-icon :icon="field.icon" />
                     </template>

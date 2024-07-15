@@ -433,7 +433,7 @@ watchEffect(() => {
                   color="transparent"
                   v-bind="rowProps"
                   height="33"
-                  class="list-row d-flex align-center text-body-2"
+                  class="list-row d-flex align-center text-body-3"
                   rounded="0"
                   link
                   :ripple="false"
@@ -485,7 +485,7 @@ watchEffect(() => {
                     <template v-else-if="cell.column.columnDef.id === 'title'">
                       <v-card
                         :width="cell.column.getSize()"
-                        class="d-flex align-center fill-height text-body-2 px-2 list-cell"
+                        class="d-flex align-center fill-height text-body-3 px-2 list-cell"
                         rounded="0"
                         color="transparent"
                       >
@@ -504,7 +504,7 @@ watchEffect(() => {
                     "
                           @click.prevent
                         />
-                        <span class="line-height-1 text-truncate ms-2">
+                        <span class="text-truncate ms-2">
                           {{ row.original.title }}
                         </span>
 

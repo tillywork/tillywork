@@ -74,7 +74,7 @@ async function handleCreate() {
           @click="dialog.closeDialog(currentDialogIndex)"
         />
       </v-card-title>
-      <p class="text-color-subtitle text-body-2 mt-4">
+      <p class="text-color-subtitle text-body-3 mt-4">
         This will reassign all cards with type
         <span class="font-weight-bold">{{ cardType.name }}</span> to
         <span class="font-weight-bold">{{ replacementCardType?.name }}</span

@@ -117,7 +117,7 @@ async function handleCreate() {
             </v-list-item>
           </template>
           <template #selection="{ item }">
-            <span class="d-flex align-center ga-3 text-body-2">
+            <span class="d-flex align-center ga-3 text-body-3">
               <v-icon :icon="item.raw.icon" />
               {{ item.title }}
             </span>

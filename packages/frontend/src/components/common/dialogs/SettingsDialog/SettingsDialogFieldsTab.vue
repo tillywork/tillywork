@@ -155,7 +155,7 @@ watch(selectedField, (v) => {
         >
           <template #name="{ row }">
             <v-icon :icon="row.original.icon" class="me-4" />
-            <span class="text-body-2">{{ row.original.name }}</span>
+            <span class="text-body-3">{{ row.original.name }}</span>
           </template>
           <template #lists="{ row }">
             <template v-for="list in row.original.lists" :key="list.id">
@@ -174,13 +174,13 @@ watch(selectedField, (v) => {
                     : ''
                 "
               />
-              <span class="text-body-2 ms-3">
+              <span class="text-body-3 ms-3">
                 {{ getFieldCreatedByName(row.original) }}
               </span>
             </v-card>
           </template>
           <template #type="{ row }">
-            <span class="text-body-2 text-capitalize">
+            <span class="text-body-3 text-capitalize">
               {{ row.original.type }}
             </span>
           </template>

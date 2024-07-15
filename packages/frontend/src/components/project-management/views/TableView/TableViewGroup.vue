@@ -366,7 +366,7 @@ watchEffect(() => {
           {{ listGroup.original.icon ?? 'mdi-circle-slice-8' }}
         </v-icon>
       </template>
-      <span class="text-body-2 ms-3">
+      <span class="text-body-3 ms-3">
         {{ listGroup.original.name }}
         <span class="ms-2 text-caption text-color-subtitle">
           {{ total }}
@@ -431,7 +431,7 @@ watchEffect(() => {
                   color="transparent"
                   v-bind="rowProps"
                   height="33"
-                  class="table-row d-flex align-center text-body-2 flex-fill"
+                  class="table-row d-flex align-center text-body-3 flex-fill"
                   rounded="0"
                   link
                   :ripple="false"
@@ -483,7 +483,7 @@ watchEffect(() => {
                     <template v-else-if="cell.column.columnDef.id === 'title'">
                       <v-card
                         :width="getColumnSize(cell.column.columnDef.id)"
-                        class="d-flex align-center fill-height text-body-2 px-2 table-cell"
+                        class="d-flex align-center fill-height text-body-3 px-2 table-cell"
                         rounded="0"
                         color="transparent"
                       >
@@ -502,7 +502,7 @@ watchEffect(() => {
                     "
                           @click.prevent
                         />
-                        <span class="line-height-1 text-truncate ms-2">
+                        <span class="text-truncate ms-2">
                           {{ row.original.title }}
                         </span>
 

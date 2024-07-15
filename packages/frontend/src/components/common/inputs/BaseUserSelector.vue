@@ -168,7 +168,7 @@ watch(selectedUsers, (v) => {
               variant="text"
               size="small"
               color="surface-dark"
-              class="text-body-2"
+              class="text-body-3"
               @click.prevent
             >
               <template #prepend>

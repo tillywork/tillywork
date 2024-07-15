@@ -211,7 +211,7 @@ function generateColumnDefs(): ColumnDef<any, any>[] {
                 color="transparent"
                 v-bind="rowProps"
                 height="33"
-                class="table-row d-flex align-center text-body-2 flex-fill"
+                class="table-row d-flex align-center text-body-3 flex-fill"
                 rounded="0"
                 link
                 :ripple="false"

@@ -15,13 +15,13 @@ const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
     <v-card-title class="text-body-1 pa-4 pb-1 bg-accent">
       {{ currentDialog?.data.title ?? 'Confirm' }}
     </v-card-title>
-    <v-card-text class="text-body-2 pa-4">
+    <v-card-text class="text-body-3 pa-4">
       {{ currentDialog?.data.message }}
     </v-card-text>
-    <v-card-actions class="text-body-2">
+    <v-card-actions class="text-body-3">
       <v-btn
         color="error"
-        class="text-body-2"
+        class="text-body-3"
         size="small"
         @click="currentDialog?.data.onCancel"
         :disabled="currentDialog?.data.isLoading"
@@ -29,7 +29,7 @@ const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
       >
       <v-btn
         color="info"
-        class="text-body-2"
+        class="text-body-3"
         size="small"
         @click="currentDialog?.data.onConfirm"
         :loading="currentDialog?.data.isLoading"

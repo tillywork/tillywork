@@ -60,7 +60,7 @@ watch(
 
 <template>
   <v-card>
-    <v-card-title class="text-body-2 d-flex align-center mb-1">
+    <v-card-title class="text-body-3 d-flex align-center mb-1">
       {{ label }}
       <v-spacer />
       <v-btn

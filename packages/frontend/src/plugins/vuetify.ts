@@ -67,7 +67,7 @@ const vuetify = createVuetify({
       slim: true,
       VListItem: {
         VListItemTitle: {
-          class: 'text-body-2',
+          class: 'text-body-3',
         },
         VIcon: {
           size: 'x-small',

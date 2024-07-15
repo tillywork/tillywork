@@ -102,7 +102,7 @@ watch(
           class="text-caption"
           size="x-small"
         />
-        <span class="text-truncate text-body-2 mx-2">
+        <span class="text-truncate text-body-3 mx-2">
           {{ selectedWorkspace?.name ?? 'Select a workspace' }}
         </span>
         <v-spacer />

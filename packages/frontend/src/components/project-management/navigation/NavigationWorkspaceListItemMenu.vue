@@ -177,7 +177,7 @@ watch(listMenu, () => {
           </template>
           <v-card>
             <v-card-title class="d-flex align-center pt-2 pe-1">
-              <span class="text-body-2">Card Types</span>
+              <span class="text-body-3">Card Types</span>
               <v-spacer />
               <v-btn
                 size="small"

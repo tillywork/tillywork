@@ -36,7 +36,7 @@ function copyInviteLink() {
 
 <template>
   <v-card v-if="project">
-    <v-card-title class="text-body-2"> Invite link </v-card-title>
+    <v-card-title class="text-body-3"> Invite link </v-card-title>
     <v-card-subtitle>
       Share this link with team members you want to join your project.
     </v-card-subtitle>

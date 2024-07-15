@@ -406,7 +406,7 @@ watch(
         </list-view>
       </template>
       <template v-else>
-        <span class="text-body-2 text-error">Error: Unknown view type</span>
+        <span class="text-body-3 text-error">Error: Unknown view type</span>
       </template>
     </div>
   </div>

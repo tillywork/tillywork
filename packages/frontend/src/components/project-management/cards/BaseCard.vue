@@ -450,7 +450,7 @@ function openDescriptionFileDialog() {
         <v-divider class="my-8" />
 
         <v-card>
-          <v-card-subtitle class="text-body-2 ps-1">Activity</v-card-subtitle>
+          <v-card-subtitle class="text-body-3 ps-1">Activity</v-card-subtitle>
           <v-card-text class="pa-0">
             <base-card-activity-timeline :card-id="cardCopy.id" />
             <base-card-comment-box
@@ -505,7 +505,7 @@ function openDescriptionFileDialog() {
           <div class="d-flex align-center my-4">
             <p class="field-label text-caption">Start date</p>
             <base-date-picker
-              class="text-body-2"
+              class="text-body-3"
               label="Start date"
               icon="mdi-calendar"
               v-model="cardCopy.startsAt"
@@ -515,7 +515,7 @@ function openDescriptionFileDialog() {
           <div class="d-flex align-center my-4">
             <p class="field-label text-caption">Due date</p>
             <base-date-picker
-              class="text-body-2"
+              class="text-body-3"
               label="Due date"
               icon="mdi-calendar"
               v-model="cardCopy.dueAt"
@@ -579,7 +579,7 @@ function openDescriptionFileDialog() {
                 <template v-else-if="field.type === FieldTypes.DATE">
                   <base-date-picker
                     v-model="cardCopy.data[field.id]"
-                    class="text-body-2"
+                    class="text-body-3"
                     :icon="field.icon ?? 'mdi-calendar'"
                     :label="field.name"
                     @update:model-value="
