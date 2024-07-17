@@ -14,6 +14,7 @@ import { Workspace } from "../workspaces/workspace.entity";
 import { FieldItem, FieldTypes } from "./types";
 import { User } from "../users/user.entity";
 import { List } from "../lists/list.entity";
+import { CardType } from "../card-types/card.type.entity";
 
 /**
  * This contains card fields.
@@ -41,6 +42,9 @@ export class Field {
     /** Contains the items for dropdown fields. */
     @Column({ type: "jsonb", nullable: true })
     items?: FieldItem[];
+
+    @ManyToOne(() => CardType, { onDelete: "CASCADE", eager: true })
+    cardType: Relation<CardType>;
 
     @Column({ type: "enum", enum: ["system", "user"], default: "system" })
     createdByType: "system" | "user";

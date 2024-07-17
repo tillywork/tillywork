@@ -1,5 +1,6 @@
 import type { User } from '@/components/common/users/types';
 import type { List } from '../lists/types';
+import type { CardType } from '../cards/types';
 
 export interface Field {
   id: number;
@@ -9,6 +10,7 @@ export interface Field {
   workspaceId: number;
   required: boolean;
   multiple: boolean;
+  cardType?: CardType;
   items?: FieldItem[];
   createdByType: 'system' | 'user';
   createdBy?: User;
@@ -23,6 +25,7 @@ export interface CreateFieldDto {
   required?: boolean;
   multiple?: boolean;
   items?: FieldItem;
+  cardType?: CardType;
 }
 
 export enum FieldTypes {
@@ -39,6 +42,7 @@ export enum FieldTypes {
   CURRENCY = 'currency',
   STAGE = 'stage',
   RICH = 'rich',
+  CARD = 'card',
 }
 
 export const FIELD_TYPE_OPTIONS = [
@@ -61,6 +65,10 @@ export const FIELD_TYPE_OPTIONS = [
   {
     title: 'User',
     value: FieldTypes.USER,
+  },
+  {
+    title: 'Relation',
+    value: FieldTypes.CARD,
   },
 ];
 

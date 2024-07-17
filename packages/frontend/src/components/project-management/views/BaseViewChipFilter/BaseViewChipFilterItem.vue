@@ -5,6 +5,7 @@ import type { FieldFilterOption } from './types';
 import type { User } from '@/components/common/users/types';
 import type { FieldFilter, FilterOperator } from '../../filters/types';
 import { useStateStore } from '@/stores/state';
+import BaseRelationInput from '@/components/common/inputs/BaseRelationInput.vue';
 
 const filter = defineModel<FieldFilter>({
   required: true,
@@ -113,6 +114,7 @@ function mapFilterOptionValueToOperator(value: string): FilterOperator {
     case FieldTypes.USER:
     case FieldTypes.DROPDOWN:
     case FieldTypes.LABEL:
+    case FieldTypes.CARD:
       if (value === 'between') {
         return 'in';
       } else if (value === 'nbetween') {
@@ -140,6 +142,7 @@ function mapFilterOperatorToFileringOption(
     case FieldTypes.USER:
     case FieldTypes.DROPDOWN:
     case FieldTypes.LABEL:
+    case FieldTypes.CARD:
       if (value === 'in') {
         return 'between';
       } else if (value === 'nin') {
@@ -293,6 +296,26 @@ watch(
         :users
         text-field
         return-id
+      />
+    </template>
+    <template v-else-if="selectedFilter?.type === FieldTypes.CARD">
+      <v-autocomplete
+        :items="filteringOptions"
+        v-model="filterOption"
+        @update:model-value="handleFilteringOptionChange"
+        label="Operator"
+        single-line
+        hide-details
+        max-width="160"
+        auto-select-first
+        :rules="[rules.required]"
+        class="me-2"
+      />
+      <base-relation-input
+        v-if="!hideFilterValue && selectedFilter.original"
+        v-model="filter.value"
+        :field="selectedFilter.original"
+        :key="selectedFilter.field"
       />
     </template>
     <base-icon-btn

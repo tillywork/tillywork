@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { FindOptionsWhere, Repository, UpdateResult } from "typeorm";
+import { Brackets, FindOptionsWhere, Repository, UpdateResult } from "typeorm";
 import { Card } from "./card.entity";
 import { CreateCardDto } from "./dto/create.card.dto";
 import { UpdateCardDto } from "./dto/update.card.dto";
@@ -104,6 +104,40 @@ export class CardsService {
             throw new NotFoundException(`Card with ID ${id} not found`);
         }
         return card;
+    }
+
+    async searchCards({
+        keyword,
+        workspaceId,
+        cardTypeId,
+    }: {
+        keyword: string;
+        cardTypeId?: number;
+        workspaceId: number;
+    }): Promise<Card[]> {
+        const queryBuilder = this.cardsRepository
+            .createQueryBuilder("card")
+            .leftJoinAndSelect("card.users", "user")
+            .where(
+                new Brackets((qb) => {
+                    qb.where("card.title ILIKE :keyword", {
+                        keyword: `%${keyword}%`,
+                    }).orWhere(
+                        "user.firstName || ' ' || user.lastName ILIKE :keyword",
+                        { keyword: `%${keyword}%` }
+                    );
+                })
+            )
+            .andWhere("card.workspaceId = :workspaceId", { workspaceId })
+            .orderBy("card.createdAt", "DESC")
+            .limit(15);
+
+        if (cardTypeId) {
+            queryBuilder.andWhere(`card.typeId = :cardTypeId`, { cardTypeId });
+        }
+
+        const cards = await queryBuilder.getMany();
+        return cards;
     }
 
     async create(createCardDto: CreateCardDto): Promise<Card> {

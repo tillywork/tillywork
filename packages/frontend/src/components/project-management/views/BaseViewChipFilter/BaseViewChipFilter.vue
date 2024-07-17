@@ -96,6 +96,7 @@ const fields = computed(() => {
         operator: getOperatorFromFieldType(field),
         icon: field.icon,
         options: field.items,
+        original: field,
       });
     });
   }
@@ -192,6 +193,7 @@ function getOperatorFromFieldType(field: Field): FilterOperator {
     case FieldTypes.USER:
     case FieldTypes.DROPDOWN:
     case FieldTypes.LABEL:
+    case FieldTypes.CARD:
       return 'in';
     case FieldTypes.DATE:
       return 'between';

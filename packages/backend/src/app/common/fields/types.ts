@@ -12,6 +12,7 @@ export enum FieldTypes {
     CURRENCY = "currency",
     STAGE = "stage",
     RICH = "rich",
+    CARD = "card",
 }
 
 export type FieldItem = {

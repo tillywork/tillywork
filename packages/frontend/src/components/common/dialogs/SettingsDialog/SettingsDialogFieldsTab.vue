@@ -15,6 +15,7 @@ import { useLogo } from '@/composables/useLogo';
 import { UpsertDialogMode } from '../types';
 import { useAuthStore } from '@/stores/auth';
 import { useListsService } from '@/composables/services/useListsService';
+import { useCardTypesService } from '@/composables/services/useCardTypesService';
 
 const selectedField = ref<Field>();
 const fieldDto = ref<Partial<Field>>();
@@ -27,9 +28,12 @@ const isCreatingOrEditing = computed(
 );
 
 const showIsMultiple = computed(() =>
-  [FieldTypes.DROPDOWN, FieldTypes.LABEL, FieldTypes.USER].includes(
-    fieldDto.value?.type as FieldTypes
-  )
+  [
+    FieldTypes.DROPDOWN,
+    FieldTypes.LABEL,
+    FieldTypes.USER,
+    FieldTypes.CARD,
+  ].includes(fieldDto.value?.type as FieldTypes)
 );
 
 const { showSnackbar } = useSnackbarStore();
@@ -45,6 +49,11 @@ const { mutateAsync: createField } = createFieldMutation();
 
 const { useGetListsQuery } = useListsService();
 const { data: lists } = useGetListsQuery({
+  workspaceId: workspace.value!.id,
+});
+
+const { useFindAllQuery } = useCardTypesService();
+const { data: cardTypes } = useFindAllQuery({
   workspaceId: workspace.value!.id,
 });
 
@@ -181,7 +190,11 @@ watch(selectedField, (v) => {
           </template>
           <template #type="{ row }">
             <span class="text-body-3 text-capitalize">
-              {{ row.original.type }}
+              {{
+                FIELD_TYPE_OPTIONS.find(
+                  (option) => option.value === row.original.type
+                )?.title
+              }}
             </span>
           </template>
         </base-table>
@@ -223,6 +236,17 @@ watch(selectedField, (v) => {
                 ? 'Field type cannot be changed'
                 : ''
             "
+          />
+
+          <v-autocomplete
+            v-if="fieldDto.type === FieldTypes.CARD"
+            v-model="fieldDto.cardType"
+            :items="cardTypes"
+            item-title="name"
+            label="Card Type"
+            auto-select-first
+            autocomplete="off"
+            return-object
           />
 
           <v-autocomplete

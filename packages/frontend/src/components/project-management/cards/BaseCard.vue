@@ -24,6 +24,7 @@ import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue'
 import BaseCardChildrenProgress from './BaseCardChildrenProgress.vue';
 import BaseCardChip from './BaseCardChip.vue';
 import { leaderKey } from '@/utils/keyboard';
+import BaseRelationInput from '@/components/common/inputs/BaseRelationInput.vue';
 
 const props = defineProps<{
   card: Card;
@@ -246,11 +247,12 @@ function updateCardListStage(card: Card, listStage: ListStage) {
 }
 
 function updateFieldValue({ field, v }: { field: Field; v: any }) {
+  console.log(v);
   cardCopy.value = {
     ...cardCopy.value,
     data: {
       ...cardCopy.value.data,
-      [field.id]: Array.isArray(v) ? (v.length && !!v[0] ? v : undefined) : v,
+      [field.id]: v,
     },
   };
 
@@ -525,7 +527,7 @@ function openDescriptionFileDialog() {
           <template v-if="fields">
             <template v-for="field in fields" :key="field.id">
               <div class="d-flex align-center my-4">
-                <p class="field-label text-caption">
+                <p class="field-label text-caption me-1">
                   {{ field.name }}
                 </p>
                 <template v-if="field.type === FieldTypes.TEXT">
@@ -538,7 +540,7 @@ function openDescriptionFileDialog() {
                   />
                 </template>
                 <template v-else-if="field.type === FieldTypes.DROPDOWN">
-                  <v-combobox
+                  <v-autocomplete
                     v-model="cardCopy.data[field.id]"
                     :items="field.items"
                     item-title="item"
@@ -553,9 +555,7 @@ function openDescriptionFileDialog() {
                       (v) =>
                         updateFieldValue({
                           field,
-                          v: Array.isArray(v)
-                            ? v.map((item) => (item.item ? item.item : item))
-                            : [v.item],
+                          v,
                         })
                     "
                   />
@@ -604,6 +604,21 @@ function openDescriptionFileDialog() {
                         updateFieldValue({
                           field,
                           v: users.map((userIdAsNumber) => userIdAsNumber.toString()),
+                        })
+                    "
+                  />
+                </template>
+                <template v-else-if="field.type === FieldTypes.CARD">
+                  <base-relation-input
+                    v-model="cardCopy.data[field.id]"
+                    :field
+                    @update:model-value="
+                      (v) =>
+                        updateFieldValue({
+                          field,
+                          v: Array.isArray(v)
+                            ? v.map((c) => c.toString())
+                            : v.toString(),
                         })
                     "
                   />
