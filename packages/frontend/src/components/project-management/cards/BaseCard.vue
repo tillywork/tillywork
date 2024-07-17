@@ -247,12 +247,11 @@ function updateCardListStage(card: Card, listStage: ListStage) {
 }
 
 function updateFieldValue({ field, v }: { field: Field; v: any }) {
-  console.log(v);
   cardCopy.value = {
     ...cardCopy.value,
     data: {
       ...cardCopy.value.data,
-      [field.id]: v,
+      [field.id]: Array.isArray(v) ? (v.length && !!v[0] ? v : undefined) : v,
     },
   };
 
@@ -555,7 +554,9 @@ function openDescriptionFileDialog() {
                       (v) =>
                         updateFieldValue({
                           field,
-                          v,
+                          v: Array.isArray(v)
+                            ? v.map((item) => (item.item ? item.item : item))
+                            : [v.item ? v.item : v],
                         })
                     "
                   />
@@ -618,7 +619,7 @@ function openDescriptionFileDialog() {
                           field,
                           v: Array.isArray(v)
                             ? v.map((c) => c.toString())
-                            : v.toString(),
+                            : [v?.toString()],
                         })
                     "
                   />

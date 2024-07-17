@@ -316,6 +316,7 @@ watch(
         v-model="filter.value"
         :field="selectedFilter.original"
         :key="selectedFilter.field"
+        multiple
       />
     </template>
     <base-icon-btn

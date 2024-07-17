@@ -7,6 +7,7 @@ import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue
 const model = defineModel();
 const props = defineProps<{
   field: Field;
+  multiple?: boolean;
 }>();
 
 const keyword = ref<string>('');
@@ -40,7 +41,7 @@ watch(debouncedKeyword, () => {
     hide-details
     :placeholder="field.name"
     :prepend-inner-icon="field.icon"
-    :multiple="field.multiple"
+    :multiple="multiple ?? field.multiple"
     autocomplete="off"
     chips
     :no-data-text="!searchEnabled ? 'Type to search..' : 'No results'"
