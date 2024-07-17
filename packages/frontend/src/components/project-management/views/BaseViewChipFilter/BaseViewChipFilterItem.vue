@@ -14,7 +14,7 @@ const props = defineProps<{
   fields: FieldFilterOption[];
   users: User[];
 }>();
-const emit = defineEmits(['filter:update:field', 'delete']);
+const emit = defineEmits(['delete']);
 
 const { currentList } = storeToRefs(useStateStore());
 const { rules } = validationUtils;
@@ -163,7 +163,6 @@ function resetFilter(selectedFilter: FieldFilter) {
 }
 
 function handleFieldChanged() {
-  emit('filter:update:field');
   if (selectedFilter.value) {
     resetFilter(selectedFilter.value);
   }
