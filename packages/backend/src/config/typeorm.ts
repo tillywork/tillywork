@@ -41,6 +41,7 @@ import { AddIconAndIconColorColumnsToSpaceAndListTables1720414956770 } from "../
 import { AddIgnoreChildrenToViewTable1720514522438 } from "../migrations/1720514522438-add-ignore-children-to-view-table";
 import { CreateListFieldsTable1720527075305 } from "../migrations/1720527075305-create-list-fields-table";
 import { AddWorkspaceIdToCardTable1721207599200 } from "../migrations/1721207599200-add-workspaceId-to-card-table";
+import { AddCardTypeIdToFieldTable1721214304859 } from "../migrations/1721214304859-add-cardTypeId-to-field-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -83,6 +84,7 @@ const migrations = [
     AddIgnoreChildrenToViewTable1720514522438,
     CreateListFieldsTable1720527075305,
     AddWorkspaceIdToCardTable1721207599200,
+    AddCardTypeIdToFieldTable1721214304859,
 ];
 
 const config: TypeOrmModuleOptions = {

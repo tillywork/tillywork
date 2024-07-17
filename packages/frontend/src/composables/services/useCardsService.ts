@@ -39,6 +39,12 @@ export interface GetGroupCardsInfiniteQueryParams {
   sortBy?: Ref<TableSortOption[] | undefined>;
 }
 
+export interface SearchCardsParams {
+  keyword: MaybeRef<string>;
+  workspaceId: MaybeRef<number>;
+  cardTypeId?: MaybeRef<number>;
+}
+
 export const useCardsService = () => {
   const queryClient = useQueryClient();
   const { sendRequest } = useHttp();
@@ -193,6 +199,38 @@ export const useCardsService = () => {
     });
   }
 
+  function searchCards({
+    keyword,
+    workspaceId,
+    cardTypeId,
+  }: SearchCardsParams) {
+    return sendRequest(`/cards`, {
+      params: {
+        q: toValue(keyword),
+        workspaceId: toValue(workspaceId),
+        cardTypeId: toValue(cardTypeId),
+      },
+    });
+  }
+
+  function useSearchCards({
+    keyword,
+    workspaceId,
+    cardTypeId,
+  }: SearchCardsParams) {
+    return useQuery({
+      queryKey: [
+        'cards',
+        {
+          workspaceId: toValue(workspaceId),
+          cardTypeId: toValue(cardTypeId),
+        },
+      ],
+      queryFn: () => searchCards({ keyword, workspaceId, cardTypeId }),
+      enabled: false,
+    });
+  }
+
   function calculateCardOrder({
     previousCard,
     nextCard,
@@ -224,6 +262,8 @@ export const useCardsService = () => {
     useGetCardQuery,
     useDeleteCardMutation,
     useUpdateCardListMutation,
+    useSearchCards,
+    searchCards,
     calculateCardOrder,
   };
 };
