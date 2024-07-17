@@ -40,6 +40,7 @@ import { AddProjectIdToUserTable1720082507515 } from "../migrations/172008250751
 import { AddIconAndIconColorColumnsToSpaceAndListTables1720414956770 } from "../migrations/1720414956770-add-icon-and-iconColor-columns-to-space-and-list-tables";
 import { AddIgnoreChildrenToViewTable1720514522438 } from "../migrations/1720514522438-add-ignore-children-to-view-table";
 import { CreateListFieldsTable1720527075305 } from "../migrations/1720527075305-create-list-fields-table";
+import { AddWorkspaceIdToCardTable1721207599200 } from "../migrations/1721207599200-add-workspaceId-to-card-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -81,6 +82,7 @@ const migrations = [
     AddIconAndIconColorColumnsToSpaceAndListTables1720414956770,
     AddIgnoreChildrenToViewTable1720514522438,
     CreateListFieldsTable1720527075305,
+    AddWorkspaceIdToCardTable1721207599200,
 ];
 
 const config: TypeOrmModuleOptions = {

@@ -17,6 +17,7 @@ import { User } from "../users/user.entity";
 import { CardActivity } from "./card-activities/card.activity.entity";
 import { CardList } from "./card-lists/card.list.entity";
 import { CardType } from "../card-types/card.type.entity";
+import { Workspace } from "../workspaces/workspace.entity";
 
 @Entity()
 export class Card {
@@ -40,7 +41,9 @@ export class Card {
     @Column({ type: "jsonb", default: {} })
     data: Record<number, any>;
 
-    @OneToMany(() => CardList, (cardList) => cardList.card)
+    @OneToMany(() => CardList, (cardList) => cardList.card, {
+        onDelete: "CASCADE",
+    })
     cardLists: Relation<CardList[]>;
 
     @ManyToMany(() => User, (user) => user.cards)
@@ -65,4 +68,7 @@ export class Card {
     parent?: Relation<Card>;
     @OneToMany(() => Card, (card) => card.parent)
     children: Relation<Card[]>;
+
+    @ManyToOne(() => Workspace, { onDelete: "CASCADE" })
+    workspace: Relation<Workspace>;
 }

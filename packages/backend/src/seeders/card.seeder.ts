@@ -47,6 +47,7 @@ export async function seedCardsData(connection: Connection): Promise<void> {
             listStageId: faker.helpers.arrayElement(
                 list.listStages.map((stage) => stage.id)
             ),
+            workspaceId: 1,
             type: list.defaultCardType.id,
             createdBy: 1,
         });

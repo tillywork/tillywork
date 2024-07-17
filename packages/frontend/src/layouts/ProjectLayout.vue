@@ -96,7 +96,7 @@ function openSettingsDialog() {
         <v-list :slim="false">
           <v-menu v-if="isAuthenticated()" :close-on-content-click="false">
             <template #activator="{ props }">
-              <user-list-item v-bind="props">
+              <user-list-item v-bind="props" avatar-size="small">
                 <template #append>
                   <v-icon icon="mdi-dots-vertical" size="small" />
                 </template>

@@ -107,7 +107,7 @@ export class CardsService {
     }
 
     async create(createCardDto: CreateCardDto): Promise<Card> {
-        const initCard = this.cardsRepository.create({
+        const card = this.cardsRepository.create({
             ...createCardDto,
             type: {
                 id: createCardDto.type,
@@ -115,17 +115,22 @@ export class CardsService {
             createdBy: {
                 id: createCardDto.createdBy,
             },
+            workspace: {
+                id: createCardDto.workspaceId,
+            },
         });
 
-        await this.cardsRepository.save(initCard);
+        await this.cardsRepository.save(card);
 
-        await this.cardListsService.create({
-            cardId: initCard.id,
-            listId: createCardDto.listId,
-            listStageId: createCardDto.listStageId,
-        });
+        if (createCardDto.listId) {
+            await this.cardListsService.create({
+                cardId: card.id,
+                listId: createCardDto.listId,
+                listStageId: createCardDto.listStageId,
+            });
+        }
 
-        return initCard;
+        return card;
     }
 
     async update(id: number, updateCardDto: UpdateCardDto): Promise<Card> {

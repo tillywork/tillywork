@@ -180,13 +180,7 @@ onBeforeUnmount(() => {
         autofocus
         class="flex-grow-0"
         @input="activeCommandIndex = 0"
-      >
-        <template #append-inner>
-          <v-btn border variant="text" size="small">
-            <span class="text-caption text-disabled">Esc</span>
-          </v-btn>
-        </template>
-      </v-text-field>
+      />
 
       <!-- ~ Grouped List of Commands -->
       <v-list

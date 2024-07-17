@@ -4,6 +4,7 @@ import type {
   WorkspaceTypes,
 } from '../../components/project-management/workspaces/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
+import type { MaybeRef } from 'vue';
 
 export const useWorkspacesService = () => {
   const { sendRequest } = useHttp();
@@ -12,12 +13,12 @@ export const useWorkspacesService = () => {
   async function getWorkspaces({
     type,
   }: {
-    type?: WorkspaceTypes;
+    type?: MaybeRef<WorkspaceTypes>;
   }): Promise<Workspace[]> {
     return sendRequest('/workspaces', {
       method: 'GET',
       params: {
-        type,
+        type: toValue(type),
       },
     });
   }
@@ -54,11 +55,11 @@ export const useWorkspacesService = () => {
     type,
     enabled,
   }: {
-    type?: WorkspaceTypes;
+    type?: MaybeRef<WorkspaceTypes>;
     enabled?: Ref<boolean>;
   }) {
     return useQuery({
-      queryKey: ['workspaces', type],
+      queryKey: ['workspaces', toValue(type)],
       queryFn: () => getWorkspaces({ type }),
       enabled,
     });
