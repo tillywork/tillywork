@@ -43,10 +43,7 @@ const snackbarId = ref<number>();
 const { useFieldsQuery } = useFieldsService();
 const { showSnackbar, closeSnackbar } = useSnackbarStore();
 const { project } = storeToRefs(useAuthStore());
-const { currentList } = storeToRefs(useStateStore());
 const { useProjectUsersQuery } = useProjectUsersService();
-
-const listId = computed(() => currentList.value!.id);
 
 // TODO-Refactor: After MR 110 merged, should be handle on parent and pass with props or provide/inject
 const { data: users } = useProjectUsersQuery({
@@ -54,8 +51,28 @@ const { data: users } = useProjectUsersQuery({
   select: (projectUsers) => projectUsers.map((pj) => pj.user),
 });
 
+const { currentList } = storeToRefs(useStateStore());
+const listId = computed(() => currentList.value!.id);
 const { data: listFields, refetch: refetchListFields } = useFieldsQuery({
   listId,
+});
+const listStagesService = useListStagesService();
+const { data: listStages } = listStagesService.useGetListStagesQuery({
+  listId,
+});
+
+watch(listStages, (stages) => {
+  if (stages) {
+    quickFilterGroupedItems.value.stage = stages.map((stage) => {
+      return {
+        field: 'listStage.id',
+        operator: 'eq',
+        value: stage.id,
+        title: stage.name,
+        type: FieldTypes.DROPDOWN,
+      };
+    });
+  }
 });
 
 const defaultFields = ref<FieldFilterOption[]>([
@@ -167,6 +184,7 @@ const filtersQuery = computed<{
 
   return filters;
 });
+
 const quickFilterGroupedItems = ref<
   Record<QuickFilterGroup, FieldFilterOption[]>
 >(defaultQuickFilterGroupedItems);
@@ -177,6 +195,7 @@ const quickFilters = ref<Record<QuickFilterGroup, FieldFilterOption[]>>({
   dropdown: [],
   label: [],
 });
+
 function handleQuickFilter() {
   function transformFilter(filter: FieldFilter) {
     return {
@@ -255,30 +274,40 @@ function handleQuickFilter() {
   };
 }
 
-function addFilter(filterOption: FieldFilterOption) {
+function addAdvancedFilter(filterOption: FieldFilterOption) {
   const filter: FieldFilter = {
     field: filterOption.field,
     operator: filterOption.operator,
     value: filterOption.value,
   };
 
-  filtersCopy.value =
-    filtersCopy.value && filtersCopy.value.where?.and
-      ? {
-          where: {
-            and: [...filtersCopy.value.where.and, filter],
-          },
-        }
-      : {
-          where: {
-            and: [filter],
-          },
-        };
+  filtersCopy.value = {
+    where: {
+      and: [
+        ...filtersQuery.value.quick,
+        ...filtersQuery.value.advanced,
+        filter,
+      ],
+    },
+  };
 
   closeAddFilterMenu();
 }
 
-function removeFilter(index: number) {
+function handleAdvancedFilter(filter: FieldFilter, index: number) {
+  filtersCopy.value = {
+    where: {
+      and: [
+        ...filtersQuery.value.quick,
+        ...filtersQuery.value.advanced.slice(0, index),
+        filter,
+        ...filtersQuery.value.advanced.slice(index + 1),
+      ],
+    },
+  };
+}
+
+function removeAdvancedFilter(index: number) {
   filtersCopy.value = {
     where: {
       and: [
@@ -322,25 +351,6 @@ function getOperatorFromFieldType(field: Field): FilterOperator {
       return 'eq';
   }
 }
-
-const listStagesService = useListStagesService();
-const { data: listStages } = listStagesService.useGetListStagesQuery({
-  listId: props.listId,
-});
-
-watch(listStages, (stages) => {
-  if (stages) {
-    quickFilterGroupedItems.value.stage = stages.map((stage) => {
-      return {
-        field: 'listStage.id',
-        operator: 'eq',
-        value: stage.id,
-        title: stage.name,
-        type: FieldTypes.DROPDOWN,
-      };
-    });
-  }
-});
 
 watch(users, (assignees) => {
   if (assignees) {
@@ -439,7 +449,10 @@ watch(listId, () => {
               <v-card>
                 <v-list>
                   <template v-for="field in fields" :key="field.field">
-                    <v-list-item @click="addFilter(field)" class="text-body-2">
+                    <v-list-item
+                      @click="addAdvancedFilter(field)"
+                      class="text-body-2"
+                    >
                       <template #prepend>
                         <v-icon :icon="field.icon" />
                       </template>
@@ -482,10 +495,13 @@ watch(listId, () => {
             >
               <base-view-chip-filter-item
                 v-model="filtersQuery.advanced[index]"
+                @update:model-value="
+                  (filter) => handleAdvancedFilter(filter, index)
+                "
                 :index
                 :fields
                 :users="users ?? []"
-                @delete="removeFilter"
+                @delete="removeAdvancedFilter"
               />
             </template>
           </v-form>
