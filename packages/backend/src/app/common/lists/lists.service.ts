@@ -47,7 +47,7 @@ export class ListsService {
             where: {
                 id,
             },
-            relations: ["listStages", "views"],
+            relations: ["listStages"],
             order: {
                 listStages: {
                     order: "ASC",

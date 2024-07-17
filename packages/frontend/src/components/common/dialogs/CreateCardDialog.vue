@@ -65,6 +65,7 @@ const createCardDto = ref<CreateCardDto>({
   users: currentDialog.value?.data?.users,
   type: cardType.value?.id,
   parent: currentDialog.value?.data?.parent,
+  workspaceId: workspace.value!.id,
 });
 
 const selectedList = ref<List>(cloneDeep(list.value));

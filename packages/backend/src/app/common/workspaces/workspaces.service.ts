@@ -1,14 +1,20 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { FindManyOptions, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { Workspace } from "./workspace.entity";
 import { CreateWorkspaceDto } from "./dto/create.workspace.dto";
 import { UpdateWorkspaceDto } from "./dto/update.workspace.dto";
 import { WorkspaceSideEffectsService } from "./workspace.side.effects.service";
+import { WorkspaceTypes } from "./types";
 
 export type WorkspaceFindAllResult = {
     total: number;
     workspaces: Workspace[];
+};
+
+export type FindAllParams = {
+    projectId: number;
+    type?: WorkspaceTypes;
 };
 
 @Injectable()
@@ -19,8 +25,18 @@ export class WorkspacesService {
         private workspaceSideEffectsService: WorkspaceSideEffectsService
     ) {}
 
-    async findAll(options?: FindManyOptions): Promise<Workspace[]> {
-        return this.workspacesRepository.find(options);
+    async findAll({ projectId, type }: FindAllParams): Promise<Workspace[]> {
+        return this.workspacesRepository.find({
+            where: {
+                project: {
+                    id: projectId,
+                },
+                type,
+            },
+            order: {
+                createdAt: "ASC",
+            },
+        });
     }
 
     async findOne(id: number): Promise<Workspace> {

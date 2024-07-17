@@ -5,8 +5,7 @@ export const useStateStore = defineStore('state', {
   persist: true,
   state: () => {
     return {
-      selectedModule:
-        WorkspaceTypes.PROJECT_MANAGEMENT as null | WorkspaceTypes,
+      selectedModule: WorkspaceTypes.PROJECT_MANAGEMENT as WorkspaceTypes,
       /** Is an input currently focused */
       isInputFocused: false,
       /** Is information navigation drawer open */

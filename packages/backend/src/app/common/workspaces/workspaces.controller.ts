@@ -18,7 +18,6 @@ import { UpdateWorkspaceDto } from "./dto/update.workspace.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
 import { WorkspaceTypes } from "./types";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { FindOptionsWhere } from "typeorm";
 
 @ApiBearerAuth()
 @ApiTags("workspaces")
@@ -42,18 +41,9 @@ export class WorkspacesController {
         const { user } = req;
         const { type } = query;
 
-        const where: FindOptionsWhere<Workspace> = {
-            project: {
-                id: user.project.id,
-            },
-        };
-
-        if (type) {
-            where["type"] = type;
-        }
-
         return this.workspacesService.findAll({
-            where,
+            projectId: user.project.id,
+            type,
         });
     }
 

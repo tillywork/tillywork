@@ -5,10 +5,14 @@ import { useSnackbarStore } from '@/stores/snackbar';
 import CreateWorkspaceForm from '@/components/project-management/workspaces/CreateWorkspaceForm.vue';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from './types';
+import { useAuthStore } from '@/stores/auth';
+import { useStateStore } from '@/stores/state';
 
 const workspacesService = useWorkspacesService();
 const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
+const { setWorkspace } = useAuthStore();
+const { setSelectedModule } = useStateStore();
 
 const currentDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CREATE_WORKSPACE)
@@ -19,8 +23,10 @@ const { mutateAsync: createWorkspace, isPending } =
 
 async function handleCreate(workspaceDto: Partial<Workspace>) {
   createWorkspace(workspaceDto)
-    .then(() => {
+    .then((createdWorkspace) => {
       dialog.closeDialog(currentDialogIndex.value);
+      setWorkspace(createdWorkspace);
+      setSelectedModule(createdWorkspace.type);
     })
     .catch(() => {
       showSnackbar({
