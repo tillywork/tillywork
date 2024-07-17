@@ -7,10 +7,14 @@ import {
     ManyToOne,
     Relation,
     DeleteDateColumn,
+    ManyToMany,
+    JoinTable,
 } from "typeorm";
 import { Workspace } from "../workspaces/workspace.entity";
 import { FieldItem, FieldTypes } from "./types";
 import { User } from "../users/user.entity";
+import { List } from "../lists/list.entity";
+import { CardType } from "../card-types/card.type.entity";
 
 /**
  * This contains card fields.
@@ -39,6 +43,9 @@ export class Field {
     @Column({ type: "jsonb", nullable: true })
     items?: FieldItem[];
 
+    @ManyToOne(() => CardType, { onDelete: "CASCADE", eager: true })
+    cardType: Relation<CardType>;
+
     @Column({ type: "enum", enum: ["system", "user"], default: "system" })
     createdByType: "system" | "user";
 
@@ -56,4 +63,8 @@ export class Field {
         nullable: false,
     })
     workspace: Relation<Workspace>;
+
+    @ManyToMany(() => List)
+    @JoinTable({ name: "list_fields" })
+    lists: Relation<List[]>;
 }

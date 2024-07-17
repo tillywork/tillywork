@@ -23,55 +23,62 @@ import { useAuthStore } from '@/stores/auth';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import BaseCardChildrenProgress from './BaseCardChildrenProgress.vue';
 import BaseCardChip from './BaseCardChip.vue';
+import { leaderKey } from '@/utils/keyboard';
+import BaseRelationInput from '@/components/common/inputs/BaseRelationInput.vue';
 
 const props = defineProps<{
   card: Card;
   showCloseButton?: boolean;
 }>();
+
 const emit = defineEmits(['click:close']);
-const { workspace, project } = storeToRefs(useAuthStore());
+
 const cardCopy = ref<Card>(cloneDeep(props.card));
-const fields = ref<Field[]>([]);
 const comment = ref<Content>();
 const isCommentEmpty = ref<boolean>();
 const descriptionInput = ref();
+const cardTitle = ref(cardCopy.value.title);
+const debouncedTitle = useDebounce(cardTitle, 2000);
+const cardDescription = ref(cardCopy.value.description);
+const debouncedDescription = useDebounce(cardDescription, 2000);
+
+const cardListStage = ref(cardCopy.value.cardLists[0].listStage);
+
+const { project } = storeToRefs(useAuthStore());
+const snackbar = useSnackbarStore();
+const stateStore = useStateStore();
+const { areChildCardsExpanded, isInfoDrawerOpen } = storeToRefs(stateStore);
+const dialog = useDialogStore();
+const keys = useMagicKeys();
+
 const cardsService = useCardsService();
 const cardActivitiesService = useCardActivitiesService();
 const projectUsersService = useProjectUsersService();
 const listStagesService = useListStagesService();
 const { useFieldsQuery } = useFieldsService();
-const snackbar = useSnackbarStore();
-const stateStore = useStateStore();
-const { areChildCardsExpanded, isInfoDrawerOpen } = storeToRefs(stateStore);
-const dialog = useDialogStore();
 
 const { mutateAsync: updateCard, isPending: isUpdating } =
   cardsService.useUpdateCardMutation();
 const usersQuery = projectUsersService.useProjectUsersQuery({
   projectId: project.value!.id,
 });
-const { data: workspaceFields } = useFieldsQuery({
-  workspaceId: workspace.value!.id,
-});
 
-watch(
-  workspaceFields,
-  (v) => {
-    if (v) {
-      v.forEach(async (field) => {
-        const exists = fields.value.find((f) => f.id === field.id);
-        if (!exists) {
-          fields.value = [...fields.value, field];
-        }
-      });
-    }
-  },
-  { immediate: true }
-);
-
-const listId = computed(() => props.card.cardLists[0].listStage.listId);
+const listId = computed(() => props.card.cardLists[0].listId);
 const listStagesQuery = listStagesService.useGetListStagesQuery({
   listId: listId.value,
+});
+
+const { data: listFields } = useFieldsQuery({
+  listId,
+});
+
+const fields = computed(() => {
+  let arr: Field[] = [];
+  if (listFields.value) {
+    arr = listFields.value;
+  }
+
+  return arr;
 });
 
 const createActivityMutation =
@@ -98,12 +105,6 @@ const isCardLoading = computed(() => {
   );
 });
 
-const cardTitle = ref(cardCopy.value.title);
-const debouncedTitle = useDebounce(cardTitle, 2000);
-watch(debouncedTitle, () => {
-  updateTitle();
-});
-
 watch(
   () => props.card,
   (v) => {
@@ -116,13 +117,19 @@ watch(
   }
 );
 
-const cardDescription = ref(cardCopy.value.description);
-const debouncedDescription = useDebounce(cardDescription, 2000);
 watch(debouncedDescription, () => {
   updateDescription();
 });
 
-const cardListStage = ref(cardCopy.value.cardLists[0].listStage);
+watch(debouncedTitle, () => {
+  updateTitle();
+});
+
+watch(keys[[leaderKey, 'I'].join('+')], (v) => {
+  if (v && !stateStore.isInputFocused) {
+    stateStore.toggleInfoDrawer();
+  }
+});
 
 function updateTitle() {
   const newTitle = cardTitle.value.trim();
@@ -444,7 +451,7 @@ function openDescriptionFileDialog() {
         <v-divider class="my-8" />
 
         <v-card>
-          <v-card-subtitle class="text-body-2 ps-1">Activity</v-card-subtitle>
+          <v-card-subtitle class="text-body-3 ps-1">Activity</v-card-subtitle>
           <v-card-text class="pa-0">
             <base-card-activity-timeline :card-id="cardCopy.id" />
             <base-card-comment-box
@@ -499,7 +506,7 @@ function openDescriptionFileDialog() {
           <div class="d-flex align-center my-4">
             <p class="field-label text-caption">Start date</p>
             <base-date-picker
-              class="text-body-2"
+              class="text-body-3"
               label="Start date"
               icon="mdi-calendar"
               v-model="cardCopy.startsAt"
@@ -509,7 +516,7 @@ function openDescriptionFileDialog() {
           <div class="d-flex align-center my-4">
             <p class="field-label text-caption">Due date</p>
             <base-date-picker
-              class="text-body-2"
+              class="text-body-3"
               label="Due date"
               icon="mdi-calendar"
               v-model="cardCopy.dueAt"
@@ -519,7 +526,7 @@ function openDescriptionFileDialog() {
           <template v-if="fields">
             <template v-for="field in fields" :key="field.id">
               <div class="d-flex align-center my-4">
-                <p class="field-label text-caption">
+                <p class="field-label text-caption me-1">
                   {{ field.name }}
                 </p>
                 <template v-if="field.type === FieldTypes.TEXT">
@@ -532,7 +539,7 @@ function openDescriptionFileDialog() {
                   />
                 </template>
                 <template v-else-if="field.type === FieldTypes.DROPDOWN">
-                  <v-combobox
+                  <v-autocomplete
                     v-model="cardCopy.data[field.id]"
                     :items="field.items"
                     item-title="item"
@@ -549,7 +556,7 @@ function openDescriptionFileDialog() {
                           field,
                           v: Array.isArray(v)
                             ? v.map((item) => (item.item ? item.item : item))
-                            : [v.item],
+                            : [v.item ? v.item : v],
                         })
                     "
                   />
@@ -573,7 +580,7 @@ function openDescriptionFileDialog() {
                 <template v-else-if="field.type === FieldTypes.DATE">
                   <base-date-picker
                     v-model="cardCopy.data[field.id]"
-                    class="text-body-2"
+                    class="text-body-3"
                     :icon="field.icon ?? 'mdi-calendar'"
                     :label="field.name"
                     @update:model-value="
@@ -598,6 +605,21 @@ function openDescriptionFileDialog() {
                         updateFieldValue({
                           field,
                           v: users.map((userIdAsNumber) => userIdAsNumber.toString()),
+                        })
+                    "
+                  />
+                </template>
+                <template v-else-if="field.type === FieldTypes.CARD">
+                  <base-relation-input
+                    v-model="cardCopy.data[field.id]"
+                    :field
+                    @update:model-value="
+                      (v) =>
+                        updateFieldValue({
+                          field,
+                          v: Array.isArray(v)
+                            ? v.map((c) => c.toString())
+                            : [v?.toString()],
                         })
                     "
                   />

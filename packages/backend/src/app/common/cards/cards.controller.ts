@@ -9,6 +9,8 @@ import {
     UseGuards,
     Logger,
     Request,
+    Query,
+    BadRequestException,
 } from "@nestjs/common";
 import {
     CardFindAllResult,
@@ -35,6 +37,25 @@ export class CardsController {
         private readonly cardsService: CardsService,
         private readonly cardListsService: CardListsService
     ) {}
+
+    @Get()
+    search(
+        @Query("q") q: string,
+        @Query("workspaceId") workspaceId: number,
+        @Query("cardTypeId") cardTypeId: number
+    ): Promise<Card[]> {
+        if (!q || !workspaceId) {
+            throw new BadRequestException(
+                "The following query params are required: q, workspaceId"
+            );
+        }
+
+        return this.cardsService.searchCards({
+            keyword: q,
+            workspaceId,
+            cardTypeId,
+        });
+    }
 
     @Post("search")
     findAll(

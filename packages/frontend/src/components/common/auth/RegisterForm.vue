@@ -128,7 +128,7 @@ async function handleRegister() {
                 <router-link to="/login">Login</router-link>
               </p>
               <v-spacer />
-              <v-btn type="submit" variant="flat" :loading class="text-body-2">
+              <v-btn type="submit" variant="flat" :loading class="text-body-3">
                 Create
               </v-btn>
             </v-card-actions>

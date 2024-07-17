@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import {
+    BadRequestException,
+    Injectable,
+    Logger,
+    NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Field } from "./field.entity";
@@ -6,7 +11,8 @@ import { CreateFieldDto } from "./dto/create.field.dto";
 import { UpdateFieldDto } from "./dto/update.field.dto";
 
 export type FindAllParams = {
-    workspaceId: number;
+    workspaceId?: number;
+    listId?: number;
 };
 
 @Injectable()
@@ -16,13 +22,23 @@ export class FieldsService {
         private fieldsRepository: Repository<Field>
     ) {}
 
-    async findAll({ workspaceId }: FindAllParams): Promise<Field[]> {
+    async findAll({ workspaceId, listId }: FindAllParams): Promise<Field[]> {
+        if (!workspaceId && !listId) {
+            throw new BadRequestException(
+                "[FieldsService#findAll] One of the following query params is required: workspaceId, listId"
+            );
+        }
+
         return this.fieldsRepository.find({
             where: {
                 workspace: {
                     id: workspaceId,
                 },
+                lists: {
+                    id: listId,
+                },
             },
+            relations: ["lists"],
             order: {
                 createdAt: "asc",
             },

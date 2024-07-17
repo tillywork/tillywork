@@ -18,15 +18,12 @@ defineProps<{
         :photo="user.photo"
         :text="getUserFullName(user)"
         :size="avatarSize ?? 'default'"
-        class="text-caption"
+        class="text-xs"
       />
     </template>
     <v-list-item-title class="text-truncate">
       {{ getUserFullName(user) }}
     </v-list-item-title>
-    <v-list-item-subtitle class="d-block text-truncate">
-      {{ user.email }}
-    </v-list-item-subtitle>
     <template #append v-if="slots['append']">
       <slot name="append"></slot>
     </template>

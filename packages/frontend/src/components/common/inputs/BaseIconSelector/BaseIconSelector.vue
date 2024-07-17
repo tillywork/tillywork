@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import Common from './common';
+import BaseColorPicker from '../BaseColorPicker.vue';
+
+defineProps<{
+  withColor?: boolean;
+}>();
 
 const icon = defineModel<string>();
+const iconColor = defineModel<string>('color');
 
 const tab = ref();
 const searchIcon = ref();
@@ -34,6 +40,8 @@ watch(
   <base-icon-btn id="activator" v-bind="attrs" :icon />
   <v-menu v-model="menu" :close-on-content-click="false" activator="#activator">
     <v-card width="296" height="400">
+      <base-color-picker v-if="withColor" v-model="iconColor" label="Color*" />
+
       <v-text-field
         v-model="searchIcon"
         hide-details

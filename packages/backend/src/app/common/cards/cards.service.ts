@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { FindOptionsWhere, Repository, UpdateResult } from "typeorm";
+import { Brackets, FindOptionsWhere, Repository, UpdateResult } from "typeorm";
 import { Card } from "./card.entity";
 import { CreateCardDto } from "./dto/create.card.dto";
 import { UpdateCardDto } from "./dto/update.card.dto";
@@ -106,8 +106,42 @@ export class CardsService {
         return card;
     }
 
+    async searchCards({
+        keyword,
+        workspaceId,
+        cardTypeId,
+    }: {
+        keyword: string;
+        cardTypeId?: number;
+        workspaceId: number;
+    }): Promise<Card[]> {
+        const queryBuilder = this.cardsRepository
+            .createQueryBuilder("card")
+            .leftJoinAndSelect("card.users", "user")
+            .where(
+                new Brackets((qb) => {
+                    qb.where("card.title ILIKE :keyword", {
+                        keyword: `%${keyword}%`,
+                    }).orWhere(
+                        "user.firstName || ' ' || user.lastName ILIKE :keyword",
+                        { keyword: `%${keyword}%` }
+                    );
+                })
+            )
+            .andWhere("card.workspaceId = :workspaceId", { workspaceId })
+            .orderBy("card.createdAt", "DESC")
+            .limit(15);
+
+        if (cardTypeId) {
+            queryBuilder.andWhere(`card.typeId = :cardTypeId`, { cardTypeId });
+        }
+
+        const cards = await queryBuilder.getMany();
+        return cards;
+    }
+
     async create(createCardDto: CreateCardDto): Promise<Card> {
-        const initCard = this.cardsRepository.create({
+        const card = this.cardsRepository.create({
             ...createCardDto,
             type: {
                 id: createCardDto.type,
@@ -115,17 +149,22 @@ export class CardsService {
             createdBy: {
                 id: createCardDto.createdBy,
             },
+            workspace: {
+                id: createCardDto.workspaceId,
+            },
         });
 
-        await this.cardsRepository.save(initCard);
+        await this.cardsRepository.save(card);
 
-        await this.cardListsService.create({
-            cardId: initCard.id,
-            listId: createCardDto.listId,
-            listStageId: createCardDto.listStageId,
-        });
+        if (createCardDto.listId) {
+            await this.cardListsService.create({
+                cardId: card.id,
+                listId: createCardDto.listId,
+                listStageId: createCardDto.listStageId,
+            });
+        }
 
-        return initCard;
+        return card;
     }
 
     async update(id: number, updateCardDto: UpdateCardDto): Promise<Card> {

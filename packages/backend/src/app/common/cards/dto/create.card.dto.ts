@@ -10,6 +10,8 @@ export class CreateCardDto {
     listStageId: number;
     @IsNotEmpty()
     type: number;
+    @IsNotEmpty()
+    workspaceId: number;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     description?: any;

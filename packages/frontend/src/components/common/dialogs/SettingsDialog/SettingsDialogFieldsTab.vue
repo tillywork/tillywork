@@ -14,6 +14,8 @@ import { useSnackbarStore } from '@/stores/snackbar';
 import { useLogo } from '@/composables/useLogo';
 import { UpsertDialogMode } from '../types';
 import { useAuthStore } from '@/stores/auth';
+import { useListsService } from '@/composables/services/useListsService';
+import { useCardTypesService } from '@/composables/services/useCardTypesService';
 
 const selectedField = ref<Field>();
 const fieldDto = ref<Partial<Field>>();
@@ -26,9 +28,12 @@ const isCreatingOrEditing = computed(
 );
 
 const showIsMultiple = computed(() =>
-  [FieldTypes.DROPDOWN, FieldTypes.LABEL, FieldTypes.USER].includes(
-    fieldDto.value?.type as FieldTypes
-  )
+  [
+    FieldTypes.DROPDOWN,
+    FieldTypes.LABEL,
+    FieldTypes.USER,
+    FieldTypes.CARD,
+  ].includes(fieldDto.value?.type as FieldTypes)
 );
 
 const { showSnackbar } = useSnackbarStore();
@@ -41,6 +46,16 @@ const { data: fields } = useFieldsQuery({
 });
 const { mutateAsync: updateField } = updateFieldMutation();
 const { mutateAsync: createField } = createFieldMutation();
+
+const { useGetListsQuery } = useListsService();
+const { data: lists } = useGetListsQuery({
+  workspaceId: workspace.value!.id,
+});
+
+const { useFindAllQuery } = useCardTypesService();
+const { data: cardTypes } = useFindAllQuery({
+  workspaceId: workspace.value!.id,
+});
 
 function handleFieldClick(field: Field) {
   selectedField.value = cloneDeep(field);
@@ -134,6 +149,11 @@ watch(selectedField, (v) => {
               accessorKey: 'type',
             },
             {
+              header: 'Lists',
+              id: 'lists',
+              accessorKey: 'lists',
+            },
+            {
               id: 'createdBy',
               header: 'Created By',
               accessorKey: 'createdBy',
@@ -144,7 +164,12 @@ watch(selectedField, (v) => {
         >
           <template #name="{ row }">
             <v-icon :icon="row.original.icon" class="me-4" />
-            <span class="text-body-2">{{ row.original.name }}</span>
+            <span class="text-body-3">{{ row.original.name }}</span>
+          </template>
+          <template #lists="{ row }">
+            <template v-for="list in row.original.lists" :key="list.id">
+              <v-chip class="me-1" density="compact">{{ list.name }}</v-chip>
+            </template>
           </template>
           <template #createdBy="{ row }">
             <v-card class="py-2">
@@ -158,14 +183,18 @@ watch(selectedField, (v) => {
                     : ''
                 "
               />
-              <span class="text-body-2 ms-3">
+              <span class="text-body-3 ms-3">
                 {{ getFieldCreatedByName(row.original) }}
               </span>
             </v-card>
           </template>
           <template #type="{ row }">
-            <span class="text-body-2 text-capitalize">
-              {{ row.original.type }}
+            <span class="text-body-3 text-capitalize">
+              {{
+                FIELD_TYPE_OPTIONS.find(
+                  (option) => option.value === row.original.type
+                )?.title
+              }}
             </span>
           </template>
         </base-table>
@@ -207,6 +236,30 @@ watch(selectedField, (v) => {
                 ? 'Field type cannot be changed'
                 : ''
             "
+          />
+
+          <v-autocomplete
+            v-if="fieldDto.type === FieldTypes.CARD"
+            v-model="fieldDto.cardType"
+            :items="cardTypes"
+            item-title="name"
+            label="Card Type"
+            auto-select-first
+            autocomplete="off"
+            return-object
+          />
+
+          <v-autocomplete
+            v-model="fieldDto.lists"
+            :items="lists"
+            item-title="name"
+            label="Lists"
+            auto-select-first
+            multiple
+            autocomplete="off"
+            return-object
+            chips
+            closable-chips
           />
 
           <div class="mb-2">

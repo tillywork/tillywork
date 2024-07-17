@@ -10,6 +10,7 @@ import { useStateStore } from '@/stores/state';
 import { useThemeStore } from '@/stores/theme';
 import { useCardTypesService } from './services/useCardTypesService';
 import { useAuthStore } from '@/stores/auth';
+import { leaderKey } from '@/utils/keyboard';
 
 export const useCommands = () => {
   const keys = useMagicKeys();

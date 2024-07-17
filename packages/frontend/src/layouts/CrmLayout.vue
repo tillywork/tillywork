@@ -1,15 +1,19 @@
 <script setup lang="ts">
-import BaseThemeSwitch from '@/components/common/base/BaseThemeSwitch.vue';
 import UserListItem from '@/components/common/navigation/UserListItem.vue';
 import { useAuthStore } from '@/stores/auth';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
 import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
 import { useLogo } from '@/composables/useLogo';
+import { useDialogStore } from '@/stores/dialog';
+import { DIALOGS } from '@/components/common/dialogs/types';
+import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
 
 const authStore = useAuthStore();
 const { isAuthenticated, logout } = authStore;
+const { workspace } = storeToRefs(authStore);
 const { navigationDrawer } = useHideNavigationDrawer();
 const logo = useLogo();
+const dialog = useDialogStore();
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
   {
@@ -45,25 +49,45 @@ if (isAuthenticated()) {
     route: '/crm/organizations',
   });
 }
+
+function openSettingsDialog() {
+  dialog.openDialog({
+    dialog: DIALOGS.SETTINGS,
+    options: {
+      fullscreen: true,
+    },
+  });
+}
 </script>
 
 <template>
   <v-app>
-    <v-navigation-drawer
-      v-model="navigationDrawer"
-      app
-      rail
-      expand-on-hover
-      color="background"
+    <v-app-bar
+      v-if="$vuetify.display.mdAndDown"
+      color="accent"
+      height="40"
+      class="border-b-thin"
     >
-      <!-- User content -->
-      <v-list v-if="isAuthenticated()" lines="one" :nav="false" :slim="false">
-        <user-list-item />
-      </v-list>
+      <v-app-bar-nav-icon
+        variant="text"
+        @click.stop="navigationDrawer = !navigationDrawer"
+      />
 
-      <v-divider></v-divider>
+      <v-toolbar-title>
+        <v-img :src="logo.getLogoUrlByTheme()" width="125" />
+      </v-toolbar-title>
+    </v-app-bar>
 
-      <v-list density="compact" nav lines="one">
+    <v-navigation-drawer v-model="navigationDrawer" app color="background">
+      <v-img
+        :src="logo.getLogoUrlByTheme()"
+        width="125"
+        class="ma-2 mt-4 hidden-md-and-down"
+      />
+      <v-divider class="hidden-md-and-down" />
+      <navigation-workspace-selector v-if="isAuthenticated()" />
+
+      <v-list class="mt-2">
         <v-list-item
           v-for="navigationItem in navigationMenuItems"
           :key="navigationItem.title"
@@ -98,33 +122,89 @@ if (isAuthenticated()) {
       </v-list>
 
       <template v-slot:append>
-        <v-list>
-          <v-list-item @click="logout()" v-if="isAuthenticated()">
-            <template #prepend>
-              <v-icon icon="mdi-logout" />
+        <!-- User content -->
+        <v-list v-if="isAuthenticated()" :slim="false">
+          <v-menu :close-on-content-click="false">
+            <template #activator="{ props }">
+              <user-list-item v-bind="props" avatar-size="small">
+                <template #append>
+                  <v-icon icon="mdi-dots-vertical" />
+                </template>
+              </user-list-item>
             </template>
-            <v-list-item-title>Logout</v-list-item-title>
-          </v-list-item>
-          <v-list-item :to="'/login'" v-else>
-            <template #prepend>
-              <v-icon icon="mdi-login" />
-            </template>
-            <v-list-item-title>Login</v-list-item-title>
-          </v-list-item>
+            <v-card class="border-thin ms-n2">
+              <v-list>
+                <v-menu>
+                  <template #activator="{ props }">
+                    <v-list-item v-bind="props">
+                      <template #prepend>
+                        <v-icon icon="mdi-apps" />
+                      </template>
+                      <v-list-item-title>Apps</v-list-item-title>
+                    </v-list-item>
+                  </template>
+                  <v-card
+                    class="d-flex flex-wrap align-center justify-space-evenly py-4"
+                    width="275"
+                    rounded="lg"
+                  >
+                    <v-card
+                      class="d-flex flex-column align-center justify-center pt-2"
+                      width="70"
+                      height="70"
+                      border="none"
+                      link
+                      rounded="lg"
+                    >
+                      <v-icon icon="mdi-timeline-check" size="24" />
+                      <v-card-title class="text-caption">Projects</v-card-title>
+                    </v-card>
+                    <v-card
+                      class="d-flex flex-column align-center justify-center pt-2"
+                      width="70"
+                      height="70"
+                      border="none"
+                      link
+                      rounded="lg"
+                    >
+                      <v-icon icon="mdi-handshake" size="24" />
+                      <v-card-title class="text-caption">CRM</v-card-title>
+                    </v-card>
+                    <v-card
+                      class="d-flex flex-column align-center justify-center pt-2"
+                      width="70"
+                      height="70"
+                      border="none"
+                      link
+                      rounded="lg"
+                    >
+                      <v-icon icon="mdi-application-braces" size="24" />
+                      <v-card-title class="text-caption">Agile</v-card-title>
+                    </v-card>
+                  </v-card>
+                </v-menu>
+                <v-list-item @click="openSettingsDialog">
+                  <template #prepend>
+                    <v-icon icon="mdi-cog" />
+                  </template>
+                  <v-list-item-title>Settings</v-list-item-title>
+                </v-list-item>
+                <v-list-item @click="logout()">
+                  <template #prepend>
+                    <v-icon icon="mdi-logout" />
+                  </template>
+                  <v-list-item-title>Logout</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </v-menu>
         </v-list>
       </template>
     </v-navigation-drawer>
 
-    <v-app-bar app class="pr-4" density="compact" color="background">
-      <v-toolbar-title>
-        <v-img :src="logo.getLogoUrlByTheme()" width="125" />
-      </v-toolbar-title>
-      <v-spacer />
-      <base-theme-switch />
-    </v-app-bar>
-
     <v-main>
       <router-view />
+      {{ workspace }}
     </v-main>
   </v-app>
 </template>

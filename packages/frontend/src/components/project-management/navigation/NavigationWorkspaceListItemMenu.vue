@@ -155,7 +155,7 @@ watch(listMenu, () => {
           <template #prepend>
             <v-icon icon="mdi-playlist-edit" />
           </template>
-          <v-list-item-title>Rename</v-list-item-title>
+          <v-list-item-title>Edit</v-list-item-title>
         </v-list-item>
         <v-list-item @click="openSettingsDialog(SettingsTabs.FIELDS)">
           <template #prepend>
@@ -177,7 +177,7 @@ watch(listMenu, () => {
           </template>
           <v-card>
             <v-card-title class="d-flex align-center pt-2 pe-1">
-              <span class="text-body-2">Card Types</span>
+              <span class="text-body-3">Card Types</span>
               <v-spacer />
               <v-btn
                 size="small"

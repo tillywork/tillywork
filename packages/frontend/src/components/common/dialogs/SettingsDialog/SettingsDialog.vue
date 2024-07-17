@@ -269,7 +269,7 @@ watch(workspace, (v) => {
                           : ''
                       "
                     />
-                    <span class="text-body-2 ms-3">
+                    <span class="text-body-3 ms-3">
                       {{ getCardTypeCreatedByName(row.original) }}
                     </span>
                   </v-card>

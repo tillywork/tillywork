@@ -63,7 +63,7 @@ async function handleSubmit() {
         class="user-select-none"
       >
         <v-list-item
-          class="text-body-2"
+          class="text-body-3"
           rounded="md"
           :value="WorkspaceTypes.PROJECT_MANAGEMENT"
         >
@@ -77,7 +77,7 @@ async function handleSubmit() {
           Project Management
         </v-list-item>
         <v-list-item
-          class="text-body-2"
+          class="text-body-3"
           rounded="md"
           :value="WorkspaceTypes.CRM"
           disabled
@@ -89,7 +89,7 @@ async function handleSubmit() {
           </template>
           Sales CRM (coming soon)
         </v-list-item>
-        <v-list-item class="text-body-2" rounded="md" disabled>
+        <v-list-item class="text-body-3" rounded="md" disabled>
           <template #prepend="{ isSelected }">
             <v-icon
               :icon="

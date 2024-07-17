@@ -25,7 +25,7 @@ const { data: project } = useGetProjectByInviteCode({ inviteCode });
           <base-avatar
             :text="project.name"
             size="x-large"
-            class="text-body-2 mb-1"
+            class="text-body-3 mb-1"
             rounded="md"
           />
           <v-card-title>Join {{ project.name }}</v-card-title>
@@ -34,7 +34,7 @@ const { data: project } = useGetProjectByInviteCode({ inviteCode });
           >
           <v-card-actions class="mt-3">
             <v-btn
-              class="flex-fill text-capitalize text-body-2"
+              class="flex-fill text-capitalize text-body-3"
               variant="flat"
               size="large"
               @click="showForm = true"

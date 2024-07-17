@@ -17,6 +17,7 @@ import type { FieldFilterOption } from './types';
 import { useFieldsService } from '@/composables/services/useFieldsService';
 import { useListStagesService } from '@/composables/services/useListStagesService';
 import { useAuthStore } from '@/stores/auth';
+import { useStateStore } from '@/stores/state';
 
 import {
   quickFilterGroups,
@@ -27,7 +28,6 @@ import {
 const props = defineProps<{
   filters?: QueryFilter;
   viewId: number;
-  listId: number;
 }>();
 const emit = defineEmits(['save', 'update']);
 
@@ -42,8 +42,11 @@ const snackbarId = ref<number>();
 
 const { useFieldsQuery } = useFieldsService();
 const { showSnackbar, closeSnackbar } = useSnackbarStore();
-const { workspace, project } = storeToRefs(useAuthStore());
+const { project } = storeToRefs(useAuthStore());
+const { currentList } = storeToRefs(useStateStore());
 const { useProjectUsersQuery } = useProjectUsersService();
+
+const listId = computed(() => currentList.value!.id);
 
 // TODO-Refactor: After MR 110 merged, should be handle on parent and pass with props or provide/inject
 const { data: users } = useProjectUsersQuery({
@@ -51,8 +54,8 @@ const { data: users } = useProjectUsersQuery({
   select: (projectUsers) => projectUsers.map((pj) => pj.user),
 });
 
-const { data: workspaceFields } = useFieldsQuery({
-  workspaceId: workspace.value!.id,
+const { data: listFields, refetch: refetchListFields } = useFieldsQuery({
+  listId,
 });
 
 const defaultFields = ref<FieldFilterOption[]>([
@@ -93,8 +96,8 @@ const defaultFields = ref<FieldFilterOption[]>([
 const fields = computed(() => {
   const fields: FieldFilterOption[] = [...defaultFields.value];
 
-  if (workspaceFields.value) {
-    workspaceFields.value.forEach((field) => {
+  if (listFields.value) {
+    listFields.value.forEach((field) => {
       fields.push({
         field: `card.data.${field.id}`,
         title: field.name,
@@ -102,6 +105,7 @@ const fields = computed(() => {
         operator: getOperatorFromFieldType(field),
         icon: field.icon,
         options: field.items,
+        original: field,
       });
     });
   }
@@ -309,6 +313,7 @@ function getOperatorFromFieldType(field: Field): FilterOperator {
     case FieldTypes.USER:
     case FieldTypes.DROPDOWN:
     case FieldTypes.LABEL:
+    case FieldTypes.CARD:
       return 'in';
     case FieldTypes.DATE:
       return 'between';
@@ -382,6 +387,10 @@ watch(
     closeSaveSnackbar();
   }
 );
+
+watch(listId, () => {
+  refetchListFields();
+});
 </script>
 
 <template>

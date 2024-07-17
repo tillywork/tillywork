@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import { WorkspaceTypes, type Workspace } from '../workspaces/types';
+import { type Workspace } from '../workspaces/types';
 import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
 import CreateWorkspaceBtn from './CreateWorkspaceBtn.vue';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 import { useAuthStore } from '@/stores/auth';
+import { useStateStore } from '@/stores/state';
 
 const dialog = useDialogStore();
 const workspacesService = useWorkspacesService();
 const selectWorkspaceMenu = ref(false);
 const authStore = useAuthStore();
 const { workspace: selectedWorkspace } = storeToRefs(authStore);
+const { selectedModule } = storeToRefs(useStateStore());
 const workspaceQuery = workspacesService.useGetWorkspacesQuery({
-  type: WorkspaceTypes.PROJECT_MANAGEMENT,
+  type: selectedModule,
 });
 const { mutateAsync: deleteWorkspace, isPending: isDeleteLoading } =
   workspacesService.useDeleteWorkspaceMutation();
@@ -74,7 +76,7 @@ watch(
       if (workspaces.length && selectedWorkspace.value) {
         selectedWorkspace.value =
           workspaces.find((w) => w.id === selectedWorkspace.value?.id) ??
-          selectedWorkspace.value;
+          workspaces[0];
       }
     }
   },
@@ -102,7 +104,7 @@ watch(
           class="text-caption"
           size="x-small"
         />
-        <span class="text-truncate text-body-2 mx-2">
+        <span class="text-truncate text-body-3 mx-2">
           {{ selectedWorkspace?.name ?? 'Select a workspace' }}
         </span>
         <v-spacer />

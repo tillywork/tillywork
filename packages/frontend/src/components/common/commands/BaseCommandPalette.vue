@@ -138,7 +138,7 @@ function handleExecuteCommand(command: Command) {
  */
 const onKeydown = (event: KeyboardEvent) => {
   // WARN: Pay attention to capitalization.
-  if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+  if ((event.metaKey || event.ctrlKey) && ['k', 'i'].includes(event.key)) {
     event.preventDefault();
   } else if (event.key === 'F1') {
     event.preventDefault();
@@ -180,13 +180,7 @@ onBeforeUnmount(() => {
         autofocus
         class="flex-grow-0"
         @input="activeCommandIndex = 0"
-      >
-        <template #append-inner>
-          <v-btn border variant="text" size="small">
-            <span class="text-caption text-disabled">Esc</span>
-          </v-btn>
-        </template>
-      </v-text-field>
+      />
 
       <!-- ~ Grouped List of Commands -->
       <v-list

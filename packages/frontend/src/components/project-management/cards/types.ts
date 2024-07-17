@@ -18,6 +18,7 @@ export interface Card {
   updatedAt: string;
   parent?: Card;
   children: Card[];
+  workspace: Workspace;
 }
 
 export interface CardList {
@@ -34,6 +35,7 @@ export interface CreateCardDto {
   title: string;
   /** The ID of the Card Type being created. */
   type: number;
+  workspaceId: number;
   listId?: number;
   listStageId?: number;
   description?: Content;
