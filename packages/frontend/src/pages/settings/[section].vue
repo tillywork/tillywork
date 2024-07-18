@@ -23,6 +23,9 @@ const settingComponents = {
   [SETTINGS.CUSTOM_FIELDS]: defineAsyncComponent(
     () => import('../../components/common/settings/CustomFieldsSettings.vue')
   ),
+  [SETTINGS.PROJECT_MEMBERS]: defineAsyncComponent(
+    () => import('../../components/common/settings/ProjectMembersSettings.vue')
+  ),
 };
 const settingRoutes = Object.keys(settingComponents);
 

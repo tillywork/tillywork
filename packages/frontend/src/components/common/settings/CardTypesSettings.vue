@@ -44,7 +44,7 @@ function getCardTypeCreatedByName(cardType: CardType) {
 </script>
 
 <template>
-  <div id="container">
+  <div id="card-types-settings-container">
     <div class="user-select-none">
       <div class="d-flex items-center ga-2">
         <h3>Card Types</h3>
@@ -141,7 +141,7 @@ function getCardTypeCreatedByName(cardType: CardType) {
 </template>
 
 <style lang="scss">
-#container {
+#card-types-settings-container {
   width: 100%;
   max-width: 768px;
 }

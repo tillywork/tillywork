@@ -35,7 +35,7 @@ async function saveWorkspace() {
 </script>
 
 <template>
-  <div id="container" class="user-select-none">
+  <div id="workspace-settings-container" class="user-select-none">
     <h3>Workspace</h3>
     <p class="text-subtitle-2 mb-2">Update your current workspace.</p>
 
@@ -66,7 +66,7 @@ async function saveWorkspace() {
 </template>
 
 <style lang="scss">
-#container {
+#workspace-settings-container {
   width: 320px;
 }
 </style>

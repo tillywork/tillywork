@@ -125,7 +125,7 @@ watch(selectedField, (v) => {
 </script>
 
 <template>
-  <div id="container">
+  <div id="custom-fields-settings-container">
     <template v-if="!isCreatingOrEditing">
       <div class="user-select-none">
         <div class="d-flex ga-2">
@@ -328,7 +328,7 @@ watch(selectedField, (v) => {
 </template>
 
 <style lang="scss">
-#container {
+#custom-fields-settings-container {
   min-height: 100%;
   width: 100%;
   max-width: 768px;
