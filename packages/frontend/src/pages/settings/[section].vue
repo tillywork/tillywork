@@ -17,6 +17,9 @@ const settingComponents = {
   [SETTINGS.WORKSPACE]: defineAsyncComponent(
     () => import('../../components/common/settings/WorkspaceSettings.vue')
   ),
+  [SETTINGS.CARD_TYPES]: defineAsyncComponent(
+    () => import('../../components/common/settings/CardTypesSettings.vue')
+  ),
 };
 const settingRoutes = Object.keys(settingComponents);
 
