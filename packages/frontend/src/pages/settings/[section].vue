@@ -20,6 +20,9 @@ const settingComponents = {
   [SETTINGS.CARD_TYPES]: defineAsyncComponent(
     () => import('../../components/common/settings/CardTypesSettings.vue')
   ),
+  [SETTINGS.CUSTOM_FIELDS]: defineAsyncComponent(
+    () => import('../../components/common/settings/CustomFieldsSettings.vue')
+  ),
 };
 const settingRoutes = Object.keys(settingComponents);
 
