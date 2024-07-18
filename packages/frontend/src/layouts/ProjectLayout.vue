@@ -35,15 +35,6 @@ if (isAuthenticated()) {
   //     },
   //   ];
 }
-
-function openSettingsDialog() {
-  dialog.openDialog({
-    dialog: DIALOGS.SETTINGS,
-    options: {
-      fullscreen: true,
-    },
-  });
-}
 </script>
 
 <template>
@@ -104,7 +95,7 @@ function openSettingsDialog() {
             </template>
             <v-card class="border-thin ms-n2">
               <v-list>
-                <v-list-item @click="openSettingsDialog">
+                <v-list-item to="/settings">
                   <template #prepend>
                     <v-icon icon="mdi-cog" />
                   </template>

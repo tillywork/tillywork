@@ -49,15 +49,6 @@ if (isAuthenticated()) {
     route: '/crm/organizations',
   });
 }
-
-function openSettingsDialog() {
-  dialog.openDialog({
-    dialog: DIALOGS.SETTINGS,
-    options: {
-      fullscreen: true,
-    },
-  });
-}
 </script>
 
 <template>
@@ -183,7 +174,7 @@ function openSettingsDialog() {
                     </v-card>
                   </v-card>
                 </v-menu>
-                <v-list-item @click="openSettingsDialog">
+                <v-list-item to="/settings/">
                   <template #prepend>
                     <v-icon icon="mdi-cog" />
                   </template>

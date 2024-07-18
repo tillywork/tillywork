@@ -2,7 +2,6 @@ import type { Command, CommandDto } from '@/components/common/commands/types';
 import {
   DIALOGS,
   DIALOG_WIDTHS,
-  SettingsTabs,
   UpsertDialogMode,
 } from '@/components/common/dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
@@ -10,7 +9,7 @@ import { useStateStore } from '@/stores/state';
 import { useThemeStore } from '@/stores/theme';
 import { useCardTypesService } from './services/useCardTypesService';
 import { useAuthStore } from '@/stores/auth';
-import { leaderKey } from '@/utils/keyboard';
+import { SETTINGS } from '@/components/common/settings/types';
 
 export const useCommands = () => {
   const keys = useMagicKeys();
@@ -69,11 +68,17 @@ export const useCommands = () => {
 
   const watchers = ref(new Map());
 
+  const router = useRouter();
+
   /**
    * Handles building the commands array.
    * @returns An array of commands
    */
   const commands = computed(() => {
+    function openSettings(section?: SETTINGS) {
+      router.push('/settings/' + (section ?? ''));
+    }
+
     const commandsDtos: CommandDto[] = [
       // ~ Cards
       ...cardTypeCommands.value,
@@ -114,34 +119,16 @@ export const useCommands = () => {
         section: 'Workspace',
         icon: 'mdi-briefcase-edit',
         title: 'Update current workspace',
-        action: () =>
-          dialog.openDialog({
-            dialog: DIALOGS.SETTINGS,
-            options: {
-              fullscreen: true,
-            },
-            data: {
-              activeTab: SettingsTabs.WORKSPACE,
-            },
-          }),
+        action: () => openSettings(SETTINGS.WORKSPACE),
         shortcut: ['F2'],
       },
 
-      // Project
+      // ~ Projects
       {
         section: 'Project',
         icon: 'mdi-account-multiple',
         title: 'Invite and manage members',
-        action: () =>
-          dialog.openDialog({
-            dialog: DIALOGS.SETTINGS,
-            options: {
-              fullscreen: true,
-            },
-            data: {
-              activeTab: SettingsTabs.MEMBERS,
-            },
-          }),
+        action: () => openSettings(SETTINGS.PROJECT_MEMBERS),
       },
 
       // ~ Settings
@@ -149,29 +136,14 @@ export const useCommands = () => {
         section: 'Settings',
         icon: 'mdi-cog',
         title: 'Settings',
-        action: () =>
-          dialog.openDialog({
-            dialog: DIALOGS.SETTINGS,
-            options: {
-              fullscreen: true,
-            },
-          }),
+        action: openSettings,
         shortcut: [','],
       },
       {
         section: 'Settings',
         icon: 'mdi-monitor-screenshot',
         title: 'Theme',
-        action: () =>
-          dialog.openDialog({
-            dialog: DIALOGS.SETTINGS,
-            options: {
-              fullscreen: true,
-            },
-            data: {
-              activeTab: SettingsTabs.THEME,
-            },
-          }),
+        action: () => openSettings(SETTINGS.THEME),
       },
       {
         section: 'Settings',
@@ -183,31 +155,13 @@ export const useCommands = () => {
         section: 'Settings',
         icon: 'mdi-toy-brick-outline',
         title: 'Card types',
-        action: () =>
-          dialog.openDialog({
-            dialog: DIALOGS.SETTINGS,
-            options: {
-              fullscreen: true,
-            },
-            data: {
-              activeTab: SettingsTabs.CARD_TYPES,
-            },
-          }),
+        action: () => openSettings(SETTINGS.CARD_TYPES),
       },
       {
         section: 'Settings',
         icon: 'mdi-form-select',
         title: 'Custom fields',
-        action: () =>
-          dialog.openDialog({
-            dialog: DIALOGS.SETTINGS,
-            options: {
-              fullscreen: true,
-            },
-            data: {
-              activeTab: SettingsTabs.FIELDS,
-            },
-          }),
+        action: () => openSettings(SETTINGS.CUSTOM_FIELDS),
       },
     ];
 
