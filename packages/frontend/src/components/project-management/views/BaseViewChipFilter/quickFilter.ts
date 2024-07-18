@@ -49,7 +49,6 @@ export type QuickFilterGroupRecord = Record<
   QuickFilterGroup,
   FieldFilterOption[] | Record<string, FieldFilterOption[]>
 >;
-// TODO: Implement Type Narrowing
 export const defaultQuickFilterGroupedItems: QuickFilterGroupRecord = {
   date: dateItems, // FieldFilterOption[]
   assignee: assigneeItems, // FieldFilterOption[]

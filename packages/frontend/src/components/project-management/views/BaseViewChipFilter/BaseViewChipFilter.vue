@@ -88,30 +88,9 @@ watch(listFields, (fields) => {
 
   if (fields) {
     fields.forEach((field) => {
-      if (field.type === FieldTypes.DROPDOWN) {
-        // TODO: Implement Type Narrowing
-        // (
-        //   quickFilterGroupedItems.dropdown as Record<
-        //     string,
-        //     FieldFilterOption[]
-        //   >
-        // )[field.name] = field.items.map((item: FieldItem) =>
-        //   buildField(field, item)
-        // );
-        quickFilterGroupedItems.dropdown[field.name] = field.items.map(
-          (item: FieldItem) => buildField(field, item)
-        );
-      } else if (field.type === FieldTypes.LABEL) {
-        // TODO: Implement Type Narrowing
-        // (
-        //   quickFilterGroupedItems[FieldTypes.LABEL] as Record<
-        //     string,
-        //     FieldFilterOption[]
-        //   >
-        // )[field.name] = field.items.map((item: FieldItem) =>
-        //   buildField(field, item)
-        // );
-        quickFilterGroupedItems[FieldTypes.LABEL][field.name] = field.items.map(
+      const group = field.type as QuickFilterGroup;
+      if (!Array.isArray(quickFilterGroupedItems[group])) {
+        quickFilterGroupedItems[group][field.name] = field.items.map(
           (item: FieldItem) => buildField(field, item)
         );
       }
@@ -300,38 +279,39 @@ function handleQuickFilter() {
         case 'date':
         case 'stage':
         case 'assignee': {
-          // TODO: Implement Type Narrowing
-          // const { nullOperator, betweenOperator, inOperator } =
-          //   buildQuickFilter(quickFilters.value[group] as FieldFilterOption[]);
-          const { nullOperator, betweenOperator, inOperator } =
-            buildQuickFilter(quickFilters.value[group]);
-          filters = [...nullOperator, ...betweenOperator, ...inOperator];
+          if (Array.isArray(quickFilters.value[group])) {
+            const { nullOperator, betweenOperator, inOperator } =
+              buildQuickFilter(quickFilters.value[group]);
+            filters = [...nullOperator, ...betweenOperator, ...inOperator];
+          }
           break;
         }
         case 'dropdown':
         case 'label': {
-          const { nullOperator, betweenOperator, inOperator } = Object.values(
-            quickFilters.value[group]
-          )
-            .map((subGroup) => buildQuickFilter(subGroup))
-            .reduce(
-              (prev, curr) => {
-                return {
-                  nullOperator: prev.nullOperator.concat(curr.nullOperator),
-                  betweenOperator: prev.betweenOperator.concat(
-                    curr.betweenOperator
-                  ),
-                  inOperator: prev.inOperator.concat(curr.inOperator),
-                };
-              },
-              {
-                nullOperator: [],
-                betweenOperator: [],
-                inOperator: [],
-              }
-            );
+          if (!Array.isArray(quickFilters.value[group])) {
+            const { nullOperator, betweenOperator, inOperator } = Object.values(
+              quickFilters.value[group]
+            )
+              .map((subGroup) => buildQuickFilter(subGroup))
+              .reduce(
+                (prev, curr) => {
+                  return {
+                    nullOperator: prev.nullOperator.concat(curr.nullOperator),
+                    betweenOperator: prev.betweenOperator.concat(
+                      curr.betweenOperator
+                    ),
+                    inOperator: prev.inOperator.concat(curr.inOperator),
+                  };
+                },
+                {
+                  nullOperator: [],
+                  betweenOperator: [],
+                  inOperator: [],
+                }
+              );
 
-          filters = [...nullOperator, ...betweenOperator, ...inOperator];
+            filters = [...nullOperator, ...betweenOperator, ...inOperator];
+          }
           break;
         }
 
@@ -436,17 +416,17 @@ watch(users, (assignees) => {
   if (assignees) {
     quickFilterGroupedItems.assignee = defaultQuickFilterGroupedItems.assignee;
 
-    assignees.forEach((assignee) =>
-      // TODO: Implement Type Narrowing
-      // (quickFilterGroupedItems.assignee as FieldFilterOption[]).push({
-      quickFilterGroupedItems.assignee.push({
-        field: 'users.id',
-        operator: 'eq',
-        value: assignee.id,
-        title: `${assignee.firstName} ${assignee.lastName}`,
-        type: FieldTypes.USER,
-      })
-    );
+    assignees.forEach((assignee) => {
+      if (Array.isArray(quickFilterGroupedItems.assignee)) {
+        quickFilterGroupedItems.assignee.push({
+          field: 'users.id',
+          operator: 'eq',
+          value: assignee.id,
+          title: `${assignee.firstName} ${assignee.lastName}`,
+          type: FieldTypes.USER,
+        });
+      }
+    });
   }
 });
 
@@ -567,7 +547,7 @@ watch(listId, () => {
                 size="small"
               />
             </v-chip-group>
-            <div v-else class="ml-4">
+            <div v-else-if="!Array.isArray(quickFilters[group])" class="ml-4">
               <div
                 v-for="(subItems, subGroup) in items"
                 :key="subGroup"
@@ -576,9 +556,7 @@ watch(listId, () => {
                 <v-card-subtitle class="text-capitalize pa-1 mr-2">
                   {{ subGroup }}
                 </v-card-subtitle>
-                <!-- TODO: Type Narrowing -->
                 <v-chip-group
-                  v-if="Array.isArray(subItems)"
                   v-model="quickFilters[group][subGroup]"
                   multiple
                   selected-class="text-primary"
