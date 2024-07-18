@@ -21,6 +21,7 @@ import { useStateStore } from '@/stores/state';
 
 import {
   quickFilterGroups,
+  quickFilterGroupsCustom,
   defaultQuickFilterGroupedItems,
   type QuickFilterGroup,
   type QuickFilterGroupRecord,
@@ -88,11 +89,14 @@ watch(listFields, (fields) => {
 
   if (fields) {
     fields.forEach((field) => {
-      const group = field.type as QuickFilterGroup;
-      if (!Array.isArray(quickFilterGroupedItems[group])) {
-        quickFilterGroupedItems[group][field.name] = field.items.map(
-          (item: FieldItem) => buildField(field, item)
-        );
+      const { type, name, items } = field;
+      if (quickFilterGroupsCustom.includes(type)) {
+        const group = type as QuickFilterGroup;
+        if (!Array.isArray(quickFilterGroupedItems[group])) {
+          quickFilterGroupedItems[group][name] = items.map((item: FieldItem) =>
+            buildField(field, item)
+          );
+        }
       }
     });
   }

@@ -1,13 +1,12 @@
 import type { FieldFilterOption } from './types';
 import { FieldTypes } from '../../fields/types';
 
+export const quickFilterGroupsDefault = ['date', 'assignee', 'stage'] as const;
+export const quickFilterGroupsCustom = ['dropdown', 'label'] as const;
 export const quickFilterGroups = [
-  'date',
-  'assignee',
-  'stage',
-  'dropdown',
-  'label',
-] as const;
+  ...quickFilterGroupsDefault,
+  ...quickFilterGroupsCustom,
+];
 
 export type QuickFilterGroup = (typeof quickFilterGroups)[number];
 
@@ -50,9 +49,9 @@ export type QuickFilterGroupRecord = Record<
   FieldFilterOption[] | Record<string, FieldFilterOption[]>
 >;
 export const defaultQuickFilterGroupedItems: QuickFilterGroupRecord = {
-  date: dateItems, // FieldFilterOption[]
-  assignee: assigneeItems, // FieldFilterOption[]
-  stage: [], // FieldFilterOption[]
-  dropdown: {}, // Record<string, FieldFilterOption[]>
-  label: {}, // Record<string, FieldFilterOption[]>
+  date: dateItems,
+  assignee: assigneeItems,
+  stage: [],
+  dropdown: {},
+  label: {},
 };
