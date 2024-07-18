@@ -197,67 +197,69 @@ const quickFilters = ref<QuickFilterGroupRecord>({
   label: {},
 });
 
-function handleQuickFilter() {
-  function transformFilter(filter: FieldFilter) {
-    return {
-      field: filter.field,
-      operator: filter.operator,
-      value: filter.value,
+function buildQuickFilter(items: FieldFilterOption[]) {
+  let values: {
+    nullOperator: FieldFilter[];
+    inOperator: FieldFilter[];
+    betweenOperator: FieldFilter[];
+  } = {
+    nullOperator: [],
+    inOperator: [],
+    betweenOperator: [],
+  };
+  values = items.reduce((prev, curr) => {
+    const filter = {
+      field: curr.field,
+      operator: curr.operator,
+      value: curr.value,
     };
-  }
-  function handleInOperator(
-    group: QuickFilterGroup,
-    field: string
-  ): FieldFilter[] {
-    let values = [];
-    if (Array.isArray(quickFilters.value[group])) {
-      values = quickFilters.value[group]
-        .filter((filter) => !['isNull', 'isNotNull'].includes(filter.operator))
-        .map((filter: FieldFilter) => filter.value);
+
+    switch (filter.operator) {
+      case 'isNull':
+      case 'isNotNull':
+        prev.nullOperator.push(filter);
+        break;
+      case 'between':
+        prev.betweenOperator.push(filter);
+        break;
+
+      default: {
+        const index = prev.inOperator.findIndex(
+          (value) => value.field === filter.field
+        );
+        if (index > -1) {
+          prev.inOperator[index] = {
+            ...prev.inOperator[index],
+            value: [...prev.inOperator[index].value, filter.value],
+          };
+        } else {
+          prev.inOperator.push({
+            field: filter.field,
+            operator: 'in',
+            value: [filter.value],
+          });
+        }
+        break;
+      }
     }
 
-    if (values.length) {
-      return [
-        {
-          field,
-          operator: 'in',
-          value: values,
-        },
-      ];
-    }
-    return [];
-  }
+    return prev;
+  }, values);
+  return values;
+}
 
+function handleQuickFilter() {
   const filters: FilterGroup[] = quickFilterGroups
     .map((group: QuickFilterGroup) => {
       let filters: FieldFilter[] = [];
 
       switch (group) {
-        case 'date': {
-          filters = (quickFilters.value[group] as FieldFilterOption[]).filter(
-            (filter) =>
-              (
-                quickFilterGroupedItems.value[group] as FieldFilterOption[]
-              ).find((item) => item.title === filter.title)
-          );
-          break;
-        }
+        case 'date':
         case 'stage':
         case 'assignee': {
-          const field = group === 'stage' ? 'listStage.id' : 'users.id';
-          filters = handleInOperator(group, field);
-
-          (quickFilters.value[group] as FieldFilterOption[])
-            .filter((filter) =>
-              ['isNull', 'isNotNull'].includes(filter.operator)
-            )
-            .map((filter) =>
-              filters.push({
-                field,
-                operator: filter.operator,
-                value: [],
-              })
-            );
+          const { nullOperator, betweenOperator, inOperator } =
+            buildQuickFilter(quickFilters.value[group] as FieldFilterOption[]);
+          filters = [...nullOperator, ...betweenOperator, ...inOperator];
           break;
         }
 
@@ -267,7 +269,7 @@ function handleQuickFilter() {
 
       if (filters.length) {
         return {
-          or: filters.map(transformFilter),
+          or: filters,
         };
       }
     })
