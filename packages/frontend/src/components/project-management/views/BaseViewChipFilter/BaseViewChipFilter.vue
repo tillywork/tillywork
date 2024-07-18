@@ -89,22 +89,30 @@ watch(listFields, (fields) => {
   if (fields) {
     fields.forEach((field) => {
       if (field.type === FieldTypes.DROPDOWN) {
-        (
-          quickFilterGroupedItems.dropdown as Record<
-            string,
-            FieldFilterOption[]
-          >
-        )[field.name] = field.items.map((item: FieldItem) =>
-          buildField(field, item)
+        // TODO: Implement Type Narrowing
+        // (
+        //   quickFilterGroupedItems.dropdown as Record<
+        //     string,
+        //     FieldFilterOption[]
+        //   >
+        // )[field.name] = field.items.map((item: FieldItem) =>
+        //   buildField(field, item)
+        // );
+        quickFilterGroupedItems.dropdown[field.name] = field.items.map(
+          (item: FieldItem) => buildField(field, item)
         );
       } else if (field.type === FieldTypes.LABEL) {
-        (
-          quickFilterGroupedItems[FieldTypes.LABEL] as Record<
-            string,
-            FieldFilterOption[]
-          >
-        )[field.name] = field.items.map((item: FieldItem) =>
-          buildField(field, item)
+        // TODO: Implement Type Narrowing
+        // (
+        //   quickFilterGroupedItems[FieldTypes.LABEL] as Record<
+        //     string,
+        //     FieldFilterOption[]
+        //   >
+        // )[field.name] = field.items.map((item: FieldItem) =>
+        //   buildField(field, item)
+        // );
+        quickFilterGroupedItems[FieldTypes.LABEL][field.name] = field.items.map(
+          (item: FieldItem) => buildField(field, item)
         );
       }
     });
@@ -292,8 +300,11 @@ function handleQuickFilter() {
         case 'date':
         case 'stage':
         case 'assignee': {
+          // TODO: Implement Type Narrowing
+          // const { nullOperator, betweenOperator, inOperator } =
+          //   buildQuickFilter(quickFilters.value[group] as FieldFilterOption[]);
           const { nullOperator, betweenOperator, inOperator } =
-            buildQuickFilter(quickFilters.value[group] as FieldFilterOption[]);
+            buildQuickFilter(quickFilters.value[group]);
           filters = [...nullOperator, ...betweenOperator, ...inOperator];
           break;
         }
@@ -426,7 +437,9 @@ watch(users, (assignees) => {
     quickFilterGroupedItems.assignee = defaultQuickFilterGroupedItems.assignee;
 
     assignees.forEach((assignee) =>
-      (quickFilterGroupedItems.assignee as FieldFilterOption[]).push({
+      // TODO: Implement Type Narrowing
+      // (quickFilterGroupedItems.assignee as FieldFilterOption[]).push({
+      quickFilterGroupedItems.assignee.push({
         field: 'users.id',
         operator: 'eq',
         value: assignee.id,
@@ -563,6 +576,7 @@ watch(listId, () => {
                 <v-card-subtitle class="text-capitalize pa-1 mr-2">
                   {{ subGroup }}
                 </v-card-subtitle>
+                <!-- TODO: Type Narrowing -->
                 <v-chip-group
                   v-if="Array.isArray(subItems)"
                   v-model="quickFilters[group][subGroup]"
