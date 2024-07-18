@@ -14,6 +14,9 @@ const settingComponents = {
   [SETTINGS.THEME]: defineAsyncComponent(
     () => import('../../components/common/settings/ThemeSettings.vue')
   ),
+  [SETTINGS.WORKSPACE]: defineAsyncComponent(
+    () => import('../../components/common/settings/WorkspaceSettings.vue')
+  ),
 };
 const settingRoutes = Object.keys(settingComponents);
 
@@ -26,7 +29,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="d-flex">
+  <div class="d-flex">
     <v-navigation-drawer color="background">
       <v-list>
         <v-list-item
@@ -43,8 +46,8 @@ onMounted(() => {
       </v-list>
     </v-navigation-drawer>
 
-    <div class="px-4 py-3">
+    <div class="px-4 py-3 w-100">
       <component :is="settingComponents[route.params.section as SETTINGS]" />
     </div>
-  </main>
+  </div>
 </template>

@@ -4,7 +4,7 @@ import BaseThemeSwitch from '../base/BaseThemeSwitch.vue';
 
 <template>
   <div class="user-select-none">
-    <h3 class="text-h6">Theme</h3>
+    <h3>Theme</h3>
     <p class="text-subtitle-2">Select the theme to use.</p>
     <base-theme-switch />
   </div>
