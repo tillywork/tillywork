@@ -211,31 +211,38 @@ export class QueryBuilderHelper {
                 return queryBuilder.andWhere(`${fieldName} <= :${field}`, {
                     [field]: processedValue,
                 });
-            case "in": {
-                let operator: "in" | "@>";
-
-                let value = `(${processedValue.join(",")})`;
-                if (fieldName.startsWith(cardPrefix)) {
-                    operator = "@>";
-                    value = `'["${processedValue.join('","')}"]'`;
-                } else operator = "in";
-
-                return queryBuilder.andWhere(
-                    `${fieldName} ${operator} ${value}`
-                );
-            }
+            case "in":
             case "nin": {
-                let operator: "not in" | "@>" = "not in";
-                let value = `(${processedValue.join(",")})`;
-                let query = `${fieldName} ${operator} ${value}`;
-
                 if (fieldName.startsWith(cardPrefix)) {
-                    operator = "@>";
-                    value = `'["${processedValue.join('","')}"]'`;
-                    query = `NOT (${fieldName} ${operator} ${value})`;
+                    if (operator[0] === "n") {
+                        return queryBuilder
+                            .andWhere(
+                                new Brackets((qb) =>
+                                    processedValue.map((value: string) => {
+                                        return qb.andWhere(
+                                            `NOT (${fieldName} @> '["${value}"]')`
+                                        );
+                                    })
+                                )
+                            )
+                            .orWhere(`${fieldName} IS NULL`);
+                    }
+
+                    return queryBuilder.andWhere(
+                        new Brackets((qb) =>
+                            processedValue.map((value: string) => {
+                                return qb.orWhere(
+                                    `${fieldName} @> '["${value}"]'`
+                                );
+                            })
+                        )
+                    );
                 }
 
-                return queryBuilder.andWhere(query);
+                const inOperator = `${operator[0] === "n" ? "NOT " : ""}in`;
+                return queryBuilder.andWhere(
+                    `${fieldName} ${inOperator} (${processedValue.join(",")})`
+                );
             }
             case "like":
                 return queryBuilder.andWhere(`${fieldName} LIKE :${field}`, {
