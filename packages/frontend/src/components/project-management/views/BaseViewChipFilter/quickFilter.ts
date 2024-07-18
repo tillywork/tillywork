@@ -45,13 +45,14 @@ const assigneeItems: FieldFilterOption[] = [
   },
 ];
 
-export const defaultQuickFilterGroupedItems: Record<
+export type QuickFilterGroupRecord = Record<
   QuickFilterGroup,
-  FieldFilterOption[]
-> = {
+  FieldFilterOption[] | Record<string, FieldFilterOption[]>
+>;
+export const defaultQuickFilterGroupedItems: QuickFilterGroupRecord = {
   date: dateItems,
   assignee: assigneeItems,
   stage: [],
-  dropdown: [],
-  label: [],
+  dropdown: {},
+  label: {},
 };

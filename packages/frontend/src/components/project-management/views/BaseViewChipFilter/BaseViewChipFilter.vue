@@ -23,6 +23,7 @@ import {
   quickFilterGroups,
   defaultQuickFilterGroupedItems,
   type QuickFilterGroup,
+  type QuickFilterGroupRecord,
 } from './quickFilter';
 
 const props = defineProps<{
@@ -66,7 +67,7 @@ watch(listStages, (stages) => {
     quickFilterGroupedItems.value.stage = stages.map((stage) => {
       return {
         field: 'listStage.id',
-        operator: 'eq',
+        operator: 'eq' as FilterOperator,
         value: stage.id,
         title: stage.name,
         type: FieldTypes.DROPDOWN,
@@ -185,15 +186,15 @@ const filtersQuery = computed<{
   return filters;
 });
 
-const quickFilterGroupedItems = ref<
-  Record<QuickFilterGroup, FieldFilterOption[]>
->(defaultQuickFilterGroupedItems);
-const quickFilters = ref<Record<QuickFilterGroup, FieldFilterOption[]>>({
+const quickFilterGroupedItems = ref<QuickFilterGroupRecord>(
+  defaultQuickFilterGroupedItems
+);
+const quickFilters = ref<QuickFilterGroupRecord>({
   date: [],
   assignee: [],
   stage: [],
-  dropdown: [],
-  label: [],
+  dropdown: {},
+  label: {},
 });
 
 function handleQuickFilter() {
@@ -208,9 +209,12 @@ function handleQuickFilter() {
     group: QuickFilterGroup,
     field: string
   ): FieldFilter[] {
-    const values = quickFilters.value[group]
-      .filter((filter) => !['isNull', 'isNotNull'].includes(filter.operator))
-      .map((filter: FieldFilter) => filter.value);
+    let values = [];
+    if (Array.isArray(quickFilters.value[group])) {
+      values = quickFilters.value[group]
+        .filter((filter) => !['isNull', 'isNotNull'].includes(filter.operator))
+        .map((filter: FieldFilter) => filter.value);
+    }
 
     if (values.length) {
       return [
@@ -229,19 +233,21 @@ function handleQuickFilter() {
       let filters: FieldFilter[] = [];
 
       switch (group) {
-        case 'date':
-          filters = quickFilters.value[group].filter((filter) =>
-            quickFilterGroupedItems.value[group].find(
-              (item) => item.title === filter.title
-            )
+        case 'date': {
+          filters = (quickFilters.value[group] as FieldFilterOption[]).filter(
+            (filter) =>
+              (
+                quickFilterGroupedItems.value[group] as FieldFilterOption[]
+              ).find((item) => item.title === filter.title)
           );
           break;
+        }
         case 'stage':
         case 'assignee': {
           const field = group === 'stage' ? 'listStage.id' : 'users.id';
           filters = handleInOperator(group, field);
 
-          quickFilters.value[group]
+          (quickFilters.value[group] as FieldFilterOption[])
             .filter((filter) =>
               ['isNull', 'isNotNull'].includes(filter.operator)
             )
@@ -358,7 +364,7 @@ watch(users, (assignees) => {
       defaultQuickFilterGroupedItems.assignee;
 
     assignees.forEach((assignee) =>
-      quickFilterGroupedItems.value.assignee.push({
+      (quickFilterGroupedItems.value.assignee as FieldFilterOption[]).push({
         field: 'users.id',
         operator: 'eq',
         value: assignee.id,
@@ -472,6 +478,7 @@ watch(listId, () => {
               {{ group }}
             </v-card-subtitle>
             <v-chip-group
+              v-if="Array.isArray(items)"
               v-model="quickFilters[group]"
               multiple
               selected-class="text-primary"
