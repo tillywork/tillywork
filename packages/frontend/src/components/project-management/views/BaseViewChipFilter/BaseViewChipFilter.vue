@@ -93,9 +93,16 @@ watch(listFields, (fields) => {
       if (quickFilterGroupsCustom.includes(type)) {
         const group = type as QuickFilterGroup;
         if (!Array.isArray(quickFilterGroupedItems[group])) {
-          quickFilterGroupedItems[group][name] = items.map((item: FieldItem) =>
-            buildField(field, item)
-          );
+          quickFilterGroupedItems[group][name] = [
+            {
+              field: `card.data.${field.id}`,
+              operator: 'isNull',
+              value: [],
+              title: `No ${name}`,
+              type: field.type,
+            },
+            ...items.map((item: FieldItem) => buildField(field, item)),
+          ];
         }
       }
     });
