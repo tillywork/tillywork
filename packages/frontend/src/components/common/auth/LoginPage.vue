@@ -2,7 +2,6 @@
 import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { useStateStore } from '@/stores/state';
 import validationUtils from '@/utils/validation';
 import type { VForm } from 'vuetify/components';
 
@@ -14,7 +13,6 @@ const errorMessage = ref<string[] | null>(null);
 const { rules } = validationUtils;
 const loading = ref(false);
 const route = useRoute('/login');
-const { currentList } = useStateStore();
 
 const login = async () => {
   errorMessage.value = null;
@@ -27,16 +25,7 @@ const login = async () => {
       loading.value = true;
       await login(email.value, password.value);
 
-      const redirectedFrom = route.redirectedFrom?.fullPath;
-      if (!redirectedFrom || redirectedFrom === '/') {
-        // - redirected from... basically nothing.
-        window.location.pathname = currentList
-          ? '/pm/list/' + currentList.id
-          : '/';
-      } else {
-        // - redirected from any route.
-        window.location.pathname = redirectedFrom;
-      }
+      window.location.pathname = route.redirectedFrom?.fullPath ?? '/';
     } catch (error: any) {
       const { showSnackbar } = useSnackbarStore();
 
