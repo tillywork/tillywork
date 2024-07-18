@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import BaseViewChip from '../BaseViewChip.vue';
 import BaseViewChipFilterItem from './BaseViewChipFilterItem.vue';
-import { FieldTypes, type Field } from '../../fields/types';
+import { FieldTypes, type Field, type FieldItem } from '../../fields/types';
 import type { VForm } from 'vuetify/components';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
@@ -64,7 +64,7 @@ const { data: listStages } = listStagesService.useGetListStagesQuery({
 
 watch(listStages, (stages) => {
   if (stages) {
-    quickFilterGroupedItems.value.stage = stages.map((stage) => {
+    quickFilterGroupedItems.stage = stages.map((stage) => {
       return {
         field: 'listStage.id',
         operator: 'eq' as FilterOperator,
@@ -72,6 +72,41 @@ watch(listStages, (stages) => {
         title: stage.name,
         type: FieldTypes.DROPDOWN,
       };
+    });
+  }
+});
+watch(listFields, (fields) => {
+  function buildField(field: Field, item: FieldItem) {
+    return {
+      field: `card.data.${field.id}`,
+      operator: getOperatorFromFieldType(field),
+      value: item.item,
+      title: item.item,
+      type: field.type,
+    };
+  }
+
+  if (fields) {
+    fields.forEach((field) => {
+      if (field.type === FieldTypes.DROPDOWN) {
+        (
+          quickFilterGroupedItems.dropdown as Record<
+            string,
+            FieldFilterOption[]
+          >
+        )[field.name] = field.items.map((item: FieldItem) =>
+          buildField(field, item)
+        );
+      } else if (field.type === FieldTypes.LABEL) {
+        (
+          quickFilterGroupedItems[FieldTypes.LABEL] as Record<
+            string,
+            FieldFilterOption[]
+          >
+        )[field.name] = field.items.map((item: FieldItem) =>
+          buildField(field, item)
+        );
+      }
     });
   }
 });
@@ -186,7 +221,7 @@ const filtersQuery = computed<{
   return filters;
 });
 
-const quickFilterGroupedItems = ref<QuickFilterGroupRecord>(
+const quickFilterGroupedItems = reactive<QuickFilterGroupRecord>(
   defaultQuickFilterGroupedItems
 );
 const quickFilters = ref<QuickFilterGroupRecord>({
@@ -259,6 +294,32 @@ function handleQuickFilter() {
         case 'assignee': {
           const { nullOperator, betweenOperator, inOperator } =
             buildQuickFilter(quickFilters.value[group] as FieldFilterOption[]);
+          filters = [...nullOperator, ...betweenOperator, ...inOperator];
+          break;
+        }
+        case 'dropdown':
+        case 'label': {
+          const { nullOperator, betweenOperator, inOperator } = Object.values(
+            quickFilters.value[group]
+          )
+            .map((subGroup) => buildQuickFilter(subGroup))
+            .reduce(
+              (prev, curr) => {
+                return {
+                  nullOperator: prev.nullOperator.concat(curr.nullOperator),
+                  betweenOperator: prev.betweenOperator.concat(
+                    curr.betweenOperator
+                  ),
+                  inOperator: prev.inOperator.concat(curr.inOperator),
+                };
+              },
+              {
+                nullOperator: [],
+                betweenOperator: [],
+                inOperator: [],
+              }
+            );
+
           filters = [...nullOperator, ...betweenOperator, ...inOperator];
           break;
         }
@@ -362,11 +423,10 @@ function getOperatorFromFieldType(field: Field): FilterOperator {
 
 watch(users, (assignees) => {
   if (assignees) {
-    quickFilterGroupedItems.value.assignee =
-      defaultQuickFilterGroupedItems.assignee;
+    quickFilterGroupedItems.assignee = defaultQuickFilterGroupedItems.assignee;
 
     assignees.forEach((assignee) =>
-      (quickFilterGroupedItems.value.assignee as FieldFilterOption[]).push({
+      (quickFilterGroupedItems.assignee as FieldFilterOption[]).push({
         field: 'users.id',
         operator: 'eq',
         value: assignee.id,
@@ -474,7 +534,7 @@ watch(listId, () => {
           <div
             v-for="(items, group) in quickFilterGroupedItems"
             :key="group"
-            class="d-flex align-center"
+            :class="[Array.isArray(items) ? 'd-flex align-center' : '']"
           >
             <v-card-subtitle class="text-capitalize pa-1 mr-2">
               {{ group }}
@@ -494,6 +554,32 @@ watch(listId, () => {
                 size="small"
               />
             </v-chip-group>
+            <div v-else class="ml-4">
+              <div
+                v-for="(subItems, subGroup) in items"
+                :key="subGroup"
+                class="d-flex align-center"
+              >
+                <v-card-subtitle class="text-capitalize pa-1 mr-2">
+                  {{ subGroup }}
+                </v-card-subtitle>
+                <v-chip-group
+                  v-if="Array.isArray(subItems)"
+                  v-model="quickFilters[group][subGroup]"
+                  multiple
+                  selected-class="text-primary"
+                  @click="handleQuickFilter"
+                >
+                  <v-chip
+                    v-for="subItem in subItems"
+                    :key="subItem.title"
+                    :text="subItem.title"
+                    :value="subItem"
+                    size="small"
+                  />
+                </v-chip-group>
+              </div>
+            </div>
           </div>
         </v-card-item>
         <v-card-item>
