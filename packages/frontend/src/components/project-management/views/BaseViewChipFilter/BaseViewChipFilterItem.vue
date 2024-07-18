@@ -156,16 +156,20 @@ function mapFilterOperatorToFileringOption(
   }
 }
 
-// Reset filter value and operator when field changes
-watch(selectedFilter, (v) => {
-  if (v) {
-    filter.value = {
-      ...filter.value,
-      value: v.value,
-      operator: v.operator,
-    };
+function resetFilter(selectedFilter: FieldFilter) {
+  const { value, operator } = selectedFilter;
+  filter.value = {
+    ...filter.value,
+    value,
+    operator,
+  };
+}
+
+function handleFieldChanged() {
+  if (selectedFilter.value) {
+    resetFilter(selectedFilter.value);
   }
-});
+}
 
 // Set selected filter option when filter is initialized
 watch(
@@ -196,6 +200,7 @@ watch(
       hide-details
       max-width="33%"
       auto-select-first
+      @update:modelValue="handleFieldChanged"
       :rules="[rules.required]"
     >
       <template #item="{ item, props }">
