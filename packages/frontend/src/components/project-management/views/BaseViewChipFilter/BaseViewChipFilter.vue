@@ -218,54 +218,49 @@ const quickFilter = reactive<QuickFilter>({});
 const quickFilterItems = reactive<QuickFilter>({ date: quickFilterDate });
 
 function buildQuickFilter(items: FieldFilterOption[]) {
-  let values: {
-    nullOperator: FieldFilter[];
-    inOperator: FieldFilter[];
-    betweenOperator: FieldFilter[];
-  } = {
-    nullOperator: [],
-    inOperator: [],
-    betweenOperator: [],
-  };
-  values = items.reduce((prev, curr) => {
-    const filter = {
-      field: curr.field,
-      operator: curr.operator,
-      value: curr.value,
-    };
+  return items.reduce(
+    (prev, curr) => {
+      const filter = {
+        field: curr.field,
+        operator: curr.operator,
+        value: curr.value,
+      };
 
-    switch (filter.operator) {
-      case 'isNull':
-      case 'isNotNull':
-        prev.nullOperator.push(filter);
-        break;
-      case 'between':
-        prev.betweenOperator.push(filter);
-        break;
+      switch (filter.operator) {
+        case 'isNull':
+        case 'isNotNull':
+        case 'between':
+          prev.filterAsIs.push(filter);
+          break;
 
-      default: {
-        const index = prev.inOperator.findIndex(
-          (value) => value.field === filter.field
-        );
-        if (index > -1) {
-          prev.inOperator[index] = {
-            ...prev.inOperator[index],
-            value: [...prev.inOperator[index].value, filter.value],
-          };
-        } else {
-          prev.inOperator.push({
-            field: filter.field,
-            operator: 'in',
-            value: [filter.value],
-          });
+        default: {
+          const index = prev.filterBeIn.findIndex(
+            (value) => value.field === filter.field
+          );
+
+          if (index > -1) {
+            prev.filterBeIn[index] = {
+              ...prev.filterBeIn[index],
+              value: [...prev.filterBeIn[index].value, filter.value],
+            };
+          } else {
+            prev.filterBeIn.push({
+              field: filter.field,
+              operator: 'in',
+              value: [filter.value],
+            });
+          }
+          break;
         }
-        break;
       }
-    }
 
-    return prev;
-  }, values);
-  return values;
+      return prev;
+    },
+    {
+      filterAsIs: [] as FieldFilter[],
+      filterBeIn: [] as FieldFilter[],
+    }
+  );
 }
 
 function handleQuickFilter() {
@@ -273,9 +268,8 @@ function handleQuickFilter() {
     .map((values) => {
       let filters: FieldFilter[] = [];
 
-      const { nullOperator, betweenOperator, inOperator } =
-        buildQuickFilter(values);
-      filters = [...nullOperator, ...betweenOperator, ...inOperator];
+      const { filterAsIs, filterBeIn } = buildQuickFilter(values);
+      filters = [...filterAsIs, ...filterBeIn];
 
       if (filters.length) {
         return { or: filters };
