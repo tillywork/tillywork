@@ -20,11 +20,11 @@ import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 
 const emit = defineEmits([
   'toggle:group',
-  'card:delete',
   'card:update:stage',
   'card:update:due-date',
   'card:update:assignees',
   'card:update:order',
+  'card:open:context-menu',
 ]);
 const props = defineProps<{
   listGroup: ListGroup;
@@ -32,7 +32,6 @@ const props = defineProps<{
   view: View;
   projectUsers: ProjectUser[];
 }>();
-const cardMenuOpen = ref<Card | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
 
 const dialog = useDialogStore();
@@ -202,22 +201,8 @@ function handleUpdateCardOrder(data: {
   emit('card:update:order', data);
 }
 
-function handleCardMenuClick({
-  card,
-  isOpen,
-}: {
-  card: Card;
-  isOpen: boolean;
-}) {
-  if (isOpen) {
-    cardMenuOpen.value = card;
-  } else {
-    cardMenuOpen.value = null;
-  }
-}
-
-function handleDeleteCard(card: Card) {
-  emit('card:delete', card);
+function handleCardContextMenu(event: MouseEvent, card: Card) {
+  emit('card:open:context-menu', { event, card });
 }
 
 function handleUpdateCardStage(data: {
@@ -335,6 +320,7 @@ watchEffect(() => {
             class="board-card"
             :to="`/pm/card/${card.id}`"
             :ripple="false"
+            @contextmenu.prevent.stop="handleCardContextMenu($event, card)"
           >
             <v-card-item class="pa-2 align-start">
               <template #prepend>
