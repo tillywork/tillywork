@@ -1,9 +1,9 @@
 import type { FieldFilterOption } from './types';
 import { FieldTypes } from '../../fields/types';
 
-export const quickFilterGroupsCustom = ['dropdown', 'label'] as const;
+export const quickFilterGroupsCustomFields = ['dropdown', 'label'] as const;
 
-export const quickFilterDate: FieldFilterOption[] = [
+export const quickFilterItemsDate: FieldFilterOption[] = [
   {
     field: 'card.dueAt',
     operator: 'isNull',

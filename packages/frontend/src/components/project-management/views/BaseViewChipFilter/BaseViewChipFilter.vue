@@ -20,8 +20,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useStateStore } from '@/stores/state';
 
 import {
-  quickFilterDate,
-  quickFilterGroupsCustom,
+  quickFilterItemsDate,
+  quickFilterGroupsCustomFields,
   type QuickFilter,
 } from './quickFilter';
 
@@ -51,6 +51,29 @@ const { data: users } = useProjectUsersQuery({
   select: (projectUsers) => projectUsers.map((pj) => pj.user),
 });
 
+watch(users, (assignees) => {
+  if (assignees) {
+    quickFilterItems.assignee = [
+      {
+        field: 'users.id',
+        operator: 'isNull',
+        value: [],
+        title: 'No Assignee',
+        type: FieldTypes.USER,
+      },
+      ...assignees.map((assignee) => {
+        return {
+          field: 'users.id',
+          operator: 'eq' as FilterOperator,
+          value: assignee.id,
+          title: `${assignee.firstName} ${assignee.lastName}`,
+          type: FieldTypes.USER,
+        };
+      }),
+    ];
+  }
+});
+
 const { currentList } = storeToRefs(useStateStore());
 const listId = computed(() => currentList.value!.id);
 const { data: listFields, refetch: refetchListFields } = useFieldsQuery({
@@ -75,20 +98,10 @@ watch(listStages, (stages) => {
   }
 });
 watch(listFields, (fields) => {
-  function buildField(field: Field, item: FieldItem) {
-    return {
-      field: `card.data.${field.id}`,
-      operator: getOperatorFromFieldType(field),
-      value: item.item,
-      title: item.item,
-      type: field.type,
-    };
-  }
-
   if (fields) {
     fields.forEach((field) => {
       const { type, name, items } = field;
-      if (quickFilterGroupsCustom.includes(type)) {
+      if (quickFilterGroupsCustomFields.includes(type)) {
         quickFilterItems[name] = [
           {
             field: `card.data.${field.id}`,
@@ -97,7 +110,15 @@ watch(listFields, (fields) => {
             title: `No ${name}`,
             type: field.type,
           },
-          ...items.map((item: FieldItem) => buildField(field, item)),
+          ...items.map((item: FieldItem) => {
+            return {
+              field: `card.data.${field.id}`,
+              operator: getOperatorFromFieldType(field),
+              value: item.item,
+              title: item.item,
+              type: field.type,
+            };
+          }),
         ];
       }
     });
@@ -215,7 +236,7 @@ const filtersQuery = computed<{
 });
 
 const quickFilter = reactive<QuickFilter>({});
-const quickFilterItems = reactive<QuickFilter>({ date: quickFilterDate });
+const quickFilterItems = reactive<QuickFilter>({ date: quickFilterItemsDate });
 
 function buildQuickFilter(items: FieldFilterOption[]) {
   return items.reduce(
@@ -361,29 +382,6 @@ function getOperatorFromFieldType(field: Field): FilterOperator {
       return 'eq';
   }
 }
-
-watch(users, (assignees) => {
-  if (assignees) {
-    quickFilterItems.assignee = [
-      {
-        field: 'users.id',
-        operator: 'isNull',
-        value: [],
-        title: 'No Assignee',
-        type: FieldTypes.USER,
-      },
-      ...assignees.map((assignee) => {
-        return {
-          field: 'users.id',
-          operator: 'eq' as FilterOperator,
-          value: assignee.id,
-          title: `${assignee.firstName} ${assignee.lastName}`,
-          type: FieldTypes.USER,
-        };
-      }),
-    ];
-  }
-});
 
 //TODO debounce changes
 watch(
