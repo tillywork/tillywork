@@ -535,53 +535,49 @@ watch(listId, () => {
               </v-card>
             </v-menu>
           </div>
-          <div
-            v-for="(items, group) in quickFilterGroupedItems"
-            :key="group"
-            :class="[Array.isArray(items) ? 'd-flex align-center' : '']"
-          >
-            <v-card-subtitle class="text-capitalize pa-1 mr-2">
-              {{ group }}
-            </v-card-subtitle>
-            <v-chip-group
-              v-if="Array.isArray(items)"
-              v-model="quickFilters[group]"
-              multiple
-              selected-class="text-primary"
-              @click="handleQuickFilter"
-            >
-              <v-chip
-                v-for="item in items"
-                :key="item.title"
-                :text="item.title"
-                :value="item"
-                size="small"
-              />
-            </v-chip-group>
-            <div v-else-if="!Array.isArray(quickFilters[group])" class="ml-4">
-              <div
-                v-for="(subItems, subGroup) in items"
-                :key="subGroup"
-                class="d-flex align-center"
+          <div v-for="(items, group) in quickFilterGroupedItems" :key="group">
+            <div v-if="Array.isArray(items)" class="d-flex align-center">
+              <v-card-subtitle class="text-capitalize pa-1 mr-2">
+                {{ group }}
+              </v-card-subtitle>
+              <v-chip-group
+                v-model="quickFilters[group]"
+                multiple
+                selected-class="text-primary"
+                @click="handleQuickFilter"
               >
-                <v-card-subtitle class="text-capitalize pa-1 mr-2">
-                  {{ subGroup }}
-                </v-card-subtitle>
-                <v-chip-group
-                  v-model="quickFilters[group][subGroup]"
-                  multiple
-                  selected-class="text-primary"
-                  @click="handleQuickFilter"
-                >
-                  <v-chip
-                    v-for="subItem in subItems"
-                    :key="subItem.title"
-                    :text="subItem.title"
-                    :value="subItem"
-                    size="small"
-                  />
-                </v-chip-group>
-              </div>
+                <v-chip
+                  v-for="item in items"
+                  :key="item.title"
+                  :text="item.title"
+                  :value="item"
+                  size="small"
+                />
+              </v-chip-group>
+            </div>
+            <div
+              v-else-if="!Array.isArray(quickFilters[group])"
+              v-for="(subItems, subGroup) in items"
+              :key="subGroup"
+              class="d-flex align-center"
+            >
+              <v-card-subtitle class="text-capitalize pa-1 mr-2">
+                {{ subGroup }}
+              </v-card-subtitle>
+              <v-chip-group
+                v-model="quickFilters[group][subGroup]"
+                multiple
+                selected-class="text-primary"
+                @click="handleQuickFilter"
+              >
+                <v-chip
+                  v-for="subItem in subItems"
+                  :key="subItem.title"
+                  :text="subItem.title"
+                  :value="subItem"
+                  size="small"
+                />
+              </v-chip-group>
             </div>
           </div>
         </v-card-item>
