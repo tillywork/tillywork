@@ -75,8 +75,8 @@ export const useCommands = () => {
    * @returns An array of commands
    */
   const commands = computed(() => {
-    function openSettings(section?: SETTINGS) {
-      router.push('/settings/' + (section ?? ''));
+    function openSettings(section: SETTINGS) {
+      router.push('/settings/' + section);
     }
 
     const commandsDtos: CommandDto[] = [
@@ -136,7 +136,7 @@ export const useCommands = () => {
         section: 'Settings',
         icon: 'mdi-cog',
         title: 'Settings',
-        action: openSettings,
+        action: () => openSettings(SETTINGS.THEME),
         shortcut: [','],
       },
       {

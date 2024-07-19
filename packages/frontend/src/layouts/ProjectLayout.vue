@@ -95,7 +95,7 @@ if (isAuthenticated()) {
             </template>
             <v-card class="border-thin ms-n2">
               <v-list>
-                <v-list-item to="/settings">
+                <v-list-item to="/settings/theme">
                   <template #prepend>
                     <v-icon icon="mdi-cog" />
                   </template>

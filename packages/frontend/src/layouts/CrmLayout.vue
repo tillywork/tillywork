@@ -174,7 +174,7 @@ if (isAuthenticated()) {
                     </v-card>
                   </v-card>
                 </v-menu>
-                <v-list-item to="/settings/">
+                <v-list-item to="/settings/theme">
                   <template #prepend>
                     <v-icon icon="mdi-cog" />
                   </template>
