@@ -34,6 +34,15 @@ onMounted(() => {
     // TEMP: Throw a 404 error.
     window.location.pathname = '/';
   }
+
+  document.title =
+    'Settings - ' + stringUtils.snakeToTitleCase(route.params.section);
+});
+
+watch(route, (v) => {
+  if (v)
+    document.title =
+      'Settings - ' + stringUtils.snakeToTitleCase(route.params.section);
 });
 </script>
 
