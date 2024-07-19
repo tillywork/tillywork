@@ -20,11 +20,9 @@ import { useAuthStore } from '@/stores/auth';
 import { useStateStore } from '@/stores/state';
 
 import {
-  quickFilterGroups,
+  quickFilterDate,
   quickFilterGroupsCustom,
-  defaultQuickFilterGroupedItems,
-  type QuickFilterGroup,
-  type QuickFilterGroupRecord,
+  type QuickFilter,
 } from './quickFilter';
 
 const props = defineProps<{
@@ -65,7 +63,7 @@ const { data: listStages } = listStagesService.useGetListStagesQuery({
 
 watch(listStages, (stages) => {
   if (stages) {
-    quickFilterGroupedItems.stage = stages.map((stage) => {
+    quickFilterItems.stage = stages.map((stage) => {
       return {
         field: 'listStage.id',
         operator: 'eq' as FilterOperator,
@@ -91,19 +89,16 @@ watch(listFields, (fields) => {
     fields.forEach((field) => {
       const { type, name, items } = field;
       if (quickFilterGroupsCustom.includes(type)) {
-        const group = type as QuickFilterGroup;
-        if (!Array.isArray(quickFilterGroupedItems[group])) {
-          quickFilterGroupedItems[group][name] = [
-            {
-              field: `card.data.${field.id}`,
-              operator: 'isNull',
-              value: [],
-              title: `No ${name}`,
-              type: field.type,
-            },
-            ...items.map((item: FieldItem) => buildField(field, item)),
-          ];
-        }
+        quickFilterItems[name] = [
+          {
+            field: `card.data.${field.id}`,
+            operator: 'isNull',
+            value: [],
+            title: `No ${name}`,
+            type: field.type,
+          },
+          ...items.map((item: FieldItem) => buildField(field, item)),
+        ];
       }
     });
   }
@@ -219,16 +214,8 @@ const filtersQuery = computed<{
   return filters;
 });
 
-const quickFilterGroupedItems = reactive<QuickFilterGroupRecord>(
-  defaultQuickFilterGroupedItems
-);
-const quickFilters = ref<QuickFilterGroupRecord>({
-  date: [],
-  assignee: [],
-  stage: [],
-  dropdown: {},
-  label: {},
-});
+const quickFilter = reactive<QuickFilter>({});
+const quickFilterItems = reactive<QuickFilter>({ date: quickFilterDate });
 
 function buildQuickFilter(items: FieldFilterOption[]) {
   let values: {
@@ -282,58 +269,16 @@ function buildQuickFilter(items: FieldFilterOption[]) {
 }
 
 function handleQuickFilter() {
-  const filters: FilterGroup[] = quickFilterGroups
-    .map((group: QuickFilterGroup) => {
+  const filters: FilterGroup[] = Object.values(quickFilter)
+    .map((values) => {
       let filters: FieldFilter[] = [];
 
-      switch (group) {
-        case 'date':
-        case 'stage':
-        case 'assignee': {
-          if (Array.isArray(quickFilters.value[group])) {
-            const { nullOperator, betweenOperator, inOperator } =
-              buildQuickFilter(quickFilters.value[group]);
-            filters = [...nullOperator, ...betweenOperator, ...inOperator];
-          }
-          break;
-        }
-        case 'dropdown':
-        case 'label': {
-          if (!Array.isArray(quickFilters.value[group])) {
-            const { nullOperator, betweenOperator, inOperator } = Object.values(
-              quickFilters.value[group]
-            )
-              .map((subGroup) => buildQuickFilter(subGroup))
-              .reduce(
-                (prev, curr) => {
-                  return {
-                    nullOperator: prev.nullOperator.concat(curr.nullOperator),
-                    betweenOperator: prev.betweenOperator.concat(
-                      curr.betweenOperator
-                    ),
-                    inOperator: prev.inOperator.concat(curr.inOperator),
-                  };
-                },
-                {
-                  nullOperator: [],
-                  betweenOperator: [],
-                  inOperator: [],
-                }
-              );
-
-            filters = [...nullOperator, ...betweenOperator, ...inOperator];
-          }
-          break;
-        }
-
-        default:
-          break;
-      }
+      const { nullOperator, betweenOperator, inOperator } =
+        buildQuickFilter(values);
+      filters = [...nullOperator, ...betweenOperator, ...inOperator];
 
       if (filters.length) {
-        return {
-          or: filters,
-        };
+        return { or: filters };
       }
     })
     .filter(Boolean) as FilterGroup[]; // NOTES: https://devblogs.microsoft.com/typescript/announcing-typescript-5-5/#inferred-type-predicates
@@ -425,19 +370,24 @@ function getOperatorFromFieldType(field: Field): FilterOperator {
 
 watch(users, (assignees) => {
   if (assignees) {
-    quickFilterGroupedItems.assignee = defaultQuickFilterGroupedItems.assignee;
-
-    assignees.forEach((assignee) => {
-      if (Array.isArray(quickFilterGroupedItems.assignee)) {
-        quickFilterGroupedItems.assignee.push({
+    quickFilterItems.assignee = [
+      {
+        field: 'users.id',
+        operator: 'isNull',
+        value: [],
+        title: 'No Assignee',
+        type: FieldTypes.USER,
+      },
+      ...assignees.map((assignee) => {
+        return {
           field: 'users.id',
-          operator: 'eq',
+          operator: 'eq' as FilterOperator,
           value: assignee.id,
           title: `${assignee.firstName} ${assignee.lastName}`,
           type: FieldTypes.USER,
-        });
-      }
-    });
+        };
+      }),
+    ];
   }
 });
 
@@ -535,50 +485,28 @@ watch(listId, () => {
               </v-card>
             </v-menu>
           </div>
-          <div v-for="(items, group) in quickFilterGroupedItems" :key="group">
-            <div v-if="Array.isArray(items)" class="d-flex align-center">
-              <v-card-subtitle class="text-capitalize pa-1 mr-2">
-                {{ group }}
-              </v-card-subtitle>
-              <v-chip-group
-                v-model="quickFilters[group]"
-                multiple
-                selected-class="text-primary"
-                @click="handleQuickFilter"
-              >
-                <v-chip
-                  v-for="item in items"
-                  :key="item.title"
-                  :text="item.title"
-                  :value="item"
-                  size="small"
-                />
-              </v-chip-group>
-            </div>
-            <div
-              v-else-if="!Array.isArray(quickFilters[group])"
-              v-for="(subItems, subGroup) in items"
-              :key="subGroup"
-              class="d-flex align-center"
+          <div
+            v-for="(items, group) in quickFilterItems"
+            :key="group"
+            class="d-flex align-center"
+          >
+            <v-card-subtitle class="text-capitalize pa-1 mr-2">
+              {{ group }}
+            </v-card-subtitle>
+            <v-chip-group
+              v-model="quickFilter[group]"
+              multiple
+              selected-class="text-primary"
+              @click="handleQuickFilter"
             >
-              <v-card-subtitle class="text-capitalize pa-1 mr-2">
-                {{ subGroup }}
-              </v-card-subtitle>
-              <v-chip-group
-                v-model="quickFilters[group][subGroup]"
-                multiple
-                selected-class="text-primary"
-                @click="handleQuickFilter"
-              >
-                <v-chip
-                  v-for="subItem in subItems"
-                  :key="subItem.title"
-                  :text="subItem.title"
-                  :value="subItem"
-                  size="small"
-                />
-              </v-chip-group>
-            </div>
+              <v-chip
+                v-for="item in items"
+                :key="item.title"
+                :text="item.title"
+                :value="item"
+                size="small"
+              />
+            </v-chip-group>
           </div>
         </v-card-item>
         <v-card-item>

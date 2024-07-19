@@ -1,16 +1,9 @@
 import type { FieldFilterOption } from './types';
 import { FieldTypes } from '../../fields/types';
 
-export const quickFilterGroupsDefault = ['date', 'assignee', 'stage'] as const;
 export const quickFilterGroupsCustom = ['dropdown', 'label'] as const;
-export const quickFilterGroups = [
-  ...quickFilterGroupsDefault,
-  ...quickFilterGroupsCustom,
-];
 
-export type QuickFilterGroup = (typeof quickFilterGroups)[number];
-
-const dateItems: FieldFilterOption[] = [
+export const quickFilterDate: FieldFilterOption[] = [
   {
     field: 'card.dueAt',
     operator: 'isNull',
@@ -34,24 +27,4 @@ const dateItems: FieldFilterOption[] = [
   },
 ];
 
-const assigneeItems: FieldFilterOption[] = [
-  {
-    field: 'users.id',
-    operator: 'isNull',
-    value: [],
-    title: 'No Assignee',
-    type: FieldTypes.USER,
-  },
-];
-
-export type QuickFilterGroupRecord = Record<
-  QuickFilterGroup,
-  FieldFilterOption[] | Record<string, FieldFilterOption[]>
->;
-export const defaultQuickFilterGroupedItems: QuickFilterGroupRecord = {
-  date: dateItems,
-  assignee: assigneeItems,
-  stage: [],
-  dropdown: {},
-  label: {},
-};
+export type QuickFilter = Record<string, FieldFilterOption[]>;
