@@ -99,29 +99,32 @@ watch(listStages, (stages) => {
 });
 watch(listFields, (fields) => {
   if (fields) {
-    fields.forEach((field) => {
-      const { type, name, items } = field;
-      if (quickFilterGroupsCustomFields.includes(type)) {
-        quickFilterItems[name] = [
-          {
-            field: `card.data.${field.id}`,
-            operator: 'isNull',
-            value: [],
-            title: `No ${name}`,
-            type: field.type,
-          },
-          ...items.map((item: FieldItem) => {
-            return {
+    fields
+      .map((x) => x)
+      .sort((a, b) => a.type.localeCompare(b.type))
+      .forEach((field) => {
+        const { type, name, items } = field;
+        if (quickFilterGroupsCustomFields.includes(type)) {
+          quickFilterItems[name] = [
+            {
               field: `card.data.${field.id}`,
-              operator: getOperatorFromFieldType(field),
-              value: item.item,
-              title: item.item,
+              operator: 'isNull',
+              value: [],
+              title: `No ${name}`,
               type: field.type,
-            };
-          }),
-        ];
-      }
-    });
+            },
+            ...items.map((item: FieldItem) => {
+              return {
+                field: `card.data.${field.id}`,
+                operator: getOperatorFromFieldType(field),
+                value: item.item,
+                title: item.item,
+                type: field.type,
+              };
+            }),
+          ];
+        }
+      });
   }
 });
 
@@ -236,7 +239,11 @@ const filtersQuery = computed<{
 });
 
 const quickFilter = reactive<QuickFilter>({});
-const quickFilterItems = reactive<QuickFilter>({ date: quickFilterItemsDate });
+const quickFilterItems = reactive<QuickFilter>({
+  date: quickFilterItemsDate,
+  assignee: [],
+  stage: [],
+});
 
 function buildQuickFilter(items: FieldFilterOption[]) {
   return items.reduce(
