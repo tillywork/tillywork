@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import validationUtils from '@/utils/validation';
-import { FieldTypes } from '../../fields/types';
+import { FieldTypes, type FieldItem } from '../../fields/types';
 import type { FieldFilterOption } from './types';
 import type { User } from '@/components/common/users/types';
+import { useFieldsService } from '@/composables/services/useFieldsService';
 import type { FieldFilter, FilterOperator } from '../../filters/types';
 import { useStateStore } from '@/stores/state';
 import BaseRelationInput from '@/components/common/inputs/BaseRelationInput.vue';
+import BaseLabelSelector from '@/components/common/inputs/BaseLabelSelector.vue';
 
 const filter = defineModel<FieldFilter>({
   required: true,
@@ -47,6 +49,24 @@ const dropdownOptions = computed(() => {
       });
   }
 });
+
+const { updateFieldMutation } = useFieldsService();
+const { mutateAsync: updateField } = updateFieldMutation();
+
+const labelOptions = computed<FieldItem[]>(() =>
+  (selectedFilter.value?.options ?? []).map((option) => {
+    return {
+      item: option.item,
+      color: option.color ?? 'default',
+    };
+  })
+);
+
+function handleUpdateLabelItems(items: FieldItem[]) {
+  if (selectedFilter.value && selectedFilter.value.original) {
+    updateField({ id: selectedFilter.value.original.id, items });
+  }
+}
 
 const hideFilterValue = computed(() => {
   return ['isNull', 'isNotNull'].includes(filterOption.value ?? '');
@@ -232,9 +252,7 @@ watch(
         :rules="[rules.required]"
       />
     </template>
-    <template
-      v-else-if="[FieldTypes.DROPDOWN, FieldTypes.LABEL].includes(selectedFilter!.type)"
-    >
+    <template v-else-if="selectedFilter?.type === FieldTypes.DROPDOWN">
       <v-autocomplete
         :items="filteringOptions"
         v-model="filterOption"
@@ -260,6 +278,30 @@ watch(
         autocomplete="off"
         chips
         closable-chips
+      />
+    </template>
+    <template v-else-if="selectedFilter?.type === FieldTypes.LABEL">
+      <v-autocomplete
+        :items="filteringOptions"
+        v-model="filterOption"
+        @update:model-value="handleFilteringOptionChange"
+        label="Operator"
+        single-line
+        hide-details
+        max-width="160"
+        auto-select-first
+        :rules="[rules.required]"
+        class="me-2"
+      />
+      <base-label-selector
+        v-if="!hideFilterValue"
+        v-model="filter.value"
+        :items="labelOptions"
+        :icon="selectedFilter.icon"
+        multiple
+        text-field
+        width="160"
+        @label:update:items="handleUpdateLabelItems"
       />
     </template>
     <template v-else-if="selectedFilter?.type === FieldTypes.DATE">
