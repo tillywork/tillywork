@@ -20,8 +20,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useStateStore } from '@/stores/state';
 
 import {
-  quickFilterItemsDate,
   quickFilterGroupsCustomFields,
+  quickFilterItemsDate,
   type QuickFilter,
 } from './quickFilter';
 
@@ -51,29 +51,6 @@ const { data: users } = useProjectUsersQuery({
   select: (projectUsers) => projectUsers.map((pj) => pj.user),
 });
 
-watch(users, (assignees) => {
-  if (assignees) {
-    quickFilterItems.assignee = [
-      {
-        field: 'users.id',
-        operator: 'isNull',
-        value: [],
-        title: 'No Assignee',
-        type: FieldTypes.USER,
-      },
-      ...assignees.map((assignee) => {
-        return {
-          field: 'users.id',
-          operator: 'eq' as FilterOperator,
-          value: assignee.id,
-          title: `${assignee.firstName} ${assignee.lastName}`,
-          type: FieldTypes.USER,
-        };
-      }),
-    ];
-  }
-});
-
 const { currentList } = storeToRefs(useStateStore());
 const listId = computed(() => currentList.value!.id);
 const { data: listFields, refetch: refetchListFields } = useFieldsQuery({
@@ -82,50 +59,6 @@ const { data: listFields, refetch: refetchListFields } = useFieldsQuery({
 const listStagesService = useListStagesService();
 const { data: listStages } = listStagesService.useGetListStagesQuery({
   listId,
-});
-
-watch(listStages, (stages) => {
-  if (stages) {
-    quickFilterItems.stage = stages.map((stage) => {
-      return {
-        field: 'listStage.id',
-        operator: 'eq' as FilterOperator,
-        value: stage.id,
-        title: stage.name,
-        type: FieldTypes.DROPDOWN,
-      };
-    });
-  }
-});
-watch(listFields, (fields) => {
-  if (fields) {
-    fields
-      .map((x) => x)
-      .sort((a, b) => a.type.localeCompare(b.type))
-      .forEach((field) => {
-        const { type, name, items } = field;
-        if (quickFilterGroupsCustomFields.includes(type)) {
-          quickFilterItems[name] = [
-            {
-              field: `card.data.${field.id}`,
-              operator: 'isNull',
-              value: [],
-              title: `No ${name}`,
-              type: field.type,
-            },
-            ...items.map((item: FieldItem) => {
-              return {
-                field: `card.data.${field.id}`,
-                operator: getOperatorFromFieldType(field),
-                value: item.item,
-                title: item.item,
-                type: field.type,
-              };
-            }),
-          ];
-        }
-      });
-  }
 });
 
 const defaultFields = ref<FieldFilterOption[]>([
@@ -238,11 +171,63 @@ const filtersQuery = computed<{
   return filters;
 });
 
-const quickFilter = reactive<QuickFilter>({});
-const quickFilterItems = reactive<QuickFilter>({
-  date: quickFilterItemsDate,
-  assignee: [],
-  stage: [],
+const activeQuickFilters = ref<QuickFilter>({});
+const quickFilters = computed(() => {
+  const stageItems = listStages.value?.map((stage) => {
+    return {
+      field: 'listStage.id',
+      operator: 'eq' as FilterOperator,
+      value: stage.id,
+      title: stage.name,
+      type: FieldTypes.DROPDOWN,
+    };
+  });
+
+  const assigneeItems = [
+    {
+      field: 'users.id',
+      operator: 'isNull',
+      value: [],
+      title: 'No Assignee',
+      type: FieldTypes.USER,
+    },
+    ...(users.value?.map((assignee) => {
+      return {
+        field: 'users.id',
+        operator: 'eq' as FilterOperator,
+        value: assignee.id,
+        title: `${assignee.firstName} ${assignee.lastName}`,
+        type: FieldTypes.USER,
+      };
+    }) ?? []),
+  ];
+
+  const customFieldItems: QuickFilter = {};
+
+  listFields.value
+    ?.map((x) => x)
+    .sort((a, b) => a.type.localeCompare(b.type))
+    .forEach((field) => {
+      const { type, name, items } = field;
+      if (quickFilterGroupsCustomFields.includes(type)) {
+        customFieldItems[name] = items.map((item: FieldItem) => {
+          return {
+            field: `card.data.${field.id}`,
+            operator: getOperatorFromFieldType(field),
+            value: item.item,
+            title: item.item,
+            type: field.type,
+          };
+        });
+      }
+    });
+
+  return {
+    date: quickFilterItemsDate,
+    assignee: assigneeItems,
+    stage: stageItems,
+    ...customFieldItems,
+  };
 });
 
 function buildQuickFilter(items: FieldFilterOption[]) {
@@ -292,7 +277,7 @@ function buildQuickFilter(items: FieldFilterOption[]) {
 }
 
 function handleQuickFilter() {
-  const filters: FilterGroup[] = Object.values(quickFilter)
+  const filters: FilterGroup[] = Object.values(activeQuickFilters.value)
     .map((values) => {
       let filters: FieldFilter[] = [];
 
@@ -303,7 +288,7 @@ function handleQuickFilter() {
         return { or: filters };
       }
     })
-    .filter(Boolean) as FilterGroup[]; // NOTES: https://devblogs.microsoft.com/typescript/announcing-typescript-5-5/#inferred-type-predicates
+    .filter(Boolean) as FilterGroup[];
 
   filtersCopy.value = {
     where: {
@@ -332,7 +317,7 @@ function addAdvancedFilter(filterOption: FieldFilterOption) {
   closeAddFilterMenu();
 }
 
-function handleAdvancedFilter(filter: FieldFilter, index: number) {
+function handleAddAdvancedFilter(filter: FieldFilter, index: number) {
   filtersCopy.value = {
     where: {
       and: [
@@ -464,7 +449,7 @@ watch(listId, () => {
                   size="small"
                   variant="tonal"
                 >
-                  Advanced Filtering
+                  Create Custom Filter
                 </v-btn>
               </template>
               <v-card>
@@ -485,15 +470,15 @@ watch(listId, () => {
             </v-menu>
           </div>
           <div
-            v-for="(items, group) in quickFilterItems"
-            :key="group"
-            class="d-flex align-center"
+            v-for="(items, field) in quickFilters"
+            :key="field"
+            class="d-flex flex-column mt-2"
           >
-            <v-card-subtitle class="text-capitalize pa-1 mr-2">
-              {{ group }}
+            <v-card-subtitle class="text-capitalize">
+              {{ field }}
             </v-card-subtitle>
             <v-chip-group
-              v-model="quickFilter[group]"
+              v-model="activeQuickFilters[field]"
               multiple
               selected-class="text-primary"
               @click="handleQuickFilter"
@@ -517,7 +502,7 @@ watch(listId, () => {
               <base-view-chip-filter-item
                 v-model="filtersQuery.advanced[index]"
                 @update:model-value="
-                  (filter) => handleAdvancedFilter(filter, index)
+                  (filter) => handleAddAdvancedFilter(filter, index)
                 "
                 :index
                 :fields
