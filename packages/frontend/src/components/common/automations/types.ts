@@ -1,35 +1,43 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { FieldFilter } from '@/components/project-management/filters/types';
+import type { Workspace } from '@/components/project-management/workspaces/types';
+import type { User } from '../users/types';
 
 export enum TriggerType {
-  TASK_CREATED = 'TASK_CREATED',
-  TASK_UPDATED = 'TASK_UPDATED',
-  TASK_STATUS_CHANGED = 'TASK_STATUS_CHANGED',
-  DUE_DATE_APPROACHING = 'DUE_DATE_APPROACHING',
-  PROJECT_CREATED = 'PROJECT_CREATED',
-  PROJECT_STATUS_CHANGED = 'PROJECT_STATUS_CHANGED',
-  USER_ADDED = 'USER_ADDED',
-  USER_ROLE_CHANGED = 'USER_ROLE_CHANGED',
+  CARD_CREATED = 'card_created',
+  CARD_FIELD_CHANGED = 'card_field_changed',
+  CARD_STAGE_CHANGED = 'card_stage_changed',
 }
 
 export enum ActionType {
-  CREATE_TASK = 'CREATE_TASK',
-  UPDATE_TASK = 'UPDATE_TASK',
-  MOVE_TASK = 'MOVE_TASK',
-  ASSIGN_TASK = 'ASSIGN_TASK',
-  SEND_EMAIL = 'SEND_EMAIL',
-  SEND_SLACK_MESSAGE = 'SEND_SLACK_MESSAGE',
-  SHOW_IN_APP_NOTIFICATION = 'SHOW_IN_APP_NOTIFICATION',
-  CHANGE_PROJECT_STATUS = 'CHANGE_PROJECT_STATUS',
-  UPDATE_PROJECT_DETAILS = 'UPDATE_PROJECT_DETAILS',
-  EXECUTE_CUSTOM_SCRIPT = 'EXECUTE_CUSTOM_SCRIPT',
-  CALL_WEBHOOK = 'CALL_WEBHOOK',
+  CREATE_CARD = 'create_card',
+  UPDATE_CARD = 'update_card',
+  CHANGE_CARD_STAGE = 'update_card_stage',
+  ASSIGN_CARD = 'assign_card',
+  SEND_EMAIL = 'send_email',
+  SEND_WEBHOOK = 'send_webhook',
 }
 
-export interface AutomationRule {
+export interface Automation {
   id: string;
   name: string;
+  workspace: Workspace;
   triggerType: TriggerType;
   conditions: FieldFilter[];
-  actions: { type: ActionType; params: any }[];
+  isEnabled: boolean;
+  firstAction: AutomationAction;
+  createdByType: 'system' | 'user';
+  createdBy?: User;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AutomationAction {
+  id: string;
+  type: ActionType;
+  data: any;
+  automation: Automation;
+  nextAction: AutomationAction;
+  createdAt: Date;
+  updatedAt: Date;
 }

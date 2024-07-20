@@ -30,6 +30,9 @@ export class Automation {
     @Column({ type: "jsonb" })
     conditions: FieldFilter[];
 
+    @Column({ type: "boolean", default: true })
+    isEnabled: boolean;
+
     @OneToOne(() => AutomationAction, { eager: true })
     @JoinColumn()
     firstAction: Relation<AutomationAction>;

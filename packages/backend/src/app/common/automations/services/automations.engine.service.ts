@@ -35,7 +35,7 @@ export class AutomationsEngineService {
         );
 
         if (!automations.length) {
-            this.logger.debug(`No automations found, skipping.`);
+            this.logger.debug(`No automations found, skipping..`);
             return;
         }
 

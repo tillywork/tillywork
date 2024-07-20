@@ -63,7 +63,7 @@ export class CreateAutomationTable1721310306344 implements MigrationInterface {
                 columnNames: ["nextActionId"],
                 referencedColumnNames: ["id"],
                 referencedTableName: "automation_action",
-                onDelete: "SET NULL",
+                onDelete: "CASCADE",
             })
         );
 
@@ -91,6 +91,11 @@ export class CreateAutomationTable1721310306344 implements MigrationInterface {
                     {
                         name: "conditions",
                         type: "jsonb",
+                    },
+                    {
+                        name: "isEnabled",
+                        type: "boolean",
+                        default: true,
                     },
                     {
                         name: "firstActionId",
@@ -133,12 +138,22 @@ export class CreateAutomationTable1721310306344 implements MigrationInterface {
         );
 
         await queryRunner.createForeignKey(
+            "automation_action",
+            new TableForeignKey({
+                columnNames: ["automationId"],
+                referencedColumnNames: ["id"],
+                referencedTableName: "automation",
+                onDelete: "CASCADE",
+            })
+        );
+
+        await queryRunner.createForeignKey(
             "automation",
             new TableForeignKey({
                 columnNames: ["firstActionId"],
                 referencedColumnNames: ["id"],
                 referencedTableName: "automation_action",
-                onDelete: "SET NULL",
+                onDelete: "CASCADE",
             })
         );
 
@@ -158,7 +173,7 @@ export class CreateAutomationTable1721310306344 implements MigrationInterface {
                 columnNames: ["createdById"],
                 referencedColumnNames: ["id"],
                 referencedTableName: "user",
-                onDelete: "SET NULL",
+                onDelete: "CASCADE",
             })
         );
     }
