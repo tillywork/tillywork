@@ -69,16 +69,15 @@ export const useCommands = () => {
   const watchers = ref(new Map());
 
   const router = useRouter();
+  function openSettings(section: SETTINGS) {
+    router.push('/settings/' + section);
+  }
 
   /**
    * Handles building the commands array.
    * @returns An array of commands
    */
   const commands = computed(() => {
-    function openSettings(section: SETTINGS) {
-      router.push('/settings/' + section);
-    }
-
     const commandsDtos: CommandDto[] = [
       // ~ Cards
       ...cardTypeCommands.value,
