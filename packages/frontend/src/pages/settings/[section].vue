@@ -9,6 +9,7 @@ definePage({
 });
 
 const route = useRoute();
+const router = useRouter();
 
 const settingComponents = {
   [SETTINGS.THEME]: defineAsyncComponent(
@@ -32,7 +33,7 @@ const settingRoutes = Object.keys(settingComponents);
 onMounted(() => {
   if (!settingRoutes.includes(route.params.section)) {
     // TEMP: Throw a 404 error.
-    window.location.pathname = '/';
+    router.replace('/');
   }
 
   document.title =

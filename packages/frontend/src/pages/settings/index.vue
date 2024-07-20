@@ -1,3 +1,4 @@
 <script setup lang="ts">
-onMounted(() => (window.location.pathname = '/settings/theme'));
+const router = useRouter();
+onMounted(() => router.replace('/settings/theme'));
 </script>
