@@ -54,8 +54,12 @@ async function bootstrap() {
         serverAdapter.setBasePath("/bullmq");
 
         const emailQueue = app.get(getQueueToken("email"));
+        const automationQueue = app.get(getQueueToken("automation"));
         createBullBoard({
-            queues: [new BullAdapter(emailQueue)],
+            queues: [
+                new BullAdapter(emailQueue),
+                new BullAdapter(automationQueue),
+            ],
             serverAdapter,
         });
 
