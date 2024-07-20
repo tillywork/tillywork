@@ -100,6 +100,12 @@ export class QueryBuilderHelper {
         }
     }
 
+    static getRandomInt({ min = 1, max = Number.MAX_SAFE_INTEGER }) {
+        const minCeiled = Math.ceil(min);
+        const maxFloored = Math.floor(max);
+        return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+    }
+
     /**
      * Processes the field name to extract
      * the value from jsonb columns defined
@@ -205,31 +211,41 @@ export class QueryBuilderHelper {
                 return queryBuilder.andWhere(`${fieldName} <= :${field}`, {
                     [field]: processedValue,
                 });
-            case "in": {
-                let operator: "in" | "@>";
-
-                let value = `(${processedValue.join(",")})`;
+            case "in":
                 if (fieldName.startsWith(cardPrefix)) {
-                    operator = "@>";
-                    value = `'["${processedValue.join('","')}"]'`;
-                } else operator = "in";
-
-                return queryBuilder.andWhere(
-                    `${fieldName} ${operator} ${value}`
-                );
-            }
-            case "nin": {
-                let operator: "not in" | "@>" = "not in";
-                let value = `(${processedValue.join(",")})`;
-                let query = `${fieldName} ${operator} ${value}`;
-
-                if (fieldName.startsWith(cardPrefix)) {
-                    operator = "@>";
-                    value = `'["${processedValue.join('","')}"]'`;
-                    query = `NOT (${fieldName} ${operator} ${value})`;
+                    return queryBuilder.andWhere(
+                        new Brackets((qb) =>
+                            processedValue.map((value: string) => {
+                                return qb.orWhere(
+                                    `${fieldName} @> '["${value}"]'`
+                                );
+                            })
+                        )
+                    );
                 }
 
-                return queryBuilder.andWhere(query);
+                return queryBuilder.andWhere(
+                    `${fieldName} ${operator} (${processedValue.join(",")})`
+                );
+                break;
+            case "nin": {
+                if (fieldName.startsWith(cardPrefix)) {
+                    return queryBuilder
+                        .andWhere(
+                            new Brackets((qb) =>
+                                processedValue.map((value: string) => {
+                                    return qb.andWhere(
+                                        `NOT (${fieldName} @> '["${value}"]')`
+                                    );
+                                })
+                            )
+                        )
+                        .orWhere(`${fieldName} IS NULL`);
+                }
+
+                return queryBuilder.andWhere(
+                    `${fieldName} NOT ${operator} (${processedValue.join(",")})`
+                );
             }
             case "like":
                 return queryBuilder.andWhere(`${fieldName} LIKE :${field}`, {
@@ -244,21 +260,21 @@ export class QueryBuilderHelper {
                     [field]: `%${processedValue}`,
                 });
             case "between":
+            case "nbetween": {
+                const randomNumber1 = this.getRandomInt({});
+                const randomNumber2 = randomNumber1 + 1;
+
+                const betweenOperator = `${
+                    operator[0] === "n" ? "NOT " : ""
+                }BETWEEN`;
                 return queryBuilder.andWhere(
-                    `${fieldName} BETWEEN :${field}1 AND :${field}2`,
+                    `${fieldName} ${betweenOperator} :${field}${randomNumber1} AND :${field}${randomNumber2}`,
                     {
-                        [`${field}1`]: processedValue[0],
-                        [`${field}2`]: processedValue[1],
+                        [`${field}${randomNumber1}`]: processedValue[0],
+                        [`${field}${randomNumber2}`]: processedValue[1],
                     }
                 );
-            case "nbetween":
-                return queryBuilder.andWhere(
-                    `${fieldName} NOT BETWEEN :${field}1 AND :${field}2`,
-                    {
-                        [`${field}1`]: processedValue[0],
-                        [`${field}2`]: processedValue[1],
-                    }
-                );
+            }
             case "isNull":
                 return queryBuilder.andWhere(`${fieldName} IS NULL`);
             case "isNotNull":
@@ -271,41 +287,30 @@ export class QueryBuilderHelper {
     }
 
     static buildQuery(
-        queryBuilder: SelectQueryBuilder<any>,
-        filterGroup: FilterGroup
-    ): SelectQueryBuilder<any> {
-        if (filterGroup.and && filterGroup.and.length > 0) {
-            queryBuilder.andWhere(
-                new Brackets((qb) => {
-                    filterGroup.and.forEach((condition) => {
-                        if (!this.isFilterGroup(condition)) {
-                            this.fieldFilterToQuery(qb, condition);
-                        } else {
-                            //TODO support filter groups inside of filter groups
-                        }
+        queryBuilder: SelectQueryBuilder<any> | WhereExpressionBuilder,
+        filterGroup: FilterGroup | FieldFilter,
+        whereOperator: "and" | "or" = "and"
+    ): SelectQueryBuilder<any> | WhereExpressionBuilder {
+        queryBuilder[`${whereOperator}Where`](
+            new Brackets((qb) => {
+                if (this.isFilterGroup(filterGroup)) {
+                    (filterGroup.and ?? []).forEach((condition) => {
+                        this.buildQuery(qb, condition, "and");
                     });
-                })
-            );
-        }
-        if (filterGroup.or && filterGroup.or.length > 0) {
-            queryBuilder.orWhere(
-                new Brackets((qb) => {
-                    filterGroup.or.forEach((condition) => {
-                        if (!this.isFilterGroup(condition)) {
-                            this.fieldFilterToQuery(qb, condition);
-                        } else {
-                            //TODO support filter groups inside of filter groups
-                        }
+                    (filterGroup.or ?? []).forEach((condition) => {
+                        this.buildQuery(qb, condition, "or");
                     });
-                })
-            );
-        }
+                } else {
+                    this.fieldFilterToQuery(qb, filterGroup);
+                }
+            })
+        );
 
         return queryBuilder;
     }
 
     static isFilterGroup(
-        condition: FieldFilter | FilterGroup
+        condition: FilterGroup | FieldFilter
     ): condition is FilterGroup {
         return "and" in condition || "or" in condition;
     }

@@ -7,39 +7,33 @@
   </a>
 </p>
 <p align="center">
-  <a href="https://makeapullrequest.com" target="_blank">
-    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" />
+  Open-source work management
+</p>
+<p align="center">
+  <a target="_blank" href="https://docs.tilly.work/getting-started/using-tillywork">
+    <strong>Get Started 👋</strong>
   </a>
-  <a href="https://github.com/tillywork/tillywork/blob/main/LICENSE" target="_blank">
-    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" />
+  ・
+  <a target="_blank" href="https://docs.tilly.work">
+    <strong>Explore Docs 📚</strong>
   </a>
+  ・
   <a href="https://discord.gg/Ttn4WeNJbb" target="_blank">
-    <img src="https://img.shields.io/discord/1241636783465168977?logo=discord&logoColor=white&label=Chat&color=7289da" alt="Chat Discord" />
+    <strong>Discord 💬</strong>
   </a>
-  <img src="https://img.shields.io/github/commit-activity/w/tillywork/tillywork" alt="Repo Activity" />
 </p>
 <p align="center">
-  <strong>Open-source work management</strong>
 </p>
 <p align="center">
-  <a target="_blank" href="https://docs.tilly.work/getting-started/using-tillywork"><strong>Get Started 👋</strong></a> ・ <a target="_blank" href="https://docs.tilly.work"><strong>Explore Docs 📚</strong></a>
+  <a href="https://discord.gg/Ttn4WeNJbb" target="_blank">
+    <img src="https://dcbadge.limes.pink/api/server/Ttn4WeNJbb?theme=blurple&compact=true" alt="Chat Discord" />
+  </a>
 </p>
 
-## Apps
+## What is tillywork?
 
-tillywork addresses a variety of team requirements through three opinionated apps:
-
-### 1. Project Management
-
-Manage timelines, allocate resources, and monitor deliverables for your projects.
-
-### 2. Sales CRM (Coming next)
-
-Manage contacts, organizations and deals.
-
-### 3. Agile Projects (Coming soon)
-
-Manage issues, sprints, and product roadmaps
+![](https://cdn.tilly.work/TWDemo4.gif)
+tillywork is a work management solution that makes project management for startups easy.
 
 ## Features
 
