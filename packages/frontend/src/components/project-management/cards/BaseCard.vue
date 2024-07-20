@@ -14,7 +14,7 @@ import BaseCardCommentBox from './BaseCardCommentBox.vue';
 import { ActivityType, type ActivityContent, type Card } from './types';
 import { cloneDeep, lowerFirst } from 'lodash';
 import { useFieldsService } from '@/composables/services/useFieldsService';
-import { FieldTypes, type Field } from '../fields/types';
+import { FieldTypes, type Field, type FieldItem } from '../fields/types';
 import { useStateStore } from '@/stores/state';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS, SettingsTabs } from '@/components/common/dialogs/types';
@@ -55,7 +55,6 @@ const cardsService = useCardsService();
 const cardActivitiesService = useCardActivitiesService();
 const projectUsersService = useProjectUsersService();
 const listStagesService = useListStagesService();
-const { useFieldsQuery } = useFieldsService();
 
 const { mutateAsync: updateCard, isPending: isUpdating } =
   cardsService.useUpdateCardMutation();
@@ -68,18 +67,15 @@ const listStagesQuery = listStagesService.useGetListStagesQuery({
   listId: listId.value,
 });
 
+const { useFieldsQuery, updateFieldMutation } = useFieldsService();
 const { data: listFields } = useFieldsQuery({
   listId,
 });
+const { mutateAsync: updateField } = updateFieldMutation();
 
-const fields = computed(() => {
-  let arr: Field[] = [];
-  if (listFields.value) {
-    arr = listFields.value;
-  }
-
-  return arr;
-});
+function handleUpdateLabelItems(id: number, items: FieldItem[]) {
+  updateField({ id, items });
+}
 
 const createActivityMutation =
   cardActivitiesService.useCreateActivityMutation();
@@ -523,109 +519,110 @@ function openDescriptionFileDialog() {
               @update:model-value="updateCardDueAt"
             />
           </div>
-          <template v-if="fields">
-            <template v-for="field in fields" :key="field.id">
-              <div class="d-flex align-center my-4">
-                <p class="field-label text-caption me-1">
-                  {{ field.name }}
-                </p>
-                <template v-if="field.type === FieldTypes.TEXT">
-                  <v-text-field
-                    v-model="cardCopy.data[field.id]"
-                    hide-details
-                    :placeholder="field.name"
-                    @update:model-value="(v) => updateFieldValue({ field, v })"
-                    :prepend-inner-icon="field.icon"
-                  />
-                </template>
-                <template v-else-if="field.type === FieldTypes.DROPDOWN">
-                  <v-autocomplete
-                    v-model="cardCopy.data[field.id]"
-                    :items="field.items"
-                    item-title="item"
-                    item-value="item"
-                    hide-details
-                    :placeholder="field.name"
-                    :prepend-inner-icon="field.icon"
-                    :multiple="field.multiple"
-                    autocomplete="off"
-                    auto-select-first
-                    @update:model-value="
-                      (v) =>
-                        updateFieldValue({
-                          field,
-                          v: Array.isArray(v)
-                            ? v.map((item) => (item.item ? item.item : item))
-                            : [v.item ? v.item : v],
-                        })
-                    "
-                  />
-                </template>
-                <template v-else-if="field.type === FieldTypes.LABEL">
-                  <base-label-selector
-                    v-model="cardCopy.data[field.id]"
-                    :items="field.items"
-                    :icon="field.icon"
-                    :placeholder="field.name"
-                    :multiple="field.multiple"
-                    @update:model-value="
-                      (v) =>
-                        updateFieldValue({
-                          field,
-                          v,
-                        })
-                    "
-                  />
-                </template>
-                <template v-else-if="field.type === FieldTypes.DATE">
-                  <base-date-picker
-                    v-model="cardCopy.data[field.id]"
-                    class="text-body-3"
-                    :icon="field.icon ?? 'mdi-calendar'"
-                    :label="field.name"
-                    @update:model-value="
-                      (v: string | string[]) =>
-                        updateFieldValue({
-                          field,
-                          v,
-                        })
-                    "
-                  />
-                </template>
-                <template v-else-if="field.type === FieldTypes.USER">
-                  <base-user-selector
-                    :model-value="cardCopy.data[field.id]?.map((userIdAsString: string) => +userIdAsString)"
-                    :users
-                    :label="field.name"
-                    return-id
-                    :icon="field.icon"
-                    size="24"
-                    @update:model-value="
-                      (users: number[]) =>
-                        updateFieldValue({
-                          field,
-                          v: users.map((userIdAsNumber) => userIdAsNumber.toString()),
-                        })
-                    "
-                  />
-                </template>
-                <template v-else-if="field.type === FieldTypes.CARD">
-                  <base-relation-input
-                    v-model="cardCopy.data[field.id]"
-                    :field
-                    @update:model-value="
-                      (v) =>
-                        updateFieldValue({
-                          field,
-                          v: Array.isArray(v)
-                            ? v.map((c) => c.toString())
-                            : [v?.toString()],
-                        })
-                    "
-                  />
-                </template>
-              </div>
-            </template>
+          <template v-for="field in listFields ?? []" :key="field.id">
+            <div class="d-flex align-center my-4">
+              <p class="field-label text-caption me-1">
+                {{ field.name }}
+              </p>
+              <template v-if="field.type === FieldTypes.TEXT">
+                <v-text-field
+                  v-model="cardCopy.data[field.id]"
+                  hide-details
+                  :placeholder="field.name"
+                  @update:model-value="(v) => updateFieldValue({ field, v })"
+                  :prepend-inner-icon="field.icon"
+                />
+              </template>
+              <template v-else-if="field.type === FieldTypes.DROPDOWN">
+                <v-autocomplete
+                  v-model="cardCopy.data[field.id]"
+                  :items="field.items"
+                  item-title="item"
+                  item-value="item"
+                  hide-details
+                  :placeholder="field.name"
+                  :prepend-inner-icon="field.icon"
+                  :multiple="field.multiple"
+                  autocomplete="off"
+                  auto-select-first
+                  @update:model-value="
+                    (v) =>
+                      updateFieldValue({
+                        field,
+                        v: Array.isArray(v)
+                          ? v.map((item) => (item.item ? item.item : item))
+                          : [v.item ? v.item : v],
+                      })
+                  "
+                />
+              </template>
+              <template v-else-if="field.type === FieldTypes.LABEL">
+                <base-label-selector
+                  v-model="cardCopy.data[field.id]"
+                  :items="field.items"
+                  :icon="field.icon"
+                  :placeholder="field.name"
+                  :multiple="field.multiple"
+                  @update:model-value="
+                    (v) =>
+                      updateFieldValue({
+                        field,
+                        v,
+                      })
+                  "
+                  @label:update:items="
+                    (items) => handleUpdateLabelItems(field.id, items)
+                  "
+                />
+              </template>
+              <template v-else-if="field.type === FieldTypes.DATE">
+                <base-date-picker
+                  v-model="cardCopy.data[field.id]"
+                  class="text-body-3"
+                  :icon="field.icon ?? 'mdi-calendar'"
+                  :label="field.name"
+                  @update:model-value="
+                    (v: string | string[]) =>
+                      updateFieldValue({
+                        field,
+                        v,
+                      })
+                  "
+                />
+              </template>
+              <template v-else-if="field.type === FieldTypes.USER">
+                <base-user-selector
+                  :model-value="cardCopy.data[field.id]?.map((userIdAsString: string) => +userIdAsString)"
+                  :users
+                  :label="field.name"
+                  return-id
+                  :icon="field.icon"
+                  size="24"
+                  @update:model-value="
+                    (users: number[]) =>
+                      updateFieldValue({
+                        field,
+                        v: users.map((userIdAsNumber) => userIdAsNumber.toString()),
+                      })
+                  "
+                />
+              </template>
+              <template v-else-if="field.type === FieldTypes.CARD">
+                <base-relation-input
+                  v-model="cardCopy.data[field.id]"
+                  :field
+                  @update:model-value="
+                    (v) =>
+                      updateFieldValue({
+                        field,
+                        v: Array.isArray(v)
+                          ? v.map((c) => c.toString())
+                          : [v?.toString()],
+                      })
+                  "
+                />
+              </template>
+            </div>
           </template>
         </v-card-text>
       </v-card>
