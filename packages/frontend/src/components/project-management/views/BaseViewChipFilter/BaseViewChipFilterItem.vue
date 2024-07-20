@@ -252,7 +252,7 @@ watch(
         :rules="[rules.required]"
       />
     </template>
-    <template v-else-if="selectedFilter?.type === FieldTypes.DROPDOWN">
+    <template v-else>
       <v-autocomplete
         :items="filteringOptions"
         v-model="filterOption"
@@ -265,106 +265,54 @@ watch(
         :rules="[rules.required]"
         class="me-2"
       />
-      <v-autocomplete
-        v-if="!hideFilterValue"
-        v-model="filter.value"
-        single-line
-        hide-details
-        :items="dropdownOptions"
-        auto-select-first
-        :rules="[rules.array.required]"
-        multiple
-        width="160"
-        autocomplete="off"
-        chips
-        closable-chips
-      />
-    </template>
-    <template v-else-if="selectedFilter?.type === FieldTypes.LABEL">
-      <v-autocomplete
-        :items="filteringOptions"
-        v-model="filterOption"
-        @update:model-value="handleFilteringOptionChange"
-        label="Operator"
-        single-line
-        hide-details
-        max-width="160"
-        auto-select-first
-        :rules="[rules.required]"
-        class="me-2"
-      />
-      <base-label-selector
-        v-if="!hideFilterValue"
-        v-model="filter.value"
-        :items="labelOptions"
-        :icon="selectedFilter.icon"
-        multiple
-        text-field
-        width="160"
-        @label:update:items="handleUpdateLabelItems"
-      />
-    </template>
-    <template v-else-if="selectedFilter?.type === FieldTypes.DATE">
-      <v-autocomplete
-        :items="filteringOptions"
-        v-model="filterOption"
-        @update:model-value="handleFilteringOptionChange"
-        label="Operator"
-        single-line
-        hide-details
-        max-width="160"
-        auto-select-first
-        :rules="[rules.required]"
-        class="me-2"
-      />
-      <base-date-picker
-        v-if="!hideFilterValue"
-        v-model="filter.value"
-        text-field
-        range
-      />
-    </template>
-    <template v-else-if="selectedFilter?.type === FieldTypes.USER">
-      <v-autocomplete
-        :items="filteringOptions"
-        v-model="filterOption"
-        @update:model-value="handleFilteringOptionChange"
-        label="Operator"
-        single-line
-        hide-details
-        max-width="160"
-        auto-select-first
-        :rules="[rules.required]"
-        class="me-2"
-      />
-      <base-user-selector
-        v-if="!hideFilterValue"
-        v-model="filter.value"
-        :users
-        text-field
-        return-id
-      />
-    </template>
-    <template v-else-if="selectedFilter?.type === FieldTypes.CARD">
-      <v-autocomplete
-        :items="filteringOptions"
-        v-model="filterOption"
-        @update:model-value="handleFilteringOptionChange"
-        label="Operator"
-        single-line
-        hide-details
-        max-width="160"
-        auto-select-first
-        :rules="[rules.required]"
-        class="me-2"
-      />
-      <base-relation-input
-        v-if="!hideFilterValue && selectedFilter.original"
-        v-model="filter.value"
-        :field="selectedFilter.original"
-        :key="selectedFilter.field"
-        multiple
-      />
+      <template v-if="!hideFilterValue">
+        <v-autocomplete
+          v-if="selectedFilter?.type === FieldTypes.DROPDOWN"
+          v-model="filter.value"
+          single-line
+          hide-details
+          :items="dropdownOptions"
+          auto-select-first
+          :rules="[rules.array.required]"
+          multiple
+          width="160"
+          autocomplete="off"
+          chips
+          closable-chips
+        />
+        <base-label-selector
+          v-if="selectedFilter?.type === FieldTypes.LABEL"
+          v-model="filter.value"
+          :items="labelOptions"
+          :icon="selectedFilter.icon"
+          multiple
+          text-field
+          width="160"
+          @label:update:items="handleUpdateLabelItems"
+        />
+        <base-date-picker
+          v-if="selectedFilter?.type === FieldTypes.DATE"
+          v-model="filter.value"
+          text-field
+          range
+        />
+        <base-user-selector
+          v-if="selectedFilter?.type === FieldTypes.USER"
+          v-model="filter.value"
+          :users
+          text-field
+          return-id
+        />
+        <base-relation-input
+          v-if="
+            selectedFilter?.type === FieldTypes.CARD && selectedFilter.original
+          "
+          v-model="filter.value"
+          :field="selectedFilter.original"
+          :key="selectedFilter.field"
+          multiple
+        />
+      </template>
     </template>
     <base-icon-btn
       icon="mdi-close"
