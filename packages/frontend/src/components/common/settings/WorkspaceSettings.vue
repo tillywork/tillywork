@@ -37,7 +37,7 @@ async function saveWorkspace() {
 <template>
   <div id="workspace-settings-container" class="user-select-none">
     <h3>Workspace</h3>
-    <p class="text-subtitle-2 mb-2">Update your current workspace.</p>
+    <p class="text-subtitle-2 mb-4">Update your current workspace.</p>
 
     <!-- TODO: Style -->
     <v-form

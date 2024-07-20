@@ -85,7 +85,7 @@ if (isAuthenticated()) {
 
       <template v-slot:append>
         <v-list :slim="false">
-          <v-menu v-if="isAuthenticated()" :close-on-content-click="false">
+          <v-menu v-if="isAuthenticated()">
             <template #activator="{ props }">
               <user-list-item v-bind="props" avatar-size="small">
                 <template #append>
@@ -110,7 +110,7 @@ if (isAuthenticated()) {
               </v-list>
             </v-card>
           </v-menu>
-          <v-list-item :to="'/login'" v-else>
+          <v-list-item v-else to="/login">
             <template #prepend>
               <v-icon icon="mdi-login" />
             </template>

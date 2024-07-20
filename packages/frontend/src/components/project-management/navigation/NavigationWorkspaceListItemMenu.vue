@@ -34,6 +34,10 @@ function handleListMenuClick() {
   emit('hover:freeze');
 }
 
+function closeListMenu() {
+  listMenu.value = false;
+}
+
 function handleDeleteList(list: List) {
   dialog.openDialog({
     dialog: DIALOGS.CONFIRM,
@@ -114,11 +118,11 @@ function openUpdateListDialog(list: List) {
       mode: UpsertDialogMode.UPDATE,
     },
   });
-  listMenu.value = false;
+  closeListMenu();
 }
 
-watch(listMenu, () => {
-  if (!listMenu.value) {
+watch(listMenu, (v) => {
+  if (!v) {
     emit('hover:unfreeze');
   }
 });
@@ -146,7 +150,7 @@ watch(listMenu, () => {
           </template>
           <v-list-item-title>Edit</v-list-item-title>
         </v-list-item>
-        <v-list-item to="/settings/custom-fields">
+        <v-list-item to="/settings/custom-fields" @click="closeListMenu">
           <template #prepend>
             <v-icon icon="mdi-form-select" />
           </template>
@@ -173,6 +177,7 @@ watch(listMenu, () => {
                 variant="text"
                 class="text-capitalize"
                 to="/settings/card-types"
+                @click="closeListMenu"
               >
                 Edit
               </v-btn>
