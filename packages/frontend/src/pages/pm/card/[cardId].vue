@@ -5,6 +5,7 @@ import { useCardsService } from '@/composables/services/useCardsService';
 definePage({
   meta: {
     requiresAuth: true,
+    collectActivities: true,
   },
 });
 

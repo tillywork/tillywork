@@ -6,6 +6,7 @@ import { useStateStore } from '@/stores/state';
 definePage({
   meta: {
     requiresAuth: true,
+    collectActivities: true,
   },
 });
 
