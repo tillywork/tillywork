@@ -24,25 +24,23 @@ export class ProjectUserActivitiesController {
         private readonly projectUserActivitiesService: ProjectUserActivitiesService
     ) {}
 
-    @Get()
-    findAll(
+    @Get("recent")
+    findForRecent(
         @Param("projectId") projectId: number,
         @Param("userId") userId: number,
         @Query("workspaceId") workspaceId: number,
-        @Query("deduplicate") deduplicate?: boolean,
         @Query("limit") limit?: number
     ) {
-        return this.projectUserActivitiesService.findAll({
+        return this.projectUserActivitiesService.findForRecent({
             projectId,
             userId,
             workspaceId,
-            deduplicate,
             limit,
         });
     }
 
     @Get(":id")
-    findOne(@Param("id") id: number) {
+    findOne(@Param("id") id: string) {
         return this.projectUserActivitiesService.findOne(id);
     }
 

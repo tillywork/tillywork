@@ -14,8 +14,8 @@ import {
 
 @Entity()
 export class ProjectUserActivity {
-    @PrimaryGeneratedColumn("increment")
-    id: number;
+    @PrimaryGeneratedColumn("uuid")
+    id: string;
 
     @ManyToOne(() => ProjectUser, (projectUser) => projectUser.activities)
     projectUser: Relation<ProjectUser>;

@@ -16,7 +16,6 @@ export interface FindAllParams {
     userId: number;
     projectId: number;
     workspaceId: number;
-    deduplicate?: boolean;
     limit?: number;
 }
 
@@ -30,12 +29,40 @@ export class ProjectUserActivitiesService {
         private cardsService: CardsService
     ) {}
 
+    async getEntity(
+        activity: ProjectUserActivity
+    ): Promise<ProjectUserActivityEntity> {
+        let entity: ProjectUserActivityEntity;
+
+        if (activity.type === ProjectUserActivityTypes.VIEW) {
+            switch (activity.entityType) {
+                case ProjectUserActivityEntityTypes.LIST:
+                    entity = await this.listsService
+                        .findOne(activity.entityId)
+                        .catch(() => {
+                            return undefined;
+                        });
+                    break;
+                case ProjectUserActivityEntityTypes.CARD:
+                    entity = await this.cardsService
+                        .findOne(activity.entityId)
+                        .catch(() => {
+                            return undefined;
+                        });
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return entity;
+    }
+
     async findAll({
         projectId,
         userId,
         workspaceId,
-        deduplicate,
-        limit,
+        limit = 50,
     }: FindAllParams): Promise<ProjectUserActivity[]> {
         const projectUser = await this.projectUsersService.findOneBy({
             where: {
@@ -48,7 +75,8 @@ export class ProjectUserActivitiesService {
                 `ProjectUser with (project ID ${projectId} and user ID ${userId}) not found`
             );
         }
-        let acitivities = await this.projectUserActivityRepository.find({
+
+        return this.projectUserActivityRepository.find({
             where: {
                 projectUserId: projectUser.id,
                 workspaceId,
@@ -56,45 +84,56 @@ export class ProjectUserActivitiesService {
             order: {
                 createdAt: "DESC",
             },
+            take: limit,
         });
+    }
 
-        if (deduplicate) {
-            acitivities = acitivities
-                .reduce((prev, curr, index) => {
-                    if (index === 0) {
-                        prev.push(curr);
-                        return prev;
-                    }
-
-                    // NOTE: To deduplicate all entries, consider implementing a Map
-                    function isSame(
-                        activity1: ProjectUserActivity,
-                        activity2: ProjectUserActivity
-                    ) {
-                        const { type, entityId, entityType } = activity1;
-                        return (
-                            type === activity2.type &&
-                            entityId === activity2.entityId &&
-                            entityType === activity2.entityType
-                        );
-                    }
-                    if (!isSame(prev[prev.length - 1], curr)) {
-                        prev.push(curr);
-                    }
-
+    async findForRecent({
+        projectId,
+        userId,
+        workspaceId,
+        limit = 5,
+    }: FindAllParams): Promise<
+        (ProjectUserActivity & { entity?: ProjectUserActivityEntity })[]
+    > {
+        let activities = await this.findAll({
+            projectId,
+            userId,
+            workspaceId,
+            limit: limit * 10, // for threshold
+        });
+        activities = activities
+            .reduce((prev, curr, index) => {
+                if (index === 0) {
+                    prev.push(curr);
                     return prev;
-                }, [])
-                .filter(Boolean);
-        }
+                }
 
-        if (limit) {
-            return acitivities.slice(0, limit);
-        }
-        return acitivities;
+                // NOTE: To deduplicate all entries, consider implementing a Map
+                function isSame(
+                    activity1: ProjectUserActivity,
+                    activity2: ProjectUserActivity
+                ) {
+                    const { type, entityId, entityType } = activity1;
+                    return (
+                        type === activity2.type &&
+                        entityId === activity2.entityId &&
+                        entityType === activity2.entityType
+                    );
+                }
+                if (!isSame(prev[prev.length - 1], curr)) {
+                    prev.push(curr);
+                }
+
+                return prev;
+            }, [])
+            .slice(0, limit);
+
+        return Promise.all(activities.map(({ id }) => this.findOne(id)));
     }
 
     async findOne(
-        id: number
+        id: string
     ): Promise<ProjectUserActivity & { entity?: ProjectUserActivityEntity }> {
         const projectUserActivity =
             await this.projectUserActivityRepository.findOne({
@@ -106,32 +145,8 @@ export class ProjectUserActivitiesService {
             );
         }
 
-        if (projectUserActivity.type === ProjectUserActivityTypes.VIEW) {
-            let entity: ProjectUserActivityEntity;
-
-            switch (projectUserActivity.entityType) {
-                case ProjectUserActivityEntityTypes.LIST:
-                    entity = await this.listsService
-                        .findOne(projectUserActivity.entityId)
-                        .catch(() => {
-                            return undefined;
-                        });
-                    break;
-                case ProjectUserActivityEntityTypes.CARD:
-                    entity = await this.cardsService
-                        .findOne(projectUserActivity.entityId)
-                        .catch(() => {
-                            return undefined;
-                        });
-                    break;
-                default:
-                    break;
-            }
-
-            return { ...projectUserActivity, entity };
-        }
-
-        return projectUserActivity;
+        const entity = await this.getEntity(projectUserActivity);
+        return { ...projectUserActivity, entity };
     }
 
     async create({
