@@ -3,56 +3,73 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import type {
   CreateProjectUserActivityDTO,
   ProjectUserActivity,
+  ProjectUserActivityEntity,
 } from '@/components/common/projects/types';
-
-type ProjectUserActivitiesParam = {
-  projectId: number;
-  userId: number;
-};
-type GetProjectUserActivitiesParam = ProjectUserActivitiesParam & {
-  workspaceId: number;
-  params?: unknown; // AxiosRequestConfig<any>.params;
-};
+import { useAuthStore } from '@/stores/auth';
 
 export const useProjectUserActivityService = () => {
   const { sendRequest } = useHttp();
   const queryClient = useQueryClient();
+  const { workspace, project, user } = useAuthStore();
 
   async function getProjectUserActivities({
-    projectId,
-    userId,
-    workspaceId,
+    isRecent,
     params,
-  }: GetProjectUserActivitiesParam): Promise<ProjectUserActivity[]> {
-    return sendRequest(`/projects/${projectId}/users/${userId}/activities`, {
-      method: 'GET',
-      params: { workspaceId, ...(params ?? {}) },
-    });
+  }: {
+    isRecent?: boolean;
+    params?: unknown; // AxiosRequestConfig<any>.params;
+  }): Promise<
+    (ProjectUserActivity & { entity?: ProjectUserActivityEntity })[]
+  > {
+    if (project && user && workspace) {
+      return sendRequest(
+        `/projects/${project.id}/users/${user.id}/activities${
+          isRecent ? '/recent' : ''
+        }`,
+        {
+          method: 'GET',
+          params: { workspaceId: workspace.id, ...(params ?? {}) },
+        }
+      );
+    }
+
+    return [];
   }
 
   async function createProjectUserActivity({
-    projectId,
-    userId,
     activity,
-  }: ProjectUserActivitiesParam & {
+  }: {
     activity: CreateProjectUserActivityDTO;
-  }): Promise<ProjectUserActivity> {
-    return sendRequest(`/projects/${projectId}/users/${userId}/activities`, {
-      method: 'POST',
-      data: activity,
-    });
+  }): Promise<ProjectUserActivity | undefined> {
+    if (project && user && workspace) {
+      return sendRequest(
+        `/projects/${project.id}/users/${user.id}/activities`,
+        {
+          method: 'POST',
+          data: { workspaceId: workspace.id, ...activity },
+        }
+      );
+    }
+    return undefined;
   }
 
-  function useProjectUserActivitiesQuery({
-    projectId,
-    userId,
-    workspaceId,
+  function useGetProjectUserActivitiesQuery({
+    isRecent,
     params,
-  }: GetProjectUserActivitiesParam) {
+  }: {
+    isRecent?: boolean;
+    params?: unknown;
+  }) {
     return useQuery({
-      queryKey: ['projectUserActivity', { projectId, userId, workspaceId }],
-      queryFn: () =>
-        getProjectUserActivities({ projectId, userId, workspaceId, params }),
+      queryKey: [
+        'projectUserActivity',
+        {
+          projectId: project?.id,
+          userId: user?.id,
+          workspaceId: workspace?.id,
+        },
+      ],
+      queryFn: () => getProjectUserActivities({ isRecent, params }),
     });
   }
 
@@ -61,14 +78,21 @@ export const useProjectUserActivityService = () => {
       mutationFn: createProjectUserActivity,
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['projectUserActivity'],
+          queryKey: [
+            'projectUserActivity',
+            {
+              projectId: project?.id,
+              userId: user?.id,
+              workspaceId: workspace?.id,
+            },
+          ],
         });
       },
     });
   }
 
   return {
-    useProjectUserActivitiesQuery,
+    useGetProjectUserActivitiesQuery,
     useCreateProjectUserActivityMutation,
   };
 };

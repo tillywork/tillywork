@@ -152,10 +152,10 @@ export const useCardsService = () => {
     });
   }
 
-  function useGetCardQuery({ cardId }: { cardId: Ref<number> }) {
+  function useGetCardQuery({ cardId }: { cardId: MaybeRef<number> }) {
     return useQuery({
       queryKey: ['cards', cardId],
-      queryFn: () => getCard(cardId.value),
+      queryFn: () => getCard(toValue(cardId)),
     });
   }
 

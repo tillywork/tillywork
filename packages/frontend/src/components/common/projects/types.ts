@@ -30,7 +30,7 @@ export type ProjectUserActivityEntityTypes =
   (typeof projectUserActivityEntityTypes)[number];
 
 export interface ProjectUserActivity {
-  id: number;
+  id: string;
   projectUser: ProjectUser;
   projectUserId: number;
   workspace: Workspace;
@@ -41,7 +41,6 @@ export interface ProjectUserActivity {
 }
 
 export type CreateProjectUserActivityDTO = {
-  workspaceId: number;
   type: ProjectUserActivityTypes;
   entityId?: number;
   entityType?: ProjectUserActivityEntityTypes;
