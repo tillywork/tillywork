@@ -1,20 +1,22 @@
 import {
-    Entity,
-    PrimaryGeneratedColumn,
     Column,
+    Entity,
     ManyToOne,
+    OneToMany,
+    PrimaryGeneratedColumn,
     Relation,
 } from "typeorm";
-import { Project } from "../project.entity";
 import { User } from "../../users/user.entity";
+import { Project } from "../project.entity";
+import { ProjectUserActivity } from "../project-user-activities/project.user.activity.entity";
 
 @Entity()
 export class ProjectUser {
     @PrimaryGeneratedColumn("increment")
     id: number;
 
-    @ManyToOne(() => Project, (project) => project.users, { nullable: false })
-    project: Relation<Project>;
+    @Column({ type: "varchar", length: 255 })
+    role: string;
 
     @ManyToOne(() => User, (user) => user.projects, {
         nullable: false,
@@ -22,8 +24,11 @@ export class ProjectUser {
     })
     user: Relation<User>;
 
-    @Column({ type: "varchar", length: 255 })
-    role: string;
+    @ManyToOne(() => Project, (project) => project.users, { nullable: false })
+    project: Relation<Project>;
+
+    @OneToMany(() => ProjectUserActivity, (activity) => activity.projectUser)
+    activities: Relation<ProjectUserActivity[]>;
 
     @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
     createdAt: Date;

@@ -42,6 +42,7 @@ import { AddIgnoreChildrenToViewTable1720514522438 } from "../migrations/1720514
 import { CreateListFieldsTable1720527075305 } from "../migrations/1720527075305-create-list-fields-table";
 import { AddWorkspaceIdToCardTable1721207599200 } from "../migrations/1721207599200-add-workspaceId-to-card-table";
 import { AddCardTypeIdToFieldTable1721214304859 } from "../migrations/1721214304859-add-cardTypeId-to-field-table";
+import { CreateProjectUserActivityTable1721460183972 } from "../migrations/1721460183972-create-project-user-activity-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -85,6 +86,7 @@ const migrations = [
     CreateListFieldsTable1720527075305,
     AddWorkspaceIdToCardTable1721207599200,
     AddCardTypeIdToFieldTable1721214304859,
+    CreateProjectUserActivityTable1721460183972,
 ];
 
 const config: TypeOrmModuleOptions = {

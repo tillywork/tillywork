@@ -14,6 +14,7 @@ import {
 import { User } from "../users/user.entity";
 import { Space } from "../spaces/space.entity";
 import { Project } from "../projects/project.entity";
+import { ProjectUserActivity } from "../projects/project-user-activities/project.user.activity.entity";
 import { WorkspaceTypes } from "./types";
 import { CardType } from "../card-types/card.type.entity";
 
@@ -55,6 +56,13 @@ export class Workspace {
         eager: true,
     })
     cardTypes: Relation<CardType[]>;
+
+    @OneToMany(
+        () => ProjectUserActivity,
+        (projectUserActivity) => projectUserActivity.workspace,
+        { eager: true }
+    )
+    projectUserActivities: Relation<ProjectUserActivity[]>;
 
     @ManyToOne(() => CardType, { eager: true })
     defaultCardType: Relation<CardType>;
