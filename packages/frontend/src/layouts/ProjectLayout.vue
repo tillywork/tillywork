@@ -2,6 +2,7 @@
 import { DIALOGS } from '@/components/common/dialogs/types';
 import UserListItem from '@/components/common/navigation/UserListItem.vue';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
+import NavigationRecent from '@/components/project-management/navigation/NavigationRecent.vue';
 import NavigationWorkspace from '@/components/project-management/navigation/NavigationWorkspace.vue';
 import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
 import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
@@ -71,7 +72,10 @@ function openSettingsDialog() {
         class="ma-2 mt-4 hidden-md-and-down"
       />
       <v-divider class="hidden-md-and-down" />
-      <navigation-workspace-selector v-if="isAuthenticated()" />
+      <div v-if="isAuthenticated()">
+        <navigation-workspace-selector />
+        <navigation-recent />
+      </div>
 
       <!-- Sidebar content -->
       <v-list v-if="navigationMenuItems.length > 0">
