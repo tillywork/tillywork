@@ -2,10 +2,12 @@
 import BaseCard from '@/components/project-management/cards/BaseCard.vue';
 import { useCardsService } from '@/composables/services/useCardsService';
 
+import { type CreateProjectUserActivityDTO } from '@/components/common/projects/types';
+import { useProjectUserActivityService } from '@/composables/services/useProjectUserActivityService';
+
 definePage({
   meta: {
     requiresAuth: true,
-    collectActivities: true,
   },
 });
 
@@ -15,6 +17,27 @@ const cardId = computed(() => +route.params.cardId);
 
 const { data: card, refetch } = cardsService.useGetCardQuery({
   cardId,
+});
+
+const { useCreateProjectUserActivityMutation } =
+  useProjectUserActivityService();
+const { mutateAsync: createProjectUserActivity } =
+  useCreateProjectUserActivityMutation();
+
+function storeActivity() {
+  const activity: CreateProjectUserActivityDTO = {
+    type: 'VIEW',
+    entityType: 'CARD',
+    entityId: cardId.value,
+  };
+
+  createProjectUserActivity({
+    activity,
+  });
+}
+
+onMounted(() => {
+  storeActivity();
 });
 
 watch(

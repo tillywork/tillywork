@@ -1,12 +1,15 @@
 <script setup lang="ts">
+import { useStateStore } from '@/stores/state';
+
 import BaseList from '@/components/project-management/lists/BaseList.vue';
 import { useListsService } from '@/composables/services/useListsService';
-import { useStateStore } from '@/stores/state';
+
+import { type CreateProjectUserActivityDTO } from '@/components/common/projects/types';
+import { useProjectUserActivityService } from '@/composables/services/useProjectUserActivityService';
 
 definePage({
   meta: {
     requiresAuth: true,
-    collectActivities: true,
   },
 });
 
@@ -18,6 +21,27 @@ const router = useRouter();
 const listId = computed(() => +route.params.listId);
 const listsService = useListsService();
 const { data: list, error, refetch } = listsService.useGetListQuery(listId);
+
+const { useCreateProjectUserActivityMutation } =
+  useProjectUserActivityService();
+const { mutateAsync: createProjectUserActivity } =
+  useCreateProjectUserActivityMutation();
+
+function storeActivity() {
+  const activity: CreateProjectUserActivityDTO = {
+    type: 'VIEW',
+    entityType: 'LIST',
+    entityId: listId.value,
+  };
+
+  createProjectUserActivity({
+    activity,
+  });
+}
+
+onMounted(() => {
+  storeActivity();
+});
 
 watch(error, (v: any) => {
   if (v.response.status === 404) {
