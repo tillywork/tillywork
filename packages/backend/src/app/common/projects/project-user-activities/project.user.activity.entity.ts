@@ -23,7 +23,7 @@ export class ProjectUserActivity {
     @Column({ type: "bigint" })
     projectUserId: number;
 
-    @ManyToOne(() => Workspace, (workspace) => workspace.projectUserActivities)
+    @ManyToOne(() => Workspace)
     workspace: Relation<Workspace>;
 
     @Column({ type: "bigint" })

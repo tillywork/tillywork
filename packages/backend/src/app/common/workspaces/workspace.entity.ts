@@ -57,13 +57,6 @@ export class Workspace {
     })
     cardTypes: Relation<CardType[]>;
 
-    @OneToMany(
-        () => ProjectUserActivity,
-        (projectUserActivity) => projectUserActivity.workspace,
-        { eager: true }
-    )
-    projectUserActivities: Relation<ProjectUserActivity[]>;
-
     @ManyToOne(() => CardType, { eager: true })
     defaultCardType: Relation<CardType>;
 }
