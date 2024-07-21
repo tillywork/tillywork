@@ -16,7 +16,7 @@ import { ProjectUserActivitiesService } from "./project.user.activities.service"
 @ApiTags("projects")
 @UseGuards(JwtAuthGuard)
 @Controller({
-    path: "projects/:projectId/users/:userId/activity",
+    path: "projects/:projectId/users/:userId/activities",
     version: "1",
 })
 export class ProjectUserActivitiesController {

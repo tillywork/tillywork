@@ -35,7 +35,7 @@ export class ProjectUserActivitiesService {
         userId,
         workspaceId,
         deduplicate,
-        limit = 2,
+        limit,
     }: FindAllParams): Promise<ProjectUserActivity[]> {
         const projectUser = await this.projectUsersService.findOneBy({
             where: {
@@ -86,7 +86,11 @@ export class ProjectUserActivitiesService {
                 }, [])
                 .filter(Boolean);
         }
-        return acitivities.slice(0, limit);
+
+        if (limit) {
+            return acitivities.slice(0, limit);
+        }
+        return acitivities;
     }
 
     async findOne(
