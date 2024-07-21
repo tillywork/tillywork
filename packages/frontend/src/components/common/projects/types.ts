@@ -1,4 +1,7 @@
 import type { User } from '../users/types';
+import type { Workspace } from '@/components/project-management/workspaces/types';
+import type { List } from '@/components/project-management/lists/types';
+import type { Card } from '@/components/project-management/cards/types';
 
 export interface Project {
   id: number;
@@ -15,3 +18,31 @@ export interface ProjectUser {
   project: Project;
   inviteCode?: string;
 }
+
+export const projectUserActivityTypes = ['VIEW'] as const;
+export type ProjectUserActivityTypes =
+  (typeof projectUserActivityTypes)[number];
+
+export type ProjectUserActivityEntity = List | Card;
+
+export const projectUserActivityEntityTypes = ['LIST', 'CARD'] as const;
+export type ProjectUserActivityEntityTypes =
+  (typeof projectUserActivityEntityTypes)[number];
+
+export interface ProjectUserActivity {
+  id: number;
+  projectUser: ProjectUser;
+  projectUserId: number;
+  workspace: Workspace;
+  workspaceId: number;
+  type: ProjectUserActivityTypes;
+  entityId: number;
+  entityType: ProjectUserActivityEntityTypes;
+}
+
+export type CreateProjectUserActivityDTO = {
+  workspaceId: number;
+  type: ProjectUserActivityTypes;
+  entityId?: number;
+  entityType?: ProjectUserActivityEntityTypes;
+};
