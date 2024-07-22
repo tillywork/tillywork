@@ -5,13 +5,6 @@ export const quickFilterGroupsCustomFields = ['dropdown', 'label'];
 
 export const quickFilterItemsDate: FieldFilterOption[] = [
   {
-    field: 'card.dueAt',
-    operator: 'isNull',
-    value: [],
-    title: 'No Due Date',
-    type: FieldTypes.DATE,
-  },
-  {
     title: 'Today',
     type: FieldTypes.DATE,
     field: 'card.dueAt',
@@ -19,10 +12,31 @@ export const quickFilterItemsDate: FieldFilterOption[] = [
     value: [':startOfDay', ':endOfDay'],
   },
   {
+    title: 'This Week',
+    type: FieldTypes.DATE,
+    field: 'card.dueAt',
+    operator: 'between',
+    value: [':startOfWeek', ':endOfWeek'],
+  },
+  {
+    title: 'Last Week',
+    type: FieldTypes.DATE,
+    field: 'card.dueAt',
+    operator: 'between',
+    value: [':startOfLastWeek', ':endOfLastWeek'],
+  },
+  {
     field: 'card.dueAt',
     operator: 'between',
     value: [':startOfTime', ':startOfDay'],
     title: 'Past Due',
+    type: FieldTypes.DATE,
+  },
+  {
+    field: 'card.dueAt',
+    operator: 'isNull',
+    value: [],
+    title: 'No Due Date',
     type: FieldTypes.DATE,
   },
 ];
