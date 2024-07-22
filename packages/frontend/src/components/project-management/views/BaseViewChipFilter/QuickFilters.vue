@@ -39,8 +39,8 @@ const quickFilterOptions = computed<QuickFilter>(() => {
     options: props.listStages.map((stage) => {
       return {
         field: 'listStage.id',
-        operator: 'eq' as FilterOperator,
-        value: stage.id,
+        operator: 'in' as FilterOperator,
+        value: [stage.id],
         title: stage.name,
         type: FieldTypes.DROPDOWN,
       };
@@ -69,8 +69,8 @@ const quickFilterOptions = computed<QuickFilter>(() => {
       ...props.users.map((assignee) => {
         return {
           field: 'users.id',
-          operator: 'eq' as FilterOperator,
-          value: assignee.id,
+          operator: 'in' as FilterOperator,
+          value: [assignee.id],
           title: `${assignee.firstName} ${assignee.lastName}`,
           type: FieldTypes.USER,
         };
@@ -117,12 +117,19 @@ function handleQuickFilterOptionClicked() {
 function mapActiveQuickFiltersToUsableFormat(): FilterGroup {
   const activeFilterFields = Object.keys(activeFilters.value);
   const activeFilterFieldGroups = {
-    and: activeFilterFields.map((key) => {
-      return {
-        or: Object.values(activeFilters.value[key]),
-      };
-    }),
+    and: activeFilterFields
+      .map((key) => {
+        const values = Object.values(activeFilters.value[key]);
+        if (values.length === 0) {
+          return null; // Skip fields with no active filters
+        }
+        return {
+          or: values,
+        };
+      })
+      .filter((group) => group !== null), // Filter out null entries
   };
+  console.log(activeFilterFieldGroups);
 
   return activeFilterFieldGroups;
 }
@@ -170,12 +177,15 @@ watch(
 </script>
 
 <template>
-  <v-card border="none" width="400">
+  <v-card border="none">
     <template v-for="group in quickFilterOptions" :key="group.name">
       <div class="d-flex flex-column flex-wrap mt-2">
-        <v-card-subtitle class="text-capitalize">
+        <v-card-title
+          class="text-capitalize text-body-3 d-flex align-center ga-2"
+        >
+          <v-icon :icon="group.icon" size="x-small" />
           {{ group.name }}
-        </v-card-subtitle>
+        </v-card-title>
         <v-chip-group
           v-model="activeFilters[group.field]"
           multiple

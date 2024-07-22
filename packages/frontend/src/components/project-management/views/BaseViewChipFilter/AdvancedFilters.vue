@@ -43,5 +43,16 @@ function removeAdvancedFilter(index: number) {
         @delete="removeAdvancedFilter"
       />
     </template>
+    <template v-if="!advancedFilters.and.length">
+      <div class="d-flex flex-column align-center justify-center my-6">
+        <span class="text-body-1 font-weight-medium mb-4"
+          >Let's get started!</span
+        >
+        <span class="text-body-3"
+          >To filter your view, click Add New Filter and select the field you
+          want to filter on.</span
+        >
+      </div>
+    </template>
   </v-form>
 </template>
