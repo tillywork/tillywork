@@ -13,19 +13,35 @@ export const useProjectUserActivityService = () => {
   const { workspace, project, user } = useAuthStore();
 
   async function getProjectUserActivities({
-    isRecent,
     params,
   }: {
-    isRecent?: boolean;
     params?: unknown; // AxiosRequestConfig<any>.params;
   }): Promise<
     (ProjectUserActivity & { entity?: ProjectUserActivityEntity })[]
   > {
     if (project && user && workspace) {
       return sendRequest(
-        `/projects/${project.id}/users/${user.id}/activities${
-          isRecent ? '/recent' : ''
-        }`,
+        `/projects/${project.id}/users/${user.id}/activities`,
+        {
+          method: 'GET',
+          params: { workspaceId: workspace.id, ...(params ?? {}) },
+        }
+      );
+    }
+
+    return [];
+  }
+
+  async function getProjectUserActivitiesRecent({
+    params,
+  }: {
+    params?: unknown;
+  }): Promise<
+    (ProjectUserActivity & { entity?: ProjectUserActivityEntity })[]
+  > {
+    if (project && user && workspace) {
+      return sendRequest(
+        `/projects/${project.id}/users/${user.id}/activities/recent`,
         {
           method: 'GET',
           params: { workspaceId: workspace.id, ...(params ?? {}) },
@@ -53,13 +69,7 @@ export const useProjectUserActivityService = () => {
     return undefined;
   }
 
-  function useGetProjectUserActivitiesQuery({
-    isRecent,
-    params,
-  }: {
-    isRecent?: boolean;
-    params?: unknown;
-  }) {
+  function useGetProjectUserActivitiesQuery({ params }: { params?: unknown }) {
     return useQuery({
       queryKey: [
         'projectUserActivity',
@@ -69,7 +79,26 @@ export const useProjectUserActivityService = () => {
           workspaceId: workspace?.id,
         },
       ],
-      queryFn: () => getProjectUserActivities({ isRecent, params }),
+      queryFn: () => getProjectUserActivities({ params }),
+    });
+  }
+
+  function useGetProjectUserActivitiesRecentQuery({
+    params,
+  }: {
+    params?: unknown;
+  }) {
+    return useQuery({
+      queryKey: [
+        'projectUserActivity',
+        {
+          isRecent: true,
+          projectId: project?.id,
+          userId: user?.id,
+          workspaceId: workspace?.id,
+        },
+      ],
+      queryFn: () => getProjectUserActivitiesRecent({ params }),
     });
   }
 
@@ -87,12 +116,24 @@ export const useProjectUserActivityService = () => {
             },
           ],
         });
+        queryClient.invalidateQueries({
+          queryKey: [
+            'projectUserActivity',
+            {
+              isRecent: true,
+              projectId: project?.id,
+              userId: user?.id,
+              workspaceId: workspace?.id,
+            },
+          ],
+        });
       },
     });
   }
 
   return {
     useGetProjectUserActivitiesQuery,
+    useGetProjectUserActivitiesRecentQuery,
     useCreateProjectUserActivityMutation,
   };
 };

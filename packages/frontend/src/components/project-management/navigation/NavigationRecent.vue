@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useProjectUserActivityService } from '@/composables/services/useProjectUserActivityService';
 
-const { useGetProjectUserActivitiesQuery } = useProjectUserActivityService();
-const { data: activities } = useGetProjectUserActivitiesQuery({
-  isRecent: true,
+const { useGetProjectUserActivitiesRecentQuery } =
+  useProjectUserActivityService();
+const { data: activities } = useGetProjectUserActivitiesRecentQuery({
   params: { limit: 2 },
 });
 
