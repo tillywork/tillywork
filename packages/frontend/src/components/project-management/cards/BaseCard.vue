@@ -506,7 +506,6 @@ function openDescriptionFileDialog() {
           <div class="d-flex align-center my-4">
             <p class="field-label text-caption">Start date</p>
             <base-date-picker
-              class="text-body-3"
               label="Start date"
               icon="mdi-calendar"
               v-model="cardCopy.startsAt"
@@ -516,7 +515,6 @@ function openDescriptionFileDialog() {
           <div class="d-flex align-center my-4">
             <p class="field-label text-caption">Due date</p>
             <base-date-picker
-              class="text-body-3"
               label="Due date"
               icon="mdi-calendar"
               v-model="cardCopy.dueAt"
@@ -580,7 +578,6 @@ function openDescriptionFileDialog() {
                 <template v-else-if="field.type === FieldTypes.DATE">
                   <base-date-picker
                     v-model="cardCopy.data[field.id]"
-                    class="text-body-3"
                     :icon="field.icon ?? 'mdi-calendar'"
                     :label="field.name"
                     @update:model-value="
