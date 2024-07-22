@@ -10,7 +10,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useDialogStore } from '@/stores/dialog';
 
 const dialog = useDialogStore();
-const { navigationDrawer } = useHideNavigationDrawer();
+const { hideNavigationDrawer } = useHideNavigationDrawer();
+const navigationDrawer = ref(true);
 const authStore = useAuthStore();
 const { logout, isAuthenticated } = authStore;
 const logo = useLogo();
@@ -40,7 +41,7 @@ if (isAuthenticated()) {
 <template>
   <v-app>
     <v-app-bar
-      v-if="$vuetify.display.mdAndDown"
+      v-if="!hideNavigationDrawer && $vuetify.display.mdAndDown"
       color="accent"
       height="40"
       class="border-b-thin"
@@ -55,7 +56,12 @@ if (isAuthenticated()) {
       </v-toolbar-title>
     </v-app-bar>
 
-    <v-navigation-drawer app v-model="navigationDrawer" color="background">
+    <v-navigation-drawer
+      v-if="!hideNavigationDrawer"
+      v-model="navigationDrawer"
+      app
+      color="background"
+    >
       <v-img
         :src="logo.getLogoUrlByTheme()"
         width="125"

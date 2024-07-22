@@ -11,7 +11,8 @@ import NavigationWorkspaceSelector from '@/components/project-management/navigat
 const authStore = useAuthStore();
 const { isAuthenticated, logout } = authStore;
 const { workspace } = storeToRefs(authStore);
-const { navigationDrawer } = useHideNavigationDrawer();
+const { hideNavigationDrawer } = useHideNavigationDrawer();
+const navigationDrawer = ref(true);
 const logo = useLogo();
 const dialog = useDialogStore();
 
@@ -54,7 +55,7 @@ if (isAuthenticated()) {
 <template>
   <v-app>
     <v-app-bar
-      v-if="$vuetify.display.mdAndDown"
+      v-if="!hideNavigationDrawer && $vuetify.display.mdAndDown"
       color="accent"
       height="40"
       class="border-b-thin"
@@ -69,7 +70,12 @@ if (isAuthenticated()) {
       </v-toolbar-title>
     </v-app-bar>
 
-    <v-navigation-drawer v-model="navigationDrawer" app color="background">
+    <v-navigation-drawer
+      v-if="!hideNavigationDrawer"
+      v-model="navigationDrawer"
+      app
+      color="background"
+    >
       <v-img
         :src="logo.getLogoUrlByTheme()"
         width="125"
