@@ -32,14 +32,14 @@ watch(route, (v) => {
 
 <template>
   <div class="d-flex">
-    <v-navigation-drawer color="background">
+    <v-navigation-drawer color="background" class="user-select-none">
       <v-list>
         <v-list-item
           v-for="section in sections"
           :key="section"
+          :to="'/settings/' + section"
           rounded="md"
           slim
-          :to="'/settings/' + section"
         >
           <template #prepend>
             <v-icon>{{ settings[section as SETTINGS].icon }}</v-icon>
