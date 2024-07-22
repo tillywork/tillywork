@@ -58,9 +58,11 @@ export const useListsService = () => {
   function useGetListsQuery({
     spaceId,
     workspaceId,
+    enabled,
   }: {
     spaceId?: number;
     workspaceId?: number;
+    enabled?: Ref<boolean>;
   }) {
     return useQuery({
       queryKey: [
@@ -72,6 +74,7 @@ export const useListsService = () => {
       ],
       queryFn: () => getLists({ spaceId, workspaceId }),
       staleTime: 1 * 60 * 1000,
+      enabled,
     });
   }
 
