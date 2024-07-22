@@ -39,10 +39,6 @@ function storeActivity() {
   });
 }
 
-onMounted(() => {
-  storeActivity();
-});
-
 watch(error, (v: any) => {
   if (v.response.status === 404) {
     router.push('/');
@@ -54,6 +50,7 @@ watch(
   (v) => {
     if (v) {
       document.title = `${v.name} - tillywork`;
+      storeActivity();
     }
     setCurrentList(v);
   },

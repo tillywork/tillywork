@@ -12,10 +12,16 @@ definePage({
 });
 
 const route = useRoute('/pm/card/[cardId]');
+const router = useRouter();
+
 const cardsService = useCardsService();
 const cardId = computed(() => +route.params.cardId);
 
-const { data: card, refetch } = cardsService.useGetCardQuery({
+const {
+  data: card,
+  error,
+  refetch,
+} = cardsService.useGetCardQuery({
   cardId,
 });
 
@@ -36,25 +42,26 @@ function storeActivity() {
   });
 }
 
-onMounted(() => {
-  storeActivity();
-});
-
 watch(
   card,
   (v) => {
     if (v) {
+      storeActivity();
       document.title = `${v.title} - tillywork`;
     }
   },
   { immediate: true }
 );
 
+watch(error, (v: any) => {
+  if (v.response.status === 404) {
+    router.push('/');
+  }
+});
+
 watch(
   () => route.params.cardId,
-  () => {
-    refetch();
-  }
+  () => refetch()
 );
 </script>
 
