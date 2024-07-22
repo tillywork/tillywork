@@ -1,7 +1,7 @@
 import type { FieldFilterOption } from './types';
 import { FieldTypes } from '../../fields/types';
 
-export const quickFilterGroupsCustomFields = ['dropdown', 'label'] as const;
+export const quickFilterGroupsCustomFields = ['dropdown', 'label'];
 
 export const quickFilterItemsDate: FieldFilterOption[] = [
   {
@@ -27,4 +27,11 @@ export const quickFilterItemsDate: FieldFilterOption[] = [
   },
 ];
 
-export type QuickFilter = Record<string, FieldFilterOption[]>;
+export type QuickFilterGroup = {
+  name: string;
+  field: string;
+  icon: string;
+  options: FieldFilterOption[];
+};
+
+export type QuickFilter = QuickFilterGroup[];
