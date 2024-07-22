@@ -19,6 +19,7 @@ import {
 import { File } from './extensions/File';
 import { TrailingNode } from './extensions/TrailingNode';
 import { Link } from '@tiptap/extension-link';
+import { CustomKeymap } from './extensions/CustomKeymap';
 
 const props = defineProps<{
   autofocus?: boolean;
@@ -59,6 +60,7 @@ const extensions = computed(() => {
     Link.configure({
       defaultProtocol: 'https',
     }),
+    CustomKeymap,
   ];
 
   if (props.singleLine) {
