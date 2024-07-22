@@ -4,7 +4,7 @@ import { Brackets, FindOptionsWhere, Repository, UpdateResult } from "typeorm";
 import { Card } from "./card.entity";
 import { CreateCardDto } from "./dto/create.card.dto";
 import { UpdateCardDto } from "./dto/update.card.dto";
-import { QueryFilter } from "../filters/types";
+import { FilterGroup, QueryFilter } from "../filters/types";
 import { QueryBuilderHelper } from "../helpers/query.builder.helper";
 import { CardListsService } from "./card-lists/card.lists.service";
 
@@ -71,7 +71,10 @@ export class CardsService {
         }
 
         if (filters && filters.where) {
-            QueryBuilderHelper.buildQuery(queryBuilder, filters.where);
+            QueryBuilderHelper.buildQuery(
+                queryBuilder,
+                filters.where as FilterGroup
+            );
         }
 
         if (sortBy && sortOrder) {
