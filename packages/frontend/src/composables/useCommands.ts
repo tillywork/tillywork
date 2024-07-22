@@ -125,7 +125,7 @@ export const useCommands = () => {
       // ~ Projects
       {
         section: 'Project',
-        icon: 'mdi-account-multiple',
+        icon: 'mdi-account-multiple-outline',
         title: 'Invite and manage members',
         action: () => openSettings(SETTINGS.PROJECT_MEMBERS),
       },

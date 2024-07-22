@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { SETTINGS } from '@/components/common/settings/types';
+import { useSettings } from '@/composables/useSettings';
 import stringUtils from '@/utils/string';
 
 definePage({
@@ -10,28 +11,10 @@ definePage({
 
 const route = useRoute();
 const router = useRouter();
-
-const settingComponents = {
-  [SETTINGS.THEME]: defineAsyncComponent(
-    () => import('../../components/common/settings/ThemeSettings.vue')
-  ),
-  [SETTINGS.WORKSPACE]: defineAsyncComponent(
-    () => import('../../components/common/settings/WorkspaceSettings.vue')
-  ),
-  [SETTINGS.CARD_TYPES]: defineAsyncComponent(
-    () => import('../../components/common/settings/CardTypesSettings.vue')
-  ),
-  [SETTINGS.CUSTOM_FIELDS]: defineAsyncComponent(
-    () => import('../../components/common/settings/CustomFieldsSettings.vue')
-  ),
-  [SETTINGS.PROJECT_MEMBERS]: defineAsyncComponent(
-    () => import('../../components/common/settings/ProjectMembersSettings.vue')
-  ),
-};
-const settingRoutes = Object.keys(settingComponents);
+const { settings, sections } = useSettings();
 
 onMounted(() => {
-  if (!settingRoutes.includes(route.params.section)) {
+  if (!sections.includes(route.params.section)) {
     // TEMP: Throw a 404 error.
     router.replace('/');
   }
@@ -52,21 +35,24 @@ watch(route, (v) => {
     <v-navigation-drawer color="background">
       <v-list>
         <v-list-item
-          v-for="route in settingRoutes"
-          :key="route"
+          v-for="section in sections"
+          :key="section"
           rounded="md"
           slim
-          :to="'/settings/' + route"
+          :to="'/settings/' + section"
         >
+          <template #prepend>
+            <v-icon>{{ settings[section].icon }}</v-icon>
+          </template>
           <v-list-item-title>
-            {{ stringUtils.snakeToTitleCase(route) }}
+            {{ stringUtils.snakeToTitleCase(section) }}
           </v-list-item-title>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
 
     <div class="px-4 py-3 w-100">
-      <component :is="settingComponents[route.params.section as SETTINGS]" />
+      <component :is="settings[route.params.section as SETTINGS].component" />
     </div>
   </div>
 </template>
