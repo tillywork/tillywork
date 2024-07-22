@@ -129,7 +129,6 @@ function mapActiveQuickFiltersToUsableFormat(): FilterGroup {
       })
       .filter((group) => group !== null), // Filter out null entries
   };
-  console.log(activeFilterFieldGroups);
 
   return activeFilterFieldGroups;
 }
