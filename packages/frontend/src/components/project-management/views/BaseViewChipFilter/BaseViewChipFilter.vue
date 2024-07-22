@@ -1,42 +1,32 @@
 <script setup lang="ts">
 import BaseViewChip from '../BaseViewChip.vue';
-import BaseViewChipFilterItem from './BaseViewChipFilterItem.vue';
-import { FieldTypes, type Field, type FieldItem } from '../../fields/types';
-import type { VForm } from 'vuetify/components';
+import { FieldTypes } from '../../fields/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
-import type {
-  FieldFilter,
-  FilterGroup,
-  FilterOperator,
-  QueryFilter,
-} from '../../filters/types';
-import type { FieldFilterOption } from './types';
+import type { FieldFilter, ViewFilter } from '../../filters/types';
+import type { FieldFilterOption, FilterViewOptions } from './types';
 import { useFieldsService } from '@/composables/services/useFieldsService';
 import { useListStagesService } from '@/composables/services/useListStagesService';
 import { useAuthStore } from '@/stores/auth';
 import { useStateStore } from '@/stores/state';
-
-import {
-  quickFilterGroupsCustomFields,
-  quickFilterItemsDate,
-  type QuickFilter,
-} from './quickFilter';
+import QuickFilters from './QuickFilters.vue';
+import AdvancedFilters from './AdvancedFilters.vue';
+import { filterUtils } from '@/utils/filter';
 
 const props = defineProps<{
-  filters?: QueryFilter;
+  filters?: ViewFilter;
   viewId: number;
 }>();
 const emit = defineEmits(['save', 'update']);
 
-const filtersForm = ref<VForm>();
 const filtersMenu = ref(false);
-const addFilterMenu = ref(false);
-const filtersCopy = ref<QueryFilter>(
-  props.filters ? cloneDeep({ ...props.filters }) : { where: { and: [] } }
+const addAdvancedFilterMenu = ref(false);
+const filtersCopy = ref<ViewFilter>(
+  props.filters ? cloneDeep({ ...props.filters }) : { where: {} }
 );
+const viewType = ref<FilterViewOptions>('quick');
 const isSnackbarOpen = ref(false);
 const snackbarId = ref<number>();
 
@@ -45,7 +35,6 @@ const { showSnackbar, closeSnackbar } = useSnackbarStore();
 const { project } = storeToRefs(useAuthStore());
 const { useProjectUsersQuery } = useProjectUsersService();
 
-// TODO-Refactor: After MR 110 merged, should be handle on parent and pass with props or provide/inject
 const { data: users } = useProjectUsersQuery({
   projectId: project.value!.id,
   select: (projectUsers) => projectUsers.map((pj) => pj.user),
@@ -96,6 +85,10 @@ const defaultFields = ref<FieldFilterOption[]>([
   },
 ]);
 
+const filtersMenuWidth = computed(() =>
+  viewType.value === 'quick' ? 300 : 750
+);
+
 const fields = computed(() => {
   const fields: FieldFilterOption[] = [...defaultFields.value];
 
@@ -105,7 +98,7 @@ const fields = computed(() => {
         field: `card.data.${field.id}`,
         title: field.name,
         type: field.type,
-        operator: getOperatorFromFieldType(field),
+        operator: filterUtils.getOperatorFromFieldType(field),
         icon: field.icon,
         options: field.items,
         original: field,
@@ -116,12 +109,24 @@ const fields = computed(() => {
   return fields;
 });
 
-const isFiltersFilled = computed(
-  () => !!filtersCopy.value?.where && !!filtersCopy.value?.where?.and?.length
+const isFiltersFilled = computed(() => filtersCount.value > 0);
+
+const filtersCount = computed(
+  () =>
+    (filtersCopy.value.where.quick?.and?.length ?? 0) +
+    (filtersCopy.value.where.advanced?.and?.length ?? 0)
 );
 
+const otherViewTypeFiltersCount = computed(() => {
+  if (viewType.value === 'quick') {
+    return filtersCopy.value.where.advanced?.and?.length ?? 0;
+  } else {
+    return filtersCopy.value.where.quick?.and?.length ?? 0;
+  }
+});
+
 function clearFilters() {
-  filtersCopy.value = { where: { and: [] } };
+  filtersCopy.value = { where: {} };
 }
 
 function applyFilters() {
@@ -148,156 +153,9 @@ function applyFilters() {
   }
 }
 
-const filtersQuery = computed<{
-  advanced: FieldFilter[];
-  quick: FilterGroup[];
-}>(() => {
-  const queryFilters = filtersCopy.value.where?.and;
-
-  let filters: { advanced: FieldFilter[]; quick: FilterGroup[] } = {
-    advanced: [],
-    quick: [],
-  };
-  if (queryFilters)
-    filters = queryFilters.reduce((prev, curr) => {
-      if ('or' in curr) {
-        prev.quick.push(curr);
-      } else if ('value' in curr) {
-        prev.advanced.push(curr);
-      }
-      return prev;
-    }, filters);
-
-  return filters;
-});
-
-const activeQuickFilters = ref<QuickFilter>({});
-const quickFilters = computed(() => {
-  const stageItems = listStages.value?.map((stage) => {
-    return {
-      field: 'listStage.id',
-      operator: 'eq' as FilterOperator,
-      value: stage.id,
-      title: stage.name,
-      type: FieldTypes.DROPDOWN,
-    };
-  });
-
-  const assigneeItems = [
-    {
-      field: 'users.id',
-      operator: 'isNull',
-      value: [],
-      title: 'No Assignee',
-      type: FieldTypes.USER,
-    },
-    ...(users.value?.map((assignee) => {
-      return {
-        field: 'users.id',
-        operator: 'eq' as FilterOperator,
-        value: assignee.id,
-        title: `${assignee.firstName} ${assignee.lastName}`,
-        type: FieldTypes.USER,
-      };
-    }) ?? []),
-  ];
-
-  const customFieldItems: QuickFilter = {};
-
-  listFields.value
-    ?.map((x) => x)
-    .sort((a, b) => a.type.localeCompare(b.type))
-    .forEach((field) => {
-      const { type, name, items } = field;
-      if (quickFilterGroupsCustomFields.includes(type)) {
-        customFieldItems[name] = items.map((item: FieldItem) => {
-          return {
-            field: `card.data.${field.id}`,
-            operator: getOperatorFromFieldType(field),
-            value: item.item,
-            title: item.item,
-            type: field.type,
-          };
-        });
-      }
-    });
-
-  return {
-    date: quickFilterItemsDate,
-    assignee: assigneeItems,
-    stage: stageItems,
-    ...customFieldItems,
-  };
-});
-
-function buildQuickFilter(items: FieldFilterOption[]) {
-  return items.reduce(
-    (prev, curr) => {
-      const filter = {
-        field: curr.field,
-        operator: curr.operator,
-        value: curr.value,
-      };
-
-      switch (filter.operator) {
-        case 'isNull':
-        case 'isNotNull':
-        case 'between':
-          prev.filterAsIs.push(filter);
-          break;
-
-        default: {
-          const index = prev.filterBeIn.findIndex(
-            (value) => value.field === filter.field
-          );
-
-          if (index > -1) {
-            prev.filterBeIn[index] = {
-              ...prev.filterBeIn[index],
-              value: [...prev.filterBeIn[index].value, filter.value],
-            };
-          } else {
-            prev.filterBeIn.push({
-              field: filter.field,
-              operator: 'in',
-              value: [filter.value],
-            });
-          }
-          break;
-        }
-      }
-
-      return prev;
-    },
-    {
-      filterAsIs: [] as FieldFilter[],
-      filterBeIn: [] as FieldFilter[],
-    }
-  );
-}
-
-function handleQuickFilter() {
-  const filters: FilterGroup[] = Object.values(activeQuickFilters.value)
-    .map((values) => {
-      let filters: FieldFilter[] = [];
-
-      const { filterAsIs, filterBeIn } = buildQuickFilter(values);
-      filters = [...filterAsIs, ...filterBeIn];
-
-      if (filters.length) {
-        return { or: filters };
-      }
-    })
-    .filter(Boolean) as FilterGroup[];
-
-  filtersCopy.value = {
-    where: {
-      and: [...filters, ...filtersQuery.value.advanced],
-    },
-  };
-}
-
 function addAdvancedFilter(filterOption: FieldFilterOption) {
+  viewType.value = 'advanced';
+
   const filter: FieldFilter = {
     field: filterOption.field,
     operator: filterOption.operator,
@@ -305,45 +163,16 @@ function addAdvancedFilter(filterOption: FieldFilterOption) {
   };
 
   filtersCopy.value = {
+    ...filtersCopy.value,
     where: {
-      and: [
-        ...filtersQuery.value.quick,
-        ...filtersQuery.value.advanced,
-        filter,
-      ],
+      quick: filtersCopy.value.where.quick,
+      advanced: {
+        and: [...(filtersCopy.value.where.advanced?.and ?? []), filter],
+      },
     },
   };
 
-  closeAddFilterMenu();
-}
-
-function handleAddAdvancedFilter(filter: FieldFilter, index: number) {
-  filtersCopy.value = {
-    where: {
-      and: [
-        ...filtersQuery.value.quick,
-        ...filtersQuery.value.advanced.slice(0, index),
-        filter,
-        ...filtersQuery.value.advanced.slice(index + 1),
-      ],
-    },
-  };
-}
-
-function removeAdvancedFilter(index: number) {
-  filtersCopy.value = {
-    where: {
-      and: [
-        ...filtersQuery.value.quick,
-        ...filtersQuery.value.advanced.slice(0, index),
-        ...filtersQuery.value.advanced.slice(index + 1),
-      ],
-    },
-  };
-}
-
-function closeAddFilterMenu() {
-  addFilterMenu.value = false;
+  addAdvancedFilterMenu.value = false;
 }
 
 function saveFilters() {
@@ -360,18 +189,14 @@ function closeSaveSnackbar() {
   }
 }
 
-function getOperatorFromFieldType(field: Field): FilterOperator {
-  switch (field.type) {
-    case FieldTypes.USER:
-    case FieldTypes.DROPDOWN:
-    case FieldTypes.LABEL:
-    case FieldTypes.CARD:
-      return 'in';
-    case FieldTypes.DATE:
-      return 'between';
+function toggleViewType() {
+  viewType.value = viewType.value === 'quick' ? 'advanced' : 'quick';
 
-    default:
-      return 'eq';
+  if (
+    viewType.value === 'advanced' &&
+    !filtersCopy.value.where.advanced?.and?.length
+  ) {
+    addAdvancedFilterMenu.value = true;
   }
 }
 
@@ -392,7 +217,7 @@ watch(
         filtersCopy.value = cloneDeep(v);
       }
     } else {
-      filtersCopy.value = {};
+      filtersCopy.value = { where: {} };
     }
   }
 );
@@ -410,12 +235,16 @@ watch(listId, () => {
 </script>
 
 <template>
-  <v-menu v-model="filtersMenu" :close-on-content-click="false" width="750">
+  <v-menu
+    v-model="filtersMenu"
+    :close-on-content-click="false"
+    :width="filtersMenuWidth"
+  >
     <template #activator="{ props }">
       <base-view-chip
         v-bind="props"
         :icon="isFiltersFilled ? 'mdi-filter' : 'mdi-filter-outline'"
-        :label="'Filters'"
+        :label="'Filters: ' + filtersCount"
         :is-filled="isFiltersFilled"
       >
         <template #append v-if="isFiltersFilled">
@@ -435,87 +264,65 @@ watch(listId, () => {
     </template>
     <v-card>
       <v-card-text class="pa-0">
-        <v-card-item>
-          <div class="d-flex">
-            <v-card-title> Quick Filters </v-card-title>
-            <v-spacer />
-            <v-menu v-model="addFilterMenu" :close-on-content-click="false">
-              <template #activator="{ props: addFilterProps }">
-                <v-btn
-                  v-bind="addFilterProps"
-                  prepend-icon="mdi-plus"
-                  class="text-capitalize"
-                  color="default"
-                  size="small"
-                  variant="tonal"
-                >
-                  Create Custom Filter
-                </v-btn>
-              </template>
-              <v-card>
-                <v-list>
-                  <template v-for="field in fields" :key="field.field">
-                    <v-list-item
-                      @click="addAdvancedFilter(field)"
-                      class="text-body-2"
-                    >
-                      <template #prepend>
-                        <v-icon :icon="field.icon" />
-                      </template>
-                      {{ field.title }}
-                    </v-list-item>
-                  </template>
-                </v-list>
-              </v-card>
-            </v-menu>
-          </div>
-          <div
-            v-for="(items, field) in quickFilters"
-            :key="field"
-            class="d-flex flex-column mt-2"
-          >
-            <v-card-subtitle class="text-capitalize">
-              {{ field }}
-            </v-card-subtitle>
-            <v-chip-group
-              v-model="activeQuickFilters[field]"
-              multiple
-              selected-class="text-primary"
-              @click="handleQuickFilter"
-            >
-              <v-chip
-                v-for="item in items"
-                :key="item.title"
-                :text="item.title"
-                :value="item"
-                size="small"
-              />
-            </v-chip-group>
-          </div>
+        <v-card-item v-if="viewType === 'quick'">
+          <quick-filters
+            v-model="filtersCopy.where.quick"
+            :list-stages="listStages ?? []"
+            :list-fields="listFields ?? []"
+            :users="users ?? []"
+          />
         </v-card-item>
-        <v-card-item>
-          <v-form ref="filtersForm">
-            <template
-              v-for="(filter, index) in filtersQuery.advanced"
-              :key="filter.type"
-            >
-              <base-view-chip-filter-item
-                v-model="filtersQuery.advanced[index]"
-                @update:model-value="
-                  (filter) => handleAddAdvancedFilter(filter, index)
-                "
-                :index
-                :fields
-                :users="users ?? []"
-                @delete="removeAdvancedFilter"
-              />
+        <v-card-item v-else>
+          <advanced-filters
+            v-model="filtersCopy.where.advanced"
+            :fields
+            :users="users ?? []"
+          />
+          <v-menu
+            v-model="addAdvancedFilterMenu"
+            :close-on-content-click="false"
+          >
+            <template #activator="{ props: addFilterProps }">
+              <v-btn
+                v-bind="addFilterProps"
+                prepend-icon="mdi-plus"
+                class="text-capitalize mt-4"
+                color="default"
+                size="small"
+              >
+                Add New Filter
+              </v-btn>
             </template>
-          </v-form>
+            <v-card>
+              <v-list>
+                <template v-for="field in fields" :key="field.field">
+                  <v-list-item
+                    @click="addAdvancedFilter(field)"
+                    class="text-body-2"
+                  >
+                    <template #prepend>
+                      <v-icon :icon="field.icon" />
+                    </template>
+                    {{ field.title }}
+                  </v-list-item>
+                </template>
+              </v-list>
+            </v-card>
+          </v-menu>
         </v-card-item>
       </v-card-text>
       <v-card-actions>
+        <v-btn
+          @click="toggleViewType"
+          class="text-capitalize text-caption"
+          color="default"
+        >
+          {{ viewType === 'quick' ? 'Advanced' : 'quick' }} Filters ({{
+            otherViewTypeFiltersCount
+          }})
+        </v-btn>
         <v-spacer />
-        <v-btn @click="saveFilters" color="primary" class="text-capitalize">
+        <v-btn @click="saveFilters" class="text-capitalize text-body-3">
           Save
         </v-btn>
       </v-card-actions>

@@ -22,7 +22,7 @@ import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
-import type { QueryFilter } from '../../filters/types';
+import type { QueryFilter, ViewFilter } from '../../filters/types';
 import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 
@@ -81,8 +81,20 @@ const users = computed(() =>
 
 const filters = computed<QueryFilter>(() => {
   if (props.view.filters) {
+    const viewFilters = {
+      where: {
+        and: [
+          ...(cloneDeep((props.view.filters as ViewFilter).where.quick?.and) ??
+            []),
+          ...(cloneDeep(
+            (props.view.filters as ViewFilter).where.advanced?.and
+          ) ?? []),
+        ],
+      },
+    };
+
     return objectUtils.deepMergeObjects(
-      cloneDeep(props.view.filters),
+      viewFilters,
       cloneDeep(props.listGroup.original.filter) ?? {}
     );
   } else {
