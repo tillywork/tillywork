@@ -35,7 +35,7 @@ export const useSettings = () => {
   };
 
   return {
-    sections: Object.keys(settings).map((s) => s as SETTINGS),
+    sections: Object.keys(settings),
     settings,
   };
 };

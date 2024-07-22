@@ -9,7 +9,7 @@ definePage({
   },
 });
 
-const route = useRoute();
+const route = useRoute('/settings/[section]');
 const router = useRouter();
 const { settings, sections } = useSettings();
 
@@ -42,7 +42,7 @@ watch(route, (v) => {
           :to="'/settings/' + section"
         >
           <template #prepend>
-            <v-icon>{{ settings[section].icon }}</v-icon>
+            <v-icon>{{ settings[section as SETTINGS].icon }}</v-icon>
           </template>
           <v-list-item-title>
             {{ stringUtils.snakeToTitleCase(section) }}
