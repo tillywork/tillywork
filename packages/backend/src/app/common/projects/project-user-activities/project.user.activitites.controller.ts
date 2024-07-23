@@ -25,13 +25,13 @@ export class ProjectUserActivitiesController {
     ) {}
 
     @Get("recent")
-    findForRecent(
+    findRecent(
         @Param("projectId") projectId: number,
         @Param("userId") userId: number,
         @Query("workspaceId") workspaceId: number,
         @Query("limit") limit?: number
     ) {
-        return this.projectUserActivitiesService.findForRecent({
+        return this.projectUserActivitiesService.findRecent({
             projectId,
             userId,
             workspaceId,

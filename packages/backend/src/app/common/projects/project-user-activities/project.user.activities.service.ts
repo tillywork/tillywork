@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { FindManyOptions, Repository } from "typeorm";
 import { ProjectUserActivity } from "./project.user.activity.entity";
 import { CreateProjectUserActivityDto } from "./dto/create.project.user.activity.dto";
 import {
@@ -16,7 +16,6 @@ export interface FindAllParams {
     userId: number;
     projectId: number;
     workspaceId: number;
-    limit?: number;
 }
 
 @Injectable()
@@ -62,8 +61,16 @@ export class ProjectUserActivitiesService {
         projectId,
         userId,
         workspaceId,
-        limit = 50,
-    }: FindAllParams): Promise<ProjectUserActivity[]> {
+        appendOptions,
+        appendSelects,
+        appendOrders,
+        groupBys,
+    }: FindAllParams & {
+        appendOptions?: FindManyOptions<ProjectUserActivity>;
+        appendSelects?: { column: string; alias?: string }[];
+        appendOrders?: { column: string; direction?: "ASC" | "DESC" }[];
+        groupBys?: string[];
+    }): Promise<ProjectUserActivity[]> {
         const projectUser = await this.projectUsersService.findOneBy({
             where: {
                 project: { id: projectId },
@@ -76,60 +83,80 @@ export class ProjectUserActivitiesService {
             );
         }
 
-        return this.projectUserActivityRepository.find({
-            where: {
+        const queryBuilder = this.projectUserActivityRepository
+            .createQueryBuilder("activity")
+            .where("activity.projectUserId = :projectUserId", {
                 projectUserId: projectUser.id,
+            })
+            .andWhere("activity.workspaceId = :workspaceId", {
                 workspaceId,
-            },
-            order: {
-                createdAt: "DESC",
-            },
-            take: limit,
-        });
+            });
+
+        if (groupBys) {
+            groupBys.forEach((groupBy, index) => {
+                if (index === 0) {
+                    queryBuilder.groupBy(`activity.${groupBy}`);
+                } else {
+                    queryBuilder.addGroupBy(`activity.${groupBy}`);
+                }
+            });
+        }
+
+        if (appendOptions) {
+            queryBuilder.setFindOptions(appendOptions);
+        }
+
+        if (appendSelects) {
+            appendSelects.forEach(({ column, alias }) =>
+                queryBuilder.addSelect(column, alias)
+            );
+        }
+
+        if (appendOrders) {
+            appendOrders.forEach(({ column, direction }) =>
+                queryBuilder.orderBy(column, direction)
+            );
+        }
+
+        return queryBuilder.getRawMany();
     }
 
-    async findForRecent({
+    async findRecent({
         projectId,
         userId,
         workspaceId,
-        limit = 5,
-    }: FindAllParams): Promise<
+        limit,
+    }: FindAllParams & { limit?: number }): Promise<
         (ProjectUserActivity & { entity?: ProjectUserActivityEntity })[]
     > {
-        let activities = await this.findAll({
+        const activities = await this.findAll({
             projectId,
             userId,
             workspaceId,
-            limit: limit * 10, // for threshold
+            appendOptions: {
+                select: ["type", "entityType", "entityId"],
+                take: limit ?? 10,
+            },
+            appendSelects: [
+                {
+                    column: `MAX("activity"."createdAt")`,
+                    alias: "createdAt",
+                },
+            ],
+            appendOrders: [{ column: `"createdAt"`, direction: "DESC" }],
+            groupBys: ["type", "entityId", "entityType"],
         });
-        activities = activities
-            .reduce((prev, curr, index) => {
-                if (index === 0) {
-                    prev.push(curr);
-                    return prev;
-                }
 
-                // NOTE: To deduplicate all entries, consider implementing a Map
-                function isSame(
-                    activity1: ProjectUserActivity,
-                    activity2: ProjectUserActivity
-                ) {
-                    const { type, entityId, entityType } = activity1;
-                    return (
-                        type === activity2.type &&
-                        entityId === activity2.entityId &&
-                        entityType === activity2.entityType
-                    );
-                }
-                if (!isSame(prev[prev.length - 1], curr)) {
-                    prev.push(curr);
-                }
-
-                return prev;
-            }, [])
-            .slice(0, limit);
-
-        return Promise.all(activities.map(({ id }) => this.findOne(id)));
+        return Promise.all(
+            activities.map(async (activity: any) => {
+                const entity = await this.getEntity({
+                    type: activity.activity_type,
+                    entityType: activity.activity_entityType,
+                    entityId: activity.activity_entityId,
+                } as ProjectUserActivity);
+                return { ...activity, entity };
+            })
+        );
     }
 
     async findOne(
