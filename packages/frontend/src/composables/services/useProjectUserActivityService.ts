@@ -7,6 +7,12 @@ import type {
 } from '@/components/common/projects/types';
 import { useAuthStore } from '@/stores/auth';
 
+export type RecentActivity = {
+  title: string;
+  path: string;
+  type: string;
+};
+
 export const useProjectUserActivityService = () => {
   const { sendRequest } = useHttp();
   const queryClient = useQueryClient();
@@ -36,9 +42,7 @@ export const useProjectUserActivityService = () => {
     params,
   }: {
     params?: unknown;
-  }): Promise<
-    (ProjectUserActivity & { entity?: ProjectUserActivityEntity })[]
-  > {
+  }): Promise<RecentActivity[]> {
     if (project && user && workspace) {
       return sendRequest(
         `/projects/${project.id}/users/${user.id}/activities/recent`,

@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { useProjectUserActivityService } from '@/composables/services/useProjectUserActivityService';
+import {
+  useProjectUserActivityService,
+  type RecentActivity,
+} from '@/composables/services/useProjectUserActivityService';
 
 const { useGetProjectUserActivitiesRecentQuery } =
   useProjectUserActivityService();
@@ -7,29 +10,11 @@ const { data: activities } = useGetProjectUserActivitiesRecentQuery({
   params: { limit: 2 },
 });
 
-type Recent = {
-  title: string;
-  path: string;
-  type: string;
-};
-const recents = ref<Recent[]>([]);
+const recents = ref<RecentActivity[]>([]);
 
 watch(activities, async (v) => {
   if (v) {
-    recents.value = v
-      .map((activity) => {
-        if (activity.type === 'VIEW') {
-          if (activity.entity) {
-            const type = activity.entityType.toLowerCase();
-            return {
-              title: activity.entity.title ?? activity.entity.name,
-              path: `/pm/${type}/${activity.entityId}`, // TODO-Next: implement workspace slug
-              type,
-            };
-          }
-        }
-      })
-      .filter(Boolean) as Recent[];
+    recents.value = v;
   }
 });
 </script>
@@ -49,7 +34,7 @@ watch(activities, async (v) => {
         class="ms-2"
       >
         <template #prepend>
-          <v-chip size="small" class="mr-4">
+          <v-chip size="small" class="text-capitalize mr-4">
             {{ recent.type }}
           </v-chip>
         </template>

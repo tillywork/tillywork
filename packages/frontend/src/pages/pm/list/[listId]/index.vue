@@ -29,7 +29,7 @@ const { mutateAsync: createProjectUserActivity } =
 
 function storeActivity() {
   const activity: CreateProjectUserActivityDTO = {
-    type: 'VIEW',
+    type: 'ENTITY',
     entityType: 'LIST',
     entityId: listId.value,
   };

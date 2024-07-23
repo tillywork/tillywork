@@ -19,7 +19,7 @@ export interface ProjectUser {
   inviteCode?: string;
 }
 
-export const projectUserActivityTypes = ['VIEW'] as const;
+export const projectUserActivityTypes = ['ENTITY', 'SETTING'] as const;
 export type ProjectUserActivityTypes =
   (typeof projectUserActivityTypes)[number];
 
