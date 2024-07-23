@@ -310,6 +310,7 @@ function openDescriptionFileDialog() {
               density="compact"
               size="default"
               @click="stateStore.toggleInfoDrawer"
+              v-tooltip="leaderKey + ' + I'"
             />
             <v-btn
               v-if="props.showCloseButton"
@@ -348,13 +349,12 @@ function openDescriptionFileDialog() {
         </div>
 
         <!-- Children -->
-        <div class="text-caption user-select-none mt-4">
+        <div class="text-body-3 user-select-none mt-4">
           <template v-if="!cardCopy.children.length">
             <v-btn
               class="text-none"
               size="small"
               prepend-icon="mdi-plus"
-              variant="text"
               color="default"
               @click="
                 dialog.openDialog({
