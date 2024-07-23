@@ -125,7 +125,7 @@ watch(selectedField, (v) => {
 </script>
 
 <template>
-  <div id="custom-fields-settings-container">
+  <v-card class="pa-4" height="100%">
     <template v-if="!isCreatingOrEditing">
       <div class="user-select-none">
         <div class="d-flex ga-2">
@@ -208,129 +208,127 @@ watch(selectedField, (v) => {
     </template>
 
     <template v-else>
-      <v-form ref="upsertFieldForm" @submit.prevent="saveField" v-if="fieldDto">
-        <div class="user-select-none">
-          <h3 class="d-flex align-start flex-column ga-2">
-            <v-btn
-              class="text-capitalize mb-2"
-              prepend-icon="mdi-chevron-left"
-              text="Back"
-              variant="text"
-              density="comfortable"
-              @click="clearSelectedField"
+      <v-card width="300">
+        <v-form
+          ref="upsertFieldForm"
+          @submit.prevent="saveField"
+          v-if="fieldDto"
+        >
+          <div class="user-select-none">
+            <h3 class="d-flex align-start flex-column ga-2">
+              <v-btn
+                class="text-capitalize mb-2"
+                prepend-icon="mdi-chevron-left"
+                text="Back"
+                variant="text"
+                density="comfortable"
+                @click="clearSelectedField"
+              />
+              <span>
+                <span class="text-capitalize">{{ upsertMode }}</span>
+                field
+              </span>
+            </h3>
+            <p class="mb-4 text-subtitle-2">General</p>
+          </div>
+
+          <!-- ~ Field Name -->
+          <v-text-field v-model="fieldDto.name" label="Field name*">
+            <template #prepend-inner>
+              <base-icon-selector v-model="fieldDto.icon" />
+            </template>
+          </v-text-field>
+
+          <!-- ~ Field Type -->
+          <v-autocomplete
+            v-model="fieldDto.type"
+            :items="FIELD_TYPE_OPTIONS"
+            label="Field type*"
+            auto-select-first
+            :readonly="upsertMode !== UpsertDialogMode.CREATE"
+            :hint="
+              upsertMode === UpsertDialogMode.UPDATE
+                ? 'Field type cannot be changed'
+                : ''
+            "
+          />
+
+          <!-- ~ Card Type -->
+          <v-autocomplete
+            v-if="fieldDto.type === FieldTypes.CARD"
+            v-model="fieldDto.cardType"
+            :items="cardTypes"
+            item-title="name"
+            label="Card Type"
+            auto-select-first
+            autocomplete="off"
+            return-object
+          />
+
+          <!-- ~ Associated Lists -->
+          <v-autocomplete
+            v-model="fieldDto.lists"
+            :items="lists"
+            item-title="name"
+            label="Lists"
+            auto-select-first
+            multiple
+            autocomplete="off"
+            return-object
+            chips
+            closable-chips
+          />
+
+          <!-- ~ Options -->
+          <div class="mb-2">
+            <v-checkbox
+              label="Required"
+              v-model="fieldDto.required"
+              density="compact"
+              color="primary"
             />
-            <span>
-              <span class="text-capitalize">{{ upsertMode }}</span>
-              field
-            </span>
-          </h3>
-          <p class="mb-4 text-subtitle-2">General</p>
-        </div>
+            <v-checkbox
+              label="Multiple"
+              v-model="fieldDto.multiple"
+              density="compact"
+              v-if="showIsMultiple"
+            />
+          </div>
 
-        <!-- ~ Field Name -->
-        <v-text-field v-model="fieldDto.name" label="Field name*">
-          <template #prepend-inner>
-            <base-icon-selector v-model="fieldDto.icon" />
+          <!-- ~ Dropdown Items -->
+          <template v-if="fieldDto.type === FieldTypes.DROPDOWN">
+            <v-divider class="mb-2" />
+            <base-array-input
+              v-model="fieldDto.items"
+              item-type="object"
+              item-value="item"
+              label="Options"
+            />
           </template>
-        </v-text-field>
+          <!-- ~ Label Choices -->
+          <template v-else-if="fieldDto.type === FieldTypes.LABEL">
+            <v-divider class="mb-2" />
+            <base-array-input
+              v-model="fieldDto.items"
+              item-type="object"
+              item-value="item"
+              label="Options"
+              item-color
+            />
+          </template>
 
-        <!-- ~ Field Type -->
-        <v-autocomplete
-          v-model="fieldDto.type"
-          :items="FIELD_TYPE_OPTIONS"
-          label="Field type*"
-          auto-select-first
-          :readonly="upsertMode !== UpsertDialogMode.CREATE"
-          :hint="
-            upsertMode === UpsertDialogMode.UPDATE
-              ? 'Field type cannot be changed'
-              : ''
-          "
-        />
-
-        <!-- ~ Card Type -->
-        <v-autocomplete
-          v-if="fieldDto.type === FieldTypes.CARD"
-          v-model="fieldDto.cardType"
-          :items="cardTypes"
-          item-title="name"
-          label="Card Type"
-          auto-select-first
-          autocomplete="off"
-          return-object
-        />
-
-        <!-- ~ Associated Lists -->
-        <v-autocomplete
-          v-model="fieldDto.lists"
-          :items="lists"
-          item-title="name"
-          label="Lists"
-          auto-select-first
-          multiple
-          autocomplete="off"
-          return-object
-          chips
-          closable-chips
-        />
-
-        <!-- ~ Options -->
-        <div class="mb-2">
-          <v-checkbox
-            label="Required"
-            v-model="fieldDto.required"
-            density="compact"
-            color="primary"
-          />
-          <v-checkbox
-            label="Multiple"
-            v-model="fieldDto.multiple"
-            density="compact"
-            v-if="showIsMultiple"
-          />
-        </div>
-
-        <!-- ~ Dropdown Items -->
-        <template v-if="fieldDto.type === FieldTypes.DROPDOWN">
-          <v-divider class="mb-2" />
-          <base-array-input
-            v-model="fieldDto.items"
-            item-type="object"
-            item-value="item"
-            label="Options"
-          />
-        </template>
-        <!-- ~ Label Choices -->
-        <template v-else-if="fieldDto.type === FieldTypes.LABEL">
-          <v-divider class="mb-2" />
-          <base-array-input
-            v-model="fieldDto.items"
-            item-type="object"
-            item-value="item"
-            label="Options"
-            item-color
-          />
-        </template>
-
-        <v-divider class="my-2" />
-        <!-- ~ Upsert Button -->
-        <div class="d-flex justify-end">
-          <v-btn
-            class="text-capitalize"
-            :text="upsertMode === UpsertDialogMode.CREATE ? 'Create' : 'Save'"
-            variant="flat"
-            type="submit"
-          />
-        </div>
-      </v-form>
+          <v-divider class="my-2" />
+          <!-- ~ Upsert Button -->
+          <div class="d-flex justify-end">
+            <v-btn
+              class="text-capitalize"
+              :text="upsertMode === UpsertDialogMode.CREATE ? 'Create' : 'Save'"
+              variant="flat"
+              type="submit"
+            />
+          </div>
+        </v-form>
+      </v-card>
     </template>
-  </div>
+  </v-card>
 </template>
-
-<style lang="scss">
-#custom-fields-settings-container {
-  min-height: 100%;
-  width: 100%;
-  max-width: 768px;
-}
-</style>

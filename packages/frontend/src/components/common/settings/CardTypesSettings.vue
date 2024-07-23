@@ -44,7 +44,7 @@ function getCardTypeCreatedByName(cardType: CardType) {
 </script>
 
 <template>
-  <div id="card-types-settings-container">
+  <v-card class="pa-4" height="100%">
     <div class="user-select-none">
       <div class="d-flex items-center ga-2">
         <h3>Card Types</h3>
@@ -62,7 +62,7 @@ function getCardTypeCreatedByName(cardType: CardType) {
       :columns="[
         {
           id: 'actions',
-          size: 50,
+          size: 60,
         },
         {
           id: 'name',
@@ -81,7 +81,9 @@ function getCardTypeCreatedByName(cardType: CardType) {
       <template #actions="{ row }">
         <v-menu v-if="row.original.createdByType === 'user'">
           <template #activator="{ props }">
-            <base-icon-btn v-bind="props" icon="mdi-dots-vertical" />
+            <div class="d-flex justify-end w-100">
+              <base-icon-btn v-bind="props" icon="mdi-dots-vertical" />
+            </div>
           </template>
           <v-card>
             <v-list>
@@ -137,12 +139,5 @@ function getCardTypeCreatedByName(cardType: CardType) {
         </v-card>
       </template>
     </base-table>
-  </div>
+  </v-card>
 </template>
-
-<style lang="scss">
-#card-types-settings-container {
-  width: 100%;
-  max-width: 768px;
-}
-</style>

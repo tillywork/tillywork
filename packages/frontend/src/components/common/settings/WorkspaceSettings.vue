@@ -35,38 +35,34 @@ async function saveWorkspace() {
 </script>
 
 <template>
-  <div id="workspace-settings-container" class="user-select-none">
+  <v-card class="pa-4" height="100%">
     <h3>Workspace</h3>
     <p class="text-subtitle-2 mb-4">Update your current workspace.</p>
 
     <!-- TODO: Style -->
-    <v-form
-      ref="workspaceForm"
-      id="workspace-form"
-      @submit.prevent="saveWorkspace"
-    >
-      <v-text-field
-        v-model="selectedWorkspaceCopy!.name"
-        label="Name"
-        hide-details
-        variant="filled"
-      />
-      <div class="d-flex justify-end">
-        <v-btn
-          variant="flat"
-          class="mt-4"
-          type="submit"
-          :disabled="isWorkspaceFormDisabled"
-        >
-          Save
-        </v-btn>
-      </div>
-    </v-form>
-  </div>
+    <v-card width="300">
+      <v-form
+        ref="workspaceForm"
+        id="workspace-form"
+        @submit.prevent="saveWorkspace"
+      >
+        <v-text-field
+          v-model="selectedWorkspaceCopy!.name"
+          label="Name"
+          hide-details
+          variant="filled"
+        />
+        <div class="d-flex justify-end">
+          <v-btn
+            variant="flat"
+            class="mt-4"
+            type="submit"
+            :disabled="isWorkspaceFormDisabled"
+          >
+            Save
+          </v-btn>
+        </div>
+      </v-form>
+    </v-card>
+  </v-card>
 </template>
-
-<style lang="scss">
-#workspace-settings-container {
-  width: 320px;
-}
-</style>

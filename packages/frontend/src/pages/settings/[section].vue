@@ -18,21 +18,34 @@ onMounted(() => {
     // TEMP: Throw a 404 error.
     router.replace('/');
   }
-
-  document.title =
-    'Settings - ' + stringUtils.snakeToTitleCase(route.params.section);
 });
 
-watch(route, (v) => {
-  if (v)
-    document.title =
-      'Settings - ' + stringUtils.snakeToTitleCase(route.params.section);
-});
+watch(
+  route,
+  (v) => {
+    if (v)
+      document.title = `${stringUtils.snakeToTitleCase(
+        route.params.section
+      )} - tillywork`;
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
   <div class="d-flex">
     <v-navigation-drawer color="background" class="user-select-none">
+      <div class="pa-3 pb-0">
+        <v-btn
+          class="text-none"
+          color="default"
+          variant="text"
+          prepend-icon="mdi-chevron-left"
+          to="/"
+        >
+          Settings
+        </v-btn>
+      </div>
       <v-list>
         <v-list-item
           v-for="section in sections"
@@ -51,8 +64,8 @@ watch(route, (v) => {
       </v-list>
     </v-navigation-drawer>
 
-    <div class="px-4 py-3 w-100">
+    <v-container class="h-100vh">
       <component :is="settings[route.params.section as SETTINGS].component" />
-    </div>
+    </v-container>
   </div>
 </template>
