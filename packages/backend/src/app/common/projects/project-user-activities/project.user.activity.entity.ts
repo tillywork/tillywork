@@ -32,10 +32,20 @@ export class ProjectUserActivity {
     @Column({ type: "enum", enum: ProjectUserActivityTypes })
     type: ProjectUserActivityTypes;
 
-    @Column({ type: "bigint" })
+    @Column({ type: "varchar", nullable: true })
+    name: string;
+
+    @Column({ type: "varchar", nullable: true })
+    path: string;
+
+    @Column({ type: "bigint", nullable: true })
     entityId: number;
 
-    @Column({ type: "enum", enum: ProjectUserActivityEntityTypes })
+    @Column({
+        type: "enum",
+        enum: ProjectUserActivityEntityTypes,
+        nullable: true,
+    })
     entityType: ProjectUserActivityEntityTypes;
 
     @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })

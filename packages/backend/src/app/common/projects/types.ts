@@ -7,8 +7,8 @@ export enum ProjectTypes {
 }
 
 export enum ProjectUserActivityTypes {
-    VIEW = "VIEW",
-    // SETTING = "SETTING", // Tracks user navigation to the setting page
+    ENTITY = "ENTITY",
+    SETTING = "SETTING",
 }
 
 export type ProjectUserActivityEntity = List | Card;

@@ -23,6 +23,12 @@ export class CreateProjectUserActivityDto {
     type: ProjectUserActivityTypes;
 
     @Optional()
+    name?: string;
+
+    @Optional()
+    path?: string;
+
+    @Optional()
     @IsInt()
     entityId?: number;
 

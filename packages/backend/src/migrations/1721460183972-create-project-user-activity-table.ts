@@ -24,10 +24,18 @@ export class CreateProjectUserActivityTable1721460183972
                     },
                     {
                         name: "type",
+                        type: "enum",
+                        enum: ["ENTITY", "SETTING"],
+                    },
+                    {
+                        name: "name",
                         type: "varchar",
-                        length: "255",
-                        // type: "enum",
-                        // enum: ["VIEW", "SETTING"], // VIEW, SETTING?
+                        isNullable: true,
+                    },
+                    {
+                        name: "path",
+                        type: "varchar",
+                        isNullable: true,
                     },
                     {
                         name: "entityId",
@@ -36,11 +44,9 @@ export class CreateProjectUserActivityTable1721460183972
                     },
                     {
                         name: "entityType",
-                        type: "varchar",
-                        length: "255",
+                        type: "enum",
+                        enum: ["LIST", "CARD"],
                         isNullable: true,
-                        // type: "enum",
-                        // enum: ["LIST", "CARD"], // LIST, CARD
                     },
                     {
                         name: "createdAt",
