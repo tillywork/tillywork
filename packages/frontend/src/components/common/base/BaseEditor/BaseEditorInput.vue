@@ -207,10 +207,9 @@ watch(textValue, (newText) => {
 watch(jsonValue, (newJson) => {
   if (editor.value) {
     const currentJson = editor.value.getJSON();
-    const compareAgainst = newJson;
     const areTheyEqual = objectUtils.isEqual(
       currentJson,
-      compareAgainst ?? ({} as any)
+      newJson ?? ({} as any)
     );
 
     if (!areTheyEqual) {
