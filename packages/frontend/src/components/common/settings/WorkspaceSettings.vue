@@ -39,7 +39,8 @@ async function saveWorkspace() {
     <h3>Workspace</h3>
     <p class="text-subtitle-2 mb-4">Update your current workspace.</p>
 
-    <!-- TODO: Style -->
+    <v-divider class="my-6" />
+
     <v-card width="300">
       <v-form
         ref="workspaceForm"

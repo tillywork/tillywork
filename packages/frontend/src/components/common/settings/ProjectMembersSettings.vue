@@ -20,8 +20,8 @@ const { data: projectUsers } = useProjectUsersQuery({
       <p class="text-subtitle-2">Manage who has access to your project.</p>
     </div>
 
-    <!-- ~ Invitation -->
-    <v-divider class="my-4" />
+    <v-divider class="my-6" />
+
     <project-invitation-link />
     <v-divider class="my-4" />
 

@@ -57,6 +57,8 @@ function getCardTypeCreatedByName(cardType: CardType) {
       </p>
     </div>
 
+    <v-divider class="my-6" />
+
     <base-table
       :data="fetchingCardTypes ?? []"
       :columns="[

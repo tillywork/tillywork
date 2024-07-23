@@ -137,6 +137,8 @@ watch(selectedField, (v) => {
         </p>
       </div>
 
+      <v-divider class="my-6" />
+
       <base-table
         :data="fields ?? []"
         :columns="[

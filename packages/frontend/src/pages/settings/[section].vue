@@ -65,7 +65,13 @@ watch(
     </v-navigation-drawer>
 
     <v-container class="h-100vh">
-      <component :is="settings[route.params.section as SETTINGS].component" />
+      <v-row justify="center">
+        <v-col cols="8" class="mt-12">
+          <component
+            :is="settings[route.params.section as SETTINGS].component"
+          />
+        </v-col>
+      </v-row>
     </v-container>
   </div>
 </template>
