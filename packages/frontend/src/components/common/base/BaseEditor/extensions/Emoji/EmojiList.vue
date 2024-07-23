@@ -59,9 +59,11 @@ const downHandler = () => {
 };
 
 const ensureVisible = () => {
-  if (emojiScroller.value) {
-    emojiScroller.value.scrollToIndex(selected.value);
-  }
+  nextTick(() => {
+    if (emojiScroller.value) {
+      emojiScroller.value.scrollToIndex(selected.value);
+    }
+  });
 };
 
 defineExpose({
