@@ -201,7 +201,7 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
               class="ms-2 align-self-center"
               variant="text"
               rounded="circle"
-              @click.prevent="clearDate"
+              @click.prevent.stop="clearDate"
             />
           </template>
         </v-text-field>
@@ -224,7 +224,7 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
               variant="text"
               rounded="circle"
               size="x-small"
-              @click.prevent="clearDate"
+              @click.prevent.stop="clearDate"
             />
           </template>
         </base-card-property-value-btn>

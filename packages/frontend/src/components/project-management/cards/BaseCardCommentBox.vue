@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
+import { leaderKey } from '@/utils/keyboard';
 import { type Content } from '@tiptap/vue-3';
 
 const value = defineModel<Content>();
 const isEmpty = defineModel<boolean>('empty');
 const baseEditor = ref();
+
+const { meta, ctrl, enter } = useMagicKeys();
 
 defineProps<{
   placeholder?: string;
@@ -19,6 +22,12 @@ function handleSubmit() {
 function openBaseEditorFileDialog() {
   baseEditor.value.openFileDialog();
 }
+
+watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
+  if (isEnterPressed && (isMetaPressed || isCtrlPressed)) {
+    handleSubmit();
+  }
+});
 </script>
 
 <template>
@@ -47,6 +56,7 @@ function openBaseEditorFileDialog() {
         density="default"
         size="x-small"
         @click="handleSubmit"
+        v-tooltip:bottom="leaderKey + ' + Enter'"
       />
     </v-card-actions>
   </v-card>
