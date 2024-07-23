@@ -30,6 +30,7 @@ import { Mention } from '@tiptap/extension-mention';
 import mentionSuggestions from './extensions/Mention/mentionSuggestions';
 import MentionChip from './extensions/Mention/MentionChip.vue';
 import { Emoji } from './extensions/Emoji';
+import objectUtils from '@/utils/object';
 
 const props = defineProps<{
   autofocus?: boolean;
@@ -206,8 +207,13 @@ watch(textValue, (newText) => {
 watch(jsonValue, (newJson) => {
   if (editor.value) {
     const currentJson = editor.value.getJSON();
-    // Using JSON.stringify to compare JSON objects
-    if (JSON.stringify(newJson) !== JSON.stringify(currentJson)) {
+    const compareAgainst = newJson;
+    const areTheyEqual = objectUtils.isEqual(
+      currentJson,
+      compareAgainst ?? ({} as any)
+    );
+
+    if (!areTheyEqual) {
       editor.value.commands.setContent(newJson as any, true);
     }
   }

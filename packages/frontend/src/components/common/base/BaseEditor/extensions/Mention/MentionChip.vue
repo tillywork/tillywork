@@ -3,8 +3,11 @@ import { useUsersService } from '@/composables/services/useUsersService';
 import BaseAvatar from '../../../BaseAvatar.vue';
 import { nodeViewProps } from '@tiptap/vue-3';
 import { NodeViewWrapper } from '@tiptap/vue-3';
+import { useAuthStore } from '@/stores/auth';
 
 const props = defineProps(nodeViewProps);
+
+const { user: currentUser } = storeToRefs(useAuthStore());
 
 const { useGetUserQuery } = useUsersService();
 const { data: user } = useGetUserQuery(props.node.attrs.id);
@@ -12,7 +15,11 @@ const { data: user } = useGetUserQuery(props.node.attrs.id);
 
 <template>
   <node-view-wrapper class="d-inline">
-    <v-chip size="small" class="px-1">
+    <v-chip
+      size="small"
+      class="px-1"
+      :color="user?.id === currentUser?.id ? 'primary' : undefined"
+    >
       <template v-if="user">
         <base-avatar
           :text="user.firstName + ' ' + user.lastName"
