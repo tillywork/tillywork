@@ -150,10 +150,10 @@ export class AuthService {
 
     async joinInvitation({
         inviteCode,
-        user,
+        userId,
     }: {
         inviteCode: string;
-        user: User;
+        userId: number;
     }): Promise<RegisterResponse> {
         const project = await this.projectsService.findOneBy({
             where: { inviteCode },
@@ -164,6 +164,8 @@ export class AuthService {
                 error: "INVALID_INVITE_CODE",
             };
         }
+
+        const user = await this.usersService.findOne(userId);
 
         await this.projectUsersService.create({
             user,

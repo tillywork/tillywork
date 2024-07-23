@@ -84,7 +84,7 @@ export class AuthController {
     ): Promise<RegisterResponse> {
         const response = await this.authService.joinInvitation({
             inviteCode,
-            user: req.user,
+            userId: req.user.id,
         });
 
         if (response["error"]) {
