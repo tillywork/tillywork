@@ -8,10 +8,12 @@ import {
     ProjectUserActivityEntityTypes,
     ProjectUserActivityTypes,
 } from "../types";
-import { ProjectUser } from "../project-users/project.user.entity";
 import { ProjectUsersService } from "../project-users/project.users.service";
 import { ListsService } from "../../lists/lists.service";
 import { CardsService } from "../../cards/cards.service";
+import { ProjectUser } from "../project-users/project.user.entity";
+import { List } from "../../lists/list.entity";
+import { Card } from "../../cards/card.entity";
 
 export interface FindAllParams {
     userId: number;
@@ -20,9 +22,14 @@ export interface FindAllParams {
 }
 
 type EntityRelationParams = {
-    type: ProjectUserActivityTypes;
     entityType: ProjectUserActivityEntityTypes;
     entityId: number;
+};
+
+type RecentResult = {
+    type: string;
+    title: string;
+    path: string;
 };
 
 @Injectable()
@@ -36,31 +43,24 @@ export class ProjectUserActivitiesService {
     ) {}
 
     async getEntity({
-        type,
         entityType,
         entityId,
     }: EntityRelationParams): Promise<ProjectUserActivityEntity> {
         let entity: ProjectUserActivityEntity;
 
-        if (type === ProjectUserActivityTypes.VIEW) {
-            switch (entityType) {
-                case ProjectUserActivityEntityTypes.LIST:
-                    entity = await this.listsService
-                        .findOne(entityId)
-                        .catch(() => {
-                            return undefined;
-                        });
-                    break;
-                case ProjectUserActivityEntityTypes.CARD:
-                    entity = await this.cardsService
-                        .findOne(entityId)
-                        .catch(() => {
-                            return undefined;
-                        });
-                    break;
-                default:
-                    break;
-            }
+        switch (entityType) {
+            case ProjectUserActivityEntityTypes.LIST:
+                entity = await this.listsService.findOne(entityId).catch(() => {
+                    return undefined;
+                });
+                break;
+            case ProjectUserActivityEntityTypes.CARD:
+                entity = await this.cardsService.findOne(entityId).catch(() => {
+                    return undefined;
+                });
+                break;
+            default:
+                break;
         }
 
         return entity;
@@ -113,10 +113,8 @@ export class ProjectUserActivitiesService {
         projectId,
         userId,
         workspaceId,
-        limit,
-    }: FindAllParams & { limit?: number }): Promise<
-        (EntityRelationParams & { entity?: ProjectUserActivityEntity })[]
-    > {
+        limit = 5,
+    }: FindAllParams & { limit?: number }): Promise<RecentResult[]> {
         const projectUser = await this.findProjectUserByProjectIdAndUserId({
             projectId,
             userId,
@@ -125,6 +123,8 @@ export class ProjectUserActivitiesService {
         const query = `
 			select
 				"activity"."type",
+				"activity"."name",
+				"activity"."path",
 				"activity"."entityId",
 				"activity"."entityType",
 				MAX("activity"."createdAt") as "createdAt"
@@ -135,25 +135,48 @@ export class ProjectUserActivitiesService {
 				and "activity"."workspaceId" = $2
 			group by
 				"activity"."type",
+				"activity"."name",
+				"activity"."path",
 				"activity"."entityId",
 				"activity"."entityType"
 			order by
 				"createdAt" desc
 			limit $3
 		`;
-        const activities: EntityRelationParams[] =
-            await this.projectUserActivityRepository.query(query, [
-                projectUser.id,
-                workspaceId,
-                limit ?? 10,
-            ]);
+        const activities: Pick<
+            ProjectUserActivity,
+            "type" | "name" | "path" | "entityId" | "entityType"
+        >[] = await this.projectUserActivityRepository.query(query, [
+            projectUser.id,
+            workspaceId,
+            limit,
+        ]);
 
-        return Promise.all(
+        const activitiesResult = await Promise.all(
             activities.map(async (activity) => {
-                const entity = await this.getEntity(activity);
-                return { ...activity, entity };
+                let { name: title, path } = activity;
+                let type: string = activity.type.toLowerCase();
+
+                if (type === ProjectUserActivityTypes.ENTITY.toLowerCase()) {
+                    const entity = await this.getEntity(activity);
+
+                    if (entity instanceof List) {
+                        title = entity.name;
+                    } else if (entity instanceof Card) {
+                        title = entity.title;
+                    }
+
+                    type = activity.entityType.toLowerCase();
+                    path = `/pm/${type}/${entity.id}`; // TODO-Next: implement workspace slug, and implement entityId OR entitySlug
+                }
+
+                if (type && title && path) {
+                    return { type, title, path };
+                }
             })
         );
+
+        return activitiesResult.filter(Boolean);
     }
 
     async findOne(
@@ -169,7 +192,14 @@ export class ProjectUserActivitiesService {
             );
         }
 
-        const entity = await this.getEntity(projectUserActivity);
+        let entity: ProjectUserActivityEntity;
+        if (projectUserActivity.type === ProjectUserActivityTypes.ENTITY) {
+            entity = await this.getEntity({
+                entityType: projectUserActivity.entityType,
+                entityId: projectUserActivity.entityId,
+            });
+        }
+
         return { ...projectUserActivity, entity };
     }
 
