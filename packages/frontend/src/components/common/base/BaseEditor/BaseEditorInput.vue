@@ -18,6 +18,8 @@ import {
 } from '@/composables/services/useFilesService';
 import { File } from './extensions/File';
 import { TrailingNode } from './extensions/TrailingNode';
+import { Link } from '@tiptap/extension-link';
+import { CustomKeymap } from './extensions/CustomKeymap';
 
 const props = defineProps<{
   autofocus?: boolean;
@@ -55,6 +57,10 @@ const extensions = computed(() => {
     Image,
     FileHandler.configure({ uploadFn: uploadFiles }),
     File,
+    Link.configure({
+      defaultProtocol: 'https',
+    }),
+    CustomKeymap,
   ];
 
   if (props.singleLine) {

@@ -43,6 +43,7 @@ import { CreateListFieldsTable1720527075305 } from "../migrations/1720527075305-
 import { AddWorkspaceIdToCardTable1721207599200 } from "../migrations/1721207599200-add-workspaceId-to-card-table";
 import { AddCardTypeIdToFieldTable1721214304859 } from "../migrations/1721214304859-add-cardTypeId-to-field-table";
 import { CreateProjectUserActivityTable1721460183972 } from "../migrations/1721460183972-create-project-user-activity-table";
+import { UpdateFilterWhereColumnForViews1721641078360 } from "../migrations/1721641078360-update-filter-where-column-for-views";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -87,6 +88,7 @@ const migrations = [
     AddWorkspaceIdToCardTable1721207599200,
     AddCardTypeIdToFieldTable1721214304859,
     CreateProjectUserActivityTable1721460183972,
+    UpdateFilterWhereColumnForViews1721641078360,
 ];
 
 const config: TypeOrmModuleOptions = {

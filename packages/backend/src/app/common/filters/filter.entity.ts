@@ -5,7 +5,7 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
 } from "typeorm";
-import { FilterEntityTypes, FilterGroup } from "./types";
+import { FilterEntityTypes, FilterGroup, ViewFilter } from "./types";
 
 @Entity()
 export class Filter {
@@ -16,7 +16,7 @@ export class Filter {
     name: string;
 
     @Column({ type: "jsonb" })
-    where: FilterGroup;
+    where: FilterGroup | ViewFilter;
 
     @Column({ type: "bigint" })
     entityId: number;

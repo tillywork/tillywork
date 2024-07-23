@@ -22,6 +22,7 @@ import {
   FilterEntityTypes,
   type Filter,
   type QueryFilter,
+  type ViewFilter,
 } from '../filters/types';
 import { cloneDeep } from 'lodash';
 import { useDialogStore } from '@/stores/dialog';
@@ -351,7 +352,7 @@ watch(
           @update:model-value="handleGroupBySelection"
         />
         <base-view-chip-filter
-          :filters="viewCopy.filters"
+          :filters="(viewCopy.filters as ViewFilter)"
           :view-id="viewCopy.id"
           @update="handleUpdateFilters"
           @save="handleSaveFilters"
