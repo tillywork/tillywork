@@ -25,9 +25,16 @@ export const useAuthService = () => {
     });
   }
 
+  function joinInvitation(inviteCode: string) {
+    return sendRequest(`/auth/invite/${inviteCode}/join`, {
+      method: 'POST',
+    });
+  }
+
   return {
     login,
     register,
     registerWithInvite,
+    joinInvitation,
   };
 };
