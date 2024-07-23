@@ -412,12 +412,5 @@ defineExpose({
     padding-inline-start: 1rem;
     border-inline-start: 3px solid rgba(#0d0d0d, 0.1);
   }
-
-  .mention {
-    border-radius: 0.4rem;
-    padding: 0.1rem 0.3rem;
-    background: #e2e8f0;
-    font-weight: bold;
-  }
 }
 </style>
