@@ -1,7 +1,7 @@
 export type Filter = {
   id: number;
   name?: string;
-  where: FilterGroup;
+  where: FilterGroup | ViewFilter;
   entityId: number;
   entityType: FilterEntityTypes;
   createdAt: string;
@@ -15,7 +15,7 @@ export enum FilterEntityTypes {
 
 export type CreateFilterDto = {
   name?: string;
-  where: FilterGroup;
+  where: FilterGroup | ViewFilter;
   entityId: number;
   entityType: FilterEntityTypes;
 };
@@ -52,4 +52,11 @@ export interface FilterGroup {
 export interface QueryFilter {
   where?: FilterGroup;
   // We can add more properties from TypeORM FindOptions (like take, skip, relations, etc.) as required.
+}
+
+export interface ViewFilter {
+  where: {
+    advanced?: FilterGroup;
+    quick?: FilterGroup;
+  };
 }

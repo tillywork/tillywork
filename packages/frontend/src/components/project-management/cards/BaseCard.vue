@@ -17,7 +17,7 @@ import { useFieldsService } from '@/composables/services/useFieldsService';
 import { FieldTypes, type Field } from '../fields/types';
 import { useStateStore } from '@/stores/state';
 import { useDialogStore } from '@/stores/dialog';
-import { DIALOGS, SettingsTabs } from '@/components/common/dialogs/types';
+import { DIALOGS } from '@/components/common/dialogs/types';
 import BaseLabelSelector from '@/components/common/inputs/BaseLabelSelector.vue';
 import { useAuthStore } from '@/stores/auth';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
@@ -104,6 +104,8 @@ const isCardLoading = computed(() => {
     updateCardListMutation.isPending.value
   );
 });
+
+const router = useRouter();
 
 watch(
   () => props.card,
@@ -263,16 +265,8 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
   });
 }
 
-function openSettingsDialog(activeTab: SettingsTabs) {
-  dialog.openDialog({
-    dialog: DIALOGS.SETTINGS,
-    data: {
-      activeTab,
-    },
-    options: {
-      fullscreen: true,
-    },
-  });
+function openCustomFieldsSettings() {
+  router.push('/settings/custom-fields');
 }
 
 function openDescriptionFileDialog() {
@@ -316,6 +310,7 @@ function openDescriptionFileDialog() {
               density="compact"
               size="default"
               @click="stateStore.toggleInfoDrawer"
+              v-tooltip="leaderKey + ' + I'"
             />
             <v-btn
               v-if="props.showCloseButton"
@@ -354,13 +349,12 @@ function openDescriptionFileDialog() {
         </div>
 
         <!-- Children -->
-        <div class="text-caption user-select-none mt-4">
+        <div class="text-body-3 user-select-none mt-4">
           <template v-if="!cardCopy.children.length">
             <v-btn
               class="text-none"
               size="small"
               prepend-icon="mdi-plus"
-              variant="text"
               color="default"
               @click="
                 dialog.openDialog({
@@ -476,7 +470,7 @@ function openDescriptionFileDialog() {
           Properties
           <v-spacer />
           <base-icon-btn
-            @click="openSettingsDialog(SettingsTabs.FIELDS)"
+            @click="openCustomFieldsSettings"
             icon="mdi-pencil"
             v-tooltip="'Edit fields'"
           />
@@ -506,7 +500,6 @@ function openDescriptionFileDialog() {
           <div class="d-flex align-center my-4">
             <p class="field-label text-caption">Start date</p>
             <base-date-picker
-              class="text-body-3"
               label="Start date"
               icon="mdi-calendar"
               v-model="cardCopy.startsAt"
@@ -516,7 +509,6 @@ function openDescriptionFileDialog() {
           <div class="d-flex align-center my-4">
             <p class="field-label text-caption">Due date</p>
             <base-date-picker
-              class="text-body-3"
               label="Due date"
               icon="mdi-calendar"
               v-model="cardCopy.dueAt"
@@ -580,7 +572,6 @@ function openDescriptionFileDialog() {
                 <template v-else-if="field.type === FieldTypes.DATE">
                   <base-date-picker
                     v-model="cardCopy.data[field.id]"
-                    class="text-body-3"
                     :icon="field.icon ?? 'mdi-calendar'"
                     :label="field.name"
                     @update:model-value="

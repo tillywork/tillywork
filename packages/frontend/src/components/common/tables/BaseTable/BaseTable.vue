@@ -224,24 +224,26 @@ function generateColumnDefs(): ColumnDef<any, any>[] {
                     rounded="0"
                     color="transparent"
                   >
-                    <!-- Check for named slot that matches columnId, and use template to define slot content -->
-                    <template
-                      v-if="
-                        cell.column.columnDef.id &&
-                        !!slots[cell.column.columnDef.id]
-                      "
-                    >
-                      <slot
-                        :name="cell.column.columnDef.id"
-                        v-bind="cell.getContext()"
-                      ></slot>
-                    </template>
-                    <template v-else>
-                      <FlexRender
-                        :render="cell.column.columnDef.cell"
-                        :props="cell.getContext()"
-                      />
-                    </template>
+                    <div class="text-truncate">
+                      <!-- Check for named slot that matches columnId, and use template to define slot content -->
+                      <template
+                        v-if="
+                          cell.column.columnDef.id &&
+                          !!slots[cell.column.columnDef.id]
+                        "
+                      >
+                        <slot
+                          :name="cell.column.columnDef.id"
+                          v-bind="cell.getContext()"
+                        ></slot>
+                      </template>
+                      <template v-else>
+                        <FlexRender
+                          :render="cell.column.columnDef.cell"
+                          :props="cell.getContext()"
+                        />
+                      </template>
+                    </div>
                   </v-card>
                 </template>
               </v-card>

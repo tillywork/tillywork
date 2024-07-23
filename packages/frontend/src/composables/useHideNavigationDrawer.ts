@@ -1,20 +1,20 @@
 export const useHideNavigationDrawer = () => {
   const route = useRoute();
-  const navigationDrawer = ref(true);
+  const hideNavigationDrawer = ref(true);
 
   watch(
     route,
     () => {
       if (route.meta.hideNavigationDrawer) {
-        navigationDrawer.value = false;
+        hideNavigationDrawer.value = true;
       } else {
-        navigationDrawer.value = true;
+        hideNavigationDrawer.value = false;
       }
     },
     { immediate: true }
   );
 
   return {
-    navigationDrawer,
+    hideNavigationDrawer,
   };
 };

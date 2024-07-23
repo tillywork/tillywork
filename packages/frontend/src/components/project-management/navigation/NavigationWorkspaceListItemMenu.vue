@@ -6,7 +6,6 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
 import type { CardType } from '../cards/types';
 import { useDialogStore } from '@/stores/dialog';
-import { SettingsTabs } from '@/components/common/dialogs/types';
 import { useAuthStore } from '@/stores/auth';
 
 const listMenu = ref(false);
@@ -28,9 +27,15 @@ const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
 );
 
+const router = useRouter();
+
 function handleListMenuClick() {
   listMenu.value = !listMenu.value;
   emit('hover:freeze');
+}
+
+function closeListMenu() {
+  listMenu.value = false;
 }
 
 function handleDeleteList(list: List) {
@@ -95,18 +100,6 @@ function handleUpdateDefaultCardType(cardType: CardType) {
   }
 }
 
-function openSettingsDialog(activeTab: SettingsTabs) {
-  dialog.openDialog({
-    dialog: DIALOGS.SETTINGS,
-    data: {
-      activeTab,
-    },
-    options: {
-      fullscreen: true,
-    },
-  });
-}
-
 function openEditStagesDialog(list: List) {
   listMenu.value = false;
   dialog.openDialog({
@@ -125,11 +118,11 @@ function openUpdateListDialog(list: List) {
       mode: UpsertDialogMode.UPDATE,
     },
   });
-  listMenu.value = false;
+  closeListMenu();
 }
 
-watch(listMenu, () => {
-  if (!listMenu.value) {
+watch(listMenu, (v) => {
+  if (!v) {
     emit('hover:unfreeze');
   }
 });
@@ -157,7 +150,7 @@ watch(listMenu, () => {
           </template>
           <v-list-item-title>Edit</v-list-item-title>
         </v-list-item>
-        <v-list-item @click="openSettingsDialog(SettingsTabs.FIELDS)">
+        <v-list-item to="/settings/custom-fields" @click="closeListMenu">
           <template #prepend>
             <v-icon icon="mdi-form-select" />
           </template>
@@ -183,9 +176,11 @@ watch(listMenu, () => {
                 size="small"
                 variant="text"
                 class="text-capitalize"
-                @click="openSettingsDialog(SettingsTabs.CARD_TYPES)"
-                >Edit</v-btn
+                to="/settings/card-types"
+                @click="closeListMenu"
               >
+                Edit
+              </v-btn>
             </v-card-title>
             <v-list min-height="200">
               <template

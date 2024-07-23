@@ -8,6 +8,13 @@
   }
 }
 
+.v-field__input,
+.v-field__field,
+.v-field-label,
+.v-label {
+  font-size: 0.875rem;
+}
+
 .v-menu {
   .v-card {
     border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
