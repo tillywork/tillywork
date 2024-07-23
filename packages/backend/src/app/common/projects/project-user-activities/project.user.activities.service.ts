@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { FindManyOptions, Repository } from "typeorm";
+import { FindManyOptions, FindOptionsWhere, Repository } from "typeorm";
 import { ProjectUserActivity } from "./project.user.activity.entity";
 import { CreateProjectUserActivityDto } from "./dto/create.project.user.activity.dto";
 import {
@@ -8,6 +8,7 @@ import {
     ProjectUserActivityEntityTypes,
     ProjectUserActivityTypes,
 } from "../types";
+import { ProjectUser } from "../project-users/project.user.entity";
 import { ProjectUsersService } from "../project-users/project.users.service";
 import { ListsService } from "../../lists/lists.service";
 import { CardsService } from "../../cards/cards.service";
@@ -17,6 +18,12 @@ export interface FindAllParams {
     projectId: number;
     workspaceId: number;
 }
+
+type EntityRelationParams = {
+    type: ProjectUserActivityTypes;
+    entityType: ProjectUserActivityEntityTypes;
+    entityId: number;
+};
 
 @Injectable()
 export class ProjectUserActivitiesService {
@@ -28,23 +35,25 @@ export class ProjectUserActivitiesService {
         private cardsService: CardsService
     ) {}
 
-    async getEntity(
-        activity: ProjectUserActivity
-    ): Promise<ProjectUserActivityEntity> {
+    async getEntity({
+        type,
+        entityType,
+        entityId,
+    }: EntityRelationParams): Promise<ProjectUserActivityEntity> {
         let entity: ProjectUserActivityEntity;
 
-        if (activity.type === ProjectUserActivityTypes.VIEW) {
-            switch (activity.entityType) {
+        if (type === ProjectUserActivityTypes.VIEW) {
+            switch (entityType) {
                 case ProjectUserActivityEntityTypes.LIST:
                     entity = await this.listsService
-                        .findOne(activity.entityId)
+                        .findOne(entityId)
                         .catch(() => {
                             return undefined;
                         });
                     break;
                 case ProjectUserActivityEntityTypes.CARD:
                     entity = await this.cardsService
-                        .findOne(activity.entityId)
+                        .findOne(entityId)
                         .catch(() => {
                             return undefined;
                         });
@@ -57,20 +66,10 @@ export class ProjectUserActivitiesService {
         return entity;
     }
 
-    async findAll({
+    async findProjectUserByProjectIdAndUserId({
         projectId,
         userId,
-        workspaceId,
-        appendOptions,
-        appendSelects,
-        appendOrders,
-        groupBys,
-    }: FindAllParams & {
-        appendOptions?: FindManyOptions<ProjectUserActivity>;
-        appendSelects?: { column: string; alias?: string }[];
-        appendOrders?: { column: string; direction?: "ASC" | "DESC" }[];
-        groupBys?: string[];
-    }): Promise<ProjectUserActivity[]> {
+    }: Omit<FindAllParams, "workspaceId">): Promise<ProjectUser> {
         const projectUser = await this.projectUsersService.findOneBy({
             where: {
                 project: { id: projectId },
@@ -82,43 +81,32 @@ export class ProjectUserActivitiesService {
                 `ProjectUser with (project ID ${projectId} and user ID ${userId}) not found`
             );
         }
+        return projectUser;
+    }
 
-        const queryBuilder = this.projectUserActivityRepository
-            .createQueryBuilder("activity")
-            .where("activity.projectUserId = :projectUserId", {
+    async findAll({
+        projectId,
+        userId,
+        workspaceId,
+        findWhere,
+        findOptions,
+    }: FindAllParams & {
+        findWhere?: FindOptionsWhere<ProjectUserActivity>;
+        findOptions?: FindManyOptions<ProjectUserActivity>;
+    }): Promise<ProjectUserActivity[]> {
+        const projectUser = await this.findProjectUserByProjectIdAndUserId({
+            projectId,
+            userId,
+        });
+
+        return this.projectUserActivityRepository.find({
+            where: {
                 projectUserId: projectUser.id,
-            })
-            .andWhere("activity.workspaceId = :workspaceId", {
                 workspaceId,
-            });
-
-        if (groupBys) {
-            groupBys.forEach((groupBy, index) => {
-                if (index === 0) {
-                    queryBuilder.groupBy(`activity.${groupBy}`);
-                } else {
-                    queryBuilder.addGroupBy(`activity.${groupBy}`);
-                }
-            });
-        }
-
-        if (appendOptions) {
-            queryBuilder.setFindOptions(appendOptions);
-        }
-
-        if (appendSelects) {
-            appendSelects.forEach(({ column, alias }) =>
-                queryBuilder.addSelect(column, alias)
-            );
-        }
-
-        if (appendOrders) {
-            appendOrders.forEach(({ column, direction }) =>
-                queryBuilder.orderBy(column, direction)
-            );
-        }
-
-        return queryBuilder.getRawMany();
+                ...findWhere,
+            },
+            ...findOptions,
+        });
     }
 
     async findRecent({
@@ -127,33 +115,42 @@ export class ProjectUserActivitiesService {
         workspaceId,
         limit,
     }: FindAllParams & { limit?: number }): Promise<
-        (ProjectUserActivity & { entity?: ProjectUserActivityEntity })[]
+        (EntityRelationParams & { entity?: ProjectUserActivityEntity })[]
     > {
-        const activities = await this.findAll({
+        const projectUser = await this.findProjectUserByProjectIdAndUserId({
             projectId,
             userId,
-            workspaceId,
-            appendOptions: {
-                select: ["type", "entityType", "entityId"],
-                take: limit ?? 10,
-            },
-            appendSelects: [
-                {
-                    column: `MAX("activity"."createdAt")`,
-                    alias: "createdAt",
-                },
-            ],
-            appendOrders: [{ column: `"createdAt"`, direction: "DESC" }],
-            groupBys: ["type", "entityId", "entityType"],
         });
 
+        const query = `
+			select
+				"activity"."type",
+				"activity"."entityId",
+				"activity"."entityType",
+				MAX("activity"."createdAt") as "createdAt"
+			from
+				"project_user_activity" "activity"
+			where
+				"activity"."projectUserId" = $1
+				and "activity"."workspaceId" = $2
+			group by
+				"activity"."type",
+				"activity"."entityId",
+				"activity"."entityType"
+			order by
+				"createdAt" desc
+			limit $3
+		`;
+        const activities: EntityRelationParams[] =
+            await this.projectUserActivityRepository.query(query, [
+                projectUser.id,
+                workspaceId,
+                limit ?? 10,
+            ]);
+
         return Promise.all(
-            activities.map(async (activity: any) => {
-                const entity = await this.getEntity({
-                    type: activity.activity_type,
-                    entityType: activity.activity_entityType,
-                    entityId: activity.activity_entityId,
-                } as ProjectUserActivity);
+            activities.map(async (activity) => {
+                const entity = await this.getEntity(activity);
                 return { ...activity, entity };
             })
         );
