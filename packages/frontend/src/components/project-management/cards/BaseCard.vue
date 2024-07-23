@@ -17,7 +17,7 @@ import { useFieldsService } from '@/composables/services/useFieldsService';
 import { FieldTypes, type Field } from '../fields/types';
 import { useStateStore } from '@/stores/state';
 import { useDialogStore } from '@/stores/dialog';
-import { DIALOGS, SettingsTabs } from '@/components/common/dialogs/types';
+import { DIALOGS } from '@/components/common/dialogs/types';
 import BaseLabelSelector from '@/components/common/inputs/BaseLabelSelector.vue';
 import { useAuthStore } from '@/stores/auth';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
@@ -104,6 +104,8 @@ const isCardLoading = computed(() => {
     updateCardListMutation.isPending.value
   );
 });
+
+const router = useRouter();
 
 watch(
   () => props.card,
@@ -263,16 +265,8 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
   });
 }
 
-function openSettingsDialog(activeTab: SettingsTabs) {
-  dialog.openDialog({
-    dialog: DIALOGS.SETTINGS,
-    data: {
-      activeTab,
-    },
-    options: {
-      fullscreen: true,
-    },
-  });
+function openCustomFieldsSettings() {
+  router.push('/settings/custom-fields');
 }
 
 function openDescriptionFileDialog() {
@@ -476,7 +470,7 @@ function openDescriptionFileDialog() {
           Properties
           <v-spacer />
           <base-icon-btn
-            @click="openSettingsDialog(SettingsTabs.FIELDS)"
+            @click="openCustomFieldsSettings"
             icon="mdi-pencil"
             v-tooltip="'Edit fields'"
           />

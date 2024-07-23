@@ -10,7 +10,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useDialogStore } from '@/stores/dialog';
 
 const dialog = useDialogStore();
-const { navigationDrawer } = useHideNavigationDrawer();
+const { hideNavigationDrawer } = useHideNavigationDrawer();
+const navigationDrawer = ref(true);
 const authStore = useAuthStore();
 const { logout, isAuthenticated } = authStore;
 const logo = useLogo();
@@ -35,21 +36,12 @@ if (isAuthenticated()) {
   //     },
   //   ];
 }
-
-function openSettingsDialog() {
-  dialog.openDialog({
-    dialog: DIALOGS.SETTINGS,
-    options: {
-      fullscreen: true,
-    },
-  });
-}
 </script>
 
 <template>
   <v-app>
     <v-app-bar
-      v-if="$vuetify.display.mdAndDown"
+      v-if="!hideNavigationDrawer && $vuetify.display.mdAndDown"
       color="accent"
       height="40"
       class="border-b-thin"
@@ -64,7 +56,12 @@ function openSettingsDialog() {
       </v-toolbar-title>
     </v-app-bar>
 
-    <v-navigation-drawer app v-model="navigationDrawer" color="background">
+    <v-navigation-drawer
+      v-if="!hideNavigationDrawer"
+      v-model="navigationDrawer"
+      app
+      color="background"
+    >
       <v-img
         :src="logo.getLogoUrlByTheme()"
         width="125"
@@ -94,7 +91,7 @@ function openSettingsDialog() {
 
       <template v-slot:append>
         <v-list :slim="false">
-          <v-menu v-if="isAuthenticated()" :close-on-content-click="false">
+          <v-menu v-if="isAuthenticated()">
             <template #activator="{ props }">
               <user-list-item v-bind="props" avatar-size="small">
                 <template #append>
@@ -104,7 +101,7 @@ function openSettingsDialog() {
             </template>
             <v-card class="border-thin ms-n2">
               <v-list>
-                <v-list-item @click="openSettingsDialog">
+                <v-list-item to="/settings/theme">
                   <template #prepend>
                     <v-icon icon="mdi-cog" />
                   </template>
@@ -119,7 +116,7 @@ function openSettingsDialog() {
               </v-list>
             </v-card>
           </v-menu>
-          <v-list-item :to="'/login'" v-else>
+          <v-list-item v-else to="/login">
             <template #prepend>
               <v-icon icon="mdi-login" />
             </template>

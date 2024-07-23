@@ -2,7 +2,6 @@ export enum DIALOGS {
   CREATE_CARD = 'CreateCardDialog',
   CONFIRM = 'ConfirmDialog',
   ONBOARDING = 'OnboardingDialog',
-  SETTINGS = 'SettingsDialog',
   UPSERT_SPACE = 'UpsertSpaceDialog',
   UPSERT_LIST = 'UpsertListDialog',
   CREATE_WORKSPACE = 'CreateWorkspaceDialog',
@@ -21,7 +20,6 @@ export const DIALOG_WIDTHS = {
   [DIALOGS.UPSERT_VIEW]: 400,
   [DIALOGS.CONFIRM]: 500,
   [DIALOGS.ONBOARDING]: undefined,
-  [DIALOGS.SETTINGS]: undefined,
   [DIALOGS.CREATE_WORKSPACE]: undefined,
   [DIALOGS.CREATE_CARD_TYPE]: 400,
   [DIALOGS.REMOVE_CARD_TYPE]: 500,
@@ -29,20 +27,6 @@ export const DIALOG_WIDTHS = {
   [DIALOGS.REMOVE_LIST_STAGE]: 500,
   [DIALOGS.EDIT_LIST_STAGES]: 400,
 };
-
-export type SettingsTab = {
-  icon: string;
-  text: string;
-  value: SettingsTabs;
-};
-
-export enum SettingsTabs {
-  THEME = 'theme',
-  WORKSPACE = 'workspace',
-  CARD_TYPES = 'cardTypes',
-  FIELDS = 'fields',
-  MEMBERS = 'members',
-}
 
 export enum UpsertDialogMode {
   CREATE = 'create',

@@ -7,12 +7,13 @@ definePage({
   },
 });
 
+const router = useRouter();
 const { currentList } = useStateStore();
 
 onMounted(() => {
   // TODO: If no list is selected, navigate to first workspace list.
   if (currentList) {
-    window.location.pathname = '/pm/list/' + currentList.id;
+    router.push('/pm/list/' + currentList.id);
   }
 });
 </script>
