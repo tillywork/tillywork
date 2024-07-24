@@ -64,7 +64,7 @@ watch(
       </v-list>
     </v-navigation-drawer>
 
-    <v-container class="h-100vh">
+    <v-container>
       <v-row justify="center">
         <v-col cols="8" class="mt-12">
           <component
