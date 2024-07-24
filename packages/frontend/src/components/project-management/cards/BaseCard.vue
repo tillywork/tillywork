@@ -567,6 +567,7 @@ function openDescriptionFileDialog() {
                     :items="field.items"
                     item-title="item"
                     item-value="item"
+                    variant="outlined"
                     hide-details
                     :placeholder="field.name"
                     :prepend-inner-icon="field.icon"
@@ -635,6 +636,7 @@ function openDescriptionFileDialog() {
                   <base-relation-input
                     v-model="cardCopy.data[field.id]"
                     :field
+                    variant="outlined"
                     @update:model-value="
                       (v) =>
                         updateFieldValue({
