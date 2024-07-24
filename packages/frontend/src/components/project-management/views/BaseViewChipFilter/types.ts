@@ -8,3 +8,5 @@ export type FieldFilterOption = FieldFilter & {
   options?: FieldItem[];
   original?: Field;
 };
+
+export type FilterViewOptions = 'quick' | 'advanced';

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
-import ProjectInvitationLink from '../../projects/ProjectInvitationLink.vue';
+import ProjectInvitationLink from '../projects/ProjectInvitationLink.vue';
 import { useDate } from '@/composables/useDate';
 import { useAuthStore } from '@/stores/auth';
 
@@ -14,28 +14,32 @@ const { data: projectUsers } = useProjectUsersQuery({
 </script>
 
 <template>
-  <v-card>
-    <v-card-title> Project Members </v-card-title>
-    <v-card-subtitle> Manage who has access to your project. </v-card-subtitle>
-    <v-card-item>
-      <v-divider class="my-4" />
-    </v-card-item>
-    <v-card-item>
-      <project-invitation-link />
-    </v-card-item>
-    <v-card-item>
-      <v-divider class="my-4" />
-    </v-card-item>
-    <v-card-item v-if="projectUsers">
-      <v-card-title class="text-body-3"> Manage members </v-card-title>
-      <v-card-subtitle class="text-caption">
-        {{ projectUsers.length }} active member{{
-          projectUsers.length > 1 ? 's' : ''
-        }}
-      </v-card-subtitle>
-      <v-list>
+  <v-card class="pa-4" height="100%">
+    <div class="user-select-none">
+      <h3>Project Members</h3>
+      <p class="text-subtitle-2">Manage who has access to your project.</p>
+    </div>
+
+    <v-divider class="my-6" />
+
+    <project-invitation-link />
+    <v-divider class="my-4" />
+
+    <!-- ~ Current Members -->
+    <template v-if="projectUsers">
+      <div class="user-select-none">
+        <h5>Manage members</h5>
+        <p class="text-caption mb-2">
+          {{ projectUsers.length }} active member{{
+            projectUsers.length > 1 ? 's' : ''
+          }}
+        </p>
+      </div>
+
+      <v-list rounded="md" class="pa-2">
         <template v-for="user in projectUsers" :key="user.id">
           <v-list-item class="px-1">
+            <!-- ~ Avatar -->
             <template #prepend>
               <base-avatar
                 :text="`${user.user.firstName} ${user.user.lastName}`"
@@ -43,17 +47,21 @@ const { data: projectUsers } = useProjectUsersQuery({
                 class="me-2"
               />
             </template>
+
+            <!-- ~ Information -->
             <v-list-item-title>{{ user.user.email }}</v-list-item-title>
-            <v-list-item-subtitle class="text-caption">
+            <v-list-item-subtitle class="text-caption user-select-none">
               Joined
               {{ dayjs(user.createdAt).fromNow() }}
             </v-list-item-subtitle>
+
+            <!-- ~ Actions -->
             <template #append v-if="false">
               <base-icon-btn icon="mdi-dots-vertical" />
             </template>
           </v-list-item>
         </template>
       </v-list>
-    </v-card-item>
+    </template>
   </v-card>
 </template>

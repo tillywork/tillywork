@@ -11,14 +11,14 @@ export const useListsService = () => {
     spaceId,
     workspaceId,
   }: {
-    spaceId?: number;
-    workspaceId?: number;
+    spaceId?: MaybeRef<number>;
+    workspaceId?: MaybeRef<number>;
   }): Promise<List[]> {
     return sendRequest('/lists', {
       method: 'GET',
       params: {
-        spaceId,
-        workspaceId,
+        spaceId: toValue(spaceId),
+        workspaceId: toValue(workspaceId),
       },
     });
   }
@@ -60,16 +60,16 @@ export const useListsService = () => {
     workspaceId,
     enabled,
   }: {
-    spaceId?: number;
-    workspaceId?: number;
+    spaceId?: MaybeRef<number>;
+    workspaceId?: MaybeRef<number>;
     enabled?: Ref<boolean>;
   }) {
     return useQuery({
       queryKey: [
         'lists',
         {
-          spaceId,
-          workspaceId,
+          spaceId: toValue(spaceId),
+          workspaceId: toValue(workspaceId),
         },
       ],
       queryFn: () => getLists({ spaceId, workspaceId }),

@@ -12,27 +12,27 @@ definePage({
 });
 
 const router = useRouter();
-
 const { currentList } = useStateStore();
 const workspaceStore = useWorkspaceStore();
 const authStore = useAuthStore();
 const { workspace } = storeToRefs(authStore);
 
-const isWorkspaceReady = computed(() => !!workspace.value);
+const isWorkspaceReady = computed(() => !!workspace.value && !currentList);
+const workspaceId = computed(() => workspace.value?.id ?? 0);
 
 const { useGetSpacesQuery } = useSpacesService();
 const { data: spaces } = useGetSpacesQuery({
-  workspaceId: workspace.value?.id,
+  workspaceId,
   enabled: isWorkspaceReady,
 });
 const { useGetListsQuery } = useListsService();
 const { data: lists } = useGetListsQuery({
-  workspaceId: workspace.value?.id,
+  workspaceId,
   enabled: isWorkspaceReady,
 });
 
 watch(lists, (v) => {
-  if (v) {
+  if (v && !currentList) {
     workspaceStore.setSpaceExpansionState(
       workspace.value!.id,
       [spaces.value?.[0]?.id].filter(Boolean) as number[]
@@ -43,7 +43,7 @@ watch(lists, (v) => {
 
 onMounted(() => {
   if (currentList) {
-    router.push({ path: `/pm/list/${currentList.id}` });
+    router.push('/pm/list/' + currentList.id);
   }
 });
 </script>

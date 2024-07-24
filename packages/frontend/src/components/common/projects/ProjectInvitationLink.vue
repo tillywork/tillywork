@@ -36,12 +36,12 @@ function copyInviteLink() {
 
 <template>
   <v-card v-if="project">
-    <v-card-title class="text-body-3"> Invite link </v-card-title>
-    <v-card-subtitle>
+    <v-card-title class="text-body-2 px-0"> Invite link </v-card-title>
+    <v-card-subtitle class="px-0">
       Share this link with team members you want to join your project.
     </v-card-subtitle>
     <v-card-item class="px-0">
-      <v-text-field readonly hide-details :model-value="inviteLink">
+      <v-text-field readonly hide-details :model-value="inviteLink" width="400">
         <template #append-inner>
           <v-btn
             prepend-icon="mdi-content-copy"

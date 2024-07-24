@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useFieldsService } from '@/composables/services/useFieldsService';
-import BaseTable from '../../tables/BaseTable/BaseTable.vue';
+import BaseTable from '../tables/BaseTable/BaseTable.vue';
 import {
   FIELD_TYPE_OPTIONS,
   type Field,
@@ -8,14 +8,14 @@ import {
 import { cloneDeep } from 'lodash';
 import { VForm } from 'vuetify/components';
 import { FieldTypes } from '@/components/project-management/fields/types';
-import BaseArrayInput from '../../inputs/BaseArrayInput.vue';
-import BaseIconSelector from '../../inputs/BaseIconSelector/BaseIconSelector.vue';
+import BaseArrayInput from '../inputs/BaseArrayInput.vue';
+import BaseIconSelector from '../inputs/BaseIconSelector/BaseIconSelector.vue';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useLogo } from '@/composables/useLogo';
-import { UpsertDialogMode } from '../types';
 import { useAuthStore } from '@/stores/auth';
 import { useListsService } from '@/composables/services/useListsService';
 import { useCardTypesService } from '@/composables/services/useCardTypesService';
+import { UpsertDialogMode } from '../dialogs/types';
 
 const selectedField = ref<Field>();
 const fieldDto = ref<Partial<Field>>();
@@ -125,106 +125,123 @@ watch(selectedField, (v) => {
 </script>
 
 <template>
-  <v-card max-width="100%" min-width="300">
+  <v-card class="pa-4" height="100%">
     <template v-if="!isCreatingOrEditing">
-      <v-card-title class="d-flex align-center">
-        Custom Fields
-        <base-icon-btn @click="handleCreateField" class="ms-4" />
-      </v-card-title>
-      <v-card-subtitle
-        >Create custom fields, and assign them to lists.</v-card-subtitle
-      >
-      <v-card-text>
-        <base-table
-          :data="fields ?? []"
-          :columns="[
-            {
-              header: 'Name',
-              id: 'name',
-              accessorKey: 'name',
-            },
-            {
-              header: 'Type',
-              id: 'type',
-              accessorKey: 'type',
-            },
-            {
-              header: 'Lists',
-              id: 'lists',
-              accessorKey: 'lists',
-            },
-            {
-              id: 'createdBy',
-              header: 'Created By',
-              accessorKey: 'createdBy',
-              size: 300,
-            },
-          ]"
-          @click:row="handleFieldClick"
-        >
-          <template #name="{ row }">
-            <v-icon :icon="row.original.icon" class="me-4" />
-            <span class="text-body-3">{{ row.original.name }}</span>
-          </template>
-          <template #lists="{ row }">
-            <template v-for="list in row.original.lists" :key="list.id">
-              <v-chip class="me-1" density="compact">{{ list.name }}</v-chip>
-            </template>
-          </template>
-          <template #createdBy="{ row }">
-            <v-card class="py-2">
-              <base-avatar
-                :photo="getFieldCreatedByPhoto(row.original)"
-                :text="getFieldCreatedByName(row.original)"
-                rounded="circle"
-                :class="
-                  row.original.createdByType === 'system'
-                    ? 'pa-1 bg-accent'
-                    : ''
-                "
-              />
-              <span class="text-body-3 ms-3">
-                {{ getFieldCreatedByName(row.original) }}
-              </span>
-            </v-card>
-          </template>
-          <template #type="{ row }">
-            <span class="text-body-3 text-capitalize">
-              {{
-                FIELD_TYPE_OPTIONS.find(
-                  (option) => option.value === row.original.type
-                )?.title
-              }}
-            </span>
-          </template>
-        </base-table>
-      </v-card-text>
-    </template>
-    <template v-else>
-      <v-form ref="upsertFieldForm" @submit.prevent="saveField" v-if="fieldDto">
-        <v-card-title class="d-flex align-start flex-column ga-2">
-          <v-btn
-            class="text-capitalize mb-2"
-            prepend-icon="mdi-chevron-left"
-            text="Back"
-            variant="text"
-            density="comfortable"
-            @click="clearSelectedField"
-          />
-          <span>
-            <span class="text-capitalize">{{ upsertMode }}</span>
-            field
-          </span>
-        </v-card-title>
-        <v-card-item>
-          <v-card-subtitle class="mb-2">General</v-card-subtitle>
+      <div class="user-select-none">
+        <div class="d-flex ga-2">
+          <h3>Custom Fields</h3>
+          <base-icon-btn @click="handleCreateField" />
+        </div>
+        <p class="text-subtitle-2 mb-2">
+          Create custom fields, and assign them to lists.
+        </p>
+      </div>
 
+      <v-divider class="my-6" />
+
+      <base-table
+        :data="fields ?? []"
+        :columns="[
+          {
+            header: 'Name',
+            id: 'name',
+            accessorKey: 'name',
+          },
+          {
+            header: 'Type',
+            id: 'type',
+            accessorKey: 'type',
+          },
+          {
+            header: 'Lists',
+            id: 'lists',
+            accessorKey: 'lists',
+          },
+          {
+            id: 'createdBy',
+            header: 'Created By',
+            accessorKey: 'createdBy',
+            size: 300,
+          },
+        ]"
+        @click:row="handleFieldClick"
+      >
+        <!-- ~ Name -->
+        <template #name="{ row }">
+          <v-icon :icon="row.original.icon" class="me-4" />
+          <span class="text-body-3">{{ row.original.name }}</span>
+        </template>
+
+        <!-- ~ Type -->
+        <template #type="{ row }">
+          <span class="text-body-3 text-capitalize">
+            {{
+              FIELD_TYPE_OPTIONS.find(
+                (option) => option.value === row.original.type
+              )?.title
+            }}
+          </span>
+        </template>
+
+        <!-- ~ Lists -->
+        <template #lists="{ row }">
+          <template v-for="list in row.original.lists" :key="list.id">
+            <v-chip class="me-1" density="compact">{{ list.name }}</v-chip>
+          </template>
+        </template>
+
+        <!-- ~ Created By -->
+        <template #createdBy="{ row }">
+          <v-card class="py-2">
+            <base-avatar
+              :photo="getFieldCreatedByPhoto(row.original)"
+              :text="getFieldCreatedByName(row.original)"
+              rounded="circle"
+              :class="
+                row.original.createdByType === 'system' ? 'pa-1 bg-accent' : ''
+              "
+            />
+            <span class="text-body-3 ms-3">
+              {{ getFieldCreatedByName(row.original) }}
+            </span>
+          </v-card>
+        </template>
+      </base-table>
+    </template>
+
+    <template v-else>
+      <v-card width="300">
+        <v-form
+          ref="upsertFieldForm"
+          @submit.prevent="saveField"
+          v-if="fieldDto"
+        >
+          <div class="user-select-none">
+            <h3 class="d-flex align-start flex-column ga-2">
+              <v-btn
+                class="text-capitalize mb-2"
+                prepend-icon="mdi-chevron-left"
+                text="Back"
+                variant="text"
+                density="comfortable"
+                @click="clearSelectedField"
+              />
+              <span>
+                <span class="text-capitalize">{{ upsertMode }}</span>
+                field
+              </span>
+            </h3>
+            <p class="mb-4 text-subtitle-2">General</p>
+          </div>
+
+          <!-- ~ Field Name -->
           <v-text-field v-model="fieldDto.name" label="Field name*">
             <template #prepend-inner>
               <base-icon-selector v-model="fieldDto.icon" />
             </template>
           </v-text-field>
 
+          <!-- ~ Field Type -->
           <v-autocomplete
             v-model="fieldDto.type"
             :items="FIELD_TYPE_OPTIONS"
@@ -238,6 +255,7 @@ watch(selectedField, (v) => {
             "
           />
 
+          <!-- ~ Card Type -->
           <v-autocomplete
             v-if="fieldDto.type === FieldTypes.CARD"
             v-model="fieldDto.cardType"
@@ -249,6 +267,7 @@ watch(selectedField, (v) => {
             return-object
           />
 
+          <!-- ~ Associated Lists -->
           <v-autocomplete
             v-model="fieldDto.lists"
             :items="lists"
@@ -262,6 +281,7 @@ watch(selectedField, (v) => {
             closable-chips
           />
 
+          <!-- ~ Options -->
           <div class="mb-2">
             <v-checkbox
               label="Required"
@@ -277,6 +297,7 @@ watch(selectedField, (v) => {
             />
           </div>
 
+          <!-- ~ Dropdown Items -->
           <template v-if="fieldDto.type === FieldTypes.DROPDOWN">
             <v-divider class="mb-2" />
             <base-array-input
@@ -286,6 +307,7 @@ watch(selectedField, (v) => {
               label="Options"
             />
           </template>
+          <!-- ~ Label Choices -->
           <template v-else-if="fieldDto.type === FieldTypes.LABEL">
             <v-divider class="mb-2" />
             <base-array-input
@@ -297,17 +319,18 @@ watch(selectedField, (v) => {
             />
           </template>
 
-          <v-divider class="mt-2" />
-        </v-card-item>
-        <v-card-actions class="d-flex justify-end">
-          <v-btn
-            class="text-capitalize"
-            :text="upsertMode === UpsertDialogMode.CREATE ? 'Create' : 'Save'"
-            variant="flat"
-            type="submit"
-          />
-        </v-card-actions>
-      </v-form>
+          <v-divider class="my-2" />
+          <!-- ~ Upsert Button -->
+          <div class="d-flex justify-end">
+            <v-btn
+              class="text-capitalize"
+              :text="upsertMode === UpsertDialogMode.CREATE ? 'Create' : 'Save'"
+              variant="flat"
+              type="submit"
+            />
+          </div>
+        </v-form>
+      </v-card>
     </template>
   </v-card>
 </template>

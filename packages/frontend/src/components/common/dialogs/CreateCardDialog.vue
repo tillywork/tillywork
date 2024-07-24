@@ -16,11 +16,14 @@ import { cloneDeep } from 'lodash';
 import { useStateStore } from '@/stores/state';
 import { useAuthStore } from '@/stores/auth';
 import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
+import { leaderKey } from '@/utils/keyboard';
 
 const dialog = useDialogStore();
 const { workspace, project } = storeToRefs(useAuthStore());
 const { showSnackbar } = useSnackbarStore();
 const { currentList } = storeToRefs(useStateStore());
+
+const { meta, ctrl, enter } = useMagicKeys();
 
 const createForm = ref<VForm>();
 const isCreatingMore = ref(false);
@@ -125,6 +128,12 @@ function handlePostCreate() {
 function openBaseEditorFileDialog() {
   descriptionEditor.value.openFileDialog();
 }
+
+watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
+  if (isEnterPressed && (isMetaPressed || isCtrlPressed)) {
+    createCard();
+  }
+});
 </script>
 
 <template>
@@ -205,8 +214,19 @@ function openBaseEditorFileDialog() {
           class="text-caption px-4 ms-4"
           type="submit"
           :loading="createCardMutation.isPending.value"
-          >Create {{ cardType.name }}</v-btn
         >
+          Create {{ cardType.name }}
+          <template #append>
+            <div class="d-flex align-center ga-1">
+              <v-icon
+                v-if="leaderKey === 'Cmd'"
+                icon="mdi-apple-keyboard-command"
+              />
+              <span v-else class="text-xs">Ctrl</span>
+              <v-icon icon="mdi-keyboard-return" />
+            </div>
+          </template>
+        </v-btn>
       </v-card-actions>
     </v-form>
   </v-card>
