@@ -62,3 +62,10 @@
 .base-icon-btn.v-btn:hover > .v-btn__overlay {
   opacity: 0.1;
 }
+
+.v-list-item--slim .v-list-item__prepend > .v-icon ~ .v-list-item__spacer {
+  width: 10px;
+}
+.v-list-group__items .v-list-item {
+  padding-inline-start: 24px !important;
+}
