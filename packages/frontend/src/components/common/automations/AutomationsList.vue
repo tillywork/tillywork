@@ -2,6 +2,11 @@
 import { useAutomationService } from '@/composables/services/useAutomationService';
 import { useAuthStore } from '@/stores/auth';
 import type { Automation } from './types';
+import LocationSelector, {
+  type LocationSelection,
+} from '@/components/project-management/inputs/LocationSelector.vue';
+
+const location = ref<LocationSelection>();
 
 const { workspace } = storeToRefs(useAuthStore());
 
@@ -23,6 +28,11 @@ function getAutomationCreatedByName(automation: Automation) {
     <h3>Automations</h3>
 
     <v-divider class="my-4" />
+
+    <div class="mb-4">
+      <span class="text-body-2 me-3 font-weight-bold">Location:</span>
+      <location-selector v-model="location" width="150" />
+    </div>
 
     <v-list lines="three" rounded="md" border="thin">
       <template v-for="automation in automations" :key="automation.id">
