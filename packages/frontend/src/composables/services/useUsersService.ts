@@ -44,9 +44,21 @@ export const useUsersService = () => {
     return user.firstName + ' ' + user.lastName;
   }
 
+  async function getUser(id: number): Promise<User> {
+    return sendRequest(`/users/${id}`);
+  }
+
+  function useGetUserQuery(id: number) {
+    return useQuery({
+      queryKey: ['users', id],
+      queryFn: () => getUser(id),
+    });
+  }
+
   return {
     useUsersQuery,
     updateUserMutation,
     getUserFullName,
+    useGetUserQuery,
   };
 };

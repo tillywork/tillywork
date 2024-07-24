@@ -34,5 +34,6 @@ export const useProjectUsersService = () => {
 
   return {
     useProjectUsersQuery,
+    getProjectUsers,
   };
 };
