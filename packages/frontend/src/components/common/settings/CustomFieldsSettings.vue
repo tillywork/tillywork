@@ -39,13 +39,18 @@ const showIsMultiple = computed(() =>
 const { showSnackbar } = useSnackbarStore();
 const { workspace } = storeToRefs(useAuthStore());
 
-const { useFieldsQuery, updateFieldMutation, createFieldMutation } =
-  useFieldsService();
+const {
+  useFieldsQuery,
+  updateFieldMutation,
+  createFieldMutation,
+  deleteFieldMutation,
+} = useFieldsService();
 const { data: fields } = useFieldsQuery({
   workspaceId: workspace.value!.id,
 });
 const { mutateAsync: updateField } = updateFieldMutation();
 const { mutateAsync: createField } = createFieldMutation();
+const { mutateAsync: deleteField } = deleteFieldMutation();
 
 const { useGetListsQuery } = useListsService();
 const { data: lists } = useGetListsQuery({
@@ -105,6 +110,19 @@ function handleCreateField() {
     name: '',
     workspaceId: workspace.value!.id,
   };
+}
+
+function handleDeleteField() {
+  deleteField(fieldDto.value!.id!)
+    .then(() => {
+      clearSelectedField;
+    })
+    .catch(() =>
+      showSnackbar({
+        message: 'Something went wrong, please try again.',
+        color: 'error',
+      })
+    );
 }
 
 function getFieldCreatedByName(field: Field) {
@@ -320,14 +338,24 @@ watch(selectedField, (v) => {
           </template>
 
           <v-divider class="my-2" />
-          <!-- ~ Upsert Button -->
-          <div class="d-flex justify-end">
+          <div class="d-flex justify-end ga-2">
+            <!-- ~ Upsert Button -->
             <v-btn
               class="text-capitalize"
               :text="upsertMode === UpsertDialogMode.CREATE ? 'Create' : 'Save'"
               variant="flat"
               type="submit"
             />
+
+            <!-- ~ Delete Button -->
+            <v-btn
+              v-if="upsertMode === UpsertDialogMode.UPDATE"
+              class="text-capitalize text-error"
+              variant="outlined"
+              @click="handleDeleteField"
+            >
+              Delete
+            </v-btn>
           </div>
         </v-form>
       </v-card>
