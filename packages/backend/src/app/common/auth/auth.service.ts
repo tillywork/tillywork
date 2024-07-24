@@ -147,4 +147,36 @@ export class AuthService {
 
         return { ...createdUser, accessToken };
     }
+
+    async joinInvitation({
+        inviteCode,
+        userId,
+    }: {
+        inviteCode: string;
+        userId: number;
+    }): Promise<RegisterResponse> {
+        const project = await this.projectsService.findOneBy({
+            where: { inviteCode },
+        });
+
+        if (!project) {
+            return {
+                error: "INVALID_INVITE_CODE",
+            };
+        }
+
+        const user = await this.usersService.findOne(userId);
+
+        await this.projectUsersService.create({
+            user,
+            project,
+            role: "admin",
+        });
+
+        const accessToken = await this.login({
+            user: { ...user, project },
+        });
+
+        return { ...user, accessToken };
+    }
 }
