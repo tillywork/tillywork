@@ -15,7 +15,8 @@ import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
 import { useListsService } from '@/composables/services/useListsService';
 import { useCardTypesService } from '@/composables/services/useCardTypesService';
-import { UpsertDialogMode } from '../dialogs/types';
+import { DIALOGS, UpsertDialogMode } from '../dialogs/types';
+import { useDialogStore } from '@/stores/dialog';
 
 const selectedField = ref<Field>();
 const fieldDto = ref<Partial<Field>>();
@@ -61,6 +62,11 @@ const { useFindAllQuery } = useCardTypesService();
 const { data: cardTypes } = useFindAllQuery({
   workspaceId: workspace.value!.id,
 });
+
+const dialog = useDialogStore();
+const confirmDialogIndex = computed(() =>
+  dialog.getDialogIndex(DIALOGS.CONFIRM)
+);
 
 function handleFieldClick(field: Field) {
   selectedField.value = cloneDeep(field);
@@ -113,16 +119,25 @@ function handleCreateField() {
 }
 
 function handleDeleteField() {
-  deleteField(fieldDto.value!.id!)
-    .then(() => {
-      clearSelectedField;
-    })
-    .catch(() =>
-      showSnackbar({
-        message: 'Something went wrong, please try again.',
-        color: 'error',
-      })
-    );
+  dialog.openDialog({
+    dialog: DIALOGS.CONFIRM,
+    data: {
+      title: 'Confirm',
+      message: `Are you sure you want to delete this field (${fieldDto.value?.name})?`,
+      onConfirm: () =>
+        deleteField(fieldDto.value!.id!)
+          .then(() => {
+            dialog.closeDialog(confirmDialogIndex.value);
+            clearSelectedField();
+          })
+          .catch(() =>
+            showSnackbar({
+              message: 'Something went wrong, please try again.',
+              color: 'error',
+            })
+          ),
+    },
+  });
 }
 
 function getFieldCreatedByName(field: Field) {
@@ -338,15 +353,7 @@ watch(selectedField, (v) => {
           </template>
 
           <v-divider class="my-2" />
-          <div class="d-flex justify-end ga-2">
-            <!-- ~ Upsert Button -->
-            <v-btn
-              class="text-capitalize"
-              :text="upsertMode === UpsertDialogMode.CREATE ? 'Create' : 'Save'"
-              variant="flat"
-              type="submit"
-            />
-
+          <div class="d-flex justify-space-between ga-2">
             <!-- ~ Delete Button -->
             <v-btn
               v-if="upsertMode === UpsertDialogMode.UPDATE"
@@ -356,6 +363,14 @@ watch(selectedField, (v) => {
             >
               Delete
             </v-btn>
+
+            <!-- ~ Upsert Button -->
+            <v-btn
+              class="text-capitalize"
+              :text="upsertMode === UpsertDialogMode.CREATE ? 'Create' : 'Save'"
+              variant="flat"
+              type="submit"
+            />
           </div>
         </v-form>
       </v-card>
