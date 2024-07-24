@@ -9,7 +9,8 @@ const { setIsCommandPaletteOpen } = useCommands();
   <v-btn
     class="text-none"
     size="small"
-    variant="tonal"
+    variant="outlined"
+    border="thin"
     color="default"
     prepend-icon="mdi-help-circle-outline"
     @click="setIsCommandPaletteOpen(true)"

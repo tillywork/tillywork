@@ -30,6 +30,14 @@ const props = defineProps<{
   multiple?: boolean;
   icon?: string;
   textField?: boolean;
+  variant?:
+    | 'outlined'
+    | 'plain'
+    | 'underlined'
+    | 'filled'
+    | 'solo'
+    | 'solo-inverted'
+    | 'solo-filled';
 }>();
 
 function isItemSelected(item: FieldItem) {
@@ -65,6 +73,7 @@ function toggleItemSelection(item: FieldItem) {
       :items
       item-title="item"
       item-value="item"
+      :variant
       hide-details
       :placeholder
       :multiple
