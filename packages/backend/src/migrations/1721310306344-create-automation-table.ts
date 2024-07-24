@@ -4,7 +4,11 @@ import {
     Table,
     TableForeignKey,
 } from "typeorm";
-import { ActionType, TriggerType } from "../app/common/automations/types";
+import {
+    ActionType,
+    LocationType,
+    TriggerType,
+} from "../app/common/automations/types";
 
 export class CreateAutomationTable1721310306344 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
@@ -101,6 +105,15 @@ export class CreateAutomationTable1721310306344 implements MigrationInterface {
                         name: "firstActionId",
                         type: "uuid",
                         isNullable: true,
+                    },
+                    {
+                        name: "locationId",
+                        type: "bigint",
+                    },
+                    {
+                        name: "locationType",
+                        type: "enum",
+                        enum: Object.values(LocationType),
                     },
                     {
                         name: "workspaceId",

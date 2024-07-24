@@ -27,9 +27,15 @@ export class AutomationsController {
     constructor(private automationsService: AutomationsService) {}
 
     @Get()
-    findAll(@Query("workspaceId") workspaceId: number) {
+    findAll(
+        @Query("workspaceId") workspaceId: number,
+        @Query("spaceId") spaceId: number,
+        @Query("listId") listId: number
+    ) {
         return this.automationsService.findAll({
             workspaceId,
+            spaceId,
+            listId,
         });
     }
 

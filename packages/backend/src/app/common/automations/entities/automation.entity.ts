@@ -12,7 +12,7 @@ import {
 } from "typeorm";
 import { Workspace } from "../../workspaces/workspace.entity";
 import { User } from "../../users/user.entity";
-import { TriggerType } from "../types";
+import { LocationType, TriggerType } from "../types";
 import { FieldFilter } from "../../filters/types";
 import { AutomationAction } from "./automation.action.entity";
 
@@ -36,6 +36,12 @@ export class Automation {
     @OneToOne(() => AutomationAction, { eager: true })
     @JoinColumn()
     firstAction: Relation<AutomationAction>;
+
+    @Column({ type: "bigint" })
+    locationId: number;
+
+    @Column({ type: "enum", enum: LocationType })
+    locationType: LocationType;
 
     @ManyToOne(() => Workspace, {
         nullable: false,

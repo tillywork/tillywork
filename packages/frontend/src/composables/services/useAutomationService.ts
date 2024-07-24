@@ -5,6 +5,8 @@ import type { Automation } from '@/components/common/automations/types';
 
 export type GetAllParams = {
   workspaceId: MaybeRef<number>;
+  listId?: MaybeRef<number | undefined>;
+  spaceId?: MaybeRef<number | undefined>;
 };
 
 export const useAutomationService = () => {
@@ -12,15 +14,19 @@ export const useAutomationService = () => {
 
   function getAutomations({
     workspaceId,
+    listId,
+    spaceId,
   }: GetAllParams): Promise<Automation[]> {
     return sendRequest(`/automations`, {
       params: {
         workspaceId: toValue(workspaceId),
+        listId: toValue(listId),
+        spaceId: toValue(spaceId),
       },
     });
   }
 
-  function useGetAutomations({ workspaceId }: GetAllParams) {
+  function useGetAutomations({ workspaceId, listId, spaceId }: GetAllParams) {
     return useQuery({
       queryKey: [
         'automations',
@@ -28,7 +34,7 @@ export const useAutomationService = () => {
           workspaceId: toValue(workspaceId),
         },
       ],
-      queryFn: () => getAutomations({ workspaceId }),
+      queryFn: () => getAutomations({ workspaceId, listId, spaceId }),
     });
   }
 

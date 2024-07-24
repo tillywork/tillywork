@@ -5,10 +5,12 @@ import { Repository } from "typeorm";
 import { CreateAutomationDto } from "../dto/create.automation.dto";
 import { UpdateAutomationDto } from "../dto/update.automation.dto";
 import { AutomationAction } from "../entities/automation.action.entity";
-import { TriggerType } from "../types";
+import { LocationType, TriggerType } from "../types";
 
 export class FindAllParams {
     workspaceId: number;
+    spaceId?: number;
+    listId?: number;
     triggerType?: TriggerType;
 }
 
@@ -24,19 +26,39 @@ export class AutomationsService {
 
     async findAll({
         workspaceId,
+        spaceId,
+        listId,
         triggerType,
     }: FindAllParams): Promise<Automation[]> {
-        return this.automationsRepository.find({
-            where: {
+        const queryBuilder = this.automationsRepository
+            .createQueryBuilder("automation")
+            .leftJoinAndSelect("automation.firstAction", "firstAction")
+            .leftJoinAndSelect("automation.createdBy", "createdBy")
+            .where("automation.workspaceId = :workspaceId", { workspaceId });
+
+        if (spaceId) {
+            queryBuilder
+                .andWhere("automation.locationId = :spaceId", { spaceId })
+                .andWhere(
+                    `automation."locationType" = '${LocationType.SPACE}'`
+                );
+        }
+
+        if (listId) {
+            queryBuilder
+                .andWhere("automation.locationId = :listId", { listId })
+                .andWhere(`automation."locationType" = '${LocationType.LIST}'`);
+        }
+
+        if (triggerType) {
+            queryBuilder.andWhere("automation.triggerType = :triggerType", {
                 triggerType,
-                workspace: {
-                    id: workspaceId,
-                },
-            },
-            order: {
-                createdAt: "DESC",
-            },
-        });
+            });
+        }
+
+        queryBuilder.orderBy("automation.createdAt", "DESC");
+
+        return queryBuilder.getMany();
     }
 
     async findOne(id: string) {

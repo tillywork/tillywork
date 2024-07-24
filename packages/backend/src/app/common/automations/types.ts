@@ -13,3 +13,8 @@ export enum ActionType {
     SEND_EMAIL = "send_email",
     SEND_WEBHOOK = "send_webhook",
 }
+
+export enum LocationType {
+    SPACE = "space",
+    LIST = "list",
+}
