@@ -27,10 +27,10 @@ export function useMentionNotifications() {
     const mentions = new Set<number>();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function traverse(node: any) {
-      if (node.type === 'mention') {
+      if (node?.type === 'mention') {
         mentions.add(node.attrs.id);
       }
-      if (node.content) {
+      if (node?.content) {
         node.content.forEach(traverse);
       }
     }

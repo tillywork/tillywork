@@ -61,9 +61,25 @@ export const useFieldsService = () => {
     });
   }
 
+  function deleteField(fieldId: number) {
+    return sendRequest(`/fields/${fieldId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  function deleteFieldMutation() {
+    return useMutation({
+      mutationFn: deleteField,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['fields'] });
+      },
+    });
+  }
+
   return {
     useFieldsQuery,
     updateFieldMutation,
     createFieldMutation,
+    deleteFieldMutation,
   };
 };

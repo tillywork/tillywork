@@ -45,6 +45,7 @@ import { AddCardTypeIdToFieldTable1721214304859 } from "../migrations/1721214304
 import { CreateAutomationTable1721310306344 } from "../migrations/1721310306344-create-automation-table";
 import { UpdateFilterWhereColumnForViews1721641078360 } from "../migrations/1721641078360-update-filter-where-column-for-views";
 import { CreateEmailTable1721766012987 } from "../migrations/1721766012987-create-email-table";
+import { AddWorkspaceIdToListTable1721829339753 } from "../migrations/1721829339753-add-workspaceId-to-list-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -91,6 +92,7 @@ const migrations = [
     CreateAutomationTable1721310306344,
     UpdateFilterWhereColumnForViews1721641078360,
     CreateEmailTable1721766012987,
+    AddWorkspaceIdToListTable1721829339753,
 ];
 
 const config: TypeOrmModuleOptions = {

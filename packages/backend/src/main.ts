@@ -35,7 +35,11 @@ async function bootstrap() {
     });
 
     // Add Global Validation Pipe
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(
+        new ValidationPipe({
+            transform: true,
+        })
+    );
 
     app.register(contentParser);
 

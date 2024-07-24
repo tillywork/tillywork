@@ -38,7 +38,7 @@ export async function seedCardsData(connection: Connection): Promise<void> {
     );
 
     logger.log("Seeding card data...");
-    const list = (await listsService.findAll())[0];
+    const list = (await listsService.findAll({}))[0];
     logger.log({ list });
     for (let i = 0; i < 100; i++) {
         const card = await cardsService.create({
