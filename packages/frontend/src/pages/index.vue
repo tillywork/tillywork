@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { useStateStore } from '@/stores/state';
+import { useWorkspaceStore } from '@/stores/workspace';
+import { useAuthStore } from '@/stores/auth';
+import { useSpacesService } from '@/composables/services/useSpacesService';
+import { useListsService } from '@/composables/services/useListsService';
 
 definePage({
   meta: {
@@ -7,12 +11,39 @@ definePage({
   },
 });
 
+const router = useRouter();
 const { currentList } = useStateStore();
+const workspaceStore = useWorkspaceStore();
+const authStore = useAuthStore();
+const { workspace } = storeToRefs(authStore);
+
+const isWorkspaceReady = computed(() => !!workspace.value && !currentList);
+const workspaceId = computed(() => workspace.value?.id ?? 0);
+
+const { useGetSpacesQuery } = useSpacesService();
+const { data: spaces } = useGetSpacesQuery({
+  workspaceId,
+  enabled: isWorkspaceReady,
+});
+const { useGetListsQuery } = useListsService();
+const { data: lists } = useGetListsQuery({
+  workspaceId,
+  enabled: isWorkspaceReady,
+});
+
+watch(lists, (v) => {
+  if (v && !currentList) {
+    workspaceStore.setSpaceExpansionState(
+      workspace.value!.id,
+      [spaces.value?.[0]?.id].filter(Boolean) as number[]
+    );
+    router.push({ path: `/pm/list/${v[0].id}` });
+  }
+});
 
 onMounted(() => {
-  // TODO: If no list is selected, navigate to first workspace list.
   if (currentList) {
-    window.location.pathname = '/pm/list/' + currentList.id;
+    router.push('/pm/list/' + currentList.id);
   }
 });
 </script>

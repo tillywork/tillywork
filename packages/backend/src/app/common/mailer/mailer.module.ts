@@ -3,6 +3,10 @@ import { BullModule } from "@nestjs/bull";
 import { MailerService } from "./mailer.service";
 import { MailerProcessor } from "./mailer.processer";
 import { ConfigModule } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { Email } from "./email.entity";
+import { MailerController } from "./mailer.controller";
+import { UsersModule } from "../users/users.module";
 
 @Module({
     imports: [
@@ -15,7 +19,10 @@ import { ConfigModule } from "@nestjs/config";
             },
         }),
         ConfigModule,
+        TypeOrmModule.forFeature([Email]),
+        UsersModule,
     ],
+    controllers: [MailerController],
     providers: [MailerService, MailerProcessor],
     exports: [MailerService],
 })

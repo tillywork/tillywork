@@ -160,7 +160,7 @@ defineExpose({ userMenu });
             variant="text"
             size="small"
             color="surface-dark"
-            class="text-body-3"
+            class="text-none font-weight-regular"
             @click.prevent
           >
             <template #prepend>

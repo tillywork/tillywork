@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    Param,
     Post,
     Request,
     Res,
@@ -8,6 +9,7 @@ import {
 } from "@nestjs/common";
 import { AuthService, RegisterResponse } from "./auth.service";
 import { LocalAuthGuard } from "./guards/local.auth.guard";
+import { JwtAuthGuard } from "./guards/jwt.auth.guard";
 import { CreateUserDto } from "../users/dto/create.user.dto";
 import { ApiBody, ApiTags } from "@nestjs/swagger";
 
@@ -65,6 +67,25 @@ export class AuthController {
         const response = await this.authService.registerWithInvite(
             createUserDto
         );
+
+        if (response["error"]) {
+            res.status(200);
+        }
+
+        return response;
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post("invite/:inviteCode/join")
+    async joinInvitation(
+        @Param("inviteCode") inviteCode: string,
+        @Request() req,
+        @Res({ passthrough: true }) res
+    ): Promise<RegisterResponse> {
+        const response = await this.authService.joinInvitation({
+            inviteCode,
+            userId: req.user.id,
+        });
 
         if (response["error"]) {
             res.status(200);

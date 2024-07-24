@@ -128,6 +128,20 @@ export const useAuthStore = defineStore('auth', {
       return response;
     },
 
+    async joinInvitation(inviteCode: string) {
+      const { joinInvitation } = useAuthService();
+
+      const response = await joinInvitation(inviteCode);
+
+      if (response.error) {
+        this.handleRegistrationError(response);
+      } else {
+        this.setToken(response.accessToken);
+      }
+
+      return response;
+    },
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handleRegistrationError(response: any) {
       const { showSnackbar } = useSnackbarStore();

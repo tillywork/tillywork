@@ -49,18 +49,6 @@ function handleDeleteWorkspace(workspace: Workspace) {
   });
 }
 
-function openUpdateWorkspaceDialog() {
-  dialog.openDialog({
-    dialog: DIALOGS.SETTINGS,
-    data: {
-      activeTab: 'workspace',
-    },
-    options: {
-      fullscreen: true,
-    },
-  });
-}
-
 watch(
   workspaceQuery.data,
   (workspaces) => {
@@ -124,7 +112,7 @@ watch(
     <v-menu activator="#workspace-menu-btn">
       <v-card>
         <v-list>
-          <v-list-item @click="openUpdateWorkspaceDialog">
+          <v-list-item to="/settings/workspace">
             <template #prepend>
               <v-icon icon="mdi-briefcase-edit" />
             </template>
