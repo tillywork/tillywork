@@ -353,7 +353,7 @@ watch(selectedField, (v) => {
           </template>
 
           <v-divider class="my-2" />
-          <div class="d-flex justify-space-between ga-2">
+          <div class="d-flex ga-2">
             <!-- ~ Delete Button -->
             <v-btn
               v-if="upsertMode === UpsertDialogMode.UPDATE"
@@ -363,6 +363,8 @@ watch(selectedField, (v) => {
             >
               Delete
             </v-btn>
+
+            <v-spacer />
 
             <!-- ~ Upsert Button -->
             <v-btn
