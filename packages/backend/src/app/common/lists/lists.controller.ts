@@ -30,7 +30,8 @@ export class ListsController {
     @Get()
     findAll(
         @Query("spaceId") spaceId: number,
-        @Query("workspaceId") workspaceId: number
+        @Query("workspaceId") workspaceId: number,
+        @Query("throughSpace") throughSpace: boolean
     ): Promise<List[]> {
         if (!spaceId && !workspaceId) {
             throw new BadRequestException(
@@ -38,7 +39,11 @@ export class ListsController {
             );
         }
 
-        return this.listsService.findAll({ spaceId, workspaceId });
+        return this.listsService.findAll({
+            spaceId,
+            workspaceId,
+            throughSpace,
+        });
     }
 
     @Get(":id")

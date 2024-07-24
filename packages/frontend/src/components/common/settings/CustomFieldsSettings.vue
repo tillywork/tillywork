@@ -50,6 +50,7 @@ const { mutateAsync: createField } = createFieldMutation();
 const { useGetListsQuery } = useListsService();
 const { data: lists } = useGetListsQuery({
   workspaceId: workspace.value!.id,
+  throughSpace: true,
 });
 
 const { useFindAllQuery } = useCardTypesService();

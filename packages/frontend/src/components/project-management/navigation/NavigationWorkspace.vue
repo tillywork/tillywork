@@ -15,10 +15,10 @@ const freezeListHoverId = ref<number | null>();
 
 const enableSpacesFetch = ref(false);
 
-const workspaceId = computed(() => workspace.value?.id);
+const workspaceId = computed(() => workspace.value?.id ?? 0);
 
 const spacesQuery = spacesService.useGetSpacesQuery({
-  workspaceId: workspaceId,
+  workspaceId,
   enabled: enableSpacesFetch,
 });
 

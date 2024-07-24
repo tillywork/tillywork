@@ -28,6 +28,7 @@ const { data: spaces } = useGetSpacesQuery({
 const { useGetListsQuery } = useListsService();
 const { data: lists } = useGetListsQuery({
   workspaceId,
+  throughSpace: true,
   enabled: isWorkspaceReady,
 });
 

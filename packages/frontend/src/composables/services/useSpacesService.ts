@@ -1,6 +1,7 @@
 import { useHttp } from '@/composables/useHttp';
 import type { Space } from '../../components/project-management/spaces/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
+import type { MaybeRef } from 'vue';
 
 export interface SpacesData {
   spaces: Space[];
@@ -14,12 +15,12 @@ export const useSpacesService = () => {
   async function getSpaces({
     workspaceId,
   }: {
-    workspaceId?: number;
+    workspaceId?: MaybeRef<number>;
   }): Promise<Space[]> {
     return sendRequest('/spaces', {
       method: 'GET',
       params: {
-        workspaceId,
+        workspaceId: toValue(workspaceId),
       },
     });
   }
@@ -54,15 +55,14 @@ export const useSpacesService = () => {
     workspaceId,
     enabled,
   }: {
-    workspaceId: MaybeRef<number | undefined>;
-    enabled: Ref<boolean>;
+    workspaceId: MaybeRef<number>;
+    enabled?: Ref<boolean>;
   }) {
     return useQuery({
-      queryKey: ['spaces', { workspaceId }],
+      queryKey: ['spaces', { workspaceId: toValue(workspaceId) }],
       queryFn: () =>
         getSpaces({
-          workspaceId:
-            typeof workspaceId === 'number' ? workspaceId : workspaceId?.value,
+          workspaceId: workspaceId,
         }),
       enabled,
     });
