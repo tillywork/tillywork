@@ -42,6 +42,8 @@ export interface ProjectUserActivity {
 
 export type CreateProjectUserActivityDTO = {
   type: ProjectUserActivityTypes;
+  name?: string;
+  path?: string;
   entityId?: number;
   entityType?: ProjectUserActivityEntityTypes;
 };
