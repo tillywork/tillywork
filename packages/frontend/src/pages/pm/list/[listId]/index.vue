@@ -4,7 +4,6 @@ import { useStateStore } from '@/stores/state';
 import BaseList from '@/components/project-management/lists/BaseList.vue';
 import { useListsService } from '@/composables/services/useListsService';
 
-import { type CreateProjectUserActivityDTO } from '@/components/common/projects/types';
 import { useProjectUserActivityService } from '@/composables/services/useProjectUserActivityService';
 
 definePage({
@@ -27,18 +26,6 @@ const { useCreateProjectUserActivityMutation } =
 const { mutateAsync: createProjectUserActivity } =
   useCreateProjectUserActivityMutation();
 
-function storeActivity() {
-  const activity: CreateProjectUserActivityDTO = {
-    type: 'ENTITY',
-    entityType: 'LIST',
-    entityId: listId.value,
-  };
-
-  createProjectUserActivity({
-    activity,
-  });
-}
-
 watch(error, (v: any) => {
   if (v.response.status === 404) {
     router.push('/');
@@ -49,8 +36,15 @@ watch(
   list,
   (v) => {
     if (v) {
+      createProjectUserActivity({
+        activity: {
+          type: 'ENTITY',
+          entityType: 'LIST',
+          entityId: listId.value,
+        },
+      });
+
       document.title = `${v.name} - tillywork`;
-      storeActivity();
     }
     setCurrentList(v);
   },

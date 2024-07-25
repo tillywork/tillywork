@@ -2,7 +2,6 @@
 import BaseCard from '@/components/project-management/cards/BaseCard.vue';
 import { useCardsService } from '@/composables/services/useCardsService';
 
-import { type CreateProjectUserActivityDTO } from '@/components/common/projects/types';
 import { useProjectUserActivityService } from '@/composables/services/useProjectUserActivityService';
 
 definePage({
@@ -30,23 +29,18 @@ const { useCreateProjectUserActivityMutation } =
 const { mutateAsync: createProjectUserActivity } =
   useCreateProjectUserActivityMutation();
 
-function storeActivity() {
-  const activity: CreateProjectUserActivityDTO = {
-    type: 'ENTITY',
-    entityType: 'CARD',
-    entityId: cardId.value,
-  };
-
-  createProjectUserActivity({
-    activity,
-  });
-}
-
 watch(
   card,
   (v) => {
     if (v) {
-      storeActivity();
+      createProjectUserActivity({
+        activity: {
+          type: 'ENTITY',
+          entityType: 'CARD',
+          entityId: cardId.value,
+        },
+      });
+
       document.title = `${v.title} - tillywork`;
     }
   },

@@ -3,7 +3,6 @@ import { SETTINGS } from '@/components/common/settings/types';
 import { useSettings } from '@/composables/useSettings';
 import stringUtils from '@/utils/string';
 
-import { type CreateProjectUserActivityDTO } from '@/components/common/projects/types';
 import { useProjectUserActivityService } from '@/composables/services/useProjectUserActivityService';
 
 definePage({
@@ -21,18 +20,6 @@ const { useCreateProjectUserActivityMutation } =
 const { mutateAsync: createProjectUserActivity } =
   useCreateProjectUserActivityMutation();
 
-function storeActivity() {
-  const activity: CreateProjectUserActivityDTO = {
-    type: 'SETTING',
-    name: route.params.section,
-    path: route.path,
-  };
-
-  createProjectUserActivity({
-    activity,
-  });
-}
-
 onMounted(() => {
   if (!sections.includes(route.params.section)) {
     // TEMP: Throw a 404 error.
@@ -44,11 +31,17 @@ watch(
   route,
   (v) => {
     if (v) {
+      createProjectUserActivity({
+        activity: {
+          type: 'SETTING',
+          name: route.params.section,
+          path: route.path,
+        },
+      });
+
       document.title = `${stringUtils.snakeToTitleCase(
         route.params.section
       )} - tillywork`;
-
-      storeActivity();
     }
   },
   { immediate: true }
