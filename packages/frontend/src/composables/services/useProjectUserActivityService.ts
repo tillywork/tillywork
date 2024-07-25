@@ -26,11 +26,7 @@ export const useProjectUserActivityService = () => {
     return { projectId, userId, workspaceId };
   }
 
-  async function getProjectUserActivities({
-    params,
-  }: {
-    params?: unknown;
-  }): Promise<
+  async function getProjectUserActivities(): Promise<
     (ProjectUserActivity & { entity?: ProjectUserActivityEntity })[]
   > {
     const { projectId, userId, workspaceId } = extractAuth();
@@ -38,16 +34,16 @@ export const useProjectUserActivityService = () => {
     if (projectId && userId && workspaceId) {
       return sendRequest(`/projects/${projectId}/users/${userId}/activities`, {
         method: 'GET',
-        params: { workspaceId: workspaceId, ...(params ?? {}) },
+        params: { workspaceId: workspaceId },
       });
     }
     return [];
   }
 
   async function getProjectUserActivitiesRecent({
-    params,
+    limit,
   }: {
-    params?: unknown;
+    limit?: number;
   }): Promise<RecentActivity[]> {
     const { projectId, userId, workspaceId } = extractAuth();
 
@@ -56,7 +52,7 @@ export const useProjectUserActivityService = () => {
         `/projects/${projectId}/users/${userId}/activities/recent`,
         {
           method: 'GET',
-          params: { workspaceId: workspaceId, ...(params ?? {}) },
+          params: { workspaceId: workspaceId, limit },
         }
       );
     }
@@ -81,19 +77,19 @@ export const useProjectUserActivityService = () => {
     return undefined;
   }
 
-  function useGetProjectUserActivitiesQuery({ params }: { params?: unknown }) {
+  function useGetProjectUserActivitiesQuery() {
     const { projectId, userId, workspaceId } = extractAuth();
 
     return useQuery({
       queryKey: ['projectUserActivity', { projectId, userId, workspaceId }],
-      queryFn: () => getProjectUserActivities({ params }),
+      queryFn: () => getProjectUserActivities(),
     });
   }
 
   function useGetProjectUserActivitiesRecentQuery({
-    params,
+    limit,
   }: {
-    params?: unknown;
+    limit?: number;
   }) {
     const { projectId, userId, workspaceId } = extractAuth();
 
@@ -102,24 +98,16 @@ export const useProjectUserActivityService = () => {
         'projectUserActivity',
         { isRecent: true, projectId, userId, workspaceId },
       ],
-      queryFn: () => getProjectUserActivitiesRecent({ params }),
+      queryFn: () => getProjectUserActivitiesRecent({ limit }),
     });
   }
 
   function useCreateProjectUserActivityMutation() {
-    const { projectId, userId, workspaceId } = extractAuth();
-
     return useMutation({
       mutationFn: createProjectUserActivity,
       onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: ['projectUserActivity', { projectId, userId, workspaceId }],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [
-            'projectUserActivity',
-            { isRecent: true, projectId, userId, workspaceId },
-          ],
+          queryKey: ['projectUserActivity'],
         });
       },
     });

@@ -5,7 +5,7 @@ import { useProjectUserActivityService } from '@/composables/services/useProject
 const { useGetProjectUserActivitiesRecentQuery } =
   useProjectUserActivityService();
 const { data: recents, refetch } = useGetProjectUserActivitiesRecentQuery({
-  params: { limit: 2 },
+  limit: 2,
 });
 
 const { workspace } = storeToRefs(useAuthStore());
