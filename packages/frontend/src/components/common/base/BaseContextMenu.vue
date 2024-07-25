@@ -83,15 +83,17 @@ function onClickOutside() {
   hideContextMenu();
 }
 
-function onEscKeyRelease(event: KeyboardEvent) {
+function onKeyDown(event: KeyboardEvent) {
   if (event.key === 'Escape') {
     hideContextMenu();
   }
 }
 
-onMounted(() => document.body.addEventListener('keyup', onEscKeyRelease));
-onBeforeUnmount(() => document.body.addEventListener('keyup', onEscKeyRelease));
+onMounted(() => document.body.addEventListener('keyup', onKeyDown));
 
+onBeforeUnmount(() => document.body.removeEventListener('keyup', onKeyDown));
+
+// TODO: Implement store
 defineExpose({ showMenu });
 </script>
 
