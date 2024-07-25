@@ -14,10 +14,10 @@ watch(workspace, () => refetch());
 </script>
 
 <template>
-  <v-card rounded="md" density="compact" color="transparent" link>
+  <v-card rounded="md" density="compact" color="transparent">
     <v-list>
       <v-list-subheader title="Recent" />
-      <div v-if="recents?.length">
+      <template v-if="recents?.length">
         <v-list-item
           v-for="(recent, i) in recents"
           :key="i"
@@ -25,14 +25,8 @@ watch(workspace, () => refetch());
           :to="recent.path"
           rounded="md"
           class="ms-2"
-        >
-          <template #prepend>
-            <v-chip size="small" class="text-capitalize mr-4">
-              {{ recent.type }}
-            </v-chip>
-          </template>
-        </v-list-item>
-      </div>
+        />
+      </template>
       <v-list-item v-else title="No Recent Data" class="ms-2" />
     </v-list>
   </v-card>
