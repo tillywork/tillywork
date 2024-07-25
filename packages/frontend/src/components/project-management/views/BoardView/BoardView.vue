@@ -82,10 +82,6 @@ function handleUpdateDueDate({
   });
 }
 
-function handleDeleteCard(card: Card) {
-  emit('card:delete', card);
-}
-
 function handleUpdateCardStage(data: {
   cardId: number;
   cardListId: number;
@@ -103,29 +99,16 @@ function handleUpdateCardOrder(data: {
   emit('card:update:order', data);
 }
 
-const contextMenuActions = [{ title: 'Delete', value: 'delete' }] as const;
-type ContextMenuAction = (typeof contextMenuActions)[number]['value'];
+const contextMenuActions = [
+  {
+    title: 'Delete',
+    value: 'delete',
+    onClick: (card: Card) => emit('card:delete', card),
+  },
+];
 const contextMenuActionRef = ref();
-
 function openCardActions({ event, card }: { event: MouseEvent; card: Card }) {
   contextMenuActionRef.value.showMenu(event, card);
-}
-
-function handleContextMenuAction({
-  action,
-  data: card,
-}: {
-  action: { id: ContextMenuAction };
-  data: Card;
-}) {
-  switch (action.id) {
-    case 'delete':
-      handleDeleteCard(card);
-      break;
-
-    default:
-      break;
-  }
 }
 </script>
 
@@ -160,6 +143,5 @@ function handleContextMenuAction({
     ref="contextMenuActionRef"
     element-id="boardViewContextMenu"
     :items="contextMenuActions"
-    @context-menu:click:action="handleContextMenuAction"
   />
 </template>

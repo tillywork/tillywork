@@ -4,7 +4,7 @@ const props = defineProps<{
   items: readonly any[];
 }>();
 
-const emit = defineEmits(['context-menu:click:action', 'context-menu:close']);
+const emit = defineEmits(['context-menu:close']);
 
 const toggleComponent = ref<boolean>();
 const componentDimension = reactive({
@@ -14,14 +14,13 @@ const componentDimension = reactive({
 
 // Ref: https://github.com/johndatserakis/vue-simple-context-menu/blob/develop/src/vue-simple-context-menu.vue
 const data = ref<any>();
+
 function showMenu(event: MouseEvent, context: any) {
   toggleComponent.value = true;
   data.value = context;
 
   let menu = document.getElementById(props.elementId);
-  if (!menu) {
-    return;
-  }
+  if (!menu) return;
 
   if (!componentDimension.width || !componentDimension.height) {
     componentDimension.width = menu.offsetWidth;
@@ -62,21 +61,25 @@ function showMenu(event: MouseEvent, context: any) {
   menu.style.top = event.pageY - borderSize + 'px';
 }
 
-function handleAction(action: {
-  id: unknown;
-  value: boolean;
-  path: unknown[];
-}) {
+function getItemById(items: readonly any[], ids: unknown[]) {
+  const id = ids.shift();
+  const item = items.find((item) => item.value === id);
+
+  if (ids.length) return getItemById(item.children, ids);
+  return item;
+}
+
+function handleAction({ path: ids }: { path: unknown[] }) {
   hideContextMenu();
-  emit('context-menu:click:action', { action, data: data.value });
+
+  const item = getItemById(props.items, ids);
+  item.onClick(data.value);
 }
 
 function hideContextMenu() {
   toggleComponent.value = false;
   const element = document.getElementById(props.elementId);
-  if (element) {
-    emit('context-menu:close');
-  }
+  if (element) emit('context-menu:close');
 }
 
 function onClickOutside() {
