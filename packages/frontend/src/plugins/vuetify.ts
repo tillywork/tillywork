@@ -51,6 +51,8 @@ const vuetify = createVuetify({
     VSwitch: {
       color: 'primary',
       flat: true,
+      inset: true,
+      density: 'comfortable',
     },
     VTextField: {
       color: 'primary',
@@ -82,7 +84,6 @@ const vuetify = createVuetify({
       },
     },
     VMenu: {
-      transition: 'none',
       offset: 3,
       width: 200,
     },

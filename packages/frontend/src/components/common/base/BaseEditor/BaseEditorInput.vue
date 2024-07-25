@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { useEditor, EditorContent, Editor, type Content } from '@tiptap/vue-3';
+import {
+  useEditor,
+  EditorContent,
+  Editor,
+  type Content,
+  VueNodeViewRenderer,
+} from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import { NoNewLine } from './extensions/NoNewLine';
@@ -20,6 +26,11 @@ import { File } from './extensions/File';
 import { TrailingNode } from './extensions/TrailingNode';
 import { Link } from '@tiptap/extension-link';
 import { CustomKeymap } from './extensions/CustomKeymap';
+import { Mention } from '@tiptap/extension-mention';
+import mentionSuggestions from './extensions/Mention/mentionSuggestions';
+import MentionChip from './extensions/Mention/MentionChip.vue';
+import { Emoji } from './extensions/Emoji';
+import objectUtils from '@/utils/object';
 
 const props = defineProps<{
   autofocus?: boolean;
@@ -61,6 +72,7 @@ const extensions = computed(() => {
       defaultProtocol: 'https',
     }),
     CustomKeymap,
+    Emoji,
   ];
 
   if (props.singleLine) {
@@ -73,6 +85,15 @@ const extensions = computed(() => {
     extensions.push(
       Commands.configure({
         suggestion,
+      })
+    );
+    extensions.push(
+      Mention.extend({
+        addNodeView() {
+          return VueNodeViewRenderer(MentionChip);
+        },
+      }).configure({
+        suggestion: mentionSuggestions,
       })
     );
   }
@@ -186,8 +207,12 @@ watch(textValue, (newText) => {
 watch(jsonValue, (newJson) => {
   if (editor.value) {
     const currentJson = editor.value.getJSON();
-    // Using JSON.stringify to compare JSON objects
-    if (JSON.stringify(newJson) !== JSON.stringify(currentJson)) {
+    const areTheyEqual = objectUtils.isEqual(
+      currentJson,
+      newJson ?? ({} as any)
+    );
+
+    if (!areTheyEqual) {
       editor.value.commands.setContent(newJson as any, true);
     }
   }
@@ -253,7 +278,8 @@ defineExpose({
 
 <style lang="scss">
 .tiptap {
-  line-height: 1.5;
+  line-height: 1.65;
+  font-size: 0.9rem;
 
   > * {
     padding: 3px 0;

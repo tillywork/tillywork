@@ -12,6 +12,7 @@ const { workspace } = storeToRefs(useAuthStore());
 const { useGetListsQuery } = useListsService();
 const { data: lists } = useGetListsQuery({
   workspaceId: workspace.value!.id,
+  throughSpace: true,
 });
 
 watch(lists, (v) => {

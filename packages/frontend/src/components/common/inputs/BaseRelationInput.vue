@@ -8,6 +8,14 @@ const model = defineModel();
 const props = defineProps<{
   field: Field;
   multiple?: boolean;
+  variant?:
+    | 'outlined'
+    | 'plain'
+    | 'underlined'
+    | 'filled'
+    | 'solo'
+    | 'solo-inverted'
+    | 'solo-filled';
 }>();
 
 const keyword = ref<string>('');
@@ -38,6 +46,7 @@ watch(debouncedKeyword, () => {
     :items="items ?? []"
     no-filter
     item-value="id"
+    :variant
     hide-details
     :placeholder="field.name"
     :prepend-inner-icon="field.icon"

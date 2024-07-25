@@ -17,6 +17,7 @@ import { View } from "../views/view.entity";
 import { ListGroup } from "./list-groups/list.group.entity";
 import { CardType } from "../card-types/card.type.entity";
 import { Field } from "../fields/field.entity";
+import { Workspace } from "../workspaces/workspace.entity";
 
 @Entity()
 export class List {
@@ -37,11 +38,17 @@ export class List {
     @UpdateDateColumn({ type: "timestamp" })
     updatedAt: Date;
 
-    @ManyToOne(() => Space, (space) => space.lists)
+    @ManyToOne(() => Space, { nullable: true })
     @JoinTable()
     space: Relation<Space>;
     @Column({ type: "bigint" })
     spaceId: number;
+
+    @ManyToOne(() => Workspace, { nullable: true })
+    @JoinTable()
+    workspace: Relation<Workspace>;
+    @Column({ type: "bigint" })
+    workspaceId: number;
 
     @OneToMany(() => ListStage, (listStage) => listStage.list)
     listStages: Relation<ListStage[]>;

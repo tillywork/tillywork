@@ -24,7 +24,7 @@ const stringUtils = {
    * @returns `true` if the query was inside the string, otherwise `false`
    *
    * @remarks
-   * This function performs a case-insensitive.
+   * This function performs a case-insensitive search.
    * An empty query will always return `true` as it is trivially found in any string.
    * A non-empty query will always return `false` when the string is empty.
    */
@@ -44,6 +44,20 @@ const stringUtils = {
     }
 
     return false;
+  },
+
+  /**
+   * Takes a snake-case string and transforms it to a title-case one.
+   * E.g. 'card-types' -> 'Card Types', 'custom-fields' -> 'Custom Fields'
+   *
+   * @param string The snake-case string to transform.
+   * @returns `string` transformed to title-case.
+   */
+  snakeToTitleCase(string: string) {
+    return string
+      .split('-')
+      .map((s) => s[0].toUpperCase() + s.slice(1))
+      .join(' ');
   },
 };
 

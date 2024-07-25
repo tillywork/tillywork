@@ -10,15 +10,18 @@ export const useListsService = () => {
   async function getLists({
     spaceId,
     workspaceId,
+    throughSpace,
   }: {
-    spaceId?: number;
-    workspaceId?: number;
+    spaceId?: MaybeRef<number>;
+    workspaceId?: MaybeRef<number>;
+    throughSpace?: MaybeRef<boolean>;
   }): Promise<List[]> {
     return sendRequest('/lists', {
       method: 'GET',
       params: {
-        spaceId,
-        workspaceId,
+        spaceId: toValue(spaceId),
+        workspaceId: toValue(workspaceId),
+        throughSpace: toValue(throughSpace),
       },
     });
   }
@@ -58,20 +61,26 @@ export const useListsService = () => {
   function useGetListsQuery({
     spaceId,
     workspaceId,
+    throughSpace,
+    enabled,
   }: {
-    spaceId?: number;
-    workspaceId?: number;
+    spaceId?: MaybeRef<number>;
+    workspaceId?: MaybeRef<number>;
+    throughSpace?: MaybeRef<boolean>;
+    enabled?: Ref<boolean>;
   }) {
     return useQuery({
       queryKey: [
         'lists',
         {
-          spaceId,
-          workspaceId,
+          spaceId: toValue(spaceId),
+          workspaceId: toValue(workspaceId),
+          throughSpace: toValue(throughSpace),
         },
       ],
-      queryFn: () => getLists({ spaceId, workspaceId }),
+      queryFn: () => getLists({ spaceId, workspaceId, throughSpace }),
       staleTime: 1 * 60 * 1000,
+      enabled,
     });
   }
 

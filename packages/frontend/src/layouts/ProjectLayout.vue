@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { DIALOGS } from '@/components/common/dialogs/types';
 import UserListItem from '@/components/common/navigation/UserListItem.vue';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
 import NavigationRecent from '@/components/project-management/navigation/NavigationRecent.vue';
@@ -8,10 +7,10 @@ import NavigationWorkspaceSelector from '@/components/project-management/navigat
 import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
 import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
-import { useDialogStore } from '@/stores/dialog';
+import CommandPaletteActivator from '@/components/common/navigation/CommandPaletteActivator.vue';
 
-const dialog = useDialogStore();
-const { navigationDrawer } = useHideNavigationDrawer();
+const { hideNavigationDrawer } = useHideNavigationDrawer();
+const navigationDrawer = ref(true);
 const authStore = useAuthStore();
 const { logout, isAuthenticated } = authStore;
 const logo = useLogo();
@@ -36,21 +35,12 @@ if (isAuthenticated()) {
   //     },
   //   ];
 }
-
-function openSettingsDialog() {
-  dialog.openDialog({
-    dialog: DIALOGS.SETTINGS,
-    options: {
-      fullscreen: true,
-    },
-  });
-}
 </script>
 
 <template>
   <v-app>
     <v-app-bar
-      v-if="$vuetify.display.mdAndDown"
+      v-if="!hideNavigationDrawer && $vuetify.display.mdAndDown"
       color="accent"
       height="40"
       class="border-b-thin"
@@ -65,7 +55,12 @@ function openSettingsDialog() {
       </v-toolbar-title>
     </v-app-bar>
 
-    <v-navigation-drawer app v-model="navigationDrawer" color="background">
+    <v-navigation-drawer
+      v-if="!hideNavigationDrawer"
+      v-model="navigationDrawer"
+      app
+      color="background"
+    >
       <v-img
         :src="logo.getLogoUrlByTheme()"
         width="125"
@@ -76,6 +71,8 @@ function openSettingsDialog() {
         <navigation-workspace-selector />
         <navigation-recent />
       </div>
+
+      <command-palette-activator class="mt-4 ms-4" />
 
       <!-- Sidebar content -->
       <v-list v-if="navigationMenuItems.length > 0">
@@ -98,7 +95,7 @@ function openSettingsDialog() {
 
       <template v-slot:append>
         <v-list :slim="false">
-          <v-menu v-if="isAuthenticated()" :close-on-content-click="false">
+          <v-menu v-if="isAuthenticated()">
             <template #activator="{ props }">
               <user-list-item v-bind="props" avatar-size="small">
                 <template #append>
@@ -108,7 +105,7 @@ function openSettingsDialog() {
             </template>
             <v-card class="border-thin ms-n2">
               <v-list>
-                <v-list-item @click="openSettingsDialog">
+                <v-list-item to="/settings/theme">
                   <template #prepend>
                     <v-icon icon="mdi-cog" />
                   </template>
@@ -123,7 +120,7 @@ function openSettingsDialog() {
               </v-list>
             </v-card>
           </v-menu>
-          <v-list-item :to="'/login'" v-else>
+          <v-list-item v-else to="/login">
             <template #prepend>
               <v-icon icon="mdi-login" />
             </template>

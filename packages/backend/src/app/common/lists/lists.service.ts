@@ -11,6 +11,12 @@ export type ListFindAllResult = {
     lists: List[];
 };
 
+export type FindAllParams = {
+    spaceId?: number;
+    workspaceId?: number;
+    throughSpace?: boolean;
+};
+
 @Injectable()
 export class ListsService {
     constructor(
@@ -19,19 +25,31 @@ export class ListsService {
         private listSideEffectsService: ListSideEffectsService
     ) {}
 
-    async findAll(options?: {
-        spaceId?: number;
-        workspaceId?: number;
-    }): Promise<List[]> {
-        const { spaceId, workspaceId } = options;
+    async findAll({
+        spaceId,
+        workspaceId,
+        throughSpace,
+    }: FindAllParams): Promise<List[]> {
+        const where: FindOptionsWhere<List> = {};
+
+        if (spaceId) {
+            where.spaceId = spaceId;
+        }
+
+        if (workspaceId) {
+            if (throughSpace) {
+                where.space = {
+                    workspace: {
+                        id: workspaceId,
+                    },
+                };
+            } else {
+                where.workspaceId = workspaceId;
+            }
+        }
 
         return this.listsRepository.find({
-            where: {
-                spaceId,
-                space: {
-                    workspaceId,
-                },
-            },
+            where,
             relations: ["listStages"],
             order: {
                 createdAt: "ASC",

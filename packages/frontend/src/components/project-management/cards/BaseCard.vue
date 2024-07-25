@@ -11,13 +11,18 @@ import { type Content } from '@tiptap/vue-3';
 import type { ListStage } from '../lists/types';
 import BaseCardActivityTimeline from './BaseCardActivityTimeline.vue';
 import BaseCardCommentBox from './BaseCardCommentBox.vue';
-import { ActivityType, type ActivityContent, type Card } from './types';
+import {
+  ActivityType,
+  type ActivityContent,
+  type Card,
+  type CardType,
+} from './types';
 import { cloneDeep, lowerFirst } from 'lodash';
 import { useFieldsService } from '@/composables/services/useFieldsService';
 import { FieldTypes, type Field } from '../fields/types';
 import { useStateStore } from '@/stores/state';
 import { useDialogStore } from '@/stores/dialog';
-import { DIALOGS, SettingsTabs } from '@/components/common/dialogs/types';
+import { DIALOGS } from '@/components/common/dialogs/types';
 import BaseLabelSelector from '@/components/common/inputs/BaseLabelSelector.vue';
 import { useAuthStore } from '@/stores/auth';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
@@ -25,6 +30,8 @@ import BaseCardChildrenProgress from './BaseCardChildrenProgress.vue';
 import BaseCardChip from './BaseCardChip.vue';
 import { leaderKey } from '@/utils/keyboard';
 import BaseRelationInput from '@/components/common/inputs/BaseRelationInput.vue';
+import { useMentionNotifications } from '@/composables/useMentionNotifications';
+import urlUtils from '@/utils/url';
 
 const props = defineProps<{
   card: Card;
@@ -44,12 +51,13 @@ const debouncedDescription = useDebounce(cardDescription, 2000);
 
 const cardListStage = ref(cardCopy.value.cardLists[0].listStage);
 
-const { project } = storeToRefs(useAuthStore());
+const { project, user } = storeToRefs(useAuthStore());
 const snackbar = useSnackbarStore();
 const stateStore = useStateStore();
 const { areChildCardsExpanded, isInfoDrawerOpen } = storeToRefs(stateStore);
 const dialog = useDialogStore();
 const keys = useMagicKeys();
+const { getNewMentions, notifyMentionedUser } = useMentionNotifications();
 
 const cardsService = useCardsService();
 const cardActivitiesService = useCardActivitiesService();
@@ -105,6 +113,8 @@ const isCardLoading = computed(() => {
   );
 });
 
+const router = useRouter();
+
 watch(
   () => props.card,
   (v) => {
@@ -117,8 +127,8 @@ watch(
   }
 );
 
-watch(debouncedDescription, () => {
-  updateDescription();
+watch(debouncedDescription, (newDescription, oldDescription) => {
+  updateDescription(newDescription, oldDescription);
 });
 
 watch(debouncedTitle, () => {
@@ -145,22 +155,33 @@ function updateTitle() {
   }
 }
 
-function updateDescription() {
+function updateDescription(newDescription: Content, oldDescription: Content) {
   if (
-    cardDescription.value &&
-    (!cardCopy.value.description ||
-      !objectUtils.isEqual(
-        cardDescription.value as any,
-        cardCopy.value.description as any
-      ))
+    newDescription &&
+    (!oldDescription ||
+      !objectUtils.isEqual(newDescription as any, oldDescription as any))
   ) {
-    cardCopy.value.description = cardDescription.value;
-    updateCard(cardCopy.value).then(() => {
+    cardCopy.value.description = newDescription;
+
+    const newMentions = getNewMentions(newDescription, oldDescription);
+
+    updateCard(cardCopy.value).then(async () => {
       snackbar.showSnackbar({
         message: 'Task description updated.',
         color: 'success',
         timeout: 2000,
       });
+
+      for (const userId of newMentions) {
+        await notifyMentionedUser({
+          userId,
+          mentionedBy: user.value!,
+          cardType: cardCopy.value.type,
+          route: `${urlUtils.getCurrentHostUrl()}${
+            router.currentRoute.value.path
+          }`,
+        });
+      }
     });
   }
 }
@@ -184,7 +205,19 @@ function createComment(content: ActivityContent) {
         type: ActivityType.COMMENT,
         content,
       })
-      .then(() => {
+      .then(async () => {
+        const newMentions = getNewMentions(content, {});
+        for (const userId of newMentions) {
+          await notifyMentionedUser({
+            userId,
+            mentionedBy: user.value!,
+            cardType: { name: 'Comment' } as CardType,
+            route: `${urlUtils.getCurrentHostUrl()}${
+              router.currentRoute.value.path
+            }`,
+          });
+        }
+
         comment.value = undefined;
       })
       .catch((e) => {
@@ -263,16 +296,8 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
   });
 }
 
-function openSettingsDialog(activeTab: SettingsTabs) {
-  dialog.openDialog({
-    dialog: DIALOGS.SETTINGS,
-    data: {
-      activeTab,
-    },
-    options: {
-      fullscreen: true,
-    },
-  });
+function openCustomFieldsSettings() {
+  router.push('/settings/custom-fields');
 }
 
 function openDescriptionFileDialog() {
@@ -316,6 +341,7 @@ function openDescriptionFileDialog() {
               density="compact"
               size="default"
               @click="stateStore.toggleInfoDrawer"
+              v-tooltip="leaderKey + ' + I'"
             />
             <v-btn
               v-if="props.showCloseButton"
@@ -354,13 +380,12 @@ function openDescriptionFileDialog() {
         </div>
 
         <!-- Children -->
-        <div class="text-caption user-select-none mt-4">
+        <div class="text-body-3 user-select-none mt-4">
           <template v-if="!cardCopy.children.length">
             <v-btn
               class="text-none"
               size="small"
               prepend-icon="mdi-plus"
-              variant="text"
               color="default"
               @click="
                 dialog.openDialog({
@@ -476,7 +501,7 @@ function openDescriptionFileDialog() {
           Properties
           <v-spacer />
           <base-icon-btn
-            @click="openSettingsDialog(SettingsTabs.FIELDS)"
+            @click="openCustomFieldsSettings"
             icon="mdi-pencil"
             v-tooltip="'Edit fields'"
           />
@@ -542,6 +567,7 @@ function openDescriptionFileDialog() {
                     :items="field.items"
                     item-title="item"
                     item-value="item"
+                    variant="outlined"
                     hide-details
                     :placeholder="field.name"
                     :prepend-inner-icon="field.icon"
@@ -610,6 +636,7 @@ function openDescriptionFileDialog() {
                   <base-relation-input
                     v-model="cardCopy.data[field.id]"
                     :field
+                    variant="outlined"
                     @update:model-value="
                       (v) =>
                         updateFieldValue({

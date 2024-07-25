@@ -9,8 +9,7 @@ import type { VForm } from 'vuetify/components';
 import { useLogo } from '@/composables/useLogo';
 import { type CreateUserDto } from '../users/types';
 
-const props = defineProps<{
-  inviteCode?: string;
+defineProps<{
   header?: string;
 }>();
 
@@ -23,7 +22,7 @@ const createUserDto = ref<CreateUserDto>({
   lastName: '',
   phoneNumber: '',
   country: '',
-  inviteCode: props.inviteCode,
+  inviteCode: '',
 });
 const errorMessage = ref<string | null>(null);
 const loading = ref(false);
@@ -32,24 +31,29 @@ const { rules } = validationUtils;
 const { showSnackbar } = useSnackbarStore();
 const { register, registerWithInvite } = useAuthStore();
 
+const inviteCode = computed(() => route.query.inviteCode);
+
 async function handleRegister() {
   if (registerForm.value?.isValid) {
     try {
       loading.value = true;
 
-      if (!props.inviteCode) {
-        const response = await register(createUserDto.value);
-        if (response.error) {
-          loading.value = false;
-        } else {
-          window.location.pathname = route.redirectedFrom?.fullPath ?? '/';
-        }
+      const response = inviteCode.value
+        ? await registerWithInvite({
+            ...createUserDto.value,
+            inviteCode: inviteCode.value as string,
+          })
+        : await register(createUserDto.value);
+      if (response.error) {
+        loading.value = false;
       } else {
-        const response = await registerWithInvite(createUserDto.value);
-        if (response.error) {
-          loading.value = false;
+        if (
+          route.redirectedFrom?.fullPath &&
+          route.redirectedFrom?.path !== `/invite/${inviteCode.value}`
+        ) {
+          window.location.pathname = route.redirectedFrom.fullPath;
         } else {
-          window.location.pathname = route.redirectedFrom?.fullPath ?? '/';
+          window.location.pathname = '/';
         }
       }
     } catch (error) {
