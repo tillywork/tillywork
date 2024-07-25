@@ -120,44 +120,67 @@ export class ProjectUserActivitiesService {
             userId,
         });
 
-        const query = `
-			select
-				"activity"."type",
-				"activity"."name",
-				"activity"."path",
-				"activity"."entityId",
-				"activity"."entityType",
-				MAX("activity"."createdAt") as "createdAt"
-			from
-				"project_user_activity" "activity"
-			where
-				"activity"."projectUserId" = $1
-				and "activity"."workspaceId" = $2
-			group by
-				"activity"."type",
-				"activity"."name",
-				"activity"."path",
-				"activity"."entityId",
-				"activity"."entityType"
-			order by
-				"createdAt" desc
-			limit $3
-		`;
-        const activities: Pick<
-            ProjectUserActivity,
-            "type" | "name" | "path" | "entityId" | "entityType"
-        >[] = await this.projectUserActivityRepository.query(query, [
-            projectUser.id,
-            workspaceId,
-            limit,
-        ]);
+        const queryBuilder = this.projectUserActivityRepository
+            .createQueryBuilder("activity")
+            .where("activity.projectUserId = :projectUserId", {
+                projectUserId: projectUser.id,
+            })
+            .andWhere("activity.workspaceId = :workspaceId", {
+                workspaceId,
+            })
+            .orderBy(`"createdAt"`, "DESC")
+            .take(limit);
 
+        const selects = [
+            {
+                column: "activity.type",
+                alias: "type",
+            },
+            {
+                column: "activity.name",
+                alias: "name",
+            },
+            {
+                column: "activity.path",
+                alias: "path",
+            },
+            {
+                column: "activity.entityType",
+                alias: "entityType",
+            },
+            {
+                column: "activity.entityId",
+                alias: "entityId",
+            },
+            {
+                column: "MAX(activity.createdAt)",
+                alias: "createdAt",
+            },
+        ];
+        selects.forEach(({ column, alias }, index) => {
+            if (index === 0) {
+                queryBuilder.select(column, alias);
+            } else {
+                queryBuilder.addSelect(column, alias);
+            }
+        });
+
+        const groupBys = ["type", "name", "path", "entityId", "entityType"];
+        groupBys.forEach((groupBy, index) => {
+            if (index === 0) {
+                queryBuilder.groupBy(`activity.${groupBy}`);
+            } else {
+                queryBuilder.addGroupBy(`activity.${groupBy}`);
+            }
+        });
+
+        const activities = await queryBuilder.getRawMany();
         const activitiesResult = await Promise.all(
             activities.map(async (activity) => {
                 let { name: title, path } = activity;
-                let type: string = activity.type.toLowerCase();
+                let type: string = activity.type;
 
-                if (type === ProjectUserActivityTypes.ENTITY.toLowerCase()) {
+                if (type === ProjectUserActivityTypes.ENTITY) {
                     const entity = await this.getEntity(activity);
 
                     if (entity instanceof List) {
