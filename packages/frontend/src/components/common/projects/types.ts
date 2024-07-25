@@ -40,10 +40,17 @@ export interface ProjectUserActivity {
   entityType: ProjectUserActivityEntityTypes;
 }
 
-export type CreateProjectUserActivityDTO = {
-  type: ProjectUserActivityTypes;
-  name?: string;
-  path?: string;
-  entityId?: number;
-  entityType?: ProjectUserActivityEntityTypes;
+type CreateProjectUserActivityEntityDTO = {
+  type: 'ENTITY';
+  entityId: number;
+  entityType: ProjectUserActivityEntityTypes;
 };
+type CreateProjectUserActivitySettingDTO = {
+  type: 'SETTING';
+  name: string;
+  path: string;
+};
+
+export type CreateProjectUserActivityDTO =
+  | CreateProjectUserActivityEntityDTO
+  | CreateProjectUserActivitySettingDTO;
