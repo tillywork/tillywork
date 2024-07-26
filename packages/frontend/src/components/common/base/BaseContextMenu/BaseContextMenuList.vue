@@ -1,15 +1,17 @@
 <script setup lang="ts">
+import { type BaseContextMenuProps } from '@/components/common/base/BaseContextMenu/BaseContextMenuWrapper.vue';
+
 const props = defineProps<{
   data: any;
-  items: readonly any[];
+  items: BaseContextMenuProps[];
 }>();
 
 const emit = defineEmits(['context-menu:close']);
 
-function handleAction(callback: (data: unknown) => void) {
+function handleAction(callback?: (data: unknown) => void) {
   emit('context-menu:close');
 
-  callback(props.data);
+  if (callback) callback(props.data);
 }
 </script>
 
@@ -20,7 +22,6 @@ function handleAction(callback: (data: unknown) => void) {
         <v-menu location="end" open-on-hover>
           <template #activator="{ props }">
             <v-list-item
-              :title="item.title"
               v-bind="{
                 ...props,
                 ...item.props,

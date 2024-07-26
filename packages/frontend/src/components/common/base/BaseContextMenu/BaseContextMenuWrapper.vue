@@ -1,9 +1,17 @@
 <script setup lang="ts">
+import { VListItem } from 'vuetify/components';
+
 import BaseContextMenuList from '@/components/common/base/BaseContextMenu/BaseContextMenuList.vue';
+
+export type BaseContextMenuProps = {
+  props: VListItem['$props'];
+  children?: BaseContextMenuProps[];
+  onClick?: (data: unknown) => any;
+};
 
 const props = defineProps<{
   elementId: string;
-  items: readonly any[];
+  items: BaseContextMenuProps[];
 }>();
 
 const emit = defineEmits(['context-menu:close']);
