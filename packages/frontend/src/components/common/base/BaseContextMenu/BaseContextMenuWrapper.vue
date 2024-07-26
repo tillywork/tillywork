@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import BaseContextMenuList from '@/components/common/base/BaseContextMenu/BaseContextMenuList.vue';
+
 const props = defineProps<{
   elementId: string;
   items: readonly any[];
@@ -61,21 +63,6 @@ function showMenu(event: MouseEvent, context: any) {
   menu.style.top = event.pageY - borderSize + 'px';
 }
 
-function getItemById(items: readonly any[], ids: unknown[]) {
-  const id = ids.shift();
-  const item = items.find((item) => item.value === id);
-
-  if (ids.length) return getItemById(item.children, ids);
-  return item;
-}
-
-function handleAction({ path: ids }: { path: unknown[] }) {
-  hideContextMenu();
-
-  const item = getItemById(props.items, ids);
-  item.onClick(data.value);
-}
-
 function hideContextMenu() {
   toggleComponent.value = false;
   const element = document.getElementById(props.elementId);
@@ -103,16 +90,11 @@ defineExpose({ showMenu });
 <template>
   <v-sheet
     :id="elementId"
-    border
+    border="md"
     class="position-absolute"
     :class="{ 'd-none': !toggleComponent }"
     v-click-outside="{ handler: onClickOutside }"
   >
-    <v-list
-      width="200"
-      :items="items"
-      @click:select="handleAction"
-      :selected="[]"
-    />
+    <base-context-menu-list :data :items />
   </v-sheet>
 </template>

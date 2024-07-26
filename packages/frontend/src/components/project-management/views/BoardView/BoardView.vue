@@ -9,7 +9,7 @@ import BoardViewGroup from './BoardViewGroup.vue';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useAuthStore } from '@/stores/auth';
-import BaseContextMenu from '@/components/common/base/BaseContextMenu.vue';
+import BaseContextMenuWrapper from '@/components/common/base/BaseContextMenu/BaseContextMenuWrapper.vue';
 
 const isLoading = defineModel<boolean>('loading');
 
@@ -101,28 +101,69 @@ function handleUpdateCardOrder(data: {
 
 const contextMenuActions = [
   {
-    value: 'delete',
-    title: 'Delete',
-    onClick: (card: Card) => emit('card:delete', card),
-    props: { 'prepend-icon': 'mdi-delete', class: 'text-error' },
+    props: {
+      value: 'delete',
+      title: 'Delete',
+      'prepend-icon': 'mdi-delete',
+      onClick: (card: Card) => emit('card:delete', card),
+      class: 'text-error',
+    },
   },
   {
-    value: 'nested',
-    title: 'Nested',
+    props: {
+      value: 'nested',
+      title: 'Nested',
+    },
     children: [
       {
-        value: 'nested-1',
-        title: 'Nested 1',
-        onClick: console.log,
+        props: {
+          value: 'nested-1',
+          title: 'Nested 1',
+          onClick: () => console.log('nested-1'),
+        },
       },
       {
-        value: 'nested-2',
-        title: 'Nested 2',
+        props: {
+          value: 'nested-2',
+          title: 'Nested 2',
+        },
         children: [
           {
-            value: 'nested-2-1',
-            title: 'Nested 2 - 1',
-            onClick: console.log,
+            props: {
+              value: 'nested-2-1',
+              title: 'Nested 2 - 1',
+              onClick: () => console.log('nested-2-1'),
+            },
+          },
+        ],
+      },
+      {
+        props: {
+          value: 'nested-3',
+          title: 'Nested 3',
+        },
+        children: [
+          {
+            props: {
+              value: 'nested-3-1',
+              title: 'Nested 3 1',
+            },
+            children: [
+              {
+                props: {
+                  value: 'nested-3-1-1',
+                  title: 'Nested 3 - 1 - 1',
+                  onClick: () => console.log('nested-3-1'),
+                },
+              },
+            ],
+          },
+          {
+            props: {
+              value: 'nested-3-2',
+              title: 'Nested 3 - 2',
+              onClick: () => console.log('nested-3-2'),
+            },
           },
         ],
       },
@@ -162,7 +203,7 @@ function openCardActions({ event, card }: { event: MouseEvent; card: Card }) {
     </div>
   </div>
 
-  <base-context-menu
+  <base-context-menu-wrapper
     ref="contextMenuActionRef"
     element-id="boardViewContextMenu"
     :items="contextMenuActions"
