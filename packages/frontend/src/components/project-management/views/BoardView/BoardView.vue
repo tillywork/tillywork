@@ -101,9 +101,10 @@ function handleUpdateCardOrder(data: {
 
 const contextMenuActions = [
   {
-    title: 'Delete',
     value: 'delete',
+    title: 'Delete',
     onClick: (card: Card) => emit('card:delete', card),
+    props: { 'prepend-icon': 'mdi-delete', class: 'text-error' },
   },
 ];
 const contextMenuActionRef = ref();

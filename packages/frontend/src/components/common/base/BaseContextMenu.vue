@@ -112,8 +112,7 @@ defineExpose({ showMenu });
       width="200"
       :items="items"
       @click:select="handleAction"
-      bg-color="white"
-      base-color="black"
+      :selected="[]"
     />
   </v-sheet>
 </template>
