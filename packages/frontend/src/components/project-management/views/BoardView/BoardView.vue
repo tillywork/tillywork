@@ -106,6 +106,28 @@ const contextMenuActions = [
     onClick: (card: Card) => emit('card:delete', card),
     props: { 'prepend-icon': 'mdi-delete', class: 'text-error' },
   },
+  {
+    value: 'nested',
+    title: 'Nested',
+    children: [
+      {
+        value: 'nested-1',
+        title: 'Nested 1',
+        onClick: console.log,
+      },
+      {
+        value: 'nested-2',
+        title: 'Nested 2',
+        children: [
+          {
+            value: 'nested-2-1',
+            title: 'Nested 2 - 1',
+            onClick: console.log,
+          },
+        ],
+      },
+    ],
+  },
 ];
 const contextMenuActionRef = ref();
 function openCardActions({ event, card }: { event: MouseEvent; card: Card }) {
