@@ -1,13 +1,25 @@
 <script setup lang="ts">
-import { VListItem } from 'vuetify/components';
+import { VDivider, VListItem } from 'vuetify/components';
 
 import BaseContextMenuList from '@/components/common/base/BaseContextMenu/BaseContextMenuList.vue';
 
-export type BaseContextMenuProps = {
+const availableComponents = ['divider', 'item'] as const;
+type AvailableComponents = (typeof availableComponents)[number];
+
+type VDividerProps = {
+  type: 'divider';
+  props?: VDivider['$props'];
+};
+type VListItemProps = {
+  type: 'item';
   props: VListItem['$props'];
+};
+
+export type BaseContextMenuProps = {
+  type: AvailableComponents;
   children?: BaseContextMenuProps[];
   onClick?: (data: unknown) => any;
-};
+} & (VDividerProps | VListItemProps);
 
 const props = defineProps<{
   elementId: string;

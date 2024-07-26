@@ -16,8 +16,8 @@ function handleAction(callback?: (data: unknown) => void) {
 </script>
 
 <template>
-  <v-list min-width="200">
-    <template v-for="item in items" :key="item.value">
+  <v-list>
+    <template v-for="(item, index) in items" :key="index">
       <template v-if="item.children">
         <v-menu location="end" open-on-hover>
           <template #activator="{ props }">
@@ -36,11 +36,14 @@ function handleAction(callback?: (data: unknown) => void) {
         </v-menu>
       </template>
 
-      <v-list-item
-        v-else
-        v-bind="item.props"
-        @click="() => handleAction(item.onClick)"
-      />
+      <template v-else>
+        <v-divider v-if="item.type === 'divider'" v-bind="item.props" />
+        <v-list-item
+          v-else
+          v-bind="item.props"
+          @click="() => handleAction(item.onClick)"
+        />
+      </template>
     </template>
   </v-list>
 </template>

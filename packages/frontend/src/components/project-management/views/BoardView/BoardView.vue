@@ -9,7 +9,9 @@ import BoardViewGroup from './BoardViewGroup.vue';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useAuthStore } from '@/stores/auth';
-import BaseContextMenuWrapper from '@/components/common/base/BaseContextMenu/BaseContextMenuWrapper.vue';
+import BaseContextMenuWrapper, {
+  type BaseContextMenuProps,
+} from '@/components/common/base/BaseContextMenu/BaseContextMenuWrapper.vue';
 
 const isLoading = defineModel<boolean>('loading');
 
@@ -99,8 +101,9 @@ function handleUpdateCardOrder(data: {
   emit('card:update:order', data);
 }
 
-const contextMenuActions = [
+const contextMenuActions: BaseContextMenuProps[] = [
   {
+    type: 'item',
     props: {
       value: 'delete',
       title: 'Delete',
@@ -110,12 +113,17 @@ const contextMenuActions = [
     onClick: (data: unknown) => emit('card:delete', data),
   },
   {
+    type: 'divider',
+  },
+  {
+    type: 'item',
     props: {
       value: 'nested',
       title: 'Nested',
     },
     children: [
       {
+        type: 'item',
         props: {
           value: 'nested-1',
           title: 'Nested 1',
@@ -123,12 +131,14 @@ const contextMenuActions = [
         onClick: () => console.log('nested-1'),
       },
       {
+        type: 'item',
         props: {
           value: 'nested-2',
           title: 'Nested 2',
         },
         children: [
           {
+            type: 'item',
             props: {
               value: 'nested-2-1',
               title: 'Nested 2 - 1',
@@ -138,18 +148,21 @@ const contextMenuActions = [
         ],
       },
       {
+        type: 'item',
         props: {
           value: 'nested-3',
           title: 'Nested 3',
         },
         children: [
           {
+            type: 'item',
             props: {
               value: 'nested-3-1',
               title: 'Nested 3 1',
             },
             children: [
               {
+                type: 'item',
                 props: {
                   value: 'nested-3-1-1',
                   title: 'Nested 3 - 1 - 1',
@@ -159,6 +172,7 @@ const contextMenuActions = [
             ],
           },
           {
+            type: 'item',
             props: {
               value: 'nested-3-2',
               title: 'Nested 3 - 2',
