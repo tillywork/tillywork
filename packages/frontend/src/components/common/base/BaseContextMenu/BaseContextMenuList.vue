@@ -6,28 +6,15 @@ const props = defineProps<{
 
 const emit = defineEmits(['context-menu:close']);
 
-function getItemById(items: readonly any[], ids: unknown[]) {
-  const id = ids.shift();
-  const item = items.find((item) => item.props.value === id);
-
-  if (ids.length) return getItemById(item.children, ids);
-  return item;
-}
-
-function handleAction({ path: ids }: { path: unknown[] }) {
-  hideContextMenu();
-
-  const item = getItemById(props.items, ids);
-  item.onClick(props.data);
-}
-
-function hideContextMenu() {
+function handleAction(callback: (data: unknown) => void) {
   emit('context-menu:close');
+
+  callback(props.data);
 }
 </script>
 
 <template>
-  <v-list width="200" @click:select="handleAction" :selected="[]">
+  <v-list min-width="200">
     <template v-for="item in items" :key="item.value">
       <template v-if="item.children">
         <v-menu location="end" open-on-hover>
@@ -39,6 +26,7 @@ function hideContextMenu() {
                 ...item.props,
               }"
               append-icon="mdi-chevron-right"
+              @click="() => handleAction(item.onClick)"
             />
           </template>
           <v-sheet border="sm">
@@ -47,7 +35,11 @@ function hideContextMenu() {
         </v-menu>
       </template>
 
-      <v-list-item v-else v-bind="item.props" />
+      <v-list-item
+        v-else
+        v-bind="item.props"
+        @click="() => handleAction(item.onClick)"
+      />
     </template>
   </v-list>
 </template>

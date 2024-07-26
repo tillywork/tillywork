@@ -104,10 +104,10 @@ const contextMenuActions = [
     props: {
       value: 'delete',
       title: 'Delete',
-      'prepend-icon': 'mdi-delete',
-      onClick: (card: Card) => emit('card:delete', card),
+      prependIcon: 'mdi-delete',
       class: 'text-error',
     },
+    onClick: (data: unknown) => emit('card:delete', data),
   },
   {
     props: {
@@ -119,8 +119,8 @@ const contextMenuActions = [
         props: {
           value: 'nested-1',
           title: 'Nested 1',
-          onClick: () => console.log('nested-1'),
         },
+        onClick: () => console.log('nested-1'),
       },
       {
         props: {
@@ -132,8 +132,8 @@ const contextMenuActions = [
             props: {
               value: 'nested-2-1',
               title: 'Nested 2 - 1',
-              onClick: () => console.log('nested-2-1'),
             },
+            onClick: () => console.log('nested-2-1'),
           },
         ],
       },
@@ -153,8 +153,8 @@ const contextMenuActions = [
                 props: {
                   value: 'nested-3-1-1',
                   title: 'Nested 3 - 1 - 1',
-                  onClick: () => console.log('nested-3-1'),
                 },
+                onClick: () => console.log('nested-3-1'),
               },
             ],
           },
@@ -162,8 +162,8 @@ const contextMenuActions = [
             props: {
               value: 'nested-3-2',
               title: 'Nested 3 - 2',
-              onClick: () => console.log('nested-3-2'),
             },
+            onClick: () => console.log('nested-3-2'),
           },
         ],
       },
