@@ -18,7 +18,7 @@ type VListItemProps = {
 export type BaseContextMenuProps = {
   type: AvailableComponents;
   children?: BaseContextMenuProps[];
-  onClick?: (data: unknown) => any;
+  onClick?: (data?: unknown) => void;
 } & (VDividerProps | VListItemProps);
 
 const props = defineProps<{
@@ -35,11 +35,11 @@ const componentDimension = reactive({
 });
 
 // Ref: https://github.com/johndatserakis/vue-simple-context-menu/blob/develop/src/vue-simple-context-menu.vue
-const data = ref<any>();
+const data = ref<unknown>();
 
-function showMenu(event: MouseEvent, context: any) {
+function showMenu(event: MouseEvent, context?: unknown) {
   toggleComponent.value = true;
-  data.value = context;
+  if (context) data.value = context;
 
   let menu = document.getElementById(props.elementId);
   if (!menu) return;

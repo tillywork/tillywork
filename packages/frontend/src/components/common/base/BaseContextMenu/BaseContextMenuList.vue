@@ -2,13 +2,13 @@
 import { type BaseContextMenuProps } from '@/components/common/base/BaseContextMenu/BaseContextMenuWrapper.vue';
 
 const props = defineProps<{
-  data: any;
+  data: unknown;
   items: BaseContextMenuProps[];
 }>();
 
 const emit = defineEmits(['context-menu:close']);
 
-function handleAction(callback?: (data: unknown) => void) {
+function handleAction(callback?: (data?: unknown) => void) {
   emit('context-menu:close');
 
   if (callback) callback(props.data);
