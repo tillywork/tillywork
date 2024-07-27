@@ -2,6 +2,7 @@
 import { VForm } from 'vuetify/components';
 import { WorkspaceTypes, type Workspace } from './types';
 import { useAuthStore } from '@/stores/auth';
+import stringUtils from '@/utils/string';
 import validationUtils from '@/utils/validation';
 
 const props = defineProps<{
@@ -21,6 +22,7 @@ const workspaceDto = ref<
   Partial<Workspace> & { createOnboardingData: boolean }
 >({
   name: '',
+  slug: '',
   projectId: project.value!.id,
   ownerId: user.value!.id,
   type: WorkspaceTypes.PROJECT_MANAGEMENT,
@@ -30,6 +32,17 @@ const workspaceDto = ref<
 watch(workspaceType, (v) => {
   workspaceDto.value.type = v[0];
 });
+
+watch(
+  () => workspaceDto.value.name,
+  (v) => {
+    if (v) {
+      workspaceDto.value.slug = stringUtils.slugify(v);
+    } else {
+      workspaceDto.value.slug = '';
+    }
+  }
+);
 
 async function handleSubmit() {
   const isValid = await workspaceForm.value?.validate();
@@ -53,6 +66,13 @@ async function handleSubmit() {
         :rules="[rules.required]"
         persistent-hint
         autofocus
+      />
+      <v-text-field
+        label="Slug"
+        hint="The slug of your workspace"
+        v-model="workspaceDto.slug"
+        :rules="[rules.required, rules.slug]"
+        persistent-hint
       />
       <p class="mt-6 ms-2 text-subtitle-2">Workspace App</p>
       <v-list
