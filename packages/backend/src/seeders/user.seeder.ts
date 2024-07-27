@@ -86,7 +86,7 @@ export async function seedUserData(connection: Connection): Promise<void> {
     const projectName = "Starter Project";
 
     let user: User;
-    let workspace: Workspace;
+    let workspace;
     let project: Project;
 
     logger.log("Seeding user data...");

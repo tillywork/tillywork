@@ -10,6 +10,7 @@ import {
     Request,
     Logger,
     Query,
+    Res,
 } from "@nestjs/common";
 import { WorkspacesService } from "./workspaces.service";
 import { Workspace } from "./workspace.entity";
@@ -53,22 +54,36 @@ export class WorkspacesController {
     }
 
     @Post()
-    create(
+    async create(
         @Body() createWorkspaceDto: CreateWorkspaceDto,
-        @Request() req
-    ): Promise<Workspace> {
-        return this.workspacesService.create({
+        @Request() req,
+        @Res({ passthrough: true }) res
+    ): Promise<Workspace | { error: string }> {
+        const response = await this.workspacesService.create({
             ...createWorkspaceDto,
             ownerId: req.user.id,
         });
+
+        if (response["error"]) {
+            res.status(422);
+        }
+
+        return response;
     }
 
     @Put(":id")
-    update(
+    async update(
         @Param("id") id: string,
-        @Body() updateWorkspaceDto: UpdateWorkspaceDto
-    ): Promise<Workspace> {
-        return this.workspacesService.update(+id, updateWorkspaceDto);
+        @Body() updateWorkspaceDto: UpdateWorkspaceDto,
+        @Res({ passthrough: true }) res
+    ): Promise<Workspace | { error: string }> {
+        const response = this.workspacesService.update(+id, updateWorkspaceDto);
+
+        if (response["error"]) {
+            res.status(422);
+        }
+
+        return response;
     }
 
     @Delete(":id")

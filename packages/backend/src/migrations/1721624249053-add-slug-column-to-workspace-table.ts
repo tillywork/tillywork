@@ -10,6 +10,7 @@ export class AddSlugColumnToWorkspaceTable1721624249053
                 name: "slug",
                 type: "varchar",
                 isNullable: false,
+                isUnique: true,
             })
         );
     }
