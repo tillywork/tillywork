@@ -82,6 +82,7 @@ export async function seedUserData(connection: Connection): Promise<void> {
     const email = "dev@tw.com";
     const password = "12345678";
     const workspaceName = "My Workspace";
+    const workspaceSlug = "my-workspace";
     const projectName = "Starter Project";
 
     let user: User;
@@ -139,6 +140,7 @@ export async function seedUserData(connection: Connection): Promise<void> {
     } else {
         workspace = await workspacesService.create({
             name: workspaceName,
+            slug: workspaceSlug,
             ownerId: user.id,
             type: WorkspaceTypes.PROJECT_MANAGEMENT,
             projectId: project.id,
