@@ -66,6 +66,7 @@ const createCardDto = ref<CreateCardDto>({
   listId: currentDialog.value?.data?.listId ?? list.value?.id,
   listStage: currentDialog.value?.data?.listStage ?? list.value?.listStages[0],
   users: currentDialog.value?.data?.users,
+  dueAt: currentDialog.value?.data?.dueAt,
   type: cardType.value?.id,
   parent: currentDialog.value?.data?.parent,
   workspaceId: workspace.value!.id,
