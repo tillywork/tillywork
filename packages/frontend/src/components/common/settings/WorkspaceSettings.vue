@@ -3,10 +3,10 @@ import { useWorkspacesService } from '@/composables/services/useWorkspacesServic
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
-import stringUtils from '@/utils/string';
 import validationUtils from '@/utils/validation';
 import { cloneDeep } from 'lodash';
 import type { VForm } from 'vuetify/components';
+import BaseSlugInput from '@/components/common/inputs/BaseSlugInput.vue';
 
 const { workspace } = storeToRefs(useAuthStore());
 const selectedWorkspaceCopy = ref(cloneDeep(workspace.value));
@@ -35,17 +35,6 @@ async function saveWorkspace() {
     });
   });
 }
-
-watch(
-  () => selectedWorkspaceCopy.value!.name,
-  (v) => {
-    if (v) {
-      selectedWorkspaceCopy.value!.slug = stringUtils.slugify(v);
-    } else {
-      selectedWorkspaceCopy.value!.slug = '';
-    }
-  }
-);
 </script>
 
 <template>
@@ -68,12 +57,16 @@ watch(
           variant="filled"
           :rules="[rules.required]"
         />
-        <v-text-field
+        <base-slug-input
           v-model="selectedWorkspaceCopy!.slug"
-          label="Slug*"
-          hide-details
-          variant="filled"
-          :rules="[rules.required, rules.slug]"
+          auto
+          :dependent="selectedWorkspaceCopy!.name"
+          :props="{
+            label: 'Slug*',
+            hideDetails: true,
+            variant: 'filled',
+            rules: [rules.required, rules.slug],
+          }"
         />
         <div class="d-flex justify-end">
           <v-btn

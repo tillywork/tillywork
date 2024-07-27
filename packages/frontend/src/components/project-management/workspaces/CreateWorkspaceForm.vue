@@ -2,8 +2,8 @@
 import { VForm } from 'vuetify/components';
 import { WorkspaceTypes, type Workspace } from './types';
 import { useAuthStore } from '@/stores/auth';
-import stringUtils from '@/utils/string';
 import validationUtils from '@/utils/validation';
+import BaseSlugInput from '@/components/common/inputs/BaseSlugInput.vue';
 
 const props = defineProps<{
   loading?: boolean;
@@ -33,17 +33,6 @@ watch(workspaceType, (v) => {
   workspaceDto.value.type = v[0];
 });
 
-watch(
-  () => workspaceDto.value.name,
-  (v) => {
-    if (v) {
-      workspaceDto.value.slug = stringUtils.slugify(v);
-    } else {
-      workspaceDto.value.slug = '';
-    }
-  }
-);
-
 async function handleSubmit() {
   const isValid = await workspaceForm.value?.validate();
   if (isValid?.valid) {
@@ -60,19 +49,23 @@ async function handleSubmit() {
   >
     <v-card width="350" class="mt-6 mx-auto" :class="cardClass">
       <v-text-field
-        label="Name"
-        hint="The name of your workspace"
         v-model="workspaceDto.name"
+        label="Name*"
+        hint="The name of your workspace"
         :rules="[rules.required]"
         persistent-hint
         autofocus
       />
-      <v-text-field
-        label="Slug"
-        hint="The slug of your workspace"
+      <base-slug-input
         v-model="workspaceDto.slug"
-        :rules="[rules.required, rules.slug]"
-        persistent-hint
+        auto
+        :dependent="workspaceDto.name!"
+        :props="{
+          label: 'Slug*',
+          hint: 'The slug of your workspace',
+          rules: [rules.required, rules.slug],
+          persistentHint: true,
+        }"
       />
       <p class="mt-6 ms-2 text-subtitle-2">Workspace App</p>
       <v-list
