@@ -59,6 +59,19 @@ const stringUtils = {
       .map((s) => s[0].toUpperCase() + s.slice(1))
       .join(' ');
   },
+
+  slugify(string: string) {
+    const slug = string
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/-+/g, '-');
+
+    return slug.charAt(slug.length - 1) === '-'
+      ? slug.slice(0, slug.length - 1)
+      : slug;
+  },
 };
 
 export default stringUtils;
