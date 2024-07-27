@@ -8,7 +8,7 @@ definePage({
   },
 });
 
-const route = useRoute('/pm/card/[cardId]');
+const route = useRoute('/[workspaceSlug]/card/[cardId]');
 const cardsService = useCardsService();
 const cardId = computed(() => +route.params.cardId);
 
