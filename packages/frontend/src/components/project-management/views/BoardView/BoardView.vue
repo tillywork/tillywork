@@ -110,78 +110,7 @@ const contextMenuActions: BaseContextMenuProps[] = [
       prependIcon: 'mdi-delete',
       class: 'text-error',
     },
-    onClick: (data: unknown) => emit('card:delete', data),
-  },
-  {
-    type: 'divider',
-  },
-  {
-    type: 'item',
-    props: {
-      value: 'nested',
-      title: 'Nested',
-    },
-    children: [
-      {
-        type: 'item',
-        props: {
-          value: 'nested-1',
-          title: 'Nested 1',
-        },
-        onClick: () => console.log('nested-1'),
-      },
-      {
-        type: 'item',
-        props: {
-          value: 'nested-2',
-          title: 'Nested 2',
-        },
-        children: [
-          {
-            type: 'item',
-            props: {
-              value: 'nested-2-1',
-              title: 'Nested 2 - 1',
-            },
-            onClick: () => console.log('nested-2-1'),
-          },
-        ],
-      },
-      {
-        type: 'item',
-        props: {
-          value: 'nested-3',
-          title: 'Nested 3',
-        },
-        children: [
-          {
-            type: 'item',
-            props: {
-              value: 'nested-3-1',
-              title: 'Nested 3 1',
-            },
-            children: [
-              {
-                type: 'item',
-                props: {
-                  value: 'nested-3-1-1',
-                  title: 'Nested 3 - 1 - 1',
-                },
-                onClick: () => console.log('nested-3-1'),
-              },
-            ],
-          },
-          {
-            type: 'item',
-            props: {
-              value: 'nested-3-2',
-              title: 'Nested 3 - 2',
-            },
-            onClick: () => console.log('nested-3-2'),
-          },
-        ],
-      },
-    ],
+    onClick: (data) => emit('card:delete', data),
   },
 ];
 const contextMenuActionRef = ref();
