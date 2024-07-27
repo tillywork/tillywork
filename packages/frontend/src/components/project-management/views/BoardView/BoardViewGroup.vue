@@ -17,6 +17,7 @@ import { cloneDeep } from 'lodash';
 import type { QueryFilter, ViewFilter } from '../../filters/types';
 import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
+import { useDate } from '@/composables/useDate';
 
 const emit = defineEmits([
   'toggle:group',
@@ -121,6 +122,7 @@ function openCreateCardDialog(listGroup: ListGroup) {
       listId: listGroup.listId,
       listStage: getCurrentStage(listGroup),
       users: getCurrentAssignee(listGroup),
+      dueAt: getCurrentDueDate(listGroup),
       listStages: props.listStages,
     },
   });
@@ -148,6 +150,30 @@ function getCurrentAssignee(group: ListGroup) {
   }
 
   return user ? [user] : undefined;
+}
+const { dayjs } = useDate();
+function getCurrentDueDate(group: ListGroup) {
+  let dueAt: string | undefined;
+
+  // TODO: After PR 110 was merged, use enum instead
+  if (group.type === ListGroupOptions.DUE_DATE) {
+    switch (group.name) {
+      case 'Past Due':
+        dueAt = dayjs().subtract(1, 'day').toISOString();
+        break;
+      case 'Today':
+        dueAt = new Date().toISOString();
+        break;
+      case 'Upcoming':
+        dueAt = dayjs().add(1, 'day').toISOString();
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  return dueAt;
 }
 
 function onDragMove() {
