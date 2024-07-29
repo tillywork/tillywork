@@ -5,6 +5,13 @@ export enum ListGroupOptions {
     DUE_DATE = "DUE_DATE",
 }
 
+export enum ListGroupDueDate {
+    PAST_DUE = "Past Due",
+    TODAY = "Today",
+    UPCOMING = "Upcoming",
+    NO_DUE_DATE = "No Due Date",
+}
+
 export const DEFAULT_LISTS = [
     {
         name: "Kickoff",

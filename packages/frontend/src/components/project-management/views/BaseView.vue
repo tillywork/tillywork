@@ -1,7 +1,14 @@
 <script setup lang="ts">
-import { ListGroupOptions, type List, type ListGroup } from '../lists/types';
+import {
+  ListGroupOptions,
+  ListGroupDueDate,
+  type List,
+  type ListGroup,
+} from '../lists/types';
 import { useViewsService } from '@/composables/services/useViewsService';
 import { useListGroupsService } from '@/composables/services/useListGroupsService';
+import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import type { ProjectUser } from '@/components/common/projects/types';
 import type { Card } from '../cards/types';
 import { type ColumnDef } from '@tanstack/vue-table';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
@@ -26,6 +33,8 @@ import {
 } from '../filters/types';
 import { cloneDeep } from 'lodash';
 import { useDialogStore } from '@/stores/dialog';
+import { useDate } from '@/composables/useDate';
+import { useAuthStore } from '@/stores/auth';
 import BaseViewChipDisplay from './BaseViewChipDisplay.vue';
 
 const props = defineProps<{
@@ -139,6 +148,12 @@ function openCreateCardDialog() {
   });
 }
 
+const { project } = storeToRefs(useAuthStore());
+const projectUsersService = useProjectUsersService();
+const { data: projectUsers } = projectUsersService.useProjectUsersQuery({
+  projectId: project.value!.id,
+});
+
 function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
   const updatedCard: Card = {
     ...card,
@@ -159,31 +174,104 @@ function handleUpdateDueDate({
   newDueDate,
 }: {
   card: Card;
-  newDueDate: string | null;
+  newDueDate?: string | null;
 }) {
-  const updatedCard = {
-    ...card,
-    dueAt: newDueDate,
-  };
+  const updatedCard = { ...card };
+
+  if (typeof newDueDate !== 'undefined') {
+    updatedCard['dueAt'] = newDueDate;
+  }
+
   updateCard(updatedCard);
 }
 
-function handleUpdateCardStage({
-  cardId,
-  cardListId,
+const { dayjs } = useDate();
+function getClassificationDate(date?: string) {
+  if (date) {
+    if (dayjs(date) < dayjs().startOf('day')) return ListGroupDueDate.PAST_DUE;
+    else if (dayjs(date) > dayjs().endOf('day'))
+      return ListGroupDueDate.UPCOMING;
+    else return ListGroupDueDate.TODAY;
+  }
+}
+function transformDateToDayjs(date: string | null) {
+  let dateInDayjs = date ? dayjs(date) : dayjs();
+  return dayjs()
+    .hour(dateInDayjs.hour())
+    .minute(dateInDayjs.minute())
+    .second(dateInDayjs.second());
+}
+
+async function handleUpdateCardStage({
+  card,
   listStageId,
+  name,
   order,
 }: {
-  cardId: number;
-  cardListId: number;
+  card: Card;
   listStageId: number;
+  name?: string;
   order?: number;
 }) {
+  if (viewCopy.value.groupBy === ListGroupOptions.ASSIGNEES) {
+    const listGroup = (listGroups.value ?? []).find(
+      (listGroup) => listGroup.name === name
+    );
+    const userId = listGroup?.entityId ?? null;
+    const user = (projectUsers.value ?? []).find((user: ProjectUser) => {
+      return user.user.id == userId;
+    })?.user;
+
+    handleUpdateAssignees({ users: user ? [user] : [], card });
+  }
+
+  if (viewCopy.value.groupBy === ListGroupOptions.DUE_DATE) {
+    let newDueDate;
+    let shouldUpdateDueAt =
+      !card.dueAt || getClassificationDate(card.dueAt) !== name;
+
+    switch (name) {
+      case ListGroupDueDate.PAST_DUE:
+        if (shouldUpdateDueAt) {
+          newDueDate = transformDateToDayjs(card.dueAt)
+            .subtract(1, 'day')
+            .toISOString();
+        }
+        break;
+      case ListGroupDueDate.TODAY:
+        if (shouldUpdateDueAt) {
+          newDueDate = transformDateToDayjs(card.dueAt).toISOString();
+        }
+        break;
+      case ListGroupDueDate.UPCOMING:
+        if (shouldUpdateDueAt) {
+          newDueDate = transformDateToDayjs(card.dueAt)
+            .add(1, 'day')
+            .toISOString();
+        }
+        break;
+      case ListGroupDueDate.NO_DUE_DATE:
+        newDueDate = null;
+        break;
+
+      default:
+        break;
+    }
+
+    handleUpdateDueDate({
+      card,
+      newDueDate,
+    });
+  }
+
   updateCardList({
-    cardId,
-    cardListId,
+    cardId: card.id,
+    cardListId: card.cardLists[0].id,
     updateCardListDto: {
-      listStageId,
+      listStageId:
+        viewCopy.value.groupBy === ListGroupOptions.LIST_STAGE
+          ? listStageId
+          : undefined,
       order,
     },
   })

@@ -2,7 +2,11 @@ import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ListGroup } from "./list.group.entity";
-import { ListGroupEntityTypes, ListGroupOptions } from "../types";
+import {
+    ListGroupDueDate,
+    ListGroupEntityTypes,
+    ListGroupOptions,
+} from "../types";
 import { ListStagesService } from "../list-stages/list.stages.service";
 import { UsersService } from "../../users/users.service";
 import { CardsService } from "../../cards/cards.service";
@@ -257,7 +261,7 @@ export class ListGroupsService {
         const groups: CreateListGroupDto[] = [
             {
                 type: ListGroupOptions.DUE_DATE,
-                name: "Past Due",
+                name: ListGroupDueDate.PAST_DUE,
                 filter: {
                     where: {
                         and: [
@@ -275,7 +279,7 @@ export class ListGroupsService {
             },
             {
                 type: ListGroupOptions.DUE_DATE,
-                name: "Today",
+                name: ListGroupDueDate.TODAY,
                 filter: {
                     where: {
                         and: [
@@ -293,7 +297,7 @@ export class ListGroupsService {
             },
             {
                 type: ListGroupOptions.DUE_DATE,
-                name: "Upcoming",
+                name: ListGroupDueDate.UPCOMING,
                 filter: {
                     where: {
                         and: [
@@ -311,7 +315,7 @@ export class ListGroupsService {
             },
             {
                 type: ListGroupOptions.DUE_DATE,
-                name: "No Due Date",
+                name: ListGroupDueDate.NO_DUE_DATE,
                 filter: {
                     where: {
                         and: [

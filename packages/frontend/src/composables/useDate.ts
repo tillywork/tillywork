@@ -5,6 +5,8 @@ import isYesterday from 'dayjs/plugin/isYesterday';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import utc from 'dayjs/plugin/utc';
 
+export type { Dayjs } from 'dayjs';
+
 export const useDate = () => {
   dayjs.extend(relativeTime);
   dayjs.extend(isYesterday);
