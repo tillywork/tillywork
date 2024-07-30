@@ -66,7 +66,6 @@ const table = useVueTable({
   manualPagination: true,
   manualGrouping: true,
   manualSorting: true,
-  columnResizeMode: 'onChange',
   enableColumnResizing: false,
   enableSorting: false,
 });
@@ -155,7 +154,7 @@ function handleUpdateCardOrder(data: {
 </script>
 
 <template>
-  <div class="list-container">
+  <div class="list-view overflow-auto">
     <div
       class="list d-flex flex-column"
       :style="`max-height: calc(100vh - 160px${
@@ -205,24 +204,6 @@ function handleUpdateCardOrder(data: {
                     >
                       {{ getColumnSortIcon(header.column) }}
                     </v-icon>
-                  </template>
-                  <!-- Column Resizer -->
-                  <template
-                    v-if="isHeaderHovering && header.column.getCanResize()"
-                  >
-                    <div class="column-resizer">
-                      <div
-                        @mousedown="header.getResizeHandler()?.($event)"
-                        @touchstart="header.getResizeHandler()?.($event)"
-                        v-show="
-                          isHeaderHovering || header.column.getIsResizing()
-                        "
-                        @click.stop
-                      >
-                        &nbsp;
-                      </div>
-                      &nbsp;
-                    </div>
                   </template>
                 </v-card>
               </v-hover>
@@ -274,21 +255,6 @@ $list-cell-padding-y: 0;
   .list {
     min-width: 100%;
     width: fit-content;
-  }
-
-  .column-resizer {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 5px;
-    height: 100%;
-    cursor: ew-resize;
-    z-index: 1;
-
-    > div {
-      border-right: 3px solid #2196f3;
-      height: 100%;
-    }
   }
 }
 </style>
