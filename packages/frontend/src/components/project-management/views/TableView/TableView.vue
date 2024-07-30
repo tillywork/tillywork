@@ -188,7 +188,7 @@ function handleUpdateCardOrder(data: {
                   class="table-header-cell py-1 px-4 text-caption user-select-none d-flex align-center text-truncate"
                   rounded="0"
                   color="accent"
-                  height="38"
+                  height="33"
                   :width="header.getSize()"
                 >
                   <!-- Header Content -->
@@ -290,17 +290,12 @@ $table-border-opacity: var(--v-border-opacity);
     .table-header-cell,
     .table-cell {
       border-inline-end: 0.25px solid
-        rgba(var(--v-border-color), calc(var(--v-border-opacity) + 0.1));
+        rgba(var(--v-border-color), var(--v-border-opacity));
     }
 
     .table-row {
       border-bottom: 0.25px solid
         rgba(var(--v-border-color), var(--v-border-opacity));
-
-      .table-cell {
-        border-inline-end: 0.25px solid
-          rgba(var(--v-border-color), calc(var(--v-border-opacity) + 0.1));
-      }
     }
   }
 
