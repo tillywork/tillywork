@@ -340,6 +340,7 @@ watchEffect(() => {
   <v-banner
     sticky
     lines="one"
+    density="comfortable"
     :border="listGroup.getIsExpanded() ? 'b-thin' : 'none'"
     bg-color="accent"
     style="z-index: 10"
@@ -369,19 +370,12 @@ watchEffect(() => {
           {{ listGroup.original.icon ?? 'mdi-circle-slice-8' }}
         </v-icon>
       </template>
-      <v-chip
-        rounded="md"
-        density="comfortable"
-        :color="listGroup.original.color"
-        class="ms-3"
-      >
+      <span class="text-body-3 ms-3">
         {{ listGroup.original.name }}
-        <template #append>
-          <span class="text-caption ms-4 font-weight-bold">
-            {{ total }}
-          </span>
-        </template>
-      </v-chip>
+        <span class="ms-2 text-caption text-color-subtitle">
+          {{ total }}
+        </span>
+      </span>
     </div>
     <v-btn
       variant="text"
@@ -428,14 +422,6 @@ watchEffect(() => {
               height="33"
               :to="`/pm/card/${row.original.id}`"
               :ripple="false"
-              :base-color="
-                row.original.cardLists[0].listStage.isCompleted ? 'success' : ''
-              "
-              :variant="
-                row.original.cardLists[0].listStage.isCompleted
-                  ? 'tonal'
-                  : undefined
-              "
             >
               <v-hover
                 #="{ isHovering: isRowHovering, props: rowProps }"
@@ -550,11 +536,6 @@ watchEffect(() => {
                             newDueDate: newValue ?? null,
                           })"
                           class="text-caption d-flex flex-fill h-100 justify-start rounded-0"
-                          :color="
-                            row.original.cardLists[0].listStage.isCompleted
-                              ? 'success'
-                              : undefined
-                          "
                           label="Set due date"
                           @click.prevent
                         />

@@ -398,6 +398,7 @@ watch(
           :columns
           :view="viewCopy"
           :groups="listGroups ?? []"
+          no-headers
           @row:delete="handleDeleteCard"
           @row:update:stage="handleUpdateCardStage"
           @row:update:due-date="handleUpdateDueDate"

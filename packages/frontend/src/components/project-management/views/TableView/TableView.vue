@@ -166,7 +166,7 @@ function handleUpdateCardOrder(data: {
 </script>
 
 <template>
-  <div class="table-container px-6 position-relative overflow-auto">
+  <div class="table-view px-6 position-relative overflow-auto">
     <div
       class="table d-flex flex-column my-2"
       :style="`max-height: calc(100vh - 180px${
@@ -188,6 +188,7 @@ function handleUpdateCardOrder(data: {
                   class="table-header-cell py-1 px-4 text-caption user-select-none d-flex align-center text-truncate"
                   rounded="0"
                   color="accent"
+                  height="38"
                   :width="header.getSize()"
                 >
                   <!-- Header Content -->
@@ -268,11 +269,11 @@ function handleUpdateCardOrder(data: {
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 $table-border-color: var(--v-border-color);
 $table-border-opacity: var(--v-border-opacity);
 
-.table-container {
+.table-view {
   .table {
     max-height: calc(100vh - 180px);
     min-width: 100%;
@@ -284,6 +285,22 @@ $table-border-opacity: var(--v-border-opacity);
     .table-header {
       border-bottom: 0.25px solid
         rgba($table-border-color, $table-border-opacity);
+    }
+
+    .table-header-cell,
+    .table-cell {
+      border-inline-end: 0.25px solid
+        rgba(var(--v-border-color), calc(var(--v-border-opacity) + 0.1));
+    }
+
+    .table-row {
+      border-bottom: 0.25px solid
+        rgba(var(--v-border-color), var(--v-border-opacity));
+
+      .table-cell {
+        border-inline-end: 0.25px solid
+          rgba(var(--v-border-color), calc(var(--v-border-opacity) + 0.1));
+      }
     }
   }
 

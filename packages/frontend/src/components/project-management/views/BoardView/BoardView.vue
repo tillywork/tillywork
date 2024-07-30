@@ -104,7 +104,7 @@ function handleUpdateCardOrder(data: {
 </script>
 
 <template>
-  <div class="board-container">
+  <div class="board-view overflow-auto">
     <div class="board">
       <v-sheet
         class="board-groups d-flex ga-4 overflow-scroll px-2"

@@ -368,8 +368,8 @@ watchEffect(() => {
               </template>
 
               <v-card-title
-                class="text-wrap text-body-2"
-                style="line-height: 1.2"
+                class="text-wrap text-body-3"
+                style="line-height: 1.5"
               >
                 {{ card.title }}
               </v-card-title>
@@ -399,11 +399,6 @@ watchEffect(() => {
                       newDueDate: newValue ?? null,
                     })"
                 class="text-caption"
-                :color="
-                  card.cardLists[0].listStage.isCompleted
-                    ? 'success'
-                    : undefined
-                "
                 label="Set due date"
                 @click.prevent
               />
@@ -425,14 +420,3 @@ watchEffect(() => {
     </v-infinite-scroll>
   </v-card>
 </template>
-
-<style lang="scss">
-.board-group {
-  .v-btn:hover > .v-btn__overlay {
-    opacity: 0.1;
-  }
-  .v-card:hover > .v-card__overlay {
-    opacity: 0.075;
-  }
-}
-</style>

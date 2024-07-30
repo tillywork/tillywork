@@ -352,7 +352,6 @@ watchEffect(() => {
     lines="one"
     density="comfortable"
     :border="listGroup.getIsExpanded() ? 'b-thin' : 'none'"
-    bg-color="accent"
     style="z-index: 10"
     v-if="!noGroupBanners"
   >
@@ -426,14 +425,6 @@ watchEffect(() => {
               height="33"
               :to="`/pm/card/${row.original.id}`"
               :ripple="false"
-              :base-color="
-                row.original.cardLists[0].listStage.isCompleted ? 'success' : ''
-              "
-              :variant="
-                row.original.cardLists[0].listStage.isCompleted
-                  ? 'tonal'
-                  : undefined
-              "
             >
               <v-hover
                 #="{ isHovering: isRowHovering, props: rowProps }"
@@ -455,7 +446,7 @@ watchEffect(() => {
                     <template v-if="cell.column.columnDef.id === 'actions'">
                       <v-card
                         :width="getColumnSize(cell.column.columnDef.id)"
-                        class="table-cell d-flex align-center fill-height"
+                        class="table-cell d-flex align-center fill-height pe-1"
                         rounded="0"
                         color="transparent"
                       >
@@ -548,11 +539,6 @@ watchEffect(() => {
                             newDueDate: newValue ?? null,
                           })"
                           class="text-caption d-flex flex-fill h-100 justify-start rounded-0"
-                          :color="
-                            row.original.cardLists[0].listStage.isCompleted
-                              ? 'success'
-                              : undefined
-                          "
                           label="Set due date"
                           @click.prevent
                         />
@@ -602,12 +588,3 @@ watchEffect(() => {
     </v-list>
   </template>
 </template>
-
-<style lang="scss">
-.table {
-  .table-row {
-    border-bottom: 0.25px solid
-      rgba(var(--v-border-color), var(--v-border-opacity));
-  }
-}
-</style>
