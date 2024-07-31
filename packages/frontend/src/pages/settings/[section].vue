@@ -3,6 +3,8 @@ import { SETTINGS } from '@/components/common/settings/types';
 import { useSettings } from '@/composables/useSettings';
 import stringUtils from '@/utils/string';
 
+import { useProjectUserActivityService } from '@/composables/services/useProjectUserActivityService';
+
 definePage({
   meta: {
     hideNavigationDrawer: true,
@@ -12,6 +14,11 @@ definePage({
 const route = useRoute('/settings/[section]');
 const router = useRouter();
 const { settings, sections } = useSettings();
+
+const { useCreateProjectUserActivityMutation } =
+  useProjectUserActivityService();
+const { mutateAsync: createProjectUserActivity } =
+  useCreateProjectUserActivityMutation();
 
 onMounted(() => {
   if (!sections.includes(route.params.section)) {
@@ -23,10 +30,19 @@ onMounted(() => {
 watch(
   route,
   (v) => {
-    if (v)
+    if (v) {
+      createProjectUserActivity({
+        activity: {
+          type: 'SETTING',
+          name: route.params.section,
+          path: route.path,
+        },
+      });
+
       document.title = `${stringUtils.snakeToTitleCase(
         route.params.section
       )} - tillywork`;
+    }
   },
   { immediate: true }
 );

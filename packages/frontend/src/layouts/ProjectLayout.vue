@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import UserListItem from '@/components/common/navigation/UserListItem.vue';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
+import NavigationRecent from '@/components/project-management/navigation/NavigationRecent.vue';
 import NavigationWorkspace from '@/components/project-management/navigation/NavigationWorkspace.vue';
 import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
 import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
@@ -66,7 +67,10 @@ if (isAuthenticated()) {
         class="ma-2 mt-4 hidden-md-and-down"
       />
       <v-divider class="hidden-md-and-down" />
-      <navigation-workspace-selector v-if="isAuthenticated()" />
+      <div v-if="isAuthenticated()">
+        <navigation-workspace-selector />
+        <navigation-recent />
+      </div>
 
       <command-palette-activator class="mt-4 ms-4" />
 
