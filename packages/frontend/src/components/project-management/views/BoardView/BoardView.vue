@@ -9,6 +9,9 @@ import BoardViewGroup from './BoardViewGroup.vue';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useAuthStore } from '@/stores/auth';
+import BaseContextMenuWrapper, {
+  type BaseContextMenuProps,
+} from '@/components/common/base/BaseContextMenu/BaseContextMenuWrapper.vue';
 
 const isLoading = defineModel<boolean>('loading');
 
@@ -81,10 +84,6 @@ function handleUpdateDueDate({
   });
 }
 
-function handleDeleteCard(card: Card) {
-  emit('card:delete', card);
-}
-
 function handleUpdateCardStage(data: {
   cardId: number;
   cardListId: number;
@@ -100,6 +99,23 @@ function handleUpdateCardOrder(data: {
   nextCard?: Card;
 }) {
   emit('card:update:order', data);
+}
+
+const contextMenuActions: BaseContextMenuProps[] = [
+  {
+    type: 'item',
+    props: {
+      value: 'delete',
+      title: 'Delete',
+      prependIcon: 'mdi-delete',
+      class: 'text-error',
+    },
+    onClick: (data) => emit('card:delete', data),
+  },
+];
+const contextMenuActionRef = ref();
+function openCardActions({ event, card }: { event: MouseEvent; card: Card }) {
+  contextMenuActionRef.value.showMenu(event, card);
 }
 </script>
 
@@ -119,14 +135,20 @@ function handleUpdateCardOrder(data: {
             :view
             :project-users="projectUsers ?? []"
             @toggle:group="toggleGroupExpansion"
-            @card:delete="handleDeleteCard"
             @card:update:stage="handleUpdateCardStage"
             @card:update:due-date="handleUpdateDueDate"
             @card:update:assignees="handleUpdateAssignees"
             @card:update:order="handleUpdateCardOrder"
+            @card:open:context-menu="openCardActions"
           />
         </template>
       </v-sheet>
     </div>
   </div>
+
+  <base-context-menu-wrapper
+    ref="contextMenuActionRef"
+    element-id="boardViewContextMenu"
+    :items="contextMenuActions"
+  />
 </template>
