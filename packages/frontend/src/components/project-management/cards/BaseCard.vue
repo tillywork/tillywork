@@ -44,6 +44,7 @@ const cardCopy = ref<Card>(cloneDeep(props.card));
 const comment = ref<Content>();
 const isCommentEmpty = ref<boolean>();
 const descriptionInput = ref();
+// TODO don't hardcode title field
 const cardTitle = ref(cardCopy.value.data.title);
 const debouncedTitle = useDebounce(cardTitle, 2000);
 const cardDescription = ref(cardCopy.value.data.description);
@@ -161,7 +162,7 @@ function updateDescription(newDescription: Content, oldDescription: Content) {
     (!oldDescription ||
       !objectUtils.isEqual(newDescription as any, oldDescription as any))
   ) {
-    cardCopy.value.description = newDescription;
+    cardCopy.value.data.description = newDescription;
 
     const newMentions = getNewMentions(newDescription, oldDescription);
 
@@ -454,7 +455,7 @@ function openDescriptionFileDialog() {
                     "
                     theme="icon"
                   />
-                  {{ child.title }}
+                  {{ child.data.title }}
                 </v-list-item-title>
 
                 <template #append>
@@ -537,6 +538,7 @@ function openDescriptionFileDialog() {
               @update:model-value="updateCardStartsAt"
             />
           </div>
+          <!-- TODO remove hardcoded fields that were migrated -->
           <div class="d-flex align-center my-4">
             <p class="field-label text-caption">Due date</p>
             <base-date-picker
