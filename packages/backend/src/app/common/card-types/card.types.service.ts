@@ -8,6 +8,8 @@ import { ListsService } from "../lists/lists.service";
 import { CardsService } from "../cards/cards.service";
 import { Workspace } from "../workspaces/workspace.entity";
 import { WorkspaceTypes } from "../workspaces/types";
+import { FieldTypes } from "../fields/types";
+import { FieldsService } from "../fields/fields.service";
 
 @Injectable()
 export class CardTypesService {
@@ -15,7 +17,8 @@ export class CardTypesService {
         @InjectRepository(CardType)
         private cardTypesRepository: Repository<CardType>,
         private listsService: ListsService,
-        private cardsService: CardsService
+        private cardsService: CardsService,
+        private fieldsService: FieldsService
     ) {}
 
     async findAll(options?: FindManyOptions<CardType>): Promise<CardType[]> {
@@ -92,29 +95,65 @@ export class CardTypesService {
     }
 
     async createDefaultWorkspaceTypes(workspace: Workspace) {
-        const defaultTypes: string[] = [];
+        const defaultTypes: CreateCardTypeDto[] = [];
         switch (workspace.type) {
             case WorkspaceTypes.PROJECT_MANAGEMENT:
-                defaultTypes.push("Task");
+                defaultTypes.push({
+                    name: "Task",
+                    fields: [
+                        {
+                            name: "Title",
+                            slug: "title",
+                            type: FieldTypes.RICH,
+                            isTitle: true,
+                            icon: "mdi-tag",
+                        },
+                        {
+                            name: "Description",
+                            type: FieldTypes.RICH,
+                            slug: "description",
+                            icon: "mdi-tag",
+                        },
+                        {
+                            name: "Due At",
+                            type: FieldTypes.DATE,
+                            slug: "due_at",
+                            icon: "mdi-calendar",
+                        },
+                    ],
+                    workspaceId: workspace.id,
+                });
                 break;
             case WorkspaceTypes.CRM:
-                defaultTypes.push("Contact");
-                defaultTypes.push("Organization");
-                defaultTypes.push("Deal");
+                // defaultTypes.push("Contact");
+                // defaultTypes.push("Organization");
+                // defaultTypes.push("Deal");
                 break;
             case WorkspaceTypes.AGILE_PROJECTS:
-                defaultTypes.push("Issue");
+            // defaultTypes.push("Issue");
         }
 
         const cardTypes = defaultTypes.map((type) => {
             return new Promise((resolve) => {
                 const cardType = this.cardTypesRepository.create({
-                    name: type,
+                    name: type.name,
                     createdByType: "system",
                     workspace,
                 });
 
                 this.cardTypesRepository.save(cardType).then((cardType) => {
+                    type.fields.forEach((field) => {
+                        this.fieldsService.create({
+                            name: field.name,
+                            slug: field.slug,
+                            type: field.type,
+                            required: true,
+                            workspaceId: workspace.id,
+                            cardTypeId: cardType.id,
+                            icon: field.icon,
+                        });
+                    });
+
                     resolve(cardType);
                 });
             });

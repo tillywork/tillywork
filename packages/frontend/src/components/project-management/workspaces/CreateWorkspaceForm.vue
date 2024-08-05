@@ -103,11 +103,11 @@ async function handleSubmit() {
         </v-list-item>
       </v-list>
 
-      <v-card-actions class="justify-center">
+      <v-card-actions class="justify-center mt-2">
         <v-btn
           variant="flat"
           size="large"
-          class="text-body-1"
+          class="text-none"
           type="submit"
           :loading
           >Create</v-btn

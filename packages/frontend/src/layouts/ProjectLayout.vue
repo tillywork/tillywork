@@ -68,7 +68,7 @@ if (isAuthenticated()) {
       <v-divider class="hidden-md-and-down" />
       <navigation-workspace-selector v-if="isAuthenticated()" />
 
-      <command-palette-activator class="mt-4 ms-4" />
+      <command-palette-activator class="mt-4 ms-3" />
 
       <!-- Sidebar content -->
       <v-list v-if="navigationMenuItems.length > 0">

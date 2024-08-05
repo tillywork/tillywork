@@ -4,12 +4,14 @@ import {
     DeleteDateColumn,
     Entity,
     ManyToOne,
+    OneToMany,
     PrimaryGeneratedColumn,
     Relation,
     UpdateDateColumn,
 } from "typeorm";
 import { Workspace } from "../workspaces/workspace.entity";
 import { User } from "../users/user.entity";
+import { Field } from "../fields/field.entity";
 
 /**
  * This is where entities like Task are derived from Card entity.
@@ -26,6 +28,12 @@ export class CardType {
         nullable: false,
     })
     workspace: Relation<Workspace>;
+
+    @OneToMany(() => Field, (field) => field.cardType, {
+        nullable: true,
+        onDelete: "CASCADE",
+    })
+    fields: Relation<Field[]>;
 
     @Column({ type: "enum", enum: ["system", "user"], default: "user" })
     createdByType: "system" | "user";

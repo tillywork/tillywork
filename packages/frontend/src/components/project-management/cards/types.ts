@@ -10,7 +10,7 @@ export interface Card {
   description: Content;
   cardLists: CardList[];
   users: User[];
-  data: Record<number, any>;
+  data: Record<string, any>;
   type: CardType;
   startsAt: string;
   dueAt: string | null;

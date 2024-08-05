@@ -333,14 +333,15 @@ watch(
         location="top"
       />
       <v-btn
-        class="text-capitalize"
-        size="small"
+        class="text-none text-caption"
         variant="tonal"
-        rounded="md"
+        size="small"
         color="primary"
         @click="openCreateCardDialog"
       >
-        <v-icon icon="mdi-plus" />
+        <template #prepend>
+          <v-icon icon="mdi-plus" />
+        </template>
         Add {{ list.defaultCardType.name.toLocaleLowerCase() }}
       </v-btn>
       <div class="mx-1">

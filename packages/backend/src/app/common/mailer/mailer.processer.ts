@@ -2,7 +2,7 @@ import { Processor, Process } from "@nestjs/bull";
 import { Job } from "bull";
 import { MailerService } from "./mailer.service";
 import { Logger } from "@nestjs/common";
-import { EmailStatus } from "./email.entity";
+import { EmailStatus } from "./types";
 
 @Processor("email")
 export class MailerProcessor {

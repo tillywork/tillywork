@@ -7,16 +7,16 @@ import type {
 import type { MaybeRef } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 
+export type FindAllParams = {
+  workspaceId: MaybeRef<number>;
+};
+
 export const useCardTypesService = () => {
   const { sendRequest } = useHttp();
   const queryClient = useQueryClient();
   const { workspace } = storeToRefs(useAuthStore());
 
-  function findAll({
-    workspaceId,
-  }: {
-    workspaceId: MaybeRef<number>;
-  }): Promise<CardType[]> {
+  function findAll({ workspaceId }: FindAllParams): Promise<CardType[]> {
     return sendRequest(`/card-types`, {
       method: 'GET',
       params: {
@@ -28,8 +28,7 @@ export const useCardTypesService = () => {
   function useFindAllQuery({
     workspaceId,
     enabled,
-  }: {
-    workspaceId: MaybeRef<number>;
+  }: FindAllParams & {
     enabled?: MaybeRef<boolean>;
   }) {
     return useQuery({

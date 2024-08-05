@@ -6,9 +6,10 @@ import { Queue } from "bull";
 import nodemailer, { Transporter } from "nodemailer";
 import { MailOptions } from "nodemailer/lib/json-transport";
 import { Repository } from "typeorm";
-import { Email, EmailStatus } from "./email.entity";
+import { Email } from "./email.entity";
 import { UsersService } from "../users/users.service";
 import { SendMentionNotificationParams } from "./mailer.controller";
+import { EmailStatus } from "./types";
 
 export type EmailOptions = MailOptions & {
     id: string;

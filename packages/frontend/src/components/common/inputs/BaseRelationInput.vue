@@ -29,7 +29,7 @@ const { useSearchCards } = useCardsService();
 const { data: items, refetch } = useSearchCards({
   keyword,
   workspaceId: workspace.value!.id,
-  cardTypeId: props.field.cardType!.id,
+  cardTypeId: props.field.dataCardType!.id,
 });
 
 watch(debouncedKeyword, () => {

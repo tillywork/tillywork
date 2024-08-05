@@ -284,7 +284,7 @@ function updateFieldValue({ field, v }: { field: Field; v: any }) {
     ...cardCopy.value,
     data: {
       ...cardCopy.value.data,
-      [field.id]: Array.isArray(v) ? (v.length && !!v[0] ? v : undefined) : v,
+      [field.slug]: Array.isArray(v) ? (v.length && !!v[0] ? v : undefined) : v,
     },
   };
 
@@ -554,7 +554,7 @@ function openDescriptionFileDialog() {
                 </p>
                 <template v-if="field.type === FieldTypes.TEXT">
                   <v-text-field
-                    v-model="cardCopy.data[field.id]"
+                    v-model="cardCopy.data[field.slug]"
                     hide-details
                     :placeholder="field.name"
                     @update:model-value="(v) => updateFieldValue({ field, v })"
@@ -563,7 +563,7 @@ function openDescriptionFileDialog() {
                 </template>
                 <template v-else-if="field.type === FieldTypes.DROPDOWN">
                   <v-autocomplete
-                    v-model="cardCopy.data[field.id]"
+                    v-model="cardCopy.data[field.slug]"
                     :items="field.items"
                     item-title="item"
                     item-value="item"
@@ -587,7 +587,7 @@ function openDescriptionFileDialog() {
                 </template>
                 <template v-else-if="field.type === FieldTypes.LABEL">
                   <base-label-selector
-                    v-model="cardCopy.data[field.id]"
+                    v-model="cardCopy.data[field.slug]"
                     :items="field.items"
                     :icon="field.icon"
                     :placeholder="field.name"
@@ -603,7 +603,7 @@ function openDescriptionFileDialog() {
                 </template>
                 <template v-else-if="field.type === FieldTypes.DATE">
                   <base-date-picker
-                    v-model="cardCopy.data[field.id]"
+                    v-model="cardCopy.data[field.slug]"
                     :icon="field.icon ?? 'mdi-calendar'"
                     :label="field.name"
                     @update:model-value="
@@ -617,7 +617,7 @@ function openDescriptionFileDialog() {
                 </template>
                 <template v-else-if="field.type === FieldTypes.USER">
                   <base-user-selector
-                    :model-value="cardCopy.data[field.id]?.map((userIdAsString: string) => +userIdAsString)"
+                    :model-value="cardCopy.data[field.slug]?.map((userIdAsString: string) => +userIdAsString)"
                     :users
                     :label="field.name"
                     return-id
@@ -634,7 +634,7 @@ function openDescriptionFileDialog() {
                 </template>
                 <template v-else-if="field.type === FieldTypes.CARD">
                   <base-relation-input
-                    v-model="cardCopy.data[field.id]"
+                    v-model="cardCopy.data[field.slug]"
                     :field
                     variant="outlined"
                     @update:model-value="

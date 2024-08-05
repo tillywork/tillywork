@@ -14,8 +14,15 @@ export class CreateFieldDto {
     name: string;
 
     @IsNotEmpty()
+    slug: string;
+
+    @IsNotEmpty()
     @IsEnum(FieldTypes)
     type: FieldTypes;
+
+    @IsOptional()
+    @IsNumber()
+    cardTypeId?: number;
 
     @IsNotEmpty()
     @IsString()

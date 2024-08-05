@@ -45,6 +45,9 @@ import { AddCardTypeIdToFieldTable1721214304859 } from "../migrations/1721214304
 import { UpdateFilterWhereColumnForViews1721641078360 } from "../migrations/1721641078360-update-filter-where-column-for-views";
 import { CreateEmailTable1721766012987 } from "../migrations/1721766012987-create-email-table";
 import { AddWorkspaceIdToListTable1721829339753 } from "../migrations/1721829339753-add-workspaceId-to-list-table";
+import { AddSlugToFieldTable1722503000613 } from "../migrations/1722503000613-add-slug-to-field-table";
+import { AddIsTitleAndIsPhotoToFieldTable1722852559605 } from "../migrations/1722852559605-add-isTitle-and-isPhoto-to-field-table";
+import { RenameCardTypeColumnInFieldTable1722854552647 } from "../migrations/1722854552647-rename-cardType-column-in-field-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -91,6 +94,9 @@ const migrations = [
     UpdateFilterWhereColumnForViews1721641078360,
     CreateEmailTable1721766012987,
     AddWorkspaceIdToListTable1721829339753,
+    AddSlugToFieldTable1722503000613,
+    AddIsTitleAndIsPhotoToFieldTable1722852559605,
+    RenameCardTypeColumnInFieldTable1722854552647,
 ];
 
 const config: TypeOrmModuleOptions = {

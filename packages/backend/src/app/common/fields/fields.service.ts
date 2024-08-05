@@ -13,6 +13,7 @@ import { UpdateFieldDto } from "./dto/update.field.dto";
 export type FindAllParams = {
     workspaceId?: number;
     listId?: number;
+    createdByType?: "system" | "user";
 };
 
 @Injectable()
@@ -22,7 +23,11 @@ export class FieldsService {
         private fieldsRepository: Repository<Field>
     ) {}
 
-    async findAll({ workspaceId, listId }: FindAllParams): Promise<Field[]> {
+    async findAll({
+        workspaceId,
+        listId,
+        createdByType,
+    }: FindAllParams): Promise<Field[]> {
         if (!workspaceId && !listId) {
             throw new BadRequestException(
                 "[FieldsService#findAll] One of the following query params is required: workspaceId, listId"
@@ -37,6 +42,7 @@ export class FieldsService {
                 lists: {
                     id: listId,
                 },
+                createdByType,
             },
             relations: ["lists"],
             order: {
@@ -60,6 +66,9 @@ export class FieldsService {
     async create(createFieldDto: CreateFieldDto): Promise<Field> {
         const field = this.fieldsRepository.create({
             ...createFieldDto,
+            cardType: {
+                id: createFieldDto.cardTypeId,
+            },
             workspace: {
                 id: createFieldDto.workspaceId,
             },

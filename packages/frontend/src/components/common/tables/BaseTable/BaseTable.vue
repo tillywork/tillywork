@@ -10,6 +10,7 @@ import {
   getSortedRowModel,
 } from '@tanstack/vue-table';
 import type { PaginationParams, TableSortOption } from './types';
+import type { Slots } from 'vue';
 
 const props = defineProps<{
   columns?: ColumnDef<any, any>[];
@@ -21,7 +22,9 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(['update:options', 'click:row']);
-const slots = defineSlots();
+const slots = useSlots() as Slots & {
+  empty?: (props: { props: any }) => VNode[];
+};
 
 const options = defineModel<PaginationParams>('options');
 
@@ -249,6 +252,17 @@ function generateColumnDefs(): ColumnDef<any, any>[] {
               </v-card>
             </v-hover>
           </v-list-item>
+        </template>
+
+        <template v-if="!table.getRowCount()">
+          <template v-if="!!slots.empty">
+            <slot name="empty" />
+          </template>
+          <template v-else>
+            <v-list-item lines="two">
+              <v-list-item-title> No data found. </v-list-item-title>
+            </v-list-item>
+          </template>
         </template>
       </v-list>
       <v-card class="table-footer">

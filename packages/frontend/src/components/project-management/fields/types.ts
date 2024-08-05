@@ -5,12 +5,13 @@ import type { CardType } from '../cards/types';
 export interface Field {
   id: number;
   name: string;
+  slug: string;
   type: FieldTypes;
   icon: string;
   workspaceId: number;
   required: boolean;
   multiple: boolean;
-  cardType?: CardType;
+  dataCardType?: CardType;
   items?: FieldItem[];
   createdByType: 'system' | 'user';
   createdBy?: User;
@@ -19,13 +20,15 @@ export interface Field {
 
 export interface CreateFieldDto {
   name: string;
+  slug: string;
   type: FieldTypes;
   icon: string;
   workspaceId: number;
   required?: boolean;
   multiple?: boolean;
-  items?: FieldItem;
-  cardType?: CardType;
+  items?: FieldItem[];
+  dataCardType?: CardType;
+  lists?: List[];
 }
 
 export enum FieldTypes {

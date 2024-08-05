@@ -7,7 +7,7 @@ const { setIsCommandPaletteOpen } = useCommands();
 
 <template>
   <v-btn
-    class="text-none"
+    class="text-none text-caption"
     size="small"
     variant="outlined"
     border="thin"

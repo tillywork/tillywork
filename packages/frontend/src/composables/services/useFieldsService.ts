@@ -1,4 +1,7 @@
-import type { Field, CreateFieldDto } from '@/components/common/fields/types';
+import type {
+  Field,
+  CreateFieldDto,
+} from '@/components/project-management/fields/types';
 import { useHttp } from '@/composables/useHttp';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import type { MaybeRef } from 'vue';
@@ -6,6 +9,7 @@ import type { MaybeRef } from 'vue';
 export type GetFieldsParams = {
   workspaceId?: MaybeRef<number>;
   listId?: MaybeRef<number>;
+  createdByType?: MaybeRef<'system' | 'user'>;
 };
 
 export const useFieldsService = () => {
@@ -15,12 +19,14 @@ export const useFieldsService = () => {
   async function getFields({
     workspaceId,
     listId,
+    createdByType,
   }: GetFieldsParams): Promise<Field[]> {
     return sendRequest('/fields', {
       method: 'GET',
       params: {
         workspaceId: toValue(workspaceId),
         listId: toValue(listId),
+        createdByType: toValue(createdByType),
       },
     });
   }

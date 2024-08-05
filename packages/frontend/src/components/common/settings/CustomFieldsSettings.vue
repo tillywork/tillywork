@@ -4,6 +4,7 @@ import BaseTable from '../tables/BaseTable/BaseTable.vue';
 import {
   FIELD_TYPE_OPTIONS,
   type Field,
+  type CreateFieldDto,
 } from '@/components/project-management/fields/types';
 import { cloneDeep } from 'lodash';
 import { VForm } from 'vuetify/components';
@@ -17,9 +18,10 @@ import { useListsService } from '@/composables/services/useListsService';
 import { useCardTypesService } from '@/composables/services/useCardTypesService';
 import { DIALOGS, UpsertDialogMode } from '../dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
+import slugify from 'slugify';
 
 const selectedField = ref<Field>();
-const fieldDto = ref<Partial<Field>>();
+const fieldDto = ref<Partial<Field> | CreateFieldDto>();
 const upsertFieldForm = ref<VForm>();
 const upsertMode = ref<UpsertDialogMode>();
 const isCreating = ref(false);
@@ -48,6 +50,7 @@ const {
 } = useFieldsService();
 const { data: fields } = useFieldsQuery({
   workspaceId: workspace.value!.id,
+  createdByType: 'user',
 });
 const { mutateAsync: updateField } = updateFieldMutation();
 const { mutateAsync: createField } = createFieldMutation();
@@ -81,9 +84,13 @@ function clearSelectedField() {
 }
 
 function saveField() {
+  if (!fieldDto.value) {
+    return;
+  }
+
   switch (upsertMode.value) {
     case UpsertDialogMode.UPDATE:
-      updateField(fieldDto.value)
+      updateField(fieldDto.value as Partial<Field>)
         .then(() => {
           clearSelectedField();
         })
@@ -96,7 +103,7 @@ function saveField() {
       break;
 
     case UpsertDialogMode.CREATE:
-      createField(fieldDto.value)
+      createField(fieldDto.value as CreateFieldDto)
         .then(() => {
           clearSelectedField();
         })
@@ -126,7 +133,7 @@ function handleDeleteField() {
       title: 'Confirm',
       message: `Are you sure you want to delete this field (${fieldDto.value?.name})?`,
       onConfirm: () =>
-        deleteField(fieldDto.value!.id!)
+        deleteField((fieldDto.value as Field).id)
           .then(() => {
             dialog.closeDialog(confirmDialogIndex.value);
             clearSelectedField();
@@ -156,6 +163,19 @@ function getFieldCreatedByPhoto(field: Field) {
 watch(selectedField, (v) => {
   fieldDto.value = cloneDeep(v);
 });
+
+watch(
+  () => fieldDto.value?.name,
+  (v) => {
+    if (v && upsertMode.value === 'create' && fieldDto.value?.name) {
+      fieldDto.value!.slug = slugify(fieldDto.value.name, {
+        lower: true,
+        replacement: '_',
+        strict: true,
+      });
+    }
+  }
+);
 </script>
 
 <template>
@@ -220,7 +240,9 @@ watch(selectedField, (v) => {
         <!-- ~ Lists -->
         <template #lists="{ row }">
           <template v-for="list in row.original.lists" :key="list.id">
-            <v-chip class="me-1" density="compact">{{ list.name }}</v-chip>
+            <v-chip class="me-1 text-caption" density="compact">{{
+              list.name
+            }}</v-chip>
           </template>
         </template>
 
@@ -275,6 +297,8 @@ watch(selectedField, (v) => {
             </template>
           </v-text-field>
 
+          <v-text-field v-model="fieldDto.slug" label="Field slug*" />
+
           <!-- ~ Field Type -->
           <v-autocomplete
             v-model="fieldDto.type"
@@ -292,7 +316,7 @@ watch(selectedField, (v) => {
           <!-- ~ Card Type -->
           <v-autocomplete
             v-if="fieldDto.type === FieldTypes.CARD"
-            v-model="fieldDto.cardType"
+            v-model="fieldDto.dataCardType"
             :items="cardTypes"
             item-title="name"
             label="Card Type"
@@ -358,7 +382,7 @@ watch(selectedField, (v) => {
             <!-- ~ Delete Button -->
             <v-btn
               v-if="upsertMode === UpsertDialogMode.UPDATE"
-              class="text-capitalize text-error"
+              class="text-none text-error"
               variant="outlined"
               @click="handleDeleteField"
             >
@@ -369,7 +393,7 @@ watch(selectedField, (v) => {
 
             <!-- ~ Upsert Button -->
             <v-btn
-              class="text-capitalize"
+              class="text-none"
               :text="upsertMode === UpsertDialogMode.CREATE ? 'Create' : 'Save'"
               variant="flat"
               type="submit"
