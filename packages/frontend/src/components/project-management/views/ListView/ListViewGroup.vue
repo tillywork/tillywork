@@ -480,7 +480,9 @@ watchEffect(() => {
                         </div>
                       </v-card>
                     </template>
-                    <template v-else-if="cell.column.columnDef.id === 'title'">
+                    <template
+                      v-else-if="cell.column.columnDef.id === 'data.title'"
+                    >
                       <v-card
                         :width="cell.column.getSize()"
                         class="d-flex align-center fill-height text-body-3 px-2 list-cell"
@@ -503,7 +505,7 @@ watchEffect(() => {
                           @click.prevent
                         />
                         <span class="text-truncate ms-2">
-                          {{ row.original.title }}
+                          {{ row.original.data.title }}
                         </span>
 
                         <!-- Progress -->
@@ -521,7 +523,9 @@ watchEffect(() => {
                         />
                       </v-card>
                     </template>
-                    <template v-else-if="cell.column.columnDef.id === 'dueAt'">
+                    <template
+                      v-else-if="cell.column.columnDef.id === 'data.due_at'"
+                    >
                       <v-card
                         :width="cell.column.getSize()"
                         class="list-cell d-flex align-center fill-height"
@@ -530,7 +534,7 @@ watchEffect(() => {
                         link
                       >
                         <base-date-picker
-                          :model-value="row.original.dueAt"
+                          :model-value="row.original.data.due_at"
                           @update:model-value="(newValue: string) => handleUpdateDueDate({
                             card: row.original,
                             newDueDate: newValue ?? null,

@@ -71,8 +71,8 @@ const columns = ref<ColumnDef<ListGroup, any>[]>([
     size: 50,
   },
   {
-    id: 'title',
-    accessorKey: 'title',
+    id: 'data.title',
+    accessorKey: 'data.title',
     header: 'Title',
     size: 800,
     minSize: 150,
@@ -85,8 +85,8 @@ const columns = ref<ColumnDef<ListGroup, any>[]>([
     minSize: 100,
   },
   {
-    id: 'dueAt',
-    accessorKey: 'dueAt',
+    id: 'data.due_at',
+    accessorKey: 'data.due_at',
     header: 'Due Date',
     size: 100,
     minSize: 100,
@@ -163,7 +163,10 @@ function handleUpdateDueDate({
 }) {
   const updatedCard = {
     ...card,
-    dueAt: newDueDate,
+    data: {
+      ...card.data,
+      due_at: newDueDate,
+    },
   };
   updateCard(updatedCard);
 }
@@ -206,7 +209,7 @@ function handleDeleteCard(card: Card) {
     dialog: DIALOGS.CONFIRM,
     data: {
       title: 'Confirm',
-      message: `Are you sure you want to delete ${card.title}?`,
+      message: `Are you sure you want to delete ${card.data.title}?`,
       onConfirm: () =>
         deleteCard(card.id)
           .then(() => {

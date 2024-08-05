@@ -53,7 +53,7 @@ const { data: listStages } = listStagesService.useGetListStagesQuery({
 const defaultFields = ref<FieldFilterOption[]>([
   {
     title: 'Title',
-    field: 'card.title',
+    field: 'card.data.title',
     operator: 'eq',
     value: '',
     type: FieldTypes.TEXT,
@@ -61,7 +61,7 @@ const defaultFields = ref<FieldFilterOption[]>([
   },
   {
     title: 'Due Date',
-    field: 'card.dueAt',
+    field: 'card.data.due_at',
     operator: 'between',
     value: '',
     type: FieldTypes.DATE,

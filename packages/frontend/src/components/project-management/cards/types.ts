@@ -6,14 +6,10 @@ import type { Workspace } from '../workspaces/types';
 
 export interface Card {
   id: number;
-  title: string;
-  description: Content;
   cardLists: CardList[];
   users: User[];
   data: Record<string, any>;
   type: CardType;
-  startsAt: string;
-  dueAt: string | null;
   createdAt: string;
   updatedAt: string;
   parent?: Card;
@@ -32,15 +28,12 @@ export interface CardList {
 }
 
 export interface CreateCardDto {
-  title: string;
+  data: Record<string, any>;
   /** The ID of the Card Type being created. */
   type: number;
   workspaceId: number;
   listId?: number;
   listStageId?: number;
-  description?: Content;
-  startsAt?: string;
-  dueAt?: string;
   users?: User[];
   listStage?: ListStage;
   parent?: Card;

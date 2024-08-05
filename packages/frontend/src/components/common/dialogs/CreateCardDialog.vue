@@ -62,7 +62,9 @@ const cardType = computed<CardType>(() => {
 
 const createCardMutation = cardsService.useCreateCardMutation();
 const createCardDto = ref<CreateCardDto>({
-  title: '',
+  data: {
+    title: '',
+  },
   listId: currentDialog.value?.data?.listId ?? list.value?.id,
   listStage: currentDialog.value?.data?.listStage ?? list.value?.listStages[0],
   users: currentDialog.value?.data?.users,
@@ -85,8 +87,8 @@ function closeDialog() {
 
 async function createCard() {
   if (
-    createCardDto.value.title &&
-    createCardDto.value.title.trim() !== '' &&
+    createCardDto.value.data.title &&
+    createCardDto.value.data.title.trim() !== '' &&
     createCardDto.value.listStage &&
     createCardDto.value.listId
   ) {
@@ -111,8 +113,8 @@ async function createCard() {
  * If create more is on, don't close the dialog.
  */
 function handlePostCreate() {
-  createCardDto.value.title = '';
-  createCardDto.value.description = undefined;
+  createCardDto.value.data.title = '';
+  createCardDto.value.data.description = undefined;
 
   showSnackbar({
     message: `${cardType.value?.name} created`,
@@ -158,7 +160,7 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
     <v-form ref="createForm" @submit.prevent="createCard">
       <div class="px-4 pb-2">
         <base-editor-input
-          v-model="createCardDto.title"
+          v-model="createCardDto.data.title"
           :placeholder="cardType.name + ' name'"
           autofocus
           :heading="3"
@@ -169,7 +171,7 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
         />
         <base-editor-input
           ref="descriptionEditor"
-          v-model:json="createCardDto.description"
+          v-model:json="createCardDto.data.description"
           placeholder="Enter description.."
           editable
           min-height="80px"
@@ -186,7 +188,7 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
             activator-hover-text="Assignee"
           />
           <base-date-picker
-            v-model="createCardDto.dueAt"
+            v-model="createCardDto.data.due_at"
             icon="mdi-calendar"
             class="text-caption"
             label="Due date"

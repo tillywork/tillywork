@@ -24,17 +24,6 @@ export class Card {
     @PrimaryGeneratedColumn("increment")
     id: number;
 
-    @Column({ type: "varchar" })
-    title: string;
-
-    @Column({ type: "jsonb", nullable: true })
-    description?: any;
-
-    @Column({ type: "timestamp", nullable: true })
-    startsAt: Date;
-    @Column({ type: "timestamp", nullable: true })
-    dueAt: Date;
-
     @ManyToOne(() => CardType, { nullable: false, eager: true })
     type: Relation<CardType>;
 

@@ -371,7 +371,7 @@ watchEffect(() => {
                 class="text-wrap text-body-3"
                 style="line-height: 1.5"
               >
-                {{ card.title }}
+                {{ card.data.title }}
               </v-card-title>
 
               <template #append>
@@ -393,7 +393,7 @@ watchEffect(() => {
               style="min-height: fit-content"
             >
               <base-date-picker
-                :model-value="card.dueAt"
+                :model-value="card.data.due_at"
                 @update:model-value="(newValue: string) => handleUpdateDueDate({
                       card: card,
                       newDueDate: newValue ?? null,

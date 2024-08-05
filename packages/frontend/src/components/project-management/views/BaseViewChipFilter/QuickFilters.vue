@@ -49,7 +49,7 @@ const quickFilterOptions = computed<QuickFilter>(() => {
 
   const dueDateGroup: QuickFilterGroup = {
     name: 'Due Date',
-    field: 'card.dueAt',
+    field: 'card.data.due_at',
     icon: 'mdi-calendar-range',
     options: quickFilterItemsDate,
   };
@@ -84,16 +84,16 @@ const quickFilterOptions = computed<QuickFilter>(() => {
     ?.map((x) => x)
     .sort((a, b) => a.type.localeCompare(b.type))
     .forEach((field) => {
-      const { type, name, items, icon, id } = field;
+      const { type, name, items, icon, slug } = field;
       if (quickFilterGroupsCustomFields.includes(type)) {
         customFieldGroups.push({
           name,
-          field: `card.data.${id}`,
+          field: `card.data.${slug}`,
           icon,
           options:
             items?.map((item: FieldItem) => {
               return {
-                field: `card.data.${id}`,
+                field: `card.data.${slug}`,
                 operator: filterUtils.getOperatorFromFieldType(field),
                 value: [item.item],
                 title: item.item,

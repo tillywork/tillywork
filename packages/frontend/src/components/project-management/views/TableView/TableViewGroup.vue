@@ -483,7 +483,9 @@ watchEffect(() => {
                         </div>
                       </v-card>
                     </template>
-                    <template v-else-if="cell.column.columnDef.id === 'title'">
+                    <template
+                      v-else-if="cell.column.columnDef.id === 'data.title'"
+                    >
                       <v-card
                         :width="getColumnSize(cell.column.columnDef.id)"
                         class="d-flex align-center fill-height text-body-3 px-2 table-cell"
@@ -506,7 +508,7 @@ watchEffect(() => {
                           @click.prevent
                         />
                         <span class="text-truncate ms-2">
-                          {{ row.original.title }}
+                          {{ row.original.data.title }}
                         </span>
 
                         <!-- Progress -->
@@ -524,7 +526,9 @@ watchEffect(() => {
                         />
                       </v-card>
                     </template>
-                    <template v-else-if="cell.column.columnDef.id === 'dueAt'">
+                    <template
+                      v-else-if="cell.column.columnDef.id === 'data.due_at'"
+                    >
                       <v-card
                         :width="getColumnSize(cell.column.columnDef.id)"
                         class="table-cell d-flex align-center fill-height"

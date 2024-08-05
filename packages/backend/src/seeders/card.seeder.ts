@@ -42,7 +42,9 @@ export async function seedCardsData(connection: Connection): Promise<void> {
     logger.log({ list });
     for (let i = 0; i < 100; i++) {
         const card = await cardsService.create({
-            title: faker.company.name(),
+            data: {
+                title: faker.company.name(),
+            },
             listId: list.id,
             listStageId: faker.helpers.arrayElement(
                 list.listStages.map((stage) => stage.id)

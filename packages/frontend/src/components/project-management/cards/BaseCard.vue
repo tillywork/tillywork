@@ -44,9 +44,9 @@ const cardCopy = ref<Card>(cloneDeep(props.card));
 const comment = ref<Content>();
 const isCommentEmpty = ref<boolean>();
 const descriptionInput = ref();
-const cardTitle = ref(cardCopy.value.title);
+const cardTitle = ref(cardCopy.value.data.title);
 const debouncedTitle = useDebounce(cardTitle, 2000);
-const cardDescription = ref(cardCopy.value.description);
+const cardDescription = ref(cardCopy.value.data.description);
 const debouncedDescription = useDebounce(cardDescription, 2000);
 
 const cardListStage = ref(cardCopy.value.cardLists[0].listStage);
@@ -120,9 +120,9 @@ watch(
   (v) => {
     if (v) {
       cardCopy.value = cloneDeep(v);
-      cardTitle.value = cardCopy.value.title;
+      cardTitle.value = cardCopy.value.data.title;
       cardListStage.value = cardCopy.value.cardLists[0].listStage;
-      cardDescription.value = cardCopy.value.description;
+      cardDescription.value = cardCopy.value.data.description;
     }
   }
 );
@@ -143,8 +143,8 @@ watch(keys[[leaderKey, 'I'].join('+')], (v) => {
 
 function updateTitle() {
   const newTitle = cardTitle.value.trim();
-  if (newTitle !== '' && newTitle !== props.card.title) {
-    cardCopy.value.title = newTitle;
+  if (newTitle !== '' && newTitle !== props.card.data.title) {
+    cardCopy.value.data.title = newTitle;
     updateCard(cardCopy.value).then(() => {
       snackbar.showSnackbar({
         message: 'Task title updated.',
@@ -233,7 +233,7 @@ function createComment(content: ActivityContent) {
 }
 
 function updateCardDueAt(newDueAt: string) {
-  if (props.card.dueAt !== newDueAt) {
+  if (props.card.data.due_at !== newDueAt) {
     updateCard(cardCopy.value).catch((e) => {
       snackbar.showSnackbar({
         color: 'error',
@@ -246,7 +246,7 @@ function updateCardDueAt(newDueAt: string) {
 }
 
 function updateCardStartsAt(newStartsAt: string) {
-  if (props.card.startsAt !== newStartsAt) {
+  if (props.card.data.starts_at !== newStartsAt) {
     updateCard(cardCopy.value).catch((e) => {
       snackbar.showSnackbar({
         color: 'error',
@@ -533,7 +533,7 @@ function openDescriptionFileDialog() {
             <base-date-picker
               label="Start date"
               icon="mdi-calendar"
-              v-model="cardCopy.startsAt"
+              v-model="cardCopy.data.starts_at"
               @update:model-value="updateCardStartsAt"
             />
           </div>
@@ -542,7 +542,7 @@ function openDescriptionFileDialog() {
             <base-date-picker
               label="Due date"
               icon="mdi-calendar"
-              v-model="cardCopy.dueAt"
+              v-model="cardCopy.data.due_at"
               @update:model-value="updateCardDueAt"
             />
           </div>
