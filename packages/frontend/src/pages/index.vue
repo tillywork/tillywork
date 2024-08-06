@@ -19,6 +19,7 @@ const { workspace } = storeToRefs(authStore);
 
 const isWorkspaceReady = computed(() => !!workspace.value && !currentList);
 const workspaceId = computed(() => workspace.value?.id ?? 0);
+const pathPrefix = computed(() => `/${workspace?.value?.slug}/list/`);
 
 const { useGetSpacesQuery } = useSpacesService();
 const { data: spaces } = useGetSpacesQuery({
@@ -38,13 +39,13 @@ watch(lists, (v) => {
       workspace.value!.id,
       [spaces.value?.[0]?.id].filter(Boolean) as number[]
     );
-    router.push({ path: `/pm/list/${v[0].id}` });
+    router.push(pathPrefix.value + v[0].id);
   }
 });
 
 onMounted(() => {
   if (currentList) {
-    router.push('/pm/list/' + currentList.id);
+    router.push(pathPrefix.value + currentList.id);
   }
 });
 </script>

@@ -42,6 +42,7 @@ import { AddIgnoreChildrenToViewTable1720514522438 } from "../migrations/1720514
 import { CreateListFieldsTable1720527075305 } from "../migrations/1720527075305-create-list-fields-table";
 import { AddWorkspaceIdToCardTable1721207599200 } from "../migrations/1721207599200-add-workspaceId-to-card-table";
 import { AddCardTypeIdToFieldTable1721214304859 } from "../migrations/1721214304859-add-cardTypeId-to-field-table";
+import { AddSlugColumnToWorkspaceTable1721624249053 } from "../migrations/1721624249053-add-slug-column-to-workspace-table";
 import { UpdateFilterWhereColumnForViews1721641078360 } from "../migrations/1721641078360-update-filter-where-column-for-views";
 import { CreateEmailTable1721766012987 } from "../migrations/1721766012987-create-email-table";
 import { AddWorkspaceIdToListTable1721829339753 } from "../migrations/1721829339753-add-workspaceId-to-list-table";
@@ -88,6 +89,7 @@ const migrations = [
     CreateListFieldsTable1720527075305,
     AddWorkspaceIdToCardTable1721207599200,
     AddCardTypeIdToFieldTable1721214304859,
+    AddSlugColumnToWorkspaceTable1721624249053,
     UpdateFilterWhereColumnForViews1721641078360,
     CreateEmailTable1721766012987,
     AddWorkspaceIdToListTable1721829339753,

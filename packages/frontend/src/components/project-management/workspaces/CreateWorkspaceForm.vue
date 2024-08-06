@@ -3,6 +3,7 @@ import { VForm } from 'vuetify/components';
 import { WorkspaceTypes, type Workspace } from './types';
 import { useAuthStore } from '@/stores/auth';
 import validationUtils from '@/utils/validation';
+import BaseSlugInput from '@/components/common/inputs/BaseSlugInput.vue';
 
 const props = defineProps<{
   loading?: boolean;
@@ -21,6 +22,7 @@ const workspaceDto = ref<
   Partial<Workspace> & { createOnboardingData: boolean }
 >({
   name: '',
+  slug: '',
   projectId: project.value!.id,
   ownerId: user.value!.id,
   type: WorkspaceTypes.PROJECT_MANAGEMENT,
@@ -47,12 +49,23 @@ async function handleSubmit() {
   >
     <v-card width="350" class="mt-6 mx-auto" :class="cardClass">
       <v-text-field
-        label="Name"
-        hint="The name of your workspace"
         v-model="workspaceDto.name"
+        label="Name*"
+        hint="The name of your workspace"
         :rules="[rules.required]"
         persistent-hint
         autofocus
+      />
+      <base-slug-input
+        v-model="workspaceDto.slug"
+        auto
+        :dependent="workspaceDto.name!"
+        :props="{
+          label: 'Slug*',
+          hint: 'The slug of your workspace',
+          rules: [rules.required, rules.slug],
+          persistentHint: true,
+        }"
       />
       <p class="mt-6 ms-2 text-subtitle-2">Workspace App</p>
       <v-list

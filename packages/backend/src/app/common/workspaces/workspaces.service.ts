@@ -53,7 +53,23 @@ export class WorkspacesService {
         return this.workspacesRepository.findOne({ where });
     }
 
-    async create(createWorkspaceDto: CreateWorkspaceDto): Promise<Workspace> {
+    async findOneBySlug(slug: string): Promise<Workspace> {
+        return this.workspacesRepository.findOne({ where: { slug } });
+    }
+
+    async create(
+        createWorkspaceDto: CreateWorkspaceDto
+    ): Promise<Workspace | { error: string }> {
+        const workspaceBySlug = await this.findOneBySlug(
+            createWorkspaceDto.slug
+        );
+
+        if (workspaceBySlug) {
+            return {
+                error: "SLUG_EXISTS",
+            };
+        }
+
         const workspace = this.workspacesRepository.create(createWorkspaceDto);
         await this.workspacesRepository.save(workspace);
 
@@ -78,7 +94,17 @@ export class WorkspacesService {
     async update(
         id: number,
         updateWorkspaceDto: UpdateWorkspaceDto
-    ): Promise<Workspace> {
+    ): Promise<Workspace | { error: string }> {
+        const workspaceBySlug = await this.findOneBySlug(
+            updateWorkspaceDto.slug
+        );
+
+        if (workspaceBySlug && workspaceBySlug.id !== id) {
+            return {
+                error: "SLUG_EXISTS",
+            };
+        }
+
         const workspace = await this.findOne(id);
         this.workspacesRepository.merge(workspace, updateWorkspaceDto);
         return this.workspacesRepository.save(workspace);

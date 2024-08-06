@@ -11,7 +11,7 @@ definePage({
 
 const { setCurrentList } = useStateStore();
 
-const route = useRoute('/pm/list/[listId]/');
+const route = useRoute('/[workspaceSlug]/list/[listId]/');
 const router = useRouter();
 
 const listId = computed(() => +route.params.listId);

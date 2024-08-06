@@ -3,6 +3,8 @@ const validationUtils = {
   rules: {
     required: (v: any) => !!v || 'This field is required',
     email: (v: string) => !v || /.+@.+\..+/.test(v) || 'Email must be valid',
+    slug: (v: string) =>
+      !v || /^[a-z0-9]+(?:-[a-z0-9]+)*$/g.test(v) || 'Slug must be valid',
     phoneNumber: (v: string) =>
       !v || /^\+?(\d.*){3,}$/.test(v) || 'Phone number must be valid',
     array: {

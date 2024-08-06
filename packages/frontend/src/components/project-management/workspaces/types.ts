@@ -4,6 +4,7 @@ import type { Space } from '../spaces/types';
 export interface Workspace {
   id: number;
   name: string;
+  slug: string;
   ownerId: number;
   projectId: number;
   type: WorkspaceTypes;
