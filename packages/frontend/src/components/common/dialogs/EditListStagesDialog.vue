@@ -3,7 +3,7 @@ import { DIALOGS, UpsertDialogMode } from './types';
 import { useDialogStore } from '@/stores/dialog';
 
 import { useQueryClient } from '@tanstack/vue-query';
-import { useListStagesService } from '@/composables/services/useListStagesService';
+import { useListStagesService } from '@/services/useListStagesService';
 import type { ListStage } from '@/components/project-management/lists/types';
 import draggable from 'vuedraggable';
 

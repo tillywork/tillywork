@@ -14,6 +14,7 @@ import { UpdateFieldDto } from "./dto/update.field.dto";
 export type FindAllParams = {
     workspaceId?: number;
     listId?: number;
+    cardTypeId?: number;
     createdByType?: "system" | "user";
 };
 
@@ -27,11 +28,12 @@ export class FieldsService {
     async findAll({
         workspaceId,
         listId,
+        cardTypeId,
         createdByType,
     }: FindAllParams): Promise<Field[]> {
-        if (!workspaceId && !listId) {
+        if (!workspaceId && !listId && !cardTypeId) {
             throw new BadRequestException(
-                "[FieldsService#findAll] One of the following query params is required: workspaceId, listId"
+                "[FieldsService#findAll] One of the following query params is required: workspaceId, listId, cardTypeId"
             );
         }
 
@@ -42,6 +44,9 @@ export class FieldsService {
                 },
                 lists: {
                     id: listId,
+                },
+                cardType: {
+                    id: cardTypeId,
                 },
                 createdByType,
             },

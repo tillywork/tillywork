@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CreateSpaceBtn from './CreateSpaceBtn.vue';
-import { useSpacesService } from '../../../composables/services/useSpacesService';
+import { useSpacesService } from '@/services/useSpacesService';
 import { useWorkspaceStore } from '@/stores/workspace';
 import NavigationWorkspaceSpaceItem from './NavigationWorkspaceSpaceItem.vue';
 import { useAuthStore } from '@/stores/auth';

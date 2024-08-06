@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { useListsService } from '@/composables/services/useListsService';
+import { useListsService } from '@/services/useListsService';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
 import BaseIconSelector from '../../common/inputs/BaseIconSelector/BaseIconSelector.vue';
 import type { List } from '@/components/project-management/lists/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
-import { useCardTypesService } from '@/composables/services/useCardTypesService';
+import { useCardTypesService } from '@/services/useCardTypesService';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS, UpsertDialogMode } from './types';
 import { useAuthStore } from '@/stores/auth';

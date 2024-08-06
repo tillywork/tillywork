@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useFilesService } from '@/composables/services/useFilesService';
+import { useFilesService } from '@/services/useFilesService';
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3';
 
 const props = defineProps(nodeViewProps);

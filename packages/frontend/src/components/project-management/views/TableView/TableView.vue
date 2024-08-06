@@ -8,11 +8,11 @@ import {
   type Column,
 } from '@tanstack/vue-table';
 import { type View } from '../types';
-import { useListGroupsService } from '@/composables/services/useListGroupsService';
+import { useListGroupsService } from '@/services/useListGroupsService';
 import type { Card } from '../../cards/types';
 import { type ListGroup } from '../../lists/types';
-import { useListStagesService } from '@/composables/services/useListStagesService';
-import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { useListStagesService } from '@/services/useListStagesService';
+import { useProjectUsersService } from '@/services/useProjectUsersService';
 import TableViewGroup from './TableViewGroup.vue';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';

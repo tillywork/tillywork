@@ -3,7 +3,7 @@ import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
-import { useCardTypesService } from '@/composables/services/useCardTypesService';
+import { useCardTypesService } from '@/services/useCardTypesService';
 import { type CardType } from '@/components/project-management/cards/types';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from './types';

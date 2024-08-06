@@ -34,9 +34,17 @@ export class Field {
     @Column({ type: "boolean", default: false })
     isTitle: boolean;
 
+    /** Defines whether this field is the main description field of the entity. */
+    @Column({ type: "boolean", default: false })
+    isDescription: boolean;
+
     /** Defines whether this field is the main photo field of the entity. */
     @Column({ type: "boolean", default: false })
     isPhoto: boolean;
+
+    /** Pinned fields appear in the views and the create card dialog. */
+    @Column({ type: "boolean", default: false })
+    isPinned: boolean;
 
     @Column({ type: "enum", enum: FieldTypes })
     type: FieldTypes;

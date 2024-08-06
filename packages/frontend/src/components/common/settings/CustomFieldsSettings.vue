@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useFieldsService } from '@/composables/services/useFieldsService';
+import { useFieldsService } from '@/services/useFieldsService';
 import BaseTable from '../tables/BaseTable/BaseTable.vue';
 import {
   FIELD_TYPE_OPTIONS,
@@ -14,8 +14,8 @@ import BaseIconSelector from '../inputs/BaseIconSelector/BaseIconSelector.vue';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
-import { useListsService } from '@/composables/services/useListsService';
-import { useCardTypesService } from '@/composables/services/useCardTypesService';
+import { useListsService } from '@/services/useListsService';
+import { useCardTypesService } from '@/services/useCardTypesService';
 import { DIALOGS, UpsertDialogMode } from '../dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 import slugify from 'slugify';

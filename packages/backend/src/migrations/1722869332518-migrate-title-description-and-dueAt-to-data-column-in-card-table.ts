@@ -18,18 +18,21 @@ export class MigrateTitleDescriptionAndDueAtToDataColumnInCardTable1722869332518
                     slug: "title",
                     type: FieldTypes.RICH,
                     icon: "mdi-text-recognition",
+                    isTitle: true,
                 },
                 {
                     name: "Description",
                     slug: "description",
                     type: FieldTypes.RICH,
                     icon: "mdi-text-box",
+                    isDescription: true,
                 },
                 {
                     name: "Due At",
                     slug: "due_at",
                     type: FieldTypes.DATE,
                     icon: "mdi-calendar",
+                    isPinned: true,
                 },
                 {
                     name: "Starts At",
@@ -53,8 +56,8 @@ export class MigrateTitleDescriptionAndDueAtToDataColumnInCardTable1722869332518
                     // If the field doesn't exist, create it
                     await queryRunner.query(
                         `
-                  INSERT INTO field (name, slug, icon, type, "cardTypeId", "workspaceId", "createdAt", "updatedAt", "createdByType")
-                  VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW(), 'system')
+                  INSERT INTO field (name, slug, icon, type, "cardTypeId", "workspaceId", "createdAt", "updatedAt", "createdByType", "isTitle", "isDescription", "isPinned")
+                  VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW(), 'system', $7, $8, $9)
                 `,
                         [
                             field.name,
@@ -63,6 +66,9 @@ export class MigrateTitleDescriptionAndDueAtToDataColumnInCardTable1722869332518
                             field.type,
                             cardType.id,
                             cardType.workspaceId,
+                            field.isTitle ?? false,
+                            field.isDescription ?? false,
+                            field.isPinned ?? false,
                         ]
                     );
                 }
@@ -74,7 +80,11 @@ export class MigrateTitleDescriptionAndDueAtToDataColumnInCardTable1722869332518
         UPDATE card
         SET data = data || jsonb_build_object(
           'title', title,
-          'description', description,
+          'description', CASE 
+            WHEN description IS NULL THEN NULL
+            WHEN description::jsonb IS NULL THEN to_jsonb(description)
+            ELSE description::jsonb
+          END,
           'due_at', "dueAt",
           'starts_at', "startsAt"
         )

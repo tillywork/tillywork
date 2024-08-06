@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useViewsService } from '@/composables/services/useViewsService';
+import { useViewsService } from '@/services/useViewsService';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
 import {

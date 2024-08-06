@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CardType } from '@/components/project-management/cards/types';
-import { useCardTypesService } from '@/composables/services/useCardTypesService';
+import { useCardTypesService } from '@/services/useCardTypesService';
 import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
 import BaseTable from '../tables/BaseTable/BaseTable.vue';

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useSpacesService } from '@/composables/services/useSpacesService';
+import { useSpacesService } from '@/services/useSpacesService';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
 import BaseIconSelector from '../../common/inputs/BaseIconSelector/BaseIconSelector.vue';

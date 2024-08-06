@@ -1,4 +1,4 @@
-import type { CardsData } from '@/composables/services/useCardsService';
+import type { CardsData } from '@/services/useCardsService';
 import type { PaginationParams } from '../views/types';
 import type { View } from '../views/types';
 import type { QueryFilter } from '../filters/types';

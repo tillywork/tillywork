@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type List } from '@/components/project-management/lists/types';
-import { useListsService } from '@/composables/services/useListsService';
+import { useListsService } from '@/services/useListsService';
 import { useAuthStore } from '@/stores/auth';
 
 const selectedList = defineModel<List>();

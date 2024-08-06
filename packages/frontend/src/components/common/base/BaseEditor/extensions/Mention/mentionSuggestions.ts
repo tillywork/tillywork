@@ -4,7 +4,7 @@ import { VueRenderer } from '@tiptap/vue-3';
 import tippy from 'tippy.js';
 
 import MentionList from './MentionList.vue';
-import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { useProjectUsersService } from '@/services/useProjectUsersService';
 import { useAuthStore } from '@/stores/auth';
 
 export default {

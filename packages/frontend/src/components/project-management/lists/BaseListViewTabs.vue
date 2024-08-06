@@ -3,7 +3,7 @@ import { ViewTypes, type View } from '../views/types';
 import type { List } from './types';
 import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
 import { useWorkspaceStore } from '@/stores/workspace';
-import { useViewsService } from '@/composables/services/useViewsService';
+import { useViewsService } from '@/services/useViewsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
 

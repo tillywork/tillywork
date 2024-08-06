@@ -1,7 +1,7 @@
 import { jwtDecode } from 'jwt-decode';
 import type { CreateUserDto, User } from '@/components/common/users/types';
 import type { RouteLocation } from 'vue-router/auto';
-import { useAuthService } from '@/composables/services/useAuthService';
+import { useAuthService } from '@/services/useAuthService';
 import { useSnackbarStore } from './snackbar';
 import type { Project } from '@/components/common/projects/types';
 import type { Workspace } from '@/components/project-management/workspaces/types';

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
 import { DIALOGS } from '@/components/common/dialogs/types';
-import { useCardActivitiesService } from '@/composables/services/useCardActivitiesService';
-import { useUsersService } from '@/composables/services/useUsersService';
+import { useCardActivitiesService } from '@/services/useCardActivitiesService';
+import { useUsersService } from '@/services/useUsersService';
 import { useDate } from '@/composables/useDate';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';

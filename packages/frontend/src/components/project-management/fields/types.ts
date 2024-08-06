@@ -16,6 +16,10 @@ export interface Field {
   createdByType: 'system' | 'user';
   createdBy?: User;
   lists?: List[];
+  isTitle: boolean;
+  isDescription: boolean;
+  isPhoto: boolean;
+  isPinned: boolean;
 }
 
 export interface CreateFieldDto {

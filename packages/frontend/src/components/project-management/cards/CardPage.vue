@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCardsService } from '@/composables/services/useCardsService';
+import { useCardsService } from '@/services/useCardsService';
 import BaseCard from './BaseCard.vue';
 
 const route = useRoute('/pm/card/[cardId]');

@@ -20,7 +20,7 @@ const snackbarOffsets = computed(() => {
       :key="snackbar.id"
       :model-value="true"
       :color="snackbar.options.color"
-      variant="tonal"
+      variant="flat"
       rounded="lg"
       :timeout="snackbar.options.timeout ?? 4000"
       :style="{ bottom: `${snackbarOffsets[index]}px` }"

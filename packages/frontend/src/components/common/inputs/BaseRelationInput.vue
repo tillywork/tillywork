@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { Field } from '@/components/project-management/fields/types';
-import { useCardsService } from '@/composables/services/useCardsService';
+import { useCardsService } from '@/services/useCardsService';
 import { useAuthStore } from '@/stores/auth';
 import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
+import type { Card } from '@/components/project-management/cards/types';
 
 const model = defineModel();
 const props = defineProps<{
@@ -57,7 +58,11 @@ watch(debouncedKeyword, () => {
     width="160"
   >
     <template #chip="{ item }">
-      <base-card-chip :card="{ id: item.value }" disable-link hide-stage />
+      <base-card-chip
+        :card="{ id: item.value, type: (item.raw as Card).type }"
+        disable-link
+        hide-stage
+      />
     </template>
   </v-autocomplete>
 </template>

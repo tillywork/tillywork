@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { useCardsService } from '@/composables/services/useCardsService';
+import { useCardsService } from '@/services/useCardsService';
 import type { Card } from './types';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
+import { useCardTypeFields } from '@/composables/useCardTypeFields';
 
 const props = defineProps<{
-  card: Pick<Card, 'id'>;
+  card: Pick<Card, 'id' | 'type'>;
   maxWidth?: number;
   disableLink?: boolean;
   hideStage?: boolean;
@@ -15,6 +16,10 @@ const cardId = computed(() => props.card.id);
 const { useGetCardQuery } = useCardsService();
 const { data: cardCopy } = useGetCardQuery({
   cardId,
+});
+
+const { titleField } = useCardTypeFields({
+  cardTypeId: props.card.type.id,
 });
 </script>
 
@@ -29,7 +34,7 @@ const { data: cardCopy } = useGetCardQuery({
     height="28"
   >
     <div class="d-inline-block text-truncate">
-      <template v-if="cardCopy">
+      <template v-if="cardCopy && titleField">
         <list-stage-selector
           v-if="!hideStage"
           :model-value="cardCopy.cardLists[0].listStage"
@@ -37,7 +42,7 @@ const { data: cardCopy } = useGetCardQuery({
           theme="icon"
           readonly
         />
-        {{ cardCopy.title }}
+        {{ cardCopy.data[titleField.slug] }}
       </template>
       <template v-else>
         <v-progress-circular

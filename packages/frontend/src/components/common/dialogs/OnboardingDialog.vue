@@ -3,8 +3,8 @@ import {
   WorkspaceTypes,
   type Workspace,
 } from '@/components/project-management/workspaces/types';
-import { useUsersService } from '@/composables/services/useUsersService';
-import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
+import { useUsersService } from '@/services/useUsersService';
+import { useWorkspacesService } from '@/services/useWorkspacesService';
 import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';

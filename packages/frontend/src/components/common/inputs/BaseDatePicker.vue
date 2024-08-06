@@ -209,7 +209,7 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
       <template v-else>
         <base-card-property-value-btn
           v-bind="props"
-          class="text-capitalize justify-space-between font-weight-regular"
+          class="text-none text-caption justify-space-between font-weight-regular"
           :class="textClass"
           @click.prevent
         >

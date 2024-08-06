@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useUsersService } from '@/composables/services/useUsersService';
+import { useUsersService } from '@/services/useUsersService';
 import { useAuthStore } from '@/stores/auth';
 
 const { getUserFullName } = useUsersService();

@@ -1,5 +1,5 @@
 import type { User } from '@/components/common/users/types';
-import { useHttp } from '../useHttp';
+import { useHttp } from '@/composables/useHttp';
 import type { CardType } from '@/components/project-management/cards/types';
 
 export type SendMentionNotificationParams = {

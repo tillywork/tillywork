@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ListGroupOptions, type List, type ListGroup } from '../lists/types';
-import { useViewsService } from '@/composables/services/useViewsService';
-import { useListGroupsService } from '@/composables/services/useListGroupsService';
+import { useViewsService } from '@/services/useViewsService';
+import { useListGroupsService } from '@/services/useListGroupsService';
 import type { Card } from '../cards/types';
 import { type ColumnDef } from '@tanstack/vue-table';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
@@ -11,13 +11,13 @@ import { DEFAULT_SORT_OPTIONS, type TableSortOption } from './types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { ViewTypes, type View } from './types';
 import { useQueryClient } from '@tanstack/vue-query';
-import { useCardsService } from '@/composables/services/useCardsService';
+import { useCardsService } from '@/services/useCardsService';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import BoardView from './BoardView/BoardView.vue';
 import ListView from './ListView/ListView.vue';
 import BaseViewChipFilter from './BaseViewChipFilter/BaseViewChipFilter.vue';
-import { useFitlersService } from '@/composables/services/useFiltersService';
+import { useFitlersService } from '@/services/useFiltersService';
 import {
   FilterEntityTypes,
   type Filter,

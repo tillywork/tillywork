@@ -3,6 +3,7 @@ import type { User } from '@/components/common/users/types';
 import type { Content } from '@tiptap/vue-3';
 import type { List, ListStage } from '../lists/types';
 import type { Workspace } from '../workspaces/types';
+import type { Field } from '../fields/types';
 
 export interface Card {
   id: number;
@@ -64,6 +65,7 @@ export type CardType = {
   id: number;
   name: string;
   workspace: Workspace;
+  fields: Field[];
   createdByType: 'system' | 'user';
   createdBy: User;
   createdAt: Date;

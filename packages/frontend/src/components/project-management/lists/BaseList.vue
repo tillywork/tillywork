@@ -3,7 +3,7 @@ import BaseListViewTabs from './BaseListViewTabs.vue';
 import BaseView from '../views/BaseView.vue';
 import type { List } from './types';
 import type { View } from '../views/types';
-import { useViewsService } from '@/composables/services/useViewsService';
+import { useViewsService } from '@/services/useViewsService';
 
 const props = defineProps<{
   list: List;

@@ -3,7 +3,7 @@ import type { Content } from '@tiptap/vue-3';
 import {
   useMailerService,
   type SendMentionNotificationParams,
-} from './services/useMailerService';
+} from '@/services/useMailerService';
 
 export function useMentionNotifications() {
   const { sendMentionNotificationEmail } = useMailerService();

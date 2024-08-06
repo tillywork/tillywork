@@ -15,8 +15,14 @@ defineProps<{
     :variant="variant ?? 'text'"
     :density="(density as any) ?? 'comfortable'"
     :size="size ?? 'small'"
-    :icon="icon ?? 'mdi-plus'"
+    icon
     :color="color ?? 'default'"
     :rounded="rounded"
-  />
+  >
+    <v-icon
+      :size="size ?? 'small'"
+      :icon="icon ?? 'mdi-plus'"
+      :color="color ?? 'default'"
+    />
+  </v-btn>
 </template>

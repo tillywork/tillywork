@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
+import { useWorkspacesService } from '@/services/useWorkspacesService';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';

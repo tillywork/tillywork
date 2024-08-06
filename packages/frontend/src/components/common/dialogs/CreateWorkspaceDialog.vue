@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
+import { useWorkspacesService } from '@/services/useWorkspacesService';
 import { type Workspace } from '@/components/project-management/workspaces/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import CreateWorkspaceForm from '@/components/project-management/workspaces/CreateWorkspaceForm.vue';

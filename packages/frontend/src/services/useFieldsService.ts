@@ -9,6 +9,7 @@ import type { MaybeRef } from 'vue';
 export type GetFieldsParams = {
   workspaceId?: MaybeRef<number>;
   listId?: MaybeRef<number>;
+  cardTypeId?: MaybeRef<number>;
   createdByType?: MaybeRef<'system' | 'user'>;
 };
 
@@ -19,6 +20,7 @@ export const useFieldsService = () => {
   async function getFields({
     workspaceId,
     listId,
+    cardTypeId,
     createdByType,
   }: GetFieldsParams): Promise<Field[]> {
     return sendRequest('/fields', {
@@ -26,6 +28,7 @@ export const useFieldsService = () => {
       params: {
         workspaceId: toValue(workspaceId),
         listId: toValue(listId),
+        cardTypeId: toValue(cardTypeId),
         createdByType: toValue(createdByType),
       },
     });
@@ -33,9 +36,17 @@ export const useFieldsService = () => {
 
   function useFieldsQuery(params: GetFieldsParams) {
     return useQuery({
-      queryKey: ['fields'],
+      queryKey: [
+        'fields',
+        {
+          workspaceId: toValue(params.workspaceId),
+          listId: toValue(params.listId),
+          cardTypeId: toValue(params.cardTypeId),
+          createdByType: toValue(params.createdByType),
+        },
+      ],
       queryFn: () => getFields(params),
-      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 1,
     });
   }
 

@@ -4,8 +4,8 @@ import type {
   CreateCardDto,
 } from '@/components/project-management/cards/types';
 import { type List } from '@/components/project-management/lists/types';
-import { useCardsService } from '@/composables/services/useCardsService';
-import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { useCardsService } from '@/services/useCardsService';
+import { useProjectUsersService } from '@/services/useProjectUsersService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import type { VForm } from 'vuetify/lib/components/index.mjs';
 import BaseEditorInput from '../base/BaseEditor/BaseEditorInput.vue';

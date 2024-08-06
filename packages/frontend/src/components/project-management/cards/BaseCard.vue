@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
 import type { User } from '@/components/common/users/types';
-import { useCardActivitiesService } from '@/composables/services/useCardActivitiesService';
-import { useCardsService } from '@/composables/services/useCardsService';
-import { useListStagesService } from '@/composables/services/useListStagesService';
-import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { useCardActivitiesService } from '@/services/useCardActivitiesService';
+import { useCardsService } from '@/services/useCardsService';
+import { useListStagesService } from '@/services/useListStagesService';
+import { useProjectUsersService } from '@/services/useProjectUsersService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { type Content } from '@tiptap/vue-3';
@@ -18,7 +18,7 @@ import {
   type CardType,
 } from './types';
 import { cloneDeep, lowerFirst } from 'lodash';
-import { useFieldsService } from '@/composables/services/useFieldsService';
+import { useFieldsService } from '@/services/useFieldsService';
 import { FieldTypes, type Field } from '../fields/types';
 import { useStateStore } from '@/stores/state';
 import { useDialogStore } from '@/stores/dialog';
@@ -32,6 +32,7 @@ import { leaderKey } from '@/utils/keyboard';
 import BaseRelationInput from '@/components/common/inputs/BaseRelationInput.vue';
 import { useMentionNotifications } from '@/composables/useMentionNotifications';
 import urlUtils from '@/utils/url';
+import { useCardTypeFields } from '@/composables/useCardTypeFields';
 
 const props = defineProps<{
   card: Card;
@@ -44,11 +45,6 @@ const cardCopy = ref<Card>(cloneDeep(props.card));
 const comment = ref<Content>();
 const isCommentEmpty = ref<boolean>();
 const descriptionInput = ref();
-// TODO don't hardcode title field
-const cardTitle = ref(cardCopy.value.data.title);
-const debouncedTitle = useDebounce(cardTitle, 2000);
-const cardDescription = ref(cardCopy.value.data.description);
-const debouncedDescription = useDebounce(cardDescription, 2000);
 
 const cardListStage = ref(cardCopy.value.cardLists[0].listStage);
 
@@ -68,27 +64,47 @@ const { useFieldsQuery } = useFieldsService();
 
 const { mutateAsync: updateCard, isPending: isUpdating } =
   cardsService.useUpdateCardMutation();
+
 const usersQuery = projectUsersService.useProjectUsersQuery({
   projectId: project.value!.id,
 });
 
 const listId = computed(() => props.card.cardLists[0].listId);
 const listStagesQuery = listStagesService.useGetListStagesQuery({
-  listId: listId.value,
+  listId,
 });
 
 const { data: listFields } = useFieldsQuery({
   listId,
 });
 
+const cardTypeId = computed(() => props.card.type.id);
+const {
+  titleField,
+  descriptionField,
+  cardTypeFieldsWithoutMainFields,
+  refetch: refetchCardTypeFields,
+} = useCardTypeFields({ cardTypeId });
+
 const fields = computed(() => {
   let arr: Field[] = [];
+
+  if (cardTypeFieldsWithoutMainFields.value) {
+    arr = [...arr, ...cardTypeFieldsWithoutMainFields.value];
+  }
+
   if (listFields.value) {
-    arr = listFields.value;
+    arr = [...arr, ...listFields.value];
   }
 
   return arr;
 });
+
+const cardTitle = ref('');
+const debouncedTitle = useDebounce(cardTitle, 2000);
+
+const cardDescription = ref<Content>();
+const debouncedDescription = useDebounce(cardDescription, 2000);
 
 const createActivityMutation =
   cardActivitiesService.useCreateActivityMutation();
@@ -120,17 +136,38 @@ watch(
   () => props.card,
   (v) => {
     if (v) {
+      refetchCardTypeFields();
       cardCopy.value = cloneDeep(v);
-      cardTitle.value = cardCopy.value.data.title;
       cardListStage.value = cardCopy.value.cardLists[0].listStage;
-      cardDescription.value = cardCopy.value.data.description;
+      initTitle();
+      initDescription();
     }
   }
 );
 
-watch(debouncedDescription, (newDescription, oldDescription) => {
-  updateDescription(newDescription, oldDescription);
+watch(
+  descriptionField,
+  (v) => {
+    if (v) {
+      initDescription();
+    }
+  },
+  { immediate: true }
+);
+
+watch(debouncedDescription, (newDescription) => {
+  updateDescription(newDescription);
 });
+
+watch(
+  titleField,
+  (v) => {
+    if (v) {
+      initTitle();
+    }
+  },
+  { immediate: true }
+);
 
 watch(debouncedTitle, () => {
   updateTitle();
@@ -142,10 +179,23 @@ watch(keys[[leaderKey, 'I'].join('+')], (v) => {
   }
 });
 
+function initTitle() {
+  if (titleField.value) {
+    cardTitle.value = cardCopy.value.data[titleField.value.slug];
+    document.title = `${cardTitle.value} - tillywork`;
+  }
+}
+
+function initDescription() {
+  if (descriptionField.value) {
+    cardDescription.value = cardCopy.value.data[descriptionField.value.slug];
+  }
+}
+
 function updateTitle() {
   const newTitle = cardTitle.value.trim();
-  if (newTitle !== '' && newTitle !== props.card.data.title) {
-    cardCopy.value.data.title = newTitle;
+  if (newTitle !== '' && newTitle !== props.card.data[titleField.value!.slug]) {
+    cardCopy.value.data[titleField.value!.slug] = newTitle;
     updateCard(cardCopy.value).then(() => {
       snackbar.showSnackbar({
         message: 'Task title updated.',
@@ -156,15 +206,20 @@ function updateTitle() {
   }
 }
 
-function updateDescription(newDescription: Content, oldDescription: Content) {
+function updateDescription(newDescription: Content | undefined) {
+  const oldDescription = props.card.data[descriptionField.value!.slug];
+
   if (
     newDescription &&
     (!oldDescription ||
-      !objectUtils.isEqual(newDescription as any, oldDescription as any))
+      !objectUtils.isEqual(
+        (newDescription as any) ?? {},
+        (oldDescription as any) ?? {}
+      ))
   ) {
-    cardCopy.value.data.description = newDescription;
+    cardCopy.value.data[descriptionField.value!.slug] = newDescription;
 
-    const newMentions = getNewMentions(newDescription, oldDescription);
+    const newMentions = getNewMentions(newDescription, oldDescription ?? {});
 
     updateCard(cardCopy.value).then(async () => {
       snackbar.showSnackbar({
@@ -233,32 +288,6 @@ function createComment(content: ActivityContent) {
   }
 }
 
-function updateCardDueAt(newDueAt: string) {
-  if (props.card.data.due_at !== newDueAt) {
-    updateCard(cardCopy.value).catch((e) => {
-      snackbar.showSnackbar({
-        color: 'error',
-        message:
-          e.response.data.message ?? 'Something went wrong, please try again.',
-        timeout: 5000,
-      });
-    });
-  }
-}
-
-function updateCardStartsAt(newStartsAt: string) {
-  if (props.card.data.starts_at !== newStartsAt) {
-    updateCard(cardCopy.value).catch((e) => {
-      snackbar.showSnackbar({
-        color: 'error',
-        message:
-          e.response.data.message ?? 'Something went wrong, please try again.',
-        timeout: 5000,
-      });
-    });
-  }
-}
-
 function updateCardListStage(card: Card, listStage: ListStage) {
   updateCardListMutation
     .mutateAsync({
@@ -324,19 +353,24 @@ function openDescriptionFileDialog() {
       />
     </template>
     <div class="base-card-content-wrapper pa-md-12 pa-6 flex-fill align-start">
-      <div class="base-card-content mx-auto">
+      <div class="base-card-content mx-auto mt-6">
         <div class="d-flex align-start">
-          <base-editor-input
-            v-model="cardTitle"
-            placeholder="Task title"
-            :heading="2"
-            single-line
-            class="flex-1-1-100 mt-1"
-            editable
-            disable-commands
-          />
+          <template v-if="titleField">
+            <base-editor-input
+              v-model="cardTitle"
+              placeholder="Task title"
+              :heading="2"
+              single-line
+              class="flex-1-1-100"
+              editable
+              disable-commands
+            />
+          </template>
+          <template v-else>
+            <v-skeleton-loader type="heading" width="100%"></v-skeleton-loader>
+          </template>
           <v-spacer />
-          <div class="d-flex align-center ga-2">
+          <div class="d-flex align-center ga-2 mt-2">
             <base-icon-btn
               icon="mdi-dock-right"
               density="compact"
@@ -365,12 +399,20 @@ function openDescriptionFileDialog() {
         </div>
 
         <div class="mt-8">
-          <base-editor-input
-            v-model:json="cardDescription"
-            ref="descriptionInput"
-            placeholder="Enter description.. (/ for commands)"
-            editable
-          />
+          <template v-if="descriptionField">
+            <base-editor-input
+              v-model:json="cardDescription"
+              ref="descriptionInput"
+              placeholder="Enter description.. (/ for commands)"
+              editable
+            />
+          </template>
+          <template v-else>
+            <v-skeleton-loader
+              type="paragraph"
+              width="100%"
+            ></v-skeleton-loader>
+          </template>
         </div>
         <div class="mt-8">
           <base-icon-btn
@@ -381,7 +423,7 @@ function openDescriptionFileDialog() {
         </div>
 
         <!-- Children -->
-        <div class="text-body-3 user-select-none mt-4">
+        <div class="text-body-3 user-select-none mt-4" v-if="titleField">
           <template v-if="!cardCopy.children.length">
             <v-btn
               class="text-none"
@@ -455,7 +497,7 @@ function openDescriptionFileDialog() {
                     "
                     theme="icon"
                   />
-                  {{ child.data.title }}
+                  {{ child.data[titleField.slug] }}
                 </v-list-item-title>
 
                 <template #append>
@@ -508,7 +550,10 @@ function openDescriptionFileDialog() {
           />
         </div>
         <v-card-text>
-          <div class="d-flex align-center mb-4">
+          <div
+            class="d-flex align-center mb-4"
+            v-if="listStagesQuery.data.value?.length"
+          >
             <p class="field-label text-caption">Stage</p>
             <list-stage-selector
               v-model="cardListStage"
@@ -527,25 +572,6 @@ function openDescriptionFileDialog() {
               @update:model-value="(v: User[]) => updateCardAssignees(cardCopy, v)"
               label="Assign"
               size="24"
-            />
-          </div>
-          <div class="d-flex align-center my-4">
-            <p class="field-label text-caption">Start date</p>
-            <base-date-picker
-              label="Start date"
-              icon="mdi-calendar"
-              v-model="cardCopy.data.starts_at"
-              @update:model-value="updateCardStartsAt"
-            />
-          </div>
-          <!-- TODO remove hardcoded fields that were migrated -->
-          <div class="d-flex align-center my-4">
-            <p class="field-label text-caption">Due date</p>
-            <base-date-picker
-              label="Due date"
-              icon="mdi-calendar"
-              v-model="cardCopy.data.due_at"
-              @update:model-value="updateCardDueAt"
             />
           </div>
           <template v-if="fields">
