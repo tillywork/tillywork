@@ -19,12 +19,14 @@ import { useCardTypesService } from '@/composables/services/useCardTypesService'
 import { DIALOGS, UpsertDialogMode } from '../dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 import slugify from 'slugify';
+import validationUtils from '@/utils/validation';
 
 const selectedField = ref<Field>();
 const fieldDto = ref<Partial<Field> | CreateFieldDto>();
 const upsertFieldForm = ref<VForm>();
 const upsertMode = ref<UpsertDialogMode>();
 const isCreating = ref(false);
+const slugExistsErrorMessage = ref('');
 
 const isCreatingOrEditing = computed(
   () => !!fieldDto.value || isCreating.value
@@ -37,6 +39,10 @@ const showIsMultiple = computed(() =>
     FieldTypes.USER,
     FieldTypes.CARD,
   ].includes(fieldDto.value?.type as FieldTypes)
+);
+
+const isUpdateOrCreateLoading = computed(
+  () => isUpdateLoading.value || isCreateLoading.value
 );
 
 const { showSnackbar } = useSnackbarStore();
@@ -52,8 +58,10 @@ const { data: fields } = useFieldsQuery({
   workspaceId: workspace.value!.id,
   createdByType: 'user',
 });
-const { mutateAsync: updateField } = updateFieldMutation();
-const { mutateAsync: createField } = createFieldMutation();
+const { mutateAsync: updateField, isPending: isUpdateLoading } =
+  updateFieldMutation();
+const { mutateAsync: createField, isPending: isCreateLoading } =
+  createFieldMutation();
 const { mutateAsync: deleteField } = deleteFieldMutation();
 
 const { useGetListsQuery } = useListsService();
@@ -81,10 +89,16 @@ function clearSelectedField() {
   selectedField.value = undefined;
   fieldDto.value = undefined;
   isCreating.value = false;
+  slugExistsErrorMessage.value = '';
 }
 
-function saveField() {
+async function saveField() {
   if (!fieldDto.value) {
+    return;
+  }
+
+  const isValid = await upsertFieldForm.value?.validate();
+  if (!isValid?.valid) {
     return;
   }
 
@@ -107,12 +121,18 @@ function saveField() {
         .then(() => {
           clearSelectedField();
         })
-        .catch(() =>
-          showSnackbar({
-            message: 'Something went wrong, please try again.',
-            color: 'error',
-          })
-        );
+        .catch((e) => {
+          if (e.response?.status === 409) {
+            slugExistsErrorMessage.value = e.response?.data?.message;
+          } else {
+            showSnackbar({
+              message:
+                e.response?.data?.message ??
+                'Something went wrong, please try again.',
+              color: 'error',
+            });
+          }
+        });
       break;
   }
 }
@@ -124,6 +144,7 @@ function handleCreateField() {
     name: '',
     workspaceId: workspace.value!.id,
   };
+  slugExistsErrorMessage.value = '';
 }
 
 function handleDeleteField() {
@@ -291,13 +312,28 @@ watch(
           </div>
 
           <!-- ~ Field Name -->
-          <v-text-field v-model="fieldDto.name" label="Field name*">
+          <v-text-field
+            v-model="fieldDto.name"
+            label="Field name*"
+            :rules="[validationUtils.rules.required]"
+          >
             <template #prepend-inner>
               <base-icon-selector v-model="fieldDto.icon" />
             </template>
           </v-text-field>
 
-          <v-text-field v-model="fieldDto.slug" label="Field slug*" />
+          <v-text-field
+            v-model="fieldDto.slug"
+            label="Field slug*"
+            :rules="[validationUtils.rules.required]"
+            :error-messages="slugExistsErrorMessage"
+            :readonly="upsertMode !== UpsertDialogMode.CREATE"
+            :hint="
+              upsertMode === UpsertDialogMode.UPDATE
+                ? 'Field slug cannot be changed.'
+                : ''
+            "
+          />
 
           <!-- ~ Field Type -->
           <v-autocomplete
@@ -311,6 +347,7 @@ watch(
                 ? 'Field type cannot be changed'
                 : ''
             "
+            :rules="[validationUtils.rules.required]"
           />
 
           <!-- ~ Card Type -->
@@ -323,6 +360,7 @@ watch(
             auto-select-first
             autocomplete="off"
             return-object
+            :rules="[validationUtils.rules.required]"
           />
 
           <!-- ~ Associated Lists -->
@@ -397,6 +435,7 @@ watch(
               :text="upsertMode === UpsertDialogMode.CREATE ? 'Create' : 'Save'"
               variant="flat"
               type="submit"
+              :loading="isUpdateOrCreateLoading"
             />
           </div>
         </v-form>

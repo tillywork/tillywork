@@ -1,11 +1,12 @@
 import {
     BadRequestException,
+    ConflictException,
     Injectable,
     Logger,
     NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { FindOptionsWhere, Repository } from "typeorm";
 import { Field } from "./field.entity";
 import { CreateFieldDto } from "./dto/create.field.dto";
 import { UpdateFieldDto } from "./dto/update.field.dto";
@@ -59,11 +60,37 @@ export class FieldsService {
         return field;
     }
 
-    async findOneBy({ where }: { where: object }): Promise<Field> {
+    async findOneBy(where: FindOptionsWhere<Field>): Promise<Field> {
         return this.fieldsRepository.findOne({ where });
     }
 
+    async findOneBySlug({
+        slug,
+        workspaceId,
+    }: {
+        slug: string;
+        workspaceId: number;
+    }) {
+        return this.findOneBy({
+            slug,
+            workspace: {
+                id: workspaceId,
+            },
+        });
+    }
+
     async create(createFieldDto: CreateFieldDto): Promise<Field> {
+        const slugExistsInWorkspace = await this.findOneBySlug({
+            slug: createFieldDto.slug,
+            workspaceId: createFieldDto.workspaceId,
+        });
+
+        if (slugExistsInWorkspace) {
+            throw new ConflictException(
+                `This slug is already used in this workspace.`
+            );
+        }
+
         const field = this.fieldsRepository.create({
             ...createFieldDto,
             cardType: {
