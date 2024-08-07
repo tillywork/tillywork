@@ -513,7 +513,7 @@ function openDescriptionFileDialog() {
       location="end"
       :key="cardCopy.id"
     >
-      <v-card>
+      <v-card color="transparent">
         <div class="pa-4 d-flex align-center">
           Properties
           <v-spacer />

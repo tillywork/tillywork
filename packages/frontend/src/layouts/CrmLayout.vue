@@ -74,7 +74,6 @@ if (isAuthenticated()) {
       v-if="!hideNavigationDrawer"
       v-model="navigationDrawer"
       app
-      color="background"
     >
       <v-img
         :src="logo.getLogoUrlByTheme()"

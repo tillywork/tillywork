@@ -200,246 +200,240 @@ watch(
 </script>
 
 <template>
-  <v-card class="pa-4" height="100%">
-    <template v-if="!isCreatingOrEditing">
-      <div class="user-select-none">
-        <div class="d-flex ga-2">
-          <h3>Custom Fields</h3>
-          <base-icon-btn @click="handleCreateField" />
-        </div>
-        <p class="text-subtitle-2 mb-2">
-          Create custom fields, and assign them to lists.
-        </p>
+  <template v-if="!isCreatingOrEditing">
+    <div class="user-select-none">
+      <div class="d-flex ga-2">
+        <h3>Custom Fields</h3>
+        <base-icon-btn @click="handleCreateField" />
       </div>
+      <p class="text-subtitle-2 mb-2">
+        Create custom fields, and assign them to lists.
+      </p>
+    </div>
 
-      <v-divider class="my-6" />
+    <v-divider class="my-6" />
 
-      <base-table
-        :data="fields ?? []"
-        :columns="[
-          {
-            header: 'Name',
-            id: 'name',
-            accessorKey: 'name',
-          },
-          {
-            header: 'Type',
-            id: 'type',
-            accessorKey: 'type',
-          },
-          {
-            header: 'Lists',
-            id: 'lists',
-            accessorKey: 'lists',
-          },
-          {
-            id: 'createdBy',
-            header: 'Created By',
-            accessorKey: 'createdBy',
-            size: 300,
-          },
-        ]"
-        @click:row="handleFieldClick"
-      >
-        <!-- ~ Name -->
-        <template #name="{ row }">
-          <v-icon :icon="row.original.icon" class="me-4" />
-          <span class="text-body-3">{{ row.original.name }}</span>
+    <base-table
+      :data="fields ?? []"
+      :columns="[
+        {
+          header: 'Name',
+          id: 'name',
+          accessorKey: 'name',
+        },
+        {
+          header: 'Type',
+          id: 'type',
+          accessorKey: 'type',
+        },
+        {
+          header: 'Lists',
+          id: 'lists',
+          accessorKey: 'lists',
+        },
+        {
+          id: 'createdBy',
+          header: 'Created By',
+          accessorKey: 'createdBy',
+          size: 300,
+        },
+      ]"
+      @click:row="handleFieldClick"
+    >
+      <!-- ~ Name -->
+      <template #name="{ row }">
+        <v-icon :icon="row.original.icon" class="me-4" />
+        <span class="text-body-3">{{ row.original.name }}</span>
+      </template>
+
+      <!-- ~ Type -->
+      <template #type="{ row }">
+        <span class="text-body-3 text-capitalize">
+          {{
+            FIELD_TYPE_OPTIONS.find(
+              (option) => option.value === row.original.type
+            )?.title
+          }}
+        </span>
+      </template>
+
+      <!-- ~ Lists -->
+      <template #lists="{ row }">
+        <template v-for="list in row.original.lists" :key="list.id">
+          <v-chip class="me-1 text-caption" density="compact">{{
+            list.name
+          }}</v-chip>
         </template>
+      </template>
 
-        <!-- ~ Type -->
-        <template #type="{ row }">
-          <span class="text-body-3 text-capitalize">
-            {{
-              FIELD_TYPE_OPTIONS.find(
-                (option) => option.value === row.original.type
-              )?.title
-            }}
+      <!-- ~ Created By -->
+      <template #createdBy="{ row }">
+        <v-card class="py-2">
+          <base-avatar
+            :photo="getFieldCreatedByPhoto(row.original)"
+            :text="getFieldCreatedByName(row.original)"
+            rounded="circle"
+            :class="
+              row.original.createdByType === 'system' ? 'pa-1 bg-accent' : ''
+            "
+          />
+          <span class="text-body-3 ms-3">
+            {{ getFieldCreatedByName(row.original) }}
           </span>
-        </template>
+        </v-card>
+      </template>
+    </base-table>
+  </template>
 
-        <!-- ~ Lists -->
-        <template #lists="{ row }">
-          <template v-for="list in row.original.lists" :key="list.id">
-            <v-chip class="me-1 text-caption" density="compact">{{
-              list.name
-            }}</v-chip>
-          </template>
-        </template>
-
-        <!-- ~ Created By -->
-        <template #createdBy="{ row }">
-          <v-card class="py-2">
-            <base-avatar
-              :photo="getFieldCreatedByPhoto(row.original)"
-              :text="getFieldCreatedByName(row.original)"
-              rounded="circle"
-              :class="
-                row.original.createdByType === 'system' ? 'pa-1 bg-accent' : ''
-              "
+  <template v-else>
+    <v-card width="300">
+      <v-form ref="upsertFieldForm" @submit.prevent="saveField" v-if="fieldDto">
+        <div class="user-select-none">
+          <h3 class="d-flex align-start flex-column ga-2">
+            <v-btn
+              class="text-capitalize mb-2"
+              prepend-icon="mdi-chevron-left"
+              text="Back"
+              variant="text"
+              density="comfortable"
+              @click="clearSelectedField"
             />
-            <span class="text-body-3 ms-3">
-              {{ getFieldCreatedByName(row.original) }}
+            <span>
+              <span class="text-capitalize">{{ upsertMode }}</span>
+              field
             </span>
-          </v-card>
-        </template>
-      </base-table>
-    </template>
+          </h3>
+          <p class="mb-4 text-subtitle-2">General</p>
+        </div>
 
-    <template v-else>
-      <v-card width="300">
-        <v-form
-          ref="upsertFieldForm"
-          @submit.prevent="saveField"
-          v-if="fieldDto"
+        <!-- ~ Field Name -->
+        <v-text-field
+          v-model="fieldDto.name"
+          label="Field name*"
+          :rules="[validationUtils.rules.required]"
         >
-          <div class="user-select-none">
-            <h3 class="d-flex align-start flex-column ga-2">
-              <v-btn
-                class="text-capitalize mb-2"
-                prepend-icon="mdi-chevron-left"
-                text="Back"
-                variant="text"
-                density="comfortable"
-                @click="clearSelectedField"
-              />
-              <span>
-                <span class="text-capitalize">{{ upsertMode }}</span>
-                field
-              </span>
-            </h3>
-            <p class="mb-4 text-subtitle-2">General</p>
-          </div>
+          <template #prepend-inner>
+            <base-icon-selector v-model="fieldDto.icon" />
+          </template>
+        </v-text-field>
 
-          <!-- ~ Field Name -->
-          <v-text-field
-            v-model="fieldDto.name"
-            label="Field name*"
-            :rules="[validationUtils.rules.required]"
+        <v-text-field
+          v-model="fieldDto.slug"
+          label="Field slug*"
+          :rules="[validationUtils.rules.required]"
+          :error-messages="slugExistsErrorMessage"
+          :readonly="upsertMode !== UpsertDialogMode.CREATE"
+          :hint="
+            upsertMode === UpsertDialogMode.UPDATE
+              ? 'Field slug cannot be changed.'
+              : ''
+          "
+        />
+
+        <!-- ~ Field Type -->
+        <v-autocomplete
+          v-model="fieldDto.type"
+          :items="FIELD_TYPE_OPTIONS"
+          label="Field type*"
+          auto-select-first
+          :readonly="upsertMode !== UpsertDialogMode.CREATE"
+          :hint="
+            upsertMode === UpsertDialogMode.UPDATE
+              ? 'Field type cannot be changed'
+              : ''
+          "
+          :rules="[validationUtils.rules.required]"
+        />
+
+        <!-- ~ Card Type -->
+        <v-autocomplete
+          v-if="fieldDto.type === FieldTypes.CARD"
+          v-model="fieldDto.dataCardType"
+          :items="cardTypes"
+          item-title="name"
+          label="Card Type"
+          auto-select-first
+          autocomplete="off"
+          return-object
+          :rules="[validationUtils.rules.required]"
+        />
+
+        <!-- ~ Associated Lists -->
+        <v-autocomplete
+          v-model="fieldDto.lists"
+          :items="lists"
+          item-title="name"
+          label="Lists"
+          auto-select-first
+          multiple
+          autocomplete="off"
+          return-object
+          chips
+          closable-chips
+        />
+
+        <!-- ~ Options -->
+        <div class="mb-2">
+          <v-checkbox
+            label="Required"
+            v-model="fieldDto.required"
+            density="compact"
+            color="primary"
+          />
+          <v-checkbox
+            label="Multiple"
+            v-model="fieldDto.multiple"
+            density="compact"
+            v-if="showIsMultiple"
+          />
+        </div>
+
+        <!-- ~ Dropdown Items -->
+        <template v-if="fieldDto.type === FieldTypes.DROPDOWN">
+          <v-divider class="mb-2" />
+          <base-array-input
+            v-model="fieldDto.items"
+            item-type="object"
+            item-value="item"
+            label="Options"
+          />
+        </template>
+        <!-- ~ Label Choices -->
+        <template v-else-if="fieldDto.type === FieldTypes.LABEL">
+          <v-divider class="mb-2" />
+          <base-array-input
+            v-model="fieldDto.items"
+            item-type="object"
+            item-value="item"
+            label="Options"
+            item-color
+          />
+        </template>
+
+        <v-divider class="my-2" />
+        <div class="d-flex ga-2">
+          <!-- ~ Delete Button -->
+          <v-btn
+            v-if="upsertMode === UpsertDialogMode.UPDATE"
+            class="text-none text-error"
+            variant="outlined"
+            @click="handleDeleteField"
           >
-            <template #prepend-inner>
-              <base-icon-selector v-model="fieldDto.icon" />
-            </template>
-          </v-text-field>
+            Delete
+          </v-btn>
 
-          <v-text-field
-            v-model="fieldDto.slug"
-            label="Field slug*"
-            :rules="[validationUtils.rules.required]"
-            :error-messages="slugExistsErrorMessage"
-            :readonly="upsertMode !== UpsertDialogMode.CREATE"
-            :hint="
-              upsertMode === UpsertDialogMode.UPDATE
-                ? 'Field slug cannot be changed.'
-                : ''
-            "
+          <v-spacer />
+
+          <!-- ~ Upsert Button -->
+          <v-btn
+            class="text-none"
+            :text="upsertMode === UpsertDialogMode.CREATE ? 'Create' : 'Save'"
+            variant="flat"
+            type="submit"
+            :loading="isUpdateOrCreateLoading"
           />
-
-          <!-- ~ Field Type -->
-          <v-autocomplete
-            v-model="fieldDto.type"
-            :items="FIELD_TYPE_OPTIONS"
-            label="Field type*"
-            auto-select-first
-            :readonly="upsertMode !== UpsertDialogMode.CREATE"
-            :hint="
-              upsertMode === UpsertDialogMode.UPDATE
-                ? 'Field type cannot be changed'
-                : ''
-            "
-            :rules="[validationUtils.rules.required]"
-          />
-
-          <!-- ~ Card Type -->
-          <v-autocomplete
-            v-if="fieldDto.type === FieldTypes.CARD"
-            v-model="fieldDto.dataCardType"
-            :items="cardTypes"
-            item-title="name"
-            label="Card Type"
-            auto-select-first
-            autocomplete="off"
-            return-object
-            :rules="[validationUtils.rules.required]"
-          />
-
-          <!-- ~ Associated Lists -->
-          <v-autocomplete
-            v-model="fieldDto.lists"
-            :items="lists"
-            item-title="name"
-            label="Lists"
-            auto-select-first
-            multiple
-            autocomplete="off"
-            return-object
-            chips
-            closable-chips
-          />
-
-          <!-- ~ Options -->
-          <div class="mb-2">
-            <v-checkbox
-              label="Required"
-              v-model="fieldDto.required"
-              density="compact"
-              color="primary"
-            />
-            <v-checkbox
-              label="Multiple"
-              v-model="fieldDto.multiple"
-              density="compact"
-              v-if="showIsMultiple"
-            />
-          </div>
-
-          <!-- ~ Dropdown Items -->
-          <template v-if="fieldDto.type === FieldTypes.DROPDOWN">
-            <v-divider class="mb-2" />
-            <base-array-input
-              v-model="fieldDto.items"
-              item-type="object"
-              item-value="item"
-              label="Options"
-            />
-          </template>
-          <!-- ~ Label Choices -->
-          <template v-else-if="fieldDto.type === FieldTypes.LABEL">
-            <v-divider class="mb-2" />
-            <base-array-input
-              v-model="fieldDto.items"
-              item-type="object"
-              item-value="item"
-              label="Options"
-              item-color
-            />
-          </template>
-
-          <v-divider class="my-2" />
-          <div class="d-flex ga-2">
-            <!-- ~ Delete Button -->
-            <v-btn
-              v-if="upsertMode === UpsertDialogMode.UPDATE"
-              class="text-none text-error"
-              variant="outlined"
-              @click="handleDeleteField"
-            >
-              Delete
-            </v-btn>
-
-            <v-spacer />
-
-            <!-- ~ Upsert Button -->
-            <v-btn
-              class="text-none"
-              :text="upsertMode === UpsertDialogMode.CREATE ? 'Create' : 'Save'"
-              variant="flat"
-              type="submit"
-              :loading="isUpdateOrCreateLoading"
-            />
-          </div>
-        </v-form>
-      </v-card>
-    </template>
-  </v-card>
+        </div>
+      </v-form>
+    </v-card>
+  </template>
 </template>

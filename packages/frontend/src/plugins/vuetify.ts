@@ -14,6 +14,7 @@ const themes = {
       background: '#F3F3F3',
       surface: '#F7F7F7',
       accent: '#EAEAEA',
+      navigation: '#EAEAEA',
       secondary: '#BCFFCD',
       error: '#E53935',
     },
@@ -25,6 +26,7 @@ const themes = {
       background: '#090909',
       surface: '#101112',
       accent: '#17191A',
+      navigation: '#131516',
       secondary: '#88FA9D',
       error: '#EF5350',
       'surface-variant': '#FEFEFE',
@@ -83,6 +85,7 @@ const vuetify = createVuetify({
         slim: true,
         nav: true,
       },
+      color: 'navigation',
     },
     VMenu: {
       offset: 3,
@@ -111,6 +114,9 @@ const vuetify = createVuetify({
     },
     VChip: {
       rounded: 'md',
+    },
+    VAppBar: {
+      color: 'navigation',
     },
   },
 });
