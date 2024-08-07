@@ -44,23 +44,22 @@ function getCardTypeCreatedByName(cardType: CardType) {
 </script>
 
 <template>
-  <v-card class="user-select-none">
-    <v-card-title class="d-flex items-center ga-2">
-      Card Types
+  <div class="user-select-none">
+    <div class="d-flex items-center ga-2">
+      <h3>Card Types</h3>
       <base-icon-btn @click="openCreateCardTypeDialog" />
-    </v-card-title>
+    </div>
 
-    <v-card-text class="text-subtitle-2 text-wrap mb-2">
+    <p class="text-subtitle-2 mb-2">
       Cards are the building block of tillywork. They can be tasks, contacts, or
       whatever you need them to be.
-    </v-card-text>
-  </v-card>
+    </p>
+  </div>
 
   <v-divider class="my-6" />
 
   <base-table
     :data="fetchingCardTypes ?? []"
-    width="100%"
     :columns="[
       {
         id: 'actions',
