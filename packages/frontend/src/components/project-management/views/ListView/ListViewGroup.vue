@@ -33,7 +33,6 @@ const emit = defineEmits([
   'toggle:group',
   'row:delete',
   'row:update:stage',
-  'row:update:due-date',
   'row:update:assignees',
   'row:update:order',
 ]);
@@ -295,19 +294,6 @@ function handleUpdateCardStage(data: {
   order?: number;
 }) {
   emit('row:update:stage', data);
-}
-
-function handleUpdateDueDate({
-  newDueDate,
-  card,
-}: {
-  newDueDate: string;
-  card: Card;
-}) {
-  emit('row:update:due-date', {
-    newDueDate,
-    card,
-  });
 }
 
 function handleUserSelection({ users, card }: { users: User[]; card: Card }) {

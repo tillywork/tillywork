@@ -34,7 +34,6 @@ const emit = defineEmits([
   'toggle:group',
   'row:delete',
   'row:update:stage',
-  'row:update:due-date',
   'row:update:assignees',
   'row:update:order',
 ]);

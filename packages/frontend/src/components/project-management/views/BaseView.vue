@@ -159,23 +159,6 @@ function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
   });
 }
 
-function handleUpdateDueDate({
-  card,
-  newDueDate,
-}: {
-  card: Card;
-  newDueDate: string | null;
-}) {
-  const updatedCard = {
-    ...card,
-    data: {
-      ...card.data,
-      due_at: newDueDate,
-    },
-  };
-  updateCard(updatedCard);
-}
-
 function handleUpdateCardStage({
   cardId,
   cardListId,
@@ -378,7 +361,6 @@ watch(
           :groups="listGroups ?? []"
           @row:delete="handleDeleteCard"
           @row:update:stage="handleUpdateCardStage"
-          @row:update:due-date="handleUpdateDueDate"
           @row:update:assignees="handleUpdateAssignees"
           @row:update:order="handleUpdateCardOrder"
         >
@@ -391,7 +373,6 @@ watch(
           :list-groups="listGroups ?? []"
           @card:delete="handleDeleteCard"
           @card:update:assignees="handleUpdateAssignees"
-          @card:update:due-date="handleUpdateDueDate"
           @card:update:stage="handleUpdateCardStage"
           @card:update:order="handleUpdateCardOrder"
         />
@@ -406,7 +387,6 @@ watch(
           no-headers
           @row:delete="handleDeleteCard"
           @row:update:stage="handleUpdateCardStage"
-          @row:update:due-date="handleUpdateDueDate"
           @row:update:assignees="handleUpdateAssignees"
           @row:update:order="handleUpdateCardOrder"
         >

@@ -26,7 +26,6 @@ const emit = defineEmits([
   'toggle:group',
   'card:delete',
   'card:update:stage',
-  'card:update:due-date',
   'card:update:assignees',
   'card:update:order',
 ]);
@@ -37,7 +36,6 @@ const props = defineProps<{
   list: List;
   projectUsers: ProjectUser[];
 }>();
-const cardMenuOpen = ref<Card | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
 
 const dialog = useDialogStore();
@@ -119,10 +117,6 @@ async function handleGroupCardsLoad({
   } else {
     done('ok');
   }
-}
-
-function toggleGroupExpansion(listGroup: ListGroup) {
-  emit('toggle:group', listGroup);
 }
 
 function openCreateCardDialog(listGroup: ListGroup) {
@@ -225,24 +219,6 @@ function handleUpdateCardOrder(data: {
   emit('card:update:order', data);
 }
 
-function handleCardMenuClick({
-  card,
-  isOpen,
-}: {
-  card: Card;
-  isOpen: boolean;
-}) {
-  if (isOpen) {
-    cardMenuOpen.value = card;
-  } else {
-    cardMenuOpen.value = null;
-  }
-}
-
-function handleDeleteCard(card: Card) {
-  emit('card:delete', card);
-}
-
 function handleUpdateCardStage(data: {
   cardId: number;
   cardListId: number;
@@ -250,19 +226,6 @@ function handleUpdateCardStage(data: {
   order?: number;
 }) {
   emit('card:update:stage', data);
-}
-
-function handleUpdateDueDate({
-  newDueDate,
-  card,
-}: {
-  newDueDate: string;
-  card: Card;
-}) {
-  emit('card:update:due-date', {
-    newDueDate,
-    card,
-  });
 }
 
 function handleUserSelection({ users, card }: { users: User[]; card: Card }) {

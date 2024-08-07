@@ -23,7 +23,6 @@ const emit = defineEmits([
   'submit',
   'load',
   'card:update:stage',
-  'card:update:due-date',
   'card:update:assignees',
   'card:update:order',
 ]);
@@ -69,19 +68,6 @@ function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
   });
 }
 
-function handleUpdateDueDate({
-  newDueDate,
-  card,
-}: {
-  newDueDate: string;
-  card: Card;
-}) {
-  emit('card:update:due-date', {
-    newDueDate,
-    card,
-  });
-}
-
 function handleDeleteCard(card: Card) {
   emit('card:delete', card);
 }
@@ -123,7 +109,6 @@ function handleUpdateCardOrder(data: {
             @toggle:group="toggleGroupExpansion"
             @card:delete="handleDeleteCard"
             @card:update:stage="handleUpdateCardStage"
-            @card:update:due-date="handleUpdateDueDate"
             @card:update:assignees="handleUpdateAssignees"
             @card:update:order="handleUpdateCardOrder"
           />
