@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { Field } from '@/components/project-management/fields/types';
-import { useCardsService } from '@/composables/services/useCardsService';
+import { useCardsService } from '@/services/useCardsService';
 import { useAuthStore } from '@/stores/auth';
 import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
+import { useCardTypeFields } from '@/composables/useCardTypeFields';
 
 const model = defineModel();
 const props = defineProps<{
@@ -29,7 +30,11 @@ const { useSearchCards } = useCardsService();
 const { data: items, refetch } = useSearchCards({
   keyword,
   workspaceId: workspace.value!.id,
-  cardTypeId: props.field.cardType!.id,
+  cardTypeId: props.field.dataCardType!.id,
+});
+
+const { titleField } = useCardTypeFields({
+  cardTypeId: props.field.dataCardType!.id,
 });
 
 watch(debouncedKeyword, () => {
@@ -46,6 +51,7 @@ watch(debouncedKeyword, () => {
     :items="items ?? []"
     no-filter
     item-value="id"
+    :item-title="`data.${titleField?.slug}`"
     :variant
     hide-details
     :placeholder="field.name"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useProjectsService } from '@/composables/services/useProjectsService';
+import { useProjectsService } from '@/services/useProjectsService';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
 

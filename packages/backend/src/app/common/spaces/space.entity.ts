@@ -34,7 +34,9 @@ export class Space {
     @DeleteDateColumn({ type: "timestamp" })
     deletedAt: Date;
 
-    @ManyToOne(() => Workspace, (workspace) => workspace.spaces)
+    @ManyToOne(() => Workspace, (workspace) => workspace.spaces, {
+        onDelete: "CASCADE",
+    })
     @JoinTable()
     workspace: Relation<Workspace>;
     @Column({ type: "bigint", nullable: false })

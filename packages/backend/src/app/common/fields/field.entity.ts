@@ -27,6 +27,25 @@ export class Field {
     @Column({ type: "varchar", length: 255 })
     name: string;
 
+    @Column({ type: "varchar", length: 255 })
+    slug: string;
+
+    /** Defines whether this field is the main title field of the entity. */
+    @Column({ type: "boolean", default: false })
+    isTitle: boolean;
+
+    /** Defines whether this field is the main description field of the entity. */
+    @Column({ type: "boolean", default: false })
+    isDescription: boolean;
+
+    /** Defines whether this field is the main photo field of the entity. */
+    @Column({ type: "boolean", default: false })
+    isPhoto: boolean;
+
+    /** Pinned fields appear in the views and the create card dialog. */
+    @Column({ type: "boolean", default: false })
+    isPinned: boolean;
+
     @Column({ type: "enum", enum: FieldTypes })
     type: FieldTypes;
 
@@ -43,8 +62,13 @@ export class Field {
     @Column({ type: "jsonb", nullable: true })
     items?: FieldItem[];
 
-    @ManyToOne(() => CardType, { onDelete: "CASCADE", eager: true })
+    /** Defines whether this is an entity-specific field. */
+    @ManyToOne(() => CardType, { onDelete: "CASCADE", nullable: true })
     cardType: Relation<CardType>;
+
+    /** Defines the card type that shows as the field items. */
+    @ManyToOne(() => CardType, { onDelete: "CASCADE", eager: true })
+    dataCardType: Relation<CardType>;
 
     @Column({ type: "enum", enum: ["system", "user"], default: "system" })
     createdByType: "system" | "user";

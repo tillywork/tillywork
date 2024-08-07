@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { useProjectsService } from '@/composables/services/useProjectsService';
+import { useProjectsService } from '@/services/useProjectsService';
 
 definePage({
   meta: {

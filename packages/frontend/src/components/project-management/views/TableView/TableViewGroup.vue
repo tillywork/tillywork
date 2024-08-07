@@ -8,10 +8,11 @@ import {
 } from '@tanstack/vue-table';
 import {
   ListGroupOptions,
+  type List,
   type ListGroup,
   type ListStage,
 } from '../../lists/types';
-import { useCardsService } from '@/composables/services/useCardsService';
+import { useCardsService } from '@/services/useCardsService';
 import type { TableSortOption, View } from '../types';
 import type { ProjectUser } from '@/components/common/projects/types';
 import { DIALOGS } from '@/components/common/dialogs/types';
@@ -25,12 +26,14 @@ import { cloneDeep } from 'lodash';
 import type { QueryFilter, ViewFilter } from '../../filters/types';
 import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
+import { FieldTypes } from '../../fields/types';
+import { useCard } from '@/composables/useCard';
+import { useCardTypeFields } from '@/composables/useCardTypeFields';
 
 const emit = defineEmits([
   'toggle:group',
   'row:delete',
   'row:update:stage',
-  'row:update:due-date',
   'row:update:assignees',
   'row:update:order',
 ]);
@@ -45,6 +48,7 @@ const props = defineProps<{
   }[];
   noGroupBanners?: boolean;
   view: View;
+  list: List;
 }>();
 const rowMenuOpen = ref<Row<Card> | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
@@ -52,6 +56,12 @@ const isGroupCardsLoading = defineModel<boolean>('loading');
 const dialog = useDialogStore();
 const cardsService = useCardsService();
 const { showSnackbar } = useSnackbarStore();
+
+const { updateFieldValue } = useCard();
+
+const { titleField } = useCardTypeFields({
+  cardTypeId: props.list.defaultCardType.id,
+});
 
 const groupCopy = ref(cloneDeep(props.listGroup));
 const sortBy = computed<TableSortOption[]>(() =>
@@ -292,19 +302,6 @@ function handleUpdateCardStage(data: {
   emit('row:update:stage', data);
 }
 
-function handleUpdateDueDate({
-  newDueDate,
-  card,
-}: {
-  newDueDate: string;
-  card: Card;
-}) {
-  emit('row:update:due-date', {
-    newDueDate,
-    card,
-  });
-}
-
 function handleUserSelection({ users, card }: { users: User[]; card: Card }) {
   emit('row:update:assignees', {
     users,
@@ -443,7 +440,9 @@ watchEffect(() => {
                     v-for="cell in row.getVisibleCells()"
                     :key="cell.id"
                   >
-                    <template v-if="cell.column.columnDef.id === 'actions'">
+                    <template
+                      v-if="cell.column.columnDef.cellType === 'actions'"
+                    >
                       <v-card
                         :width="getColumnSize(cell.column.columnDef.id)"
                         class="table-cell d-flex align-center fill-height pe-1"
@@ -483,7 +482,9 @@ watchEffect(() => {
                         </div>
                       </v-card>
                     </template>
-                    <template v-else-if="cell.column.columnDef.id === 'title'">
+                    <template
+                      v-else-if="cell.column.columnDef.cellType === 'title'"
+                    >
                       <v-card
                         :width="getColumnSize(cell.column.columnDef.id)"
                         class="d-flex align-center fill-height text-body-3 px-2 table-cell"
@@ -505,16 +506,21 @@ watchEffect(() => {
                     "
                           @click.prevent
                         />
-                        <span class="text-truncate ms-2">
-                          {{ row.original.title }}
-                        </span>
+
+                        <template v-if="titleField">
+                          <span class="text-truncate ms-2">
+                            {{ row.original.data[titleField.slug] }}
+                          </span>
+                        </template>
+                        <template v-else>
+                          <v-skeleton-loader type="text" width="100%" />
+                        </template>
 
                         <!-- Progress -->
                         <base-card-children-progress
                           v-if="row.original.children.length > 0"
                           :card="row.original"
                           border="thin"
-                          rounded="pill"
                           min-width="fit-content"
                           class="text-caption ms-2"
                           style="
@@ -524,7 +530,11 @@ watchEffect(() => {
                         />
                       </v-card>
                     </template>
-                    <template v-else-if="cell.column.columnDef.id === 'dueAt'">
+                    <template
+                      v-else-if="
+                        cell.column.columnDef.cellType === FieldTypes.DATE
+                      "
+                    >
                       <v-card
                         :width="getColumnSize(cell.column.columnDef.id)"
                         class="table-cell d-flex align-center fill-height"
@@ -533,18 +543,26 @@ watchEffect(() => {
                         link
                       >
                         <base-date-picker
-                          :model-value="row.original.dueAt"
-                          @update:model-value="(newValue: string) => handleUpdateDueDate({
+                          :model-value="
+                            row.original.data[cell.column.columnDef.field.slug]
+                          "
+                          @update:model-value="(v: string) => updateFieldValue({
                             card: row.original,
-                            newDueDate: newValue ?? null,
+                            field: cell.column.columnDef.field,
+                            v
                           })"
                           class="text-caption d-flex flex-fill h-100 justify-start rounded-0"
-                          label="Set due date"
+                          :label="`Set ${cell.column.columnDef.header.toLowerCase()}`"
+                          rounded="0"
                           @click.prevent
                         />
                       </v-card>
                     </template>
-                    <template v-else-if="cell.column.columnDef.id === 'users'">
+                    <template
+                      v-else-if="
+                        cell.column.columnDef.cellType === FieldTypes.USER
+                      "
+                    >
                       <v-card
                         :width="getColumnSize(cell.column.columnDef.id)"
                         class="table-cell d-flex align-center fill-height px-1"

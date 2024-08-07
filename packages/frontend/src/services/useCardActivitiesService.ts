@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
-import { useHttp } from '../useHttp';
+import { useHttp } from '@/composables/useHttp';
 import type {
   ActivityContent,
   ActivityType,
@@ -7,29 +7,38 @@ import type {
 } from '@/components/project-management/cards/types';
 import type { MaybeRef } from 'vue';
 
+export type FindAllParams = {
+  cardId: MaybeRef<number>;
+  sortBy?: {
+    key: string;
+    order: 'asc' | 'desc';
+  };
+};
+
 export const useCardActivitiesService = () => {
   const { sendRequest } = useHttp();
   const queryClient = useQueryClient();
 
-  function findAll({
-    cardId,
-  }: {
-    cardId: MaybeRef<number>;
-  }): Promise<CardActivity[]> {
+  function findAll({ cardId, sortBy }: FindAllParams): Promise<CardActivity[]> {
     return sendRequest(`/cards/${toValue(cardId)}/activities`, {
       method: 'GET',
+      params: {
+        sortBy: sortBy?.key,
+        sortOrder: sortBy?.order,
+      },
     });
   }
 
-  function useFindAllQuery(cardId: MaybeRef<number>) {
+  function useFindAllQuery({ cardId, sortBy }: FindAllParams) {
     return useQuery({
       queryKey: [
         'cardActivities',
         {
           cardId: toValue(cardId),
+          sortBy: `${sortBy?.key}`,
         },
       ],
-      queryFn: () => findAll({ cardId }),
+      queryFn: () => findAll({ cardId, sortBy }),
     });
   }
 

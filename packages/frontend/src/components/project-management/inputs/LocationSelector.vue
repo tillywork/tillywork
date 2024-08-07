@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useListsService } from '@/composables/services/useListsService';
-import { useSpacesService } from '@/composables/services/useSpacesService';
+import { useListsService } from '@/services/useListsService';
+import { useSpacesService } from '@/services/useSpacesService';
 import { useAuthStore } from '@/stores/auth';
 import type { Space } from '../spaces/types';
 import type { List } from '../lists/types';

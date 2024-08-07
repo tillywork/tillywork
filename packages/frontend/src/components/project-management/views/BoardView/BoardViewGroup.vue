@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import {
   ListGroupOptions,
+  type List,
   type ListGroup,
   type ListStage,
 } from '../../lists/types';
-import { useCardsService } from '@/composables/services/useCardsService';
+import { useCardsService } from '@/services/useCardsService';
 import type { TableSortOption, View } from '../types';
 import type { ProjectUser } from '@/components/common/projects/types';
 import { DIALOGS } from '@/components/common/dialogs/types';
@@ -17,12 +18,14 @@ import { cloneDeep } from 'lodash';
 import type { QueryFilter, ViewFilter } from '../../filters/types';
 import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
+import { useCardTypeFields } from '@/composables/useCardTypeFields';
+import { FieldTypes } from '../../fields/types';
+import { useCard } from '@/composables/useCard';
 
 const emit = defineEmits([
   'toggle:group',
   'card:delete',
   'card:update:stage',
-  'card:update:due-date',
   'card:update:assignees',
   'card:update:order',
 ]);
@@ -30,14 +33,20 @@ const props = defineProps<{
   listGroup: ListGroup;
   listStages: ListStage[];
   view: View;
+  list: List;
   projectUsers: ProjectUser[];
 }>();
-const cardMenuOpen = ref<Card | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
 
 const dialog = useDialogStore();
 const cardsService = useCardsService();
 const { showSnackbar } = useSnackbarStore();
+
+const { updateFieldValue } = useCard();
+
+const { titleField, pinnedFields } = useCardTypeFields({
+  cardTypeId: props.list.defaultCardType.id,
+});
 
 const groupCopy = ref(cloneDeep(props.listGroup));
 const sortBy = computed<TableSortOption[]>(() =>
@@ -108,10 +117,6 @@ async function handleGroupCardsLoad({
   } else {
     done('ok');
   }
-}
-
-function toggleGroupExpansion(listGroup: ListGroup) {
-  emit('toggle:group', listGroup);
 }
 
 function openCreateCardDialog(listGroup: ListGroup) {
@@ -214,24 +219,6 @@ function handleUpdateCardOrder(data: {
   emit('card:update:order', data);
 }
 
-function handleCardMenuClick({
-  card,
-  isOpen,
-}: {
-  card: Card;
-  isOpen: boolean;
-}) {
-  if (isOpen) {
-    cardMenuOpen.value = card;
-  } else {
-    cardMenuOpen.value = null;
-  }
-}
-
-function handleDeleteCard(card: Card) {
-  emit('card:delete', card);
-}
-
 function handleUpdateCardStage(data: {
   cardId: number;
   cardListId: number;
@@ -239,19 +226,6 @@ function handleUpdateCardStage(data: {
   order?: number;
 }) {
   emit('card:update:stage', data);
-}
-
-function handleUpdateDueDate({
-  newDueDate,
-  card,
-}: {
-  newDueDate: string;
-  card: Card;
-}) {
-  emit('card:update:due-date', {
-    newDueDate,
-    card,
-  });
 }
 
 function handleUserSelection({ users, card }: { users: User[]; card: Card }) {
@@ -367,12 +341,17 @@ watchEffect(() => {
                 />
               </template>
 
-              <v-card-title
-                class="text-wrap text-body-3"
-                style="line-height: 1.5"
-              >
-                {{ card.title }}
-              </v-card-title>
+              <template v-if="titleField">
+                <v-card-title
+                  class="text-wrap text-body-3"
+                  style="line-height: 1.5"
+                >
+                  {{ card.data[titleField.slug] }}
+                </v-card-title>
+              </template>
+              <template v-else>
+                <v-skeleton-loader type="text" class="mt-n2" />
+              </template>
 
               <template #append>
                 <base-user-selector
@@ -392,16 +371,37 @@ watchEffect(() => {
               class="px-2 py-1 align-end"
               style="min-height: fit-content"
             >
-              <base-date-picker
-                :model-value="card.dueAt"
-                @update:model-value="(newValue: string) => handleUpdateDueDate({
-                      card: card,
-                      newDueDate: newValue ?? null,
-                    })"
-                class="text-caption"
-                label="Set due date"
-                @click.prevent
-              />
+              <div class="d-flex flex-wrap flex-fill">
+                <template v-if="pinnedFields">
+                  <template v-for="field in pinnedFields" :key="field.slug">
+                    <template v-if="field.type === FieldTypes.DATE">
+                      <base-date-picker
+                        :model-value="card.data[field.slug]"
+                        @update:model-value="(v: string) => updateFieldValue({
+                            card,
+                            field,
+                            v
+                        })"
+                        class="text-caption"
+                        :label="`Set ${field.name.toLowerCase()}`"
+                        @click.prevent
+                      />
+                    </template>
+                    <template v-else>
+                      <span class="text-error text-xs"
+                        >Unknown field type: {{ field.type }}</span
+                      >
+                    </template>
+                  </template>
+                </template>
+                <template v-else>
+                  <v-skeleton-loader
+                    type="text"
+                    class="mt-n2 flex-fill"
+                    width="100%"
+                  />
+                </template>
+              </div>
 
               <v-spacer />
               <!-- Progress -->

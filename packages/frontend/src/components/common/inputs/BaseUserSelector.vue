@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useUsersService } from '@/composables/services/useUsersService';
+import { useUsersService } from '@/services/useUsersService';
 import stringUtils from '@/utils/string';
 import { type User } from '../users/types';
 import { cloneDeep } from 'lodash';

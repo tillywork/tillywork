@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { useFieldsService } from '@/composables/services/useFieldsService';
+import { useFieldsService } from '@/services/useFieldsService';
 import BaseTable from '../tables/BaseTable/BaseTable.vue';
 import {
   FIELD_TYPE_OPTIONS,
   type Field,
+  type CreateFieldDto,
 } from '@/components/project-management/fields/types';
 import { cloneDeep } from 'lodash';
 import { VForm } from 'vuetify/components';
@@ -13,16 +14,19 @@ import BaseIconSelector from '../inputs/BaseIconSelector/BaseIconSelector.vue';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
-import { useListsService } from '@/composables/services/useListsService';
-import { useCardTypesService } from '@/composables/services/useCardTypesService';
+import { useListsService } from '@/services/useListsService';
+import { useCardTypesService } from '@/services/useCardTypesService';
 import { DIALOGS, UpsertDialogMode } from '../dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
+import slugify from 'slugify';
+import validationUtils from '@/utils/validation';
 
 const selectedField = ref<Field>();
-const fieldDto = ref<Partial<Field>>();
+const fieldDto = ref<Partial<Field> | CreateFieldDto>();
 const upsertFieldForm = ref<VForm>();
 const upsertMode = ref<UpsertDialogMode>();
 const isCreating = ref(false);
+const slugExistsErrorMessage = ref('');
 
 const isCreatingOrEditing = computed(
   () => !!fieldDto.value || isCreating.value
@@ -37,6 +41,10 @@ const showIsMultiple = computed(() =>
   ].includes(fieldDto.value?.type as FieldTypes)
 );
 
+const isUpdateOrCreateLoading = computed(
+  () => isUpdateLoading.value || isCreateLoading.value
+);
+
 const { showSnackbar } = useSnackbarStore();
 const { workspace } = storeToRefs(useAuthStore());
 
@@ -48,9 +56,12 @@ const {
 } = useFieldsService();
 const { data: fields } = useFieldsQuery({
   workspaceId: workspace.value!.id,
+  createdByType: 'user',
 });
-const { mutateAsync: updateField } = updateFieldMutation();
-const { mutateAsync: createField } = createFieldMutation();
+const { mutateAsync: updateField, isPending: isUpdateLoading } =
+  updateFieldMutation();
+const { mutateAsync: createField, isPending: isCreateLoading } =
+  createFieldMutation();
 const { mutateAsync: deleteField } = deleteFieldMutation();
 
 const { useGetListsQuery } = useListsService();
@@ -78,12 +89,22 @@ function clearSelectedField() {
   selectedField.value = undefined;
   fieldDto.value = undefined;
   isCreating.value = false;
+  slugExistsErrorMessage.value = '';
 }
 
-function saveField() {
+async function saveField() {
+  if (!fieldDto.value) {
+    return;
+  }
+
+  const isValid = await upsertFieldForm.value?.validate();
+  if (!isValid?.valid) {
+    return;
+  }
+
   switch (upsertMode.value) {
     case UpsertDialogMode.UPDATE:
-      updateField(fieldDto.value)
+      updateField(fieldDto.value as Partial<Field>)
         .then(() => {
           clearSelectedField();
         })
@@ -96,16 +117,22 @@ function saveField() {
       break;
 
     case UpsertDialogMode.CREATE:
-      createField(fieldDto.value)
+      createField(fieldDto.value as CreateFieldDto)
         .then(() => {
           clearSelectedField();
         })
-        .catch(() =>
-          showSnackbar({
-            message: 'Something went wrong, please try again.',
-            color: 'error',
-          })
-        );
+        .catch((e) => {
+          if (e.response?.status === 409) {
+            slugExistsErrorMessage.value = e.response?.data?.message;
+          } else {
+            showSnackbar({
+              message:
+                e.response?.data?.message ??
+                'Something went wrong, please try again.',
+              color: 'error',
+            });
+          }
+        });
       break;
   }
 }
@@ -117,6 +144,7 @@ function handleCreateField() {
     name: '',
     workspaceId: workspace.value!.id,
   };
+  slugExistsErrorMessage.value = '';
 }
 
 function handleDeleteField() {
@@ -126,7 +154,7 @@ function handleDeleteField() {
       title: 'Confirm',
       message: `Are you sure you want to delete this field (${fieldDto.value?.name})?`,
       onConfirm: () =>
-        deleteField(fieldDto.value!.id!)
+        deleteField((fieldDto.value as Field).id)
           .then(() => {
             dialog.closeDialog(confirmDialogIndex.value);
             clearSelectedField();
@@ -156,6 +184,19 @@ function getFieldCreatedByPhoto(field: Field) {
 watch(selectedField, (v) => {
   fieldDto.value = cloneDeep(v);
 });
+
+watch(
+  () => fieldDto.value?.name,
+  (v) => {
+    if (v && upsertMode.value === 'create' && fieldDto.value?.name) {
+      fieldDto.value!.slug = slugify(fieldDto.value.name, {
+        lower: true,
+        replacement: '_',
+        strict: true,
+      });
+    }
+  }
+);
 </script>
 
 <template>
@@ -220,7 +261,9 @@ watch(selectedField, (v) => {
         <!-- ~ Lists -->
         <template #lists="{ row }">
           <template v-for="list in row.original.lists" :key="list.id">
-            <v-chip class="me-1" density="compact">{{ list.name }}</v-chip>
+            <v-chip class="me-1 text-caption" density="compact">{{
+              list.name
+            }}</v-chip>
           </template>
         </template>
 
@@ -269,11 +312,28 @@ watch(selectedField, (v) => {
           </div>
 
           <!-- ~ Field Name -->
-          <v-text-field v-model="fieldDto.name" label="Field name*">
+          <v-text-field
+            v-model="fieldDto.name"
+            label="Field name*"
+            :rules="[validationUtils.rules.required]"
+          >
             <template #prepend-inner>
               <base-icon-selector v-model="fieldDto.icon" />
             </template>
           </v-text-field>
+
+          <v-text-field
+            v-model="fieldDto.slug"
+            label="Field slug*"
+            :rules="[validationUtils.rules.required]"
+            :error-messages="slugExistsErrorMessage"
+            :readonly="upsertMode !== UpsertDialogMode.CREATE"
+            :hint="
+              upsertMode === UpsertDialogMode.UPDATE
+                ? 'Field slug cannot be changed.'
+                : ''
+            "
+          />
 
           <!-- ~ Field Type -->
           <v-autocomplete
@@ -287,18 +347,20 @@ watch(selectedField, (v) => {
                 ? 'Field type cannot be changed'
                 : ''
             "
+            :rules="[validationUtils.rules.required]"
           />
 
           <!-- ~ Card Type -->
           <v-autocomplete
             v-if="fieldDto.type === FieldTypes.CARD"
-            v-model="fieldDto.cardType"
+            v-model="fieldDto.dataCardType"
             :items="cardTypes"
             item-title="name"
             label="Card Type"
             auto-select-first
             autocomplete="off"
             return-object
+            :rules="[validationUtils.rules.required]"
           />
 
           <!-- ~ Associated Lists -->
@@ -358,7 +420,7 @@ watch(selectedField, (v) => {
             <!-- ~ Delete Button -->
             <v-btn
               v-if="upsertMode === UpsertDialogMode.UPDATE"
-              class="text-capitalize text-error"
+              class="text-none text-error"
               variant="outlined"
               @click="handleDeleteField"
             >
@@ -369,10 +431,11 @@ watch(selectedField, (v) => {
 
             <!-- ~ Upsert Button -->
             <v-btn
-              class="text-capitalize"
+              class="text-none"
               :text="upsertMode === UpsertDialogMode.CREATE ? 'Create' : 'Save'"
               variant="flat"
               type="submit"
+              :loading="isUpdateOrCreateLoading"
             />
           </div>
         </v-form>

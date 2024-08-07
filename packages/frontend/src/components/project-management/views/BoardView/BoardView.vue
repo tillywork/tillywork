@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { View } from '../types';
-import { useListGroupsService } from '@/composables/services/useListGroupsService';
+import { useListGroupsService } from '@/services/useListGroupsService';
 import type { Card } from '../../cards/types';
-import { type ListGroup } from '../../lists/types';
-import { useListStagesService } from '@/composables/services/useListStagesService';
-import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { type List, type ListGroup } from '../../lists/types';
+import { useListStagesService } from '@/services/useListStagesService';
+import { useProjectUsersService } from '@/services/useProjectUsersService';
 import BoardViewGroup from './BoardViewGroup.vue';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
@@ -14,6 +14,7 @@ const isLoading = defineModel<boolean>('loading');
 
 const props = defineProps<{
   view: View;
+  list: List;
   listGroups: ListGroup[];
 }>();
 
@@ -22,7 +23,6 @@ const emit = defineEmits([
   'submit',
   'load',
   'card:update:stage',
-  'card:update:due-date',
   'card:update:assignees',
   'card:update:order',
 ]);
@@ -68,19 +68,6 @@ function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
   });
 }
 
-function handleUpdateDueDate({
-  newDueDate,
-  card,
-}: {
-  newDueDate: string;
-  card: Card;
-}) {
-  emit('card:update:due-date', {
-    newDueDate,
-    card,
-  });
-}
-
 function handleDeleteCard(card: Card) {
   emit('card:delete', card);
 }
@@ -117,11 +104,11 @@ function handleUpdateCardOrder(data: {
             :list-group="listGroup"
             :list-stages="listStages ?? []"
             :view
+            :list
             :project-users="projectUsers ?? []"
             @toggle:group="toggleGroupExpansion"
             @card:delete="handleDeleteCard"
             @card:update:stage="handleUpdateCardStage"
-            @card:update:due-date="handleUpdateDueDate"
             @card:update:assignees="handleUpdateAssignees"
             @card:update:order="handleUpdateCardOrder"
           />

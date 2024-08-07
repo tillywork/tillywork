@@ -2,8 +2,8 @@
 import { useStateStore } from '@/stores/state';
 import { useWorkspaceStore } from '@/stores/workspace';
 import { useAuthStore } from '@/stores/auth';
-import { useSpacesService } from '@/composables/services/useSpacesService';
-import { useListsService } from '@/composables/services/useListsService';
+import { useSpacesService } from '@/services/useSpacesService';
+import { useListsService } from '@/services/useListsService';
 
 definePage({
   meta: {

@@ -10,10 +10,10 @@ const themes = {
   light: {
     dark: false,
     colors: {
-      primary: '#1976D2',
-      background: '#FEFFFE',
-      surface: '#FEFEFE',
-      accent: '#F7F7F7',
+      primary: '#126ac2',
+      background: '#F3F3F3',
+      surface: '#F7F7F7',
+      accent: '#EAEAEA',
       secondary: '#BCFFCD',
       error: '#E53935',
     },
@@ -21,7 +21,7 @@ const themes = {
   dark: {
     dark: true,
     colors: {
-      primary: '#1976D2',
+      primary: '#3692ed',
       background: '#090909',
       surface: '#101112',
       accent: '#17191A',
@@ -46,7 +46,7 @@ const vuetify = createVuetify({
     },
     VBtn: {
       color: 'primary',
-      rounded: 'md',
+      class: 'text-body-3',
     },
     VSwitch: {
       color: 'primary',

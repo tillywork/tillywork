@@ -3,7 +3,7 @@ import { ViewTypes, type View } from '../views/types';
 import type { List } from './types';
 import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
 import { useWorkspaceStore } from '@/stores/workspace';
-import { useViewsService } from '@/composables/services/useViewsService';
+import { useViewsService } from '@/services/useViewsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
 
@@ -141,7 +141,7 @@ watch(
           v-bind="props"
           rounded="0"
           variant="text"
-          class="text-capitalize"
+          class="text-none text-caption"
           color="default"
           @click="handleTabSelection(view)"
           size="small"
@@ -203,7 +203,7 @@ watch(
       </v-hover>
     </template>
     <v-btn
-      class="text-capitalize"
+      class="text-none text-caption"
       variant="text"
       size="small"
       rounded="0"

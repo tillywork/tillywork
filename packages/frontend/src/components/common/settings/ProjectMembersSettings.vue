@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { useProjectUsersService } from '@/services/useProjectUsersService';
 import ProjectInvitationLink from '../projects/ProjectInvitationLink.vue';
 import { useDate } from '@/composables/useDate';
 import { useAuthStore } from '@/stores/auth';

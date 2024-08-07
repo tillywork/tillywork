@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import BaseList from '@/components/project-management/lists/BaseList.vue';
-import { useListsService } from '@/composables/services/useListsService';
+import { useListsService } from '@/services/useListsService';
 import { useStateStore } from '@/stores/state';
 
 definePage({

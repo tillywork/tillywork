@@ -123,7 +123,7 @@ export class CardsService {
             .leftJoinAndSelect("card.users", "user")
             .where(
                 new Brackets((qb) => {
-                    qb.where("card.title ILIKE :keyword", {
+                    qb.where("card.data ->> 'title' ILIKE :keyword", {
                         keyword: `%${keyword}%`,
                     }).orWhere(
                         "user.firstName || ' ' || user.lastName ILIKE :keyword",

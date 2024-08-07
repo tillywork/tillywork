@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useUsersService } from '@/composables/services/useUsersService';
+import { useUsersService } from '@/services/useUsersService';
 import BaseAvatar from '../../../BaseAvatar.vue';
 import { nodeViewProps } from '@tiptap/vue-3';
 import { NodeViewWrapper } from '@tiptap/vue-3';

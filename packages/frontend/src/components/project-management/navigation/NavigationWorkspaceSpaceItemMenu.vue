@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Space } from '../spaces/types';
-import { useSpacesService } from '@/composables/services/useSpacesService';
+import { useSpacesService } from '@/services/useSpacesService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';

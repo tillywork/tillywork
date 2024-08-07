@@ -1,4 +1,7 @@
-import type { Field, CreateFieldDto } from '@/components/common/fields/types';
+import type {
+  Field,
+  CreateFieldDto,
+} from '@/components/project-management/fields/types';
 import { useHttp } from '@/composables/useHttp';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import type { MaybeRef } from 'vue';
@@ -6,6 +9,8 @@ import type { MaybeRef } from 'vue';
 export type GetFieldsParams = {
   workspaceId?: MaybeRef<number>;
   listId?: MaybeRef<number>;
+  cardTypeId?: MaybeRef<number>;
+  createdByType?: MaybeRef<'system' | 'user'>;
 };
 
 export const useFieldsService = () => {
@@ -15,21 +20,36 @@ export const useFieldsService = () => {
   async function getFields({
     workspaceId,
     listId,
+    cardTypeId,
+    createdByType,
   }: GetFieldsParams): Promise<Field[]> {
     return sendRequest('/fields', {
       method: 'GET',
       params: {
         workspaceId: toValue(workspaceId),
         listId: toValue(listId),
+        cardTypeId: toValue(cardTypeId),
+        createdByType: toValue(createdByType),
       },
     });
   }
 
-  function useFieldsQuery(params: GetFieldsParams) {
+  function useFieldsQuery(
+    params: GetFieldsParams & { enabled?: MaybeRef<boolean> }
+  ) {
     return useQuery({
-      queryKey: ['fields'],
+      queryKey: [
+        'fields',
+        {
+          workspaceId: toValue(params.workspaceId),
+          listId: toValue(params.listId),
+          cardTypeId: toValue(params.cardTypeId),
+          createdByType: toValue(params.createdByType),
+        },
+      ],
       queryFn: () => getFields(params),
-      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 1,
+      enabled: params.enabled,
     });
   }
 

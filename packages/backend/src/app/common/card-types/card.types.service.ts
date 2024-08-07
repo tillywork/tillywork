@@ -8,6 +8,7 @@ import { ListsService } from "../lists/lists.service";
 import { CardsService } from "../cards/cards.service";
 import { Workspace } from "../workspaces/workspace.entity";
 import { WorkspaceTypes } from "../workspaces/types";
+import { FieldsService } from "../fields/fields.service";
 
 @Injectable()
 export class CardTypesService {
@@ -15,7 +16,8 @@ export class CardTypesService {
         @InjectRepository(CardType)
         private cardTypesRepository: Repository<CardType>,
         private listsService: ListsService,
-        private cardsService: CardsService
+        private cardsService: CardsService,
+        private fieldsService: FieldsService
     ) {}
 
     async findAll(options?: FindManyOptions<CardType>): Promise<CardType[]> {

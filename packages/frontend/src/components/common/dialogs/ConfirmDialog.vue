@@ -21,16 +21,14 @@ const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
     <v-card-actions class="text-body-3">
       <v-btn
         color="error"
-        class="text-body-3"
-        size="small"
-        @click="currentDialog?.data.onCancel"
+        @click="
+          currentDialog?.data.onCancel ?? dialog.closeDialog(currentDialogIndex)
+        "
         :disabled="currentDialog?.data.isLoading"
         >Cancel</v-btn
       >
       <v-btn
         color="info"
-        class="text-body-3"
-        size="small"
         @click="currentDialog?.data.onConfirm"
         :loading="currentDialog?.data.isLoading"
         >Confirm</v-btn

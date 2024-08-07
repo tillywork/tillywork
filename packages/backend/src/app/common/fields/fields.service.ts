@@ -1,11 +1,12 @@
 import {
     BadRequestException,
+    ConflictException,
     Injectable,
     Logger,
     NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { FindOptionsWhere, Repository } from "typeorm";
 import { Field } from "./field.entity";
 import { CreateFieldDto } from "./dto/create.field.dto";
 import { UpdateFieldDto } from "./dto/update.field.dto";
@@ -13,6 +14,8 @@ import { UpdateFieldDto } from "./dto/update.field.dto";
 export type FindAllParams = {
     workspaceId?: number;
     listId?: number;
+    cardTypeId?: number;
+    createdByType?: "system" | "user";
 };
 
 @Injectable()
@@ -22,10 +25,15 @@ export class FieldsService {
         private fieldsRepository: Repository<Field>
     ) {}
 
-    async findAll({ workspaceId, listId }: FindAllParams): Promise<Field[]> {
-        if (!workspaceId && !listId) {
+    async findAll({
+        workspaceId,
+        listId,
+        cardTypeId,
+        createdByType,
+    }: FindAllParams): Promise<Field[]> {
+        if (!workspaceId && !listId && !cardTypeId) {
             throw new BadRequestException(
-                "[FieldsService#findAll] One of the following query params is required: workspaceId, listId"
+                "[FieldsService#findAll] One of the following query params is required: workspaceId, listId, cardTypeId"
             );
         }
 
@@ -37,6 +45,10 @@ export class FieldsService {
                 lists: {
                     id: listId,
                 },
+                cardType: {
+                    id: cardTypeId,
+                },
+                createdByType,
             },
             relations: ["lists"],
             order: {
@@ -53,13 +65,42 @@ export class FieldsService {
         return field;
     }
 
-    async findOneBy({ where }: { where: object }): Promise<Field> {
+    async findOneBy(where: FindOptionsWhere<Field>): Promise<Field> {
         return this.fieldsRepository.findOne({ where });
     }
 
+    async findOneBySlug({
+        slug,
+        workspaceId,
+    }: {
+        slug: string;
+        workspaceId: number;
+    }) {
+        return this.findOneBy({
+            slug,
+            workspace: {
+                id: workspaceId,
+            },
+        });
+    }
+
     async create(createFieldDto: CreateFieldDto): Promise<Field> {
+        const slugExistsInWorkspace = await this.findOneBySlug({
+            slug: createFieldDto.slug,
+            workspaceId: createFieldDto.workspaceId,
+        });
+
+        if (slugExistsInWorkspace) {
+            throw new ConflictException(
+                `This slug is already used in this workspace.`
+            );
+        }
+
         const field = this.fieldsRepository.create({
             ...createFieldDto,
+            cardType: {
+                id: createFieldDto.cardTypeId,
+            },
             workspace: {
                 id: createFieldDto.workspaceId,
             },

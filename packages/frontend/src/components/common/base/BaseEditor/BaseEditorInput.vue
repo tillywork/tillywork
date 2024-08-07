@@ -21,7 +21,7 @@ import {
   TWFileType,
   useFilesService,
   type TWFile,
-} from '@/composables/services/useFilesService';
+} from '@/services/useFilesService';
 import { File } from './extensions/File';
 import { TrailingNode } from './extensions/TrailingNode';
 import { Link } from '@tiptap/extension-link';

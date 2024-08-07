@@ -4,11 +4,11 @@ import { FieldTypes } from '../../fields/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
-import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { useProjectUsersService } from '@/services/useProjectUsersService';
 import type { FieldFilter, ViewFilter } from '../../filters/types';
 import type { FieldFilterOption, FilterViewOptions } from './types';
-import { useFieldsService } from '@/composables/services/useFieldsService';
-import { useListStagesService } from '@/composables/services/useListStagesService';
+import { useFieldsService } from '@/services/useFieldsService';
+import { useListStagesService } from '@/services/useListStagesService';
 import { useAuthStore } from '@/stores/auth';
 import { useStateStore } from '@/stores/state';
 import QuickFilters from './QuickFilters.vue';
@@ -24,7 +24,9 @@ const emit = defineEmits(['save', 'update']);
 const filtersMenu = ref(false);
 const addAdvancedFilterMenu = ref(false);
 const filtersCopy = ref<ViewFilter>(
-  props.filters ? cloneDeep({ ...props.filters }) : { where: {} }
+  props.filters
+    ? cloneDeep({ ...props.filters })
+    : { where: { quick: { and: [] }, advanced: { and: [] } } }
 );
 const viewType = ref<FilterViewOptions>('quick');
 const isSnackbarOpen = ref(false);
@@ -53,7 +55,7 @@ const { data: listStages } = listStagesService.useGetListStagesQuery({
 const defaultFields = ref<FieldFilterOption[]>([
   {
     title: 'Title',
-    field: 'card.title',
+    field: 'card.data.title',
     operator: 'eq',
     value: '',
     type: FieldTypes.TEXT,
@@ -61,7 +63,7 @@ const defaultFields = ref<FieldFilterOption[]>([
   },
   {
     title: 'Due Date',
-    field: 'card.dueAt',
+    field: 'card.data.due_at',
     operator: 'between',
     value: '',
     type: FieldTypes.DATE,
@@ -134,7 +136,12 @@ function applyFilters() {
     filtersCopy.value,
     props.filters ?? {
       where: {
-        and: [],
+        quick: {
+          and: [],
+        },
+        advanced: {
+          and: [],
+        },
       },
     }
   );
@@ -217,7 +224,9 @@ watch(
         filtersCopy.value = cloneDeep(v);
       }
     } else {
-      filtersCopy.value = { where: {} };
+      filtersCopy.value = {
+        where: { quick: { and: [] }, advanced: { and: [] } },
+      };
     }
   }
 );

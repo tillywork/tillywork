@@ -15,9 +15,9 @@ export class UpdateFilterWhereColumnForViews1721641078360
             if (where?.and) {
                 for (const condition of where.and) {
                     if (condition.or) {
-                        newWhere.quick.and.push(...condition.or);
+                        (newWhere.quick.and as any[]).push(...condition.or);
                     } else {
-                        newWhere.advanced.and.push(condition);
+                        (newWhere.advanced.and as any[]).push(condition);
                     }
                 }
             }

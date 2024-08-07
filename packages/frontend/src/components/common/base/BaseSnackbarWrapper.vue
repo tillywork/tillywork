@@ -16,21 +16,24 @@ const snackbarOffsets = computed(() => {
   <div class="d-flex flex-column align-self-start">
     <v-snackbar
       v-for="(snackbar, index) in snackbars"
+      location="end"
       :key="snackbar.id"
       :model-value="true"
       :color="snackbar.options.color"
+      variant="flat"
+      rounded="lg"
       :timeout="snackbar.options.timeout ?? 4000"
       :style="{ bottom: `${snackbarOffsets[index]}px` }"
       @after-leave="closeSnackbar(snackbar.id)"
     >
-      {{ snackbar.options.message }}
+      <span class="text-body-3">{{ snackbar.options.message }}</span>
       <template #actions>
         <v-btn
-          variant="text"
-          class="text-capitalize"
           v-if="snackbar.options.showConfirm"
+          variant="text"
+          class="text-none text-caption"
           @click="snackbar.options.onConfirm"
-          color="info"
+          color="default"
         >
           {{ snackbar.options.confirmText ?? 'Confirm' }}
         </v-btn>

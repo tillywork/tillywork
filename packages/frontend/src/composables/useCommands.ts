@@ -7,7 +7,7 @@ import {
 import { useDialogStore } from '@/stores/dialog';
 import { useStateStore } from '@/stores/state';
 import { useThemeStore } from '@/stores/theme';
-import { useCardTypesService } from './services/useCardTypesService';
+import { useCardTypesService } from '@/services/useCardTypesService';
 import { useAuthStore } from '@/stores/auth';
 import { SETTINGS } from '@/components/common/settings/types';
 

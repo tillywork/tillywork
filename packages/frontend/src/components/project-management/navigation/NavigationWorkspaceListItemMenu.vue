@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { List } from '../lists/types';
-import { useListsService } from '@/composables/services/useListsService';
+import { useListsService } from '@/services/useListsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';

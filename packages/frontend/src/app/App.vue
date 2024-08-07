@@ -3,8 +3,8 @@ import BaseSnackbarWrapper from '@/components/common/base/BaseSnackbarWrapper.vu
 import BaseDialog from '@/components/common/dialogs/BaseDialog.vue';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { WorkspaceTypes } from '@/components/project-management/workspaces/types';
-import { useProjectsService } from '@/composables/services/useProjectsService';
-import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
+import { useProjectsService } from '@/services/useProjectsService';
+import { useWorkspacesService } from '@/services/useWorkspacesService';
 import { useCommands } from '@/composables/useCommands';
 import { useState } from '@/composables/useState';
 import CrmLayout from '@/layouts/CrmLayout.vue';
@@ -17,7 +17,7 @@ import { VueQueryDevtools } from '@tanstack/vue-query-devtools';
 import posthog from 'posthog-js';
 import { useTheme } from 'vuetify';
 import BaseCommandPalette from '@/components/common/commands/BaseCommandPalette.vue';
-import { useUsersService } from '@/composables/services/useUsersService';
+import { useUsersService } from '@/services/useUsersService';
 
 const themeStore = useThemeStore();
 const {

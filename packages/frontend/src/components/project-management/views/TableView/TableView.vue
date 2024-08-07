@@ -8,11 +8,11 @@ import {
   type Column,
 } from '@tanstack/vue-table';
 import { type View } from '../types';
-import { useListGroupsService } from '@/composables/services/useListGroupsService';
+import { useListGroupsService } from '@/services/useListGroupsService';
 import type { Card } from '../../cards/types';
-import { type ListGroup } from '../../lists/types';
-import { useListStagesService } from '@/composables/services/useListStagesService';
-import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { type List, type ListGroup } from '../../lists/types';
+import { useListStagesService } from '@/services/useListStagesService';
+import { useProjectUsersService } from '@/services/useProjectUsersService';
 import TableViewGroup from './TableViewGroup.vue';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
@@ -22,6 +22,7 @@ const isLoading = defineModel<boolean>('loading');
 
 const props = defineProps<{
   columns: ColumnDef<ListGroup, any>[];
+  list: List;
   view: View;
   groups: ListGroup[];
 }>();
@@ -31,7 +32,6 @@ const emit = defineEmits([
   'submit',
   'load',
   'row:update:stage',
-  'row:update:due-date',
   'row:update:assignees',
   'row:update:order',
 ]);
@@ -59,7 +59,9 @@ const table = useVueTable({
   get data() {
     return props.groups;
   },
-  columns: props.columns as ColumnDef<ListGroup, any>[],
+  get columns() {
+    return props.columns as ColumnDef<ListGroup, any>[];
+  },
   getCoreRowModel: getCoreRowModel(),
   getRowId: (row) => `${row.id}`,
   manualPagination: true,
@@ -126,19 +128,6 @@ function toggleGroupExpansion(listGroup: Row<ListGroup>) {
 function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
   emit('row:update:assignees', {
     users,
-    card,
-  });
-}
-
-function handleUpdateDueDate({
-  newDueDate,
-  card,
-}: {
-  newDueDate: string;
-  card: Card;
-}) {
-  emit('row:update:due-date', {
-    newDueDate,
     card,
   });
 }
@@ -251,6 +240,7 @@ function handleUpdateCardOrder(data: {
             v-model:loading="isLoading"
             :list-group="listGroup"
             :list-stages="listStages ?? []"
+            :list
             :view
             :project-users="projectUsers ?? []"
             :table
@@ -259,7 +249,6 @@ function handleUpdateCardOrder(data: {
             @toggle:group="toggleGroupExpansion"
             @row:delete="handleDeleteCard"
             @row:update:stage="handleUpdateCardStage"
-            @row:update:due-date="handleUpdateDueDate"
             @row:update:assignees="handleUpdateAssignees"
             @row:update:order="handleUpdateCardOrder"
           />

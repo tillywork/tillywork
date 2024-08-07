@@ -83,7 +83,13 @@ function toggleItemSelection(item: FieldItem) {
       auto-select-first
     >
       <template #chip="{ item, props }">
-        <v-chip v-bind="props" :color="item.raw.color" variant="flat" />
+        <v-chip
+          v-bind="props"
+          :color="item.raw.color"
+          variant="tonal"
+          rounded="xl"
+          class="text-body-3"
+        />
       </template>
     </v-autocomplete>
   </template>
@@ -96,7 +102,13 @@ function toggleItemSelection(item: FieldItem) {
         <div v-bind="props" class="d-flex ga-1">
           <template v-if="selectedItems.length">
             <template v-for="item in selectedItems" :key="item.item">
-              <v-chip :color="item?.color" variant="flat" link size="small">
+              <v-chip
+                :color="item?.color"
+                variant="tonal"
+                link
+                rounded="xl"
+                class="text-body-3"
+              >
                 {{ item?.item }}
               </v-chip>
             </template>
@@ -121,7 +133,12 @@ function toggleItemSelection(item: FieldItem) {
               :active="isItemSelected(item)"
               @click="toggleItemSelection(item)"
             >
-              <v-chip :color="item.color" variant="flat" size="small">
+              <v-chip
+                :color="item.color"
+                variant="tonal"
+                rounded="xl"
+                class="text-body-3"
+              >
                 {{ item.item }}
               </v-chip>
               <template #append>

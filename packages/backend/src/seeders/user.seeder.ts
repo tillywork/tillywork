@@ -28,6 +28,8 @@ import { CardsService } from "../app/common/cards/cards.service";
 import { Card } from "../app/common/cards/card.entity";
 import { CardListsService } from "../app/common/cards/card-lists/card.lists.service";
 import { CardList } from "../app/common/cards/card-lists/card.list.entity";
+import { FieldsService } from "../app/common/fields/fields.service";
+import { Field } from "../app/common/fields/field.entity";
 
 const logger = new Logger("UserSeeder");
 
@@ -58,10 +60,12 @@ export async function seedUserData(connection: Connection): Promise<void> {
         connection.getRepository(Space),
         spaceSideEffectsService
     );
+    const fieldsService = new FieldsService(connection.getRepository(Field));
     const cardTypesService = new CardTypesService(
         connection.getRepository(CardType),
         listsService,
-        cardsService
+        cardsService,
+        fieldsService
     );
     const workspaceSideEffectsService = new WorkspaceSideEffectsService(
         spacesService,

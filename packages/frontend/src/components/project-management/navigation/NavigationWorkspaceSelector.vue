@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type Workspace } from '../workspaces/types';
-import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
+import { useWorkspacesService } from '@/services/useWorkspacesService';
 import CreateWorkspaceBtn from './CreateWorkspaceBtn.vue';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useDialogStore } from '@/stores/dialog';

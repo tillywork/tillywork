@@ -1,5 +1,5 @@
 import type { User } from '@/components/common/users/types';
-import { useHttp } from '../useHttp';
+import { useHttp } from '@/composables/useHttp';
 import { useSnackbarStore } from '@/stores/snackbar';
 
 export type TWFile = {

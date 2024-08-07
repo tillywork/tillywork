@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useViewsService } from '@/composables/services/useViewsService';
+import { useViewsService } from '@/services/useViewsService';
 import BaseViewChip from './BaseViewChip.vue';
 import type { View } from './types';
 import { useStateStore } from '@/stores/state';

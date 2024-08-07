@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import BaseCard from '@/components/project-management/cards/BaseCard.vue';
-import { useCardsService } from '@/composables/services/useCardsService';
+import { useCardsService } from '@/services/useCardsService';
 
 definePage({
   meta: {
@@ -15,16 +15,6 @@ const cardId = computed(() => +route.params.cardId);
 const { data: card, refetch } = cardsService.useGetCardQuery({
   cardId,
 });
-
-watch(
-  card,
-  (v) => {
-    if (v) {
-      document.title = `${v.title} - tillywork`;
-    }
-  },
-  { immediate: true }
-);
 
 watch(
   () => route.params.cardId,

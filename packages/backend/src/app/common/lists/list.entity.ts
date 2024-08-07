@@ -38,7 +38,7 @@ export class List {
     @UpdateDateColumn({ type: "timestamp" })
     updatedAt: Date;
 
-    @ManyToOne(() => Space, { nullable: true })
+    @ManyToOne(() => Space, { nullable: true, onDelete: "CASCADE" })
     @JoinTable()
     space: Relation<Space>;
     @Column({ type: "bigint" })

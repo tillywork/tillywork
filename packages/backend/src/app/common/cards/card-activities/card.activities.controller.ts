@@ -6,6 +6,7 @@ import {
     Logger,
     Param,
     Post,
+    Query,
     Request,
     UseGuards,
 } from "@nestjs/common";
@@ -29,8 +30,18 @@ export class CardActivitiesController {
     ) {}
 
     @Get()
-    findAll(@Param("cardId") cardId: number) {
-        return this.cardActivitiesService.findAll({ cardId });
+    findAll(
+        @Param("cardId") cardId: number,
+        @Query("sortBy") sortBy: string,
+        @Query("sortOrder") sortOrder: "asc" | "desc"
+    ) {
+        return this.cardActivitiesService.findAll({
+            cardId,
+            sortBy: {
+                key: sortBy,
+                order: sortOrder,
+            },
+        });
     }
 
     @Post()

@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ListGroupOptions, type List, type ListGroup } from '../lists/types';
-import { useViewsService } from '@/composables/services/useViewsService';
-import { useListGroupsService } from '@/composables/services/useListGroupsService';
+import { ListGroupOptions, type List } from '../lists/types';
+import { useViewsService } from '@/services/useViewsService';
+import { useListGroupsService } from '@/services/useListGroupsService';
 import type { Card } from '../cards/types';
-import { type ColumnDef } from '@tanstack/vue-table';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
@@ -11,13 +10,13 @@ import { DEFAULT_SORT_OPTIONS, type TableSortOption } from './types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { ViewTypes, type View } from './types';
 import { useQueryClient } from '@tanstack/vue-query';
-import { useCardsService } from '@/composables/services/useCardsService';
+import { useCardsService } from '@/services/useCardsService';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import BoardView from './BoardView/BoardView.vue';
 import ListView from './ListView/ListView.vue';
 import BaseViewChipFilter from './BaseViewChipFilter/BaseViewChipFilter.vue';
-import { useFitlersService } from '@/composables/services/useFiltersService';
+import { useFitlersService } from '@/services/useFiltersService';
 import {
   FilterEntityTypes,
   type Filter,
@@ -27,6 +26,9 @@ import {
 import { cloneDeep } from 'lodash';
 import { useDialogStore } from '@/stores/dialog';
 import BaseViewChipDisplay from './BaseViewChipDisplay.vue';
+import { useCardTypeFields } from '@/composables/useCardTypeFields';
+import { FieldTypes, type Field } from '../fields/types';
+import type { TableColumnDef } from './TableView/types';
 
 const props = defineProps<{
   view: View;
@@ -53,60 +55,63 @@ const groupBy = computed(() => props.view.groupBy);
 const isViewLoading = ref(false);
 const sortByOptions = DEFAULT_SORT_OPTIONS;
 
-const isPageLoading = computed(() => {
-  return (
-    updateViewMutation.isPending.value ||
-    isFetchingGroups.value ||
-    isUpdatingCard.value ||
-    isDeletingCard.value ||
-    isViewLoading.value
-  );
+const { titleField } = useCardTypeFields({
+  cardTypeId: props.list.defaultCardType.id,
 });
 
-const columns = ref<ColumnDef<ListGroup, any>[]>([
-  {
+const columns = computed<TableColumnDef[]>(() => {
+  const actionsColumn: TableColumnDef = {
     id: 'actions',
     enableResizing: false,
     enableSorting: false,
     size: 50,
-  },
-  {
-    id: 'title',
-    accessorKey: 'title',
-    header: 'Title',
-    size: 800,
-    minSize: 150,
-  },
-  {
+    cellType: 'actions',
+  };
+
+  const usersColumn: TableColumnDef = {
     id: 'users',
     accessorKey: 'users',
     header: 'Assignee',
     size: 100,
     minSize: 100,
-  },
-  {
-    id: 'dueAt',
-    accessorKey: 'dueAt',
+    cellType: FieldTypes.USER,
+  };
+
+  const titleColumn: TableColumnDef = {
+    id: `data.${titleField.value?.slug}`,
+    accessorKey: `data.${titleField.value?.slug}`,
+    header: titleField.value?.name,
+    size: 300,
+    minSize: 150,
+    cellType: 'title',
+    field: titleField.value,
+  };
+
+  const dueAtColumn: TableColumnDef = {
+    id: 'data.due_at',
+    accessorKey: 'data.due_at',
     header: 'Due Date',
-    size: 100,
-    minSize: 100,
-  },
-]);
+    size: 150,
+    minSize: 150,
+    cellType: FieldTypes.DATE,
+    field: {
+      slug: 'due_at',
+    } as Field,
+  };
+
+  return [actionsColumn, titleColumn, dueAtColumn, usersColumn];
+});
 
 const updateViewMutation = viewsService.useUpdateViewMutation();
 
-const {
-  data: listGroups,
-  isFetching: isFetchingGroups,
-  refetch: refetchListGroups,
-} = listGroupsService.useGetListGroupsByOptionQuery({
-  listId,
-  ignoreCompleted,
-  groupBy,
-});
+const { data: listGroups, refetch: refetchListGroups } =
+  listGroupsService.useGetListGroupsByOptionQuery({
+    listId,
+    ignoreCompleted,
+    groupBy,
+  });
 
-const { mutateAsync: updateCard, isPending: isUpdatingCard } =
-  cardsService.useUpdateCardMutation();
+const { mutateAsync: updateCard } = cardsService.useUpdateCardMutation();
 const { mutateAsync: deleteCard, isPending: isDeletingCard } =
   cardsService.useDeleteCardMutation();
 const { mutateAsync: updateCardList } =
@@ -154,20 +159,6 @@ function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
   });
 }
 
-function handleUpdateDueDate({
-  card,
-  newDueDate,
-}: {
-  card: Card;
-  newDueDate: string | null;
-}) {
-  const updatedCard = {
-    ...card,
-    dueAt: newDueDate,
-  };
-  updateCard(updatedCard);
-}
-
 function handleUpdateCardStage({
   cardId,
   cardListId,
@@ -206,7 +197,7 @@ function handleDeleteCard(card: Card) {
     dialog: DIALOGS.CONFIRM,
     data: {
       title: 'Confirm',
-      message: `Are you sure you want to delete ${card.title}?`,
+      message: `Are you sure you want to delete ${card.data.title}?`,
       onConfirm: () =>
         deleteCard(card.id)
           .then(() => {
@@ -324,23 +315,17 @@ watch(
 
 <template>
   <div class="view-container" v-if="viewCopy">
-    <div class="view-actions d-flex ga-2 py-4 px-12">
-      <v-progress-linear
-        indeterminate
-        color="primary"
-        :active="isPageLoading"
-        absolute
-        location="top"
-      />
+    <div class="view-actions d-flex ga-2 pa-4 overflow-auto">
       <v-btn
-        class="text-capitalize"
-        size="small"
+        class="text-none text-caption"
         variant="tonal"
-        rounded="md"
+        size="small"
         color="primary"
         @click="openCreateCardDialog"
       >
-        <v-icon icon="mdi-plus" />
+        <template #prepend>
+          <v-icon icon="mdi-plus" />
+        </template>
         Add {{ list.defaultCardType.name.toLocaleLowerCase() }}
       </v-btn>
       <div class="mx-1">
@@ -371,11 +356,11 @@ watch(
         <table-view
           v-model:loading="isViewLoading"
           :columns
+          :list
           :view="viewCopy"
           :groups="listGroups ?? []"
           @row:delete="handleDeleteCard"
           @row:update:stage="handleUpdateCardStage"
-          @row:update:due-date="handleUpdateDueDate"
           @row:update:assignees="handleUpdateAssignees"
           @row:update:order="handleUpdateCardOrder"
         >
@@ -384,10 +369,10 @@ watch(
       <template v-else-if="viewCopy.type === ViewTypes.BOARD">
         <board-view
           :view="viewCopy"
+          :list
           :list-groups="listGroups ?? []"
           @card:delete="handleDeleteCard"
           @card:update:assignees="handleUpdateAssignees"
-          @card:update:due-date="handleUpdateDueDate"
           @card:update:stage="handleUpdateCardStage"
           @card:update:order="handleUpdateCardOrder"
         />
@@ -396,12 +381,12 @@ watch(
         <list-view
           v-model:loading="isViewLoading"
           :columns
+          :list
           :view="viewCopy"
           :groups="listGroups ?? []"
           no-headers
           @row:delete="handleDeleteCard"
           @row:update:stage="handleUpdateCardStage"
-          @row:update:due-date="handleUpdateDueDate"
           @row:update:assignees="handleUpdateAssignees"
           @row:update:order="handleUpdateCardOrder"
         >
