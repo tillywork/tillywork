@@ -57,6 +57,7 @@ const vuetify = createVuetify({
     VTextField: {
       color: 'primary',
       density: 'compact',
+      variant: 'outlined',
     },
     VDataTable: {
       density: 'compact',
@@ -93,12 +94,15 @@ const vuetify = createVuetify({
     },
     VSelect: {
       density: 'compact',
+      variant: 'outlined',
     },
     VAutocomplete: {
       density: 'compact',
+      variant: 'outlined',
     },
     VCombobox: {
       density: 'compact',
+      variant: 'outlined',
     },
     VCheckbox: {
       density: 'compact',

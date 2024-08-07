@@ -45,7 +45,7 @@ async function handleSubmit() {
     @submit.prevent="handleSubmit"
     validate-on="submit"
   >
-    <v-card width="350" class="mt-6 mx-auto" :class="cardClass">
+    <v-card width="350" class="pt-2 mt-6 mx-auto" :class="cardClass">
       <v-text-field
         label="Name"
         hint="The name of your workspace"

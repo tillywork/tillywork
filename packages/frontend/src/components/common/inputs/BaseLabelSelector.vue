@@ -126,6 +126,7 @@ function toggleItemSelection(item: FieldItem) {
           hide-details
           clearable
           autocomplete="off"
+          variant="filled"
         />
         <v-list>
           <template v-for="item in searchedLabels" :key="item.item">

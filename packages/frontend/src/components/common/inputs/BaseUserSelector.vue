@@ -201,6 +201,7 @@ defineExpose({ userMenu });
         hide-details
         single-line
         autofocus
+        variant="filled"
       />
       <v-list>
         <v-list-item
