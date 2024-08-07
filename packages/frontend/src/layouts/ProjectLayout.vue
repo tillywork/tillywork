@@ -40,7 +40,6 @@ if (isAuthenticated()) {
   <v-app>
     <v-app-bar
       v-if="!hideNavigationDrawer && $vuetify.display.mdAndDown"
-      color="accent"
       height="40"
       class="border-b-thin"
     >
@@ -58,7 +57,6 @@ if (isAuthenticated()) {
       v-if="!hideNavigationDrawer"
       v-model="navigationDrawer"
       app
-      color="background"
     >
       <v-img
         :src="logo.getLogoUrlByTheme()"
