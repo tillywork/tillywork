@@ -141,7 +141,7 @@ watch(
           v-bind="props"
           rounded="0"
           variant="text"
-          class="text-capitalize"
+          class="text-none text-caption"
           color="default"
           @click="handleTabSelection(view)"
           size="small"
@@ -203,7 +203,7 @@ watch(
       </v-hover>
     </template>
     <v-btn
-      class="text-capitalize"
+      class="text-none text-caption"
       variant="text"
       size="small"
       rounded="0"

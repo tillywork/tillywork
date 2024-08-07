@@ -8,6 +8,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { ActivityType, type CardActivity } from './types';
 import { useDialogStore } from '@/stores/dialog';
+import BaseCardCommentBox from './BaseCardCommentBox.vue';
+import type { Content } from '@tiptap/vue-3';
 
 const { dayjs } = useDate();
 
@@ -15,11 +17,17 @@ const props = defineProps<{
   cardId: number;
 }>();
 
-const cardActivitiesService = useCardActivitiesService();
+const emit = defineEmits(['comment']);
+
+const { useFindAllQuery, useDeleteActivityMutation } =
+  useCardActivitiesService();
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
 const dialog = useDialogStore();
 const snackbar = useSnackbarStore();
+
+const comment = ref<Content>();
+const isCommentEmpty = ref<boolean>();
 
 const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
@@ -27,8 +35,15 @@ const confirmDialogIndex = computed(() =>
 
 const cardId = computed(() => props.cardId);
 
-const query = cardActivitiesService.useFindAllQuery(cardId);
-const deleteActivity = cardActivitiesService.useDeleteActivityMutation();
+const { data: activities, refetch } = useFindAllQuery({
+  cardId,
+  sortBy: {
+    key: 'createdAt',
+    order: 'desc',
+  },
+});
+const { mutateAsync: deleteActivity, isPending: isDeleting } =
+  useDeleteActivityMutation();
 
 const { getUserFullName } = useUsersService();
 
@@ -40,17 +55,16 @@ function openConfirmDeleteDialog(comment: CardActivity) {
       message: 'Are you sure you want to delete this comment?',
       onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
       onConfirm: () => deleteComment(comment),
-      isLoading: deleteActivity.isPending.value,
+      isLoading: isDeleting.value,
     },
   });
 }
 
 function deleteComment(comment: CardActivity) {
-  deleteActivity
-    .mutateAsync({
-      cardId: props.cardId,
-      activityId: comment.id,
-    })
+  deleteActivity({
+    cardId: props.cardId,
+    activityId: comment.id,
+  })
     .catch(() => {
       snackbar.showSnackbar({
         message: 'Something went wrong, please try again.',
@@ -63,12 +77,28 @@ function deleteComment(comment: CardActivity) {
     });
 }
 
+function createComment() {
+  if (!isCommentEmpty.value) {
+    emit('comment', comment);
+    comment.value = undefined;
+  }
+}
+
 watch(cardId, () => {
-  query.refetch();
+  refetch();
 });
 </script>
 
 <template>
+  <template v-if="user">
+    <base-card-comment-box
+      v-model="comment"
+      v-model:empty="isCommentEmpty"
+      placeholder="Write comment.. (/ for commands)"
+      @submit="createComment"
+      class="my-4"
+    />
+  </template>
   <v-timeline
     side="end"
     density="compact"
@@ -77,7 +107,7 @@ watch(cardId, () => {
     class="card-activities pa-3 pt-6 ps-1"
     align="start"
   >
-    <template v-for="activity in query.data.value" :key="activity.id">
+    <template v-for="activity in activities" :key="activity.id">
       <template v-if="activity.type === ActivityType.UPDATE">
         <v-timeline-item class="text-caption">
           <template #icon>

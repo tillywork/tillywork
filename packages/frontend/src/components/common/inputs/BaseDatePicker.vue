@@ -17,6 +17,7 @@ const props = defineProps<{
   activatorColor?: string;
   textField?: boolean;
   range?: boolean;
+  rounded?: string;
 }>();
 const dateDialog = defineModel<boolean>('dialog', {
   default: false,
@@ -187,6 +188,7 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
           readonly
           single-line
           hide-details
+          :rounded
         >
           <template #prepend-inner v-if="icon">
             <v-icon
@@ -212,6 +214,7 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
           class="text-none text-caption justify-space-between font-weight-regular"
           :class="textClass"
           @click.prevent
+          :rounded
         >
           <template #prepend v-if="icon">
             <v-icon :icon color="default" />

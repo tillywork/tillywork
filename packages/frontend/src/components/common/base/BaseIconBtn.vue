@@ -19,10 +19,6 @@ defineProps<{
     :color="color ?? 'default'"
     :rounded="rounded"
   >
-    <v-icon
-      :size="size ?? 'small'"
-      :icon="icon ?? 'mdi-plus'"
-      :color="color ?? 'default'"
-    />
+    <v-icon :size="size ?? 'small'" :icon="icon ?? 'mdi-plus'" />
   </v-btn>
 </template>

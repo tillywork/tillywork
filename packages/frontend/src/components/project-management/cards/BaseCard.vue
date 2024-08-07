@@ -10,7 +10,6 @@ import objectUtils from '@/utils/object';
 import { type Content } from '@tiptap/vue-3';
 import type { ListStage } from '../lists/types';
 import BaseCardActivityTimeline from './BaseCardActivityTimeline.vue';
-import BaseCardCommentBox from './BaseCardCommentBox.vue';
 import {
   ActivityType,
   type ActivityContent,
@@ -33,6 +32,7 @@ import BaseRelationInput from '@/components/common/inputs/BaseRelationInput.vue'
 import { useMentionNotifications } from '@/composables/useMentionNotifications';
 import urlUtils from '@/utils/url';
 import { useCardTypeFields } from '@/composables/useCardTypeFields';
+import { useCard } from '@/composables/useCard';
 
 const props = defineProps<{
   card: Card;
@@ -42,8 +42,6 @@ const props = defineProps<{
 const emit = defineEmits(['click:close']);
 
 const cardCopy = ref<Card>(cloneDeep(props.card));
-const comment = ref<Content>();
-const isCommentEmpty = ref<boolean>();
 const descriptionInput = ref();
 
 const cardListStage = ref(cardCopy.value.cardLists[0].listStage);
@@ -61,6 +59,8 @@ const cardActivitiesService = useCardActivitiesService();
 const projectUsersService = useProjectUsersService();
 const listStagesService = useListStagesService();
 const { useFieldsQuery } = useFieldsService();
+
+const { updateFieldValue } = useCard();
 
 const { mutateAsync: updateCard, isPending: isUpdating } =
   cardsService.useUpdateCardMutation();
@@ -254,38 +254,33 @@ function updateCardAssignees(card: Card, assignees: User[]) {
 }
 
 function createComment(content: ActivityContent) {
-  if (!isCommentEmpty.value) {
-    createActivityMutation
-      .mutateAsync({
-        cardId: cardCopy.value.id,
-        type: ActivityType.COMMENT,
-        content,
-      })
-      .then(async () => {
-        const newMentions = getNewMentions(content, {});
-        for (const userId of newMentions) {
-          await notifyMentionedUser({
-            userId,
-            mentionedBy: user.value!,
-            cardType: { name: 'Comment' } as CardType,
-            route: `${urlUtils.getCurrentHostUrl()}${
-              router.currentRoute.value.path
-            }`,
-          });
-        }
-
-        comment.value = undefined;
-      })
-      .catch((e) => {
-        snackbar.showSnackbar({
-          color: 'error',
-          message:
-            e.response.data.message ??
-            'Something went wrong, please try again.',
-          timeout: 5000,
+  createActivityMutation
+    .mutateAsync({
+      cardId: cardCopy.value.id,
+      type: ActivityType.COMMENT,
+      content,
+    })
+    .then(async () => {
+      const newMentions = getNewMentions(content, {});
+      for (const userId of newMentions) {
+        await notifyMentionedUser({
+          userId,
+          mentionedBy: user.value!,
+          cardType: { name: 'Comment' } as CardType,
+          route: `${urlUtils.getCurrentHostUrl()}${
+            router.currentRoute.value.path
+          }`,
         });
+      }
+    })
+    .catch((e) => {
+      snackbar.showSnackbar({
+        color: 'error',
+        message:
+          e.response.data.message ?? 'Something went wrong, please try again.',
+        timeout: 5000,
       });
-  }
+    });
 }
 
 function updateCardListStage(card: Card, listStage: ListStage) {
@@ -307,23 +302,6 @@ function updateCardListStage(card: Card, listStage: ListStage) {
 
       cardListStage.value = props.card.cardLists[0].listStage;
     });
-}
-
-function updateFieldValue({ field, v }: { field: Field; v: any }) {
-  cardCopy.value = {
-    ...cardCopy.value,
-    data: {
-      ...cardCopy.value.data,
-      [field.slug]: Array.isArray(v) ? (v.length && !!v[0] ? v : undefined) : v,
-    },
-  };
-
-  updateCard(cardCopy.value).catch(() => {
-    snackbar.showSnackbar({
-      message: 'Something went wrong, please try again.',
-      color: 'error',
-    });
-  });
 }
 
 function openCustomFieldsSettings() {
@@ -521,13 +499,9 @@ function openDescriptionFileDialog() {
         <v-card>
           <v-card-subtitle class="text-body-3 ps-1">Activity</v-card-subtitle>
           <v-card-text class="pa-0">
-            <base-card-activity-timeline :card-id="cardCopy.id" />
-            <base-card-comment-box
-              v-model="comment"
-              v-model:empty="isCommentEmpty"
-              placeholder="Write comment.. (/ for commands)"
-              @submit="createComment"
-              class="ms-1"
+            <base-card-activity-timeline
+              :card-id="cardCopy.id"
+              @comment="createComment"
             />
           </v-card-text>
         </v-card>
@@ -585,7 +559,9 @@ function openDescriptionFileDialog() {
                     v-model="cardCopy.data[field.slug]"
                     hide-details
                     :placeholder="field.name"
-                    @update:model-value="(v) => updateFieldValue({ field, v })"
+                    @update:model-value="
+                      (v) => updateFieldValue({ card: cardCopy, field, v })
+                    "
                     :prepend-inner-icon="field.icon"
                   />
                 </template>
@@ -605,6 +581,7 @@ function openDescriptionFileDialog() {
                     @update:model-value="
                       (v) =>
                         updateFieldValue({
+                          card: cardCopy,
                           field,
                           v: Array.isArray(v)
                             ? v.map((item) => (item.item ? item.item : item))
@@ -623,6 +600,7 @@ function openDescriptionFileDialog() {
                     @update:model-value="
                       (v) =>
                         updateFieldValue({
+                          card: cardCopy,
                           field,
                           v,
                         })
@@ -637,6 +615,7 @@ function openDescriptionFileDialog() {
                     @update:model-value="
                       (v: string | string[]) =>
                         updateFieldValue({
+                            card: cardCopy, 
                           field,
                           v,
                         })
@@ -654,6 +633,7 @@ function openDescriptionFileDialog() {
                     @update:model-value="
                       (users: number[]) =>
                         updateFieldValue({
+                            card: cardCopy, 
                           field,
                           v: users.map((userIdAsNumber) => userIdAsNumber.toString()),
                         })
@@ -668,6 +648,7 @@ function openDescriptionFileDialog() {
                     @update:model-value="
                       (v) =>
                         updateFieldValue({
+                          card: cardCopy,
                           field,
                           v: Array.isArray(v)
                             ? v.map((c) => c.toString())

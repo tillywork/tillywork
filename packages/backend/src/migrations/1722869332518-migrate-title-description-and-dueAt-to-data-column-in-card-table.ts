@@ -8,7 +8,6 @@ export class MigrateTitleDescriptionAndDueAtToDataColumnInCardTable1722869332518
         const cardTypes = await queryRunner.query(`
             SELECT id, "workspaceId" 
             FROM card_type 
-            WHERE "createdByType" = 'system'
           `);
 
         for (const cardType of cardTypes) {
@@ -152,7 +151,6 @@ export class MigrateTitleDescriptionAndDueAtToDataColumnInCardTable1722869332518
         const cardTypes = await queryRunner.query(`
             SELECT id 
             FROM card_type 
-            WHERE "createdByType" = 'system'
           `);
 
         for (const cardType of cardTypes) {

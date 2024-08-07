@@ -10,7 +10,7 @@ import {
 import { type View } from '../types';
 import { useListGroupsService } from '@/services/useListGroupsService';
 import type { Card } from '../../cards/types';
-import { type ListGroup } from '../../lists/types';
+import { type List, type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import TableViewGroup from './TableViewGroup.vue';
@@ -22,6 +22,7 @@ const isLoading = defineModel<boolean>('loading');
 
 const props = defineProps<{
   columns: ColumnDef<ListGroup, any>[];
+  list: List;
   view: View;
   groups: ListGroup[];
 }>();
@@ -59,7 +60,9 @@ const table = useVueTable({
   get data() {
     return props.groups;
   },
-  columns: props.columns as ColumnDef<ListGroup, any>[],
+  get columns() {
+    return props.columns as ColumnDef<ListGroup, any>[];
+  },
   getCoreRowModel: getCoreRowModel(),
   getRowId: (row) => `${row.id}`,
   manualPagination: true,
@@ -251,6 +254,7 @@ function handleUpdateCardOrder(data: {
             v-model:loading="isLoading"
             :list-group="listGroup"
             :list-stages="listStages ?? []"
+            :list
             :view
             :project-users="projectUsers ?? []"
             :table

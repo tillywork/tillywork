@@ -10,7 +10,7 @@ import {
 import type { View } from '../types';
 import { useListGroupsService } from '@/services/useListGroupsService';
 import type { Card } from '../../cards/types';
-import { type ListGroup } from '../../lists/types';
+import { type List, type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import ListViewGroup from './ListViewGroup.vue';
@@ -23,6 +23,7 @@ const isLoading = defineModel<boolean>('loading');
 const props = defineProps<{
   columns: ColumnDef<ListGroup, any>[];
   noHeaders?: boolean;
+  list: List;
   view: View;
   groups: ListGroup[];
 }>();
@@ -225,6 +226,7 @@ function handleUpdateCardOrder(data: {
             v-model:loading="isLoading"
             :list-group="listGroup"
             :list-stages="listStages ?? []"
+            :list
             :view
             :project-users="projectUsers ?? []"
             :table

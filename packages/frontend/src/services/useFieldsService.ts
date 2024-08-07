@@ -34,7 +34,9 @@ export const useFieldsService = () => {
     });
   }
 
-  function useFieldsQuery(params: GetFieldsParams) {
+  function useFieldsQuery(
+    params: GetFieldsParams & { enabled?: MaybeRef<boolean> }
+  ) {
     return useQuery({
       queryKey: [
         'fields',
@@ -47,6 +49,7 @@ export const useFieldsService = () => {
       ],
       queryFn: () => getFields(params),
       staleTime: 1000 * 60 * 1,
+      enabled: params.enabled,
     });
   }
 

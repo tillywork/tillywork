@@ -3,12 +3,15 @@ import { useFieldsService } from '@/services/useFieldsService';
 
 export const useCardTypeFields = ({
   cardTypeId,
+  enabled,
 }: {
   cardTypeId: MaybeRef<number>;
+  enabled?: MaybeRef<boolean>;
 }) => {
   const { useFieldsQuery } = useFieldsService();
   const { data: cardTypeFields, refetch } = useFieldsQuery({
     cardTypeId,
+    enabled,
   });
 
   const titleField = computed(() =>
@@ -25,11 +28,16 @@ export const useCardTypeFields = ({
     )
   );
 
+  const pinnedFields = computed(() =>
+    cardTypeFieldsWithoutMainFields.value?.filter((field) => field.isPinned)
+  );
+
   return {
     cardTypeFields,
     titleField,
     descriptionField,
     cardTypeFieldsWithoutMainFields,
+    pinnedFields,
     refetch,
   };
 };

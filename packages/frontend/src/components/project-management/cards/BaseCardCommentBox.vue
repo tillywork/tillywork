@@ -31,7 +31,7 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
 </script>
 
 <template>
-  <v-card rounded="md" border="thin" class="mt-6">
+  <v-card rounded="md" border="thin">
     <v-card-text>
       <base-editor-input
         ref="baseEditor"

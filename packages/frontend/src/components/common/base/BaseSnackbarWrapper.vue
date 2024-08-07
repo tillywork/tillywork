@@ -29,14 +29,10 @@ const snackbarOffsets = computed(() => {
       <span class="text-body-3">{{ snackbar.options.message }}</span>
       <template #actions>
         <v-btn
-          v-if="
-            snackbar.options.showConfirm === undefined
-              ? true
-              : snackbar.options.showConfirm
-          "
+          v-if="snackbar.options.showConfirm"
           variant="text"
           class="text-none text-caption"
-          @click="snackbar.options.onConfirm ?? closeSnackbar(snackbar.id)"
+          @click="snackbar.options.onConfirm"
           color="default"
         >
           {{ snackbar.options.confirmText ?? 'Confirm' }}

@@ -1,11 +1,15 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { FindOptionsOrder, Repository } from "typeorm";
 import { CardActivity } from "./card.activity.entity";
 import { CreateCardActivityDto } from "./dto/create.card.activity.dto";
 
 export interface FindAllParams {
     cardId: number;
+    sortBy?: {
+        key: string;
+        order: "asc" | "desc";
+    };
 }
 
 @Injectable()
@@ -15,7 +19,13 @@ export class CardActivitiesService {
         private cardActivitiesRepository: Repository<CardActivity>
     ) {}
 
-    async findAll({ cardId }: FindAllParams): Promise<CardActivity[]> {
+    async findAll({
+        cardId,
+        sortBy = {
+            key: "createdAt",
+            order: "asc",
+        },
+    }: FindAllParams): Promise<CardActivity[]> {
         const cardActivities = await this.cardActivitiesRepository.find({
             where: {
                 card: {
@@ -23,7 +33,7 @@ export class CardActivitiesService {
                 },
             },
             order: {
-                createdAt: "ASC",
+                [sortBy.key]: sortBy.order,
             },
             relations: ["createdBy"],
         });

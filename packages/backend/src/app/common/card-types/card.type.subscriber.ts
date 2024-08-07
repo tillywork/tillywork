@@ -56,7 +56,9 @@ export class CardTypeSubscriber implements EntitySubscriberInterface<CardType> {
             const fieldEntity = fieldRepo.create({
                 ...field,
                 workspace: event.entity.workspace,
-                cardType: event.entity,
+                cardType: {
+                    id: event.entity.id,
+                },
             });
 
             await fieldRepo.save(fieldEntity);

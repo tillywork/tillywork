@@ -8,6 +8,7 @@ import {
 } from '@tanstack/vue-table';
 import {
   ListGroupOptions,
+  type List,
   type ListGroup,
   type ListStage,
 } from '../../lists/types';
@@ -16,7 +17,6 @@ import type { TableSortOption, View } from '../types';
 import type { ProjectUser } from '@/components/common/projects/types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import type { Card } from '../../cards/types';
-import { FlexRender } from '@tanstack/vue-table';
 import draggable from 'vuedraggable';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
@@ -25,6 +25,9 @@ import { cloneDeep } from 'lodash';
 import type { QueryFilter, ViewFilter } from '../../filters/types';
 import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
+import { useCardTypeFields } from '@/composables/useCardTypeFields';
+import { FieldTypes } from '../../fields/types';
+import { useCard } from '@/composables/useCard';
 
 const emit = defineEmits([
   'toggle:group',
@@ -40,6 +43,7 @@ const props = defineProps<{
   projectUsers: ProjectUser[];
   table: Table<ListGroup>;
   view: View;
+  list: List;
 }>();
 const rowMenuOpen = ref<Row<Card> | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
@@ -47,6 +51,12 @@ const isGroupCardsLoading = defineModel<boolean>('loading');
 const dialog = useDialogStore();
 const cardsService = useCardsService();
 const { showSnackbar } = useSnackbarStore();
+
+const { updateFieldValue } = useCard();
+
+const { titleField, pinnedFields } = useCardTypeFields({
+  cardTypeId: props.list.defaultCardType.id,
+});
 
 const groupCopy = ref(cloneDeep(props.listGroup));
 const sortBy = computed<TableSortOption[]>(() =>
@@ -389,7 +399,7 @@ watchEffect(() => {
   </v-banner>
   <template v-if="listGroup.getIsExpanded()">
     <v-list
-      class="pa-0 overflow-scroll"
+      class="pa-0"
       rounded="0"
       :height="groupHeight"
       :max-height="maxHeight"
@@ -416,85 +426,61 @@ watchEffect(() => {
           group="cards"
         >
           <template #item="{ element: row }">
-            <v-list-item
-              class="pa-0"
-              rounded="0"
-              height="33"
-              :to="`/pm/card/${row.original.id}`"
-              :ripple="false"
-            >
+            <div class="list-row-wrapper">
               <v-hover
                 #="{ isHovering: isRowHovering, props: rowProps }"
                 :disabled="isDragging"
               >
-                <v-card
-                  color="transparent"
-                  v-bind="rowProps"
-                  height="33"
-                  class="list-row d-flex align-center text-body-3"
+                <v-list-item
+                  class="list-row text-body-3"
                   rounded="0"
-                  link
+                  height="33"
+                  :to="`/pm/card/${row.original.id}`"
                   :ripple="false"
+                  v-bind="rowProps"
                 >
-                  <template
-                    v-for="cell in row.getVisibleCells()"
-                    :key="cell.id"
-                  >
-                    <template v-if="cell.column.columnDef.id === 'actions'">
-                      <v-card
-                        :width="cell.column.getSize()"
-                        class="list-cell d-flex align-center fill-height"
-                        rounded="0"
-                        color="transparent"
-                      >
-                        <div
-                          class="d-flex flex-fill justify-end ga-1"
-                          v-if="isRowHovering || rowMenuOpen?.id === row.id"
-                        >
-                          <v-menu
-                            @update:model-value="
-                              (v) => handleCardMenuClick({ row, isOpen: v })
-                            "
-                          >
-                            <template #activator="{ props }">
-                              <base-icon-btn
-                                v-bind="props"
-                                icon="mdi-dots-vertical"
-                                @click.prevent
-                              />
-                            </template>
-                            <v-card class="border-thin">
-                              <v-list>
-                                <v-list-item
-                                  class="text-error"
-                                  @click="handleDeleteCard(row.original)"
-                                >
-                                  <template #prepend>
-                                    <v-icon icon="mdi-delete" />
-                                  </template>
-                                  <v-list-item-title>Delete</v-list-item-title>
-                                </v-list-item>
-                              </v-list>
-                            </v-card>
-                          </v-menu>
-                        </div>
-                      </v-card>
-                    </template>
-                    <template
-                      v-else-if="cell.column.columnDef.id === 'data.title'"
+                  <template #prepend>
+                    <div
+                      :style="{ width: '30px' }"
+                      class="d-flex justify-end me-2"
                     >
-                      <v-card
-                        :width="cell.column.getSize()"
-                        class="d-flex align-center fill-height text-body-3 px-2 list-cell"
-                        rounded="0"
-                        color="transparent"
-                      >
-                        <list-stage-selector
-                          :model-value="row.original.cardLists[0].listStage"
-                          theme="icon"
-                          rounded="circle"
-                          :list-stages="listStages ?? []"
-                          @update:modelValue="
+                      <div v-if="isRowHovering || rowMenuOpen?.id === row.id">
+                        <v-menu
+                          @update:model-value="
+                            (v) => handleCardMenuClick({ row, isOpen: v })
+                          "
+                        >
+                          <template #activator="{ props }">
+                            <base-icon-btn
+                              v-bind="props"
+                              icon="mdi-dots-vertical"
+                              @click.prevent
+                            />
+                          </template>
+                          <v-card class="border-thin">
+                            <v-list>
+                              <v-list-item
+                                class="text-error"
+                                @click="handleDeleteCard(row.original)"
+                              >
+                                <template #prepend>
+                                  <v-icon icon="mdi-delete" />
+                                </template>
+                                <v-list-item-title>Delete</v-list-item-title>
+                              </v-list-item>
+                            </v-list>
+                          </v-card>
+                        </v-menu>
+                      </div>
+                    </div>
+                  </template>
+                  <v-list-item-title class="d-flex align-center ga-1">
+                    <list-stage-selector
+                      :model-value="row.original.cardLists[0].listStage"
+                      theme="icon"
+                      rounded="circle"
+                      :list-stages="listStages ?? []"
+                      @update:modelValue="
                         (modelValue: ListStage) =>
                         handleUpdateCardStage({
                             cardId: row.original.id,
@@ -502,87 +488,69 @@ watchEffect(() => {
                             listStageId: modelValue.id,
                         })
                     "
-                          @click.prevent
-                        />
-                        <span class="text-truncate ms-2">
-                          {{ row.original.data.title }}
-                        </span>
+                      @click.prevent
+                    />
 
-                        <!-- Progress -->
-                        <base-card-children-progress
-                          v-if="row.original.children.length > 0"
-                          :card="row.original"
-                          border="thin"
-                          rounded="pill"
-                          class="text-caption ms-2"
-                          min-width="fit-content"
-                          style="
-                            padding-top: 2px !important;
-                            padding-bottom: 2px !important;
-                          "
-                        />
-                      </v-card>
+                    <template v-if="titleField">
+                      <span class="text-truncate ms-2">
+                        {{ row.original.data[titleField.slug] }}
+                      </span>
                     </template>
-                    <template
-                      v-else-if="cell.column.columnDef.id === 'data.due_at'"
-                    >
-                      <v-card
-                        :width="cell.column.getSize()"
-                        class="list-cell d-flex align-center fill-height"
-                        rounded="0"
-                        color="transparent"
-                        link
-                      >
-                        <base-date-picker
-                          :model-value="row.original.data.due_at"
-                          @update:model-value="(newValue: string) => handleUpdateDueDate({
-                            card: row.original,
-                            newDueDate: newValue ?? null,
-                          })"
-                          class="text-caption d-flex flex-fill h-100 justify-start rounded-0"
-                          label="Set due date"
-                          @click.prevent
-                        />
-                      </v-card>
+                    <template v-else>
+                      <v-skeleton-loader type="text" width="100%" />
                     </template>
-                    <template v-else-if="cell.column.columnDef.id === 'users'">
-                      <v-card
-                        :width="cell.column.getSize()"
-                        class="list-cell d-flex align-center fill-height px-1"
-                        rounded="0"
-                        color="transparent"
-                        link
-                      >
-                        <base-user-selector
-                          :model-value="row.original.users"
-                          :users
-                          fill
-                          @update:model-value="
+
+                    <!-- Progress -->
+                    <base-card-children-progress
+                      v-if="row.original.children.length > 0"
+                      :card="row.original"
+                      border="thin"
+                      class="text-caption ms-2"
+                      style="
+                        padding-top: 2px !important;
+                        padding-bottom: 2px !important;
+                      "
+                    />
+                  </v-list-item-title>
+                  <template #append>
+                    <div class="d-flex align-center ga-2 me-6">
+                      <template v-for="field in pinnedFields" :key="field.slug">
+                        <template v-if="field.type === FieldTypes.DATE">
+                          <base-date-picker
+                            :model-value="row.original.data[field.slug]"
+                            @update:model-value="(v: string) => updateFieldValue({
+                                card: row.original,
+                                field,
+                                v
+                            })"
+                            class="text-caption d-flex justify-start rounded-0"
+                            :label="`Set ${field.name.toLowerCase()}`"
+                            @click.prevent
+                          />
+                        </template>
+                        <template v-else>
+                          <span class="text-error text-xs"
+                            >Unknown field type: {{ field.type }}</span
+                          >
+                        </template>
+                      </template>
+
+                      <base-user-selector
+                        :model-value="row.original.users"
+                        :users
+                        fill
+                        @update:model-value="
                             (users: User[]) => handleUserSelection({
                                 users, card: row.original
                             })
                           "
-                          @click.stop
-                        />
-                      </v-card>
-                    </template>
-                    <template v-else>
-                      <v-card
-                        :width="cell.column.getSize()"
-                        class="list-cell d-flex align-center fill-height"
-                        rounded="0"
-                        color="transparent"
-                      >
-                        <FlexRender
-                          :render="cell.column.columnDef.cell"
-                          :props="cell.getContext()"
-                        />
-                      </v-card>
-                    </template>
+                        @click.stop
+                      />
+                    </div>
                   </template>
-                </v-card>
+                </v-list-item>
               </v-hover>
-            </v-list-item>
+            </div>
           </template>
         </draggable>
       </v-infinite-scroll>

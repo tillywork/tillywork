@@ -24,7 +24,9 @@ const emit = defineEmits(['save', 'update']);
 const filtersMenu = ref(false);
 const addAdvancedFilterMenu = ref(false);
 const filtersCopy = ref<ViewFilter>(
-  props.filters ? cloneDeep({ ...props.filters }) : { where: {} }
+  props.filters
+    ? cloneDeep({ ...props.filters })
+    : { where: { quick: { and: [] }, advanced: { and: [] } } }
 );
 const viewType = ref<FilterViewOptions>('quick');
 const isSnackbarOpen = ref(false);
@@ -134,7 +136,12 @@ function applyFilters() {
     filtersCopy.value,
     props.filters ?? {
       where: {
-        and: [],
+        quick: {
+          and: [],
+        },
+        advanced: {
+          and: [],
+        },
       },
     }
   );
@@ -217,7 +224,9 @@ watch(
         filtersCopy.value = cloneDeep(v);
       }
     } else {
-      filtersCopy.value = { where: {} };
+      filtersCopy.value = {
+        where: { quick: { and: [] }, advanced: { and: [] } },
+      };
     }
   }
 );

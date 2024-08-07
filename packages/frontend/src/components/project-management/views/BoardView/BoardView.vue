@@ -2,7 +2,7 @@
 import type { View } from '../types';
 import { useListGroupsService } from '@/services/useListGroupsService';
 import type { Card } from '../../cards/types';
-import { type ListGroup } from '../../lists/types';
+import { type List, type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import BoardViewGroup from './BoardViewGroup.vue';
@@ -14,6 +14,7 @@ const isLoading = defineModel<boolean>('loading');
 
 const props = defineProps<{
   view: View;
+  list: List;
   listGroups: ListGroup[];
 }>();
 
@@ -117,6 +118,7 @@ function handleUpdateCardOrder(data: {
             :list-group="listGroup"
             :list-stages="listStages ?? []"
             :view
+            :list
             :project-users="projectUsers ?? []"
             @toggle:group="toggleGroupExpansion"
             @card:delete="handleDeleteCard"

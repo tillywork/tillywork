@@ -5,13 +5,15 @@ import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue'
 import { useCardTypeFields } from '@/composables/useCardTypeFields';
 
 const props = defineProps<{
-  card: Pick<Card, 'id' | 'type'>;
+  card: Pick<Card, 'id'>;
   maxWidth?: number;
   disableLink?: boolean;
   hideStage?: boolean;
 }>();
 
 const cardId = computed(() => props.card.id);
+const cardTypeId = computed(() => cardCopy.value?.type.id ?? 0);
+const cardTypeFieldsEnabled = computed(() => !!cardCopy.value);
 
 const { useGetCardQuery } = useCardsService();
 const { data: cardCopy } = useGetCardQuery({
@@ -19,7 +21,8 @@ const { data: cardCopy } = useGetCardQuery({
 });
 
 const { titleField } = useCardTypeFields({
-  cardTypeId: props.card.type.id,
+  cardTypeId,
+  enabled: cardTypeFieldsEnabled,
 });
 </script>
 
