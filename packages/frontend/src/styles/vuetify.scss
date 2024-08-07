@@ -15,6 +15,11 @@
   font-size: 0.875rem;
 }
 
+.v-input__details {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
 .v-menu {
   .v-card {
     border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));

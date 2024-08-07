@@ -138,6 +138,7 @@ watch(locationMenu, (v) => {
         autocomplete="off"
         clearable
         placeholder="Search.."
+        variant="filled"
       />
       <v-list
         v-model:opened="openedListGroups"

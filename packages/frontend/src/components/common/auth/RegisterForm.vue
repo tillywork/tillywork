@@ -79,12 +79,17 @@ async function handleRegister() {
         <v-img
           :src="logo.getLogoUrlByTheme()"
           alt="tillywork"
-          width="225"
+          width="150"
           class="mx-auto mb-3"
         />
         <v-form ref="registerForm" @submit.prevent="handleRegister">
-          <v-card color="accent" class="px-4 py-2" :loading>
-            <v-card-title class="text-h5 mb-2">
+          <v-card
+            color="transparent"
+            class="px-4 py-2"
+            :loading
+            max-width="470"
+          >
+            <v-card-title class="text-h6 mb-2">
               {{ header ?? 'Create a free account' }}
             </v-card-title>
             <v-card-text class="pb-0">
@@ -94,6 +99,7 @@ async function handleRegister() {
                   label="First Name*"
                   required
                   :rules="[rules.required]"
+                  autofocus
                 />
                 <v-text-field
                   v-model="createUserDto.lastName"
@@ -127,13 +133,13 @@ async function handleRegister() {
               /> -->
             </v-card-text>
             <v-card-actions class="px-4 pt-0">
-              <p v-if="!inviteCode">
-                Already have an account?
-                <router-link to="/login">Login</router-link>
-              </p>
+              <template v-if="!inviteCode">
+                <span class="text-caption"> Already have an account? </span>
+                <v-btn class="text-none ms-1" to="/login">Login</v-btn>
+              </template>
               <v-spacer />
-              <v-btn type="submit" variant="flat" :loading class="text-body-3">
-                Create
+              <v-btn type="submit" variant="flat" :loading class="text-none">
+                Start
               </v-btn>
             </v-card-actions>
           </v-card>
