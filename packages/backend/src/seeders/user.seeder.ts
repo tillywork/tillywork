@@ -41,6 +41,8 @@ export async function seedUserData(connection: Connection): Promise<void> {
     );
     const cardsService = new CardsService(
         connection.getRepository(Card),
+        connection.getRepository(CardList),
+        connection.getRepository(User),
         cardListsService
     );
     const listStagesService = new ListStagesService(

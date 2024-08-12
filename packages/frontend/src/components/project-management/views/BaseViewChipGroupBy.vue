@@ -1,30 +1,66 @@
 <script setup lang="ts">
-import {
-  DEFAULT_LIST_GROUP_BY_OPTIONS,
-  ListGroupOptions,
-} from '../lists/types';
+import { DEFAULT_LIST_GROUP_BY_OPTIONS } from '../lists/types';
 import type { ListGroupOption } from './types';
 import BaseViewChip from './BaseViewChip.vue';
+import { ListGroupOptions, type ViewGroupByOption } from '@tillywork/shared';
+import { useCardTypeFields } from '@/composables/useCardTypeFields';
+import { useStateStore } from '@/stores/state';
 
-const groupBy = defineModel<ListGroupOptions>();
-const groupByOptions = ref(DEFAULT_LIST_GROUP_BY_OPTIONS);
+const groupBy = defineModel<ViewGroupByOption>();
+
+const { currentList } = storeToRefs(useStateStore());
+const cardTypeId = computed(() => currentList.value?.defaultCardType.id ?? 0);
+const cardTypeEnabled = computed(() => !!currentList.value);
+
+const { groupableFields } = useCardTypeFields({
+  cardTypeId,
+  enabled: cardTypeEnabled,
+});
+
+const groupByOptions = computed(() => {
+  const arr = [...DEFAULT_LIST_GROUP_BY_OPTIONS];
+
+  if (groupableFields.value) {
+    groupableFields.value.forEach((field) => {
+      arr.push({
+        label: field.name,
+        value: ListGroupOptions.FIELD,
+        icon: field.icon,
+        field,
+      });
+    });
+  }
+  //TODO get list fields
+
+  return arr;
+});
+
 const selectedOption = computed(() =>
-  groupByOptions.value.find((option) => option.value === groupBy.value)
+  groupByOptions.value.find((option) => isOptionSelected(option))
 );
+
 const isGroupByFilled = computed(
-  () => groupBy.value && groupBy.value !== ListGroupOptions.ALL
+  () => groupBy.value && groupBy.value.type !== ListGroupOptions.ALL
 );
 
 function handleGroupBySelection(option: ListGroupOption) {
-  groupBy.value = option.value;
+  groupBy.value = {
+    type: option.value,
+    fieldId: option.field?.id,
+  };
 }
 
 function isOptionSelected(option: ListGroupOption) {
-  return option.value === groupBy.value;
+  return (
+    option.value === groupBy.value?.type &&
+    option.field?.id === groupBy.value.fieldId
+  );
 }
 
 function clearGroupBy() {
-  groupBy.value = ListGroupOptions.ALL;
+  groupBy.value = {
+    type: ListGroupOptions.ALL,
+  };
 }
 </script>
 
@@ -61,11 +97,9 @@ function clearGroupBy() {
             :active="isOptionSelected(option)"
           >
             <template #prepend>
-              <v-icon
-                :color="isOptionSelected(option) ? 'primary' : 'grey'"
-                size="small"
-                >{{ option.icon ?? 'mdi-circle-slice-8' }}</v-icon
-              >
+              <v-icon :color="isOptionSelected(option) ? 'primary' : 'grey'">{{
+                option.icon ?? 'mdi-circle-slice-8'
+              }}</v-icon>
             </template>
             <v-list-item-title
               class="user-select-none"

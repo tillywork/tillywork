@@ -16,14 +16,20 @@ const { mutateAsync: updateView } = useUpdateViewMutation();
 function handleToggleCompleted() {
   updateView({
     id: props.view.id,
-    ignoreCompleted: !props.view.ignoreCompleted,
+    options: {
+      ...props.view.options,
+      hideCompleted: !props.view.options.hideCompleted,
+    },
   });
 }
 
 function handleToggleChildren() {
   updateView({
     id: props.view.id,
-    ignoreChildren: !props.view.ignoreChildren,
+    options: {
+      ...props.view.options,
+      hideChildren: !props.view.options.hideChildren,
+    },
   });
 }
 </script>
@@ -36,7 +42,7 @@ function handleToggleChildren() {
           <v-list-item @click="handleToggleCompleted">
             <template #append>
               <v-switch
-                :model-value="!view.ignoreCompleted"
+                :model-value="!view.options.hideCompleted"
                 readonly
                 inset
                 hide-details
@@ -49,7 +55,7 @@ function handleToggleChildren() {
           <v-list-item @click="handleToggleChildren">
             <template #append>
               <v-switch
-                :model-value="!view.ignoreChildren"
+                :model-value="!view.options.hideChildren"
                 readonly
                 inset
                 hide-details

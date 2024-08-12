@@ -1,5 +1,6 @@
 import type { MaybeRef } from 'vue';
 import { useFieldsService } from '@/services/useFieldsService';
+import { FieldTypes } from '@/components/project-management/fields/types';
 
 export const useCardTypeFields = ({
   cardTypeId,
@@ -32,12 +33,24 @@ export const useCardTypeFields = ({
     cardTypeFieldsWithoutMainFields.value?.filter((field) => field.isPinned)
   );
 
+  const groupableFields = computed(() =>
+    cardTypeFieldsWithoutMainFields.value?.filter((field) =>
+      [
+        FieldTypes.DROPDOWN,
+        FieldTypes.LABEL,
+        FieldTypes.DATE,
+        FieldTypes.USER,
+      ].includes(field.type)
+    )
+  );
+
   return {
     cardTypeFields,
     titleField,
     descriptionField,
     cardTypeFieldsWithoutMainFields,
     pinnedFields,
+    groupableFields,
     refetch,
   };
 };

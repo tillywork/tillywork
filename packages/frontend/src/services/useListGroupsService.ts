@@ -1,16 +1,14 @@
 import type { MaybeRef } from 'vue';
 import { useHttp } from '@/composables/useHttp';
-import type {
-  ListGroup,
-  ListGroupOptions,
-} from '../../components/project-management/lists/types';
+import type { ListGroup } from '@/components/project-management/lists/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import type { TableSortOption } from '@/components/project-management/views/types';
+import type { ViewGroupByOption } from '@tillywork/shared';
 
 export interface GetListGroupsByOptionParams {
   listId: MaybeRef<number>;
   ignoreCompleted: MaybeRef<boolean>;
-  groupBy: MaybeRef<ListGroupOptions>;
+  groupBy: MaybeRef<ViewGroupByOption>;
   sortCardsBy?: MaybeRef<TableSortOption[]>;
 }
 
@@ -32,14 +30,15 @@ export const useListGroupsService = () => {
       method: 'POST',
       data: {
         ignoreCompleted: toValue(ignoreCompleted),
-        groupBy: toValue(groupBy),
+        groupBy: toValue(groupBy).type,
+        fieldId: toValue(groupBy).fieldId,
         sortCardsBy: toValue(sortCardsBy),
       },
     });
   }
 
   async function update(listGroup: Partial<ListGroup>) {
-    return sendRequest(`/lists/${listGroup.listId}/groups/${listGroup.id}`, {
+    return sendRequest(`/lists/${listGroup.list!.id}/groups/${listGroup.id}`, {
       method: 'PUT',
       data: listGroup,
     });

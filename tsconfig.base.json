@@ -9,12 +9,14 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "es2015",
-    "module": "esnext",
-    "lib": ["es2020", "dom"],
+    "module": "ESNext",
+    "lib": ["ES2021", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@tillywork/shared": ["packages/shared/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

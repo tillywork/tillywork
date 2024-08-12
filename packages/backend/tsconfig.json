@@ -11,6 +11,13 @@
         }
     ],
     "compilerOptions": {
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitThis": true,
+        "baseUrl": ".",
+        "paths": {
+            "@tillywork/shared": ["../shared/src/index.ts"]
+        }
     }
 }

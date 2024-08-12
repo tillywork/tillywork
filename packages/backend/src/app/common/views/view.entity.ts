@@ -8,10 +8,10 @@ import {
     JoinColumn,
     Relation,
 } from "typeorm";
-import { ViewSortOption, ViewTypes } from "./types";
+import { ViewTypes } from "./types";
 import { List } from "../lists/list.entity";
-import { ListGroupOptions } from "../lists/types";
 import { QueryFilter } from "../filters/types";
+import { ListGroupOptions, ViewOptions } from "@tillywork/shared";
 
 @Entity()
 export class View {
@@ -24,21 +24,16 @@ export class View {
     @Column({ type: "enum", enum: ViewTypes, default: ViewTypes.TABLE })
     type: ViewTypes;
 
-    @Column({ type: "boolean", default: true })
-    ignoreCompleted: boolean;
-
-    @Column({ type: "boolean", default: false })
-    ignoreChildren: boolean;
-
     @Column({
-        type: "enum",
-        enum: ListGroupOptions,
-        default: ListGroupOptions.LIST_STAGE,
+        type: "jsonb",
+        default: {
+            groupBy: {
+                type: ListGroupOptions.LIST_STAGE,
+            },
+            ignoreCompleted: true,
+        },
     })
-    groupBy: ListGroupOptions;
-
-    @Column("jsonb", { nullable: true })
-    sortBy: ViewSortOption;
+    options: ViewOptions;
 
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;

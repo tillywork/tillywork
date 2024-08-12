@@ -1,8 +1,7 @@
 import { Controller, Post, Body, Param, Put, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../../auth/guards/jwt.auth.guard";
 import { UpdateListGroupDto } from "./dto/update.list.group.dto";
-import { ListGroupOptions } from "../types";
-import { ListGroupsService } from "./list.groups.service";
+import { GenerateGroupsParams, ListGroupsService } from "./list.groups.service";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 @ApiBearerAuth()
@@ -22,12 +21,14 @@ export class ListGroupsController {
         {
             ignoreCompleted,
             groupBy,
-        }: { ignoreCompleted: boolean; groupBy: ListGroupOptions }
+            fieldId,
+        }: Omit<GenerateGroupsParams, "listId">
     ) {
         return this.listGroupsService.generateGroups({
             listId,
             ignoreCompleted,
-            groupBy: groupBy ?? ListGroupOptions.ALL,
+            groupBy,
+            fieldId,
         });
     }
 

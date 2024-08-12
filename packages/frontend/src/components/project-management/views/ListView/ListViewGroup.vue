@@ -6,12 +6,7 @@ import {
   type Row,
   type Table,
 } from '@tanstack/vue-table';
-import {
-  ListGroupOptions,
-  type List,
-  type ListGroup,
-  type ListStage,
-} from '../../lists/types';
+import { type List, type ListGroup, type ListStage } from '../../lists/types';
 import { useCardsService } from '@/services/useCardsService';
 import type { TableSortOption, View } from '../types';
 import type { ProjectUser } from '@/components/common/projects/types';
@@ -28,6 +23,7 @@ import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 import { useCardTypeFields } from '@/composables/useCardTypeFields';
 import { FieldTypes } from '../../fields/types';
 import { useCard } from '@/composables/useCard';
+import { ListGroupOptions } from '@tillywork/shared';
 
 const emit = defineEmits([
   'toggle:group',
@@ -59,7 +55,7 @@ const { titleField, pinnedFields } = useCardTypeFields({
 
 const groupCopy = ref(cloneDeep(props.listGroup));
 const sortBy = computed<TableSortOption[]>(() =>
-  props.view.sortBy ? [cloneDeep(props.view.sortBy)] : []
+  props.view.options.sortBy ? [cloneDeep(props.view.options.sortBy)] : []
 );
 const tableSortState = computed(() =>
   sortBy.value?.map((sortOption) => {
@@ -106,15 +102,17 @@ const filters = computed<QueryFilter>(() => {
   }
 });
 
-const ignoreCompleted = computed<boolean>(() => props.view.ignoreCompleted);
-const ignoreChildren = computed<boolean>(() => props.view.ignoreChildren);
+const ignoreCompleted = computed<boolean>(
+  () => props.view.options.hideCompleted
+);
+const ignoreChildren = computed<boolean>(() => props.view.options.hideChildren);
 
 const cards = ref<Card[]>([]);
 const total = ref(0);
 
 const { fetchNextPage, isFetching, hasNextPage, refetch, data } =
   cardsService.useGetGroupCardsInfinite({
-    listId: groupCopy.value.original.listId,
+    listId: groupCopy.value.original.list.id,
     groupId: groupCopy.value.original.id,
     ignoreCompleted,
     ignoreChildren,
@@ -167,7 +165,7 @@ function openCreateCardDialog(listGroup: ListGroup) {
   dialog.openDialog({
     dialog: DIALOGS.CREATE_CARD,
     data: {
-      listId: listGroup.listId,
+      listId: listGroup.list.id,
       listStage: getCurrentStage(listGroup),
       users: getCurrentAssignee(listGroup),
       listStages: props.listStages,
@@ -190,7 +188,7 @@ function getCurrentStage(group: ListGroup) {
 function getCurrentAssignee(group: ListGroup) {
   let user: User | undefined;
 
-  if (group.type === ListGroupOptions.ASSIGNEES) {
+  if (group.type === ListGroupOptions.ASSIGNEE) {
     user = props.projectUsers.find((user: ProjectUser) => {
       return user.user.id == group.entityId;
     })?.user;
@@ -353,7 +351,7 @@ watchEffect(() => {
       @click="toggleGroupExpansion(listGroup)"
     />
     <div>
-      <template v-if="listGroup.original.type === ListGroupOptions.ASSIGNEES">
+      <template v-if="listGroup.original.type === ListGroupOptions.ASSIGNEE">
         <base-avatar
           :photo="listGroup.original.icon"
           :text="listGroup.original.name"
@@ -433,7 +431,7 @@ watchEffect(() => {
                       <div v-if="isRowHovering || rowMenuOpen?.id === row.id">
                         <v-menu
                           @update:model-value="
-                            (v) => handleCardMenuClick({ row, isOpen: v })
+                            (v: boolean) => handleCardMenuClick({ row, isOpen: v })
                           "
                         >
                           <template #activator="{ props }">
