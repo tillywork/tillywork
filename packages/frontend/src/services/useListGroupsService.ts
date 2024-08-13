@@ -7,7 +7,7 @@ import type { ViewGroupByOption } from '@tillywork/shared';
 
 export interface GetListGroupsByOptionParams {
   listId: MaybeRef<number>;
-  ignoreCompleted: MaybeRef<boolean>;
+  hideCompleted: MaybeRef<boolean>;
   groupBy: MaybeRef<ViewGroupByOption>;
   sortCardsBy?: MaybeRef<TableSortOption[]>;
 }
@@ -24,12 +24,12 @@ export const useListGroupsService = () => {
     listId,
     groupBy,
     sortCardsBy,
-    ignoreCompleted,
+    hideCompleted,
   }: GetListGroupsByOptionParams): Promise<ListGroup[]> {
     return sendRequest(`/lists/${toValue(listId)}/groups`, {
       method: 'POST',
       data: {
-        ignoreCompleted: toValue(ignoreCompleted),
+        hideCompleted: toValue(hideCompleted),
         groupBy: toValue(groupBy).type,
         fieldId: toValue(groupBy).fieldId,
         sortCardsBy: toValue(sortCardsBy),
@@ -45,13 +45,13 @@ export const useListGroupsService = () => {
   }
 
   function useGetListGroupsByOptionQuery(params: GetListGroupsQueryParams) {
-    const { listId, ignoreCompleted, groupBy, sortCardsBy } = params;
+    const { listId, hideCompleted, groupBy, sortCardsBy } = params;
     const getListGroupsQuery = useQuery({
       queryKey: ['listGroups', { listId }],
       queryFn: () =>
         getListGroupsByOption({
           listId,
-          ignoreCompleted,
+          hideCompleted,
           groupBy,
           sortCardsBy,
         }),

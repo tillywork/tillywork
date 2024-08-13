@@ -33,7 +33,7 @@ export class GenerateGroupsParams {
 
     @IsOptional()
     @IsBoolean()
-    ignoreCompleted?: boolean;
+    hideCompleted?: boolean;
 
     @ValidateIf((o) => o.groupBy === ListGroupOptions.FIELD)
     @IsNotEmpty()
@@ -102,7 +102,7 @@ export class ListGroupsService {
 
     async generateGroups({
         listId,
-        ignoreCompleted,
+        hideCompleted,
         groupBy,
         fieldId,
     }: GenerateGroupsParams): Promise<ListGroup[]> {
@@ -147,7 +147,7 @@ export class ListGroupsService {
             case FieldTypes.STAGE:
                 generatedGroups = await this.generateGroupsByListStage({
                     listId,
-                    ignoreCompleted,
+                    hideCompleted,
                 });
                 break;
 
@@ -210,14 +210,14 @@ export class ListGroupsService {
 
     async generateGroupsByListStage({
         listId,
-        ignoreCompleted,
+        hideCompleted,
     }: {
         listId: number;
-        ignoreCompleted: boolean;
+        hideCompleted: boolean;
     }): Promise<CreateListGroupDto[]> {
         const stages = await this.listStagesService.findAll({
             listId,
-            ignoreCompleted,
+            hideCompleted,
         });
 
         return stages.map((stage) => {

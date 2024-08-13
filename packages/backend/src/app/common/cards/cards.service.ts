@@ -8,8 +8,6 @@ import { FilterGroup, QueryFilter } from "../filters/types";
 import { QueryBuilderHelper } from "../helpers/query.builder.helper";
 import { CardListsService } from "./card-lists/card.lists.service";
 import { IsNotEmpty, IsNumber } from "class-validator";
-import { CardList } from "./card-lists/card.list.entity";
-import { User } from "../users/user.entity";
 import { RelationIdLoader } from "typeorm/query-builder/relation-id/RelationIdLoader";
 import { RelationCountLoader } from "typeorm/query-builder/relation-count/RelationCountLoader";
 import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
@@ -30,9 +28,9 @@ export class FindAllParams {
     limit?: number;
     sortBy?: string;
     sortOrder?: "ASC" | "DESC";
-    ignoreCompleted?: boolean;
+    hideCompleted?: boolean;
     filters?: QueryFilter;
-    ignoreChildren?: boolean;
+    hideChildren?: boolean;
 }
 
 @Injectable()
@@ -41,10 +39,6 @@ export class CardsService {
     constructor(
         @InjectRepository(Card)
         private cardsRepository: Repository<Card>,
-        @InjectRepository(CardList)
-        private cardListsRepository: Repository<CardList>,
-        @InjectRepository(User)
-        private usersRepository: Repository<User>,
         private cardListsService: CardListsService
     ) {}
 
@@ -54,9 +48,9 @@ export class CardsService {
         limit = 10,
         sortBy = "cardLists.order",
         sortOrder = "ASC",
-        ignoreCompleted,
+        hideCompleted,
         filters,
-        ignoreChildren,
+        hideChildren,
     }: FindAllParams): Promise<CardFindAllResult> {
         const skip = (page - 1) * limit;
         const take = limit != -1 ? limit : undefined;
@@ -75,13 +69,13 @@ export class CardsService {
             )
             .where("cardLists.list.id = :listId", { listId });
 
-        if (ignoreCompleted) {
+        if (hideCompleted) {
             queryBuilder.andWhere("listStage.isCompleted = :isCompleted", {
                 isCompleted: false,
             });
         }
 
-        if (ignoreChildren) {
+        if (hideChildren) {
             queryBuilder.andWhere("card.parentId IS NULL");
         }
 

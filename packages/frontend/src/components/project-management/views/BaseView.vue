@@ -49,7 +49,7 @@ const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
 );
 
-const ignoreCompleted = computed(() => props.view.options.hideCompleted);
+const hideCompleted = computed(() => props.view.options.hideCompleted);
 const groupBy = computed({
   get() {
     return viewCopy.value.options.groupBy;
@@ -135,7 +135,7 @@ const updateViewMutation = viewsService.useUpdateViewMutation();
 const { data: listGroups, refetch: refetchListGroups } =
   listGroupsService.useGetListGroupsByOptionQuery({
     listId,
-    ignoreCompleted,
+    hideCompleted,
     groupBy,
   });
 

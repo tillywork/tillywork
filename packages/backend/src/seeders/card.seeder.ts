@@ -12,7 +12,6 @@ import { CardsService } from "../app/common/cards/cards.service";
 import { Card } from "../app/common/cards/card.entity";
 import { CardList } from "../app/common/cards/card-lists/card.list.entity";
 import { CardListsService } from "../app/common/cards/card-lists/card.lists.service";
-import { User } from "src/app/common/users/user.entity";
 
 const logger = new Logger("CardSeeder");
 
@@ -22,8 +21,6 @@ export async function seedCardsData(connection: Connection): Promise<void> {
     );
     const cardsService = new CardsService(
         connection.getRepository(Card),
-        connection.getRepository(CardList),
-        connection.getRepository(User),
         cardListsService
     );
     const viewsService = new ViewsService(connection.getRepository(View));

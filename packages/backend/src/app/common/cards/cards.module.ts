@@ -7,12 +7,10 @@ import { CardSubscriber } from "./card.subscriber";
 import { CardUserSubscriber } from "./card.user.subscriber";
 import { CardListsModule } from "./card-lists/card.lists.module";
 import { CardActivitiesModule } from "./card-activities/card.activities.module";
-import { CardList } from "./card-lists/card.list.entity";
-import { User } from "../users/user.entity";
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Card, CardList, User]),
+        TypeOrmModule.forFeature([Card]),
         CardListsModule,
         CardActivitiesModule,
     ],

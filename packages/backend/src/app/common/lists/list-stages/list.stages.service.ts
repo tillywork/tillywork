@@ -13,7 +13,7 @@ export type ListStageFindAllResult = {
 
 export type FindAllParams = {
     listId: number;
-    ignoreCompleted?: boolean;
+    hideCompleted?: boolean;
 };
 
 @Injectable()
@@ -26,13 +26,13 @@ export class ListStagesService {
 
     async findAll({
         listId,
-        ignoreCompleted,
+        hideCompleted,
     }: FindAllParams): Promise<ListStage[]> {
         const where: FindOptionsWhere<ListStage> = {
             listId,
         };
 
-        if (ignoreCompleted) {
+        if (hideCompleted) {
             where.isCompleted = false;
         }
 

@@ -19,14 +19,14 @@ export class ListGroupsController {
         @Param("listId") listId: number,
         @Body()
         {
-            ignoreCompleted,
+            hideCompleted,
             groupBy,
             fieldId,
         }: Omit<GenerateGroupsParams, "listId">
     ) {
         return this.listGroupsService.generateGroups({
             listId,
-            ignoreCompleted,
+            hideCompleted,
             groupBy,
             fieldId,
         });

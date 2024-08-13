@@ -30,7 +30,7 @@ export class View {
             groupBy: {
                 type: ListGroupOptions.LIST_STAGE,
             },
-            ignoreCompleted: true,
+            hideCompleted: true,
         },
     })
     options: ViewOptions;
