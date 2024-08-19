@@ -6,7 +6,7 @@
         "types": ["node"],
         "emitDecoratorMetadata": true,
         "paths": {
-            "@tillywork/shared": ["../shared"]
+            "@tillywork/shared": ["../shared/src/index.ts"]
         }
     },
     "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"],
