@@ -40,9 +40,9 @@ async function handleRegister() {
 
       const response = inviteCode.value
         ? await registerWithInvite({
-            ...createUserDto.value,
-            inviteCode: inviteCode.value as string,
-          })
+          ...createUserDto.value,
+          inviteCode: inviteCode.value as string,
+        })
         : await register(createUserDto.value);
       if (response.error) {
         loading.value = false;
@@ -76,52 +76,22 @@ async function handleRegister() {
   <v-container class="fill-height">
     <v-row class="justify-center">
       <v-col cols="12" md="7" lg="5" class="mt-n4">
-        <v-img
-          :src="logo.getLogoUrlByTheme()"
-          alt="tillywork"
-          width="150"
-          class="mx-auto mb-3"
-        />
+        <v-img :src="logo.getLogoUrlByTheme()" alt="tillywork" width="150" class="mx-auto mb-3" />
         <v-form ref="registerForm" @submit.prevent="handleRegister">
-          <v-card
-            color="transparent"
-            class="px-4 py-2"
-            :loading
-            max-width="470"
-          >
+          <v-card color="transparent" class="px-4 py-2 mx-auto" :loading max-width="470">
             <v-card-title class="text-h6 mb-2">
               {{ header ?? 'Create a free account' }}
             </v-card-title>
             <v-card-text class="pb-0">
               <div class="d-flex ga-2 mb-1">
-                <v-text-field
-                  v-model="createUserDto.firstName"
-                  label="First Name*"
-                  required
-                  :rules="[rules.required]"
-                  autofocus
-                />
-                <v-text-field
-                  v-model="createUserDto.lastName"
-                  label="Last Name*"
-                  required
-                  :rules="[rules.required]"
-                />
+                <v-text-field v-model="createUserDto.firstName" label="First Name*" required :rules="[rules.required]"
+                  autofocus />
+                <v-text-field v-model="createUserDto.lastName" label="Last Name*" required :rules="[rules.required]" />
               </div>
-              <v-text-field
-                v-model="createUserDto.email"
-                label="Email*"
-                required
-                :rules="[rules.required, rules.email]"
-                class="mb-1"
-              />
-              <v-text-field
-                v-model="createUserDto.password"
-                label="Password*"
-                type="password"
-                required
-                :rules="[rules.required]"
-              />
+              <v-text-field v-model="createUserDto.email" label="Email*" required :rules="[rules.required, rules.email]"
+                class="mb-1" />
+              <v-text-field v-model="createUserDto.password" label="Password*" type="password" required
+                :rules="[rules.required]" />
               <!-- <v-phone-input
                 v-model="createUserDto.phoneNumber"
                 v-model:country="createUserDto.country"
