@@ -17,7 +17,7 @@
         "noImplicitThis": true,
         "baseUrl": ".",
         "paths": {
-            "@tillywork/shared": ["../shared/src/index.ts"]
+            "@tillywork/shared": ["../shared"]
         }
     }
 }

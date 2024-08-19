@@ -8,7 +8,7 @@ export class AddOptionsToViewTable1723129297915 implements MigrationInterface {
             new TableColumn({
                 name: "options",
                 type: "jsonb",
-                default: `json_build_object('groupBy', '${ListGroupOptions.LIST_STAGE}', 'hideCompleted', true)`,
+                default: `json_build_object('groupBy', json_build_object('type', '${ListGroupOptions.LIST_STAGE}'), 'hideCompleted', true)`,
             })
         );
 
@@ -35,7 +35,7 @@ export class AddOptionsToViewTable1723129297915 implements MigrationInterface {
                 name: "groupBy",
                 type: "enum",
                 enum: Object.values(ListGroupOptions),
-                default: ListGroupOptions.LIST_STAGE,
+                default: `'${ListGroupOptions.LIST_STAGE}'`,
             })
         );
 

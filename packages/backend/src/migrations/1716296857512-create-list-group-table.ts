@@ -4,6 +4,8 @@ import {
     Table,
     TableForeignKey,
 } from "typeorm";
+import { ListGroupOptions } from "@tillywork/shared";
+import { ListGroupEntityTypes } from "../app/common/lists/types";
 
 export class CreateListGroupTable1716296857512 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
@@ -22,7 +24,7 @@ export class CreateListGroupTable1716296857512 implements MigrationInterface {
                     {
                         name: "entityType",
                         type: "enum",
-                        enum: ["LIST_STAGE", "USER"],
+                        enum: Object.values(ListGroupEntityTypes),
                         isNullable: true,
                     },
                     {
@@ -34,7 +36,7 @@ export class CreateListGroupTable1716296857512 implements MigrationInterface {
                     {
                         name: "type",
                         type: "enum",
-                        enum: ["ALL", "LIST_STAGE", "ASSIGNEES", "DUE_DATE"],
+                        enum: Object.values(ListGroupOptions),
                         isNullable: false,
                     },
                     { name: "isExpanded", type: "boolean", default: true },

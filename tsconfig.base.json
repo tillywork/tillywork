@@ -15,8 +15,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@tillywork/shared": ["packages/shared/src/index.ts"]
-    }
+      "@tillywork/shared": ["./packages/shared"]
+    },
+    "plugins": [{ "transform": "typescript-transform-paths" }]
   },
   "exclude": ["node_modules", "tmp"]
 }

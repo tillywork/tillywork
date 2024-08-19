@@ -1,8 +1,6 @@
 {
     "name": "@tillywork/shared",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "type": "commonjs",
-    "exports": {
-        "default": "./src/index.ts"
-    }
+    "main": "./src/index.ts"
 }
