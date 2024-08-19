@@ -18,7 +18,7 @@ import {
 } from './types';
 import { cloneDeep, lowerFirst } from 'lodash';
 import { useFieldsService } from '@/services/useFieldsService';
-import { FieldTypes, type Field } from '../fields/types';
+import { FieldTypes, type Field, type FieldItem } from '../fields/types';
 import { useStateStore } from '@/stores/state';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
@@ -31,7 +31,7 @@ import { leaderKey } from '@/utils/keyboard';
 import BaseRelationInput from '@/components/common/inputs/BaseRelationInput.vue';
 import { useMentionNotifications } from '@/composables/useMentionNotifications';
 import urlUtils from '@/utils/url';
-import { useCardTypeFields } from '@/composables/useCardTypeFields';
+import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
 
 const props = defineProps<{
@@ -84,7 +84,7 @@ const {
   descriptionField,
   cardTypeFieldsWithoutMainFields,
   refetch: refetchCardTypeFields,
-} = useCardTypeFields({ cardTypeId });
+} = useFields({ cardTypeId });
 
 const fields = computed(() => {
   let arr: Field[] = [];
@@ -560,7 +560,7 @@ function openDescriptionFileDialog() {
                     hide-details
                     :placeholder="field.name"
                     @update:model-value="
-                      (v) => updateFieldValue({ card: cardCopy, field, v })
+                      (v: string) => updateFieldValue({ card: cardCopy, field, v })
                     "
                     :prepend-inner-icon="field.icon"
                   />
@@ -579,7 +579,7 @@ function openDescriptionFileDialog() {
                     autocomplete="off"
                     auto-select-first
                     @update:model-value="
-                      (v) =>
+                      (v: FieldItem) =>
                         updateFieldValue({
                           card: cardCopy,
                           field,

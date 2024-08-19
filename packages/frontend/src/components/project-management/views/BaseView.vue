@@ -26,7 +26,7 @@ import {
 import { cloneDeep } from 'lodash';
 import { useDialogStore } from '@/stores/dialog';
 import BaseViewChipDisplay from './BaseViewChipDisplay.vue';
-import { useCardTypeFields } from '@/composables/useCardTypeFields';
+import { useFields } from '@/composables/useFields';
 import { FieldTypes, type Field } from '../fields/types';
 import type { TableColumnDef } from './TableView/types';
 
@@ -82,7 +82,7 @@ const sortBy = computed({
 
 const isViewLoading = ref(false);
 
-const { titleField } = useCardTypeFields({
+const { titleField } = useFields({
   cardTypeId: props.list.defaultCardType.id,
 });
 

@@ -103,7 +103,7 @@ async function handleSubmitForm() {
     });
     dialog.closeDialog(currentDialogIndex.value);
     queryClient.invalidateQueries({ queryKey: ['listGroups'] });
-    queryClient.invalidateQueries({ queryKey: ['cards'] }); // TODO: Improvement, only related groupIds (current & replacement)
+    queryClient.invalidateQueries({ queryKey: ['cards'] });
   } catch (err) {
     showSnackbar({
       message: 'Something went wrong, please try again.',

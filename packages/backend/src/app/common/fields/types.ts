@@ -17,4 +17,6 @@ export enum FieldTypes {
 
 export type FieldItem = {
     item: string;
+    color?: string;
+    icon?: string;
 };

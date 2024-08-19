@@ -20,7 +20,7 @@ import { cloneDeep } from 'lodash';
 import type { QueryFilter, ViewFilter } from '../../filters/types';
 import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
-import { useCardTypeFields } from '@/composables/useCardTypeFields';
+import { useFields } from '@/composables/useFields';
 import { FieldTypes } from '../../fields/types';
 import { useCard } from '@/composables/useCard';
 import { ListGroupOptions } from '@tillywork/shared';
@@ -49,7 +49,7 @@ const { showSnackbar } = useSnackbarStore();
 
 const { updateFieldValue } = useCard();
 
-const { titleField, pinnedFields } = useCardTypeFields({
+const { titleField, pinnedFields } = useFields({
   cardTypeId: props.list.defaultCardType.id,
 });
 

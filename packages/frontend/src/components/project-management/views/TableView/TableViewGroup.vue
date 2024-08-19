@@ -23,7 +23,7 @@ import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 import { FieldTypes } from '../../fields/types';
 import { useCard } from '@/composables/useCard';
-import { useCardTypeFields } from '@/composables/useCardTypeFields';
+import { useFields } from '@/composables/useFields';
 import { ListGroupOptions } from '@tillywork/shared';
 
 const emit = defineEmits([
@@ -55,7 +55,7 @@ const { showSnackbar } = useSnackbarStore();
 
 const { updateFieldValue } = useCard();
 
-const { titleField } = useCardTypeFields({
+const { titleField } = useFields({
   cardTypeId: props.list.defaultCardType.id,
 });
 

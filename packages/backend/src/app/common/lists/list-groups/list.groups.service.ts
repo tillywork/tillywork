@@ -166,6 +166,14 @@ export class ListGroupsService {
                 });
                 break;
 
+            case FieldTypes.LABEL:
+            case FieldTypes.DROPDOWN:
+                generatedGroups = this.generateGroupsByFieldItems({
+                    listId,
+                    field: groupByField,
+                });
+                break;
+
             default:
                 generatedGroups = [
                     {
@@ -420,6 +428,59 @@ export class ListGroupsService {
         ];
 
         return groups;
+    }
+
+    generateGroupsByFieldItems({
+        listId,
+        field,
+    }: {
+        listId: number;
+        field: Field;
+    }) {
+        const groups: CreateListGroupDto[] = field.items.map(
+            (fieldItem, index) => ({
+                name: fieldItem.item,
+                type: ListGroupOptions.FIELD,
+                color: fieldItem.color,
+                icon: fieldItem.icon ?? field.icon,
+                listId,
+                order: index + 1,
+                fieldId: field.id,
+                filter: {
+                    where: {
+                        and: [
+                            {
+                                field: `card.data.${field.slug}`,
+                                operator: "in",
+                                value: [fieldItem.item],
+                            },
+                        ],
+                    },
+                },
+            })
+        );
+
+        const emptyGroup: CreateListGroupDto = {
+            name: "Empty",
+            type: ListGroupOptions.FIELD,
+            icon: field.icon,
+            listId,
+            order: groups.length + 1,
+            fieldId: field.id,
+            filter: {
+                where: {
+                    and: [
+                        {
+                            field: `card.data.${field.slug}`,
+                            operator: "isNull",
+                            value: null,
+                        },
+                    ],
+                },
+            },
+        };
+
+        return [...groups, emptyGroup];
     }
 
     async findOne(id: number): Promise<ListGroup> {

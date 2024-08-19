@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCardTypeFields } from '@/composables/useCardTypeFields';
+import { useFields } from '@/composables/useFields';
 import { useStateStore } from '@/stores/state';
 import BaseViewChip from './BaseViewChip.vue';
 import {
@@ -12,11 +12,13 @@ const sortBy = defineModel<TableSortOption>();
 
 const { currentList } = storeToRefs(useStateStore());
 const cardTypeId = computed(() => currentList.value?.defaultCardType.id ?? 0);
-const cardTypeEnabled = computed(() => !!currentList.value);
+const listId = computed(() => currentList.value?.id ?? 0);
+const fieldsEnabled = computed(() => !!currentList.value);
 
-const { groupableFields } = useCardTypeFields({
+const { groupableFields } = useFields({
   cardTypeId,
-  enabled: cardTypeEnabled,
+  listId,
+  enabled: fieldsEnabled,
 });
 
 const sortByOptions = computed(() => {

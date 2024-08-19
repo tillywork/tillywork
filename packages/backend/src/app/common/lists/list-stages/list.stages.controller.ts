@@ -60,7 +60,6 @@ export class ListStagesController {
         @Param("id") id: number,
         @Body() updateListDto: UpdateListStageDto
     ): Promise<ListStage> {
-        // TODO: Handle Authorization (I think, we can use CASL?) --implement in all Request too--
         return this.listStagesService.update(id, updateListDto);
     }
 
