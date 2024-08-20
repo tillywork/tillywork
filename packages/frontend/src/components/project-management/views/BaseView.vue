@@ -49,7 +49,7 @@ const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
 );
 
-const hideCompleted = computed(() => props.view.options.hideCompleted);
+const hideCompleted = computed(() => viewCopy.value.options.hideCompleted);
 const groupBy = computed({
   get() {
     return viewCopy.value.options.groupBy;
