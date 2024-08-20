@@ -36,7 +36,6 @@ const sortByOptions = computed(() => {
       });
     });
   }
-  //TODO get list fields
 
   return arr;
 });

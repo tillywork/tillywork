@@ -38,7 +38,7 @@ const listId = computed(() => props.list.id);
 const viewCopy = ref<View>(cloneDeep(props.view));
 const viewsService = useViewsService();
 const cardsService = useCardsService();
-const listGroupsService = useListGroupsService();
+const { useGetListGroupsByOptionQuery } = useListGroupsService();
 const { useCreateFilterMutation, useUpdateFilterMutation } =
   useFitlersService();
 const dialog = useDialogStore();
@@ -133,7 +133,7 @@ const columns = computed<TableColumnDef[]>(() => {
 const updateViewMutation = viewsService.useUpdateViewMutation();
 
 const { data: listGroups, refetch: refetchListGroups } =
-  listGroupsService.useGetListGroupsByOptionQuery({
+  useGetListGroupsByOptionQuery({
     listId,
     hideCompleted,
     groupBy,

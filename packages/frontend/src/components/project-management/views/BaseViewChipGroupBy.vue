@@ -32,14 +32,13 @@ const groupByOptions = computed(() => {
       });
     });
   }
-  //TODO get list fields
 
   return arr;
 });
 
-const selectedOption = computed(() =>
-  groupByOptions.value.find((option) => isOptionSelected(option))
-);
+const selectedOption = computed(() => {
+  return groupByOptions.value.find((option) => isOptionSelected(option));
+});
 
 const isGroupByFilled = computed(
   () => groupBy.value && groupBy.value.type !== ListGroupOptions.ALL

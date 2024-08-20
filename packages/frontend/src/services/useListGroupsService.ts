@@ -26,12 +26,14 @@ export const useListGroupsService = () => {
     sortCardsBy,
     hideCompleted,
   }: GetListGroupsByOptionParams): Promise<ListGroup[]> {
+    const groupByValue = computed(() => toValue(groupBy));
+
     return sendRequest(`/lists/${toValue(listId)}/groups`, {
       method: 'POST',
       data: {
         hideCompleted: toValue(hideCompleted),
-        groupBy: toValue(groupBy).type,
-        fieldId: toValue(groupBy).fieldId,
+        groupBy: groupByValue.value.type,
+        fieldId: groupByValue.value.fieldId,
         sortCardsBy: toValue(sortCardsBy),
       },
     });
@@ -47,7 +49,7 @@ export const useListGroupsService = () => {
   function useGetListGroupsByOptionQuery(params: GetListGroupsQueryParams) {
     const { listId, hideCompleted, groupBy, sortCardsBy } = params;
     const getListGroupsQuery = useQuery({
-      queryKey: ['listGroups', { listId }],
+      queryKey: ['listGroups', { listId: toValue(listId) }],
       queryFn: () =>
         getListGroupsByOption({
           listId,
