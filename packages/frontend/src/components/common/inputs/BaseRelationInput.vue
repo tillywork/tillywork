@@ -3,7 +3,7 @@ import type { Field } from '@/components/project-management/fields/types';
 import { useCardsService } from '@/services/useCardsService';
 import { useAuthStore } from '@/stores/auth';
 import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
-import { useCardTypeFields } from '@/composables/useCardTypeFields';
+import { useFields } from '@/composables/useFields';
 
 const model = defineModel();
 const props = defineProps<{
@@ -33,7 +33,7 @@ const { data: items, refetch } = useSearchCards({
   cardTypeId: props.field.dataCardType!.id,
 });
 
-const { titleField } = useCardTypeFields({
+const { titleField } = useFields({
   cardTypeId: props.field.dataCardType!.id,
 });
 

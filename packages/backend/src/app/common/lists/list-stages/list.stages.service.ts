@@ -13,6 +13,7 @@ export type ListStageFindAllResult = {
 
 export type FindAllParams = {
     listId: number;
+    hideCompleted?: boolean;
 };
 
 @Injectable()
@@ -23,10 +24,17 @@ export class ListStagesService {
         private cardListsService: CardListsService
     ) {}
 
-    async findAll({ listId }: FindAllParams): Promise<ListStage[]> {
-        const where = {
+    async findAll({
+        listId,
+        hideCompleted,
+    }: FindAllParams): Promise<ListStage[]> {
+        const where: FindOptionsWhere<ListStage> = {
             listId,
         };
+
+        if (hideCompleted) {
+            where.isCompleted = false;
+        }
 
         return this.listStagesRepository.find({
             where,
@@ -37,7 +45,6 @@ export class ListStagesService {
     }
 
     async findOne(id: number): Promise<ListStage> {
-        // TODO: Handle related lists (handle "Not Found" rejections). Implement in Delete requests as well.
         const listStage = await this.listStagesRepository.findOne({
             where: {
                 id,

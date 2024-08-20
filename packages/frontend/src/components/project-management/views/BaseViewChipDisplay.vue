@@ -4,9 +4,9 @@ import BaseViewChip from './BaseViewChip.vue';
 import type { View } from './types';
 import { useStateStore } from '@/stores/state';
 
-const props = defineProps<{
-  view: View;
-}>();
+const view = defineModel<View>({
+  required: true,
+});
 
 const { currentList } = storeToRefs(useStateStore());
 
@@ -15,15 +15,21 @@ const { mutateAsync: updateView } = useUpdateViewMutation();
 
 function handleToggleCompleted() {
   updateView({
-    id: props.view.id,
-    ignoreCompleted: !props.view.ignoreCompleted,
+    id: view.value.id,
+    options: {
+      ...view.value.options,
+      hideCompleted: !view.value.options.hideCompleted,
+    },
   });
 }
 
 function handleToggleChildren() {
   updateView({
-    id: props.view.id,
-    ignoreChildren: !props.view.ignoreChildren,
+    id: view.value.id,
+    options: {
+      ...view.value.options,
+      hideChildren: !view.value.options.hideChildren,
+    },
   });
 }
 </script>
@@ -36,7 +42,7 @@ function handleToggleChildren() {
           <v-list-item @click="handleToggleCompleted">
             <template #append>
               <v-switch
-                :model-value="!view.ignoreCompleted"
+                :model-value="!view.options.hideCompleted"
                 readonly
                 inset
                 hide-details
@@ -49,7 +55,7 @@ function handleToggleChildren() {
           <v-list-item @click="handleToggleChildren">
             <template #append>
               <v-switch
-                :model-value="!view.ignoreChildren"
+                :model-value="!view.options.hideChildren"
                 readonly
                 inset
                 hide-details

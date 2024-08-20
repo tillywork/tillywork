@@ -4,9 +4,30 @@
     "sourceRoot": "packages/backend/src",
     "projectType": "application",
     "targets": {
+        "build": {
+            "dependsOn": [
+                {
+                    "target": "build",
+                    "projects": "shared"
+                }
+            ],
+            "configurations": {
+                "production": {
+                    "optimization": true,
+                    "extractLicenses": true,
+                    "inspect": false
+                }
+            }
+        },
         "serve": {
             "executor": "@nx/js:node",
             "defaultConfiguration": "development",
+            "dependsOn": [
+                {
+                    "target": "build",
+                    "projects": "shared"
+                }
+            ],
             "options": {
                 "buildTarget": "backend:build"
             },
@@ -34,26 +55,26 @@
         "migration:run": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "ts-node node_modules/typeorm/cli migration:run -d packages/backend/src/config/typeorm.ts"
+                "command": "ts-node -r tsconfig-paths/register --project tsconfig.typeorm.json node_modules/typeorm/cli migration:run -d packages/backend/src/config/typeorm.ts"
             }
         },
         "migration:generate": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "ts-node node_modules/typeorm/cli -d packages/backend/src/config/typeorm.ts migration:generate"
+                "command": "ts-node -r tsconfig-paths/register --project tsconfig.typeorm.json node_modules/typeorm/cli -d packages/backend/src/config/typeorm.ts migration:generate"
             }
         },
         "migration:create": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "ts-node ../../../../node_modules/typeorm/cli migration:create",
+                "command": "ts-node -r tsconfig-paths/register --project ../../../../tsconfig.typeorm.json ../../../../node_modules/typeorm/cli migration:create",
                 "cwd": "packages/backend/src/migrations"
             }
         },
         "migration:revert": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "ts-node node_modules/typeorm/cli -d packages/backend/src/config/typeorm.ts migration:revert"
+                "command": "ts-node -r tsconfig-paths/register --project tsconfig.typeorm.json node_modules/typeorm/cli -d packages/backend/src/config/typeorm.ts migration:revert"
             }
         }
     },

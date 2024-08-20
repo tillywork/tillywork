@@ -1,4 +1,5 @@
 import { MigrationInterface, QueryRunner, Table } from "typeorm";
+import { ListGroupOptions } from "@tillywork/shared";
 
 export class CreateViewTable1716299003967 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
@@ -27,8 +28,8 @@ export class CreateViewTable1716299003967 implements MigrationInterface {
                     {
                         name: "groupBy",
                         type: "enum",
-                        enum: ["ALL", "LIST_STAGE", "ASSIGNEES", "DUE_DATE"],
-                        default: `'LIST_STAGE'`,
+                        enum: Object.values(ListGroupOptions),
+                        default: `'${ListGroupOptions.LIST_STAGE}'`,
                     },
                     {
                         name: "sortBy",

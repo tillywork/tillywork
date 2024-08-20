@@ -7,21 +7,30 @@ import { UpdateCardDto } from "./dto/update.card.dto";
 import { FilterGroup, QueryFilter } from "../filters/types";
 import { QueryBuilderHelper } from "../helpers/query.builder.helper";
 import { CardListsService } from "./card-lists/card.lists.service";
+import { IsNotEmpty, IsNumber } from "class-validator";
+import { RelationIdLoader } from "typeorm/query-builder/relation-id/RelationIdLoader";
+import { RelationCountLoader } from "typeorm/query-builder/relation-count/RelationCountLoader";
+import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
+import { RelationCountMetadataToAttributeTransformer } from "typeorm/query-builder/relation-count/RelationCountMetadataToAttributeTransformer";
+import { RelationIdMetadataToAttributeTransformer } from "typeorm/query-builder/relation-id/RelationIdMetadataToAttributeTransformer";
 
 export type CardFindAllResult = {
     total: number;
     cards: Card[];
 };
 
-export interface FindAllParams {
+export class FindAllParams {
+    @IsNotEmpty()
+    @IsNumber()
     listId: number;
+
     page?: number;
     limit?: number;
     sortBy?: string;
     sortOrder?: "ASC" | "DESC";
-    ignoreCompleted?: boolean;
+    hideCompleted?: boolean;
     filters?: QueryFilter;
-    ignoreChildren?: boolean;
+    hideChildren?: boolean;
 }
 
 @Injectable()
@@ -39,9 +48,9 @@ export class CardsService {
         limit = 10,
         sortBy = "cardLists.order",
         sortOrder = "ASC",
-        ignoreCompleted,
+        hideCompleted,
         filters,
-        ignoreChildren,
+        hideChildren,
     }: FindAllParams): Promise<CardFindAllResult> {
         const skip = (page - 1) * limit;
         const take = limit != -1 ? limit : undefined;
@@ -60,13 +69,13 @@ export class CardsService {
             )
             .where("cardLists.list.id = :listId", { listId });
 
-        if (ignoreCompleted) {
+        if (hideCompleted) {
             queryBuilder.andWhere("listStage.isCompleted = :isCompleted", {
                 isCompleted: false,
             });
         }
 
-        if (ignoreChildren) {
+        if (hideChildren) {
             queryBuilder.andWhere("card.parentId IS NULL");
         }
 
@@ -78,15 +87,78 @@ export class CardsService {
         }
 
         if (sortBy && sortOrder) {
-            queryBuilder.addOrderBy(sortBy, sortOrder);
+            queryBuilder.addOrderBy(sortBy, sortOrder, "NULLS LAST");
         }
 
-        const [cards, total] = await queryBuilder
-            .take(take)
-            .skip(skip)
-            .getManyAndCount();
+        /**
+         * TypeORM doesn't support querying while ordering
+         * on a JSONB column using getMany or getManyAndCount,
+         * so we have to extract the SQL and run it manually.
+         */
+        const [sql, params] = queryBuilder.getQueryAndParameters();
 
-        return { cards, total };
+        const connection = this.cardsRepository.manager.connection;
+        const queryRunner = connection.createQueryRunner(
+            connection.defaultReplicationModeForReads()
+        );
+
+        try {
+            // Taken from https://github.com/typeorm/typeorm/blob/master/src/query-builder/SelectQueryBuilder.ts#L3373
+            const relationIdLoader = new RelationIdLoader(
+                connection,
+                queryRunner,
+                queryBuilder.expressionMap.relationIdAttributes
+            );
+            const relationCountLoader = new RelationCountLoader(
+                connection,
+                queryRunner,
+                queryBuilder.expressionMap.relationCountAttributes
+            );
+
+            const relationIdMetadataTransformer =
+                new RelationIdMetadataToAttributeTransformer(
+                    queryBuilder.expressionMap
+                );
+            relationIdMetadataTransformer.transform();
+            const relationCountMetadataTransformer =
+                new RelationCountMetadataToAttributeTransformer(
+                    queryBuilder.expressionMap
+                );
+            relationCountMetadataTransformer.transform();
+
+            const rawResults = await queryRunner.query(
+                sql + ` OFFSET ${skip} LIMIT ${take}`,
+                params,
+                true
+            );
+
+            const rawRelationIdResults = await relationIdLoader.load(
+                rawResults.records
+            );
+            const rawRelationCountResults = await relationCountLoader.load(
+                rawResults.records
+            );
+            const transformer = new RawSqlResultsToEntityTransformer(
+                queryBuilder.expressionMap,
+                connection.driver,
+                rawRelationIdResults,
+                rawRelationCountResults,
+                queryRunner
+            );
+
+            const totalCountQuery = queryBuilder.clone().orderBy();
+            const totalResult = await totalCountQuery.getCount();
+            const total = totalResult ?? 0;
+
+            const cards = transformer.transform(
+                rawResults.records,
+                queryBuilder.expressionMap.mainAlias
+            );
+
+            return { cards, total };
+        } finally {
+            await queryRunner.release();
+        }
     }
 
     async findOne(id: number): Promise<Card> {

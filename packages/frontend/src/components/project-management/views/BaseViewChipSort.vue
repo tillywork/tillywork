@@ -1,13 +1,45 @@
 <script setup lang="ts">
+import { useFields } from '@/composables/useFields';
+import { useStateStore } from '@/stores/state';
 import BaseViewChip from './BaseViewChip.vue';
-import type { TableSortOption, ListSortOption } from './types';
-
-const props = defineProps<{
-  sortByOptions: ListSortOption[];
-}>();
+import {
+  type TableSortOption,
+  type ListSortOption,
+  DEFAULT_SORT_OPTIONS,
+} from './types';
 
 const sortBy = defineModel<TableSortOption>();
-const sortByOptions = computed(() => props.sortByOptions);
+
+const { currentList } = storeToRefs(useStateStore());
+const cardTypeId = computed(() => currentList.value?.defaultCardType.id ?? 0);
+const listId = computed(() => currentList.value?.id ?? 0);
+const fieldsEnabled = computed(() => !!currentList.value);
+
+const { groupableFields } = useFields({
+  cardTypeId,
+  listId,
+  enabled: fieldsEnabled,
+});
+
+const sortByOptions = computed(() => {
+  const arr = [...DEFAULT_SORT_OPTIONS];
+
+  if (groupableFields) {
+    groupableFields.value?.forEach((field) => {
+      arr.push({
+        label: field.name,
+        icon: field.icon,
+        value: {
+          key: `card.data->>'${field.slug}'`,
+          order: 'ASC',
+        },
+      });
+    });
+  }
+
+  return arr;
+});
+
 const selectedOption = computed(() =>
   sortByOptions.value.find((option) => isOptionSelected(option))
 );
@@ -83,9 +115,9 @@ function toggleSortDirection() {
             :active="isOptionSelected(option)"
           >
             <template #prepend>
-              <v-icon v-if="isOptionSelected(option)" size="x-small">
-                {{ sortDirectionIcon }}
-              </v-icon>
+              <v-icon :color="isOptionSelected(option) ? 'primary' : 'grey'">{{
+                option.icon ?? 'mdi-circle-slice-8'
+              }}</v-icon>
             </template>
             <v-list-item-title
               class="user-select-none"
@@ -94,11 +126,9 @@ function toggleSortDirection() {
               {{ option.label }}
             </v-list-item-title>
             <template #append>
-              <v-icon
-                icon="mdi-check"
-                size="12"
-                v-if="isOptionSelected(option)"
-              />
+              <v-icon v-if="isOptionSelected(option)" size="x-small">
+                {{ sortDirectionIcon }}
+              </v-icon>
             </template>
           </v-list-item>
         </template>

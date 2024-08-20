@@ -32,6 +32,9 @@ RUN npm install pm2 -g
 # Copy backend build
 COPY --from=build /app/dist/packages/backend ./dist/backend
 
+# Copy shared package
+COPY --from=build /app/dist/packages/shared ./dist/shared
+
 # Copy frontend build
 COPY --from=build /app/dist/packages/frontend /usr/share/nginx/html
 

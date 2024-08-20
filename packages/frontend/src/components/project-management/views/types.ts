@@ -1,5 +1,7 @@
+import type { ListGroupOptions, ViewOptions } from '@tillywork/shared';
 import type { Filter } from '../filters/types';
-import type { List, ListGroupOptions } from '../lists/types';
+import type { List } from '../lists/types';
+import type { Field } from '../fields/types';
 
 export interface View {
   id: number;
@@ -7,10 +9,7 @@ export interface View {
   type: ViewTypes;
   listId: number;
   list: List;
-  ignoreCompleted: boolean;
-  ignoreChildren: boolean;
-  groupBy: ListGroupOptions;
-  sortBy?: TableSortOption;
+  options: ViewOptions;
   updatedAt: string;
   filters?: Filter;
 }
@@ -26,6 +25,7 @@ export enum ViewTypes {
 export interface ListGroupOption {
   label: string;
   value: ListGroupOptions;
+  field?: Field;
 }
 
 export type SortDirection = 'ASC' | 'DESC';
@@ -33,25 +33,21 @@ export type SortDirection = 'ASC' | 'DESC';
 export interface ListSortOption {
   label: string;
   value: TableSortOption;
+  icon: string;
 }
 
 export const DEFAULT_SORT_OPTIONS: ListSortOption[] = [
   {
     label: 'Creation Date',
+    icon: 'mdi-clock-edit',
     value: {
       key: 'card.createdAt',
       order: 'ASC',
     },
   },
   {
-    label: 'Due Date',
-    value: {
-      key: 'card.dueAt',
-      order: 'ASC',
-    },
-  },
-  {
     label: 'Completed',
+    icon: 'mdi-list-status',
     value: {
       key: 'listStage.isCompleted',
       order: 'ASC',

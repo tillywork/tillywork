@@ -49,6 +49,8 @@ import { AddSlugToFieldTable1722503000613 } from "../migrations/1722503000613-ad
 import { AddIsTitleAndIsPhotoToFieldTable1722852559605 } from "../migrations/1722852559605-add-isTitle-and-isPhoto-to-field-table";
 import { RenameCardTypeColumnInFieldTable1722854552647 } from "../migrations/1722854552647-rename-cardType-column-in-field-table";
 import { MigrateTitleDescriptionAndDueAtToDataColumnInCardTable1722869332518 } from "../migrations/1722869332518-migrate-title-description-and-dueAt-to-data-column-in-card-table";
+import { AddFieldIdAndFilterToListGroupTable1723106937425 } from "../migrations/1723106937425-add-fieldId-and-filter-to-list-group-table";
+import { AddOptionsToViewTable1723129297915 } from "../migrations/1723129297915-add-options-to-view-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -99,6 +101,8 @@ const migrations = [
     AddIsTitleAndIsPhotoToFieldTable1722852559605,
     RenameCardTypeColumnInFieldTable1722854552647,
     MigrateTitleDescriptionAndDueAtToDataColumnInCardTable1722869332518,
+    AddFieldIdAndFilterToListGroupTable1723106937425,
+    AddOptionsToViewTable1723129297915,
 ];
 
 const config: TypeOrmModuleOptions = {

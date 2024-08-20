@@ -8,7 +8,8 @@ import {
 } from "typeorm";
 import { ListStage } from "./list.stage.entity";
 import { ListGroup } from "../list-groups/list.group.entity";
-import { ListGroupEntityTypes, ListGroupOptions } from "../types";
+import { ListGroupEntityTypes } from "../types";
+import { ListGroupOptions } from "@tillywork/shared";
 
 @Injectable()
 @EventSubscriber()
@@ -29,7 +30,9 @@ export class ListStagesSubscriber
             entityType: ListGroupEntityTypes.LIST_STAGE,
             type: ListGroupOptions.LIST_STAGE,
             entityId: event.entity.id,
-            listId: event.entity.listId,
+            list: {
+                id: event.entity.listId,
+            },
         });
         listGroupRepo.merge(listGroup, {
             name: event.entity.name,
@@ -45,7 +48,9 @@ export class ListStagesSubscriber
             entityType: ListGroupEntityTypes.LIST_STAGE,
             type: ListGroupOptions.LIST_STAGE,
             entityId: event.entity.id,
-            listId: event.entity.listId,
+            list: {
+                id: event.entity.listId,
+            },
         });
         listGroupRepo.remove(listGroup);
     }

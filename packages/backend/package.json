@@ -1,8 +1,6 @@
 {
     "name": "backend",
     "version": "0.0.1",
-    "main": "main.ts",
-    "scripts": {},
     "keywords": [
         "nest"
     ],

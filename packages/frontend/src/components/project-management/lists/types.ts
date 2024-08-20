@@ -1,8 +1,9 @@
-import type { CardsData } from '@/services/useCardsService';
 import type { PaginationParams } from '../views/types';
 import type { View } from '../views/types';
 import type { QueryFilter } from '../filters/types';
 import type { CardType } from '../cards/types';
+import type { Field } from '../fields/types';
+import { ListGroupOptions } from '@tillywork/shared';
 
 export interface List {
   id: number;
@@ -24,17 +25,10 @@ export interface ListStage {
   isCompleted?: boolean;
 }
 
-export enum ListGroupOptions {
-  ALL = 'ALL',
-  LIST_STAGE = 'LIST_STAGE',
-  ASSIGNEES = 'ASSIGNEES',
-  DUE_DATE = 'DUE_DATE',
-}
-
 export interface ListGroup {
   id: number;
   name: string;
-  listId: number;
+  list: List;
   type: ListGroupOptions;
   entityId?: number;
   color?: string;
@@ -42,10 +36,15 @@ export interface ListGroup {
   filter?: QueryFilter;
   options?: PaginationParams;
   isExpanded?: boolean;
-  cards?: CardsData;
+  field?: Field;
 }
 
-export const DEFAULT_LIST_GROUP_BY_OPTIONS = [
+export const DEFAULT_LIST_GROUP_BY_OPTIONS: {
+  label: string;
+  value: ListGroupOptions;
+  icon: string;
+  field?: Field;
+}[] = [
   {
     label: 'Stage',
     value: ListGroupOptions.LIST_STAGE,
@@ -53,12 +52,7 @@ export const DEFAULT_LIST_GROUP_BY_OPTIONS = [
   },
   {
     label: 'Assignee',
-    value: ListGroupOptions.ASSIGNEES,
+    value: ListGroupOptions.ASSIGNEE,
     icon: 'mdi-account',
-  },
-  {
-    label: 'Due Date',
-    value: ListGroupOptions.DUE_DATE,
-    icon: 'mdi-clock-time-four',
   },
 ];

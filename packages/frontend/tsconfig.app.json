@@ -6,7 +6,8 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"],
-      "~/*": ["src/*"]
+      "~/*": ["src/*"],
+      "@tillywork/shared": ["../shared/src/index.ts"]
     },
     "moduleResolution": "Bundler"
   },

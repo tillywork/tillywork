@@ -1,10 +1,3 @@
-export enum ListGroupOptions {
-    ALL = "ALL",
-    LIST_STAGE = "LIST_STAGE",
-    ASSIGNEES = "ASSIGNEES",
-    DUE_DATE = "DUE_DATE",
-}
-
 export const DEFAULT_LISTS = [
     {
         name: "Kickoff",
@@ -31,6 +24,6 @@ export const DEFAULT_LIST_STAGES = [
 ];
 
 export enum ListGroupEntityTypes {
-    LIST_STAGE = "LIST_STAGE",
-    USER = "USER",
+    LIST_STAGE = "list_stage",
+    USER = "user",
 }

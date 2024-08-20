@@ -6,13 +6,15 @@ import validationUtils from '@/utils/validation';
 import type { VForm } from 'vuetify/components';
 
 const logo = useLogo();
+const route = useRoute('/login');
+
 const loginForm = ref<VForm>();
 const email = ref('');
 const password = ref('');
 const errorMessage = ref<string[] | null>(null);
-const { rules } = validationUtils;
 const loading = ref(false);
-const route = useRoute('/login');
+
+const { rules } = validationUtils;
 
 const login = async () => {
   errorMessage.value = null;
@@ -55,7 +57,7 @@ const login = async () => {
           class="mx-auto mb-3"
         />
         <v-form ref="loginForm" @submit.prevent="login">
-          <v-card color="transparent" class="pa-4" max-width="470">
+          <v-card color="transparent" class="pa-4 mx-auto" max-width="470">
             <v-card-text>
               <v-text-field
                 v-model="email"

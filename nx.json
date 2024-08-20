@@ -1,52 +1,52 @@
 {
-  "extends": "nx/presets/npm.json",
-  "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "nxCloudAccessToken": "NjlkZWU1MTEtMWI3MS00OThmLThjMWYtZGQ1MDE5MDgyYTZjfHJlYWQtd3JpdGU=",
-  "useDaemonProcess": false,
-  "plugins": [
-    {
-      "plugin": "@nx/nuxt/plugin",
-      "options": {
-        "buildTargetName": "build",
-        "serveTargetName": "serve"
-      }
-    },
-    {
-      "plugin": "@nx/vite/plugin",
-      "options": {
-        "buildTargetName": "build",
-        "previewTargetName": "preview",
-        "testTargetName": "test",
-        "serveTargetName": "serve",
-        "serveStaticTargetName": "serve-static"
-      }
-    },
-    {
-      "plugin": "@nx/webpack/plugin",
-      "options": {
-        "buildTargetName": "build",
-        "serveTargetName": "serve",
-        "previewTargetName": "preview"
-      }
-    },
-    {
-      "plugin": "@nx/eslint/plugin",
-      "options": {
-        "targetName": "lint"
-      }
-    },
-    {
-      "plugin": "@nx/jest/plugin",
-      "options": {
-        "targetName": "test"
-      }
-    },
-    {
-      "plugin": "@nx/cypress/plugin",
-      "options": {
-        "targetName": "e2e",
-        "componentTestingTargetName": "component-test"
-      }
-    }
-  ]
+    "extends": "nx/presets/npm.json",
+    "$schema": "./node_modules/nx/schemas/nx-schema.json",
+    "nxCloudAccessToken": "NjlkZWU1MTEtMWI3MS00OThmLThjMWYtZGQ1MDE5MDgyYTZjfHJlYWQtd3JpdGU=",
+    "useDaemonProcess": false,
+    "plugins": [
+        {
+            "plugin": "@nx/nuxt/plugin",
+            "options": {
+                "buildTargetName": "build",
+                "serveTargetName": "serve"
+            }
+        },
+        {
+            "plugin": "@nx/vite/plugin",
+            "options": {
+                "buildTargetName": "build",
+                "previewTargetName": "preview",
+                "testTargetName": "test",
+                "serveTargetName": "serve",
+                "serveStaticTargetName": "serve-static"
+            }
+        },
+        {
+            "plugin": "@nx/webpack/plugin",
+            "options": {
+                "buildTargetName": "build",
+                "serveTargetName": "serve",
+                "previewTargetName": "preview"
+            }
+        },
+        {
+            "plugin": "@nx/eslint/plugin",
+            "options": {
+                "targetName": "lint"
+            }
+        },
+        {
+            "plugin": "@nx/jest/plugin",
+            "options": {
+                "targetName": "test"
+            }
+        },
+        {
+            "plugin": "@nx/cypress/plugin",
+            "options": {
+                "targetName": "e2e",
+                "componentTestingTargetName": "component-test"
+            }
+        }
+    ]
 }

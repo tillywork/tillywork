@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  ListGroupOptions,
-  type List,
-  type ListGroup,
-  type ListStage,
-} from '../../lists/types';
+import { type List, type ListGroup, type ListStage } from '../../lists/types';
 import { useCardsService } from '@/services/useCardsService';
 import type { TableSortOption, View } from '../types';
 import type { ProjectUser } from '@/components/common/projects/types';
@@ -18,9 +13,10 @@ import { cloneDeep } from 'lodash';
 import type { QueryFilter, ViewFilter } from '../../filters/types';
 import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
-import { useCardTypeFields } from '@/composables/useCardTypeFields';
+import { useFields } from '@/composables/useFields';
 import { FieldTypes } from '../../fields/types';
 import { useCard } from '@/composables/useCard';
+import { ListGroupOptions } from '@tillywork/shared';
 
 const emit = defineEmits([
   'toggle:group',
@@ -44,13 +40,13 @@ const { showSnackbar } = useSnackbarStore();
 
 const { updateFieldValue } = useCard();
 
-const { titleField, pinnedFields } = useCardTypeFields({
+const { titleField, pinnedFields } = useFields({
   cardTypeId: props.list.defaultCardType.id,
 });
 
 const groupCopy = ref(cloneDeep(props.listGroup));
 const sortBy = computed<TableSortOption[]>(() =>
-  props.view.sortBy ? [cloneDeep(props.view.sortBy)] : []
+  props.view.options.sortBy ? [cloneDeep(props.view.options.sortBy)] : []
 );
 
 const isDraggingDisabled = computed(() => {
@@ -84,8 +80,8 @@ const filters = computed<QueryFilter>(() => {
   }
 });
 
-const ignoreCompleted = computed<boolean>(() => props.view.ignoreCompleted);
-const ignoreChildren = computed<boolean>(() => props.view.ignoreChildren);
+const hideCompleted = computed<boolean>(() => props.view.options.hideCompleted);
+const hideChildren = computed<boolean>(() => props.view.options.hideChildren);
 
 const cards = ref<Card[]>([]);
 const total = ref(0);
@@ -93,10 +89,10 @@ const isDragging = ref(false);
 
 const { fetchNextPage, isFetching, hasNextPage, refetch, data } =
   cardsService.useGetGroupCardsInfinite({
-    listId: groupCopy.value.listId,
+    listId: groupCopy.value.list.id,
     groupId: groupCopy.value.id,
-    ignoreCompleted,
-    ignoreChildren,
+    hideCompleted,
+    hideChildren,
     filters,
     sortBy,
   });
@@ -123,7 +119,7 @@ function openCreateCardDialog(listGroup: ListGroup) {
   dialog.openDialog({
     dialog: DIALOGS.CREATE_CARD,
     data: {
-      listId: listGroup.listId,
+      listId: listGroup.list.id,
       listStage: getCurrentStage(listGroup),
       users: getCurrentAssignee(listGroup),
       listStages: props.listStages,
@@ -146,7 +142,7 @@ function getCurrentStage(group: ListGroup) {
 function getCurrentAssignee(group: ListGroup) {
   let user: User | undefined;
 
-  if (group.type === ListGroupOptions.ASSIGNEES) {
+  if (group.type === ListGroupOptions.ASSIGNEE) {
     user = props.projectUsers.find((user: ProjectUser) => {
       return user.user.id == group.entityId;
     })?.user;
@@ -273,7 +269,7 @@ watchEffect(() => {
       style="z-index: 10"
     >
       <div>
-        <template v-if="listGroup.type === ListGroupOptions.ASSIGNEES">
+        <template v-if="listGroup.type === ListGroupOptions.ASSIGNEE">
           <base-avatar
             :photo="listGroup.icon"
             :text="listGroup.name"

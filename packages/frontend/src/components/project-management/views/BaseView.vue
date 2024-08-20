@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ListGroupOptions, type List } from '../lists/types';
+import { type List } from '../lists/types';
 import { useViewsService } from '@/services/useViewsService';
 import { useListGroupsService } from '@/services/useListGroupsService';
 import type { Card } from '../cards/types';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
-import { DEFAULT_SORT_OPTIONS, type TableSortOption } from './types';
+import { type TableSortOption } from './types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { ViewTypes, type View } from './types';
 import { useQueryClient } from '@tanstack/vue-query';
@@ -26,7 +26,7 @@ import {
 import { cloneDeep } from 'lodash';
 import { useDialogStore } from '@/stores/dialog';
 import BaseViewChipDisplay from './BaseViewChipDisplay.vue';
-import { useCardTypeFields } from '@/composables/useCardTypeFields';
+import { useFields } from '@/composables/useFields';
 import { FieldTypes, type Field } from '../fields/types';
 import type { TableColumnDef } from './TableView/types';
 
@@ -38,7 +38,7 @@ const listId = computed(() => props.list.id);
 const viewCopy = ref<View>(cloneDeep(props.view));
 const viewsService = useViewsService();
 const cardsService = useCardsService();
-const listGroupsService = useListGroupsService();
+const { useGetListGroupsByOptionQuery } = useListGroupsService();
 const { useCreateFilterMutation, useUpdateFilterMutation } =
   useFitlersService();
 const dialog = useDialogStore();
@@ -49,13 +49,40 @@ const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
 );
 
-const ignoreCompleted = computed(() => props.view.ignoreCompleted);
-const groupBy = computed(() => props.view.groupBy);
+const hideCompleted = computed(() => props.view.options.hideCompleted);
+const groupBy = computed({
+  get() {
+    return viewCopy.value.options.groupBy;
+  },
+  set(v) {
+    viewCopy.value = {
+      ...viewCopy.value,
+      options: {
+        ...viewCopy.value.options,
+        groupBy: v,
+      },
+    };
+  },
+});
+
+const sortBy = computed({
+  get() {
+    return viewCopy.value.options.sortBy;
+  },
+  set(v) {
+    viewCopy.value = {
+      ...viewCopy.value,
+      options: {
+        ...viewCopy.value.options,
+        sortBy: v,
+      },
+    };
+  },
+});
 
 const isViewLoading = ref(false);
-const sortByOptions = DEFAULT_SORT_OPTIONS;
 
-const { titleField } = useCardTypeFields({
+const { titleField } = useFields({
   cardTypeId: props.list.defaultCardType.id,
 });
 
@@ -87,6 +114,7 @@ const columns = computed<TableColumnDef[]>(() => {
     field: titleField.value,
   };
 
+  //TODO get pinned fields by default, and allow user to customize columns in table from fields in table
   const dueAtColumn: TableColumnDef = {
     id: 'data.due_at',
     accessorKey: 'data.due_at',
@@ -105,9 +133,9 @@ const columns = computed<TableColumnDef[]>(() => {
 const updateViewMutation = viewsService.useUpdateViewMutation();
 
 const { data: listGroups, refetch: refetchListGroups } =
-  listGroupsService.useGetListGroupsByOptionQuery({
+  useGetListGroupsByOptionQuery({
     listId,
-    ignoreCompleted,
+    hideCompleted,
     groupBy,
   });
 
@@ -120,17 +148,17 @@ const { mutateAsync: updateCardList } =
 const { mutateAsync: createFilter } = useCreateFilterMutation();
 const { mutateAsync: updateFilter } = useUpdateFilterMutation();
 
-function handleGroupBySelection(option: ListGroupOptions) {
-  updateViewMutation.mutateAsync({
-    ...viewCopy.value,
-    groupBy: option,
-  });
+function handleGroupBySelection() {
+  updateViewMutation.mutateAsync(viewCopy.value);
 }
 
 function handleSortBySelection(option: TableSortOption) {
   updateViewMutation.mutateAsync({
     ...viewCopy.value,
-    sortBy: option ?? null, // If no option, we want to clear the sort by setting it to null
+    options: {
+      ...viewCopy.value.options,
+      sortBy: option ?? null,
+    },
   });
 }
 
@@ -333,7 +361,7 @@ watch(
       </div>
       <div class="d-flex align-center ga-2">
         <base-view-chip-group-by
-          v-model="viewCopy.groupBy"
+          v-model="groupBy"
           @update:model-value="handleGroupBySelection"
         />
         <base-view-chip-filter
@@ -343,11 +371,10 @@ watch(
           @save="handleSaveFilters"
         />
         <base-view-chip-sort
-          v-model="viewCopy.sortBy"
+          v-model="sortBy"
           @update:model-value="handleSortBySelection"
-          :sort-by-options="sortByOptions"
         />
-        <base-view-chip-display :view="viewCopy" />
+        <base-view-chip-display v-model="viewCopy" />
       </div>
     </div>
 

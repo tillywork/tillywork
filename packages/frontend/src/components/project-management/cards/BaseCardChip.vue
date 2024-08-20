@@ -2,7 +2,7 @@
 import { useCardsService } from '@/services/useCardsService';
 import type { Card } from './types';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
-import { useCardTypeFields } from '@/composables/useCardTypeFields';
+import { useFields } from '@/composables/useFields';
 
 const props = defineProps<{
   card: Pick<Card, 'id'>;
@@ -20,7 +20,7 @@ const { data: cardCopy } = useGetCardQuery({
   cardId,
 });
 
-const { titleField } = useCardTypeFields({
+const { titleField } = useFields({
   cardTypeId,
   enabled: cardTypeFieldsEnabled,
 });

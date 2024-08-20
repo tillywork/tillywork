@@ -1,16 +1,23 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { FindOptionsWhere, Repository } from "typeorm";
 import { Space } from "./space.entity";
 import { CreateSpaceDto } from "./dto/create.space.dto";
 import { UpdateSpaceDto } from "./dto/update.space.dto";
 import { SpaceSideEffectsService } from "./space.side.effects.service";
 import { CardType } from "../card-types/card.type.entity";
+import { IsNotEmpty, IsNumber } from "class-validator";
 
 export type SpaceFindAllResult = {
     total: number;
     spaces: Space[];
 };
+
+export class FindAllParams {
+    @IsNotEmpty()
+    @IsNumber()
+    workspaceId: number;
+}
 
 @Injectable()
 export class SpacesService {
@@ -20,15 +27,21 @@ export class SpacesService {
         private spaceSideEffectsService: SpaceSideEffectsService
     ) {}
 
-    async findAll(): Promise<SpaceFindAllResult> {
-        const result = await this.spacesRepository.findAndCount();
-        return { spaces: result[0], total: result[1] };
-    }
+    async findAll({ workspaceId }: FindAllParams): Promise<Space[]> {
+        const where: FindOptionsWhere<Space> = {
+            workspace: {
+                id: workspaceId,
+            },
+        };
 
-    async findAllBy({ where }: { where: object }): Promise<Space[]> {
         return this.spacesRepository.find({
             where,
-            order: { createdAt: "ASC" },
+            order: {
+                createdAt: "ASC",
+                lists: {
+                    createdAt: "ASC",
+                },
+            },
             relations: ["lists"],
         });
     }

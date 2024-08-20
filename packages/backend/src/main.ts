@@ -7,8 +7,8 @@ import {
 import { AppModule } from "./app/app.module";
 import { Connection } from "typeorm";
 import { seedUserData } from "./seeders/user.seeder";
-import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import metadata from "./metadata";
+// import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+// import metadata from "./metadata";
 import { FastifyAdapter as BullFastifyAdapter } from "@bull-board/fastify";
 import { getQueueToken } from "@nestjs/bull";
 import { createBullBoard } from "@bull-board/api";
@@ -38,20 +38,23 @@ async function bootstrap() {
     app.useGlobalPipes(
         new ValidationPipe({
             transform: true,
+            transformOptions: {
+                enableImplicitConversion: true,
+            },
         })
     );
 
     app.register(contentParser);
 
-    await SwaggerModule.loadPluginMetadata(metadata);
-    const config = new DocumentBuilder()
-        .setTitle("tillywork API")
-        .setVersion("1.0")
-        .addBearerAuth()
-        .addBasicAuth()
-        .build();
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup("docs", app, document);
+    // await SwaggerModule.loadPluginMetadata(metadata);
+    // const config = new DocumentBuilder()
+    //     .setTitle("tillywork API")
+    //     .setVersion("1.0")
+    //     .addBearerAuth()
+    //     .addBasicAuth()
+    //     .build();
+    // const document = SwaggerModule.createDocument(app, config);
+    // SwaggerModule.setup("docs", app, document);
 
     if (configService.get("TW_MAIL_ENABLE")) {
         const serverAdapter = new BullFastifyAdapter();

@@ -1,20 +1,20 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ListGroup } from "./list.group.entity";
 import { ListGroupsService } from "./list.groups.service";
 import { ListGroupsController } from "./list.groups.controller";
 import { ListStagesModule } from "../list-stages/list.stages.module";
-import { UsersModule } from "../../users/users.module";
-import { CardsModule } from "../../cards/cards.module";
-import { FiltersModule } from "../../filters/filters.module";
+import { FieldsModule } from "../../fields/fields.module";
+import { ListsModule } from "../lists.module";
+import { ProjectUsersModule } from "../../projects/project-users/project.users.module";
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([ListGroup]),
         ListStagesModule,
-        UsersModule,
-        CardsModule,
-        FiltersModule,
+        FieldsModule,
+        forwardRef(() => ListsModule),
+        ProjectUsersModule,
     ],
     controllers: [ListGroupsController],
     providers: [ListGroupsService],

@@ -5,7 +5,6 @@
     "scripts": {
         "build": "nx run-many -t build -p frontend backend -c production",
         "dev": "nx run-many -t serve -p frontend backend",
-        "dev:reset": "npm run reset && npm run dev",
         "format": "nx run-many -t format -p frontend backend",
         "lint": "nx run-many -t lint -p frontend backend",
         "reset": "nx run backend:db:reset",
@@ -82,8 +81,10 @@
         "reflect-metadata": "^0.1.13",
         "rxjs": "^7.8.0",
         "slugify": "^1.6.6",
+        "ts-patch": "^3.2.1",
         "tslib": "^2.3.0",
         "typeorm": "^0.3.20",
+        "typescript-transform-paths": "^3.5.0",
         "vuetify": "^3.6.1"
     },
     "workspaces": [
