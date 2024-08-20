@@ -374,7 +374,7 @@ watch(
           v-model="sortBy"
           @update:model-value="handleSortBySelection"
         />
-        <base-view-chip-display :view="viewCopy" />
+        <base-view-chip-display v-model="viewCopy" />
       </div>
     </div>
 

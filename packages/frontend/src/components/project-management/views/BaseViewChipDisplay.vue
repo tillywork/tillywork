@@ -4,9 +4,9 @@ import BaseViewChip from './BaseViewChip.vue';
 import type { View } from './types';
 import { useStateStore } from '@/stores/state';
 
-const props = defineProps<{
-  view: View;
-}>();
+const view = defineModel<View>({
+  required: true,
+});
 
 const { currentList } = storeToRefs(useStateStore());
 
@@ -15,20 +15,20 @@ const { mutateAsync: updateView } = useUpdateViewMutation();
 
 function handleToggleCompleted() {
   updateView({
-    id: props.view.id,
+    id: view.value.id,
     options: {
-      ...props.view.options,
-      hideCompleted: !props.view.options.hideCompleted,
+      ...view.value.options,
+      hideCompleted: !view.value.options.hideCompleted,
     },
   });
 }
 
 function handleToggleChildren() {
   updateView({
-    id: props.view.id,
+    id: view.value.id,
     options: {
-      ...props.view.options,
-      hideChildren: !props.view.options.hideChildren,
+      ...view.value.options,
+      hideChildren: !view.value.options.hideChildren,
     },
   });
 }
