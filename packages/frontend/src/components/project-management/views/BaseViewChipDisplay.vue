@@ -10,6 +10,36 @@ const view = defineModel<View>({
 
 const { currentList } = storeToRefs(useStateStore());
 
+const showCompleted = computed({
+  get() {
+    return !view.value.options.hideCompleted;
+  },
+  set(v) {
+    view.value = {
+      ...view.value,
+      options: {
+        ...view.value.options,
+        hideCompleted: !v,
+      },
+    };
+  },
+});
+
+const showChildren = computed({
+  get() {
+    return !view.value.options.hideChildren;
+  },
+  set(v) {
+    view.value = {
+      ...view.value,
+      options: {
+        ...view.value.options,
+        hideChildren: !v,
+      },
+    };
+  },
+});
+
 const { useUpdateViewMutation } = useViewsService();
 const { mutateAsync: updateView } = useUpdateViewMutation();
 
@@ -42,7 +72,7 @@ function handleToggleChildren() {
           <v-list-item @click="handleToggleCompleted">
             <template #append>
               <v-switch
-                :model-value="!view.options.hideCompleted"
+                v-model="showCompleted"
                 readonly
                 inset
                 hide-details
@@ -55,7 +85,7 @@ function handleToggleChildren() {
           <v-list-item @click="handleToggleChildren">
             <template #append>
               <v-switch
-                :model-value="!view.options.hideChildren"
+                v-model="showChildren"
                 readonly
                 inset
                 hide-details
