@@ -39,8 +39,6 @@
         "@types/passport-jwt": "^4.0.1",
         "@types/passport-local": "^1.0.38",
         "swc-loader": "^0.2.6",
-        "ts-patch": "^3.2.1",
-        "typescript-transform-paths": "^3.5.0",
         "webpack-cli": "^5.1.4"
     }
 }
