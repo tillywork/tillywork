@@ -3,7 +3,7 @@
     "version": "0.0.2",
     "license": "MIT",
     "scripts": {
-        "build": "nx run-many -t build -p frontend backend -c production",
+        "build": "nx run-many -t build -p frontend backend -c production --skip-nx-cache",
         "dev": "nx run-many -t serve -p frontend backend",
         "format": "nx run-many -t format -p frontend backend",
         "lint": "nx run-many -t lint -p frontend backend",
