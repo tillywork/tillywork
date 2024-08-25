@@ -103,6 +103,6 @@ export class ListsService {
 
     async remove(id: number): Promise<void> {
         const list = await this.findOne(id);
-        await this.listsRepository.remove(list);
+        await this.listsRepository.softRemove(list);
     }
 }

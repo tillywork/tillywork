@@ -51,6 +51,7 @@ import { RenameCardTypeColumnInFieldTable1722854552647 } from "../migrations/172
 import { MigrateTitleDescriptionAndDueAtToDataColumnInCardTable1722869332518 } from "../migrations/1722869332518-migrate-title-description-and-dueAt-to-data-column-in-card-table";
 import { AddFieldIdAndFilterToListGroupTable1723106937425 } from "../migrations/1723106937425-add-fieldId-and-filter-to-list-group-table";
 import { AddOptionsToViewTable1723129297915 } from "../migrations/1723129297915-add-options-to-view-table";
+import { AddDeletedAtToListTable1724584476422 } from "src/migrations/1724584476422-add-deletedAt-to-list-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -103,6 +104,7 @@ const migrations = [
     MigrateTitleDescriptionAndDueAtToDataColumnInCardTable1722869332518,
     AddFieldIdAndFilterToListGroupTable1723106937425,
     AddOptionsToViewTable1723129297915,
+    AddDeletedAtToListTable1724584476422,
 ];
 
 const config: TypeOrmModuleOptions = {

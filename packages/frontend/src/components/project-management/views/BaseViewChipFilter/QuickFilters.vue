@@ -46,7 +46,7 @@ const quickFilterOptions = computed<QuickFilter>(() => {
       };
     }),
   };
-
+  //TODO use useFields instead
   const dueDateGroup: QuickFilterGroup = {
     name: 'Due Date',
     field: 'card.data.due_at',
