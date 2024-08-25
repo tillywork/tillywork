@@ -93,6 +93,7 @@ const filtersMenuWidth = computed(() =>
 
 const fields = computed(() => {
   const fields: FieldFilterOption[] = [...defaultFields.value];
+  //TODO use useFields instead to get cardType and list fields
 
   if (listFields.value) {
     listFields.value.forEach((field) => {

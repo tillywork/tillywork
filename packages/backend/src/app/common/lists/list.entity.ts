@@ -9,6 +9,7 @@ import {
     OneToMany,
     Relation,
     ManyToMany,
+    DeleteDateColumn,
 } from "typeorm";
 import { Space } from "../spaces/space.entity";
 import { CardList } from "../cards/card-lists/card.list.entity";
@@ -37,6 +38,8 @@ export class List {
     createdAt: Date;
     @UpdateDateColumn({ type: "timestamp" })
     updatedAt: Date;
+    @DeleteDateColumn({ type: "timestamp" })
+    deletedAt?: Date;
 
     @ManyToOne(() => Space, { nullable: true, onDelete: "CASCADE" })
     @JoinTable()

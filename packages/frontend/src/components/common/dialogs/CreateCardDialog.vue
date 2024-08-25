@@ -187,6 +187,7 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
             :users="users ?? []"
             activator-hover-text="Assignee"
           />
+          <!-- TODO get pinned fields here -->
           <base-date-picker
             v-model="createCardDto.data.due_at"
             icon="mdi-calendar"
