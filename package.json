@@ -4,13 +4,12 @@
     "license": "MIT",
     "scripts": {
         "build": "nx run-many -t build -p frontend backend -c production --skip-nx-cache",
-        "dev": "nx run-many -t serve -p frontend backend",
+        "dev": "nx run-many -t serve -p frontend backend --skip-nx-cache",
         "format": "nx run-many -t format -p frontend backend",
         "lint": "nx run-many -t lint -p frontend backend",
         "reset": "nx run backend:db:reset",
         "swagger": "nx run backend:metadata"
     },
-    "private": true,
     "devDependencies": {
         "@nestjs/schematics": "^10.0.1",
         "@nestjs/testing": "^10.0.2",
@@ -88,6 +87,8 @@
         "vuetify": "^3.6.1"
     },
     "workspaces": [
-        "packages/*"
+        "packages/frontend",
+        "packages/backend",
+        "packages/docs"
     ]
 }
