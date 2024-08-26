@@ -18,21 +18,20 @@ import {
 } from './types';
 import { cloneDeep, lowerFirst } from 'lodash';
 import { useFieldsService } from '@/services/useFieldsService';
-import { FieldTypes, type Field, type FieldItem } from '../fields/types';
+import { type Field } from '../../common/fields/types';
 import { useStateStore } from '@/stores/state';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
-import BaseLabelSelector from '@/components/common/inputs/BaseLabelSelector.vue';
 import { useAuthStore } from '@/stores/auth';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import BaseCardChildrenProgress from './BaseCardChildrenProgress.vue';
 import BaseCardChip from './BaseCardChip.vue';
 import { leaderKey } from '@/utils/keyboard';
-import BaseRelationInput from '@/components/common/inputs/BaseRelationInput.vue';
 import { useMentionNotifications } from '@/composables/useMentionNotifications';
 import urlUtils from '@/utils/url';
 import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
+import BaseField from '../../common/fields/BaseField.vue';
 
 const props = defineProps<{
   card: Card;
@@ -113,13 +112,15 @@ const updateCardListMutation = cardsService.useUpdateCardListMutation();
 
 const users = computed(
   () =>
-    usersQuery.data.value?.map((projectUser) => {
-      const user = projectUser.user;
-      return {
-        ...user,
-        fullName: `${user.firstName} ${user.lastName}`,
-      };
-    }) ?? []
+    usersQuery.data.value
+      ?.map((projectUser) => {
+        const user = projectUser.user;
+        return {
+          ...user,
+          fullName: `${user.firstName} ${user.lastName}`,
+        };
+      })
+      .sort((a) => (a.id === user.value!.id ? 0 : 1)) ?? []
 );
 
 const isCardLoading = computed(() => {
@@ -554,109 +555,15 @@ function openDescriptionFileDialog() {
                 <p class="field-label text-caption me-1">
                   {{ field.name }}
                 </p>
-                <template v-if="field.type === FieldTypes.TEXT">
-                  <v-text-field
-                    v-model="cardCopy.data[field.slug]"
-                    hide-details
-                    :placeholder="field.name"
-                    @update:model-value="
-                      (v: string) => updateFieldValue({ card: cardCopy, field, v })
-                    "
-                    :prepend-inner-icon="field.icon"
-                  />
-                </template>
-                <template v-else-if="field.type === FieldTypes.DROPDOWN">
-                  <v-autocomplete
-                    v-model="cardCopy.data[field.slug]"
-                    :items="field.items"
-                    item-title="item"
-                    item-value="item"
-                    variant="outlined"
-                    hide-details
-                    :placeholder="field.name"
-                    :prepend-inner-icon="field.icon"
-                    :multiple="field.multiple"
-                    autocomplete="off"
-                    auto-select-first
-                    @update:model-value="
-                      (v: FieldItem) =>
-                        updateFieldValue({
-                          card: cardCopy,
-                          field,
-                          v: Array.isArray(v)
+                <base-field
+                  :field="field"
+                  v-model="cardCopy.data[field.slug]"
+                  @update:model-value="
+                    (v: any) => updateFieldValue({ card: cardCopy, field, v: Array.isArray(v)
                             ? v.map((item) => (item.item ? item.item : item))
-                            : [v.item ? v.item : v],
-                        })
-                    "
-                  />
-                </template>
-                <template v-else-if="field.type === FieldTypes.LABEL">
-                  <base-label-selector
-                    v-model="cardCopy.data[field.slug]"
-                    :items="field.items"
-                    :icon="field.icon"
-                    :placeholder="field.name"
-                    :multiple="field.multiple"
-                    @update:model-value="
-                      (v) =>
-                        updateFieldValue({
-                          card: cardCopy,
-                          field,
-                          v,
-                        })
-                    "
-                  />
-                </template>
-                <template v-else-if="field.type === FieldTypes.DATE">
-                  <base-date-picker
-                    v-model="cardCopy.data[field.slug]"
-                    :icon="field.icon ?? 'mdi-calendar'"
-                    :label="field.name"
-                    @update:model-value="
-                      (v: string | string[]) =>
-                        updateFieldValue({
-                            card: cardCopy, 
-                          field,
-                          v,
-                        })
-                    "
-                  />
-                </template>
-                <template v-else-if="field.type === FieldTypes.USER">
-                  <base-user-selector
-                    :model-value="cardCopy.data[field.slug]?.map((userIdAsString: string) => +userIdAsString)"
-                    :users
-                    :label="field.name"
-                    return-id
-                    :icon="field.icon"
-                    size="24"
-                    @update:model-value="
-                      (users: number[]) =>
-                        updateFieldValue({
-                            card: cardCopy, 
-                          field,
-                          v: users.map((userIdAsNumber) => userIdAsNumber.toString()),
-                        })
-                    "
-                  />
-                </template>
-                <template v-else-if="field.type === FieldTypes.CARD">
-                  <base-relation-input
-                    v-model="cardCopy.data[field.slug]"
-                    :field
-                    variant="outlined"
-                    @update:model-value="
-                      (v) =>
-                        updateFieldValue({
-                          card: cardCopy,
-                          field,
-                          v: Array.isArray(v)
-                            ? v.map((c) => c.toString())
-                            : [v?.toString()],
-                        })
-                    "
-                  />
-                </template>
+                            : [v.item ? v.item : v], })
+                  "
+                />
               </div>
             </template>
           </template>

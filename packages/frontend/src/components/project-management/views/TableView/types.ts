@@ -1,6 +1,6 @@
 import type { ColumnDef } from '@tanstack/vue-table';
 import type { ListGroup } from '../../lists/types';
-import type { Field, FieldTypes } from '../../fields/types';
+import type { Field, FieldTypes } from '../../../common/fields/types';
 
 export type TableColumnDef = ColumnDef<ListGroup, any> & {
   cellType: FieldTypes | 'actions' | 'title';

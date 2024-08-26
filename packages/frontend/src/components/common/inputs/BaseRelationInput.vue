@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Field } from '@/components/project-management/fields/types';
+import type { Field } from '@/components/common/fields/types';
 import { useCardsService } from '@/services/useCardsService';
 import { useAuthStore } from '@/stores/auth';
 import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';

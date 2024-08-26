@@ -1,6 +1,6 @@
 import type { User } from '@/components/common/users/types';
-import type { List } from '../lists/types';
-import type { CardType } from '../cards/types';
+import type { List } from '../../project-management/lists/types';
+import type { CardType } from '../../project-management/cards/types';
 
 export interface Field {
   id: number;

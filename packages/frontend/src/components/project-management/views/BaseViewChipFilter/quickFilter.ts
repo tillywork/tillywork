@@ -1,5 +1,5 @@
 import type { FieldFilterOption } from './types';
-import { FieldTypes } from '../../fields/types';
+import { FieldTypes } from '../../../common/fields/types';
 
 export const quickFilterGroupsCustomFields = ['dropdown', 'label'];
 

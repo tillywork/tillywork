@@ -5,10 +5,10 @@ import {
   FIELD_TYPE_OPTIONS,
   type Field,
   type CreateFieldDto,
-} from '@/components/project-management/fields/types';
+  FieldTypes,
+} from '@/components/common/fields/types';
 import { cloneDeep } from 'lodash';
 import { VForm } from 'vuetify/components';
-import { FieldTypes } from '@/components/project-management/fields/types';
 import BaseArrayInput from '../inputs/BaseArrayInput.vue';
 import BaseIconSelector from '../inputs/BaseIconSelector/BaseIconSelector.vue';
 import { useSnackbarStore } from '@/stores/snackbar';
