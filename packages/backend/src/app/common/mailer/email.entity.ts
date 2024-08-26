@@ -28,6 +28,12 @@ export class Email {
     })
     status: EmailStatus;
 
+    @Column("timestamp", { nullable: true, array: true })
+    openTimes: string[];
+
+    @Column({ type: "int", default: 0 })
+    openCount: number;
+
     @CreateDateColumn()
     createdAt: Date;
 
