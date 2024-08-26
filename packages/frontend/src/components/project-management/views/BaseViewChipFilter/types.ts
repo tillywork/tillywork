@@ -1,5 +1,9 @@
 import type { FieldFilter } from '../../filters/types';
-import type { Field, FieldItem, FieldTypes } from '../../fields/types';
+import type {
+  Field,
+  FieldItem,
+  FieldTypes,
+} from '../../../common/fields/types';
 
 export type FieldFilterOption = FieldFilter & {
   title: string;

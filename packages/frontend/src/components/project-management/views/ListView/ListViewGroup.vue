@@ -21,7 +21,7 @@ import type { QueryFilter, ViewFilter } from '../../filters/types';
 import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 import { useFields } from '@/composables/useFields';
-import { FieldTypes } from '../../fields/types';
+import { FieldTypes } from '../../../common/fields/types';
 import { useCard } from '@/composables/useCard';
 import { ListGroupOptions } from '@tillywork/shared';
 
@@ -496,6 +496,7 @@ watchEffect(() => {
                   </v-list-item-title>
                   <template #append>
                     <div class="d-flex align-center ga-2 me-6">
+                      <!-- TODO use BaseField component here -->
                       <template v-for="field in pinnedFields" :key="field.slug">
                         <template v-if="field.type === FieldTypes.DATE">
                           <base-date-picker

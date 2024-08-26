@@ -17,6 +17,8 @@ import { useStateStore } from '@/stores/state';
 import { useAuthStore } from '@/stores/auth';
 import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
 import { leaderKey } from '@/utils/keyboard';
+import { useFields } from '@/composables/useFields';
+import BaseField from '../fields/BaseField.vue';
 
 const dialog = useDialogStore();
 const { workspace, project } = storeToRefs(useAuthStore());
@@ -58,6 +60,11 @@ const cardType = computed<CardType>(() => {
   } else {
     return workspace.value?.defaultCardType;
   }
+});
+
+const { pinnedFields } = useFields({
+  cardTypeId: cardType.value.id,
+  listId: list.value.id,
 });
 
 const createCardMutation = cardsService.useCreateCardMutation();
@@ -187,13 +194,13 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
             :users="users ?? []"
             activator-hover-text="Assignee"
           />
-          <!-- TODO get pinned fields here -->
-          <base-date-picker
-            v-model="createCardDto.data.due_at"
-            icon="mdi-calendar"
-            class="text-caption"
-            label="Due date"
-          />
+
+          <template v-for="field in pinnedFields" :key="field.id">
+            <base-field
+              :field="field"
+              v-model="createCardDto.data[field.slug]"
+            />
+          </template>
         </div>
       </div>
       <v-card-actions

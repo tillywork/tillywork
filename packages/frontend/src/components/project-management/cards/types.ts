@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { User } from '@/components/common/users/types';
-import type { Content } from '@tiptap/vue-3';
 import type { List, ListStage } from '../lists/types';
 import type { Workspace } from '../workspaces/types';
-import type { Field } from '../fields/types';
+import type { Field } from '../../common/fields/types';
 
 export interface Card {
   id: number;

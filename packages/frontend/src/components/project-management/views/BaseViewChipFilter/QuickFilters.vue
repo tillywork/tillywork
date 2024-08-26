@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import type { User } from '@/components/common/users/types';
 import type { ListStage } from '../../lists/types';
-import { FieldTypes, type Field, type FieldItem } from '../../fields/types';
+import {
+  FieldTypes,
+  type Field,
+  type FieldItem,
+} from '../../../common/fields/types';
 import type {
   FieldFilter,
   FilterGroup,

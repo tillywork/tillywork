@@ -1,7 +1,4 @@
-import {
-  type Field,
-  FieldTypes,
-} from '@/components/project-management/fields/types';
+import { type Field, FieldTypes } from '@/components/common/fields/types';
 import type {
   FieldFilter,
   FilterOperator,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import BaseViewChip from '../BaseViewChip.vue';
-import { FieldTypes } from '../../fields/types';
+import { FieldTypes } from '../../../common/fields/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';

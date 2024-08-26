@@ -2,7 +2,7 @@ import type { PaginationParams } from '../views/types';
 import type { View } from '../views/types';
 import type { QueryFilter } from '../filters/types';
 import type { CardType } from '../cards/types';
-import type { Field } from '../fields/types';
+import type { Field } from '../../common/fields/types';
 import { ListGroupOptions } from '@tillywork/shared';
 
 export interface List {

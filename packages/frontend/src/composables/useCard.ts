@@ -1,5 +1,5 @@
 import type { Card } from '@/components/project-management/cards/types';
-import type { Field } from '@/components/project-management/fields/types';
+import type { Field } from '@/components/common/fields/types';
 import { useCardsService } from '@/services/useCardsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { cloneDeep } from 'lodash';

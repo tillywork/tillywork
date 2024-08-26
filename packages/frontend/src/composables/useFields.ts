@@ -1,9 +1,6 @@
 import { toValue, type MaybeRef } from 'vue';
 import { useFieldsService } from '@/services/useFieldsService';
-import {
-  FieldTypes,
-  type Field,
-} from '@/components/project-management/fields/types';
+import { FieldTypes, type Field } from '@/components/common/fields/types';
 
 export const useFields = ({
   cardTypeId,

@@ -1,7 +1,4 @@
-import type {
-  Field,
-  CreateFieldDto,
-} from '@/components/project-management/fields/types';
+import type { Field, CreateFieldDto } from '@/components/common/fields/types';
 import { useHttp } from '@/composables/useHttp';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import type { MaybeRef } from 'vue';

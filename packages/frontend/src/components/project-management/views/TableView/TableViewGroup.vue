@@ -21,7 +21,7 @@ import { cloneDeep } from 'lodash';
 import type { QueryFilter, ViewFilter } from '../../filters/types';
 import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
-import { FieldTypes } from '../../fields/types';
+import { FieldTypes } from '../../../common/fields/types';
 import { useCard } from '@/composables/useCard';
 import { useFields } from '@/composables/useFields';
 import { ListGroupOptions } from '@tillywork/shared';

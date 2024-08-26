@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FieldItem } from '@/components/project-management/fields/types';
+import type { FieldItem } from '@/components/common/fields/types';
 
 const selected = defineModel<string[]>({
   default: [],

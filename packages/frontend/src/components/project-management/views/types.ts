@@ -1,7 +1,7 @@
 import type { ListGroupOptions, ViewOptions } from '@tillywork/shared';
 import type { Filter } from '../filters/types';
 import type { List } from '../lists/types';
-import type { Field } from '../fields/types';
+import type { Field } from '../../common/fields/types';
 
 export interface View {
   id: number;
