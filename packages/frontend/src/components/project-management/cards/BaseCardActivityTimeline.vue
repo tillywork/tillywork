@@ -3,15 +3,13 @@ import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 import { useUsersService } from '@/services/useUsersService';
-import { useDate } from '@/composables/useDate';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { ActivityType, type CardActivity } from './types';
 import { useDialogStore } from '@/stores/dialog';
 import BaseCardCommentBox from './BaseCardCommentBox.vue';
 import type { Content } from '@tiptap/vue-3';
-
-const { dayjs } = useDate();
+import { dayjs } from '@tillywork/shared';
 
 const props = defineProps<{
   cardId: number;

@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import ProjectInvitationLink from '../projects/ProjectInvitationLink.vue';
-import { useDate } from '@/composables/useDate';
 import { useAuthStore } from '@/stores/auth';
+import { dayjs } from '@tillywork/shared';
 
-const { dayjs } = useDate();
 const { workspace } = storeToRefs(useAuthStore());
 const { useProjectUsersQuery } = useProjectUsersService();
 

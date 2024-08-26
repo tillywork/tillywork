@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import BaseCardPropertyValueBtn from '@/components/project-management/cards/BaseCardPropertyValueBtn.vue';
-import { useDate } from '@/composables/useDate';
 import { DATE_RANGE_SUGGESTIONS, type DateRangeSuggestion } from './types';
 import objectUtils from '@/utils/object';
-
-const { dayjs } = useDate();
+import { dayjs } from '@tillywork/shared';
 
 const dateModel = defineModel<string | string[] | null>();
 
@@ -57,10 +55,12 @@ const processedDate = computed({
     if (v) {
       if (Array.isArray(v)) {
         dateValue.value = v.map((dateObject) => {
-          return dateObject.toISOString();
+          const date = dateObject.setHours(23, 59, 59);
+          return dayjs(date).utc().format();
         });
       } else {
-        dateValue.value = v.toISOString();
+        const date = v.setHours(23, 59, 59);
+        dateValue.value = dayjs(date).utc().format();
       }
     }
   },
@@ -158,14 +158,16 @@ function getTextFromDate(date: string) {
     return selectedRangeSuggestion.value?.title ?? date;
   }
 
-  if (dayjs(date).isToday()) {
+  const localDate = dayjs(date).local();
+
+  if (localDate.isToday()) {
     return 'Today';
-  } else if (dayjs(date).isTomorrow()) {
+  } else if (localDate.isTomorrow()) {
     return 'Tomorrow';
-  } else if (dayjs(date).isYesterday()) {
+  } else if (localDate.isYesterday()) {
     return 'Yesterday';
   } else {
-    return dayjs(date).format('MMM D');
+    return localDate.format('MMM D');
   }
 }
 
