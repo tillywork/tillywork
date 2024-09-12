@@ -39,10 +39,19 @@ export class CardTypeSubscriber implements EntitySubscriberInterface<CardType> {
                 icon: "mdi-text-box",
             },
             {
+                name: "Assignee",
+                type: FieldTypes.USER,
+                slug: "assignee",
+                icon: "mdi-account",
+                isPinned: true,
+                isAssignee: true,
+            },
+            {
                 name: "Due At",
                 type: FieldTypes.DATE,
                 slug: "due_at",
                 icon: "mdi-calendar",
+                isPinned: true,
             },
             {
                 name: "Starts At",

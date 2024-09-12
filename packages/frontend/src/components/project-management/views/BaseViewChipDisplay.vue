@@ -138,22 +138,6 @@ function handleToggleColumn(field: Field) {
                     />
                   </template>
                 </v-list-item>
-                <v-list-item disabled>
-                  <template #prepend>
-                    <v-icon icon="mdi-account" />
-                  </template>
-                  <v-list-item-title>Assignee</v-list-item-title>
-                  <template #append>
-                    <v-switch
-                      :model-value="true"
-                      readonly
-                      inset
-                      hide-details
-                      density="compact"
-                      class="ms-2"
-                    />
-                  </template>
-                </v-list-item>
                 <template v-for="field in tableFields" :key="field.id">
                   <v-list-item @click="handleToggleColumn(field)">
                     <template #prepend>
