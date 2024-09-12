@@ -541,6 +541,7 @@ watchEffect(() => {
                             row.original.data[cell.column.columnDef.field.slug]
                           "
                           rounded="0"
+                          flex-fill
                           @update:model-value="
                             (v: any) => updateFieldValue({ 
                                 card: row.original,

@@ -14,6 +14,7 @@ interface Props {
   textField?: boolean;
   returnId?: boolean;
   icon?: string;
+  returnString?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -26,7 +27,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const userMenu = defineModel('menu', { type: Boolean, default: false });
-const value = defineModel<User[] | number[]>({ default: () => [] });
+const value = defineModel<User[] | (number | string)[]>({ default: () => [] });
 
 const { getUserFullName } = useUsersService();
 const searchTerm = ref('');
@@ -73,7 +74,9 @@ watch(
   selectedUsers,
   (newValue) => {
     value.value = props.returnId
-      ? newValue.map((user) => user.id)
+      ? newValue.map((user) =>
+          props.returnString ? user.id.toString() : user.id
+        )
       : cloneDeep(newValue);
   },
   { deep: true }

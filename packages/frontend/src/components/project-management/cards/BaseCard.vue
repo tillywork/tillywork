@@ -545,10 +545,9 @@ function openDescriptionFileDialog() {
                   :field="field"
                   v-model="cardCopy.data[field.slug]"
                   @update:model-value="
-                    (v: any) => updateFieldValue({ card: cardCopy, field, v: Array.isArray(v)
-                            ? v.map((item) => (item.item ? item.item : item))
-                            : [v.item ? v.item : v], })
+                    (v: any) => updateFieldValue({ card: cardCopy, field, v })
                   "
+                  flex-fill
                 />
               </div>
             </template>

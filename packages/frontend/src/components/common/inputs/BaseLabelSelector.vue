@@ -69,7 +69,7 @@ const {
             </template>
           </template>
           <template v-else>
-            <v-card-subtitle class="px-1 text-caption">Empty</v-card-subtitle>
+            <v-card-subtitle class="pa-1 text-caption">Empty</v-card-subtitle>
           </template>
         </v-card>
       </template>

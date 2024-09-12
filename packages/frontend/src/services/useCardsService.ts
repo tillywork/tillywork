@@ -11,8 +11,8 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/vue-query';
-import type { QueryFilter } from '@/components/project-management/filters/types';
 import type { MaybeRef } from 'vue';
+import type { QueryFilter } from '@tillywork/shared';
 
 export interface CardsData {
   cards: Card[];
@@ -124,7 +124,10 @@ export const useCardsService = () => {
           filters: filters?.value,
           sortBy: sortBy?.value,
         }),
-      queryKey: ['cards', { groupId, filters: filters?.value }],
+      queryKey: [
+        'cards',
+        { listId: toValue(listId), groupId: toValue(groupId) },
+      ],
       getNextPageParam: (lastPage, allPages, lastPageParam) => {
         if (lastPage?.cards.length === 0) {
           return undefined;
