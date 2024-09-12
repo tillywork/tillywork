@@ -10,15 +10,9 @@ import objectUtils from '@/utils/object';
 import { type Content } from '@tiptap/vue-3';
 import type { ListStage } from '../lists/types';
 import BaseCardActivityTimeline from './BaseCardActivityTimeline.vue';
-import {
-  ActivityType,
-  type ActivityContent,
-  type Card,
-  type CardType,
-} from './types';
+import { ActivityType, type ActivityContent, type Card } from './types';
 import { cloneDeep, lowerFirst } from 'lodash';
 import { useFieldsService } from '@/services/useFieldsService';
-import { type Field } from '../../common/fields/types';
 import { useStateStore } from '@/stores/state';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
@@ -32,6 +26,7 @@ import urlUtils from '@/utils/url';
 import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
 import BaseField from '../../common/fields/BaseField.vue';
+import type { Field, CardType } from '@tillywork/shared';
 
 const props = defineProps<{
   card: Card;
@@ -512,6 +507,7 @@ function openDescriptionFileDialog() {
       v-model="isInfoDrawerOpen"
       width="350"
       location="end"
+      color="surface"
       :key="cardCopy.id"
     >
       <v-card color="transparent">
@@ -537,16 +533,6 @@ function openDescriptionFileDialog() {
               @update:model-value="
                 (listStage) => updateCardListStage(cardCopy, listStage)
               "
-            />
-          </div>
-          <div class="d-flex align-center my-4">
-            <p class="field-label text-caption">Assigned to</p>
-            <base-user-selector
-              v-model="cardCopy.users"
-              :users="users ?? []"
-              @update:model-value="(v: User[]) => updateCardAssignees(cardCopy, v)"
-              label="Assign"
-              size="24"
             />
           </div>
           <template v-if="fields">

@@ -5,14 +5,8 @@ const props = defineProps<UseInputsProps>();
 
 const emit = defineEmits(['update:modelValue']);
 
-const {
-  selected,
-  selectedItems,
-  search,
-  filteredItems,
-  isItemSelected,
-  toggleItemSelection,
-} = useInputs(props, emit);
+const { selected, search, filteredItems, isItemSelected, toggleItemSelection } =
+  useInputs(props, emit);
 </script>
 
 <template>
@@ -22,54 +16,32 @@ const {
       :items
       item-title="item"
       item-value="item"
-      :variant
+      variant="outlined"
       hide-details
       :placeholder
-      :multiple
       :prepend-inner-icon="icon"
+      :multiple
       autocomplete="off"
-      chips
       auto-select-first
-    >
-      <template #chip="{ item, props }">
-        <v-chip
-          v-bind="props"
-          :color="item.raw.color"
-          variant="tonal"
-          rounded="xl"
-          class="text-body-3"
-          :density
-        />
-      </template>
-    </v-autocomplete>
+    />
   </template>
   <template v-else>
-    <v-menu :close-on-content-click="false" @update:model-value="search = ''">
+    <v-menu :close-on-content-click="false">
       <template #activator="{ props }">
         <v-card
-          link
           v-bind="props"
-          class="d-flex align-center flex-fill h-100 flex-1-0 ga-1 pa-1"
+          class="pa-2 flex-fill h-100 d-flex align-center text-truncate"
           color="transparent"
           :rounded
           @click.prevent
         >
-          <template v-if="selectedItems.length">
-            <template v-for="item in selectedItems" :key="item.item">
-              <v-chip
-                :color="item?.color"
-                variant="tonal"
-                link
-                rounded="xl"
-                class="text-body-3"
-                :density
-              >
-                {{ item?.item }}
-              </v-chip>
-            </template>
+          <template v-if="selected && !!selected[0]">
+            <v-card-text class="pa-0 text-caption">
+              {{ selected.join(', ') }}
+            </v-card-text>
           </template>
           <template v-else>
-            <v-card-subtitle class="px-1 text-caption">Empty</v-card-subtitle>
+            <v-card-subtitle class="text-caption px-0">Empty</v-card-subtitle>
           </template>
         </v-card>
       </template>
@@ -89,15 +61,7 @@ const {
               :active="isItemSelected(item)"
               @click="toggleItemSelection(item)"
             >
-              <v-chip
-                :color="item.color"
-                variant="tonal"
-                rounded="xl"
-                class="text-body-3"
-                :density
-              >
-                {{ item.item }}
-              </v-chip>
+              <v-list-item-title>{{ item.item }}</v-list-item-title>
               <template #append>
                 <v-icon
                   icon="mdi-check"

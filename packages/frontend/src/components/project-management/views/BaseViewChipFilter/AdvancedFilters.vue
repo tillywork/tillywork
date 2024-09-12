@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import type { User } from '@/components/common/users/types';
-import type { FilterGroup } from '../../filters/types';
 import AdvancedFiltersItem from './AdvancedFiltersItem.vue';
-import type { FieldFilterOption } from './types';
 import type { VForm } from 'vuetify/components';
+import type { FilterGroup, FieldFilterOption } from '@tillywork/shared';
 
 const advancedFilters = defineModel<FilterGroup>({
   required: true,

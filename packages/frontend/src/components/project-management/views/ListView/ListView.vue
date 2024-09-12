@@ -3,7 +3,6 @@ import {
   FlexRender,
   getCoreRowModel,
   useVueTable,
-  type ColumnDef,
   type Row,
   type Column,
 } from '@tanstack/vue-table';
@@ -21,8 +20,6 @@ import { useAuthStore } from '@/stores/auth';
 const isLoading = defineModel<boolean>('loading');
 
 const props = defineProps<{
-  columns: ColumnDef<ListGroup, any>[];
-  noHeaders?: boolean;
   list: List;
   view: View;
   groups: ListGroup[];
@@ -60,7 +57,7 @@ const table = useVueTable({
   get data() {
     return props.groups;
   },
-  columns: props.columns as ColumnDef<ListGroup, any>[],
+  columns: [],
   getCoreRowModel: getCoreRowModel(),
   getRowId: (row) => `${row.id}`,
   manualPagination: true,
@@ -155,12 +152,12 @@ function handleUpdateCardOrder(data: {
         >
           <div
             class="list-header-group d-flex border-b-thin border-collapse"
-            v-if="!noHeaders"
+            v-if="false"
           >
             <template v-for="header in headerGroup.headers" :key="header.id">
               <v-hover
                 #="{ isHovering: isHeaderHovering, props: headerProps }"
-                v-if="!noHeaders"
+                v-if="false"
               >
                 <v-card
                   v-bind="headerProps"
@@ -168,7 +165,7 @@ function handleUpdateCardOrder(data: {
                   rounded="0"
                   color="accent"
                   :width="header.getSize()"
-                  :height="noHeaders ? 0 : 28"
+                  :height="true ? 0 : 28"
                 >
                   <!-- Header Content -->
                   <FlexRender

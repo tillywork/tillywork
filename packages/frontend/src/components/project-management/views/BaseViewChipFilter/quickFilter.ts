@@ -1,5 +1,4 @@
-import type { FieldFilterOption } from './types';
-import { FieldTypes } from '../../../common/fields/types';
+import { FieldTypes, type FieldFilterOption } from '@tillywork/shared';
 
 export const quickFilterGroupsCustomFields = ['dropdown', 'label'];
 

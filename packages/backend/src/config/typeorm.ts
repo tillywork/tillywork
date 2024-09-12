@@ -53,6 +53,8 @@ import { AddFieldIdAndFilterToListGroupTable1723106937425 } from "../migrations/
 import { AddOptionsToViewTable1723129297915 } from "../migrations/1723129297915-add-options-to-view-table";
 import { AddDeletedAtToListTable1724584476422 } from "../migrations/1724584476422-add-deletedAt-to-list-table";
 import { AddEmailOpenTrackingToEmailTable1724673051203 } from "../migrations/1724673051203-add-email-open-tracking-to-email-table";
+import { AddColumnsToOptionsColumnInViewTable1724762987440 } from "../migrations/1724762987440-add-columns-to-options-column-in-view-table";
+import { MigrateCardUsersToDataColumn1725792730053 } from "../migrations/1725792730053-migrate-card-users-to-data-column";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -107,6 +109,8 @@ const migrations = [
     AddOptionsToViewTable1723129297915,
     AddDeletedAtToListTable1724584476422,
     AddEmailOpenTrackingToEmailTable1724673051203,
+    AddColumnsToOptionsColumnInViewTable1724762987440,
+    MigrateCardUsersToDataColumn1725792730053,
 ];
 
 const config: TypeOrmModuleOptions = {

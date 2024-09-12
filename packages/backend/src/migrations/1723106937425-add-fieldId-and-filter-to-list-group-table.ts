@@ -8,7 +8,8 @@ import { ListGroupEntityTypes } from "../app/common/lists/types";
 import { ListGroupOptions } from "@tillywork/shared";
 
 export class AddFieldIdAndFilterToListGroupTable1723106937425
-    implements MigrationInterface {
+    implements MigrationInterface
+{
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query("TRUNCATE list_group RESTART IDENTITY");
 
@@ -64,10 +65,7 @@ export class AddFieldIdAndFilterToListGroupTable1723106937425
 
         await queryRunner.query(`UPDATE view set "oldGroupBy" = "groupBy"`);
 
-        await queryRunner.dropColumn(
-            "view",
-            "groupBy"
-        );
+        await queryRunner.dropColumn("view", "groupBy");
 
         await queryRunner.addColumn(
             "view",
@@ -86,7 +84,7 @@ export class AddFieldIdAndFilterToListGroupTable1723106937425
             `UPDATE view set "groupBy" = '${ListGroupOptions.ALL}' WHERE "oldGroupBy" ILIKE 'ALL'`
         );
         await queryRunner.query(
-            `UPDATE view set "groupBy" = '${ListGroupOptions.ASSIGNEE}' WHERE "oldGroupBy" ILIKE 'ASSIGNEES' OR "oldGroupBy" ILIKE '${ListGroupOptions.ASSIGNEE}'`
+            `UPDATE view set "groupBy" = 'assignee' WHERE "oldGroupBy" ILIKE 'ASSIGNEES' OR "oldGroupBy" ILIKE 'assignee'`
         );
 
         await queryRunner.changeColumn(

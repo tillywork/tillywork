@@ -1,5 +1,5 @@
-import type { CardType } from '@tillywork/shared';
-import type { Space } from '../spaces/types';
+import { CardType } from '../card-types';
+import { Space } from '../spaces';
 
 export interface Workspace {
   id: number;

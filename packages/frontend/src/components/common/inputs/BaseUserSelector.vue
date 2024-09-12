@@ -63,7 +63,7 @@ function isUserSelected(user: User): boolean {
 function getSelectedUsersFromModel(): User[] {
   if (props.returnId) {
     return (value.value as number[])
-      .map((id) => props.users.find((user) => user.id === id))
+      .map((id) => props.users.find((user) => user.id == id))
       .filter((user): user is User => user !== undefined);
   }
   return cloneDeep(value.value as User[]);
@@ -170,26 +170,28 @@ defineExpose({ userMenu });
           </v-btn>
         </template>
         <template v-else>
-          <v-tooltip
-            v-for="(selectedUser, index) in selectedUsers"
-            :key="selectedUser.email + 'selected-user'"
-            location="bottom"
-          >
-            <template #activator="{ props: tooltipProps }">
-              <base-avatar
-                v-bind="tooltipProps"
-                :photo="selectedUser.photo"
-                :text="getUserFullName(selectedUser)"
-                class="text-xs"
-                :class="{ 'ms-n1': index > 0 }"
-                :size
-                :style="{ zIndex: 100 - index }"
-              />
-            </template>
-            <span class="text-caption">{{
-              getUserFullName(selectedUser)
-            }}</span>
-          </v-tooltip>
+          <div :class="fill ? 'px-2' : ''">
+            <v-tooltip
+              v-for="(selectedUser, index) in selectedUsers"
+              :key="selectedUser.email + 'selected-user'"
+              location="bottom"
+            >
+              <template #activator="{ props: tooltipProps }">
+                <base-avatar
+                  v-bind="tooltipProps"
+                  :photo="selectedUser.photo"
+                  :text="getUserFullName(selectedUser)"
+                  class="text-xs"
+                  :class="{ 'ms-n1': index > 0 }"
+                  :size
+                  :style="{ zIndex: 100 - index }"
+                />
+              </template>
+              <span class="text-caption">{{
+                getUserFullName(selectedUser)
+              }}</span>
+            </v-tooltip>
+          </div>
         </template>
       </div>
     </template>
@@ -206,7 +208,7 @@ defineExpose({ userMenu });
       <v-list>
         <v-list-item
           v-for="user in searchedUsers"
-          :key="user.email + 'list-item' + isUserSelected(user)"
+          :key="user.id"
           @click="toggleUserSelection(user)"
           :active="isUserSelected(user)"
           class="text-truncate"

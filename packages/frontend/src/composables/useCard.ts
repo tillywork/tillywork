@@ -1,7 +1,7 @@
 import type { Card } from '@/components/project-management/cards/types';
-import type { Field } from '@/components/common/fields/types';
 import { useCardsService } from '@/services/useCardsService';
 import { useSnackbarStore } from '@/stores/snackbar';
+import type { Field } from '@tillywork/shared';
 import { cloneDeep } from 'lodash';
 
 export const useCard = () => {
@@ -19,12 +19,16 @@ export const useCard = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     v: any;
   }) {
+    const newValue = Array.isArray(v)
+      ? v.map((item) => (item.item ? item.item : item.toString()))
+      : [v.item ? v.item : v.toString()];
+    console.log('newValue', newValue);
     const cardCopy = cloneDeep(card);
-    cardCopy.data[field.slug] = Array.isArray(v)
-      ? v.length && !!v[0]
-        ? v
+    cardCopy.data[field.slug] = Array.isArray(newValue)
+      ? newValue.length && !!newValue[0]
+        ? newValue
         : undefined
-      : v;
+      : newValue;
 
     updateCard(cardCopy).catch(() => {
       showSnackbar({

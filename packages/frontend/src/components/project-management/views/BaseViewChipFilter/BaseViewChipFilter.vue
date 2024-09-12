@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import BaseViewChip from '../BaseViewChip.vue';
-import { FieldTypes } from '../../../common/fields/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
-import type { FieldFilter, ViewFilter } from '../../filters/types';
-import type { FieldFilterOption, FilterViewOptions } from './types';
 import { useFieldsService } from '@/services/useFieldsService';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useAuthStore } from '@/stores/auth';
@@ -14,6 +11,13 @@ import { useStateStore } from '@/stores/state';
 import QuickFilters from './QuickFilters.vue';
 import AdvancedFilters from './AdvancedFilters.vue';
 import { filterUtils } from '@/utils/filter';
+import {
+  type ViewFilter,
+  FieldTypes,
+  type FieldFilter,
+  type FieldFilterOption,
+  type FilterViewOptions,
+} from '@tillywork/shared';
 
 const props = defineProps<{
   filters?: ViewFilter;
@@ -71,7 +75,7 @@ const defaultFields = ref<FieldFilterOption[]>([
   },
   {
     title: 'Assignee',
-    field: 'users.id',
+    field: 'card.data.assignee',
     operator: 'in',
     value: [],
     type: FieldTypes.USER,
@@ -98,7 +102,7 @@ const fields = computed(() => {
   if (listFields.value) {
     listFields.value.forEach((field) => {
       fields.push({
-        field: `card.data.${field.id}`,
+        field: `card.data.${field.slug}`,
         title: field.name,
         type: field.type,
         operator: filterUtils.getOperatorFromFieldType(field),

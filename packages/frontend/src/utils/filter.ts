@@ -1,8 +1,9 @@
-import { type Field, FieldTypes } from '@/components/common/fields/types';
-import type {
-  FieldFilter,
-  FilterOperator,
-} from '@/components/project-management/filters/types';
+import {
+  type Field,
+  type FilterOperator,
+  FieldTypes,
+  type FieldFilter,
+} from '@tillywork/shared';
 import objectUtils from './object';
 
 export const filterUtils = {

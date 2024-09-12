@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import validationUtils from '@/utils/validation';
-import { FieldTypes } from '../../../common/fields/types';
-import type { FieldFilterOption } from './types';
 import type { User } from '@/components/common/users/types';
-import type { FieldFilter, FilterOperator } from '../../filters/types';
 import { useStateStore } from '@/stores/state';
 import BaseRelationInput from '@/components/common/inputs/BaseRelationInput.vue';
+import {
+  type FieldFilter,
+  type FieldFilterOption,
+  type FilterOperator,
+  FieldTypes,
+} from '@tillywork/shared';
 
 const filter = defineModel<FieldFilter>({
   required: true,

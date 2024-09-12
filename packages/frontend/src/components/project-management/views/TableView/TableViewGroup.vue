@@ -12,19 +12,21 @@ import type { TableSortOption, View } from '../types';
 import type { ProjectUser } from '@/components/common/projects/types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import type { Card } from '../../cards/types';
-import { FlexRender } from '@tanstack/vue-table';
 import draggable from 'vuedraggable';
 import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
-import type { QueryFilter, ViewFilter } from '../../filters/types';
 import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
-import { FieldTypes } from '../../../common/fields/types';
 import { useCard } from '@/composables/useCard';
 import { useFields } from '@/composables/useFields';
-import { ListGroupOptions } from '@tillywork/shared';
+import {
+  ListGroupOptions,
+  type QueryFilter,
+  type ViewFilter,
+} from '@tillywork/shared';
+import BaseField from '@/components/common/fields/BaseField.vue';
 
 const emit = defineEmits([
   'toggle:group',
@@ -81,10 +83,6 @@ const isDraggingDisabled = computed(() => {
   return sortBy.value && sortBy.value.length > 0;
 });
 
-const users = computed(() =>
-  props.projectUsers.map((projectUser) => projectUser.user)
-);
-
 const filters = computed<QueryFilter>(() => {
   if (props.view.filters) {
     const viewFilters = {
@@ -128,7 +126,9 @@ const groupTable = useVueTable({
   get data() {
     return cards.value;
   },
-  columns: columns.value,
+  get columns() {
+    return columns.value;
+  },
   getCoreRowModel: getCoreRowModel(),
   getRowId: (row) => `${row.id}`,
   manualPagination: true,
@@ -526,69 +526,29 @@ watchEffect(() => {
                         />
                       </v-card>
                     </template>
-                    <template
-                      v-else-if="
-                        cell.column.columnDef.cellType === FieldTypes.DATE
-                      "
-                    >
-                      <v-card
-                        :width="getColumnSize(cell.column.columnDef.id)"
-                        class="table-cell d-flex align-center fill-height"
-                        rounded="0"
-                        color="transparent"
-                        link
-                      >
-                        <base-date-picker
-                          :model-value="
-                            row.original.data[cell.column.columnDef.field.slug]
-                          "
-                          @update:model-value="(v: string) => updateFieldValue({
-                            card: row.original,
-                            field: cell.column.columnDef.field,
-                            v
-                          })"
-                          class="text-caption d-flex flex-fill h-100 justify-start rounded-0"
-                          :label="`Set ${cell.column.columnDef.header.toLowerCase()}`"
-                          rounded="0"
-                          @click.prevent
-                        />
-                      </v-card>
-                    </template>
-                    <template
-                      v-else-if="
-                        cell.column.columnDef.cellType === FieldTypes.USER
-                      "
-                    >
-                      <v-card
-                        :width="getColumnSize(cell.column.columnDef.id)"
-                        class="table-cell d-flex align-center fill-height px-1"
-                        rounded="0"
-                        color="transparent"
-                        link
-                      >
-                        <base-user-selector
-                          :model-value="row.original.users"
-                          :users
-                          fill
-                          @update:model-value="
-                            (users: User[]) => handleUserSelection({
-                                users, card: row.original
-                            })
-                          "
-                          @click.stop
-                        />
-                      </v-card>
-                    </template>
                     <template v-else>
                       <v-card
                         :width="getColumnSize(cell.column.columnDef.id)"
                         class="table-cell d-flex align-center fill-height"
                         rounded="0"
                         color="transparent"
+                        link
                       >
-                        <FlexRender
-                          :render="cell.column.columnDef.cell"
-                          :props="cell.getContext()"
+                        <base-field
+                          class="flex-fill h-100"
+                          :field="cell.column.columnDef.field"
+                          :model-value="
+                            row.original.data[cell.column.columnDef.field.slug]
+                          "
+                          rounded="0"
+                          @update:model-value="
+                            (v: any) => updateFieldValue({ 
+                                card: row.original,
+                                field: cell.column.columnDef.field,
+                                v
+                            })
+                          "
+                          @click.prevent
                         />
                       </v-card>
                     </template>

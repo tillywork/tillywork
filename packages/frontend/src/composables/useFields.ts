@@ -1,6 +1,6 @@
 import { toValue, type MaybeRef } from 'vue';
 import { useFieldsService } from '@/services/useFieldsService';
-import { FieldTypes, type Field } from '@/components/common/fields/types';
+import { FieldTypes, type Field } from '@tillywork/shared';
 
 export const useFields = ({
   cardTypeId,
@@ -73,6 +73,18 @@ export const useFields = ({
     )
   );
 
+  const tableFields = computed(() =>
+    fields.value.filter((field) =>
+      [
+        FieldTypes.DROPDOWN,
+        FieldTypes.CARD,
+        FieldTypes.LABEL,
+        FieldTypes.DATE,
+        FieldTypes.USER,
+      ].includes(field.type)
+    )
+  );
+
   return {
     fields,
     listFields,
@@ -82,6 +94,7 @@ export const useFields = ({
     cardTypeFieldsWithoutMainFields,
     pinnedFields,
     groupableFields,
+    tableFields,
     refetch,
   };
 };

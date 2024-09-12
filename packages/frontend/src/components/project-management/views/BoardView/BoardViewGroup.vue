@@ -10,13 +10,16 @@ import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
-import type { QueryFilter, ViewFilter } from '../../filters/types';
 import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 import { useFields } from '@/composables/useFields';
-import { FieldTypes } from '../../../common/fields/types';
 import { useCard } from '@/composables/useCard';
-import { ListGroupOptions } from '@tillywork/shared';
+import {
+  ListGroupOptions,
+  type QueryFilter,
+  type ViewFilter,
+  FieldTypes,
+} from '@tillywork/shared';
 
 const emit = defineEmits([
   'toggle:group',

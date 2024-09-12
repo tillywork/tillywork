@@ -90,6 +90,7 @@ const vuetify = createVuetify({
     VMenu: {
       offset: 3,
       width: 200,
+      transition: 'none',
     },
     VIcon: {
       size: 'small',

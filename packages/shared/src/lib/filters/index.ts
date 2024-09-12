@@ -1,3 +1,5 @@
+import { FieldTypes, FieldItem, Field } from '../fields';
+
 export type Filter = {
   id: number;
   name?: string;
@@ -60,3 +62,13 @@ export interface ViewFilter {
     quick?: FilterGroup;
   };
 }
+
+export type FieldFilterOption = FieldFilter & {
+  title: string;
+  type: FieldTypes;
+  icon?: string;
+  options?: FieldItem[];
+  original?: Field;
+};
+
+export type FilterViewOptions = 'quick' | 'advanced';

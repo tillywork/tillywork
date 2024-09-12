@@ -1,9 +1,11 @@
 import type { PaginationParams } from '../views/types';
 import type { View } from '../views/types';
-import type { QueryFilter } from '../filters/types';
-import type { CardType } from '../cards/types';
-import type { Field } from '../../common/fields/types';
-import { ListGroupOptions } from '@tillywork/shared';
+import {
+  ListGroupOptions,
+  type CardType,
+  type Field,
+  type QueryFilter,
+} from '@tillywork/shared';
 
 export interface List {
   id: number;
@@ -49,10 +51,5 @@ export const DEFAULT_LIST_GROUP_BY_OPTIONS: {
     label: 'Stage',
     value: ListGroupOptions.LIST_STAGE,
     icon: 'mdi-circle-slice-8',
-  },
-  {
-    label: 'Assignee',
-    value: ListGroupOptions.ASSIGNEE,
-    icon: 'mdi-account',
   },
 ];

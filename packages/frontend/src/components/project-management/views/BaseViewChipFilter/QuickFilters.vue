@@ -2,16 +2,6 @@
 import type { User } from '@/components/common/users/types';
 import type { ListStage } from '../../lists/types';
 import {
-  FieldTypes,
-  type Field,
-  type FieldItem,
-} from '../../../common/fields/types';
-import type {
-  FieldFilter,
-  FilterGroup,
-  FilterOperator,
-} from '../../filters/types';
-import {
   type QuickFilter,
   type QuickFilterGroup,
   quickFilterGroupsCustomFields,
@@ -19,6 +9,14 @@ import {
 } from './quickFilter';
 import { filterUtils } from '@/utils/filter';
 import objectUtils from '@/utils/object';
+import {
+  type FilterGroup,
+  type Field,
+  type FieldFilter,
+  type FilterOperator,
+  FieldTypes,
+  type FieldItem,
+} from '@tillywork/shared';
 
 const quickFilters = defineModel<FilterGroup>({
   required: true,
@@ -50,6 +48,7 @@ const quickFilterOptions = computed<QuickFilter>(() => {
       };
     }),
   };
+
   //TODO use useFields instead
   const dueDateGroup: QuickFilterGroup = {
     name: 'Due Date',
@@ -60,11 +59,11 @@ const quickFilterOptions = computed<QuickFilter>(() => {
 
   const assigneeGroup: QuickFilterGroup = {
     name: 'Assignee',
-    field: 'users.id',
+    field: 'card.data.assignee',
     icon: 'mdi-account',
     options: [
       {
-        field: 'users.id',
+        field: 'card.data.assignee',
         operator: 'isNull',
         value: [],
         title: 'No Assignee',
@@ -72,7 +71,7 @@ const quickFilterOptions = computed<QuickFilter>(() => {
       },
       ...props.users.map((assignee) => {
         return {
-          field: 'users.id',
+          field: 'card.data.assignee',
           operator: 'in' as FilterOperator,
           value: [assignee.id],
           title: `${assignee.firstName} ${assignee.lastName}`,

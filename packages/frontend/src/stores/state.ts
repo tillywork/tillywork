@@ -1,5 +1,4 @@
-import type { List } from '@/components/project-management/lists/types';
-import { WorkspaceTypes } from '@/components/project-management/workspaces/types';
+import { WorkspaceTypes, type List } from '@tillywork/shared';
 
 export const useStateStore = defineStore('state', {
   persist: true,

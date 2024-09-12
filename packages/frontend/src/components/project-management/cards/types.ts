@@ -2,7 +2,7 @@
 import type { User } from '@/components/common/users/types';
 import type { List, ListStage } from '../lists/types';
 import type { Workspace } from '../workspaces/types';
-import type { Field } from '../../common/fields/types';
+import { type CardType } from '@tillywork/shared';
 
 export interface Card {
   id: number;
@@ -56,22 +56,3 @@ export interface CardActivity {
   createdAt: Date;
   createdBy: User;
 }
-
-/**
- * This is where entities like Task are derived from Card entity.
- */
-export type CardType = {
-  id: number;
-  name: string;
-  workspace: Workspace;
-  fields: Field[];
-  createdByType: 'system' | 'user';
-  createdBy: User;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type CreateCardTypeDto = {
-  name: string;
-  workspaceId: number;
-};
