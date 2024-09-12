@@ -33,6 +33,7 @@ const { data: users } = useProjectUsersQuery({
       v-model="value"
       :icon="field.icon ?? 'mdi-calendar'"
       :label="field.name"
+      :rounded
     />
   </template>
   <template v-else-if="field.type === FieldTypes.TEXT">
