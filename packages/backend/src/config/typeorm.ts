@@ -53,6 +53,7 @@ import { AddFieldIdAndFilterToListGroupTable1723106937425 } from "../migrations/
 import { AddOptionsToViewTable1723129297915 } from "../migrations/1723129297915-add-options-to-view-table";
 import { AddDeletedAtToListTable1724584476422 } from "../migrations/1724584476422-add-deletedAt-to-list-table";
 import { AddEmailOpenTrackingToEmailTable1724673051203 } from "../migrations/1724673051203-add-email-open-tracking-to-email-table";
+import { FixDescriptionAndDueAtFields1726391466764 } from "src/migrations/1726391466764-fix-description-and-due-at-fields";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -107,6 +108,7 @@ const migrations = [
     AddOptionsToViewTable1723129297915,
     AddDeletedAtToListTable1724584476422,
     AddEmailOpenTrackingToEmailTable1724673051203,
+    FixDescriptionAndDueAtFields1726391466764,
 ];
 
 const config: TypeOrmModuleOptions = {

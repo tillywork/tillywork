@@ -37,12 +37,14 @@ export class CardTypeSubscriber implements EntitySubscriberInterface<CardType> {
                 type: FieldTypes.RICH,
                 slug: "description",
                 icon: "mdi-text-box",
+                isDescription: true,
             },
             {
                 name: "Due At",
                 type: FieldTypes.DATE,
                 slug: "due_at",
                 icon: "mdi-calendar",
+                isPinned: true,
             },
             {
                 name: "Starts At",
