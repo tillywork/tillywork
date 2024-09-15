@@ -6,16 +6,15 @@ import {
   type Row,
   type Column,
 } from '@tanstack/vue-table';
-import type { View } from '../types';
 import { useListGroupsService } from '@/services/useListGroupsService';
 import type { Card } from '../../cards/types';
 import { type List, type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import ListViewGroup from './ListViewGroup.vue';
-import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useAuthStore } from '@/stores/auth';
+import type { View } from '@tillywork/shared';
 
 const isLoading = defineModel<boolean>('loading');
 
@@ -30,7 +29,6 @@ const emit = defineEmits([
   'submit',
   'load',
   'row:update:stage',
-  'row:update:assignees',
   'row:update:order',
 ]);
 
@@ -106,13 +104,6 @@ function toggleGroupExpansion(listGroup: Row<ListGroup>) {
     .finally(() => {
       isLoading.value = false;
     });
-}
-
-function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
-  emit('row:update:assignees', {
-    users,
-    card,
-  });
 }
 
 function handleDeleteCard(card: Card) {
@@ -216,7 +207,6 @@ function handleUpdateCardOrder(data: {
             @toggle:group="toggleGroupExpansion"
             @row:delete="handleDeleteCard"
             @row:update:stage="handleUpdateCardStage"
-            @row:update:assignees="handleUpdateAssignees"
             @row:update:order="handleUpdateCardOrder"
           />
         </template>

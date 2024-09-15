@@ -61,6 +61,7 @@ const { pinnedFields } = useFields({
 const createCardMutation = cardsService.useCreateCardMutation();
 const createCardDto = ref<CreateCardDto>({
   data: {
+    ...(currentDialog.value.data.data ?? {}),
     title: '',
   },
   listId: currentDialog.value?.data?.listId ?? list.value?.id,

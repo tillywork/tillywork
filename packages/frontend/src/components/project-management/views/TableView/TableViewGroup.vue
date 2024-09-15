@@ -10,14 +10,11 @@ import { type List, type ListGroup, type ListStage } from '../../lists/types';
 import { useCardsService } from '@/services/useCardsService';
 import type { TableSortOption } from '../types';
 import type { ProjectUser } from '@/components/common/projects/types';
-import { DIALOGS } from '@/components/common/dialogs/types';
 import type { Card } from '../../cards/types';
 import draggable from 'vuedraggable';
-import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
-import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 import { useCard } from '@/composables/useCard';
 import { useFields } from '@/composables/useFields';
@@ -26,14 +23,15 @@ import {
   type QueryFilter,
   type ViewFilter,
   type View,
+  FieldTypes,
 } from '@tillywork/shared';
 import BaseField from '@/components/common/fields/BaseField.vue';
+import { useListGroup } from '@/composables/useListGroup';
 
 const emit = defineEmits([
   'toggle:group',
   'row:delete',
   'row:update:stage',
-  'row:update:assignees',
   'row:update:order',
 ]);
 const props = defineProps<{
@@ -52,9 +50,9 @@ const props = defineProps<{
 const rowMenuOpen = ref<Row<Card> | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
 
-const dialog = useDialogStore();
 const cardsService = useCardsService();
 const { showSnackbar } = useSnackbarStore();
+const { openCreateCardDialog } = useListGroup(props);
 
 const { updateFieldValue } = useCard();
 
@@ -166,42 +164,6 @@ function toggleGroupExpansion(listGroup: Row<ListGroup>) {
   emit('toggle:group', listGroup);
 }
 
-function openCreateCardDialog(listGroup: ListGroup) {
-  dialog.openDialog({
-    dialog: DIALOGS.CREATE_CARD,
-    data: {
-      listId: listGroup.list.id,
-      listStage: getCurrentStage(listGroup),
-      users: getCurrentAssignee(listGroup),
-      listStages: props.listStages,
-    },
-  });
-}
-
-function getCurrentStage(group: ListGroup) {
-  let stage: ListStage | undefined;
-
-  if (group.type === ListGroupOptions.LIST_STAGE) {
-    stage = props.listStages.find((stage) => {
-      return stage.id == group.entityId;
-    });
-  }
-
-  return stage ? { ...stage } : undefined;
-}
-
-function getCurrentAssignee(group: ListGroup) {
-  let user: User | undefined;
-
-  if (group.type === ListGroupOptions.ASSIGNEE) {
-    user = props.projectUsers.find((user: ProjectUser) => {
-      return user.user.id == group.entityId;
-    })?.user;
-  }
-
-  return user ? [user] : undefined;
-}
-
 function onDragMove() {
   if (isDraggingDisabled.value) {
     isDragging.value = false;
@@ -299,13 +261,6 @@ function handleUpdateCardStage(data: {
   emit('row:update:stage', data);
 }
 
-function handleUserSelection({ users, card }: { users: User[]; card: Card }) {
-  emit('row:update:assignees', {
-    users,
-    card,
-  });
-}
-
 function getColumnSize(columnId: string) {
   const columnSize = props.columnSizes.find((cs) => cs.id === columnId);
   return columnSize?.size;
@@ -358,7 +313,12 @@ watchEffect(() => {
       @click="toggleGroupExpansion(listGroup)"
     />
     <div>
-      <template v-if="listGroup.original.type === ListGroupOptions.ASSIGNEE">
+      <template
+        v-if="
+          listGroup.original.type === ListGroupOptions.FIELD &&
+          listGroup.original.field?.type === FieldTypes.USER
+        "
+      >
         <base-avatar
           :photo="listGroup.original.icon"
           :text="listGroup.original.name"

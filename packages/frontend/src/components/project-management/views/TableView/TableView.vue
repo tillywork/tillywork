@@ -12,7 +12,6 @@ import { type List, type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import TableViewGroup from './TableViewGroup.vue';
-import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useAuthStore } from '@/stores/auth';
 import { useFields } from '@/composables/useFields';
@@ -32,7 +31,6 @@ const emit = defineEmits([
   'submit',
   'load',
   'row:update:stage',
-  'row:update:assignees',
   'row:update:order',
 ]);
 
@@ -171,13 +169,6 @@ function toggleGroupExpansion(listGroup: Row<ListGroup>) {
     });
 }
 
-function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
-  emit('row:update:assignees', {
-    users,
-    card,
-  });
-}
-
 function handleDeleteCard(card: Card) {
   emit('row:delete', card);
 }
@@ -295,7 +286,6 @@ function handleUpdateCardOrder(data: {
             @toggle:group="toggleGroupExpansion"
             @row:delete="handleDeleteCard"
             @row:update:stage="handleUpdateCardStage"
-            @row:update:assignees="handleUpdateAssignees"
             @row:update:order="handleUpdateCardOrder"
           />
         </template>

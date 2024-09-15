@@ -21,8 +21,10 @@ export const useCard = () => {
   }) {
     const newValue = Array.isArray(v)
       ? v.map((item) => (item.item ? item.item : item.toString()))
-      : [v.item ? v.item : v.toString()];
-    console.log('newValue', newValue);
+      : v
+      ? [v.item ? v.item : v.toString()]
+      : undefined;
+
     const cardCopy = cloneDeep(card);
     cardCopy.data[field.slug] = Array.isArray(newValue)
       ? newValue.length && !!newValue[0]

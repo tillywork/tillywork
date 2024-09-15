@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import { type List, type ListGroup, type ListStage } from '../../lists/types';
 import { useCardsService } from '@/services/useCardsService';
-import type { TableSortOption, View } from '../types';
+import type { TableSortOption } from '../types';
 import type { ProjectUser } from '@/components/common/projects/types';
-import { DIALOGS } from '@/components/common/dialogs/types';
 import type { Card } from '../../cards/types';
 import draggable from 'vuedraggable';
-import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
-import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
@@ -19,13 +16,15 @@ import {
   type QueryFilter,
   type ViewFilter,
   FieldTypes,
+  type View,
 } from '@tillywork/shared';
+import { useListGroup } from '@/composables/useListGroup';
+import BaseField from '@/components/common/fields/BaseField.vue';
 
 const emit = defineEmits([
   'toggle:group',
   'card:delete',
   'card:update:stage',
-  'card:update:assignees',
   'card:update:order',
 ]);
 const props = defineProps<{
@@ -37,13 +36,13 @@ const props = defineProps<{
 }>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
 
-const dialog = useDialogStore();
 const cardsService = useCardsService();
 const { showSnackbar } = useSnackbarStore();
+const { openCreateCardDialog } = useListGroup(props);
 
 const { updateFieldValue } = useCard();
 
-const { titleField, pinnedFields } = useFields({
+const { titleField, assigneeField, pinnedFieldsWithoutAssignee } = useFields({
   cardTypeId: props.list.defaultCardType.id,
 });
 
@@ -116,42 +115,6 @@ async function handleGroupCardsLoad({
   } else {
     done('ok');
   }
-}
-
-function openCreateCardDialog(listGroup: ListGroup) {
-  dialog.openDialog({
-    dialog: DIALOGS.CREATE_CARD,
-    data: {
-      listId: listGroup.list.id,
-      listStage: getCurrentStage(listGroup),
-      users: getCurrentAssignee(listGroup),
-      listStages: props.listStages,
-    },
-  });
-}
-
-function getCurrentStage(group: ListGroup) {
-  let stage: ListStage | undefined;
-
-  if (group.type === ListGroupOptions.LIST_STAGE) {
-    stage = props.listStages.find((stage) => {
-      return stage.id == group.entityId;
-    });
-  }
-
-  return stage ? { ...stage } : undefined;
-}
-
-function getCurrentAssignee(group: ListGroup) {
-  let user: User | undefined;
-
-  if (group.type === ListGroupOptions.ASSIGNEE) {
-    user = props.projectUsers.find((user: ProjectUser) => {
-      return user.user.id == group.entityId;
-    })?.user;
-  }
-
-  return user ? [user] : undefined;
 }
 
 function onDragMove() {
@@ -227,13 +190,6 @@ function handleUpdateCardStage(data: {
   emit('card:update:stage', data);
 }
 
-function handleUserSelection({ users, card }: { users: User[]; card: Card }) {
-  emit('card:update:assignees', {
-    users,
-    card,
-  });
-}
-
 watch(
   data,
   (v) => {
@@ -272,7 +228,12 @@ watchEffect(() => {
       style="z-index: 10"
     >
       <div>
-        <template v-if="listGroup.type === ListGroupOptions.ASSIGNEE">
+        <template
+          v-if="
+            listGroup.type === ListGroupOptions.FIELD &&
+            listGroup.field?.type === FieldTypes.USER
+          "
+        >
           <base-avatar
             :photo="listGroup.icon"
             :text="listGroup.name"
@@ -353,17 +314,21 @@ watchEffect(() => {
               </template>
 
               <template #append>
-                <base-user-selector
-                  :model-value="card.users"
-                  :users
-                  fill
-                  @update:model-value="
-                      (users: User[]) => handleUserSelection({
-                         users, card
+                <template v-if="assigneeField">
+                  <base-user-selector
+                    :model-value="card.data[assigneeField.slug]"
+                    :users
+                    fill
+                    return-id
+                    return-string
+                    @update:model-value="
+                      (v: string[]) => updateFieldValue({
+                        card, field: assigneeField, v
                       })
                     "
-                  @click.stop
-                />
+                    @click.stop
+                  />
+                </template>
               </template>
             </v-card-item>
             <v-card-actions
@@ -371,27 +336,21 @@ watchEffect(() => {
               style="min-height: fit-content"
             >
               <div class="d-flex flex-wrap flex-fill">
-                <!-- TODO use BaseField component here -->
-                <template v-if="pinnedFields">
-                  <template v-for="field in pinnedFields" :key="field.slug">
-                    <template v-if="field.type === FieldTypes.DATE">
-                      <base-date-picker
-                        :model-value="card.data[field.slug]"
-                        @update:model-value="(v: string) => updateFieldValue({
-                            card,
-                            field,
-                            v
-                        })"
-                        class="text-caption"
-                        :label="`Set ${field.name.toLowerCase()}`"
-                        @click.prevent
-                      />
-                    </template>
-                    <template v-else>
-                      <span class="text-error text-xs"
-                        >Unknown field type: {{ field.type }}</span
-                      >
-                    </template>
+                <template v-if="pinnedFieldsWithoutAssignee">
+                  <template
+                    v-for="field in pinnedFieldsWithoutAssignee"
+                    :key="field.slug"
+                  >
+                    <base-field
+                      :field
+                      no-label
+                      :model-value="card.data[field.slug]"
+                      @update:model-value="(v: string) => updateFieldValue({
+                        card,
+                        field,
+                        v
+                      })"
+                    />
                   </template>
                 </template>
                 <template v-else>

@@ -52,6 +52,10 @@ export const useFields = ({
     cardTypeFields.value?.find((field) => field.isDescription)
   );
 
+  const assigneeField = computed(() =>
+    cardTypeFields.value?.find((field) => field.isAssignee)
+  );
+
   const cardTypeFieldsWithoutMainFields = computed(() =>
     cardTypeFields.value?.filter(
       (field) => !field.isTitle && !field.isDescription && !field.isPhoto
@@ -60,6 +64,11 @@ export const useFields = ({
 
   const pinnedFields = computed(() =>
     fields.value?.filter((field) => field.isPinned)
+  );
+
+  /** Used in Board and List views, where we display the assignee field independantly of other pinned fields. */
+  const pinnedFieldsWithoutAssignee = computed(() =>
+    pinnedFields.value.filter((field) => !field.isAssignee)
   );
 
   const groupableFields = computed(() =>
@@ -109,8 +118,10 @@ export const useFields = ({
     cardTypeFields,
     titleField,
     descriptionField,
+    assigneeField,
     cardTypeFieldsWithoutMainFields,
     pinnedFields,
+    pinnedFieldsWithoutAssignee,
     groupableFields,
     tableFields,
     refetch,

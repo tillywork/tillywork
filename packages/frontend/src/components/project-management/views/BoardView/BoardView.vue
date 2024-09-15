@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import type { View } from '../types';
 import { useListGroupsService } from '@/services/useListGroupsService';
 import type { Card } from '../../cards/types';
 import { type List, type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import BoardViewGroup from './BoardViewGroup.vue';
-import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useAuthStore } from '@/stores/auth';
+import type { View } from '@tillywork/shared';
 
 const isLoading = defineModel<boolean>('loading');
 
@@ -23,7 +22,6 @@ const emit = defineEmits([
   'submit',
   'load',
   'card:update:stage',
-  'card:update:assignees',
   'card:update:order',
 ]);
 
@@ -59,13 +57,6 @@ function toggleGroupExpansion(listGroup: ListGroup) {
     .finally(() => {
       isLoading.value = false;
     });
-}
-
-function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
-  emit('card:update:assignees', {
-    users,
-    card,
-  });
 }
 
 function handleDeleteCard(card: Card) {
@@ -109,7 +100,6 @@ function handleUpdateCardOrder(data: {
             @toggle:group="toggleGroupExpansion"
             @card:delete="handleDeleteCard"
             @card:update:stage="handleUpdateCardStage"
-            @card:update:assignees="handleUpdateAssignees"
             @card:update:order="handleUpdateCardOrder"
           />
         </template>

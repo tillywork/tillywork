@@ -19,6 +19,7 @@ export interface Field {
   isTitle: boolean;
   isDescription: boolean;
   isPhoto: boolean;
+  isAssignee: boolean;
   isPinned: boolean;
 }
 

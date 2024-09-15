@@ -7,16 +7,13 @@ import {
 } from '@tanstack/vue-table';
 import { type List, type ListGroup, type ListStage } from '../../lists/types';
 import { useCardsService } from '@/services/useCardsService';
-import type { TableSortOption, View } from '../types';
+import type { TableSortOption } from '../types';
 import type { ProjectUser } from '@/components/common/projects/types';
-import { DIALOGS } from '@/components/common/dialogs/types';
 import type { Card } from '../../cards/types';
 import draggable from 'vuedraggable';
-import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
-import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
@@ -25,13 +22,15 @@ import {
   type QueryFilter,
   type ViewFilter,
   FieldTypes,
+  type View,
 } from '@tillywork/shared';
+import { useListGroup } from '@/composables/useListGroup';
+import BaseField from '@/components/common/fields/BaseField.vue';
 
 const emit = defineEmits([
   'toggle:group',
   'row:delete',
   'row:update:stage',
-  'row:update:assignees',
   'row:update:order',
 ]);
 const props = defineProps<{
@@ -45,13 +44,13 @@ const props = defineProps<{
 const rowMenuOpen = ref<Row<Card> | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
 
-const dialog = useDialogStore();
 const cardsService = useCardsService();
 const { showSnackbar } = useSnackbarStore();
+const { openCreateCardDialog } = useListGroup(props);
 
 const { updateFieldValue } = useCard();
 
-const { titleField, pinnedFields } = useFields({
+const { titleField, assigneeField, pinnedFieldsWithoutAssignee } = useFields({
   cardTypeId: props.list.defaultCardType.id,
 });
 
@@ -73,10 +72,6 @@ const maxHeight = computed(() =>
 const isDraggingDisabled = computed(() => {
   return sortBy.value && sortBy.value.length > 0;
 });
-
-const users = computed(() =>
-  props.projectUsers.map((projectUser) => projectUser.user)
-);
 
 const filters = computed<QueryFilter>(() => {
   if (props.view.filters) {
@@ -156,42 +151,6 @@ async function handleGroupCardsLoad({
 
 function toggleGroupExpansion(listGroup: Row<ListGroup>) {
   emit('toggle:group', listGroup);
-}
-
-function openCreateCardDialog(listGroup: ListGroup) {
-  dialog.openDialog({
-    dialog: DIALOGS.CREATE_CARD,
-    data: {
-      listId: listGroup.list.id,
-      listStage: getCurrentStage(listGroup),
-      users: getCurrentAssignee(listGroup),
-      listStages: props.listStages,
-    },
-  });
-}
-
-function getCurrentStage(group: ListGroup) {
-  let stage: ListStage | undefined;
-
-  if (group.type === ListGroupOptions.LIST_STAGE) {
-    stage = props.listStages.find((stage) => {
-      return stage.id == group.entityId;
-    });
-  }
-
-  return stage ? { ...stage } : undefined;
-}
-
-function getCurrentAssignee(group: ListGroup) {
-  let user: User | undefined;
-
-  if (group.type === ListGroupOptions.ASSIGNEE) {
-    user = props.projectUsers.find((user: ProjectUser) => {
-      return user.user.id == group.entityId;
-    })?.user;
-  }
-
-  return user ? [user] : undefined;
 }
 
 function onDragMove() {
@@ -291,13 +250,6 @@ function handleUpdateCardStage(data: {
   emit('row:update:stage', data);
 }
 
-function handleUserSelection({ users, card }: { users: User[]; card: Card }) {
-  emit('row:update:assignees', {
-    users,
-    card,
-  });
-}
-
 watch(
   data,
   (v) => {
@@ -348,7 +300,12 @@ watchEffect(() => {
       @click="toggleGroupExpansion(listGroup)"
     />
     <div>
-      <template v-if="listGroup.original.type === ListGroupOptions.ASSIGNEE">
+      <template
+        v-if="
+          listGroup.original.type === ListGroupOptions.FIELD &&
+          listGroup.original.field?.type === FieldTypes.USER
+        "
+      >
         <base-avatar
           :photo="listGroup.original.icon"
           :text="listGroup.original.name"
@@ -495,39 +452,33 @@ watchEffect(() => {
                   </v-list-item-title>
                   <template #append>
                     <div class="d-flex align-center ga-2 me-6">
-                      <!-- TODO use BaseField component here -->
-                      <template v-for="field in pinnedFields" :key="field.slug">
-                        <template v-if="field.type === FieldTypes.DATE">
-                          <base-date-picker
-                            :model-value="row.original.data[field.slug]"
-                            @update:model-value="(v: string) => updateFieldValue({
+                      <template
+                        v-for="field in pinnedFieldsWithoutAssignee"
+                        :key="field.slug"
+                      >
+                        <base-field
+                          :field
+                          no-label
+                          :model-value="row.original.data[field.slug]"
+                          @update:model-value="(v: string) => updateFieldValue({
                                 card: row.original,
                                 field,
                                 v
                             })"
-                            class="text-caption d-flex justify-start rounded-0"
-                            :label="`Set ${field.name.toLowerCase()}`"
-                            @click.prevent
-                          />
-                        </template>
-                        <template v-else>
-                          <span class="text-error text-xs"
-                            >Unknown field type: {{ field.type }}</span
-                          >
-                        </template>
+                        />
                       </template>
-
-                      <base-user-selector
-                        :model-value="row.original.users"
-                        :users
-                        fill
-                        @update:model-value="
-                            (users: User[]) => handleUserSelection({
-                                users, card: row.original
-                            })
-                          "
-                        @click.stop
-                      />
+                      <template v-if="assigneeField">
+                        <base-field
+                          :field="assigneeField"
+                          no-label
+                          :model-value="row.original.data[assigneeField.slug]"
+                          @update:model-value="(v: string) => updateFieldValue({
+                                card: row.original,
+                                field: assigneeField,
+                                v
+                            })"
+                        />
+                      </template>
                     </div>
                   </template>
                 </v-list-item>

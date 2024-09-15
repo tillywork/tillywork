@@ -10,7 +10,6 @@ import { type TableSortOption } from './types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useCardsService } from '@/services/useCardsService';
-import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import BoardView from './BoardView/BoardView.vue';
 import ListView from './ListView/ListView.vue';
@@ -89,7 +88,6 @@ const { data: listGroups, refetch: refetchListGroups } =
     groupBy,
   });
 
-const { mutateAsync: updateCard } = cardsService.useUpdateCardMutation();
 const { mutateAsync: deleteCard, isPending: isDeletingCard } =
   cardsService.useDeleteCardMutation();
 const { mutateAsync: updateCardList } =
@@ -119,21 +117,6 @@ function openCreateCardDialog() {
       list: props.list,
       type: props.list.defaultCardType,
     },
-  });
-}
-
-function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
-  const updatedCard: Card = {
-    ...card,
-    users,
-  };
-
-  updateCard(updatedCard).catch(() => {
-    showSnackbar({
-      message: 'Something went wrong, please try again.',
-      color: 'error',
-      timeout: 5000,
-    });
   });
 }
 
@@ -337,7 +320,6 @@ watch(
           :groups="listGroups ?? []"
           @row:delete="handleDeleteCard"
           @row:update:stage="handleUpdateCardStage"
-          @row:update:assignees="handleUpdateAssignees"
           @row:update:order="handleUpdateCardOrder"
         >
         </table-view>
@@ -348,7 +330,6 @@ watch(
           :list
           :list-groups="listGroups ?? []"
           @card:delete="handleDeleteCard"
-          @card:update:assignees="handleUpdateAssignees"
           @card:update:stage="handleUpdateCardStage"
           @card:update:order="handleUpdateCardOrder"
         />
@@ -362,7 +343,6 @@ watch(
           no-headers
           @row:delete="handleDeleteCard"
           @row:update:stage="handleUpdateCardStage"
-          @row:update:assignees="handleUpdateAssignees"
           @row:update:order="handleUpdateCardOrder"
         >
         </list-view>
