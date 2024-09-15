@@ -1,41 +1,35 @@
 import { FieldTypes, type FieldFilterOption } from '@tillywork/shared';
 
-export const quickFilterGroupsCustomFields = ['dropdown', 'label'];
+export const quickFilterGroupsCustomFields = [
+  FieldTypes.DROPDOWN,
+  FieldTypes.LABEL,
+  FieldTypes.DATE,
+  FieldTypes.USER,
+];
 
-export const quickFilterItemsDate: FieldFilterOption[] = [
+export const quickFilterDateOptions: Omit<FieldFilterOption, 'field'>[] = [
   {
     title: 'Today',
     type: FieldTypes.DATE,
-    field: 'card.data.due_at',
     operator: 'between',
     value: [':startOfDay', ':endOfDay'],
   },
   {
     title: 'This Week',
     type: FieldTypes.DATE,
-    field: 'card.data.due_at',
     operator: 'between',
     value: [':startOfWeek', ':endOfWeek'],
   },
   {
     title: 'Last Week',
     type: FieldTypes.DATE,
-    field: 'card.data.due_at',
     operator: 'between',
     value: [':startOfLastWeek', ':endOfLastWeek'],
   },
   {
-    field: 'card.data.due_at',
     operator: 'between',
     value: [':startOfTime', ':startOfDay'],
     title: 'Past Due',
-    type: FieldTypes.DATE,
-  },
-  {
-    field: 'card.data.due_at',
-    operator: 'isNull',
-    value: [],
-    title: 'No Due Date',
     type: FieldTypes.DATE,
   },
 ];

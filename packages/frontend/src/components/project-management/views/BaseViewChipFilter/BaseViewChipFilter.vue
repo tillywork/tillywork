@@ -4,7 +4,6 @@ import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
-import { useFieldsService } from '@/services/useFieldsService';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useAuthStore } from '@/stores/auth';
 import { useStateStore } from '@/stores/state';
@@ -18,6 +17,7 @@ import {
   type FieldFilterOption,
   type FilterViewOptions,
 } from '@tillywork/shared';
+import { useFields } from '@/composables/useFields';
 
 const props = defineProps<{
   filters?: ViewFilter;
@@ -36,71 +36,47 @@ const viewType = ref<FilterViewOptions>('quick');
 const isSnackbarOpen = ref(false);
 const snackbarId = ref<number>();
 
-const { useFieldsQuery } = useFieldsService();
 const { showSnackbar, closeSnackbar } = useSnackbarStore();
 const { project } = storeToRefs(useAuthStore());
 const { useProjectUsersQuery } = useProjectUsersService();
+const { currentList } = storeToRefs(useStateStore());
+
+const cardTypeId = computed(() => currentList.value?.defaultCardType.id ?? 0);
+const listId = computed(() => currentList.value!.id);
+
+const { filterableFields } = useFields({
+  cardTypeId,
+  listId,
+});
 
 const { data: users } = useProjectUsersQuery({
   projectId: project.value!.id,
   select: (projectUsers) => projectUsers.map((pj) => pj.user),
 });
 
-const { currentList } = storeToRefs(useStateStore());
-const listId = computed(() => currentList.value!.id);
-const { data: listFields, refetch: refetchListFields } = useFieldsQuery({
-  listId,
-});
 const listStagesService = useListStagesService();
 const { data: listStages } = listStagesService.useGetListStagesQuery({
   listId,
 });
-
-const defaultFields = ref<FieldFilterOption[]>([
-  {
-    title: 'Title',
-    field: 'card.data.title',
-    operator: 'eq',
-    value: '',
-    type: FieldTypes.TEXT,
-    icon: 'mdi-format-title',
-  },
-  {
-    title: 'Due Date',
-    field: 'card.data.due_at',
-    operator: 'between',
-    value: '',
-    type: FieldTypes.DATE,
-    icon: 'mdi-calendar-range',
-  },
-  {
-    title: 'Assignee',
-    field: 'card.data.assignee',
-    operator: 'in',
-    value: [],
-    type: FieldTypes.USER,
-    icon: 'mdi-account',
-  },
-  {
-    title: 'Stage',
-    field: 'listStage.id',
-    operator: 'in',
-    value: [],
-    type: FieldTypes.DROPDOWN,
-    icon: 'mdi-circle-slice-8',
-  },
-]);
 
 const filtersMenuWidth = computed(() =>
   viewType.value === 'quick' ? 300 : 750
 );
 
 const fields = computed(() => {
-  const fields: FieldFilterOption[] = [...defaultFields.value];
-  //TODO use useFields instead to get cardType and list fields
+  const fields: FieldFilterOption[] = [
+    {
+      title: 'Stage',
+      field: 'listStage.id',
+      operator: 'in',
+      value: [],
+      type: FieldTypes.DROPDOWN,
+      icon: 'mdi-circle-slice-8',
+    },
+  ];
 
-  if (listFields.value) {
-    listFields.value.forEach((field) => {
+  if (filterableFields.value) {
+    filterableFields.value.forEach((field) => {
       fields.push({
         field: `card.data.${field.slug}`,
         title: field.name,
@@ -242,10 +218,6 @@ watch(
     closeSaveSnackbar();
   }
 );
-
-watch(listId, () => {
-  refetchListFields();
-});
 </script>
 
 <template>
@@ -282,7 +254,7 @@ watch(listId, () => {
           <quick-filters
             v-model="filtersCopy.where.quick"
             :list-stages="listStages ?? []"
-            :list-fields="listFields ?? []"
+            :fields="filterableFields ?? []"
             :users="users ?? []"
           />
         </v-card-item>

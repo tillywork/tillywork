@@ -71,6 +71,16 @@ export const useFields = ({
     pinnedFields.value.filter((field) => !field.isAssignee)
   );
 
+  const filterableFields = computed(() => {
+    const filterableFields = [...fields.value];
+
+    if (titleField.value) {
+      filterableFields.unshift(titleField.value);
+    }
+
+    return filterableFields;
+  });
+
   const groupableFields = computed(() =>
     fields.value?.filter((field) =>
       [
@@ -124,6 +134,7 @@ export const useFields = ({
     pinnedFieldsWithoutAssignee,
     groupableFields,
     tableFields,
+    filterableFields,
     refetch,
     sortFieldsByViewColumns,
   };
