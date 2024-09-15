@@ -37,6 +37,7 @@ export class CardTypeSubscriber implements EntitySubscriberInterface<CardType> {
                 type: FieldTypes.RICH,
                 slug: "description",
                 icon: "mdi-text-box",
+                isDescription: true,
             },
             {
                 name: "Assignee",

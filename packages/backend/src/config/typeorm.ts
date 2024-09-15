@@ -55,6 +55,7 @@ import { AddDeletedAtToListTable1724584476422 } from "../migrations/172458447642
 import { AddEmailOpenTrackingToEmailTable1724673051203 } from "../migrations/1724673051203-add-email-open-tracking-to-email-table";
 import { AddColumnsToOptionsColumnInViewTable1724762987440 } from "../migrations/1724762987440-add-columns-to-options-column-in-view-table";
 import { MigrateCardUsersToDataColumn1725792730053 } from "../migrations/1725792730053-migrate-card-users-to-data-column";
+import { FixDescriptionAndDueAtFields1726391466764 } from "src/migrations/1726391466764-fix-description-and-due-at-fields";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -111,6 +112,7 @@ const migrations = [
     AddEmailOpenTrackingToEmailTable1724673051203,
     AddColumnsToOptionsColumnInViewTable1724762987440,
     MigrateCardUsersToDataColumn1725792730053,
+    FixDescriptionAndDueAtFields1726391466764,
 ];
 
 const config: TypeOrmModuleOptions = {
