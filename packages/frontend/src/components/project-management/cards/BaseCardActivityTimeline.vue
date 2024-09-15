@@ -77,7 +77,7 @@ function deleteComment(comment: CardActivity) {
 
 function createComment() {
   if (!isCommentEmpty.value) {
-    emit('comment', comment);
+    emit('comment', comment.value);
     comment.value = undefined;
   }
 }
