@@ -1,27 +1,53 @@
 <script setup lang="ts">
 import { useViewsService } from '@/services/useViewsService';
 import BaseViewChip from './BaseViewChip.vue';
-import type { View } from './types';
 import { useStateStore } from '@/stores/state';
 import { useFields } from '@/composables/useFields';
-import { ViewTypes, type Field } from '@tillywork/shared';
+import { type Field, type View, ViewTypes } from '@tillywork/shared';
 import { cloneDeep } from 'lodash';
+import draggable from 'vuedraggable';
+import { useSnackbarStore } from '@/stores/snackbar';
 
 const view = defineModel<View>({
   required: true,
 });
 
 const { currentList } = storeToRefs(useStateStore());
+const { showSnackbar } = useSnackbarStore();
 
 const { useUpdateViewMutation } = useViewsService();
 const { mutateAsync: updateView } = useUpdateViewMutation();
 
 const cardTypeId = computed(() => currentList.value?.defaultCardType.id ?? 0);
 
-const { titleField, tableFields } = useFields({
+const { titleField, tableFields, sortFieldsByViewColumns } = useFields({
   cardTypeId,
   listId: currentList.value!.id,
 });
+
+const enabledTableColumns = computed({
+  get() {
+    return sortFieldsByViewColumns(
+      tableFields.value?.filter((field) => isColumnEnabledInView(field)),
+      view.value.options.columns ?? []
+    );
+  },
+  set(v) {
+    const newColumnOrder = v.map((field) => field.id.toString());
+    view.value.options.columns = newColumnOrder;
+
+    updateView(view.value).catch(() => {
+      showSnackbar({
+        message: 'Something went wrong, please try again.',
+        color: 'error',
+      });
+    });
+  },
+});
+
+const disabledTableColumns = computed(() =>
+  tableFields.value?.filter((field) => !isColumnEnabledInView(field))
+);
 
 function handleToggleCompleted() {
   updateView({
@@ -70,7 +96,6 @@ function handleToggleColumn(field: Field) {
     },
   });
 }
-//TODO drag columns to reorder
 </script>
 
 <template>
@@ -122,11 +147,15 @@ function handleToggleColumn(field: Field) {
             </template>
             <v-card max-height="400">
               <v-list :lines="false">
+                <v-list-subheader> Table Fields </v-list-subheader>
                 <v-list-item disabled v-if="titleField">
                   <template #prepend>
-                    <v-icon :icon="titleField.icon" />
+                    <v-icon icon="mdi-drag-horizontal-variant" disabled />
                   </template>
-                  <v-list-item-title>{{ titleField.name }}</v-list-item-title>
+                  <v-list-item-title>
+                    <v-icon :icon="titleField.icon" class="me-2" />
+                    {{ titleField.name }}</v-list-item-title
+                  >
                   <template #append>
                     <v-switch
                       :model-value="true"
@@ -138,12 +167,52 @@ function handleToggleColumn(field: Field) {
                     />
                   </template>
                 </v-list-item>
-                <template v-for="field in tableFields" :key="field.id">
+                <draggable
+                  v-model="enabledTableColumns"
+                  item-key="id"
+                  animation="100"
+                  ghost-class="v-list-item--active"
+                  handle=".handle"
+                >
+                  <template #item="{ element: field }">
+                    <v-list-item @click="handleToggleColumn(field)">
+                      <template #prepend>
+                        <v-icon
+                          class="handle cursor-grab"
+                          icon="mdi-drag-horizontal-variant"
+                        />
+                      </template>
+                      <v-list-item-title>
+                        <v-icon :icon="field.icon" class="me-2" />
+                        {{ field.name }}</v-list-item-title
+                      >
+                      <template #append>
+                        <v-switch
+                          :model-value="isColumnEnabledInView(field)"
+                          inset
+                          hide-details
+                          density="compact"
+                          class="ms-2"
+                          @update:modelValue="handleToggleColumn(field)"
+                        />
+                      </template>
+                    </v-list-item>
+                  </template>
+                </draggable>
+                <v-list-subheader
+                  class="mt-2"
+                  v-if="disabledTableColumns.length"
+                  >All Fields</v-list-subheader
+                >
+                <template v-for="field in disabledTableColumns" :key="field.id">
                   <v-list-item @click="handleToggleColumn(field)">
                     <template #prepend>
-                      <v-icon :icon="field.icon" />
+                      <v-icon icon="mdi-drag-horizontal-variant" disabled />
                     </template>
-                    <v-list-item-title>{{ field.name }}</v-list-item-title>
+                    <v-list-item-title>
+                      <v-icon :icon="field.icon" class="me-2" />
+                      {{ field.name }}
+                    </v-list-item-title>
                     <template #append>
                       <v-switch
                         :model-value="isColumnEnabledInView(field)"

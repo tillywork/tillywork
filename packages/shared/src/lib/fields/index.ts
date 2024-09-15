@@ -108,5 +108,6 @@ export const DEFAULT_CARD_FIELDS: Partial<Field>[] = [
 
 export type FieldItem = {
   item: string;
-  color: string;
+  color?: string;
+  icon?: string;
 };

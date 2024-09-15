@@ -8,7 +8,7 @@ import {
 } from '@tanstack/vue-table';
 import { type List, type ListGroup, type ListStage } from '../../lists/types';
 import { useCardsService } from '@/services/useCardsService';
-import type { TableSortOption, View } from '../types';
+import type { TableSortOption } from '../types';
 import type { ProjectUser } from '@/components/common/projects/types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import type { Card } from '../../cards/types';
@@ -25,6 +25,7 @@ import {
   ListGroupOptions,
   type QueryFilter,
   type ViewFilter,
+  type View,
 } from '@tillywork/shared';
 import BaseField from '@/components/common/fields/BaseField.vue';
 

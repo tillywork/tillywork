@@ -6,7 +6,7 @@ import { CreateSpaceDto } from "./dto/create.space.dto";
 import { UpdateSpaceDto } from "./dto/update.space.dto";
 import { SpaceSideEffectsService } from "./space.side.effects.service";
 import { CardType } from "../card-types/card.type.entity";
-import { IsNotEmpty, IsNumber } from "class-validator";
+import { IsNotEmpty, IsNumberString } from "class-validator";
 
 export type SpaceFindAllResult = {
     total: number;
@@ -15,7 +15,7 @@ export type SpaceFindAllResult = {
 
 export class FindAllParams {
     @IsNotEmpty()
-    @IsNumber()
+    @IsNumberString()
     workspaceId: number;
 }
 

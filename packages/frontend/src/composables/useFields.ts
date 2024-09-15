@@ -77,13 +77,31 @@ export const useFields = ({
     fields.value.filter((field) =>
       [
         FieldTypes.DROPDOWN,
-        FieldTypes.CARD,
         FieldTypes.LABEL,
         FieldTypes.DATE,
         FieldTypes.USER,
       ].includes(field.type)
     )
   );
+
+  function sortFieldsByViewColumns(fields: Field[], columns: string[]) {
+    return fields.sort((a, b) => {
+      const indexA = columns.indexOf(a.id.toString());
+      const indexB = columns.indexOf(b.id.toString());
+
+      // If both IDs are found in columns
+      if (indexA !== -1 && indexB !== -1) {
+        return indexA - indexB;
+      }
+
+      // If only one ID is found, prioritize the found one
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+
+      // If neither ID is found, maintain their original order
+      return 0;
+    });
+  }
 
   return {
     fields,
@@ -96,5 +114,6 @@ export const useFields = ({
     groupableFields,
     tableFields,
     refetch,
+    sortFieldsByViewColumns,
   };
 };

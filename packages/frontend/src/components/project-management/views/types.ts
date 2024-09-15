@@ -1,17 +1,4 @@
-import type { ListGroupOptions, ViewOptions } from '@tillywork/shared';
-import type { Filter, Field } from '@tillywork/shared';
-import type { List } from '../lists/types';
-
-export interface View {
-  id: number;
-  name: string;
-  type: ViewTypes;
-  listId: number;
-  list: List;
-  options: ViewOptions;
-  updatedAt: string;
-  filters?: Filter;
-}
+import type { Field, ListGroupOptions } from '@tillywork/shared';
 
 export enum ViewTypes {
   TABLE = 'table',

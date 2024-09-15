@@ -8,7 +8,6 @@ import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
 import { type TableSortOption } from './types';
 import { DIALOGS } from '@/components/common/dialogs/types';
-import { ViewTypes, type View } from '@tillywork/shared';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useCardsService } from '@/services/useCardsService';
 import type { User } from '@/components/common/users/types';
@@ -25,6 +24,8 @@ import {
   type Filter,
   FilterEntityTypes,
   type ViewFilter,
+  type View,
+  ViewTypes,
 } from '@tillywork/shared';
 
 const props = defineProps<{

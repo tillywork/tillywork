@@ -6,7 +6,6 @@ import {
   type Row,
   type Column,
 } from '@tanstack/vue-table';
-import { type View } from '../types';
 import { useListGroupsService } from '@/services/useListGroupsService';
 import type { Card } from '../../cards/types';
 import { type List, type ListGroup } from '../../lists/types';
@@ -18,7 +17,7 @@ import { useSnackbarStore } from '@/stores/snackbar';
 import { useAuthStore } from '@/stores/auth';
 import { useFields } from '@/composables/useFields';
 import type { TableColumnDef } from './types';
-import { FieldTypes } from '@tillywork/shared';
+import { type View } from '@tillywork/shared';
 
 const isLoading = defineModel<boolean>('loading');
 
@@ -39,13 +38,13 @@ const emit = defineEmits([
 
 const expandedState = ref<Record<string, boolean>>();
 
-const { titleField, fields } = useFields({
+const { titleField, fields, sortFieldsByViewColumns } = useFields({
   cardTypeId: props.list.defaultCardType.id,
   listId: props.list.id,
 });
 
 const viewColumnIds = computed(() =>
-  props.view.options.columns?.map((columnId) => +columnId)
+  props.view.options.columns?.map((columnId) => columnId)
 );
 
 const columns = computed<TableColumnDef[]>(() => {
@@ -67,34 +66,22 @@ const columns = computed<TableColumnDef[]>(() => {
     field: titleField.value,
   };
 
-  //   const usersColumn: TableColumnDef = {
-  //     id: 'users',
-  //     accessorKey: 'users',
-  //     header: 'Assignee',
-  //     size: 100,
-  //     minSize: 100,
-  //     cellType: FieldTypes.USER,
-  //   };
+  const viewColumns: TableColumnDef[] = sortFieldsByViewColumns(
+    fields.value.filter((field) =>
+      viewColumnIds.value?.includes(field.id.toString())
+    ),
+    viewColumnIds.value ?? []
+  ).map((field) => ({
+    id: `data.${field.slug}`,
+    accessorKey: `data.${field.slug}`,
+    header: field.name,
+    size: 150,
+    minSize: 100,
+    cellType: field.type,
+    field,
+  }));
 
-  const viewColumns: TableColumnDef[] = fields.value
-    .filter((field) => viewColumnIds.value?.includes(field.id))
-    .map((field) => ({
-      id: `data.${field.slug}`,
-      accessorKey: `data.${field.slug}`,
-      header: field.name,
-      size: 150,
-      minSize: 100,
-      cellType: field.type,
-      field,
-    }));
-
-  return [
-    actionsColumn,
-    titleColumn,
-    //TODO move assignees to card type fields
-    // usersColumn,
-    ...viewColumns,
-  ];
+  return [actionsColumn, titleColumn, ...viewColumns];
 });
 
 const { showSnackbar } = useSnackbarStore();
