@@ -2,23 +2,21 @@
 import type { User } from '@/components/common/users/types';
 import type { ListStage } from '../../lists/types';
 import {
-  FieldTypes,
-  type Field,
-  type FieldItem,
-} from '../../../common/fields/types';
-import type {
-  FieldFilter,
-  FilterGroup,
-  FilterOperator,
-} from '../../filters/types';
-import {
   type QuickFilter,
   type QuickFilterGroup,
   quickFilterGroupsCustomFields,
-  quickFilterItemsDate,
+  quickFilterDateOptions,
 } from './quickFilter';
 import { filterUtils } from '@/utils/filter';
 import objectUtils from '@/utils/object';
+import {
+  type FilterGroup,
+  type Field,
+  type FieldFilter,
+  type FilterOperator,
+  FieldTypes,
+  type FieldFilterOption,
+} from '@tillywork/shared';
 
 const quickFilters = defineModel<FilterGroup>({
   required: true,
@@ -30,7 +28,7 @@ const quickFilters = defineModel<FilterGroup>({
 const props = defineProps<{
   listStages: ListStage[];
   users: User[];
-  listFields: Field[];
+  fields: Field[];
 }>();
 
 const activeFilters = ref<Record<string, FieldFilter[]>>({});
@@ -50,66 +48,84 @@ const quickFilterOptions = computed<QuickFilter>(() => {
       };
     }),
   };
-  //TODO use useFields instead
-  const dueDateGroup: QuickFilterGroup = {
-    name: 'Due Date',
-    field: 'card.data.due_at',
-    icon: 'mdi-calendar-range',
-    options: quickFilterItemsDate,
-  };
 
-  const assigneeGroup: QuickFilterGroup = {
-    name: 'Assignee',
-    field: 'users.id',
-    icon: 'mdi-account',
-    options: [
-      {
-        field: 'users.id',
-        operator: 'isNull',
-        value: [],
-        title: 'No Assignee',
-        type: FieldTypes.USER,
-      },
-      ...props.users.map((assignee) => {
-        return {
-          field: 'users.id',
-          operator: 'in' as FilterOperator,
-          value: [assignee.id],
-          title: `${assignee.firstName} ${assignee.lastName}`,
-          type: FieldTypes.USER,
-        };
-      }),
-    ],
-  };
+  const fieldGroups: QuickFilter = [];
 
-  const customFieldGroups: QuickFilter = [];
-
-  props.listFields
+  props.fields
     ?.map((x) => x)
     .sort((a, b) => a.type.localeCompare(b.type))
     .forEach((field) => {
-      const { type, name, items, icon, slug } = field;
-      if (quickFilterGroupsCustomFields.includes(type)) {
-        customFieldGroups.push({
-          name,
-          field: `card.data.${slug}`,
-          icon,
-          options:
-            items?.map((item: FieldItem) => {
-              return {
-                field: `card.data.${slug}`,
-                operator: filterUtils.getOperatorFromFieldType(field),
-                value: [item.item],
-                title: item.item,
-                type: field.type,
-              };
-            }) ?? [],
-        });
+      if (quickFilterGroupsCustomFields.includes(field.type)) {
+        fieldGroups.push(buildFieldQuickFilterGroup(field));
       }
     });
 
-  return [dueDateGroup, stageGroup, assigneeGroup, ...customFieldGroups];
+  return [stageGroup, ...fieldGroups];
 });
+
+function buildFieldQuickFilterGroup(field: Field): QuickFilterGroup {
+  const options = buildFieldQuickFilterOptions(field);
+
+  return {
+    name: field.name,
+    field: `card.data.${field.slug}`,
+    icon: field.icon,
+    options,
+  };
+}
+
+function buildFieldQuickFilterOptions(field: Field) {
+  let options: FieldFilterOption[] = [];
+
+  switch (field.type) {
+    case FieldTypes.LABEL:
+    case FieldTypes.DROPDOWN:
+      options =
+        field.items?.map((item) => {
+          return {
+            field: `card.data.${field.slug}`,
+            operator: filterUtils.getOperatorFromFieldType(field),
+            value: [item.item],
+            title: item.item,
+            type: field.type,
+          };
+        }) ?? [];
+      break;
+
+    case FieldTypes.DATE:
+      options = quickFilterDateOptions.map((option) => {
+        return {
+          ...option,
+          field: `card.data.${field.slug}`,
+        };
+      });
+      break;
+
+    case FieldTypes.USER:
+      options = props.users.map((user) => {
+        return {
+          field: `card.data.${field.slug}`,
+          operator: filterUtils.getOperatorFromFieldType(field),
+          title: `${user.firstName} ${user.lastName}`,
+          type: FieldTypes.USER,
+          value: [user.id],
+        };
+      });
+      break;
+  }
+
+  options.push({
+    field: `card.data.${field.slug}`,
+    operator: 'isNull',
+    value: [],
+    title: `No ${field.name}`,
+    type: field.type,
+  });
+
+  console.log(options);
+
+  return options;
+}
 
 function handleQuickFilterOptionClicked() {
   quickFilters.value = mapActiveQuickFiltersToUsableFormat();

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ViewTypes, type View } from '../views/types';
+import { ViewTypes, type View } from '@tillywork/shared';
 import type { List } from './types';
 import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
 import { useWorkspaceStore } from '@/stores/workspace';

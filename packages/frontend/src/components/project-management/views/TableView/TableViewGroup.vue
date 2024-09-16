@@ -6,33 +6,36 @@ import {
   type Row,
   type Table,
 } from '@tanstack/vue-table';
-import { type List, type ListGroup, type ListStage } from '../../lists/types';
 import { useCardsService } from '@/services/useCardsService';
-import type { TableSortOption, View } from '../types';
-import type { ProjectUser } from '@/components/common/projects/types';
-import { DIALOGS } from '@/components/common/dialogs/types';
-import type { Card } from '../../cards/types';
-import { FlexRender } from '@tanstack/vue-table';
 import draggable from 'vuedraggable';
-import type { User } from '@/components/common/users/types';
-import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
-import type { QueryFilter, ViewFilter } from '../../filters/types';
-import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
-import { FieldTypes } from '../../../common/fields/types';
 import { useCard } from '@/composables/useCard';
 import { useFields } from '@/composables/useFields';
-import { ListGroupOptions } from '@tillywork/shared';
+import {
+  ListGroupOptions,
+  type QueryFilter,
+  type ViewFilter,
+  type View,
+  FieldTypes,
+  type ListGroup,
+  type ListStage,
+  type ProjectUser,
+  type List,
+  type Card,
+  type SortState,
+} from '@tillywork/shared';
+import BaseField from '@/components/common/fields/BaseField.vue';
+import { useListGroup } from '@/composables/useListGroup';
 
 const emit = defineEmits([
   'toggle:group',
-  'row:delete',
-  'row:update:stage',
-  'row:update:assignees',
-  'row:update:order',
+  'card:delete',
+  'card:update:stage',
+  'card:update:order',
 ]);
+
 const props = defineProps<{
   listGroup: Row<ListGroup>;
   listStages: ListStage[];
@@ -46,12 +49,13 @@ const props = defineProps<{
   view: View;
   list: List;
 }>();
+
 const rowMenuOpen = ref<Row<Card> | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
 
-const dialog = useDialogStore();
+const cards = ref<Card[]>([]);
+
 const cardsService = useCardsService();
-const { showSnackbar } = useSnackbarStore();
 
 const { updateFieldValue } = useCard();
 
@@ -60,7 +64,7 @@ const { titleField } = useFields({
 });
 
 const groupCopy = ref(cloneDeep(props.listGroup));
-const sortBy = computed<TableSortOption[]>(() =>
+const sortBy = computed<SortState>(() =>
   props.view.options.sortBy ? [cloneDeep(props.view.options.sortBy)] : []
 );
 const tableSortState = computed(() =>
@@ -75,14 +79,6 @@ const columns = computed(
 const groupHeight = computed(() => (cards.value.length ?? 0) * 33 + 33);
 const maxHeight = computed(() =>
   props.listGroup.original.name === 'All' ? 'calc(100vh - 230px)' : 350
-);
-
-const isDraggingDisabled = computed(() => {
-  return sortBy.value && sortBy.value.length > 0;
-});
-
-const users = computed(() =>
-  props.projectUsers.map((projectUser) => projectUser.user)
 );
 
 const filters = computed<QueryFilter>(() => {
@@ -111,7 +107,6 @@ const filters = computed<QueryFilter>(() => {
 const hideCompleted = computed<boolean>(() => props.view.options.hideCompleted);
 const hideChildren = computed<boolean>(() => props.view.options.hideChildren);
 
-const cards = ref<Card[]>([]);
 const total = ref(0);
 
 const { fetchNextPage, isFetching, hasNextPage, refetch, data } =
@@ -128,7 +123,9 @@ const groupTable = useVueTable({
   get data() {
     return cards.value;
   },
-  columns: columns.value,
+  get columns() {
+    return columns.value;
+  },
   getCoreRowModel: getCoreRowModel(),
   getRowId: (row) => `${row.id}`,
   manualPagination: true,
@@ -141,7 +138,17 @@ const groupTable = useVueTable({
 });
 
 const draggableCards = ref(groupTable.getCoreRowModel().rows);
-const isDragging = ref(false);
+
+const {
+  openCreateCardDialog,
+  isDragging,
+  setDragItem,
+  onDragAdd,
+  onDragEnd,
+  onDragMove,
+  onDragStart,
+  onDragUpdate,
+} = useListGroup({ props, emit, cards: draggableCards });
 
 async function handleGroupCardsLoad({
   done,
@@ -165,112 +172,6 @@ function toggleGroupExpansion(listGroup: Row<ListGroup>) {
   emit('toggle:group', listGroup);
 }
 
-function openCreateCardDialog(listGroup: ListGroup) {
-  dialog.openDialog({
-    dialog: DIALOGS.CREATE_CARD,
-    data: {
-      listId: listGroup.list.id,
-      listStage: getCurrentStage(listGroup),
-      users: getCurrentAssignee(listGroup),
-      listStages: props.listStages,
-    },
-  });
-}
-
-function getCurrentStage(group: ListGroup) {
-  let stage: ListStage | undefined;
-
-  if (group.type === ListGroupOptions.LIST_STAGE) {
-    stage = props.listStages.find((stage) => {
-      return stage.id == group.entityId;
-    });
-  }
-
-  return stage ? { ...stage } : undefined;
-}
-
-function getCurrentAssignee(group: ListGroup) {
-  let user: User | undefined;
-
-  if (group.type === ListGroupOptions.ASSIGNEE) {
-    user = props.projectUsers.find((user: ProjectUser) => {
-      return user.user.id == group.entityId;
-    })?.user;
-  }
-
-  return user ? [user] : undefined;
-}
-
-function onDragMove() {
-  if (isDraggingDisabled.value) {
-    isDragging.value = false;
-    return false;
-  }
-}
-
-function onDragStart() {
-  isDragging.value = true;
-
-  if (isDraggingDisabled.value) {
-    showSnackbar({
-      message: 'Dragging cards is only enabled when sorting is disabled.',
-      color: 'error',
-      timeout: 5000,
-    });
-  }
-}
-
-function onDragEnd() {
-  isDragging.value = false;
-}
-
-function onDragUpdate(event: any) {
-  const { newIndex } = event;
-  isDragging.value = false;
-
-  const previousCard = draggableCards.value[newIndex - 1]?.original;
-  const currentCard = draggableCards.value[newIndex]?.original;
-  const nextCard = draggableCards.value[newIndex + 1]?.original;
-
-  handleUpdateCardOrder({
-    currentCard,
-    previousCard,
-    nextCard,
-  });
-}
-
-function onDragAdd(event: any) {
-  const { newIndex } = event;
-  isDragging.value = false;
-
-  const previousCard = draggableCards.value[newIndex - 1]?.original;
-  const currentCard = draggableCards.value[newIndex]?.original;
-  const nextCard = draggableCards.value[newIndex + 1]?.original;
-
-  const newOrder = cardsService.calculateCardOrder({ previousCard, nextCard });
-
-  handleUpdateCardStage({
-    cardId: currentCard.id,
-    cardListId: currentCard.cardLists[0].id,
-    listStageId: props.listGroup.original.entityId!,
-    order: newOrder,
-  });
-}
-
-function handleUpdateCardOrder(data: {
-  currentCard: Card;
-  previousCard?: Card;
-  nextCard?: Card;
-}) {
-  emit('row:update:order', data);
-}
-
-function setDragItem(data: DataTransfer) {
-  const img = new Image();
-  img.src = 'https://en.wikipedia.org/wiki/File:1x1.png#/media/File:1x1.png';
-  data.setDragImage(img, 0, 0);
-}
-
 function handleCardMenuClick({
   row,
   isOpen,
@@ -286,7 +187,7 @@ function handleCardMenuClick({
 }
 
 function handleDeleteCard(card: Card) {
-  emit('row:delete', card);
+  emit('card:delete', card);
 }
 
 function handleUpdateCardStage(data: {
@@ -295,14 +196,7 @@ function handleUpdateCardStage(data: {
   listStageId: number;
   order?: number;
 }) {
-  emit('row:update:stage', data);
-}
-
-function handleUserSelection({ users, card }: { users: User[]; card: Card }) {
-  emit('row:update:assignees', {
-    users,
-    card,
-  });
+  emit('card:update:stage', data);
 }
 
 function getColumnSize(columnId: string) {
@@ -357,7 +251,12 @@ watchEffect(() => {
       @click="toggleGroupExpansion(listGroup)"
     />
     <div>
-      <template v-if="listGroup.original.type === ListGroupOptions.ASSIGNEE">
+      <template
+        v-if="
+          listGroup.original.type === ListGroupOptions.FIELD &&
+          listGroup.original.field?.type === FieldTypes.USER
+        "
+      >
         <base-avatar
           :photo="listGroup.original.icon"
           :text="listGroup.original.name"
@@ -526,69 +425,30 @@ watchEffect(() => {
                         />
                       </v-card>
                     </template>
-                    <template
-                      v-else-if="
-                        cell.column.columnDef.cellType === FieldTypes.DATE
-                      "
-                    >
-                      <v-card
-                        :width="getColumnSize(cell.column.columnDef.id)"
-                        class="table-cell d-flex align-center fill-height"
-                        rounded="0"
-                        color="transparent"
-                        link
-                      >
-                        <base-date-picker
-                          :model-value="
-                            row.original.data[cell.column.columnDef.field.slug]
-                          "
-                          @update:model-value="(v: string) => updateFieldValue({
-                            card: row.original,
-                            field: cell.column.columnDef.field,
-                            v
-                          })"
-                          class="text-caption d-flex flex-fill h-100 justify-start rounded-0"
-                          :label="`Set ${cell.column.columnDef.header.toLowerCase()}`"
-                          rounded="0"
-                          @click.prevent
-                        />
-                      </v-card>
-                    </template>
-                    <template
-                      v-else-if="
-                        cell.column.columnDef.cellType === FieldTypes.USER
-                      "
-                    >
-                      <v-card
-                        :width="getColumnSize(cell.column.columnDef.id)"
-                        class="table-cell d-flex align-center fill-height px-1"
-                        rounded="0"
-                        color="transparent"
-                        link
-                      >
-                        <base-user-selector
-                          :model-value="row.original.users"
-                          :users
-                          fill
-                          @update:model-value="
-                            (users: User[]) => handleUserSelection({
-                                users, card: row.original
-                            })
-                          "
-                          @click.stop
-                        />
-                      </v-card>
-                    </template>
                     <template v-else>
                       <v-card
                         :width="getColumnSize(cell.column.columnDef.id)"
                         class="table-cell d-flex align-center fill-height"
                         rounded="0"
                         color="transparent"
+                        link
                       >
-                        <FlexRender
-                          :render="cell.column.columnDef.cell"
-                          :props="cell.getContext()"
+                        <base-field
+                          class="flex-fill h-100"
+                          :field="cell.column.columnDef.field"
+                          :model-value="
+                            row.original.data[cell.column.columnDef.field.slug]
+                          "
+                          rounded="0"
+                          flex-fill
+                          @update:model-value="
+                            (v: any) => updateFieldValue({ 
+                                card: row.original,
+                                field: cell.column.columnDef.field,
+                                v
+                            })
+                          "
+                          @click.prevent
                         />
                       </v-card>
                     </template>

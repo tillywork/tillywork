@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import type {
-  CardType,
-  CreateCardDto,
-} from '@/components/project-management/cards/types';
+import type { CreateCardDto } from '@/components/project-management/cards/types';
 import { type List } from '@/components/project-management/lists/types';
 import { useCardsService } from '@/services/useCardsService';
-import { useProjectUsersService } from '@/services/useProjectUsersService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import type { VForm } from 'vuetify/lib/components/index.mjs';
 import BaseEditorInput from '../base/BaseEditor/BaseEditorInput.vue';
@@ -19,9 +15,10 @@ import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue
 import { leaderKey } from '@/utils/keyboard';
 import { useFields } from '@/composables/useFields';
 import BaseField from '../fields/BaseField.vue';
+import type { CardType } from '@tillywork/shared';
 
 const dialog = useDialogStore();
-const { workspace, project } = storeToRefs(useAuthStore());
+const { workspace } = storeToRefs(useAuthStore());
 const { showSnackbar } = useSnackbarStore();
 const { currentList } = storeToRefs(useStateStore());
 
@@ -32,12 +29,6 @@ const isCreatingMore = ref(false);
 const descriptionEditor = ref();
 
 const cardsService = useCardsService();
-const projectUsersService = useProjectUsersService();
-
-const { data: users } = projectUsersService.useProjectUsersQuery({
-  projectId: project.value!.id,
-  select: (data) => data.map((pu) => pu.user),
-});
 
 const currentDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CREATE_CARD)
@@ -70,11 +61,11 @@ const { pinnedFields } = useFields({
 const createCardMutation = cardsService.useCreateCardMutation();
 const createCardDto = ref<CreateCardDto>({
   data: {
+    ...(currentDialog.value.data.data ?? {}),
     title: '',
   },
   listId: currentDialog.value?.data?.listId ?? list.value?.id,
   listStage: currentDialog.value?.data?.listStage ?? list.value?.listStages[0],
-  users: currentDialog.value?.data?.users,
   type: cardType.value?.id,
   parent: currentDialog.value?.data?.parent,
   workspaceId: workspace.value!.id,
@@ -93,6 +84,7 @@ function closeDialog() {
 }
 
 async function createCard() {
+  console.log(createCardDto.value);
   if (
     createCardDto.value.data.title &&
     createCardDto.value.data.title.trim() !== '' &&
@@ -102,7 +94,8 @@ async function createCard() {
     createCardDto.value.listStageId = createCardDto.value.listStage.id;
     createCardMutation
       .mutateAsync(createCardDto.value)
-      .then(() => {
+      .then((card) => {
+        console.log('card', card);
         handlePostCreate();
       })
       .catch(() => {
@@ -184,21 +177,17 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
           min-height="80px"
         />
 
-        <div class="d-flex ga-2 align-center">
+        <div class="d-flex ga-1 align-center">
           <list-stage-selector
             v-model="createCardDto.listStage"
             :listStages="list?.listStages ?? []"
-          />
-          <base-user-selector
-            v-model="createCardDto.users"
-            :users="users ?? []"
-            activator-hover-text="Assignee"
           />
 
           <template v-for="field in pinnedFields" :key="field.id">
             <base-field
               :field="field"
               v-model="createCardDto.data[field.slug]"
+              no-label
             />
           </template>
         </div>

@@ -40,6 +40,14 @@ export class CardTypeSubscriber implements EntitySubscriberInterface<CardType> {
                 isDescription: true,
             },
             {
+                name: "Assignee",
+                type: FieldTypes.USER,
+                slug: "assignee",
+                icon: "mdi-account",
+                isPinned: true,
+                isAssignee: true,
+            },
+            {
                 name: "Due At",
                 type: FieldTypes.DATE,
                 slug: "due_at",

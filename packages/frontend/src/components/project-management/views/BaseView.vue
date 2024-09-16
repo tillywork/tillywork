@@ -8,27 +8,24 @@ import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
 import { type TableSortOption } from './types';
 import { DIALOGS } from '@/components/common/dialogs/types';
-import { ViewTypes, type View } from './types';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useCardsService } from '@/services/useCardsService';
-import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import BoardView from './BoardView/BoardView.vue';
 import ListView from './ListView/ListView.vue';
 import BaseViewChipFilter from './BaseViewChipFilter/BaseViewChipFilter.vue';
 import { useFitlersService } from '@/services/useFiltersService';
-import {
-  FilterEntityTypes,
-  type Filter,
-  type QueryFilter,
-  type ViewFilter,
-} from '../filters/types';
 import { cloneDeep } from 'lodash';
 import { useDialogStore } from '@/stores/dialog';
 import BaseViewChipDisplay from './BaseViewChipDisplay.vue';
-import { useFields } from '@/composables/useFields';
-import { FieldTypes, type Field } from '../../common/fields/types';
-import type { TableColumnDef } from './TableView/types';
+import {
+  type QueryFilter,
+  type Filter,
+  FilterEntityTypes,
+  type ViewFilter,
+  type View,
+  ViewTypes,
+} from '@tillywork/shared';
 
 const props = defineProps<{
   view: View;
@@ -82,54 +79,6 @@ const sortBy = computed({
 
 const isViewLoading = ref(false);
 
-const { titleField } = useFields({
-  cardTypeId: props.list.defaultCardType.id,
-});
-
-const columns = computed<TableColumnDef[]>(() => {
-  const actionsColumn: TableColumnDef = {
-    id: 'actions',
-    enableResizing: false,
-    enableSorting: false,
-    size: 50,
-    cellType: 'actions',
-  };
-
-  const usersColumn: TableColumnDef = {
-    id: 'users',
-    accessorKey: 'users',
-    header: 'Assignee',
-    size: 100,
-    minSize: 100,
-    cellType: FieldTypes.USER,
-  };
-
-  const titleColumn: TableColumnDef = {
-    id: `data.${titleField.value?.slug}`,
-    accessorKey: `data.${titleField.value?.slug}`,
-    header: titleField.value?.name,
-    size: 300,
-    minSize: 150,
-    cellType: 'title',
-    field: titleField.value,
-  };
-
-  //TODO get pinned fields by default, and allow user to customize columns in table from fields in table
-  const dueAtColumn: TableColumnDef = {
-    id: 'data.due_at',
-    accessorKey: 'data.due_at',
-    header: 'Due Date',
-    size: 150,
-    minSize: 150,
-    cellType: FieldTypes.DATE,
-    field: {
-      slug: 'due_at',
-    } as Field,
-  };
-
-  return [actionsColumn, titleColumn, dueAtColumn, usersColumn];
-});
-
 const updateViewMutation = viewsService.useUpdateViewMutation();
 
 const { data: listGroups, refetch: refetchListGroups } =
@@ -139,7 +88,6 @@ const { data: listGroups, refetch: refetchListGroups } =
     groupBy,
   });
 
-const { mutateAsync: updateCard } = cardsService.useUpdateCardMutation();
 const { mutateAsync: deleteCard, isPending: isDeletingCard } =
   cardsService.useDeleteCardMutation();
 const { mutateAsync: updateCardList } =
@@ -169,21 +117,6 @@ function openCreateCardDialog() {
       list: props.list,
       type: props.list.defaultCardType,
     },
-  });
-}
-
-function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
-  const updatedCard: Card = {
-    ...card,
-    users,
-  };
-
-  updateCard(updatedCard).catch(() => {
-    showSnackbar({
-      message: 'Something went wrong, please try again.',
-      color: 'error',
-      timeout: 5000,
-    });
   });
 }
 
@@ -343,7 +276,7 @@ watch(
 
 <template>
   <div class="view-container" v-if="viewCopy">
-    <div class="view-actions d-flex ga-2 pa-4 overflow-auto">
+    <div class="view-actions d-flex ga-2 py-4 px-6 overflow-auto">
       <v-btn
         class="text-none text-caption"
         variant="tonal"
@@ -382,13 +315,11 @@ watch(
       <template v-if="viewCopy.type === ViewTypes.TABLE">
         <table-view
           v-model:loading="isViewLoading"
-          :columns
           :list
           :view="viewCopy"
           :groups="listGroups ?? []"
           @row:delete="handleDeleteCard"
           @row:update:stage="handleUpdateCardStage"
-          @row:update:assignees="handleUpdateAssignees"
           @row:update:order="handleUpdateCardOrder"
         >
         </table-view>
@@ -399,7 +330,6 @@ watch(
           :list
           :list-groups="listGroups ?? []"
           @card:delete="handleDeleteCard"
-          @card:update:assignees="handleUpdateAssignees"
           @card:update:stage="handleUpdateCardStage"
           @card:update:order="handleUpdateCardOrder"
         />
@@ -407,14 +337,12 @@ watch(
       <template v-else-if="viewCopy.type === ViewTypes.LIST">
         <list-view
           v-model:loading="isViewLoading"
-          :columns
           :list
           :view="viewCopy"
           :groups="listGroups ?? []"
           no-headers
           @row:delete="handleDeleteCard"
           @row:update:stage="handleUpdateCardStage"
-          @row:update:assignees="handleUpdateAssignees"
           @row:update:order="handleUpdateCardOrder"
         >
         </list-view>

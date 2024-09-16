@@ -42,6 +42,10 @@ export class Field {
     @Column({ type: "boolean", default: false })
     isPhoto: boolean;
 
+    /** Defines whether this field is the main assignee field of the entity. */
+    @Column({ type: "boolean", default: false })
+    isAssignee: boolean;
+
     /** Pinned fields appear in the views and the create card dialog. */
     @Column({ type: "boolean", default: false })
     isPinned: boolean;

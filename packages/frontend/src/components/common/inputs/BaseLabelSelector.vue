@@ -1,69 +1,18 @@
 <script setup lang="ts">
-import type { FieldItem } from '@/components/common/fields/types';
+import { useInputs, type UseInputsProps } from '@/composables/useInputs';
 
-const selected = defineModel<string[]>({
-  default: [],
-});
+const props = defineProps<UseInputsProps>();
 
-const selectedItems = computed(() =>
-  selected.value?.map((label) =>
-    props.items?.find((item) => item.item === label)
-  )
-);
+const emit = defineEmits(['update:modelValue']);
 
-const searchLabels = ref<string>();
-const searchedLabels = computed(() => {
-  if (searchLabels.value) {
-    return props.items?.filter((item) =>
-      item.item
-        .toLocaleLowerCase()
-        .includes(searchLabels.value!.toLocaleLowerCase())
-    );
-  }
-
-  return props.items;
-});
-
-const props = defineProps<{
-  items?: FieldItem[];
-  placeholder?: string;
-  multiple?: boolean;
-  icon?: string;
-  textField?: boolean;
-  variant?:
-    | 'outlined'
-    | 'plain'
-    | 'underlined'
-    | 'filled'
-    | 'solo'
-    | 'solo-inverted'
-    | 'solo-filled';
-}>();
-
-function isItemSelected(item: FieldItem) {
-  return !!selected.value?.find((label) => item.item === label);
-}
-
-function toggleItemSelection(item: FieldItem) {
-  if (props.multiple) {
-    if (!isItemSelected(item)) {
-      selected.value = [...selected.value, item.item];
-    } else {
-      const index = selected.value.findIndex((label) => label === item.item);
-
-      selected.value = [
-        ...selected.value.slice(0, index),
-        ...selected.value.slice(index + 1),
-      ];
-    }
-  } else {
-    if (!isItemSelected(item)) {
-      selected.value = [item.item];
-    } else {
-      selected.value = [];
-    }
-  }
-}
+const {
+  selected,
+  selectedItems,
+  search,
+  filteredItems,
+  isItemSelected,
+  toggleItemSelection,
+} = useInputs(props, emit);
 </script>
 
 <template>
@@ -89,17 +38,22 @@ function toggleItemSelection(item: FieldItem) {
           variant="tonal"
           rounded="xl"
           class="text-body-3"
+          :density
         />
       </template>
     </v-autocomplete>
   </template>
   <template v-else>
-    <v-menu
-      :close-on-content-click="false"
-      @update:model-value="searchLabels = ''"
-    >
+    <v-menu :close-on-content-click="false" @update:model-value="search = ''">
       <template #activator="{ props }">
-        <div v-bind="props" class="d-flex ga-1">
+        <v-card
+          link
+          v-bind="props"
+          class="d-flex align-center flex-fill h-100 flex-1-0 ga-1 pa-1"
+          color="transparent"
+          :rounded
+          @click.prevent
+        >
           <template v-if="selectedItems.length">
             <template v-for="item in selectedItems" :key="item.item">
               <v-chip
@@ -108,19 +62,20 @@ function toggleItemSelection(item: FieldItem) {
                 link
                 rounded="xl"
                 class="text-body-3"
+                :density
               >
                 {{ item?.item }}
               </v-chip>
             </template>
           </template>
           <template v-else>
-            <base-icon-btn :icon />
+            <v-card-subtitle class="pa-1 text-caption">Empty</v-card-subtitle>
           </template>
-        </div>
+        </v-card>
       </template>
       <v-card>
         <v-text-field
-          v-model="searchLabels"
+          v-model="search"
           placeholder="Search.."
           autofocus
           hide-details
@@ -129,7 +84,7 @@ function toggleItemSelection(item: FieldItem) {
           variant="filled"
         />
         <v-list>
-          <template v-for="item in searchedLabels" :key="item.item">
+          <template v-for="item in filteredItems" :key="item.item">
             <v-list-item
               :active="isItemSelected(item)"
               @click="toggleItemSelection(item)"
@@ -139,6 +94,7 @@ function toggleItemSelection(item: FieldItem) {
                 variant="tonal"
                 rounded="xl"
                 class="text-body-3"
+                :density
               >
                 {{ item.item }}
               </v-chip>

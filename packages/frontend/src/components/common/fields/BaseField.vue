@@ -2,13 +2,17 @@
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import BaseLabelSelector from '../inputs/BaseLabelSelector.vue';
 import BaseRelationInput from '../inputs/BaseRelationInput.vue';
-import { type Field, FieldTypes } from './types';
+import BaseDropdownInput from '../inputs/BaseDropdownInput.vue';
 import { useAuthStore } from '@/stores/auth';
+import { type Field, FieldTypes } from '@tillywork/shared';
 
 const value = defineModel<any>();
 
 defineProps<{
   field: Field;
+  noLabel?: boolean;
+  flexFill?: boolean;
+  rounded?: string;
 }>();
 
 const { project, user } = storeToRefs(useAuthStore());
@@ -29,6 +33,7 @@ const { data: users } = useProjectUsersQuery({
       v-model="value"
       :icon="field.icon ?? 'mdi-calendar'"
       :label="field.name"
+      :rounded
     />
   </template>
   <template v-else-if="field.type === FieldTypes.TEXT">
@@ -40,18 +45,13 @@ const { data: users } = useProjectUsersQuery({
     />
   </template>
   <template v-else-if="field.type === FieldTypes.DROPDOWN">
-    <v-autocomplete
+    <base-dropdown-input
       v-model="value"
       :items="field.items"
-      item-title="item"
-      item-value="item"
-      variant="outlined"
-      hide-details
+      :icon="field.icon"
       :placeholder="field.name"
-      :prepend-inner-icon="field.icon"
       :multiple="field.multiple"
-      autocomplete="off"
-      auto-select-first
+      :rounded
     />
   </template>
   <template v-else-if="field.type === FieldTypes.LABEL">
@@ -61,16 +61,21 @@ const { data: users } = useProjectUsersQuery({
       :icon="field.icon"
       :placeholder="field.name"
       :multiple="field.multiple"
+      density="compact"
+      :rounded
     />
   </template>
   <template v-else-if="field.type === FieldTypes.USER">
     <base-user-selector
-      :model-value="value?.map((userIdAsString: string) => +userIdAsString)"
+      v-model="value"
       :users="users ?? []"
-      :label="field.name"
+      :label="!noLabel ? field.name : undefined"
       return-id
+      return-string
       :icon="field.icon"
       size="24"
+      :fill="flexFill"
+      :rounded
     />
   </template>
   <template v-else-if="field.type === FieldTypes.CARD">

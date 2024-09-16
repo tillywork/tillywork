@@ -1,6 +1,6 @@
-import type { Field, CreateFieldDto } from '@/components/common/fields/types';
 import { useHttp } from '@/composables/useHttp';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import type { CreateFieldDto, Field } from '@tillywork/shared';
 import type { MaybeRef } from 'vue';
 
 export type GetFieldsParams = {

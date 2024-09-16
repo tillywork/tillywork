@@ -2,36 +2,39 @@
 import {
   getCoreRowModel,
   useVueTable,
-  type ColumnDef,
   type Row,
   type Table,
 } from '@tanstack/vue-table';
-import { type List, type ListGroup, type ListStage } from '../../lists/types';
 import { useCardsService } from '@/services/useCardsService';
-import type { TableSortOption, View } from '../types';
-import type { ProjectUser } from '@/components/common/projects/types';
-import { DIALOGS } from '@/components/common/dialogs/types';
-import type { Card } from '../../cards/types';
 import draggable from 'vuedraggable';
-import type { User } from '@/components/common/users/types';
-import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
-import type { QueryFilter, ViewFilter } from '../../filters/types';
-import { useDialogStore } from '@/stores/dialog';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 import { useFields } from '@/composables/useFields';
-import { FieldTypes } from '../../../common/fields/types';
 import { useCard } from '@/composables/useCard';
-import { ListGroupOptions } from '@tillywork/shared';
+import {
+  ListGroupOptions,
+  type QueryFilter,
+  type ViewFilter,
+  FieldTypes,
+  type View,
+  type List,
+  type Card,
+  type ListGroup,
+  type ListStage,
+  type ProjectUser,
+  type SortState,
+} from '@tillywork/shared';
+import { useListGroup } from '@/composables/useListGroup';
+import BaseField from '@/components/common/fields/BaseField.vue';
 
 const emit = defineEmits([
   'toggle:group',
-  'row:delete',
-  'row:update:stage',
-  'row:update:assignees',
-  'row:update:order',
+  'card:delete',
+  'card:update:stage',
+  'card:update:order',
 ]);
+
 const props = defineProps<{
   listGroup: Row<ListGroup>;
   listStages: ListStage[];
@@ -43,18 +46,16 @@ const props = defineProps<{
 const rowMenuOpen = ref<Row<Card> | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
 
-const dialog = useDialogStore();
 const cardsService = useCardsService();
-const { showSnackbar } = useSnackbarStore();
 
 const { updateFieldValue } = useCard();
 
-const { titleField, pinnedFields } = useFields({
+const { titleField, assigneeField, pinnedFieldsWithoutAssignee } = useFields({
   cardTypeId: props.list.defaultCardType.id,
 });
 
 const groupCopy = ref(cloneDeep(props.listGroup));
-const sortBy = computed<TableSortOption[]>(() =>
+const sortBy = computed<SortState>(() =>
   props.view.options.sortBy ? [cloneDeep(props.view.options.sortBy)] : []
 );
 const tableSortState = computed(() =>
@@ -62,21 +63,10 @@ const tableSortState = computed(() =>
     return { id: sortOption.key, desc: sortOption.order === 'desc' };
   })
 );
-const columns = computed(
-  () => props.table._getColumnDefs() as ColumnDef<Card, unknown>[]
-);
 
 const groupHeight = computed(() => (cards.value.length ?? 0) * 33 + 33);
 const maxHeight = computed(() =>
   props.listGroup.original.name === 'All' ? 'calc(100vh - 230px)' : 350
-);
-
-const isDraggingDisabled = computed(() => {
-  return sortBy.value && sortBy.value.length > 0;
-});
-
-const users = computed(() =>
-  props.projectUsers.map((projectUser) => projectUser.user)
 );
 
 const filters = computed<QueryFilter>(() => {
@@ -122,7 +112,7 @@ const groupTable = useVueTable({
   get data() {
     return cards.value;
   },
-  columns: columns.value,
+  columns: [],
   getCoreRowModel: getCoreRowModel(),
   getRowId: (row) => `${row.id}`,
   manualPagination: true,
@@ -135,7 +125,20 @@ const groupTable = useVueTable({
 });
 
 const draggableCards = ref(groupTable.getCoreRowModel().rows);
-const isDragging = ref(false);
+const {
+  openCreateCardDialog,
+  isDragging,
+  setDragItem,
+  onDragAdd,
+  onDragEnd,
+  onDragMove,
+  onDragStart,
+  onDragUpdate,
+} = useListGroup({
+  props,
+  emit,
+  cards: draggableCards,
+});
 
 async function handleGroupCardsLoad({
   done,
@@ -159,112 +162,6 @@ function toggleGroupExpansion(listGroup: Row<ListGroup>) {
   emit('toggle:group', listGroup);
 }
 
-function openCreateCardDialog(listGroup: ListGroup) {
-  dialog.openDialog({
-    dialog: DIALOGS.CREATE_CARD,
-    data: {
-      listId: listGroup.list.id,
-      listStage: getCurrentStage(listGroup),
-      users: getCurrentAssignee(listGroup),
-      listStages: props.listStages,
-    },
-  });
-}
-
-function getCurrentStage(group: ListGroup) {
-  let stage: ListStage | undefined;
-
-  if (group.type === ListGroupOptions.LIST_STAGE) {
-    stage = props.listStages.find((stage) => {
-      return stage.id == group.entityId;
-    });
-  }
-
-  return stage ? { ...stage } : undefined;
-}
-
-function getCurrentAssignee(group: ListGroup) {
-  let user: User | undefined;
-
-  if (group.type === ListGroupOptions.ASSIGNEE) {
-    user = props.projectUsers.find((user: ProjectUser) => {
-      return user.user.id == group.entityId;
-    })?.user;
-  }
-
-  return user ? [user] : undefined;
-}
-
-function onDragMove() {
-  if (isDraggingDisabled.value) {
-    isDragging.value = false;
-    return false;
-  }
-}
-
-function onDragStart() {
-  isDragging.value = true;
-
-  if (isDraggingDisabled.value) {
-    showSnackbar({
-      message: 'Dragging cards is only enabled when sorting is disabled.',
-      color: 'error',
-      timeout: 5000,
-    });
-  }
-}
-
-function onDragEnd() {
-  isDragging.value = false;
-}
-
-function onDragUpdate(event: any) {
-  const { newIndex } = event;
-  isDragging.value = false;
-
-  const previousCard = draggableCards.value[newIndex - 1]?.original;
-  const currentCard = draggableCards.value[newIndex]?.original;
-  const nextCard = draggableCards.value[newIndex + 1]?.original;
-
-  handleUpdateCardOrder({
-    currentCard,
-    previousCard,
-    nextCard,
-  });
-}
-
-function onDragAdd(event: any) {
-  const { newIndex } = event;
-  isDragging.value = false;
-
-  const previousCard = draggableCards.value[newIndex - 1]?.original;
-  const currentCard = draggableCards.value[newIndex]?.original;
-  const nextCard = draggableCards.value[newIndex + 1]?.original;
-
-  const newOrder = cardsService.calculateCardOrder({ previousCard, nextCard });
-
-  handleUpdateCardStage({
-    cardId: currentCard.id,
-    cardListId: currentCard.cardLists[0].id,
-    listStageId: props.listGroup.original.entityId!,
-    order: newOrder,
-  });
-}
-
-function handleUpdateCardOrder(data: {
-  currentCard: Card;
-  previousCard?: Card;
-  nextCard?: Card;
-}) {
-  emit('row:update:order', data);
-}
-
-function setDragItem(data: DataTransfer) {
-  const img = new Image();
-  img.src = 'https://en.wikipedia.org/wiki/File:1x1.png#/media/File:1x1.png';
-  data.setDragImage(img, 0, 0);
-}
-
 function handleCardMenuClick({
   row,
   isOpen,
@@ -280,7 +177,7 @@ function handleCardMenuClick({
 }
 
 function handleDeleteCard(card: Card) {
-  emit('row:delete', card);
+  emit('card:delete', card);
 }
 
 function handleUpdateCardStage(data: {
@@ -289,14 +186,7 @@ function handleUpdateCardStage(data: {
   listStageId: number;
   order?: number;
 }) {
-  emit('row:update:stage', data);
-}
-
-function handleUserSelection({ users, card }: { users: User[]; card: Card }) {
-  emit('row:update:assignees', {
-    users,
-    card,
-  });
+  emit('card:update:stage', data);
 }
 
 watch(
@@ -349,7 +239,12 @@ watchEffect(() => {
       @click="toggleGroupExpansion(listGroup)"
     />
     <div>
-      <template v-if="listGroup.original.type === ListGroupOptions.ASSIGNEE">
+      <template
+        v-if="
+          listGroup.original.type === ListGroupOptions.FIELD &&
+          listGroup.original.field?.type === FieldTypes.USER
+        "
+      >
         <base-avatar
           :photo="listGroup.original.icon"
           :text="listGroup.original.name"
@@ -496,39 +391,33 @@ watchEffect(() => {
                   </v-list-item-title>
                   <template #append>
                     <div class="d-flex align-center ga-2 me-6">
-                      <!-- TODO use BaseField component here -->
-                      <template v-for="field in pinnedFields" :key="field.slug">
-                        <template v-if="field.type === FieldTypes.DATE">
-                          <base-date-picker
-                            :model-value="row.original.data[field.slug]"
-                            @update:model-value="(v: string) => updateFieldValue({
+                      <template
+                        v-for="field in pinnedFieldsWithoutAssignee"
+                        :key="field.slug"
+                      >
+                        <base-field
+                          :field
+                          no-label
+                          :model-value="row.original.data[field.slug]"
+                          @update:model-value="(v: string) => updateFieldValue({
                                 card: row.original,
                                 field,
                                 v
                             })"
-                            class="text-caption d-flex justify-start rounded-0"
-                            :label="`Set ${field.name.toLowerCase()}`"
-                            @click.prevent
-                          />
-                        </template>
-                        <template v-else>
-                          <span class="text-error text-xs"
-                            >Unknown field type: {{ field.type }}</span
-                          >
-                        </template>
+                        />
                       </template>
-
-                      <base-user-selector
-                        :model-value="row.original.users"
-                        :users
-                        fill
-                        @update:model-value="
-                            (users: User[]) => handleUserSelection({
-                                users, card: row.original
-                            })
-                          "
-                        @click.stop
-                      />
+                      <template v-if="assigneeField">
+                        <base-field
+                          :field="assigneeField"
+                          no-label
+                          :model-value="row.original.data[assigneeField.slug]"
+                          @update:model-value="(v: string) => updateFieldValue({
+                                card: row.original,
+                                field: assigneeField,
+                                v
+                            })"
+                        />
+                      </template>
                     </div>
                   </template>
                 </v-list-item>

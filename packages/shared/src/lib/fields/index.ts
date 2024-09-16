@@ -1,6 +1,6 @@
-import type { User } from '@/components/common/users/types';
-import type { List } from '../../project-management/lists/types';
-import type { CardType } from '../../project-management/cards/types';
+import { CardType } from '../card-types';
+import { List } from '../lists';
+import { User } from '../users';
 
 export interface Field {
   id: number;
@@ -19,6 +19,7 @@ export interface Field {
   isTitle: boolean;
   isDescription: boolean;
   isPhoto: boolean;
+  isAssignee: boolean;
   isPinned: boolean;
 }
 
@@ -108,5 +109,6 @@ export const DEFAULT_CARD_FIELDS: Partial<Field>[] = [
 
 export type FieldItem = {
   item: string;
-  color: string;
+  color?: string;
+  icon?: string;
 };

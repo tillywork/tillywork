@@ -60,7 +60,6 @@ export class CardsService {
             .createQueryBuilder("card")
             .leftJoinAndSelect("card.cardLists", "cardLists")
             .leftJoinAndSelect("cardLists.listStage", "listStage")
-            .leftJoinAndSelect("card.users", "users")
             .leftJoinAndSelect("card.children", "children")
             .leftJoinAndSelect("children.cardLists", "childrenCardLists")
             .leftJoinAndSelect(
@@ -167,10 +166,8 @@ export class CardsService {
             relations: [
                 "cardLists",
                 "cardLists.listStage",
-                "users",
                 "parent",
                 "children",
-                "children.users",
                 "children.cardLists",
                 "children.cardLists.listStage",
             ],
@@ -192,15 +189,11 @@ export class CardsService {
     }): Promise<Card[]> {
         const queryBuilder = this.cardsRepository
             .createQueryBuilder("card")
-            .leftJoinAndSelect("card.users", "user")
             .where(
                 new Brackets((qb) => {
                     qb.where("card.data ->> 'title' ILIKE :keyword", {
                         keyword: `%${keyword}%`,
-                    }).orWhere(
-                        "user.firstName || ' ' || user.lastName ILIKE :keyword",
-                        { keyword: `%${keyword}%` }
-                    );
+                    });
                 })
             )
             .andWhere("card.workspaceId = :workspaceId", { workspaceId })
@@ -244,16 +237,7 @@ export class CardsService {
 
     async update(id: number, updateCardDto: UpdateCardDto): Promise<Card> {
         const card = await this.findOne(id);
-
-        // Update card fields except for 'users'
-        const { users, ...updateFields } = updateCardDto;
-        this.cardsRepository.merge(card, updateFields);
-
-        // If 'users' are provided in the update DTO, update the relation
-        if (users) {
-            // Replace the current card.users with the new list from updateCardDto
-            card.users = users;
-        }
+        this.cardsRepository.merge(card, updateCardDto);
 
         return this.cardsRepository.save(card);
     }

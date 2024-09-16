@@ -3,26 +3,22 @@ import {
   FlexRender,
   getCoreRowModel,
   useVueTable,
-  type ColumnDef,
   type Row,
   type Column,
 } from '@tanstack/vue-table';
-import type { View } from '../types';
 import { useListGroupsService } from '@/services/useListGroupsService';
 import type { Card } from '../../cards/types';
 import { type List, type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import ListViewGroup from './ListViewGroup.vue';
-import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useAuthStore } from '@/stores/auth';
+import type { View } from '@tillywork/shared';
 
 const isLoading = defineModel<boolean>('loading');
 
 const props = defineProps<{
-  columns: ColumnDef<ListGroup, any>[];
-  noHeaders?: boolean;
   list: List;
   view: View;
   groups: ListGroup[];
@@ -33,7 +29,6 @@ const emit = defineEmits([
   'submit',
   'load',
   'row:update:stage',
-  'row:update:assignees',
   'row:update:order',
 ]);
 
@@ -60,7 +55,7 @@ const table = useVueTable({
   get data() {
     return props.groups;
   },
-  columns: props.columns as ColumnDef<ListGroup, any>[],
+  columns: [],
   getCoreRowModel: getCoreRowModel(),
   getRowId: (row) => `${row.id}`,
   manualPagination: true,
@@ -111,13 +106,6 @@ function toggleGroupExpansion(listGroup: Row<ListGroup>) {
     });
 }
 
-function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
-  emit('row:update:assignees', {
-    users,
-    card,
-  });
-}
-
 function handleDeleteCard(card: Card) {
   emit('row:delete', card);
 }
@@ -155,12 +143,12 @@ function handleUpdateCardOrder(data: {
         >
           <div
             class="list-header-group d-flex border-b-thin border-collapse"
-            v-if="!noHeaders"
+            v-if="false"
           >
             <template v-for="header in headerGroup.headers" :key="header.id">
               <v-hover
                 #="{ isHovering: isHeaderHovering, props: headerProps }"
-                v-if="!noHeaders"
+                v-if="false"
               >
                 <v-card
                   v-bind="headerProps"
@@ -168,7 +156,7 @@ function handleUpdateCardOrder(data: {
                   rounded="0"
                   color="accent"
                   :width="header.getSize()"
-                  :height="noHeaders ? 0 : 28"
+                  :height="true ? 0 : 28"
                 >
                   <!-- Header Content -->
                   <FlexRender
@@ -217,10 +205,9 @@ function handleUpdateCardOrder(data: {
             :project-users="projectUsers ?? []"
             :table
             @toggle:group="toggleGroupExpansion"
-            @row:delete="handleDeleteCard"
-            @row:update:stage="handleUpdateCardStage"
-            @row:update:assignees="handleUpdateAssignees"
-            @row:update:order="handleUpdateCardOrder"
+            @card:delete="handleDeleteCard"
+            @card:update:stage="handleUpdateCardStage"
+            @card:update:order="handleUpdateCardOrder"
           />
         </template>
       </v-card>

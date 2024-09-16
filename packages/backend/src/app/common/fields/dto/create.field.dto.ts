@@ -6,8 +6,8 @@ import {
     IsOptional,
     IsString,
 } from "class-validator";
-import { FieldItem, FieldTypes } from "../types";
 import { User } from "../../users/user.entity";
+import { FieldItem, FieldTypes } from "@tillywork/shared";
 
 export class CreateFieldDto {
     @IsNotEmpty()

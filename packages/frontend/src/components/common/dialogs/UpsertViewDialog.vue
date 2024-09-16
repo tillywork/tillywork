@@ -2,10 +2,7 @@
 import { useViewsService } from '@/services/useViewsService';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
-import {
-  ViewTypes,
-  type View,
-} from '@/components/project-management/views/types';
+import { ViewTypes, type View } from '@tillywork/shared';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS, UpsertDialogMode } from './types';

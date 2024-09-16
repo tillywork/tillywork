@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import { useFieldsService } from '@/services/useFieldsService';
 import BaseTable from '../tables/BaseTable/BaseTable.vue';
-import {
-  FIELD_TYPE_OPTIONS,
-  type Field,
-  type CreateFieldDto,
-  FieldTypes,
-} from '@/components/common/fields/types';
 import { cloneDeep } from 'lodash';
 import { VForm } from 'vuetify/components';
 import BaseArrayInput from '../inputs/BaseArrayInput.vue';
@@ -20,6 +14,12 @@ import { DIALOGS, UpsertDialogMode } from '../dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 import slugify from 'slugify';
 import validationUtils from '@/utils/validation';
+import {
+  type Field,
+  type CreateFieldDto,
+  FieldTypes,
+  FIELD_TYPE_OPTIONS,
+} from '@tillywork/shared';
 
 const selectedField = ref<Field>();
 const fieldDto = ref<Partial<Field> | CreateFieldDto>();

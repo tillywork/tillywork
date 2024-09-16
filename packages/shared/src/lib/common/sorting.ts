@@ -4,3 +4,5 @@ export type SortOption = {
 };
 
 export type SortDirection = 'asc' | 'desc';
+
+export type SortState = SortOption[];

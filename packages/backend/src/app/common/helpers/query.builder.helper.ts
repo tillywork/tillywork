@@ -231,7 +231,6 @@ export class QueryBuilderHelper {
                 return queryBuilder.andWhere(
                     `${fieldName} ${operator} (${processedValue.join(",")})`
                 );
-                break;
             case "nin": {
                 if (fieldName.startsWith(cardPrefix)) {
                     return queryBuilder
@@ -271,6 +270,7 @@ export class QueryBuilderHelper {
                 const betweenOperator = `${
                     operator[0] === "n" ? "NOT " : ""
                 }BETWEEN`;
+
                 return queryBuilder.andWhere(
                     `${fieldName} ${betweenOperator} :${field}${randomNumber1} AND :${field}${randomNumber2}`,
                     {

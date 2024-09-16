@@ -3,25 +3,24 @@ import {
   FlexRender,
   getCoreRowModel,
   useVueTable,
-  type ColumnDef,
   type Row,
   type Column,
 } from '@tanstack/vue-table';
-import { type View } from '../types';
 import { useListGroupsService } from '@/services/useListGroupsService';
 import type { Card } from '../../cards/types';
 import { type List, type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import TableViewGroup from './TableViewGroup.vue';
-import type { User } from '@/components/common/users/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useAuthStore } from '@/stores/auth';
+import { useFields } from '@/composables/useFields';
+import type { TableColumnDef } from './types';
+import { type View } from '@tillywork/shared';
 
 const isLoading = defineModel<boolean>('loading');
 
 const props = defineProps<{
-  columns: ColumnDef<ListGroup, any>[];
   list: List;
   view: View;
   groups: ListGroup[];
@@ -32,11 +31,56 @@ const emit = defineEmits([
   'submit',
   'load',
   'row:update:stage',
-  'row:update:assignees',
   'row:update:order',
 ]);
 
 const expandedState = ref<Record<string, boolean>>();
+
+const { titleField, fields, sortFieldsByViewColumns } = useFields({
+  cardTypeId: props.list.defaultCardType.id,
+  listId: props.list.id,
+});
+
+const viewColumnIds = computed(() =>
+  props.view.options.columns?.map((columnId) => columnId)
+);
+
+const columns = computed<TableColumnDef[]>(() => {
+  const actionsColumn: TableColumnDef = {
+    id: 'actions',
+    enableResizing: false,
+    enableSorting: false,
+    size: 50,
+    cellType: 'actions',
+  };
+
+  const titleColumn: TableColumnDef = {
+    id: `data.${titleField.value?.slug}`,
+    accessorKey: `data.${titleField.value?.slug}`,
+    header: titleField.value?.name,
+    size: 300,
+    minSize: 150,
+    cellType: 'title',
+    field: titleField.value,
+  };
+
+  const viewColumns: TableColumnDef[] = sortFieldsByViewColumns(
+    fields.value.filter((field) =>
+      viewColumnIds.value?.includes(field.id.toString())
+    ),
+    viewColumnIds.value ?? []
+  ).map((field) => ({
+    id: `data.${field.slug}`,
+    accessorKey: `data.${field.slug}`,
+    header: field.name,
+    size: 150,
+    minSize: 100,
+    cellType: field.type,
+    field,
+  }));
+
+  return [actionsColumn, titleColumn, ...viewColumns];
+});
 
 const { showSnackbar } = useSnackbarStore();
 const { project } = storeToRefs(useAuthStore());
@@ -60,7 +104,7 @@ const table = useVueTable({
     return props.groups;
   },
   get columns() {
-    return props.columns as ColumnDef<ListGroup, any>[];
+    return columns.value;
   },
   getCoreRowModel: getCoreRowModel(),
   getRowId: (row) => `${row.id}`,
@@ -125,13 +169,6 @@ function toggleGroupExpansion(listGroup: Row<ListGroup>) {
     });
 }
 
-function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
-  emit('row:update:assignees', {
-    users,
-    card,
-  });
-}
-
 function handleDeleteCard(card: Card) {
   emit('row:delete', card);
 }
@@ -155,7 +192,7 @@ function handleUpdateCardOrder(data: {
 </script>
 
 <template>
-  <div class="table-view px-6 position-relative overflow-auto">
+  <div class="table-view mx-6 position-relative overflow-auto">
     <div
       class="table d-flex flex-column my-2"
       :style="`max-height: calc(100vh - 180px${
@@ -247,10 +284,9 @@ function handleUpdateCardOrder(data: {
             :column-sizes="columnSizes"
             :no-group-banners="noGroupBanners"
             @toggle:group="toggleGroupExpansion"
-            @row:delete="handleDeleteCard"
-            @row:update:stage="handleUpdateCardStage"
-            @row:update:assignees="handleUpdateAssignees"
-            @row:update:order="handleUpdateCardOrder"
+            @card:delete="handleDeleteCard"
+            @card:update:stage="handleUpdateCardStage"
+            @card:update:order="handleUpdateCardOrder"
           />
         </template>
       </v-card>

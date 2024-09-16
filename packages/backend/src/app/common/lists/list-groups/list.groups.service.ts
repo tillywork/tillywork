@@ -124,12 +124,6 @@ export class ListGroupsService {
                 } as Field;
                 break;
 
-            case ListGroupOptions.ASSIGNEE:
-                groupByField = {
-                    type: FieldTypes.USER,
-                } as Field;
-                break;
-
             case ListGroupOptions.FIELD:
                 groupByField = await this.fieldsService.findOneBy({
                     id: fieldId,
@@ -155,7 +149,6 @@ export class ListGroupsService {
                 generatedGroups = await this.generateGroupsByUsers({
                     listId,
                     field: groupByField,
-                    isAssignee: groupBy === ListGroupOptions.ASSIGNEE,
                 });
                 break;
 
@@ -257,11 +250,9 @@ export class ListGroupsService {
     async generateGroupsByUsers({
         listId,
         field,
-        isAssignee,
     }: {
         listId: number;
         field?: Field;
-        isAssignee?: boolean;
     }) {
         const users = (
             await this.projectUsersService.findAll({
@@ -284,9 +275,7 @@ export class ListGroupsService {
 
         const groups: CreateListGroupDto[] = users.map((user, index) => {
             const group: CreateListGroupDto = {
-                type: isAssignee
-                    ? ListGroupOptions.ASSIGNEE
-                    : ListGroupOptions.FIELD,
+                type: ListGroupOptions.FIELD,
                 name: user.firstName + " " + user.lastName,
                 icon: user.photo,
                 fieldId: field?.id,
@@ -297,11 +286,9 @@ export class ListGroupsService {
                     where: {
                         and: [
                             {
-                                field: isAssignee
-                                    ? "users.id"
-                                    : `data.${field.slug}`,
-                                operator: "eq",
-                                value: user.id,
+                                field: `card.data.${field.slug}`,
+                                operator: "in",
+                                value: [user.id.toString()],
                             },
                         ],
                     },
@@ -313,9 +300,7 @@ export class ListGroupsService {
         });
 
         groups.push({
-            type: isAssignee
-                ? ListGroupOptions.ASSIGNEE
-                : ListGroupOptions.FIELD,
+            type: ListGroupOptions.FIELD,
             name: "Empty",
             fieldId: field?.id,
             listId,
@@ -323,9 +308,7 @@ export class ListGroupsService {
                 where: {
                     and: [
                         {
-                            field: isAssignee
-                                ? "users.id"
-                                : `data.${field.slug}`,
+                            field: `card.data.${field.slug}`,
                             operator: "isNull",
                             value: null,
                         },
