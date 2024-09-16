@@ -5,13 +5,8 @@ import {
   type Row,
   type Table,
 } from '@tanstack/vue-table';
-import { type List, type ListGroup, type ListStage } from '../../lists/types';
 import { useCardsService } from '@/services/useCardsService';
-import type { TableSortOption } from '../types';
-import type { ProjectUser } from '@/components/common/projects/types';
-import type { Card } from '../../cards/types';
 import draggable from 'vuedraggable';
-import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
@@ -23,16 +18,23 @@ import {
   type ViewFilter,
   FieldTypes,
   type View,
+  type List,
+  type Card,
+  type ListGroup,
+  type ListStage,
+  type ProjectUser,
+  type SortState,
 } from '@tillywork/shared';
 import { useListGroup } from '@/composables/useListGroup';
 import BaseField from '@/components/common/fields/BaseField.vue';
 
 const emit = defineEmits([
   'toggle:group',
-  'row:delete',
-  'row:update:stage',
-  'row:update:order',
+  'card:delete',
+  'card:update:stage',
+  'card:update:order',
 ]);
+
 const props = defineProps<{
   listGroup: Row<ListGroup>;
   listStages: ListStage[];
@@ -45,8 +47,6 @@ const rowMenuOpen = ref<Row<Card> | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
 
 const cardsService = useCardsService();
-const { showSnackbar } = useSnackbarStore();
-const { openCreateCardDialog } = useListGroup(props);
 
 const { updateFieldValue } = useCard();
 
@@ -55,7 +55,7 @@ const { titleField, assigneeField, pinnedFieldsWithoutAssignee } = useFields({
 });
 
 const groupCopy = ref(cloneDeep(props.listGroup));
-const sortBy = computed<TableSortOption[]>(() =>
+const sortBy = computed<SortState>(() =>
   props.view.options.sortBy ? [cloneDeep(props.view.options.sortBy)] : []
 );
 const tableSortState = computed(() =>
@@ -68,10 +68,6 @@ const groupHeight = computed(() => (cards.value.length ?? 0) * 33 + 33);
 const maxHeight = computed(() =>
   props.listGroup.original.name === 'All' ? 'calc(100vh - 230px)' : 350
 );
-
-const isDraggingDisabled = computed(() => {
-  return sortBy.value && sortBy.value.length > 0;
-});
 
 const filters = computed<QueryFilter>(() => {
   if (props.view.filters) {
@@ -129,7 +125,20 @@ const groupTable = useVueTable({
 });
 
 const draggableCards = ref(groupTable.getCoreRowModel().rows);
-const isDragging = ref(false);
+const {
+  openCreateCardDialog,
+  isDragging,
+  setDragItem,
+  onDragAdd,
+  onDragEnd,
+  onDragMove,
+  onDragStart,
+  onDragUpdate,
+} = useListGroup({
+  props,
+  emit,
+  cards: draggableCards,
+});
 
 async function handleGroupCardsLoad({
   done,
@@ -153,76 +162,6 @@ function toggleGroupExpansion(listGroup: Row<ListGroup>) {
   emit('toggle:group', listGroup);
 }
 
-function onDragMove() {
-  if (isDraggingDisabled.value) {
-    isDragging.value = false;
-    return false;
-  }
-}
-
-function onDragStart() {
-  isDragging.value = true;
-
-  if (isDraggingDisabled.value) {
-    showSnackbar({
-      message: 'Dragging cards is only enabled when sorting is disabled.',
-      color: 'error',
-      timeout: 5000,
-    });
-  }
-}
-
-function onDragEnd() {
-  isDragging.value = false;
-}
-
-function onDragUpdate(event: any) {
-  const { newIndex } = event;
-  isDragging.value = false;
-
-  const previousCard = draggableCards.value[newIndex - 1]?.original;
-  const currentCard = draggableCards.value[newIndex]?.original;
-  const nextCard = draggableCards.value[newIndex + 1]?.original;
-
-  handleUpdateCardOrder({
-    currentCard,
-    previousCard,
-    nextCard,
-  });
-}
-
-function onDragAdd(event: any) {
-  const { newIndex } = event;
-  isDragging.value = false;
-
-  const previousCard = draggableCards.value[newIndex - 1]?.original;
-  const currentCard = draggableCards.value[newIndex]?.original;
-  const nextCard = draggableCards.value[newIndex + 1]?.original;
-
-  const newOrder = cardsService.calculateCardOrder({ previousCard, nextCard });
-
-  handleUpdateCardStage({
-    cardId: currentCard.id,
-    cardListId: currentCard.cardLists[0].id,
-    listStageId: props.listGroup.original.entityId!,
-    order: newOrder,
-  });
-}
-
-function handleUpdateCardOrder(data: {
-  currentCard: Card;
-  previousCard?: Card;
-  nextCard?: Card;
-}) {
-  emit('row:update:order', data);
-}
-
-function setDragItem(data: DataTransfer) {
-  const img = new Image();
-  img.src = 'https://en.wikipedia.org/wiki/File:1x1.png#/media/File:1x1.png';
-  data.setDragImage(img, 0, 0);
-}
-
 function handleCardMenuClick({
   row,
   isOpen,
@@ -238,7 +177,7 @@ function handleCardMenuClick({
 }
 
 function handleDeleteCard(card: Card) {
-  emit('row:delete', card);
+  emit('card:delete', card);
 }
 
 function handleUpdateCardStage(data: {
@@ -247,7 +186,7 @@ function handleUpdateCardStage(data: {
   listStageId: number;
   order?: number;
 }) {
-  emit('row:update:stage', data);
+  emit('card:update:stage', data);
 }
 
 watch(

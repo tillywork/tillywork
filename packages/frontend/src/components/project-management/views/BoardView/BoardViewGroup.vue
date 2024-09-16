@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import { type List, type ListGroup, type ListStage } from '../../lists/types';
 import { useCardsService } from '@/services/useCardsService';
-import type { TableSortOption } from '../types';
 import type { ProjectUser } from '@/components/common/projects/types';
-import type { Card } from '../../cards/types';
 import draggable from 'vuedraggable';
-import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
@@ -17,6 +13,11 @@ import {
   type ViewFilter,
   FieldTypes,
   type View,
+  type Card,
+  type ListGroup,
+  type ListStage,
+  type List,
+  type SortState,
 } from '@tillywork/shared';
 import { useListGroup } from '@/composables/useListGroup';
 import BaseField from '@/components/common/fields/BaseField.vue';
@@ -27,6 +28,7 @@ const emit = defineEmits([
   'card:update:stage',
   'card:update:order',
 ]);
+
 const props = defineProps<{
   listGroup: ListGroup;
   listStages: ListStage[];
@@ -34,11 +36,21 @@ const props = defineProps<{
   list: List;
   projectUsers: ProjectUser[];
 }>();
+
 const isGroupCardsLoading = defineModel<boolean>('loading');
 
+const cards = ref<Card[]>([]);
+
 const cardsService = useCardsService();
-const { showSnackbar } = useSnackbarStore();
-const { openCreateCardDialog } = useListGroup(props);
+const {
+  openCreateCardDialog,
+  isDragging,
+  onDragAdd,
+  onDragEnd,
+  onDragMove,
+  onDragStart,
+  onDragUpdate,
+} = useListGroup({ props, emit, cards });
 
 const { updateFieldValue } = useCard();
 
@@ -47,13 +59,9 @@ const { titleField, assigneeField, pinnedFieldsWithoutAssignee } = useFields({
 });
 
 const groupCopy = ref(cloneDeep(props.listGroup));
-const sortBy = computed<TableSortOption[]>(() =>
+const sortBy = computed<SortState>(() =>
   props.view.options.sortBy ? [cloneDeep(props.view.options.sortBy)] : []
 );
-
-const isDraggingDisabled = computed(() => {
-  return sortBy.value && sortBy.value.length > 0;
-});
 
 const users = computed(() =>
   props.projectUsers.map((projectUser) => projectUser.user)
@@ -85,9 +93,7 @@ const filters = computed<QueryFilter>(() => {
 const hideCompleted = computed<boolean>(() => props.view.options.hideCompleted);
 const hideChildren = computed<boolean>(() => props.view.options.hideChildren);
 
-const cards = ref<Card[]>([]);
 const total = ref(0);
-const isDragging = ref(false);
 
 const { fetchNextPage, isFetching, hasNextPage, refetch, data } =
   cardsService.useGetGroupCardsInfinite({
@@ -117,69 +123,7 @@ async function handleGroupCardsLoad({
   }
 }
 
-function onDragMove() {
-  if (isDraggingDisabled.value) {
-    isDragging.value = false;
-    return false;
-  }
-}
-
-function onDragStart() {
-  isDragging.value = true;
-
-  if (isDraggingDisabled.value) {
-    showSnackbar({
-      message: 'Dragging cards is only enabled when sorting is disabled.',
-      color: 'error',
-      timeout: 5000,
-    });
-  }
-}
-
-function onDragEnd() {
-  isDragging.value = false;
-}
-
-function onDragUpdate(event: any) {
-  const { newIndex } = event;
-  isDragging.value = false;
-
-  const previousCard = cards.value[newIndex - 1];
-  const currentCard = cards.value[newIndex];
-  const nextCard = cards.value[newIndex + 1];
-
-  handleUpdateCardOrder({
-    currentCard,
-    previousCard,
-    nextCard,
-  });
-}
-
-function onDragAdd(event: any) {
-  const { newIndex } = event;
-  isDragging.value = false;
-
-  const previousCard = cards.value[newIndex - 1];
-  const currentCard = cards.value[newIndex];
-  const nextCard = cards.value[newIndex + 1];
-
-  const newOrder = cardsService.calculateCardOrder({ previousCard, nextCard });
-
-  handleUpdateCardStage({
-    cardId: currentCard.id,
-    cardListId: currentCard.cardLists[0].id,
-    listStageId: props.listGroup.entityId!,
-    order: newOrder,
-  });
-}
-
-function handleUpdateCardOrder(data: {
-  currentCard: Card;
-  previousCard?: Card;
-  nextCard?: Card;
-}) {
-  emit('card:update:order', data);
-}
+//TODO fix drag/drop into different groups
 
 function handleUpdateCardStage(data: {
   cardId: number;

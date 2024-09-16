@@ -284,9 +284,9 @@ function handleUpdateCardOrder(data: {
             :column-sizes="columnSizes"
             :no-group-banners="noGroupBanners"
             @toggle:group="toggleGroupExpansion"
-            @row:delete="handleDeleteCard"
-            @row:update:stage="handleUpdateCardStage"
-            @row:update:order="handleUpdateCardOrder"
+            @card:delete="handleDeleteCard"
+            @card:update:stage="handleUpdateCardStage"
+            @card:update:order="handleUpdateCardOrder"
           />
         </template>
       </v-card>

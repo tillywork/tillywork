@@ -1,10 +1,10 @@
-import type { PaginationParams } from '../views/types';
-import type { View } from '../views/types';
 import {
   ListGroupOptions,
   type CardType,
   type Field,
   type QueryFilter,
+  type View,
+  type PaginationParams,
 } from '@tillywork/shared';
 
 export interface List {
