@@ -84,6 +84,7 @@ function closeDialog() {
 }
 
 async function createCard() {
+  console.log(createCardDto.value);
   if (
     createCardDto.value.data.title &&
     createCardDto.value.data.title.trim() !== '' &&
@@ -93,7 +94,8 @@ async function createCard() {
     createCardDto.value.listStageId = createCardDto.value.listStage.id;
     createCardMutation
       .mutateAsync(createCardDto.value)
-      .then(() => {
+      .then((card) => {
+        console.log('card', card);
         handlePostCreate();
       })
       .catch(() => {

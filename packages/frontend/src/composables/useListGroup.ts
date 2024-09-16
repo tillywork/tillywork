@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useCardsService } from '@/services/useCardsService';
@@ -6,7 +7,6 @@ import { useSnackbarStore } from '@/stores/snackbar';
 import {
   type ListStage,
   ListGroupOptions,
-  type User,
   FieldTypes,
   type ProjectUser,
   type View,
@@ -59,11 +59,20 @@ export const useListGroup = ({
   function openCreateCardDialog(listGroup: ListGroup) {
     const cardData: Record<string, unknown> = {};
 
-    if (
-      listGroup.type === ListGroupOptions.FIELD &&
-      listGroup.field?.type === FieldTypes.USER
-    ) {
-      cardData[listGroup.field.slug] = getGroupUser(listGroup);
+    if (listGroup.type === ListGroupOptions.FIELD) {
+      const value = getGroupValue();
+
+      switch (listGroup.field?.type) {
+        case FieldTypes.DROPDOWN:
+        case FieldTypes.LABEL:
+        case FieldTypes.USER:
+          cardData[listGroup.field!.slug] = value ? [value] : undefined;
+          break;
+
+        case FieldTypes.DATE:
+          cardData[listGroup.field!.slug] = getGroupValue();
+          break;
+      }
     }
 
     dialog.openDialog({
@@ -89,19 +98,58 @@ export const useListGroup = ({
     return stage ? { ...stage } : undefined;
   }
 
-  function getGroupUser(group: ListGroup) {
-    let user: User | undefined;
+  function getGroupValue() {
+    let value;
+    switch (listGroup.value.field?.type) {
+      case FieldTypes.DROPDOWN:
+      case FieldTypes.LABEL:
+        value = listGroup.value.field?.items?.find(
+          (item) => item.item === listGroup.value.name
+        )?.item;
+        break;
 
-    if (
-      group.type === ListGroupOptions.FIELD &&
-      group.field?.type === FieldTypes.USER
-    ) {
-      user = props.projectUsers.find((user: ProjectUser) => {
-        return user.user.id == group.entityId;
-      })?.user;
+      case FieldTypes.DATE: {
+        const filter: FieldFilter = listGroup.value.filter?.where?.and?.find(
+          (condition) =>
+            (condition as FieldFilter).field ===
+            `card.data.${listGroup.value.field?.slug ?? ''}`
+        ) as FieldFilter;
+
+        if (!filter) break;
+
+        const today = new Date();
+        today.setHours(23, 59, 59);
+
+        switch (filter.operator) {
+          case 'lt': {
+            const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+
+            value = dayjs(yesterday).utc().format();
+            break;
+          }
+          case 'gt': {
+            const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+
+            value = dayjs(tomorrow).utc().format();
+            break;
+          }
+          case 'between': {
+            value = dayjs(today).utc().format();
+            break;
+          }
+          default:
+            value = undefined;
+            break;
+        }
+        break;
+      }
+
+      case FieldTypes.USER:
+        value = listGroup.value.entityId;
+        break;
     }
 
-    return user ? [user.id.toString()] : undefined;
+    return value;
   }
 
   function onDragMove() {
@@ -179,65 +227,10 @@ export const useListGroup = ({
       }
 
       case ListGroupOptions.FIELD: {
-        let newValue: any;
-
-        switch (listGroup.value.field?.type) {
-          case FieldTypes.DROPDOWN:
-          case FieldTypes.LABEL:
-            newValue = listGroup.value.field?.items?.find(
-              (item) => item.item === listGroup.value.name
-            )?.item;
-            break;
-
-          case FieldTypes.DATE: {
-            const filter: FieldFilter =
-              listGroup.value.filter?.where?.and?.find(
-                (condition) =>
-                  (condition as FieldFilter).field ===
-                  `card.data.${listGroup.value.field?.slug ?? ''}`
-              ) as FieldFilter;
-
-            if (!filter) break;
-
-            const today = new Date();
-            today.setHours(23, 59, 59);
-
-            switch (filter.operator) {
-              case 'lt': {
-                const yesterday = new Date(
-                  today.getTime() - 24 * 60 * 60 * 1000
-                );
-
-                newValue = dayjs(yesterday).utc().format();
-                break;
-              }
-              case 'gt': {
-                const tomorrow = new Date(
-                  today.getTime() + 24 * 60 * 60 * 1000
-                );
-
-                newValue = dayjs(tomorrow).utc().format();
-                break;
-              }
-              case 'between': {
-                newValue = dayjs(today).utc().format();
-                break;
-              }
-              default:
-                newValue = undefined;
-                break;
-            }
-            break;
-          }
-
-          case FieldTypes.USER:
-            newValue = listGroup.value.entityId;
-            break;
-        }
+        const newValue = getGroupValue();
 
         updateFieldValue({
           card: currentCard,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           field: listGroup.value.field!,
           v: newValue,
         });
