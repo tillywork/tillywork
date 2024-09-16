@@ -78,6 +78,10 @@ export const FIELD_TYPE_OPTIONS = [
     title: 'Relation',
     value: FieldTypes.CARD,
   },
+  {
+    title: 'Checkbox',
+    value: FieldTypes.CHECKBOX,
+  },
 ];
 
 export const DEFAULT_CARD_FIELDS: Partial<Field>[] = [

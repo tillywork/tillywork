@@ -13,6 +13,7 @@ defineProps<{
   noLabel?: boolean;
   flexFill?: boolean;
   rounded?: string;
+  table?: boolean;
 }>();
 
 const { project, user } = storeToRefs(useAuthStore());
@@ -80,5 +81,17 @@ const { data: users } = useProjectUsersQuery({
   </template>
   <template v-else-if="field.type === FieldTypes.CARD">
     <base-relation-input v-model="value" :field variant="outlined" />
+  </template>
+  <template v-else-if="field.type === FieldTypes.CHECKBOX">
+    <div
+      class="d-flex align-center user-select-none"
+      :class="table ? 'justify-center' : ''"
+      @click.prevent="value = !value"
+    >
+      <v-checkbox v-model="value" hide-details />
+      <v-label v-if="!table" class="flex-fill fill-height text-caption">{{
+        field.name
+      }}</v-label>
+    </div>
   </template>
 </template>

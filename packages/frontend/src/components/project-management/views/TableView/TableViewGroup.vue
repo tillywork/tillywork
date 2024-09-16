@@ -448,7 +448,8 @@ watchEffect(() => {
                                 v
                             })
                           "
-                          @click.prevent
+                          table
+                          @click.stop
                         />
                       </v-card>
                     </template>

@@ -88,6 +88,7 @@ export const useFields = ({
         FieldTypes.LABEL,
         FieldTypes.DATE,
         FieldTypes.USER,
+        FieldTypes.CHECKBOX,
       ].includes(field.type)
     )
   );
@@ -99,6 +100,7 @@ export const useFields = ({
         FieldTypes.LABEL,
         FieldTypes.DATE,
         FieldTypes.USER,
+        FieldTypes.CHECKBOX,
       ].includes(field.type)
     )
   );
