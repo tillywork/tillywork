@@ -280,13 +280,14 @@ watchEffect(() => {
               class="px-2 py-1 align-end"
               style="min-height: fit-content"
             >
-              <div class="d-flex align-center flex-wrap flex-fill ga-2">
+              <div class="d-flex align-center flex-wrap flex-fill">
                 <template v-if="pinnedFieldsWithoutAssignee">
                   <template
                     v-for="field in pinnedFieldsWithoutAssignee"
                     :key="field.slug"
                   >
                     <base-field
+                      class="me-2"
                       :field
                       no-label
                       :model-value="card.data[field.slug]"
