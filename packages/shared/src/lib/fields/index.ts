@@ -34,7 +34,7 @@ export interface CreateFieldDto {
   items?: FieldItem[];
   dataCardType?: CardType;
   lists?: List[];
-  isPinned: boolean;
+  isPinned?: boolean;
 }
 
 export enum FieldTypes {
