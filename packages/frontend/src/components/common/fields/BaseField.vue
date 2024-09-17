@@ -54,6 +54,7 @@ const { data: users } = useProjectUsersQuery({
       :placeholder="field.name"
       :multiple="field.multiple"
       :rounded
+      :fill="flexFill"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.LABEL">
@@ -65,6 +66,7 @@ const { data: users } = useProjectUsersQuery({
       :multiple="field.multiple"
       density="compact"
       :rounded
+      :fill="flexFill"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.USER">
@@ -85,7 +87,7 @@ const { data: users } = useProjectUsersQuery({
   </template>
   <template v-else-if="field.type === FieldTypes.CHECKBOX">
     <div
-      class="d-flex align-center user-select-none"
+      class="base-checkbox d-flex align-center user-select-none"
       :class="table ? 'justify-center' : ''"
       @click.prevent="value = !value"
     >
@@ -103,6 +105,17 @@ const { data: users } = useProjectUsersQuery({
       @click.prevent
       :rounded
       :fill="flexFill"
+      :tooltip="field.name"
     />
   </template>
 </template>
+
+<style lang="scss">
+.base-checkbox {
+  .v-checkbox {
+    .v-selection-control {
+      min-height: auto !important;
+    }
+  }
+}
+</style>

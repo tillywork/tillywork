@@ -61,6 +61,7 @@ const { updateFieldValue } = useCard();
 
 const { titleField } = useFields({
   cardTypeId: props.list.defaultCardType.id,
+  listId: props.list.id,
 });
 
 const groupCopy = ref(cloneDeep(props.listGroup));

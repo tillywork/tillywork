@@ -30,13 +30,21 @@ const { selected, search, filteredItems, isItemSelected, toggleItemSelection } =
       <template #activator="{ props }">
         <v-card
           v-bind="props"
-          class="pa-2 flex-fill h-100 d-flex align-center text-truncate"
+          class="pa-2 d-flex align-center text-truncate"
+          :class="{
+            'flex-fill': fill,
+          }"
           color="transparent"
           :rounded
           @click.prevent
         >
           <template v-if="selected && !!selected[0]">
-            <v-card-text class="pa-0 text-caption">
+            <v-card-text
+              class="pa-0 text-caption"
+              :style="{
+                width: 'fit-content',
+              }"
+            >
               {{ selected.join(', ') }}
             </v-card-text>
           </template>

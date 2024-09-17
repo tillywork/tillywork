@@ -49,7 +49,10 @@ const {
         <v-card
           link
           v-bind="props"
-          class="d-flex align-center flex-fill h-100 flex-1-0 ga-1 pa-1"
+          class="d-flex align-center h-100 flex-1-0 ga-1 pa-1"
+          :class="{
+            'flex-fill': fill,
+          }"
           color="transparent"
           :rounded
           @click.prevent

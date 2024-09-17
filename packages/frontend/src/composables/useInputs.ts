@@ -17,6 +17,7 @@ export interface UseInputsProps {
     | 'solo-filled';
   rounded?: string;
   density?: string;
+  fill?: boolean;
 }
 
 interface UseInputsEmit {

@@ -52,6 +52,7 @@ const { updateFieldValue } = useCard();
 
 const { titleField, assigneeField, pinnedFieldsWithoutAssignee } = useFields({
   cardTypeId: props.list.defaultCardType.id,
+  listId: props.list.id,
 });
 
 const groupCopy = ref(cloneDeep(props.listGroup));
@@ -311,7 +312,7 @@ watchEffect(() => {
                 <v-list-item
                   class="list-row text-body-3"
                   rounded="0"
-                  height="33"
+                  height="36"
                   :to="`/pm/card/${row.original.id}`"
                   :ripple="false"
                   v-bind="rowProps"
@@ -390,7 +391,12 @@ watchEffect(() => {
                     />
                   </v-list-item-title>
                   <template #append>
-                    <div class="d-flex align-center ga-2 me-6">
+                    <div
+                      class="d-flex align-center ga-2 me-6"
+                      :style="{
+                        maxHeight: '28px',
+                      }"
+                    >
                       <template
                         v-for="field in pinnedFieldsWithoutAssignee"
                         :key="field.slug"

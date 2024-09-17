@@ -10,9 +10,8 @@ import {
 } from "typeorm";
 import { List } from "../list.entity";
 import { Field } from "../../fields/field.entity";
-import { QueryFilter } from "../../filters/types";
 import { ListGroupEntityTypes } from "../types";
-import { ListGroupOptions } from "@tillywork/shared";
+import { ListGroupOptions, QueryFilter } from "@tillywork/shared";
 
 @Entity()
 export class ListGroup {

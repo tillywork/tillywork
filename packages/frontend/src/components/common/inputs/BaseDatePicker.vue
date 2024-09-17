@@ -225,7 +225,7 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
           <template #append v-if="dateValue">
             <base-icon-btn
               icon="mdi-close"
-              class="ms-2 align-self-center"
+              class="align-self-center"
               variant="text"
               rounded="circle"
               size="x-small"
