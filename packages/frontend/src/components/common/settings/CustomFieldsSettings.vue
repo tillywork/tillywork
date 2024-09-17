@@ -396,6 +396,9 @@ watch(
             label="Pinned"
             v-model="fieldDto.isPinned"
             density="compact"
+            hint="Pinned fields appear in cards in your board and list views, as well as when creating a card."
+            persistent-hint
+            :hide-details="false"
           />
           <v-checkbox
             label="Multiple"
