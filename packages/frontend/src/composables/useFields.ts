@@ -101,6 +101,7 @@ export const useFields = ({
         FieldTypes.DATE,
         FieldTypes.USER,
         FieldTypes.CHECKBOX,
+        FieldTypes.NUMBER,
       ].includes(field.type)
     )
   );

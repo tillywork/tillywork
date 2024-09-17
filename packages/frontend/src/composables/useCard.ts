@@ -32,6 +32,7 @@ export const useCard = () => {
           : undefined;
         break;
       case FieldTypes.CHECKBOX:
+      case FieldTypes.NUMBER:
         newValue = v;
         break;
       default:

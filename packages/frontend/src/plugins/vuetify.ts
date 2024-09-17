@@ -5,6 +5,7 @@ import { md3 } from 'vuetify/blueprints';
 import '@mdi/font/css/materialdesignicons.css';
 import 'vuetify/styles';
 import '@/styles/vuetify.scss';
+import { VNumberInput } from 'vuetify/labs/VNumberInput';
 
 const themes = {
   light: {
@@ -36,7 +37,10 @@ const themes = {
 
 const vuetify = createVuetify({
   blueprint: md3,
-  components,
+  components: {
+    ...components,
+    VNumberInput,
+  },
   directives,
   theme: {
     defaultTheme: 'light',
@@ -118,6 +122,12 @@ const vuetify = createVuetify({
     },
     VAppBar: {
       color: 'navigation',
+    },
+    VNumberInput: {
+      VBtn: {
+        color: 'default',
+        rounded: 'circle',
+      },
     },
   },
 });

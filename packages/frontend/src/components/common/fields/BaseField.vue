@@ -5,6 +5,7 @@ import BaseRelationInput from '../inputs/BaseRelationInput.vue';
 import BaseDropdownInput from '../inputs/BaseDropdownInput.vue';
 import { useAuthStore } from '@/stores/auth';
 import { type Field, FieldTypes } from '@tillywork/shared';
+import BaseNumberInput from '../inputs/BaseNumberInput.vue';
 
 const value = defineModel<any>();
 
@@ -89,9 +90,19 @@ const { data: users } = useProjectUsersQuery({
       @click.prevent="value = !value"
     >
       <v-checkbox v-model="value" hide-details />
-      <v-label v-if="!table" class="flex-fill fill-height text-caption">{{
-        field.name
-      }}</v-label>
+      <v-label
+        v-if="!table"
+        class="flex-fill fill-height text-caption cursor-pointer"
+        >{{ field.name }}</v-label
+      >
     </div>
+  </template>
+  <template v-else-if="field.type === FieldTypes.NUMBER">
+    <base-number-input
+      v-model="value"
+      @click.prevent
+      :rounded
+      :fill="flexFill"
+    />
   </template>
 </template>
