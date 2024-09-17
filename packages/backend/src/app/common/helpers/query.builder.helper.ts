@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Logger } from "@nestjs/common";
 import { WhereExpressionBuilder, Brackets, SelectQueryBuilder } from "typeorm";
-import { FieldFilter, FilterGroup, FilterOperator } from "../filters/types";
-import { dayjs } from "@tillywork/shared";
+import {
+    dayjs,
+    FieldFilter,
+    FilterGroup,
+    FilterOperator,
+} from "@tillywork/shared";
 
 @Injectable()
 export class QueryBuilderHelper {
@@ -199,6 +203,13 @@ export class QueryBuilderHelper {
                 return queryBuilder.andWhere(`${fieldName} != :${field}`, {
                     [field]: processedValue,
                 });
+            case "neOrNull":
+                return queryBuilder.andWhere(
+                    `${fieldName} != :${field} OR ${fieldName} IS NULL`,
+                    {
+                        [field]: processedValue,
+                    }
+                );
             case "gt":
                 return queryBuilder.andWhere(`${fieldName} > :${field}`, {
                     [field]: processedValue,

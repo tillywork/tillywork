@@ -124,6 +124,8 @@ const vuetify = createVuetify({
       color: 'navigation',
     },
     VNumberInput: {
+      density: 'compact',
+      variant: 'outlined',
       VBtn: {
         color: 'default',
         rounded: 'circle',

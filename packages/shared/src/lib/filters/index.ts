@@ -37,7 +37,8 @@ export type FilterOperator =
   | 'between' // between two values
   | 'nbetween' // not between two values
   | 'isNull' // checks if a value is null
-  | 'isNotNull'; // value is not null
+  | 'isNotNull' // value is not null
+  | 'neOrNull';
 
 export interface FieldFilter {
   field: string;

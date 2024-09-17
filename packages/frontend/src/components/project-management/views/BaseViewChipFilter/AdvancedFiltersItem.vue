@@ -29,7 +29,6 @@ const selectedFilter = computed(() =>
 );
 
 const dropdownOptions = computed(() => {
-  // Add specific field options here
   switch (filter.value.field) {
     case 'listStage.id':
       return (
@@ -93,6 +92,40 @@ const filteringOptions = [
   },
 ];
 
+const checkboxOptions = [
+  {
+    title: 'Is true',
+    value: 'isTrue',
+  },
+  {
+    title: 'Is false',
+    value: 'isFalse',
+  },
+];
+
+const numberOperators = [
+  {
+    title: 'Equals',
+    value: 'eq',
+  },
+  {
+    title: 'Less Than',
+    value: 'lt',
+  },
+  {
+    title: 'Greater Than',
+    value: 'gt',
+  },
+  {
+    title: 'Is empty',
+    value: 'isNull',
+  },
+  {
+    title: 'Is not empty',
+    value: 'isNotNull',
+  },
+];
+
 function removeFilter() {
   emit('delete', props.index);
 }
@@ -101,8 +134,18 @@ function removeFilter() {
  * Triggered when filteringOptions are selected
  * @param value Value of the option selected
  */
-function handleFilteringOptionChange(value: string) {
-  filter.value.operator = mapFilterOptionValueToOperator(value);
+function handleFilteringOptionChange(filterOption: string) {
+  if (selectedFilter.value?.type === FieldTypes.CHECKBOX) {
+    if (filterOption === 'isTrue') {
+      filter.value.operator = 'eq';
+      filter.value.value = true;
+    } else if (filterOption === 'isFalse') {
+      filter.value.operator = 'neOrNull';
+      filter.value.value = true;
+    }
+  } else {
+    filter.value.operator = mapFilterOptionValueToOperator(filterOption);
+  }
 }
 
 /**
@@ -126,6 +169,7 @@ function mapFilterOptionValueToOperator(value: string): FilterOperator {
         return value as FilterOperator;
       }
     case FieldTypes.DATE:
+    case FieldTypes.NUMBER:
     default:
       return value as FilterOperator;
   }
@@ -153,7 +197,15 @@ function mapFilterOperatorToFileringOption(
       } else {
         return value as FilterOperator;
       }
+    case FieldTypes.CHECKBOX:
+      if (value === 'eq') {
+        return 'isTrue' as FilterOperator;
+      } else if (value === 'neOrNull') {
+        return 'isFalse' as FilterOperator;
+      }
+      return 'isTrue' as FilterOperator;
     case FieldTypes.DATE:
+    case FieldTypes.NUMBER:
     default:
       return value as FilterOperator;
   }
@@ -180,6 +232,9 @@ watch(
   (v) => {
     if (v) {
       filterOption.value = mapFilterOperatorToFileringOption(v.operator);
+      if (selectedFilter.value?.type === FieldTypes.CHECKBOX) {
+        handleFilteringOptionChange(filterOption.value);
+      }
     }
   },
   { immediate: true }
@@ -214,7 +269,9 @@ watch(
         </v-list-item>
       </template>
     </v-autocomplete>
-    <template v-if="selectedFilter?.type === FieldTypes.TEXT">
+    <template
+      v-if="[FieldTypes.TEXT, FieldTypes.RICH].includes(selectedFilter!.type)"
+    >
       <v-autocomplete
         :items="textOperators"
         v-model="filter.operator"
@@ -227,6 +284,7 @@ watch(
         class="me-2"
       />
       <v-text-field
+        v-if="!hideFilterValue"
         v-model="filter.value"
         label="Value"
         hide-details
@@ -325,6 +383,42 @@ watch(
         :field="selectedFilter.original"
         :key="selectedFilter.field"
         multiple
+      />
+    </template>
+    <template v-if="selectedFilter?.type === FieldTypes.CHECKBOX">
+      <v-autocomplete
+        :items="checkboxOptions"
+        v-model="filterOption"
+        @update:model-value="handleFilteringOptionChange"
+        label="Value"
+        single-line
+        hide-details
+        max-width="160"
+        auto-select-first
+        :rules="[rules.required]"
+        class="me-2"
+      />
+    </template>
+    <template v-if="selectedFilter?.type === FieldTypes.NUMBER">
+      <v-autocomplete
+        :items="numberOperators"
+        v-model="filter.operator"
+        label="Operator"
+        single-line
+        hide-details
+        max-width="160"
+        auto-select-first
+        :rules="[rules.required]"
+        class="me-2"
+      />
+      <v-number-input
+        v-if="!hideFilterValue"
+        v-model="filter.value"
+        label="Value"
+        hide-details
+        single-line
+        clearable
+        :rules="[rules.required]"
       />
     </template>
     <base-icon-btn
