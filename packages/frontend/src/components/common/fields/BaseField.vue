@@ -5,6 +5,7 @@ import BaseRelationInput from '../inputs/BaseRelationInput.vue';
 import BaseDropdownInput from '../inputs/BaseDropdownInput.vue';
 import { useAuthStore } from '@/stores/auth';
 import { type Field, FieldTypes } from '@tillywork/shared';
+import BaseNumberInput from '../inputs/BaseNumberInput.vue';
 
 const value = defineModel<any>();
 
@@ -13,6 +14,7 @@ defineProps<{
   noLabel?: boolean;
   flexFill?: boolean;
   rounded?: string;
+  table?: boolean;
 }>();
 
 const { project, user } = storeToRefs(useAuthStore());
@@ -52,6 +54,7 @@ const { data: users } = useProjectUsersQuery({
       :placeholder="field.name"
       :multiple="field.multiple"
       :rounded
+      :fill="flexFill"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.LABEL">
@@ -63,6 +66,7 @@ const { data: users } = useProjectUsersQuery({
       :multiple="field.multiple"
       density="compact"
       :rounded
+      :fill="flexFill"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.USER">
@@ -81,4 +85,37 @@ const { data: users } = useProjectUsersQuery({
   <template v-else-if="field.type === FieldTypes.CARD">
     <base-relation-input v-model="value" :field variant="outlined" />
   </template>
+  <template v-else-if="field.type === FieldTypes.CHECKBOX">
+    <div
+      class="base-checkbox d-flex align-center user-select-none"
+      :class="table ? 'justify-center' : ''"
+      @click.prevent="value = !value"
+    >
+      <v-checkbox v-model="value" hide-details />
+      <v-label
+        v-if="!table"
+        class="flex-fill fill-height text-caption cursor-pointer"
+        >{{ field.name }}</v-label
+      >
+    </div>
+  </template>
+  <template v-else-if="field.type === FieldTypes.NUMBER">
+    <base-number-input
+      v-model="value"
+      @click.prevent
+      :rounded
+      :fill="flexFill"
+      :tooltip="field.name"
+    />
+  </template>
 </template>
+
+<style lang="scss">
+.base-checkbox {
+  .v-checkbox {
+    .v-selection-control {
+      min-height: auto !important;
+    }
+  }
+}
+</style>

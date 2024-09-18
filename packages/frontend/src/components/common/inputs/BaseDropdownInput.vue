@@ -7,6 +7,8 @@ const emit = defineEmits(['update:modelValue']);
 
 const { selected, search, filteredItems, isItemSelected, toggleItemSelection } =
   useInputs(props, emit);
+
+const attrs = useAttrs();
 </script>
 
 <template>
@@ -29,14 +31,25 @@ const { selected, search, filteredItems, isItemSelected, toggleItemSelection } =
     <v-menu :close-on-content-click="false">
       <template #activator="{ props }">
         <v-card
-          v-bind="props"
-          class="pa-2 flex-fill h-100 d-flex align-center text-truncate"
+          v-bind="{
+            ...props,
+            ...attrs,
+          }"
+          class="pa-2 d-flex align-center text-truncate"
+          :class="{
+            'flex-fill': fill,
+          }"
           color="transparent"
           :rounded
           @click.prevent
         >
           <template v-if="selected && !!selected[0]">
-            <v-card-text class="pa-0 text-caption">
+            <v-card-text
+              class="pa-0 text-caption"
+              :style="{
+                width: 'fit-content',
+              }"
+            >
               {{ selected.join(', ') }}
             </v-card-text>
           </template>

@@ -41,6 +41,17 @@ const showIsMultiple = computed(() =>
   ].includes(fieldDto.value?.type as FieldTypes)
 );
 
+const pinnableField = computed(() =>
+  [
+    FieldTypes.DROPDOWN,
+    FieldTypes.LABEL,
+    FieldTypes.USER,
+    FieldTypes.DATE,
+    FieldTypes.CHECKBOX,
+    FieldTypes.NUMBER,
+  ].includes(fieldDto.value?.type as FieldTypes)
+);
+
 const isUpdateOrCreateLoading = computed(
   () => isUpdateLoading.value || isCreateLoading.value
 );
@@ -374,11 +385,20 @@ watch(
 
         <!-- ~ Options -->
         <div class="mb-2">
-          <v-checkbox
+          <!-- <v-checkbox
             label="Required"
             v-model="fieldDto.required"
             density="compact"
             color="primary"
+          /> -->
+          <v-checkbox
+            v-if="pinnableField"
+            label="Pinned"
+            v-model="fieldDto.isPinned"
+            density="compact"
+            hint="Pinned fields appear in cards in your board and list views, as well as when creating a card."
+            persistent-hint
+            :hide-details="false"
           />
           <v-checkbox
             label="Multiple"

@@ -31,6 +31,10 @@ export const useCard = () => {
           ? [v.item ? v.item : v.toString()]
           : undefined;
         break;
+      case FieldTypes.CHECKBOX:
+      case FieldTypes.NUMBER:
+        newValue = v;
+        break;
       default:
         newValue = Array.isArray(v)
           ? v.map((item) => (item.item ? item.item : item.toString()))

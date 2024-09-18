@@ -34,6 +34,7 @@ export interface CreateFieldDto {
   items?: FieldItem[];
   dataCardType?: CardType;
   lists?: List[];
+  isPinned?: boolean;
 }
 
 export enum FieldTypes {
@@ -77,6 +78,14 @@ export const FIELD_TYPE_OPTIONS = [
   {
     title: 'Relation',
     value: FieldTypes.CARD,
+  },
+  {
+    title: 'Checkbox',
+    value: FieldTypes.CHECKBOX,
+  },
+  {
+    title: 'Number',
+    value: FieldTypes.NUMBER,
   },
 ];
 

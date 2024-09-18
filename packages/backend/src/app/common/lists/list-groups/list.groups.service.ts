@@ -167,6 +167,13 @@ export class ListGroupsService {
                 });
                 break;
 
+            case FieldTypes.CHECKBOX:
+                generatedGroups = this.generateGroupsForCheckbox({
+                    listId,
+                    field: groupByField,
+                });
+                break;
+
             default:
                 generatedGroups = [
                     {
@@ -464,6 +471,58 @@ export class ListGroupsService {
         };
 
         return [...groups, emptyGroup];
+    }
+
+    generateGroupsForCheckbox({
+        listId,
+        field,
+    }: {
+        listId: number;
+        field: Field;
+    }) {
+        const trueGroup: CreateListGroupDto = {
+            name: "True",
+            type: ListGroupOptions.FIELD,
+            icon: "mdi-check",
+            color: "success",
+            listId,
+            order: 1,
+            fieldId: field.id,
+            filter: {
+                where: {
+                    and: [
+                        {
+                            field: `card.data.${field.slug}`,
+                            operator: "eq",
+                            value: true,
+                        },
+                    ],
+                },
+            },
+        };
+
+        const falseGroup: CreateListGroupDto = {
+            name: "False",
+            type: ListGroupOptions.FIELD,
+            icon: "mdi-close",
+            color: "error",
+            listId,
+            order: 1,
+            fieldId: field.id,
+            filter: {
+                where: {
+                    and: [
+                        {
+                            field: `card.data.${field.slug}`,
+                            operator: "neOrNull",
+                            value: true,
+                        },
+                    ],
+                },
+            },
+        };
+
+        return [trueGroup, falseGroup];
     }
 
     async findOne(id: number): Promise<ListGroup> {

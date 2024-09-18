@@ -7,9 +7,8 @@ import {
     IsString,
     ValidateIf,
 } from "class-validator";
-import { QueryFilter } from "../../../filters/types";
 import { ListGroupEntityTypes } from "../../types";
-import { ListGroupOptions } from "@tillywork/shared";
+import { ListGroupOptions, QueryFilter } from "@tillywork/shared";
 
 export class CreateListGroupDto {
     @IsString()

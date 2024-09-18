@@ -13,6 +13,8 @@ const {
   isItemSelected,
   toggleItemSelection,
 } = useInputs(props, emit);
+
+const attrs = useAttrs();
 </script>
 
 <template>
@@ -48,8 +50,14 @@ const {
       <template #activator="{ props }">
         <v-card
           link
-          v-bind="props"
-          class="d-flex align-center flex-fill h-100 flex-1-0 ga-1 pa-1"
+          v-bind="{
+            ...props,
+            ...attrs,
+          }"
+          class="d-flex align-center h-100 flex-1-0 ga-1 pa-1"
+          :class="{
+            'flex-fill': fill,
+          }"
           color="transparent"
           :rounded
           @click.prevent
