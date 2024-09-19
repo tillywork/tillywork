@@ -18,6 +18,7 @@ export interface UseInputsProps {
   rounded?: string;
   density?: string;
   fill?: boolean;
+  label?: string;
 }
 
 interface UseInputsEmit {

@@ -32,8 +32,8 @@ const attrs = useAttrs();
       <template #activator="{ props }">
         <v-card
           v-bind="{
-            ...props,
             ...attrs,
+            ...props,
           }"
           class="pa-2 d-flex align-center text-truncate"
           :class="{
@@ -54,7 +54,9 @@ const attrs = useAttrs();
             </v-card-text>
           </template>
           <template v-else>
-            <v-card-subtitle class="text-caption px-0">Empty</v-card-subtitle>
+            <v-card-subtitle class="text-caption px-0">{{
+              label
+            }}</v-card-subtitle>
           </template>
         </v-card>
       </template>
