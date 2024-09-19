@@ -2,8 +2,8 @@
 import BaseListViewTabs from './BaseListViewTabs.vue';
 import BaseView from '../views/BaseView.vue';
 import type { List } from './types';
-import type { View } from '../views/types';
 import { useViewsService } from '@/services/useViewsService';
+import type { View } from '@tillywork/shared';
 
 const props = defineProps<{
   list: List;
@@ -27,7 +27,7 @@ const view = ref<View>();
     </div>
     <v-divider />
     <template v-if="view">
-      <base-view :view :list />
+      <base-view :view :list :key="view.id" />
     </template>
   </div>
 </template>

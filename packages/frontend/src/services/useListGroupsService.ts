@@ -14,6 +14,7 @@ export interface GetListGroupsByOptionParams {
 
 export type GetListGroupsQueryParams = GetListGroupsByOptionParams & {
   enabled?: Ref<boolean>;
+  viewId: MaybeRef<number>;
 };
 
 export const useListGroupsService = () => {
@@ -40,6 +41,7 @@ export const useListGroupsService = () => {
   }
 
   async function update(listGroup: Partial<ListGroup>) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return sendRequest(`/lists/${listGroup.list!.id}/groups/${listGroup.id}`, {
       method: 'PUT',
       data: listGroup,
@@ -47,9 +49,12 @@ export const useListGroupsService = () => {
   }
 
   function useGetListGroupsByOptionQuery(params: GetListGroupsQueryParams) {
-    const { listId, hideCompleted, groupBy, sortCardsBy } = params;
+    const { listId, hideCompleted, groupBy, sortCardsBy, viewId } = params;
     const getListGroupsQuery = useQuery({
-      queryKey: ['listGroups', { listId: toValue(listId) }],
+      queryKey: [
+        'listGroups',
+        { listId: toValue(listId), viewId: toValue(viewId) },
+      ],
       queryFn: () =>
         getListGroupsByOption({
           listId,

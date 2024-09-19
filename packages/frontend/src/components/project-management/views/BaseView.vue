@@ -84,6 +84,7 @@ const updateViewMutation = viewsService.useUpdateViewMutation();
 const { data: listGroups, refetch: refetchListGroups } =
   useGetListGroupsByOptionQuery({
     listId,
+    viewId: viewCopy.value.id,
     hideCompleted,
     groupBy,
   });
