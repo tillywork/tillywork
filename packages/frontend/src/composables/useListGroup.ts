@@ -19,6 +19,7 @@ import {
 import { cloneDeep } from 'lodash';
 import { useCard } from './useCard';
 import type { Row } from '@tanstack/vue-table';
+import { useListGroupsService } from '@/services/useListGroupsService';
 
 interface UseListGroupEmits {
   (e: 'card:update:order' | 'card:update:stage', value: unknown): void;
@@ -28,6 +29,7 @@ export const useListGroup = ({
   props,
   emit,
   cards,
+  reactiveGroup,
 }: {
   props: {
     listGroup: ListGroup | Row<ListGroup>;
@@ -37,6 +39,7 @@ export const useListGroup = ({
   };
   emit: UseListGroupEmits;
   cards: Ref<(Card | Row<Card>)[]>;
+  reactiveGroup?: Ref<ListGroup>;
 }) => {
   const isDragging = ref(false);
 
@@ -55,6 +58,9 @@ export const useListGroup = ({
 
   const { updateFieldValue } = useCard();
   const { calculateCardOrder } = useCardsService();
+
+  const { useUpdateListGroupMutation } = useListGroupsService();
+  const { mutateAsync: updateListGroup } = useUpdateListGroupMutation();
 
   function openCreateCardDialog(listGroup: ListGroup) {
     const cardData: Record<string, unknown> = {};
@@ -252,6 +258,20 @@ export const useListGroup = ({
     data.setDragImage(img, 0, 0);
   }
 
+  function toggleGroupExpansion() {
+    if (reactiveGroup) {
+      reactiveGroup.value.isExpanded = !reactiveGroup.value.isExpanded;
+
+      updateListGroup(reactiveGroup.value).catch(() => {
+        showSnackbar({
+          message: 'Something went wrong, please try again.',
+          color: 'error',
+          timeout: 5000,
+        });
+      });
+    }
+  }
+
   return {
     openCreateCardDialog,
     onDragAdd,
@@ -261,5 +281,6 @@ export const useListGroup = ({
     onDragUpdate,
     setDragItem,
     isDragging,
+    toggleGroupExpansion,
   };
 };
