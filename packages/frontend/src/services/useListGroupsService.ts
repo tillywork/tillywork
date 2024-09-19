@@ -67,14 +67,9 @@ export const useListGroupsService = () => {
   function useUpdateListGroupMutation() {
     return useMutation({
       mutationFn: update,
-      onSuccess: (listGroup) => {
+      onSuccess: () => {
         queryClient.invalidateQueries({
-          queryKey: [
-            'listGroups',
-            {
-              listId: listGroup.listId,
-            },
-          ],
+          queryKey: ['listGroups'],
         });
       },
     });

@@ -3,16 +3,13 @@ import {
   FlexRender,
   getCoreRowModel,
   useVueTable,
-  type Row,
   type Column,
 } from '@tanstack/vue-table';
-import { useListGroupsService } from '@/services/useListGroupsService';
 import type { Card } from '../../cards/types';
 import { type List, type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import TableViewGroup from './TableViewGroup.vue';
-import { useSnackbarStore } from '@/stores/snackbar';
 import { useAuthStore } from '@/stores/auth';
 import { useFields } from '@/composables/useFields';
 import type { TableColumnDef } from './types';
@@ -82,12 +79,7 @@ const columns = computed<TableColumnDef[]>(() => {
   return [actionsColumn, titleColumn, ...viewColumns];
 });
 
-const { showSnackbar } = useSnackbarStore();
 const { project } = storeToRefs(useAuthStore());
-
-const listGroupsService = useListGroupsService();
-const { mutateAsync: updateListGroup } =
-  listGroupsService.useUpdateListGroupMutation();
 
 const listsStagesService = useListStagesService();
 const { data: listStages } = listsStagesService.useGetListStagesQuery({
@@ -148,25 +140,6 @@ function getColumnSortIcon(column: Column<ListGroup, unknown>) {
     default:
       return 'mdi-arrow-up';
   }
-}
-
-function toggleGroupExpansion(listGroup: Row<ListGroup>) {
-  listGroup.toggleExpanded();
-  isLoading.value = true;
-  updateListGroup({
-    ...listGroup.original,
-    isExpanded: listGroup.getIsExpanded(),
-  })
-    .catch(() => {
-      showSnackbar({
-        message: 'Something went wrong, please try again.',
-        color: 'error',
-        timeout: 5000,
-      });
-    })
-    .finally(() => {
-      isLoading.value = false;
-    });
 }
 
 function handleDeleteCard(card: Card) {
@@ -283,7 +256,6 @@ function handleUpdateCardOrder(data: {
             :table
             :column-sizes="columnSizes"
             :no-group-banners="noGroupBanners"
-            @toggle:group="toggleGroupExpansion"
             @card:delete="handleDeleteCard"
             @card:update:stage="handleUpdateCardStage"
             @card:update:order="handleUpdateCardOrder"

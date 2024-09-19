@@ -30,7 +30,6 @@ import BaseField from '@/components/common/fields/BaseField.vue';
 import { useListGroup } from '@/composables/useListGroup';
 
 const emit = defineEmits([
-  'toggle:group',
   'card:delete',
   'card:update:stage',
   'card:update:order',
@@ -64,7 +63,7 @@ const { titleField } = useFields({
   listId: props.list.id,
 });
 
-const groupCopy = ref(cloneDeep(props.listGroup));
+const groupCopy = ref(cloneDeep(props.listGroup.original));
 const sortBy = computed<SortState>(() =>
   props.view.options.sortBy ? [cloneDeep(props.view.options.sortBy)] : []
 );
@@ -112,8 +111,8 @@ const total = ref(0);
 
 const { fetchNextPage, isFetching, hasNextPage, refetch, data } =
   cardsService.useGetGroupCardsInfinite({
-    listId: groupCopy.value.original.list.id,
-    groupId: groupCopy.value.original.id,
+    listId: groupCopy.value.list.id,
+    groupId: groupCopy.value.id,
     hideCompleted,
     hideChildren,
     filters,
@@ -149,7 +148,13 @@ const {
   onDragMove,
   onDragStart,
   onDragUpdate,
-} = useListGroup({ props, emit, cards: draggableCards });
+  toggleGroupExpansion,
+} = useListGroup({
+  props,
+  emit,
+  cards: draggableCards,
+  reactiveGroup: groupCopy,
+});
 
 async function handleGroupCardsLoad({
   done,
@@ -167,10 +172,6 @@ async function handleGroupCardsLoad({
   } else {
     done('ok');
   }
-}
-
-function toggleGroupExpansion(listGroup: Row<ListGroup>) {
-  emit('toggle:group', listGroup);
 }
 
 function handleCardMenuClick({
@@ -225,6 +226,15 @@ watch(
   { deep: true }
 );
 
+watch(
+  () => props.listGroup,
+  (v) => {
+    if (v) {
+      groupCopy.value = cloneDeep(v.original);
+    }
+  }
+);
+
 watchEffect(() => {
   if (isFetching.value) {
     isGroupCardsLoading.value = true;
@@ -239,17 +249,15 @@ watchEffect(() => {
     sticky
     lines="one"
     density="comfortable"
-    :border="listGroup.getIsExpanded() ? 'b-thin' : 'none'"
+    :border="groupCopy.isExpanded ? 'b-thin' : 'none'"
     style="z-index: 10"
     v-if="!noGroupBanners"
   >
     <base-icon-btn
-      :icon="
-        listGroup.getIsExpanded() ? 'mdi-chevron-down' : 'mdi-chevron-right'
-      "
-      :color="listGroup.getIsExpanded() ? 'info' : 'default'"
+      :icon="groupCopy.isExpanded ? 'mdi-chevron-down' : 'mdi-chevron-right'"
+      :color="groupCopy.isExpanded ? 'info' : 'default'"
       class="me-2"
-      @click="toggleGroupExpansion(listGroup)"
+      @click="toggleGroupExpansion"
     />
     <div>
       <template
@@ -283,7 +291,7 @@ watchEffect(() => {
       @click="openCreateCardDialog(listGroup.original)"
     />
   </v-banner>
-  <template v-if="listGroup.getIsExpanded()">
+  <template v-if="groupCopy.isExpanded">
     <v-list
       class="pa-0 overflow-scroll"
       rounded="0"
