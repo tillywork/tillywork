@@ -55,6 +55,7 @@ const { data: users } = useProjectUsersQuery({
       :multiple="field.multiple"
       :rounded
       :fill="flexFill"
+      :label="field.name"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.LABEL">
@@ -67,6 +68,7 @@ const { data: users } = useProjectUsersQuery({
       density="compact"
       :rounded
       :fill="flexFill"
+      :label="field.name"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.USER">

@@ -51,10 +51,10 @@ const attrs = useAttrs();
         <v-card
           link
           v-bind="{
-            ...props,
             ...attrs,
+            ...props,
           }"
-          class="d-flex align-center h-100 flex-1-0 ga-1 pa-1"
+          class="d-flex align-center h-100 ga-1 pa-1"
           :class="{
             'flex-fill': fill,
           }"
@@ -77,7 +77,9 @@ const attrs = useAttrs();
             </template>
           </template>
           <template v-else>
-            <v-card-subtitle class="pa-1 text-caption">Empty</v-card-subtitle>
+            <v-card-subtitle class="pa-1 text-caption">{{
+              label
+            }}</v-card-subtitle>
           </template>
         </v-card>
       </template>
