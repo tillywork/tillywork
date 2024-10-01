@@ -24,15 +24,10 @@ import {
   type ListStage,
   type ProjectUser,
   type SortState,
+  type Field,
 } from '@tillywork/shared';
 import { useListGroup } from '@/composables/useListGroup';
 import BaseField from '@/components/common/fields/BaseField.vue';
-
-const emit = defineEmits([
-  'card:delete',
-  'card:update:stage',
-  'card:update:order',
-]);
 
 const props = defineProps<{
   listGroup: Row<ListGroup>;
@@ -135,9 +130,10 @@ const {
   onDragStart,
   onDragUpdate,
   toggleGroupExpansion,
+  handleDeleteCard,
+  handleUpdateCardStage,
 } = useListGroup({
   props,
-  emit,
   cards: draggableCards,
   reactiveGroup: groupCopy,
 });
@@ -172,19 +168,6 @@ function handleCardMenuClick({
   } else {
     rowMenuOpen.value = null;
   }
-}
-
-function handleDeleteCard(card: Card) {
-  emit('card:delete', card);
-}
-
-function handleUpdateCardStage(data: {
-  cardId: number;
-  cardListId: number;
-  listStageId: number;
-  order?: number;
-}) {
-  emit('card:update:stage', data);
 }
 
 watch(
@@ -423,7 +406,7 @@ watch(
                           :model-value="row.original.data[assigneeField.slug]"
                           @update:model-value="(v: string) => updateFieldValue({
                                 card: row.original,
-                                field: assigneeField,
+                                field: assigneeField as Field,
                                 v
                             })"
                         />

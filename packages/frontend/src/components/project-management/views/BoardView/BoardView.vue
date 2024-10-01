@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useListGroupsService } from '@/services/useListGroupsService';
-import type { Card } from '../../cards/types';
 import { type List, type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
@@ -16,14 +15,6 @@ const props = defineProps<{
   list: List;
   listGroups: ListGroup[];
 }>();
-
-const emit = defineEmits([
-  'card:delete',
-  'submit',
-  'load',
-  'card:update:stage',
-  'card:update:order',
-]);
 
 const { showSnackbar } = useSnackbarStore();
 const { project } = storeToRefs(useAuthStore());
@@ -58,27 +49,6 @@ function toggleGroupExpansion(listGroup: ListGroup) {
       isLoading.value = false;
     });
 }
-
-function handleDeleteCard(card: Card) {
-  emit('card:delete', card);
-}
-
-function handleUpdateCardStage(data: {
-  cardId: number;
-  cardListId: number;
-  listStageId: number;
-  order?: number;
-}) {
-  emit('card:update:stage', data);
-}
-
-function handleUpdateCardOrder(data: {
-  currentCard: Card;
-  previousCard?: Card;
-  nextCard?: Card;
-}) {
-  emit('card:update:order', data);
-}
 </script>
 
 <template>
@@ -98,9 +68,6 @@ function handleUpdateCardOrder(data: {
             :list
             :project-users="projectUsers ?? []"
             @toggle:group="toggleGroupExpansion"
-            @card:delete="handleDeleteCard"
-            @card:update:stage="handleUpdateCardStage"
-            @card:update:order="handleUpdateCardOrder"
           />
         </template>
       </v-sheet>

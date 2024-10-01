@@ -29,12 +29,6 @@ import {
 import BaseField from '@/components/common/fields/BaseField.vue';
 import { useListGroup } from '@/composables/useListGroup';
 
-const emit = defineEmits([
-  'card:delete',
-  'card:update:stage',
-  'card:update:order',
-]);
-
 const props = defineProps<{
   listGroup: Row<ListGroup>;
   listStages: ListStage[];
@@ -54,7 +48,7 @@ const isGroupCardsLoading = defineModel<boolean>('loading');
 
 const cards = ref<Card[]>([]);
 
-const cardsService = useCardsService();
+const { useGetGroupCardsInfinite } = useCardsService();
 
 const { updateFieldValue } = useCard();
 
@@ -110,7 +104,7 @@ const hideChildren = computed<boolean>(() => props.view.options.hideChildren);
 const total = ref(0);
 
 const { fetchNextPage, isFetching, hasNextPage, refetch, data } =
-  cardsService.useGetGroupCardsInfinite({
+  useGetGroupCardsInfinite({
     listId: groupCopy.value.list.id,
     groupId: groupCopy.value.id,
     hideCompleted,
@@ -149,9 +143,10 @@ const {
   onDragStart,
   onDragUpdate,
   toggleGroupExpansion,
+  handleDeleteCard,
+  handleUpdateCardStage,
 } = useListGroup({
   props,
-  emit,
   cards: draggableCards,
   reactiveGroup: groupCopy,
 });
@@ -186,19 +181,6 @@ function handleCardMenuClick({
   } else {
     rowMenuOpen.value = null;
   }
-}
-
-function handleDeleteCard(card: Card) {
-  emit('card:delete', card);
-}
-
-function handleUpdateCardStage(data: {
-  cardId: number;
-  cardListId: number;
-  listStageId: number;
-  order?: number;
-}) {
-  emit('card:update:stage', data);
 }
 
 function getColumnSize(columnId: string) {

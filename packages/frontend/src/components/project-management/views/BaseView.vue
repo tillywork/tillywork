@@ -2,14 +2,12 @@
 import { type List } from '../lists/types';
 import { useViewsService } from '@/services/useViewsService';
 import { useListGroupsService } from '@/services/useListGroupsService';
-import type { Card } from '../cards/types';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
 import { type TableSortOption } from './types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useQueryClient } from '@tanstack/vue-query';
-import { useCardsService } from '@/services/useCardsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import BoardView from './BoardView/BoardView.vue';
 import ListView from './ListView/ListView.vue';
@@ -34,17 +32,12 @@ const props = defineProps<{
 const listId = computed(() => props.list.id);
 const viewCopy = ref<View>(cloneDeep(props.view));
 const viewsService = useViewsService();
-const cardsService = useCardsService();
 const { useGetListGroupsByOptionQuery } = useListGroupsService();
 const { useCreateFilterMutation, useUpdateFilterMutation } =
   useFitlersService();
 const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
 const queryClient = useQueryClient();
-
-const confirmDialogIndex = computed(() =>
-  dialog.getDialogIndex(DIALOGS.CONFIRM)
-);
 
 const hideCompleted = computed(() => viewCopy.value.options.hideCompleted);
 const groupBy = computed({
@@ -89,11 +82,6 @@ const { data: listGroups, refetch: refetchListGroups } =
     groupBy,
   });
 
-const { mutateAsync: deleteCard, isPending: isDeletingCard } =
-  cardsService.useDeleteCardMutation();
-const { mutateAsync: updateCardList } =
-  cardsService.useUpdateCardListMutation();
-
 const { mutateAsync: createFilter } = useCreateFilterMutation();
 const { mutateAsync: updateFilter } = useUpdateFilterMutation();
 
@@ -118,92 +106,6 @@ function openCreateCardDialog() {
       list: props.list,
       type: props.list.defaultCardType,
     },
-  });
-}
-
-function handleUpdateCardStage({
-  cardId,
-  cardListId,
-  listStageId,
-  order,
-}: {
-  cardId: number;
-  cardListId: number;
-  listStageId: number;
-  order?: number;
-}) {
-  updateCardList({
-    cardId,
-    cardListId,
-    updateCardListDto: {
-      listStageId,
-      order,
-    },
-  })
-    .then(() => {
-      queryClient.invalidateQueries({
-        queryKey: ['listGroups', { listId: props.list.id }],
-      });
-    })
-    .catch(() => {
-      showSnackbar({
-        message: 'Something went wrong, please try again.',
-        color: 'error',
-        timeout: 5000,
-      });
-    });
-}
-
-function handleDeleteCard(card: Card) {
-  dialog.openDialog({
-    dialog: DIALOGS.CONFIRM,
-    data: {
-      title: 'Confirm',
-      message: `Are you sure you want to delete ${card.data.title}?`,
-      onConfirm: () =>
-        deleteCard(card.id)
-          .then(() => {
-            dialog.closeDialog(confirmDialogIndex.value);
-          })
-          .catch(() => {
-            showSnackbar({
-              message: 'Something went wrong, please try again!',
-              color: 'error',
-              timeout: 5000,
-            });
-          }),
-      onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
-      isLoading: isDeletingCard,
-    },
-  });
-}
-
-function handleUpdateCardOrder({
-  currentCard,
-  previousCard,
-  nextCard,
-}: {
-  currentCard: Card;
-  previousCard?: Card;
-  nextCard?: Card;
-}) {
-  const newOrder = cardsService.calculateCardOrder({
-    previousCard,
-    nextCard,
-  });
-
-  updateCardList({
-    cardId: currentCard.id,
-    cardListId: currentCard.cardLists[0].id,
-    updateCardListDto: {
-      order: newOrder,
-    },
-  }).catch(() => {
-    showSnackbar({
-      message: 'Something went wrong, please try again.',
-      color: 'error',
-      timeout: 5000,
-    });
   });
 }
 
@@ -319,21 +221,11 @@ watch(
           :list
           :view="viewCopy"
           :groups="listGroups ?? []"
-          @row:delete="handleDeleteCard"
-          @row:update:stage="handleUpdateCardStage"
-          @row:update:order="handleUpdateCardOrder"
         >
         </table-view>
       </template>
       <template v-else-if="viewCopy.type === ViewTypes.BOARD">
-        <board-view
-          :view="viewCopy"
-          :list
-          :list-groups="listGroups ?? []"
-          @card:delete="handleDeleteCard"
-          @card:update:stage="handleUpdateCardStage"
-          @card:update:order="handleUpdateCardOrder"
-        />
+        <board-view :view="viewCopy" :list :list-groups="listGroups ?? []" />
       </template>
       <template v-else-if="viewCopy.type === ViewTypes.LIST">
         <list-view
@@ -342,9 +234,6 @@ watch(
           :view="viewCopy"
           :groups="listGroups ?? []"
           no-headers
-          @row:delete="handleDeleteCard"
-          @row:update:stage="handleUpdateCardStage"
-          @row:update:order="handleUpdateCardOrder"
         >
         </list-view>
       </template>
