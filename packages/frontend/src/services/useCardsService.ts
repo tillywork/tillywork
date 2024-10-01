@@ -121,13 +121,10 @@ export const useCardsService = () => {
           hideChildren,
           page: pageParam,
           limit: 15,
-          filters: filters?.value,
-          sortBy: sortBy?.value,
+          filters: toValue(filters),
+          sortBy: toValue(sortBy),
         }),
-      queryKey: [
-        'cards',
-        { listId: toValue(listId), groupId: toValue(groupId) },
-      ],
+      queryKey: ['cards', { listId, groupId }],
       getNextPageParam: (lastPage, allPages, lastPageParam) => {
         if (lastPage?.cards.length === 0) {
           return undefined;
@@ -268,5 +265,6 @@ export const useCardsService = () => {
     useSearchCards,
     searchCards,
     calculateCardOrder,
+    getCards,
   };
 };

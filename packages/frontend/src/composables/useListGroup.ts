@@ -15,19 +15,16 @@ import {
   type Card,
   type FieldFilter,
   dayjs,
+  type List,
 } from '@tillywork/shared';
 import { cloneDeep } from 'lodash';
 import { useCard } from './useCard';
 import type { Row } from '@tanstack/vue-table';
 import { useListGroupsService } from '@/services/useListGroupsService';
-
-interface UseListGroupEmits {
-  (e: 'card:update:order' | 'card:update:stage', value: unknown): void;
-}
+import { useQueryClient } from '@tanstack/vue-query';
 
 export const useListGroup = ({
   props,
-  emit,
   cards,
   reactiveGroup,
 }: {
@@ -36,8 +33,8 @@ export const useListGroup = ({
     listStages: ListStage[];
     projectUsers: ProjectUser[];
     view: View;
+    list: List;
   };
-  emit: UseListGroupEmits;
   cards: Ref<(Card | Row<Card>)[]>;
   reactiveGroup?: Ref<ListGroup>;
 }) => {
@@ -53,11 +50,24 @@ export const useListGroup = ({
     return sortBy.value && sortBy.value.length > 0;
   });
 
+  const confirmDialogIndex = computed(() =>
+    dialog.getDialogIndex(DIALOGS.CONFIRM)
+  );
+
   const dialog = useDialogStore();
   const { showSnackbar } = useSnackbarStore();
+  const queryClient = useQueryClient();
 
   const { updateFieldValue } = useCard();
-  const { calculateCardOrder } = useCardsService();
+  const {
+    calculateCardOrder,
+    useDeleteCardMutation,
+    useUpdateCardListMutation,
+  } = useCardsService();
+
+  const { mutateAsync: deleteCard, isPending: isDeletingCard } =
+    useDeleteCardMutation();
+  const { mutateAsync: updateCardList } = useUpdateCardListMutation();
 
   const { useUpdateListGroupMutation } = useListGroupsService();
   const { mutateAsync: updateListGroup } = useUpdateListGroupMutation();
@@ -195,10 +205,10 @@ export const useListGroup = ({
       nextCard = (nextCard as Row<Card>)?.original;
     }
 
-    emit('card:update:order', {
+    handleUpdateCardOrder({
       currentCard,
-      previousCard,
-      nextCard,
+      previousCard: previousCard as Card,
+      nextCard: nextCard as Card,
     });
   }
 
@@ -223,10 +233,10 @@ export const useListGroup = ({
 
     switch (listGroup.value.type) {
       case ListGroupOptions.LIST_STAGE: {
-        emit('card:update:stage', {
+        handleUpdateCardStage({
           cardId: currentCard.id,
           cardListId: currentCard.cardLists[0].id,
-          listStageId: listGroup.value.entityId,
+          listStageId: listGroup.value.entityId as number,
           order: newOrder,
         });
         break;
@@ -241,10 +251,10 @@ export const useListGroup = ({
           v: newValue,
         });
 
-        emit('card:update:order', {
+        handleUpdateCardOrder({
           currentCard,
-          previousCard,
-          nextCard,
+          previousCard: previousCard as Card,
+          nextCard: nextCard as Card,
         });
 
         break;
@@ -272,6 +282,92 @@ export const useListGroup = ({
     }
   }
 
+  function handleUpdateCardStage({
+    cardId,
+    cardListId,
+    listStageId,
+    order,
+  }: {
+    cardId: number;
+    cardListId: number;
+    listStageId: number;
+    order?: number;
+  }) {
+    updateCardList({
+      cardId,
+      cardListId,
+      updateCardListDto: {
+        listStageId,
+        order,
+      },
+    })
+      .then(() => {
+        queryClient.invalidateQueries({
+          queryKey: ['listGroups', { listId: props.list.id }],
+        });
+      })
+      .catch(() => {
+        showSnackbar({
+          message: 'Something went wrong, please try again.',
+          color: 'error',
+          timeout: 5000,
+        });
+      });
+  }
+
+  function handleDeleteCard(card: Card) {
+    dialog.openDialog({
+      dialog: DIALOGS.CONFIRM,
+      data: {
+        title: 'Confirm',
+        message: `Are you sure you want to delete ${card.data.title}?`,
+        onConfirm: () =>
+          deleteCard(card.id)
+            .then(() => {
+              dialog.closeDialog(confirmDialogIndex.value);
+            })
+            .catch(() => {
+              showSnackbar({
+                message: 'Something went wrong, please try again!',
+                color: 'error',
+                timeout: 5000,
+              });
+            }),
+        onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
+        isLoading: isDeletingCard,
+      },
+    });
+  }
+
+  function handleUpdateCardOrder({
+    currentCard,
+    previousCard,
+    nextCard,
+  }: {
+    currentCard: Card;
+    previousCard?: Card;
+    nextCard?: Card;
+  }) {
+    const newOrder = calculateCardOrder({
+      previousCard,
+      nextCard,
+    });
+
+    updateCardList({
+      cardId: currentCard.id,
+      cardListId: currentCard.cardLists[0].id,
+      updateCardListDto: {
+        order: newOrder,
+      },
+    }).catch(() => {
+      showSnackbar({
+        message: 'Something went wrong, please try again.',
+        color: 'error',
+        timeout: 5000,
+      });
+    });
+  }
+
   return {
     openCreateCardDialog,
     onDragAdd,
@@ -282,5 +378,8 @@ export const useListGroup = ({
     setDragItem,
     isDragging,
     toggleGroupExpansion,
+    handleDeleteCard,
+    handleUpdateCardOrder,
+    handleUpdateCardStage,
   };
 };

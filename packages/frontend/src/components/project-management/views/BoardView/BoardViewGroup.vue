@@ -18,16 +18,10 @@ import {
   type ListStage,
   type List,
   type SortState,
+  type Field,
 } from '@tillywork/shared';
 import { useListGroup } from '@/composables/useListGroup';
 import BaseField from '@/components/common/fields/BaseField.vue';
-
-const emit = defineEmits([
-  'toggle:group',
-  'card:delete',
-  'card:update:stage',
-  'card:update:order',
-]);
 
 const props = defineProps<{
   listGroup: ListGroup;
@@ -50,7 +44,8 @@ const {
   onDragMove,
   onDragStart,
   onDragUpdate,
-} = useListGroup({ props, emit, cards });
+  handleUpdateCardStage,
+} = useListGroup({ props, cards });
 
 const { updateFieldValue } = useCard();
 
@@ -122,17 +117,6 @@ async function handleGroupCardsLoad({
   } else {
     done('ok');
   }
-}
-
-//TODO fix drag/drop into different groups
-
-function handleUpdateCardStage(data: {
-  cardId: number;
-  cardListId: number;
-  listStageId: number;
-  order?: number;
-}) {
-  emit('card:update:stage', data);
 }
 
 watch(
@@ -268,7 +252,7 @@ watchEffect(() => {
                     return-string
                     @update:model-value="
                       (v: string[]) => updateFieldValue({
-                        card, field: assigneeField, v
+                        card, field: assigneeField as Field, v
                       })
                     "
                     @click.stop

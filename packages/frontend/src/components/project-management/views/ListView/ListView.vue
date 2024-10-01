@@ -5,7 +5,6 @@ import {
   useVueTable,
   type Column,
 } from '@tanstack/vue-table';
-import type { Card } from '../../cards/types';
 import { type List, type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
@@ -20,14 +19,6 @@ const props = defineProps<{
   view: View;
   groups: ListGroup[];
 }>();
-
-const emit = defineEmits([
-  'row:delete',
-  'submit',
-  'load',
-  'row:update:stage',
-  'row:update:order',
-]);
 
 const expandedState = ref<Record<string, boolean>>();
 
@@ -77,27 +68,6 @@ function getColumnSortIcon(column: Column<ListGroup, unknown>) {
     default:
       return 'mdi-arrow-up';
   }
-}
-
-function handleDeleteCard(card: Card) {
-  emit('row:delete', card);
-}
-
-function handleUpdateCardStage(data: {
-  cardId: number;
-  cardListId: number;
-  listStageId: number;
-  order?: number;
-}) {
-  emit('row:update:stage', data);
-}
-
-function handleUpdateCardOrder(data: {
-  currentCard: Card;
-  previousCard?: Card;
-  nextCard?: Card;
-}) {
-  emit('row:update:order', data);
 }
 </script>
 
@@ -177,9 +147,6 @@ function handleUpdateCardOrder(data: {
             :view
             :project-users="projectUsers ?? []"
             :table
-            @card:delete="handleDeleteCard"
-            @card:update:stage="handleUpdateCardStage"
-            @card:update:order="handleUpdateCardOrder"
           />
         </template>
       </v-card>
