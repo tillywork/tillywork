@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import Common from './common';
+import Icons from './icons';
 import BaseColorPicker from '../BaseColorPicker.vue';
+import stringUtils from '@/utils/string';
+
+export type IconSelection = {
+  name: string;
+  icon: string;
+};
 
 defineProps<{
   withColor?: boolean;
@@ -16,20 +22,26 @@ const attrs = useAttrs();
 
 const iconDictionary = computed(() => {
   return {
-    common: Common,
+    icons: Icons.filter(
+      (icon) =>
+        stringUtils.fuzzySearch(searchIcon.value, icon.icon) ||
+        stringUtils.fuzzySearch(searchIcon.value, icon.name)
+    ),
   };
 });
 
-function handleSelectIcon(selectedIcon: string) {
-  icon.value = selectedIcon;
-  menu.value = false;
+function handleSelectIcon(selectedIcon: IconSelection) {
+  icon.value = selectedIcon.icon;
 }
 
 watch(
   icon,
   (v) => {
     if (!v) {
-      handleSelectIcon('mdi-tag');
+      handleSelectIcon({
+        icon: 'mdi-tag',
+        name: 'Tag',
+      });
     }
   },
   { immediate: true }
@@ -37,11 +49,9 @@ watch(
 </script>
 
 <template>
-  <base-icon-btn id="activator" v-bind="attrs" :icon />
+  <base-icon-btn id="activator" v-bind="attrs" :icon :color="iconColor" />
   <v-menu v-model="menu" :close-on-content-click="false" activator="#activator">
-    <v-card width="296" height="400">
-      <base-color-picker v-if="withColor" v-model="iconColor" label="Color*" />
-
+    <v-card width="296">
       <v-text-field
         v-model="searchIcon"
         hide-details
@@ -57,9 +67,7 @@ watch(
         center-active
         density="compact"
       >
-        <v-tab slim>
-          <v-icon icon="mdi-apps" />
-        </v-tab>
+        <v-tab class="text-capitalize text-body-3"> Icons </v-tab>
       </v-tabs>
       <v-divider class="mx-4" />
       <v-tabs-items v-model="tab">
@@ -68,18 +76,31 @@ watch(
           v-for="(v, k, idx) in iconDictionary"
           class="overflow-auto py-2"
         >
+          <div class="py-2 px-4 border-b-thin">
+            <span class="text-body-3 me-3">Color</span>
+            <base-color-picker
+              v-if="withColor"
+              v-model="iconColor"
+              hide-details
+              icon
+            />
+          </div>
           <v-card height="316" border="none" class="overflow-auto">
             <v-card-text class="pa-2 d-flex flex-wrap ga-1">
               <template v-for="(i, index) in v" :key="index">
                 <v-btn
                   icon
-                  color=""
-                  :style="{ backgroundColor: icon === i ? 'accent' : '' }"
+                  :style="{ backgroundColor: icon === i.icon ? 'accent' : '' }"
                   density="comfortable"
                   @click="handleSelectIcon(i)"
-                  :active="icon === i"
+                  :active="icon === i.icon"
+                  color="default"
+                  size="30"
+                  v-tooltip:bottom="i.name"
                 >
-                  <v-icon>{{ i }}</v-icon>
+                  <v-icon :color="icon === i.icon ? iconColor : undefined">{{
+                    i.icon
+                  }}</v-icon>
                 </v-btn>
               </template>
             </v-card-text>
