@@ -15,8 +15,10 @@ import { FiltersModule } from "./filters/filters.module";
 import { ClsModule } from "nestjs-cls";
 import { CardTypesModule } from "./card-types/card.types.module";
 import { MailerModule } from "./mailer/mailer.module";
-import { ConditionalModule } from "@nestjs/config";
+import { ConditionalModule, ConfigModule, ConfigService } from "@nestjs/config";
 import { FilesModule } from "./files/files.module";
+import { AutomationsModule } from "./automations/automations.module";
+import { BullModule } from "@nestjs/bull";
 
 @Module({
     imports: [
@@ -25,6 +27,16 @@ import { FilesModule } from "./files/files.module";
             middleware: {
                 mount: true,
             },
+        }),
+        BullModule.forRootAsync({
+            imports: [ConfigModule],
+            useFactory: async (configService: ConfigService) => ({
+                redis: {
+                    host: configService.get("TW_REDIS_HOST"),
+                    port: configService.get("TW_REDIS_PORT"),
+                },
+            }),
+            inject: [ConfigService],
         }),
         AuthModule,
         CardsModule,
@@ -41,6 +53,7 @@ import { FilesModule } from "./files/files.module";
         // Only add this module if TW_MAIL_ENABLE env variable is true
         ConditionalModule.registerWhen(MailerModule, "TW_MAIL_ENABLE"),
         FilesModule,
+        AutomationsModule,
     ],
     controllers: [],
     providers: [
