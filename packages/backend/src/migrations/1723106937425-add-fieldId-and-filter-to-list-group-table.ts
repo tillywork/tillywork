@@ -72,7 +72,7 @@ export class AddFieldIdAndFilterToListGroupTable1723106937425
             new TableColumn({
                 name: "groupBy",
                 type: "enum",
-                enum: Object.values(ListGroupOptions),
+                enum: ["all", "list_stage", "assignee"],
                 isNullable: true,
             })
         );
