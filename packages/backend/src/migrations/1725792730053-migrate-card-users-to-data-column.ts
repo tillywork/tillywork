@@ -6,9 +6,7 @@ export class MigrateCardUsersToDataColumn1725792730053
 {
     public async up(queryRunner: QueryRunner): Promise<void> {
         //Clear list groups
-        await queryRunner.query(
-            `DELETE FROM list_group WHERE "entityType" = 'user' OR type = 'assignee'`
-        );
+        await queryRunner.query(`DELETE FROM list_group`);
 
         await queryRunner.addColumn(
             "field",
