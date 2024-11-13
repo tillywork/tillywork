@@ -11,11 +11,16 @@ import {
     CardActivity,
 } from "./card-activities/card.activity.entity";
 import { CardType } from "../card-types/card.type.entity";
+import { AutomationsEngineService } from "../automations/services/automations.engine.service";
+import { TriggerType } from "../automations/types";
 
 @Injectable()
 @EventSubscriber()
 export class CardSubscriber implements EntitySubscriberInterface<Card> {
-    constructor(connection: Connection) {
+    constructor(
+        connection: Connection,
+        private readonly automationEngineService: AutomationsEngineService
+    ) {
         connection.subscribers.push(this);
     }
     /**
@@ -45,5 +50,10 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
             createdBy: event.entity.createdBy,
         });
         activityRepo.save(activity);
+
+        this.automationEngineService.processAutomations({
+            trigger: TriggerType.CARD_CREATED,
+            cardId: event.entity.id,
+        });
     }
 }
