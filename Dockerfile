@@ -4,13 +4,15 @@ FROM node:bullseye-slim AS build
 # Set working directory
 WORKDIR /app
 
+ARG TW_VITE_POSTHOG_KEY
+ENV TW_VITE_POSTHOG_KEY=${TW_VITE_POSTHOG_KEY}
 ENV TW_VITE_API_URL=/api/v1
 
 # Copy source code
 COPY . .
 
-# Install dependencies
-RUN npm ci
+# Install dependencies and cache them
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 # Build the app
 RUN npm run build
