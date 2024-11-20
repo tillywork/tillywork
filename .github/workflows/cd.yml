@@ -29,3 +29,7 @@ jobs:
           push: true
           tags: tillywork/tillywork:latest
           platforms: linux/amd64,linux/arm64/v8
+          cache-from: type=registry,ref=tillywork/tillywork:cache
+          cache-to: type=inline
+        env:
+          TW_VITE_POSTHOG_KEY: ${{ secrets.TW_POSTHOG_KEY }}
