@@ -3,47 +3,62 @@ import { ConfigService } from "@nestjs/config";
 import { TWFile } from "./file.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { User } from "../users/user.entity";
+import { StorageAdapter } from "./adapters/storage.adapter";
+import { S3StorageAdapter } from "./adapters/s3.storage.adapter";
+import { LocalStorageAdapter } from "./adapters/local.storage.adapter";
 import { FileDto, TWFileType } from "./types";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import fs from "fs";
-import path from "path";
+import { User } from "../users/user.entity";
 import { CreateFileDto } from "./dtos/create.file.dto";
+import { FileStorageType } from "@tillywork/shared";
 import { UpdateFileDto } from "./dtos/update.file.dto";
+import { join } from "path";
+import { AzureStorageAdapter } from "./adapters/azure.storage.adapter";
 
 @Injectable()
 export class FilesService {
-    private readonly s3: S3Client;
-    private readonly bucket: string;
-    private readonly endpoint: string;
-    private readonly cdnUrl: string;
-    private readonly storageType: string;
-    private readonly localStoragePath: string = "uploads";
-    private readonly configService: ConfigService;
+    private readonly storageAdapter: StorageAdapter;
 
     constructor(
         @InjectRepository(TWFile)
         private filesRepository: Repository<TWFile>,
-        configService: ConfigService
+        private readonly configService: ConfigService
     ) {
-        this.configService = configService;
-        this.endpoint = configService.get("TW_AWS_S3_ENDPOINT");
-        this.storageType = configService.get("TW_FILE_STORAGE_TYPE");
-        this.cdnUrl = configService.get("TW_CDN_URL");
+        const storageType = configService.get("TW_FILE_STORAGE_TYPE");
+        const localStoragePath = "uploads";
 
-        if (this.storageType === "s3") {
-            this.s3 = new S3Client({
-                region: configService.get("TW_AWS_REGION"),
-                credentials: {
+        switch (storageType) {
+            case FileStorageType.S3:
+                this.storageAdapter = new S3StorageAdapter({
+                    region: configService.get("TW_AWS_REGION"),
                     accessKeyId: configService.get("TW_AWS_ACCESS_KEY_ID"),
                     secretAccessKey: configService.get(
                         "TW_AWS_SECRET_ACCESS_KEY"
                     ),
-                },
-                endpoint: this.endpoint !== "" ? this.endpoint : undefined,
-                forcePathStyle: this.endpoint !== "" ? true : false,
-            });
-            this.bucket = configService.get("TW_AWS_S3_BUCKET");
+                    bucket: configService.get("TW_AWS_S3_BUCKET"),
+                    endpoint: configService.get("TW_AWS_S3_ENDPOINT"),
+                    localStoragePath,
+                    cdnUrl: configService.get("TW_CDN_URL"),
+                });
+                break;
+
+            case FileStorageType.AZURE:
+                this.storageAdapter = new AzureStorageAdapter({
+                    connectionString: configService.get(
+                        "TW_AZURE_CONNECTION_STRING"
+                    ),
+                    containerName: configService.get("TW_AZURE_CONTAINER_NAME"),
+                    localStoragePath,
+                    cdnUrl: configService.get("TW_CDN_URL"),
+                });
+                break;
+
+            case FileStorageType.LOCAL:
+            default:
+                this.storageAdapter = new LocalStorageAdapter({
+                    storagePath: localStoragePath,
+                    apiUrl: configService.get("TW_VITE_API_URL"),
+                });
+                break;
         }
     }
 
@@ -54,71 +69,18 @@ export class FilesService {
         file: FileDto;
         createdBy: User;
     }): Promise<TWFile> {
-        if (this.storageType === "s3") {
-            return this.uploadFileToS3({ file, createdBy });
-        } else {
-            return this.uploadFileToLocal({ file, createdBy });
-        }
-    }
-
-    async uploadFileToS3({
-        file,
-        createdBy,
-    }: {
-        file: FileDto;
-        createdBy: User;
-    }): Promise<TWFile> {
         const fileNameWithTimestamp = this.prependTimestampToFilename(
             file.originalname
         );
 
-        const uploadParams = {
-            Bucket: this.bucket,
-            Key: `${this.localStoragePath}/${fileNameWithTimestamp}`,
-            Body: file.buffer,
-        };
-
-        const uploadCommand = new PutObjectCommand(uploadParams);
-        await this.s3.send(uploadCommand);
-
-        return this.create({
-            name: file.originalname,
-            key: fileNameWithTimestamp,
-            url: this.getFullFileUrl(fileNameWithTimestamp),
-            type: file.mimetype.startsWith("image")
-                ? TWFileType.IMAGE
-                : TWFileType.FILE,
-            size: file.size,
-            createdBy,
-            projectId: createdBy.project.id,
-        });
-    }
-
-    async uploadFileToLocal({
-        file,
-        createdBy,
-    }: {
-        file: FileDto;
-        createdBy: User;
-    }): Promise<TWFile> {
-        const fileNameWithTimestamp = this.prependTimestampToFilename(
-            file.originalname
-        );
-
-        const filePath = path.join(
-            this.localStoragePath,
+        const key = await this.storageAdapter.uploadFile(
+            file,
             fileNameWithTimestamp
         );
 
-        // Ensure the directory exists
-        await fs.promises.mkdir(this.localStoragePath, { recursive: true });
-
-        // Save the file to the local file system
-        await fs.promises.writeFile(filePath, file.buffer);
-
         const createdFile = await this.create({
             name: file.originalname,
-            key: fileNameWithTimestamp,
+            key,
             type: file.mimetype.startsWith("image")
                 ? TWFileType.IMAGE
                 : TWFileType.FILE,
@@ -128,7 +90,7 @@ export class FilesService {
         });
 
         return this.update(createdFile.id, {
-            url: this.getFullFileUrl(createdFile.id),
+            url: this.storageAdapter.getFileUrl(createdFile),
         });
     }
 
@@ -141,33 +103,11 @@ export class FilesService {
     }
 
     /**
-     * Returns the URL to the file depending
-     * on project setup.
-     * @param fileName The key of the file uploaded
-     * @returns The full URL to the file.
+     * Get the local storage path for files.
+     * @returns {string} The absolute path to the local file storage directory.
      */
-    getFullFileUrl(fileName: string) {
-        if (this.storageType === "s3") {
-            if (this.cdnUrl && this.cdnUrl !== "") {
-                return `${this.cdnUrl}/${this.localStoragePath}/${encodeURI(
-                    fileName
-                )}`;
-            } else if (this.endpoint && this.endpoint !== "") {
-                return `${this.endpoint}/${this.bucket}/${
-                    this.localStoragePath
-                }/${encodeURI(fileName)}`;
-            } else {
-                return encodeURI(fileName);
-            }
-        } else {
-            return `${this.configService.get(
-                "TW_VITE_API_URL"
-            )}/files/${encodeURI(fileName)}`;
-        }
-    }
-
-    getLocalStoragePath() {
-        return this.localStoragePath;
+    getLocalStoragePath(): string {
+        return join(process.cwd(), "uploads");
     }
 
     prependTimestampToFilename(fileName: string) {
@@ -207,12 +147,10 @@ export class FilesService {
         });
     }
 
-    async create(createFileDto: CreateFileDto) {
+    async create(createFileDto: CreateFileDto): Promise<TWFile> {
         const fileEntity = this.filesRepository.create({
             ...createFileDto,
-            project: {
-                id: createFileDto.projectId,
-            },
+            project: { id: createFileDto.projectId },
         });
 
         await this.filesRepository.save(fileEntity);
