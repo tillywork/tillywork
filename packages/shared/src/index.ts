@@ -9,3 +9,4 @@ export * from './lib/workspaces';
 export * from './lib/spaces';
 export * from './lib/filters';
 export * from './lib/cards';
+export * from './lib/files';

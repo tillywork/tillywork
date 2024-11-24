@@ -7,6 +7,7 @@
     "license": "MIT",
     "dependencies": {
         "@aws-sdk/client-s3": "^3.609.0",
+        "@azure/storage-blob": "^12.26.0",
         "@bull-board/api": "^5.20.5",
         "@bull-board/fastify": "^5.20.5",
         "@nest-lab/fastify-multer": "^1.2.0",
