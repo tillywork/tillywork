@@ -37,7 +37,7 @@ docker run --name tillywork -e TW_DB_HOST=host.docker.internal -e TW_DB_NAME=til
 
 ### 3. Create an account
 
-Go to `/register` on your instance to create an account. For example, `http://localhost:4200/register`
+Go to `/register` on your instance to create an account. For example, `http://localhost/register`
 
 ## Docker Compose
 
@@ -71,4 +71,4 @@ docker compose -p tillywork up -d
 
 ### 4. Create an account
 
-Go to `/register` on your instance to create an account. For example, `http://localhost:4200/register`
+Go to `/register` on your instance to create an account. For example, `http://localhost/register`
