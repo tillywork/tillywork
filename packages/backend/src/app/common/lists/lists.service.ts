@@ -1,10 +1,26 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+    forwardRef,
+    Inject,
+    Injectable,
+    NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { FindOptionsWhere, Repository, UpdateResult } from "typeorm";
+import {
+    FindOptionsWhere,
+    In,
+    IsNull,
+    Not,
+    Repository,
+    UpdateResult,
+} from "typeorm";
 import { List } from "./list.entity";
 import { CreateListDto } from "./dto/create.list.dto";
 import { UpdateListDto } from "./dto/update.list.dto";
 import { ListSideEffectsService } from "./list.side.effects.service";
+import { AuthService } from "../auth/auth.service";
+import { ClsService } from "nestjs-cls";
+import { AccessControl } from "../auth/entities/access.control.entity";
+import { PermissionLevel } from "@tillywork/shared";
 
 export type ListFindAllResult = {
     total: number;
@@ -22,7 +38,10 @@ export class ListsService {
     constructor(
         @InjectRepository(List)
         private listsRepository: Repository<List>,
-        private listSideEffectsService: ListSideEffectsService
+        private listSideEffectsService: ListSideEffectsService,
+        @Inject(forwardRef(() => AuthService))
+        private authService: AuthService,
+        private clsService: ClsService
     ) {}
 
     async findAll({
@@ -30,7 +49,29 @@ export class ListsService {
         workspaceId,
         throughSpace,
     }: FindAllParams): Promise<List[]> {
-        const where: FindOptionsWhere<List> = {};
+        const user = this.clsService.get("user");
+
+        const accessControlEntries = await this.listsRepository.manager
+            .getRepository(AccessControl)
+            .find({
+                where: {
+                    user: {
+                        id: user.id,
+                    },
+                    list: {
+                        id: Not(IsNull()),
+                    },
+                    permissionLevel: Not(PermissionLevel.NONE),
+                },
+                loadRelationIds: {
+                    relations: ["list"],
+                },
+            });
+
+        const listIds = accessControlEntries.map((entry) => entry.list);
+        const where: FindOptionsWhere<List> = {
+            id: In(listIds),
+        };
 
         if (spaceId) {
             where.spaceId = spaceId;
@@ -61,6 +102,15 @@ export class ListsService {
     }
 
     async findOne(id: number): Promise<List> {
+        const user = this.clsService.get("user");
+
+        await this.authService.authorize(
+            user,
+            "list",
+            id,
+            PermissionLevel.VIEWER
+        );
+
         const list = await this.listsRepository.findOne({
             where: {
                 id,
@@ -73,9 +123,11 @@ export class ListsService {
                 },
             },
         });
+
         if (!list) {
             throw new NotFoundException(`List with ID ${id} not found`);
         }
+
         return list;
     }
 
@@ -89,7 +141,17 @@ export class ListsService {
     }
 
     async update(id: number, updateListDto: UpdateListDto): Promise<List> {
+        const user = this.clsService.get("user");
+
+        await this.authService.authorize(
+            user,
+            "list",
+            id,
+            PermissionLevel.EDITOR
+        );
+
         const list = await this.findOne(id);
+
         this.listsRepository.merge(list, updateListDto);
         return this.listsRepository.save(list);
     }
@@ -102,6 +164,15 @@ export class ListsService {
     }
 
     async remove(id: number): Promise<void> {
+        const user = this.clsService.get("user");
+
+        await this.authService.authorize(
+            user,
+            "list",
+            id,
+            PermissionLevel.EDITOR
+        );
+
         const list = await this.findOne(id);
         await this.listsRepository.softRemove(list);
     }

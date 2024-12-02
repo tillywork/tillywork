@@ -3,10 +3,16 @@ import { type Space } from '../spaces/types';
 import NavigationWorkspaceListItem from './NavigationWorkspaceListItem.vue';
 import NavigationWorkspaceSpaceItemMenu from './NavigationWorkspaceSpaceItemMenu.vue';
 import CreateListBtn from './CreateListBtn.vue';
+import { useListsService } from '@/services/useListsService';
 
-defineProps<{
+const { space } = defineProps<{
   space: Space;
 }>();
+
+const { useGetListsQuery } = useListsService();
+const { data: lists } = useGetListsQuery({
+  spaceId: space.id,
+});
 
 const freezeSpaceHoverId = ref<number | null>();
 
@@ -46,7 +52,7 @@ function clearHoverFreeze() {
         </v-list-item>
       </template>
 
-      <template v-for="list in space.lists" :key="list.id">
+      <template v-for="list in lists" :key="list.id">
         <navigation-workspace-list-item :list="list" />
       </template>
     </v-list-group>
