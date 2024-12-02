@@ -10,6 +10,8 @@ import { LocalStrategy } from "./strategies/local.strategy";
 import { ConfigModule } from "@nestjs/config";
 import { ProjectsModule } from "../projects/projects.module";
 import { ProjectUsersModule } from "../projects/project-users/project.users.module";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { AccessControl } from "./entities/access.control.entity";
 
 @Module({
     imports: [
@@ -21,6 +23,7 @@ import { ProjectUsersModule } from "../projects/project-users/project.users.modu
         ConfigModule.forRoot(),
         forwardRef(() => ProjectsModule),
         forwardRef(() => ProjectUsersModule),
+        TypeOrmModule.forFeature([AccessControl]),
     ],
     providers: [
         AuthService,

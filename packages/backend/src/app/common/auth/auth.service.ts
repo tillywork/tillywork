@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { ForbiddenException, Injectable, Logger } from "@nestjs/common";
 import { UsersService } from "../users/users.service";
 import { JwtService } from "@nestjs/jwt";
 import { User } from "../users/user.entity";
@@ -8,6 +8,14 @@ import { ProjectsService } from "../projects/projects.service";
 import { CreateProjectDto } from "../projects/dto/create.project.dto";
 import { Project } from "../projects/project.entity";
 import { ProjectUsersService } from "../projects/project-users/project.users.service";
+import { InjectRepository } from "@nestjs/typeorm";
+import { AccessControl } from "./entities/access.control.entity";
+import { Repository } from "typeorm";
+import { PermissionLevel } from "@tillywork/shared";
+import { Workspace } from "../workspaces/workspace.entity";
+import { Space } from "../spaces/space.entity";
+import { List } from "../lists/list.entity";
+import { Card } from "../cards/card.entity";
 
 export type RegisterResponse =
     | (User & {
@@ -24,7 +32,9 @@ export class AuthService {
         private usersService: UsersService,
         private jwtService: JwtService,
         private projectsService: ProjectsService,
-        private projectUsersService: ProjectUsersService
+        private projectUsersService: ProjectUsersService,
+        @InjectRepository(AccessControl)
+        private accessControlRepository: Repository<AccessControl>
     ) {}
 
     async login({ user }: { user: User }): Promise<string> {
@@ -178,5 +188,82 @@ export class AuthService {
         });
 
         return { ...user, accessToken };
+    }
+
+    async checkPermission(
+        user: User,
+        resourceType: "project" | "workspace" | "space" | "list" | "card",
+        resourceId: number,
+        requiredLevel: PermissionLevel
+    ): Promise<boolean> {
+        const accessControl = await this.accessControlRepository.findOne({
+            where: {
+                user: { id: user.id },
+                [`${resourceType}`]: { id: resourceId },
+            },
+        });
+
+        if (!accessControl) {
+            return false;
+        }
+
+        const permissionOrder = [
+            PermissionLevel.NONE,
+            PermissionLevel.VIEWER,
+            PermissionLevel.EDITOR,
+            PermissionLevel.OWNER,
+        ];
+
+        return (
+            permissionOrder.indexOf(accessControl.permissionLevel) >=
+            permissionOrder.indexOf(requiredLevel)
+        );
+    }
+
+    // Authorize an action, throwing an exception if not permitted
+    async authorize(
+        user: User,
+        resourceType: "project" | "workspace" | "space" | "list" | "card",
+        resourceId: number,
+        requiredLevel: PermissionLevel
+    ): Promise<void> {
+        const hasPermission = await this.checkPermission(
+            user,
+            resourceType,
+            resourceId,
+            requiredLevel
+        );
+
+        if (!hasPermission) {
+            throw new ForbiddenException("Insufficient permissions");
+        }
+    }
+
+    // Grant permission to a user for a specific resource
+    async grantPermission(
+        user: User,
+        resourceType: "project" | "workspace" | "space" | "list" | "card",
+        resource: Project | Workspace | Space | List | Card,
+        permissionLevel: PermissionLevel
+    ): Promise<AccessControl> {
+        const accessControl = this.accessControlRepository.create({
+            user,
+            permissionLevel,
+            [resourceType]: resource,
+        });
+
+        return this.accessControlRepository.save(accessControl);
+    }
+
+    // Revoke all permissions for a user on a specific resource
+    async revokePermissions(
+        user: User,
+        resourceType: "project" | "workspace" | "space" | "list" | "card",
+        resource: Project | Workspace | Space | List | Card
+    ): Promise<void> {
+        await this.accessControlRepository.delete({
+            user: { id: user.id },
+            [`${resourceType}`]: { id: resource.id },
+        });
     }
 }
