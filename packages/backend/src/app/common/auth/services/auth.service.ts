@@ -1,13 +1,14 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { UsersService } from "../users/users.service";
+import { UsersService } from "../../users/users.service";
 import { JwtService } from "@nestjs/jwt";
-import { User } from "../users/user.entity";
+import { User } from "../../users/user.entity";
 import bcrypt from "bcrypt";
-import { CreateUserDto } from "../users/dto/create.user.dto";
-import { ProjectsService } from "../projects/projects.service";
-import { CreateProjectDto } from "../projects/dto/create.project.dto";
-import { Project } from "../projects/project.entity";
-import { ProjectUsersService } from "../projects/project-users/project.users.service";
+import { CreateUserDto } from "../../users/dto/create.user.dto";
+import { ProjectsService } from "../../projects/projects.service";
+import { CreateProjectDto } from "../../projects/dto/create.project.dto";
+import { Project } from "../../projects/project.entity";
+import { ProjectUsersService } from "../../projects/project-users/project.users.service";
+import { ClsService } from "nestjs-cls";
 
 export type RegisterResponse =
     | (User & {
@@ -20,11 +21,13 @@ export type RegisterResponse =
 @Injectable()
 export class AuthService {
     private readonly logger = new Logger("AuthService");
+
     constructor(
         private usersService: UsersService,
         private jwtService: JwtService,
         private projectsService: ProjectsService,
-        private projectUsersService: ProjectUsersService
+        private projectUsersService: ProjectUsersService,
+        private clsService: ClsService
     ) {}
 
     async login({ user }: { user: User }): Promise<string> {
@@ -54,25 +57,33 @@ export class AuthService {
                 email
             );
 
-            if (
-                user &&
-                (await this.validatePassword(password, user.password))
-            ) {
-                const project = await this.projectsService.findOneBy({
-                    where: {
-                        users: {
-                            user: {
-                                id: user.id,
-                            },
-                        },
-                    },
-                });
-
-                return { user, project };
+            if (!user) {
+                return null;
             }
 
-            return null;
+            const isPasswordValid = await this.validatePassword(
+                password,
+                user.password
+            );
+
+            if (!isPasswordValid) {
+                return null;
+            }
+
+            this.clsService.setIfUndefined("user", user);
+            const project = await this.projectsService.findOneBy({
+                where: {
+                    users: {
+                        user: {
+                            id: user.id,
+                        },
+                    },
+                },
+            });
+
+            return { user, project };
         } catch (error) {
+            this.logger.error(error);
             return null;
         }
     }
@@ -114,9 +125,9 @@ export class AuthService {
     async registerWithInvite(
         createUserDto: CreateUserDto
     ): Promise<RegisterResponse> {
-        const project = await this.projectsService.findOneBy({
-            where: { inviteCode: createUserDto.inviteCode },
-        });
+        const project = await this.projectsService.findOneByInviteCode(
+            createUserDto.inviteCode
+        );
 
         if (!project) {
             return {

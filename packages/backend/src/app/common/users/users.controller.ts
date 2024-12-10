@@ -28,21 +28,25 @@ export class UsersController {
 
     private logger = new Logger("UsersController");
 
+    //TODO disable this action for non-admins
     @Get()
     findAll(): Promise<UserFindAllResult> {
         return this.usersService.findAll({});
     }
 
+    //TODO non-admins only able to retrieve their own user
     @Get(":id")
     findOne(@Param("id") id: string): Promise<User> {
         return this.usersService.findOne(+id);
     }
 
+    //TODO disable for non-admins
     @Post()
     create(@Body() createUserDto: CreateUserDto): Promise<User> {
         return this.usersService.create(createUserDto);
     }
 
+    //TODO non-admins only able to update their own user
     @Put(":id")
     update(
         @Param("id") id: string,
@@ -51,6 +55,7 @@ export class UsersController {
         return this.usersService.update(+id, updateUserDto);
     }
 
+    //TODO non-admins only able to delete their own user
     @Delete(":id")
     remove(@Param("id") id: string): Promise<void> {
         return this.usersService.remove(+id);

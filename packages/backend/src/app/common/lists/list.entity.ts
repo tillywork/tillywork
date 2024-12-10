@@ -19,6 +19,7 @@ import { ListGroup } from "./list-groups/list.group.entity";
 import { CardType } from "../card-types/card.type.entity";
 import { Field } from "../fields/field.entity";
 import { Workspace } from "../workspaces/workspace.entity";
+import { AccessType } from "@tillywork/shared";
 
 @Entity()
 export class List {
@@ -33,6 +34,9 @@ export class List {
 
     @Column({ type: "varchar", length: 255 })
     name: string;
+
+    @Column({ type: "enum", enum: AccessType, default: AccessType.PUBLIC })
+    accessType: AccessType;
 
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;

@@ -9,7 +9,6 @@ import { FieldsService } from "../../fields/fields.service";
 import { ListsService } from "../lists.service";
 import { FieldTypes } from "../../fields/types";
 import { ListGroupEntityTypes } from "../types";
-import { ProjectUsersService } from "../../projects/project-users/project.users.service";
 import { Field } from "../../fields/field.entity";
 import { isEqual } from "lodash";
 import {
@@ -21,6 +20,7 @@ import {
     ValidateIf,
 } from "class-validator";
 import { ListGroupOptions } from "@tillywork/shared";
+import { ProjectUser } from "../../projects/project-users/project.user.entity";
 
 export class GenerateGroupsParams {
     @IsNotEmpty()
@@ -54,8 +54,7 @@ export class ListGroupsService {
         private listGroupsRepository: Repository<ListGroup>,
         private listStagesService: ListStagesService,
         private fieldsService: FieldsService,
-        private listsService: ListsService,
-        private projectUsersService: ProjectUsersService
+        private listsService: ListsService
     ) {}
 
     async create(createListGroupDto: CreateListGroupDto): Promise<ListGroup> {
@@ -262,7 +261,7 @@ export class ListGroupsService {
         field?: Field;
     }) {
         const users = (
-            await this.projectUsersService.findAll({
+            await this.listGroupsRepository.manager.find(ProjectUser, {
                 where: {
                     project: {
                         workspaces: {
