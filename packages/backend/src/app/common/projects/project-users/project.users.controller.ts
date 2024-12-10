@@ -28,11 +28,7 @@ export class ProjectUsersController {
     @Get()
     findAll(@Param("projectId") projectId: number): Promise<ProjectUser[]> {
         return this.projectUsersService.findAll({
-            where: {
-                project: {
-                    id: projectId,
-                },
-            },
+            projectId,
         });
     }
 

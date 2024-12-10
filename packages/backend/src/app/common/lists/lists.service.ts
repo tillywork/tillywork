@@ -17,10 +17,10 @@ import { List } from "./list.entity";
 import { CreateListDto } from "./dto/create.list.dto";
 import { UpdateListDto } from "./dto/update.list.dto";
 import { ListSideEffectsService } from "./list.side.effects.service";
-import { AuthService } from "../auth/auth.service";
 import { ClsService } from "nestjs-cls";
 import { AccessControl } from "../auth/entities/access.control.entity";
 import { PermissionLevel } from "@tillywork/shared";
+import { AccessControlService } from "../auth/services/access.control.service";
 
 export type ListFindAllResult = {
     total: number;
@@ -39,8 +39,8 @@ export class ListsService {
         @InjectRepository(List)
         private listsRepository: Repository<List>,
         private listSideEffectsService: ListSideEffectsService,
-        @Inject(forwardRef(() => AuthService))
-        private authService: AuthService,
+        @Inject(forwardRef(() => AccessControlService))
+        private accessControlService: AccessControlService,
         private clsService: ClsService
     ) {}
 
@@ -104,7 +104,7 @@ export class ListsService {
     async findOne(id: number): Promise<List> {
         const user = this.clsService.get("user");
 
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
             "list",
             id,
@@ -137,13 +137,15 @@ export class ListsService {
 
         await this.listSideEffectsService.postCreate(list);
 
+        this.accessControlService.applyResourceAccess(list, "list");
+
         return list;
     }
 
     async update(id: number, updateListDto: UpdateListDto): Promise<List> {
         const user = this.clsService.get("user");
 
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
             "list",
             id,
@@ -166,7 +168,7 @@ export class ListsService {
     async remove(id: number): Promise<void> {
         const user = this.clsService.get("user");
 
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
             "list",
             id,

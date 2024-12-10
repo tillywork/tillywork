@@ -12,10 +12,10 @@ import { UpdateSpaceDto } from "./dto/update.space.dto";
 import { SpaceSideEffectsService } from "./space.side.effects.service";
 import { CardType } from "../card-types/card.type.entity";
 import { IsNotEmpty, IsNumberString } from "class-validator";
-import { AuthService } from "../auth/auth.service";
 import { ClsService } from "nestjs-cls";
 import { AccessControl } from "../auth/entities/access.control.entity";
 import { PermissionLevel } from "@tillywork/shared";
+import { AccessControlService } from "../auth/services/access.control.service";
 
 export type SpaceFindAllResult = {
     total: number;
@@ -34,8 +34,8 @@ export class SpacesService {
         @InjectRepository(Space)
         private spacesRepository: Repository<Space>,
         private spaceSideEffectsService: SpaceSideEffectsService,
-        @Inject(forwardRef(() => AuthService))
-        private authService: AuthService,
+        @Inject(forwardRef(() => AccessControlService))
+        private accessControlService: AccessControlService,
         private clsService: ClsService
     ) {}
 
@@ -81,7 +81,7 @@ export class SpacesService {
     async findOne(id: number): Promise<Space> {
         const user = this.clsService.get("user");
 
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
             "space",
             id,
@@ -117,13 +117,15 @@ export class SpacesService {
             space.lists = [list];
         }
 
+        this.accessControlService.applyResourceAccess(space, "space");
+
         return space;
     }
 
     async update(id: number, updateSpaceDto: UpdateSpaceDto): Promise<Space> {
         const user = this.clsService.get("user");
 
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
             "space",
             id,
@@ -139,7 +141,7 @@ export class SpacesService {
     async remove(id: number): Promise<void> {
         const user = this.clsService.get("user");
 
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
             "space",
             id,

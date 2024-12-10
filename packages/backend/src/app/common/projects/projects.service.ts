@@ -10,9 +10,9 @@ import { Project } from "./project.entity";
 import { CreateProjectDto } from "./dto/create.project.dto";
 import { UpdateProjectDto } from "./dto/update.project.dto";
 import { ProjectUsersService } from "./project-users/project.users.service";
-import { AuthService } from "../auth/auth.service";
 import { PermissionLevel } from "@tillywork/shared";
 import { ClsService } from "nestjs-cls";
+import { AccessControlService } from "../auth/services/access.control.service";
 
 export type ProjectFindAllResult = {
     total: number;
@@ -25,8 +25,8 @@ export class ProjectsService {
         @InjectRepository(Project)
         private projectsRepository: Repository<Project>,
         private projectUsersService: ProjectUsersService,
-        @Inject(forwardRef(() => AuthService))
-        private authService: AuthService,
+        @Inject(forwardRef(() => AccessControlService))
+        private accessControlService: AccessControlService,
         private clsService: ClsService
     ) {}
 
@@ -38,7 +38,7 @@ export class ProjectsService {
 
     async findOne(id: number): Promise<Project> {
         const user = this.clsService.get("user");
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
             "project",
             id,
@@ -62,14 +62,23 @@ export class ProjectsService {
         where: FindOptionsWhere<Project>;
     }): Promise<Project> {
         const project = await this.projectsRepository.findOne({ where });
+
         const user = this.clsService.get("user");
 
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
             "project",
             project.id,
             PermissionLevel.VIEWER
         );
+
+        return project;
+    }
+
+    async findOneByInviteCode(inviteCode: string) {
+        const project = await this.projectsRepository.findOneBy({
+            inviteCode,
+        });
 
         return project;
     }
@@ -96,7 +105,7 @@ export class ProjectsService {
     ): Promise<Project> {
         const user = this.clsService.get("user");
 
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
             "project",
             id,
@@ -112,7 +121,7 @@ export class ProjectsService {
     async remove(id: number): Promise<void> {
         const user = this.clsService.get("user");
 
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
             "project",
             id,

@@ -19,9 +19,9 @@ import { RelationCountLoader } from "typeorm/query-builder/relation-count/Relati
 import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
 import { RelationCountMetadataToAttributeTransformer } from "typeorm/query-builder/relation-count/RelationCountMetadataToAttributeTransformer";
 import { RelationIdMetadataToAttributeTransformer } from "typeorm/query-builder/relation-id/RelationIdMetadataToAttributeTransformer";
-import { AuthService } from "../auth/auth.service";
 import { ClsService } from "nestjs-cls";
 import { PermissionLevel } from "@tillywork/shared";
+import { AccessControlService } from "../auth/services/access.control.service";
 
 export type CardFindAllResult = {
     total: number;
@@ -49,8 +49,8 @@ export class CardsService {
         @InjectRepository(Card)
         private cardsRepository: Repository<Card>,
         private cardListsService: CardListsService,
-        @Inject(forwardRef(() => AuthService))
-        private authService: AuthService,
+        @Inject(forwardRef(() => AccessControlService))
+        private accessControlService: AccessControlService,
         private clsService: ClsService
     ) {}
 
@@ -64,9 +64,17 @@ export class CardsService {
         filters,
         hideChildren,
     }: FindAllParams): Promise<CardFindAllResult> {
+        const user = this.clsService.get("user");
+
+        await this.accessControlService.authorize(
+            user,
+            "list",
+            listId,
+            PermissionLevel.VIEWER
+        );
+
         const skip = (page - 1) * limit;
         const take = limit != -1 ? limit : undefined;
-        const user = this.clsService.get("user");
 
         // Start building the query
         const queryBuilder = this.cardsRepository
@@ -79,18 +87,7 @@ export class CardsService {
                 "childrenCardLists.listStage",
                 "childrenListStage"
             )
-            .innerJoin(
-                "access_control",
-                "accessControl",
-                `accessControl.cardId = card.id AND accessControl.userId = :userId`,
-                {
-                    userId: user.id,
-                }
-            )
-            .where("cardLists.list.id = :listId", { listId })
-            .andWhere("accessControl.permissionLevel != :permissionLevel", {
-                permissionLevel: PermissionLevel.NONE,
-            });
+            .where("cardLists.list.id = :listId", { listId });
 
         if (hideCompleted) {
             queryBuilder.andWhere("listStage.isCompleted = :isCompleted", {
@@ -186,12 +183,6 @@ export class CardsService {
 
     async findOne(id: number): Promise<Card> {
         const user = this.clsService.get("user");
-        await this.authService.authorize(
-            user,
-            "card",
-            id,
-            PermissionLevel.VIEWER
-        );
 
         const card = await this.cardsRepository.findOne({
             where: { id },
@@ -203,10 +194,22 @@ export class CardsService {
                 "children.cardLists",
                 "children.cardLists.listStage",
             ],
+            loadRelationIds: {
+                relations: ["workspace"],
+            },
         });
+
         if (!card) {
             throw new NotFoundException(`Card with ID ${id} not found`);
         }
+
+        await this.accessControlService.authorize(
+            user,
+            "list",
+            card.cardLists.map((cardList) => cardList.listId),
+            PermissionLevel.VIEWER
+        );
+
         return card;
     }
 
@@ -269,15 +272,15 @@ export class CardsService {
 
     async update(id: number, updateCardDto: UpdateCardDto): Promise<Card> {
         const user = this.clsService.get("user");
+        const card = await this.findOne(id);
 
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
-            "card",
-            id,
-            PermissionLevel.VIEWER
+            "workspace",
+            card.workspace as unknown as number,
+            PermissionLevel.EDITOR
         );
 
-        const card = await this.findOne(id);
         this.cardsRepository.merge(card, updateCardDto);
 
         return this.cardsRepository.save(card);
@@ -292,15 +295,15 @@ export class CardsService {
 
     async remove(id: number): Promise<void> {
         const user = this.clsService.get("user");
+        const card = await this.findOne(id);
 
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
-            "card",
-            id,
-            PermissionLevel.VIEWER
+            "workspace",
+            card.workspace as unknown as number,
+            PermissionLevel.EDITOR
         );
 
-        const card = await this.findOne(id);
         await this.cardsRepository.softRemove(card);
     }
 }

@@ -53,11 +53,6 @@ export class CreateAccessControlTable1733140447674
                         isNullable: true,
                     },
                     {
-                        name: "cardId",
-                        type: "bigint",
-                        isNullable: true,
-                    },
-                    {
                         name: "createdAt",
                         type: "timestamp",
                         default: "CURRENT_TIMESTAMP",
@@ -99,12 +94,6 @@ export class CreateAccessControlTable1733140447674
                 referencedTableName: "list",
                 onDelete: "CASCADE",
             }),
-            new TableForeignKey({
-                columnNames: ["cardId"],
-                referencedColumnNames: ["id"],
-                referencedTableName: "card",
-                onDelete: "CASCADE",
-            }),
         ]);
 
         await queryRunner.createIndices("access_control", [
@@ -127,10 +116,6 @@ export class CreateAccessControlTable1733140447674
             new TableIndex({
                 name: "IDX_ACCESS_CONTROL_LIST",
                 columnNames: ["userId", "listId", "permissionLevel"],
-            }),
-            new TableIndex({
-                name: "IDX_ACCESS_CONTROL_CARD",
-                columnNames: ["userId", "cardId", "permissionLevel"],
             }),
             new TableIndex({
                 name: "IDX_ACCESS_CONTROL_CREATED_AT",

@@ -14,7 +14,7 @@ import { CreateProjectDto } from "./dto/create.project.dto";
 import { UpdateProjectDto } from "./dto/update.project.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { AuthService } from "../auth/auth.service";
+import { AuthService } from "../auth/services/auth.service";
 import { CurrentUser } from "../auth/decorators/current.user.decorator";
 import { User } from "../users/user.entity";
 
@@ -88,10 +88,6 @@ export class ProjectsController {
 
     @Get("/invite/:inviteCode")
     findOneByInviteCode(@Param("inviteCode") inviteCode: string) {
-        return this.projectsService.findOneBy({
-            where: {
-                inviteCode,
-            },
-        });
+        return this.projectsService.findOneByInviteCode(inviteCode);
     }
 }

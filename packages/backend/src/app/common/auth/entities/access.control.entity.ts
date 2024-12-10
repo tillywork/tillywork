@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
 import { User } from "../../users/user.entity";
-import { Card } from "../../cards/card.entity";
 import { List } from "../../lists/list.entity";
 import { Project } from "../../projects/project.entity";
 import { Space } from "../../spaces/space.entity";
@@ -34,9 +33,6 @@ export class AccessControl {
 
     @ManyToOne(() => List, { nullable: true })
     list?: List;
-
-    @ManyToOne(() => Card, { nullable: true })
-    card?: Card;
 
     @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
     createdAt: Date;

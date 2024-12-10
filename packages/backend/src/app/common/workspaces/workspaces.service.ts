@@ -11,10 +11,10 @@ import { CreateWorkspaceDto } from "./dto/create.workspace.dto";
 import { UpdateWorkspaceDto } from "./dto/update.workspace.dto";
 import { WorkspaceSideEffectsService } from "./workspace.side.effects.service";
 import { WorkspaceTypes } from "./types";
-import { AuthService } from "../auth/auth.service";
 import { ClsService } from "nestjs-cls";
-import { PermissionLevel } from "@tillywork/shared";
 import { AccessControl } from "../auth/entities/access.control.entity";
+import { AccessControlService } from "../auth/services/access.control.service";
+import { PermissionLevel } from "@tillywork/shared";
 
 export type WorkspaceFindAllResult = {
     total: number;
@@ -31,8 +31,8 @@ export class WorkspacesService {
         @InjectRepository(Workspace)
         private workspacesRepository: Repository<Workspace>,
         private workspaceSideEffectsService: WorkspaceSideEffectsService,
-        @Inject(forwardRef(() => AuthService))
-        private authService: AuthService,
+        @Inject(forwardRef(() => AccessControlService))
+        private accessControlService: AccessControlService,
         private clsService: ClsService
     ) {}
 
@@ -73,7 +73,7 @@ export class WorkspacesService {
     async findOne(id: number): Promise<Workspace> {
         const user = this.clsService.get("user");
 
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
             "workspace",
             id,
@@ -95,7 +95,7 @@ export class WorkspacesService {
         const workspace = await this.workspacesRepository.findOne({ where });
         const user = this.clsService.get("user");
 
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
             "workspace",
             workspace.id,
@@ -124,6 +124,11 @@ export class WorkspacesService {
             workspace.spaces = [space];
         }
 
+        await this.accessControlService.applyResourceAccess(
+            workspace,
+            "workspace"
+        );
+
         return workspace;
     }
 
@@ -133,7 +138,7 @@ export class WorkspacesService {
     ): Promise<Workspace> {
         const user = this.clsService.get("user");
 
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
             "workspace",
             id,
@@ -149,7 +154,7 @@ export class WorkspacesService {
     async remove(id: number): Promise<void> {
         const user = this.clsService.get("user");
 
-        await this.authService.authorize(
+        await this.accessControlService.authorize(
             user,
             "workspace",
             id,

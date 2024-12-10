@@ -1,5 +1,5 @@
 import { Module, forwardRef } from "@nestjs/common";
-import { AuthService } from "./auth.service";
+import { AuthService } from "./services/auth.service";
 import { UsersModule } from "../users/users.module";
 import { AuthController } from "./auth.controller";
 import { JwtModule } from "@nestjs/jwt";
@@ -12,6 +12,11 @@ import { ProjectsModule } from "../projects/projects.module";
 import { ProjectUsersModule } from "../projects/project-users/project.users.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AccessControl } from "./entities/access.control.entity";
+import { AccessControlService } from "./services/access.control.service";
+import { AccessStrategyFactory } from "./factories/access.strategy.factory";
+import { WorkspaceAccessStrategy } from "./strategies/access.strategy/workspace.access.strategy";
+import { SpaceAccessStrategy } from "./strategies/access.strategy/space.access.strategy";
+import { ListAccessStrategy } from "./strategies/access.strategy/list.access.strategy";
 
 @Module({
     imports: [
@@ -31,8 +36,13 @@ import { AccessControl } from "./entities/access.control.entity";
         JwtStrategy,
         LocalAuthGuard,
         JwtAuthGuard,
+        AccessControlService,
+        AccessStrategyFactory,
+        WorkspaceAccessStrategy,
+        SpaceAccessStrategy,
+        ListAccessStrategy,
     ],
     controllers: [AuthController],
-    exports: [AuthService],
+    exports: [AuthService, AccessControlService],
 })
 export class AuthModule {}

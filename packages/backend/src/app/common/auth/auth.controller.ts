@@ -1,17 +1,11 @@
-import {
-    Body,
-    Controller,
-    Param,
-    Post,
-    Request,
-    Res,
-    UseGuards,
-} from "@nestjs/common";
-import { AuthService, RegisterResponse } from "./auth.service";
+import { Body, Controller, Param, Post, Res, UseGuards } from "@nestjs/common";
+import { AuthService, RegisterResponse } from "./services/auth.service";
 import { LocalAuthGuard } from "./guards/local.auth.guard";
 import { JwtAuthGuard } from "./guards/jwt.auth.guard";
 import { CreateUserDto } from "../users/dto/create.user.dto";
 import { ApiBody, ApiTags } from "@nestjs/swagger";
+import { CurrentUser } from "./decorators/current.user.decorator";
+import { User } from "../users/user.entity";
 
 @ApiTags("auth")
 @Controller({
@@ -38,9 +32,9 @@ export class AuthController {
         },
     })
     @Post("login")
-    async login(@Request() req): Promise<LoginResponse> {
+    async login(@CurrentUser() user): Promise<LoginResponse> {
         const accessToken = await this.authService.login({
-            user: req.user,
+            user,
         });
         return { accessToken };
     }
@@ -79,12 +73,12 @@ export class AuthController {
     @Post("invite/:inviteCode/join")
     async joinInvitation(
         @Param("inviteCode") inviteCode: string,
-        @Request() req,
+        @CurrentUser() user: User,
         @Res({ passthrough: true }) res
     ): Promise<RegisterResponse> {
         const response = await this.authService.joinInvitation({
             inviteCode,
-            userId: req.user.id,
+            userId: user.id,
         });
 
         if (response["error"]) {

@@ -14,7 +14,6 @@ import { ProjectUsersModule } from "../../projects/project-users/project.users.m
         ListStagesModule,
         FieldsModule,
         forwardRef(() => ListsModule),
-        ProjectUsersModule,
     ],
     controllers: [ListGroupsController],
     providers: [ListGroupsService],

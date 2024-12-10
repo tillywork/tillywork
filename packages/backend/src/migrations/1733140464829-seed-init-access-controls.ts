@@ -122,52 +122,6 @@ export class SeedInitAccessControls1733140464829 implements MigrationInterface {
                 AND ac."listId" = l.id
             WHERE ac.id IS NULL
         `);
-
-        // Migrate card owners to card access control
-        await queryRunner.query(`
-            INSERT INTO access_control (
-                "userId", 
-                "cardId", 
-                "permissionLevel", 
-                "createdAt"
-            )
-            SELECT DISTINCT
-                c."createdById", 
-                c.id, 
-                'owner'::access_control_permissionlevel_enum, 
-                CURRENT_TIMESTAMP
-            FROM card c
-            LEFT JOIN access_control ac 
-                ON ac."userId" = c."createdById" 
-                AND ac."cardId" = c.id
-            WHERE ac.id IS NULL
-        `);
-
-        // Migrate project users to card access control
-        await queryRunner.query(`
-            INSERT INTO access_control (
-                "userId", 
-                "cardId", 
-                "permissionLevel", 
-                "createdAt"
-            )
-            SELECT DISTINCT
-                pu."userId", 
-                c.id, 
-                'editor'::access_control_permissionlevel_enum, 
-                CURRENT_TIMESTAMP
-            FROM card c
-            JOIN card_list cl on cl."cardId" = c.id
-            JOIN list l ON l.id = cl."listId"
-            LEFT JOIN space s on s.id = l."spaceId"
-            JOIN workspace w ON w.id = s."workspaceId" or w.id = l."workspaceId"
-            JOIN project p ON p.id = w."projectId"
-            JOIN project_user pu ON pu."projectId" = p.id
-            LEFT JOIN access_control ac 
-                ON ac."userId" = pu."userId" 
-                AND ac."cardId" = c.id
-            WHERE ac.id IS NULL
-        `);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
