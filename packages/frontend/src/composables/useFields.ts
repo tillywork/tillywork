@@ -1,6 +1,6 @@
 import { toValue, type MaybeRef } from 'vue';
 import { useFieldsService } from '@/services/useFieldsService';
-import { FieldTypes, type Field } from '@tillywork/shared';
+import { FieldTypes, type Card, type Field } from '@tillywork/shared';
 
 export const useFields = ({
   cardTypeId,
@@ -125,6 +125,22 @@ export const useFields = ({
     });
   }
 
+  /**
+   * Used to disable date picker text color in base field when a card is completed.
+   * @param card
+   * @param field
+   * @returns 'default' | undefined
+   */
+  function getDateFieldColor(card: Card, field: Field) {
+    const listStage = card.cardLists.find(
+      (cardList) => cardList.listId === toValue(listId)
+    )?.listStage;
+
+    if (listStage && field.type === FieldTypes.DATE && listStage.isCompleted) {
+      return 'default';
+    }
+  }
+
   return {
     fields,
     listFields,
@@ -140,5 +156,6 @@ export const useFields = ({
     filterableFields,
     refetch,
     sortFieldsByViewColumns,
+    getDateFieldColor,
   };
 };

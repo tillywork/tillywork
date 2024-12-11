@@ -49,7 +49,12 @@ const {
 
 const { updateFieldValue } = useCard();
 
-const { titleField, assigneeField, pinnedFieldsWithoutAssignee } = useFields({
+const {
+  titleField,
+  assigneeField,
+  pinnedFieldsWithoutAssignee,
+  getDateFieldColor,
+} = useFields({
   cardTypeId: props.list.defaultCardType.id,
   listId: props.list.id,
 });
@@ -273,6 +278,7 @@ watchEffect(() => {
                     <base-field
                       class="me-2"
                       :field
+                      :color="getDateFieldColor(card, field)"
                       no-label
                       :model-value="card.data[field.slug]"
                       @update:model-value="(v: string) => updateFieldValue({
