@@ -87,9 +87,7 @@ export class AccessControlService {
         );
 
         if (!hasPermission) {
-            throw new ForbiddenException(
-                `Insufficient permissions: ${resourceType} - ${resourceId} - ${requiredLevel}`
-            );
+            throw new ForbiddenException(`Insufficient permissions`);
         }
     }
 
