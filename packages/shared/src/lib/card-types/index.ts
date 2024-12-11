@@ -8,6 +8,7 @@ import { Workspace } from '../workspaces';
 export type CardType = {
   id: number;
   name: string;
+  layout: CardTypeLayout;
   workspace: Workspace;
   fields: Field[];
   createdByType: 'system' | 'user';
@@ -20,3 +21,9 @@ export type CreateCardTypeDto = {
   name: string;
   workspaceId: number;
 };
+
+export enum CardTypeLayout {
+  DEFAULT = 'default',
+  PERSON = 'person',
+  ORGANIZATION = 'organization',
+}

@@ -60,6 +60,10 @@ import { ResetViewsWithAssigneeGroupBy1726493876246 } from "../migrations/172649
 import { CreateAccessControlTable1733140447674 } from "../migrations/1733140447674-create-access-control-table";
 import { SeedInitAccessControls1733140464829 } from "../migrations/1733140464829-seed-init-access-controls";
 import { AddAccessTypeToWorkspaceSpaceListAndCardTables1733166524606 } from "../migrations/1733166524606-add-access-type-to-workspace-space-list-and-card-tables";
+import { AddTypeColumnToListTable1729608774525 } from "../migrations/1729608774525-add-type-column-to-list-table";
+import { AddLayoutToCardTypesTable1731493105407 } from "src/migrations/1731493105407-add-layout-to-card-types-table";
+import { MakeListStageIdNullableInCardListTable1731495327851 } from "src/migrations/1731495327851-make-list-stage-id-nullable-in-card-list-table";
+import { AddSlugToListTable1732707580057 } from "src/migrations/1732707580057-add-slug-to-list-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -121,6 +125,10 @@ const migrations = [
     CreateAccessControlTable1733140447674,
     SeedInitAccessControls1733140464829,
     AddAccessTypeToWorkspaceSpaceListAndCardTables1733166524606,
+    AddTypeColumnToListTable1729608774525,
+    AddLayoutToCardTypesTable1731493105407,
+    MakeListStageIdNullableInCardListTable1731495327851,
+    AddSlugToListTable1732707580057,
 ];
 
 const config: TypeOrmModuleOptions = {

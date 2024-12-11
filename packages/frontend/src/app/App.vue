@@ -13,7 +13,7 @@ import ProjectLayout from '@/layouts/ProjectLayout.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useDialogStore } from '@/stores/dialog';
 import { useThemeStore } from '@/stores/theme';
-import { VueQueryDevtools } from '@tanstack/vue-query-devtools';
+// import { VueQueryDevtools } from '@tanstack/vue-query-devtools';
 import posthog from 'posthog-js';
 import { useTheme } from 'vuetify';
 import BaseCommandPalette from '@/components/common/commands/BaseCommandPalette.vue';
@@ -145,5 +145,5 @@ registerInputFocusAndBlurListeners();
   <base-dialog />
   <base-snackbar-wrapper />
   <base-command-palette v-if="isCommandsEnabled" />
-  <VueQueryDevtools />
+  <!--<VueQueryDevtools /> -->
 </template>

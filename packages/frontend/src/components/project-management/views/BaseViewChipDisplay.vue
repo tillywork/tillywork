@@ -20,10 +20,11 @@ const { useUpdateViewMutation } = useViewsService();
 const { mutateAsync: updateView } = useUpdateViewMutation();
 
 const cardTypeId = computed(() => currentList.value?.defaultCardType.id ?? 0);
+const listId = computed(() => currentList.value!.id);
 
 const { titleField, tableFields, sortFieldsByViewColumns } = useFields({
   cardTypeId,
-  listId: currentList.value!.id,
+  listId,
 });
 
 const enabledTableColumns = computed({

@@ -9,7 +9,7 @@ definePage({
   },
 });
 
-const { setCurrentList } = useStateStore();
+const { setCurrentList, setTitle } = useStateStore();
 
 const route = useRoute('/pm/list/[listId]/');
 const router = useRouter();
@@ -28,7 +28,7 @@ watch(
   list,
   (v) => {
     if (v) {
-      document.title = `${v.name} - tillywork`;
+      setTitle(v.name);
     }
     setCurrentList(v);
   },

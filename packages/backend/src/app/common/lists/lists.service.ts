@@ -9,6 +9,7 @@ import {
     FindOptionsWhere,
     In,
     IsNull,
+    Like,
     Not,
     Repository,
     UpdateResult,
@@ -21,6 +22,8 @@ import { ClsService } from "nestjs-cls";
 import { AccessControl } from "../auth/entities/access.control.entity";
 import { PermissionLevel } from "@tillywork/shared";
 import { AccessControlService } from "../auth/services/access.control.service";
+import slugify from "slugify";
+import { Space } from "../spaces/space.entity";
 
 export type ListFindAllResult = {
     total: number;
@@ -132,12 +135,19 @@ export class ListsService {
     }
 
     async create(createListDto: CreateListDto): Promise<List> {
-        const list = this.listsRepository.create(createListDto);
+        const slug = await this.slugifyListName(createListDto);
+
+        const list = this.listsRepository.create({
+            ...createListDto,
+            slug,
+        });
+
         await this.listsRepository.save(list);
-
         await this.accessControlService.applyResourceAccess(list, "list");
-
-        await this.listSideEffectsService.postCreate(list);
+        await this.listSideEffectsService.postCreate({
+            list,
+            createDefaultStages: createListDto.createDefaultStages,
+        });
 
         return list;
     }
@@ -177,5 +187,69 @@ export class ListsService {
 
         const list = await this.findOne(id);
         await this.listsRepository.softRemove(list);
+    }
+
+    async slugifyListName({
+        name,
+        workspaceId,
+        spaceId,
+    }: {
+        name: string;
+        workspaceId?: number;
+        spaceId?: number;
+    }) {
+        let resolvedWorkspaceId = workspaceId;
+        let slug = slugify(name, { lower: true, strict: true });
+
+        if (!resolvedWorkspaceId && spaceId) {
+            const space = await this.listsRepository.manager.findOne(Space, {
+                where: { id: spaceId },
+                select: ["workspaceId"],
+            });
+
+            if (space) {
+                resolvedWorkspaceId = space.workspaceId;
+            }
+        }
+
+        if (!resolvedWorkspaceId) {
+            return slug;
+        }
+
+        const existingSlugs = await this.listsRepository.find({
+            where: {
+                spaceId: spaceId,
+                workspace: {
+                    id: workspaceId,
+                },
+                slug: Like(`${slug}%`),
+            },
+            select: ["slug"],
+        });
+
+        if (existingSlugs.length === 0) {
+            return slug;
+        }
+
+        const matchingExistingSlugs = existingSlugs
+            .map((existingSlug) => {
+                const parts = existingSlug.slug.split("-");
+                if (parts.length > 1) {
+                    const lastPart = parts[parts.length - 1];
+                    const num = parseInt(lastPart);
+                    return !isNaN(num) ? num : null;
+                }
+                return null;
+            })
+            .filter((num) => num !== null);
+
+        const nextNumber =
+            matchingExistingSlugs.length > 0
+                ? Math.max(...matchingExistingSlugs) + 1
+                : 1;
+
+        slug = `${slug}-${nextNumber}`;
+
+        return slug;
     }
 }

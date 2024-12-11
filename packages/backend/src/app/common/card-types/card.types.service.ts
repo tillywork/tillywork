@@ -12,11 +12,18 @@ import { PermissionLevel } from "@tillywork/shared";
 import { ClsService } from "nestjs-cls";
 import { AccessControlService } from "../auth/services/access.control.service";
 import { IsNotEmpty } from "class-validator";
+import { CardTypesSideEffectsService } from "./card.types.side.effects.service";
+import { CardTypeLayout } from "@tillywork/shared";
 
 export class FindAllParams {
     @IsNotEmpty()
     workspaceId: number;
 }
+
+type DefaultWorkspaceCardType = {
+    name: string;
+    layout?: CardTypeLayout;
+};
 
 @Injectable()
 export class CardTypesService {
@@ -26,7 +33,8 @@ export class CardTypesService {
         private listsService: ListsService,
         private cardsService: CardsService,
         private accessControlService: AccessControlService,
-        private clsService: ClsService
+        private clsService: ClsService,
+        private cardTypesSideEffectsService: CardTypesSideEffectsService
     ) {}
 
     async findAll({ workspaceId }: FindAllParams): Promise<CardType[]> {
@@ -80,13 +88,19 @@ export class CardTypesService {
             PermissionLevel.EDITOR
         );
 
-        const cardType = this.cardTypesRepository.create({
+        let cardType = this.cardTypesRepository.create({
             ...createCardTypeDto,
-            workspace: {
+            workspace: createCardTypeDto.workspace ?? {
                 id: createCardTypeDto.workspaceId,
             },
         });
-        return this.cardTypesRepository.save(cardType);
+
+        cardType = await this.cardTypesRepository.save(cardType);
+        cardType = await this.cardTypesSideEffectsService.postCreate({
+            cardType,
+        });
+
+        return cardType;
     }
 
     async update(
@@ -147,37 +161,48 @@ export class CardTypesService {
         await this.cardTypesRepository.softRemove(cardType);
     }
 
-    async createDefaultWorkspaceTypes(workspace: Workspace) {
-        const defaultTypes: string[] = [];
+    async createDefaultWorkspaceTypes(
+        workspace: Workspace
+    ): Promise<CardType[]> {
+        const defaultTypes: DefaultWorkspaceCardType[] = [];
         switch (workspace.type) {
             case WorkspaceTypes.PROJECT_MANAGEMENT:
-                defaultTypes.push("Task");
+                defaultTypes.push({
+                    name: "Task",
+                });
                 break;
             case WorkspaceTypes.CRM:
-                defaultTypes.push("Contact");
-                defaultTypes.push("Organization");
-                defaultTypes.push("Deal");
+                defaultTypes.push({
+                    name: "Contact",
+                    layout: CardTypeLayout.PERSON,
+                });
+                defaultTypes.push({
+                    name: "Organization",
+                    layout: CardTypeLayout.ORGANIZATION,
+                });
+                defaultTypes.push({
+                    name: "Deal",
+                });
                 break;
             case WorkspaceTypes.AGILE_PROJECTS:
-                defaultTypes.push("Issue");
+                defaultTypes.push({
+                    name: "Issue",
+                });
         }
 
-        const cardTypes = defaultTypes.map((type) => {
-            return new Promise((resolve) => {
-                const cardType = this.cardTypesRepository.create({
-                    name: type,
+        const cardTypesPromises = defaultTypes.map((type) => {
+            return new Promise<CardType>((resolve) => {
+                this.create({
+                    name: type.name,
+                    layout: type.layout,
                     createdByType: "system",
+                    workspaceId: workspace.id,
                     workspace,
-                });
-
-                this.cardTypesRepository.save(cardType).then((cardType) => {
-                    resolve(cardType);
-                });
+                }).then((cardType) => resolve(cardType));
             });
         });
 
-        const promiseResults = await Promise.allSettled(cardTypes);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return promiseResults.map((pr) => (pr as any).value);
+        const cardTypes = await Promise.all(cardTypesPromises);
+        return cardTypes;
     }
 }

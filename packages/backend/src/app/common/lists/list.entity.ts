@@ -20,6 +20,7 @@ import { CardType } from "../card-types/card.type.entity";
 import { Field } from "../fields/field.entity";
 import { Workspace } from "../workspaces/workspace.entity";
 import { AccessType } from "@tillywork/shared";
+import { ListType } from "@tillywork/shared";
 
 @Entity()
 export class List {
@@ -56,6 +57,12 @@ export class List {
     workspace: Relation<Workspace>;
     @Column({ type: "bigint" })
     workspaceId: number;
+
+    @Column({ type: "enum", enum: ListType })
+    type: ListType;
+
+    @Column({ type: "varchar", length: 255 })
+    slug: string;
 
     @OneToMany(() => ListStage, (listStage) => listStage.list)
     listStages: Relation<ListStage[]>;

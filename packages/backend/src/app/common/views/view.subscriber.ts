@@ -78,7 +78,7 @@ export class ViewSubscriber implements EntitySubscriberInterface<View> {
             ];
 
             event.entity.options.columns = [
-                titleField.id.toString(),
+                titleField?.id.toString(),
                 ...pinnedFields.map((field) => field.id.toString()),
             ];
 

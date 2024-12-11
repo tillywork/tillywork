@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
-import type { User } from '@/components/common/users/types';
 import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 import { useCardsService } from '@/services/useCardsService';
 import { useListStagesService } from '@/services/useListStagesService';
@@ -8,24 +7,30 @@ import { useProjectUsersService } from '@/services/useProjectUsersService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { type Content } from '@tiptap/vue-3';
-import type { ListStage } from '../lists/types';
-import BaseCardActivityTimeline from './BaseCardActivityTimeline.vue';
-import { ActivityType, type ActivityContent, type Card } from './types';
+import BaseCardActivityTimeline from '../BaseCardActivityTimeline.vue';
 import { cloneDeep, lowerFirst } from 'lodash';
 import { useStateStore } from '@/stores/state';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useAuthStore } from '@/stores/auth';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
-import BaseCardChildrenProgress from './BaseCardChildrenProgress.vue';
-import BaseCardChip from './BaseCardChip.vue';
+import BaseCardChildrenProgress from '../BaseCardChildrenProgress.vue';
+import BaseCardChip from '../BaseCardChip.vue';
 import { leaderKey } from '@/utils/keyboard';
 import { useMentionNotifications } from '@/composables/useMentionNotifications';
 import urlUtils from '@/utils/url';
 import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
-import BaseField from '../../common/fields/BaseField.vue';
-import type { Field, CardType } from '@tillywork/shared';
+import BaseField from '../../../common/fields/BaseField.vue';
+import {
+  type Field,
+  type CardType,
+  ActivityType,
+  type ActivityContent,
+  type Card,
+  type ListStage,
+  type User,
+} from '@tillywork/shared';
 
 const props = defineProps<{
   card: Card;
@@ -463,7 +468,7 @@ function openDescriptionFileDialog() {
                     :listStages="listStagesQuery.data.value ?? []"
                     size="default"
                     @update:model-value="
-                      (listStage) => updateCardListStage(child, listStage)
+                      (listStage: ListStage) => updateCardListStage(child, listStage)
                     "
                     theme="icon"
                   />
@@ -527,7 +532,7 @@ function openDescriptionFileDialog() {
               :listStages="listStagesQuery.data.value ?? []"
               size="default"
               @update:model-value="
-                (listStage) => updateCardListStage(cardCopy, listStage)
+                (listStage: ListStage) => updateCardListStage(cardCopy, listStage)
               "
             />
           </div>

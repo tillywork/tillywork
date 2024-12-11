@@ -1,22 +1,24 @@
 <script setup lang="ts">
-import type { CreateCardDto } from '@/components/project-management/cards/types';
-import { type List } from '@/components/project-management/lists/types';
 import { useCardsService } from '@/services/useCardsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import type { VForm } from 'vuetify/lib/components/index.mjs';
-import BaseEditorInput from '../base/BaseEditor/BaseEditorInput.vue';
+import BaseEditorInput from '../../base/BaseEditor/BaseEditorInput.vue';
 import { useDialogStore } from '@/stores/dialog';
-import { DIALOGS } from './types';
-import BaseListSelector from '../inputs/BaseListSelector.vue';
+import { DIALOGS } from '../types';
+import BaseListSelector from '../../inputs/BaseListSelector.vue';
 import { cloneDeep } from 'lodash';
 import { useStateStore } from '@/stores/state';
 import { useAuthStore } from '@/stores/auth';
 import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
 import { leaderKey } from '@/utils/keyboard';
 import { useFields } from '@/composables/useFields';
-import BaseField from '../fields/BaseField.vue';
-import type { CardType } from '@tillywork/shared';
+import BaseField from '../../fields/BaseField.vue';
 import posthog from 'posthog-js';
+import {
+  type CardType,
+  type CreateCardDto,
+  type List,
+} from '@tillywork/shared';
 
 const dialog = useDialogStore();
 const { workspace } = storeToRefs(useAuthStore());
@@ -88,10 +90,9 @@ async function createCard() {
   if (
     createCardDto.value.data.title &&
     createCardDto.value.data.title.trim() !== '' &&
-    createCardDto.value.listStage &&
     createCardDto.value.listId
   ) {
-    createCardDto.value.listStageId = createCardDto.value.listStage.id;
+    createCardDto.value.listStageId = createCardDto.value.listStage?.id;
     createCardMutation
       .mutateAsync(createCardDto.value)
       .then((card) => {
@@ -157,7 +158,7 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
       <v-spacer />
       <base-icon-btn icon="mdi-close" color="default" @click="closeDialog()" />
     </div>
-    <v-form ref="createForm" @submit.prevent="createCard">
+    <v-form ref="createForm" @submit.prevent="createCard()">
       <div class="px-4 pb-2">
         <base-editor-input
           v-model="createCardDto.data.title"
@@ -179,6 +180,7 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
 
         <div class="d-flex ga-1 align-center">
           <list-stage-selector
+            v-if="list?.listStages.length"
             v-model="createCardDto.listStage"
             :listStages="list?.listStages ?? []"
           />

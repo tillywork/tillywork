@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IsNotEmpty, IsObject, ValidateNested } from "class-validator";
+import {
+    IsNotEmpty,
+    IsNumber,
+    IsObject,
+    IsOptional,
+    ValidateNested,
+} from "class-validator";
 import { User } from "../../users/user.entity";
 import { Type } from "class-transformer";
 
@@ -19,10 +25,14 @@ export class CreateCardDto {
 
     @IsNotEmpty()
     listId: number;
-    @IsNotEmpty()
+
+    @IsOptional()
+    @IsNumber()
     listStageId: number;
+
     @IsNotEmpty()
     type: number;
+
     @IsNotEmpty()
     workspaceId: number;
 

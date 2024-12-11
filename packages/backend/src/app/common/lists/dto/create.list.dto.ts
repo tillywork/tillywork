@@ -1,5 +1,6 @@
 import {
     IsBoolean,
+    IsEnum,
     IsNotEmpty,
     IsNumber,
     IsOptional,
@@ -7,6 +8,7 @@ import {
     ValidateIf,
 } from "class-validator";
 import { CardType } from "../../card-types/card.type.entity";
+import { ListType } from "@tillywork/shared";
 
 export class CreateListDto {
     @IsOptional()
@@ -36,5 +38,9 @@ export class CreateListDto {
 
     @IsBoolean()
     @IsOptional()
-    createOnboardingData?: boolean;
+    createDefaultStages?: boolean;
+
+    @IsOptional()
+    @IsEnum(ListType)
+    type?: ListType;
 }

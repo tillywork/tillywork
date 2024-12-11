@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { DEFAULT_LIST_GROUP_BY_OPTIONS } from '../lists/types';
 import type { ListGroupOption } from './types';
 import BaseViewChip from './BaseViewChip.vue';
 import { ListGroupOptions, type ViewGroupByOption } from '@tillywork/shared';
@@ -21,7 +20,15 @@ const { groupableFields } = useFields({
 });
 
 const groupByOptions = computed(() => {
-  const arr = [...DEFAULT_LIST_GROUP_BY_OPTIONS];
+  const arr = [];
+
+  if (currentList.value?.listStages.length) {
+    arr.push({
+      label: 'Stage',
+      value: ListGroupOptions.LIST_STAGE,
+      icon: 'mdi-circle-slice-8',
+    });
+  }
 
   if (groupableFields.value) {
     groupableFields.value.forEach((field) => {

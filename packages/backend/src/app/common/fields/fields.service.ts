@@ -124,9 +124,11 @@ export class FieldsService {
     async findOneBySlug({
         slug,
         workspaceId,
+        cardTypeId,
     }: {
         slug: string;
         workspaceId: number;
+        cardTypeId?: number;
     }) {
         const user = this.clsService.get("user");
         await this.accessControlService.authorize(
@@ -140,6 +142,9 @@ export class FieldsService {
             slug,
             workspace: {
                 id: workspaceId,
+            },
+            cardType: {
+                id: cardTypeId,
             },
         });
     }
@@ -156,6 +161,7 @@ export class FieldsService {
         const slugExistsInWorkspace = await this.findOneBySlug({
             slug: createFieldDto.slug,
             workspaceId: createFieldDto.workspaceId,
+            cardTypeId: createFieldDto.cardTypeId,
         });
 
         if (slugExistsInWorkspace) {

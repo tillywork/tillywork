@@ -1,7 +1,7 @@
-import type { Card } from '@/components/project-management/cards/types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCardsService } from '@/services/useCardsService';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { FieldTypes, type Field } from '@tillywork/shared';
+import { FieldTypes, type Card, type Field } from '@tillywork/shared';
 import { cloneDeep } from 'lodash';
 
 export const useCard = () => {
@@ -16,7 +16,6 @@ export const useCard = () => {
   }: {
     card: Card;
     field: Field;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     v: any;
   }) {
     let newValue: any;
@@ -43,14 +42,14 @@ export const useCard = () => {
           : undefined;
     }
 
-    const cardCopy = cloneDeep(card);
-    cardCopy.data[field.slug] = Array.isArray(newValue)
+    const cardCopy = ref(cloneDeep(card));
+    cardCopy.value.data[field.slug] = Array.isArray(newValue)
       ? newValue.length && !!newValue[0]
         ? newValue
         : undefined
       : newValue;
 
-    updateCard(cardCopy).catch(() => {
+    updateCard(cardCopy.value).catch(() => {
       showSnackbar({
         message: 'Something went wrong, please try again.',
         color: 'error',

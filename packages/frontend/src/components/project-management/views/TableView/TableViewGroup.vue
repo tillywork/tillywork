@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  FlexRender,
   getCoreRowModel,
   useVueTable,
   type ColumnDef,
@@ -25,6 +26,7 @@ import {
   type List,
   type Card,
   type SortState,
+  CardTypeLayout,
 } from '@tillywork/shared';
 import BaseField from '@/components/common/fields/BaseField.vue';
 import { useListGroup } from '@/composables/useListGroup';
@@ -98,8 +100,12 @@ const filters = computed<QueryFilter>(() => {
   }
 });
 
-const hideCompleted = computed<boolean>(() => props.view.options.hideCompleted);
-const hideChildren = computed<boolean>(() => props.view.options.hideChildren);
+const hideCompleted = computed<boolean>(
+  () => props.view.options.hideCompleted ?? false
+);
+const hideChildren = computed<boolean>(
+  () => props.view.options.hideChildren ?? false
+);
 
 const total = ref(0);
 
@@ -186,6 +192,16 @@ function handleCardMenuClick({
 function getColumnSize(columnId: string) {
   const columnSize = props.columnSizes.find((cs) => cs.id === columnId);
   return columnSize?.size;
+}
+
+/**
+ * @param {FieldTypes} fieldType
+ * @returns boolean Whether or not this field should be rendered as a base field, or just the value
+ */
+function shouldRenderField(fieldType: FieldTypes) {
+  return ![FieldTypes.TEXT, FieldTypes.EMAIL, FieldTypes.URL].includes(
+    fieldType
+  );
 }
 
 watch(
@@ -306,7 +322,7 @@ watchEffect(() => {
               class="pa-0"
               rounded="0"
               height="33"
-              :to="`/pm/card/${row.original.id}`"
+              :to="`/card/${row.original.id}`"
               :ripple="false"
             >
               <v-hover
@@ -378,6 +394,7 @@ watchEffect(() => {
                         color="transparent"
                       >
                         <list-stage-selector
+                          v-if="list.listStages.length"
                           :model-value="row.original.cardLists[0].listStage"
                           theme="icon"
                           rounded="circle"
@@ -399,7 +416,18 @@ watchEffect(() => {
                           </span>
                         </template>
                         <template v-else>
-                          <v-skeleton-loader type="text" width="100%" />
+                          <template
+                            v-if="
+                              list.defaultCardType.layout ===
+                              CardTypeLayout.PERSON
+                            "
+                          >
+                            <span class="text-truncate ms-2">
+                              {{ row.original.data.first_name }}
+                              {{ row.original.data.last_name }}
+                            </span>
+                          </template>
+                          <v-skeleton-loader v-else type="text" width="100%" />
                         </template>
 
                         <!-- Progress -->
@@ -424,30 +452,46 @@ watchEffect(() => {
                         color="transparent"
                         link
                       >
-                        <base-field
-                          class="flex-fill h-100"
-                          :field="cell.column.columnDef.field"
-                          :model-value="
-                            row.original.data[cell.column.columnDef.field.slug]
+                        <template
+                          v-if="
+                            shouldRenderField(cell.column.columnDef.cellType)
                           "
-                          :color="
-                            getDateFieldColor(
-                              row.original,
-                              cell.column.columnDef.field
-                            )
-                          "
-                          rounded="0"
-                          flex-fill
-                          @update:model-value="
+                        >
+                          <base-field
+                            class="flex-fill h-100"
+                            :field="cell.column.columnDef.field"
+                            :model-value="
+                              row.original.data[
+                                cell.column.columnDef.field.slug
+                              ]
+                            "
+                            :color="
+                              getDateFieldColor(
+                                row.original,
+                                cell.column.columnDef.field
+                              )
+                            "
+                            rounded="0"
+                            flex-fill
+                            @update:model-value="
                             (v: any) => updateFieldValue({ 
                                 card: row.original,
                                 field: cell.column.columnDef.field,
                                 v
                             })
                           "
-                          table
-                          @click.stop
-                        />
+                            table
+                            @click.stop
+                          />
+                        </template>
+                        <template v-else>
+                          <div class="pa-2">
+                            <flex-render
+                              :render="cell.column.columnDef.cell"
+                              :props="cell.getContext()"
+                            />
+                          </div>
+                        </template>
                       </v-card>
                     </template>
                   </template>

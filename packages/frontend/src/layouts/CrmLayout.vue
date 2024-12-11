@@ -200,7 +200,6 @@ if (isAuthenticated()) {
 
     <v-main>
       <router-view />
-      {{ workspace }}
     </v-main>
   </v-app>
 </template>

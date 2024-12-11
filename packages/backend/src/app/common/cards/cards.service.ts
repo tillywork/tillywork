@@ -90,9 +90,7 @@ export class CardsService {
             .where("cardLists.list.id = :listId", { listId });
 
         if (hideCompleted) {
-            queryBuilder.andWhere("listStage.isCompleted = :isCompleted", {
-                isCompleted: false,
-            });
+            queryBuilder.andWhere("listStage.isCompleted IS NOT TRUE");
         }
 
         if (hideChildren) {

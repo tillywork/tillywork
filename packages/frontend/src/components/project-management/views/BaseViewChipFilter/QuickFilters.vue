@@ -34,22 +34,24 @@ const props = defineProps<{
 const activeFilters = ref<Record<string, FieldFilter[]>>({});
 
 const quickFilterOptions = computed<QuickFilter>(() => {
-  const stageGroup: QuickFilterGroup = {
-    name: 'Stage',
-    field: 'listStage.id',
-    icon: 'mdi-circle-slice-8',
-    options: props.listStages.map((stage) => {
-      return {
-        field: 'listStage.id',
-        operator: 'in' as FilterOperator,
-        value: [stage.id],
-        title: stage.name,
-        type: FieldTypes.DROPDOWN,
-      };
-    }),
-  };
-
   const fieldGroups: QuickFilter = [];
+
+  if (props.listStages.length) {
+    fieldGroups.push({
+      name: 'Stage',
+      field: 'listStage.id',
+      icon: 'mdi-circle-slice-8',
+      options: props.listStages.map((stage) => {
+        return {
+          field: 'listStage.id',
+          operator: 'in' as FilterOperator,
+          value: [stage.id],
+          title: stage.name,
+          type: FieldTypes.DROPDOWN,
+        };
+      }),
+    });
+  }
 
   props.fields
     ?.map((x) => x)
@@ -60,7 +62,7 @@ const quickFilterOptions = computed<QuickFilter>(() => {
       }
     });
 
-  return [stageGroup, ...fieldGroups];
+  return fieldGroups;
 });
 
 function buildFieldQuickFilterGroup(field: Field): QuickFilterGroup {

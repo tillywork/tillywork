@@ -31,5 +31,8 @@ export const useStateStore = defineStore('state', {
     setCurrentList(list: undefined | List) {
       this.currentList = list;
     },
+    setTitle(title?: string) {
+      document.title = `${title ? title + ' | tillywork' : 'tillywork'}`;
+    },
   },
 });

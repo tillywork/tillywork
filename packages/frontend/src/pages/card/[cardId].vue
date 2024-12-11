@@ -1,14 +1,8 @@
 <script setup lang="ts">
-import BaseCard from '@/components/project-management/cards/BaseCard.vue';
+import BaseCard from '@/components/project-management/cards/BaseCard/BaseCard.vue';
 import { useCardsService } from '@/services/useCardsService';
 
-definePage({
-  meta: {
-    requiresAuth: true,
-  },
-});
-
-const route = useRoute('/pm/card/[cardId]');
+const route = useRoute('/card/[cardId]');
 const cardsService = useCardsService();
 const cardId = computed(() => +route.params.cardId);
 

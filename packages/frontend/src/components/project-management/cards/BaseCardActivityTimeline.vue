@@ -5,14 +5,14 @@ import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 import { useUsersService } from '@/services/useUsersService';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { ActivityType, type CardActivity } from './types';
 import { useDialogStore } from '@/stores/dialog';
 import BaseCardCommentBox from './BaseCardCommentBox.vue';
 import type { Content } from '@tiptap/vue-3';
-import { dayjs } from '@tillywork/shared';
+import { dayjs, ActivityType, type CardActivity } from '@tillywork/shared';
 
 const props = defineProps<{
   cardId: number;
+  hideCommentInput?: boolean;
 }>();
 
 const emit = defineEmits(['comment']);
@@ -88,7 +88,7 @@ watch(cardId, () => {
 </script>
 
 <template>
-  <template v-if="user">
+  <template v-if="user && !hideCommentInput">
     <base-card-comment-box
       v-model="comment"
       v-model:empty="isCommentEmpty"

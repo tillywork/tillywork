@@ -87,6 +87,10 @@ export const FIELD_TYPE_OPTIONS = [
     title: 'Number',
     value: FieldTypes.NUMBER,
   },
+  {
+    title: 'Email',
+    value: FieldTypes.EMAIL,
+  },
 ];
 
 export const DEFAULT_CARD_FIELDS: Partial<Field>[] = [

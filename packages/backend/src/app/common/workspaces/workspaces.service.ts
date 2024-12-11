@@ -2,6 +2,7 @@ import {
     forwardRef,
     Inject,
     Injectable,
+    Logger,
     NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -106,15 +107,7 @@ export class WorkspacesService {
     }
 
     async create(createWorkspaceDto: CreateWorkspaceDto): Promise<Workspace> {
-        const workspace = this.workspacesRepository.create(createWorkspaceDto);
-        await this.workspacesRepository.save(workspace);
-
-        const defaultCardTypes =
-            await this.workspaceSideEffectsService.createDefaultCardTypes(
-                workspace
-            );
-
-        workspace.defaultCardType = defaultCardTypes[0];
+        let workspace = this.workspacesRepository.create(createWorkspaceDto);
         await this.workspacesRepository.save(workspace);
 
         await this.accessControlService.applyResourceAccess(
@@ -122,12 +115,12 @@ export class WorkspacesService {
             "workspace"
         );
 
-        if (createWorkspaceDto.createOnboardingData) {
-            const space = await this.workspaceSideEffectsService.postCreate(
-                workspace
-            );
-            workspace.spaces = [space];
-        }
+        Logger.debug({ createWorkspaceDto });
+
+        workspace = await this.workspaceSideEffectsService.postCreate({
+            workspace,
+            createOnboardingData: createWorkspaceDto.createOnboardingData,
+        });
 
         return workspace;
     }

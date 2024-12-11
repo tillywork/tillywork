@@ -6,6 +6,7 @@ import stringUtils from '@/utils/string';
 
 definePage({
   meta: {
+    requiresAuth: true,
     hideNavigationDrawer: true,
   },
 });

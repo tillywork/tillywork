@@ -80,14 +80,13 @@ async function handleSubmit() {
           class="text-body-3"
           rounded="md"
           :value="WorkspaceTypes.CRM"
-          disabled
         >
           <template #prepend="{ isSelected }">
             <v-icon
               :icon="isSelected ? 'mdi-handshake' : 'mdi-handshake-outline'"
             />
           </template>
-          Sales CRM (coming soon)
+          Sales CRM
         </v-list-item>
         <v-list-item class="text-body-3" rounded="md" disabled>
           <template #prepend="{ isSelected }">

@@ -23,9 +23,9 @@ export enum ViewTypes {
 
 export type ViewOptions = {
   groupBy: ViewGroupByOption;
-  sortBy: SortOption;
-  hideCompleted: boolean;
-  hideChildren: boolean;
+  sortBy?: SortOption;
+  hideCompleted?: boolean;
+  hideChildren?: boolean;
   columns?: string[];
 };
 

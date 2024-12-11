@@ -7,6 +7,8 @@ import { SpacesModule } from "../spaces/spaces.module";
 import { WorkspaceSideEffectsService } from "./workspace.side.effects.service";
 import { CardTypesModule } from "../card-types/card.types.module";
 import { AuthModule } from "../auth/auth.module";
+import { ListsModule } from "../lists/lists.module";
+import { ViewsModule } from "../views/views.module";
 
 @Module({
     imports: [
@@ -14,6 +16,9 @@ import { AuthModule } from "../auth/auth.module";
         SpacesModule,
         CardTypesModule,
         forwardRef(() => AuthModule),
+        forwardRef(() => CardTypesModule),
+        ListsModule,
+        ViewsModule,
     ],
     controllers: [WorkspacesController],
     providers: [WorkspacesService, WorkspaceSideEffectsService],

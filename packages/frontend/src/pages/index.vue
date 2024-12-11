@@ -4,6 +4,7 @@ import { useWorkspaceStore } from '@/stores/workspace';
 import { useAuthStore } from '@/stores/auth';
 import { useSpacesService } from '@/services/useSpacesService';
 import { useListsService } from '@/services/useListsService';
+import { WorkspaceTypes, type List } from '@tillywork/shared';
 
 definePage({
   meta: {
@@ -12,7 +13,8 @@ definePage({
 });
 
 const router = useRouter();
-const { currentList } = useStateStore();
+const { setCurrentList } = useStateStore();
+const { currentList, selectedModule } = storeToRefs(useStateStore());
 const workspaceStore = useWorkspaceStore();
 const authStore = useAuthStore();
 const { workspace } = storeToRefs(authStore);
@@ -32,19 +34,46 @@ const { data: lists } = useGetListsQuery({
   enabled: isWorkspaceReady,
 });
 
+function getCrmListLink(list: List) {
+  return `/crm/${list.slug}`;
+}
+
+function navigateToLastList() {
+  let link = '/';
+  if (currentList.value && selectedModule.value) {
+    switch (selectedModule.value) {
+      case WorkspaceTypes.CRM:
+        link = getCrmListLink(currentList.value);
+        break;
+
+      case WorkspaceTypes.PROJECT_MANAGEMENT:
+      default:
+        link = `/pm/list/${currentList.value.id}`;
+        break;
+    }
+  }
+
+  router.push(link);
+}
+
 watch(lists, (v) => {
-  if (v && !currentList) {
+  if (v && !currentList.value) {
     workspaceStore.setSpaceExpansionState(
       workspace.value!.id,
       [spaces.value?.[0]?.id].filter(Boolean) as number[]
     );
-    router.push({ path: `/pm/list/${v[0].id}` });
+
+    if (v[0]) {
+      setCurrentList(v[0]);
+    }
+
+    navigateToLastList();
   }
 });
 
 onMounted(() => {
-  if (currentList) {
-    router.push('/pm/list/' + currentList.id);
+  if (currentList.value) {
+    navigateToLastList();
   }
 });
 </script>

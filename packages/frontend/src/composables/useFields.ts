@@ -56,6 +56,10 @@ export const useFields = ({
     cardTypeFields.value?.find((field) => field.isAssignee)
   );
 
+  const leadStageField = computed(() =>
+    cardTypeFields.value?.find((field) => field.slug === 'lead_stage')
+  );
+
   const cardTypeFieldsWithoutMainFields = computed(() =>
     cardTypeFields.value?.filter(
       (field) => !field.isTitle && !field.isDescription && !field.isPhoto
@@ -102,6 +106,8 @@ export const useFields = ({
         FieldTypes.USER,
         FieldTypes.CHECKBOX,
         FieldTypes.NUMBER,
+        FieldTypes.TEXT,
+        FieldTypes.EMAIL,
       ].includes(field.type)
     )
   );
@@ -154,6 +160,7 @@ export const useFields = ({
     groupableFields,
     tableFields,
     filterableFields,
+    leadStageField,
     refetch,
     sortFieldsByViewColumns,
     getDateFieldColor,

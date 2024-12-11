@@ -14,7 +14,7 @@ let axiosInstance: AxiosInstance;
 const refreshTokenInterceptor = async (error: any) => {
   const authStore = useAuthStore();
   const { login, logout } = authStore;
-  const { token } = storeToRefs(authStore)
+  const { token } = storeToRefs(authStore);
 
   if (error.response.status === 401 && !error.config._retry && token.value) {
     // try {
@@ -42,7 +42,7 @@ const refreshTokenInterceptor = async (error: any) => {
  */
 const createAxiosInstance = () => {
   const authStore = useAuthStore();
-  const { token } = storeToRefs(authStore)
+  const { token } = storeToRefs(authStore);
 
   const instance = axios.create({
     baseURL: import.meta.env.TW_VITE_API_URL,
@@ -60,10 +60,10 @@ const createAxiosInstance = () => {
     }
   );
 
-  instance.interceptors.response.use(
-    (response) => response,
-    refreshTokenInterceptor
-  );
+  //   instance.interceptors.response.use(
+  //     (response) => response,
+  //     refreshTokenInterceptor
+  //   );
 
   return instance;
 };

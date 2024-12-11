@@ -65,16 +65,18 @@ const filtersMenuWidth = computed(() =>
 );
 
 const fields = computed(() => {
-  const fields: FieldFilterOption[] = [
-    {
+  const fields: FieldFilterOption[] = [];
+
+  if (listStages.value?.length) {
+    fields.push({
       title: 'Stage',
       field: 'listStage.id',
       operator: 'in',
       value: [],
       type: FieldTypes.DROPDOWN,
       icon: 'mdi-circle-slice-8',
-    },
-  ];
+    });
+  }
 
   if (filterableFields.value) {
     filterableFields.value.forEach((field) => {
