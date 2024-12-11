@@ -76,6 +76,28 @@ export class SeedInitAccessControls1733140464829 implements MigrationInterface {
             WHERE ac.id IS NULL
         `);
 
+        // Migrate project owner to space access control
+        await queryRunner.query(`
+            INSERT INTO access_control (
+                "userId", 
+                "spaceId", 
+                "permissionLevel", 
+                "createdAt"
+            )
+            SELECT DISTINCT
+                p."ownerId", 
+                s.id, 
+                'owner'::access_control_permissionlevel_enum, 
+                CURRENT_TIMESTAMP
+            FROM space s
+            JOIN workspace w ON w.id = s."workspaceId"
+            JOIN project p ON p.id = w."projectId"
+            LEFT JOIN access_control ac 
+                ON ac."userId" = p."ownerId" 
+                AND ac."spaceId" = s.id
+            WHERE ac.id IS NULL
+        `);
+
         // Migrate project users to space access control
         await queryRunner.query(`
             INSERT INTO access_control (
@@ -96,6 +118,29 @@ export class SeedInitAccessControls1733140464829 implements MigrationInterface {
             LEFT JOIN access_control ac 
                 ON ac."userId" = pu."userId" 
                 AND ac."spaceId" = s.id
+            WHERE ac.id IS NULL
+        `);
+
+        // Migrate project owner to list access control
+        await queryRunner.query(`
+            INSERT INTO access_control (
+                "userId", 
+                "listId", 
+                "permissionLevel", 
+                "createdAt"
+            )
+            SELECT DISTINCT
+                p."ownerId", 
+                l.id, 
+                'owner'::access_control_permissionlevel_enum, 
+                CURRENT_TIMESTAMP
+            FROM list l
+            LEFT JOIN space s on s.id = l."spaceId"
+            JOIN workspace w ON w.id = s."workspaceId" or w.id = l."workspaceId"
+            JOIN project p ON p.id = w."projectId"
+            LEFT JOIN access_control ac 
+                ON ac."userId" = p."ownerId" 
+                AND ac."listId" = l.id
             WHERE ac.id IS NULL
         `);
 
