@@ -135,9 +135,9 @@ export class ListsService {
         const list = this.listsRepository.create(createListDto);
         await this.listsRepository.save(list);
 
-        await this.listSideEffectsService.postCreate(list);
+        await this.accessControlService.applyResourceAccess(list, "list");
 
-        this.accessControlService.applyResourceAccess(list, "list");
+        await this.listSideEffectsService.postCreate(list);
 
         return list;
     }

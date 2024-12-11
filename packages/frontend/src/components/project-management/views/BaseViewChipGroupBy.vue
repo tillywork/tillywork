@@ -5,6 +5,7 @@ import BaseViewChip from './BaseViewChip.vue';
 import { ListGroupOptions, type ViewGroupByOption } from '@tillywork/shared';
 import { useFields } from '@/composables/useFields';
 import { useStateStore } from '@/stores/state';
+import posthog from 'posthog-js';
 
 const groupBy = defineModel<ViewGroupByOption>();
 
@@ -49,6 +50,11 @@ function handleGroupBySelection(option: ListGroupOption) {
     type: option.value,
     fieldId: option.field?.id,
   };
+
+  posthog.capture('update_group_by', {
+    groupBy: option.value,
+    field: option.field,
+  });
 }
 
 function isOptionSelected(option: ListGroupOption) {
@@ -62,6 +68,10 @@ function clearGroupBy() {
   groupBy.value = {
     type: ListGroupOptions.ALL,
   };
+
+  posthog.capture('update_group_by', {
+    groupBy: ListGroupOptions.ALL,
+  });
 }
 </script>
 

@@ -7,6 +7,7 @@ import { type Field, type View, ViewTypes } from '@tillywork/shared';
 import { cloneDeep } from 'lodash';
 import draggable from 'vuedraggable';
 import { useSnackbarStore } from '@/stores/snackbar';
+import posthog from 'posthog-js';
 
 const view = defineModel<View>({
   required: true,
@@ -35,6 +36,7 @@ const enabledTableColumns = computed({
   set(v) {
     const newColumnOrder = v.map((field) => field.id.toString());
     view.value.options.columns = newColumnOrder;
+    posthog.capture('order_table_columns', { viewId: view.value.id });
 
     updateView(view.value).catch(() => {
       showSnackbar({
@@ -50,6 +52,11 @@ const disabledTableColumns = computed(() =>
 );
 
 function handleToggleCompleted() {
+  posthog.capture('toggle_hide_completed', {
+    viewId: view.value.id,
+    value: !view.value.options.hideCompleted,
+  });
+
   updateView({
     id: view.value.id,
     options: {
@@ -60,6 +67,11 @@ function handleToggleCompleted() {
 }
 
 function handleToggleChildren() {
+  posthog.capture('toggle_hide_children', {
+    viewId: view.value.id,
+    value: !view.value.options.hideChildren,
+  });
+
   updateView({
     id: view.value.id,
     options: {
@@ -74,6 +86,10 @@ function isColumnEnabledInView(field: Field) {
 }
 
 function handleToggleColumn(field: Field) {
+  posthog.capture('toggle_table_column', {
+    viewId: view.value.id,
+  });
+
   let viewColumns = cloneDeep(view.value.options.columns) ?? [];
   const columnIndex = viewColumns?.findIndex(
     (fieldId) => fieldId === field.id.toString()

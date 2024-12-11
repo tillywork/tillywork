@@ -18,6 +18,7 @@ import {
   type FilterViewOptions,
 } from '@tillywork/shared';
 import { useFields } from '@/composables/useFields';
+import posthog from 'posthog-js';
 
 const props = defineProps<{
   filters?: ViewFilter;
@@ -138,6 +139,10 @@ function applyFilters() {
       });
       isSnackbarOpen.value = true;
     }
+
+    posthog.capture('updated_filters', {
+      viewId: props.viewId,
+    });
   }
 }
 

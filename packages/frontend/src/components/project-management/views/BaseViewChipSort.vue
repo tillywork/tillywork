@@ -7,6 +7,7 @@ import {
   type ListSortOption,
   DEFAULT_SORT_OPTIONS,
 } from './types';
+import posthog from 'posthog-js';
 
 const sortBy = defineModel<TableSortOption>();
 
@@ -54,6 +55,10 @@ const sortDirectionIcon = computed(() => {
 });
 
 function handleSortBySelection(option: ListSortOption) {
+  posthog.capture('updated_sort_by', {
+    option: option.value,
+  });
+
   if (isOptionSelected(option)) {
     toggleSortDirection();
   } else {
@@ -67,6 +72,10 @@ function isOptionSelected(option: ListSortOption) {
 }
 
 function clearSortBy() {
+  posthog.capture('updated_sort_by', {
+    option: null,
+  });
+
   sortBy.value = undefined;
 }
 
