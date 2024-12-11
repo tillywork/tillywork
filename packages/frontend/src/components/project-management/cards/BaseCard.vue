@@ -12,7 +12,6 @@ import type { ListStage } from '../lists/types';
 import BaseCardActivityTimeline from './BaseCardActivityTimeline.vue';
 import { ActivityType, type ActivityContent, type Card } from './types';
 import { cloneDeep, lowerFirst } from 'lodash';
-import { useFieldsService } from '@/services/useFieldsService';
 import { useStateStore } from '@/stores/state';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
@@ -52,7 +51,6 @@ const cardsService = useCardsService();
 const cardActivitiesService = useCardActivitiesService();
 const projectUsersService = useProjectUsersService();
 const listStagesService = useListStagesService();
-const { useFieldsQuery } = useFieldsService();
 
 const { updateFieldValue } = useCard();
 
@@ -68,17 +66,15 @@ const listStagesQuery = listStagesService.useGetListStagesQuery({
   listId,
 });
 
-const { data: listFields } = useFieldsQuery({
-  listId,
-});
-
 const cardTypeId = computed(() => props.card.type.id);
 const {
   titleField,
   descriptionField,
   cardTypeFieldsWithoutMainFields,
+  listFields,
   refetch: refetchCardTypeFields,
-} = useFields({ cardTypeId });
+  getDateFieldColor,
+} = useFields({ cardTypeId, listId });
 
 const fields = computed(() => {
   let arr: Field[] = [];
@@ -543,6 +539,7 @@ function openDescriptionFileDialog() {
                 </p>
                 <base-field
                   :field="field"
+                  :color="getDateFieldColor(cardCopy, field)"
                   v-model="cardCopy.data[field.slug]"
                   @update:model-value="
                     (v: any) => updateFieldValue({ card: cardCopy, field, v })

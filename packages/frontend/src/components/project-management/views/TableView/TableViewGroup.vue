@@ -52,7 +52,7 @@ const { useGetGroupCardsInfinite } = useCardsService();
 
 const { updateFieldValue } = useCard();
 
-const { titleField } = useFields({
+const { titleField, getDateFieldColor } = useFields({
   cardTypeId: props.list.defaultCardType.id,
   listId: props.list.id,
 });
@@ -429,6 +429,12 @@ watchEffect(() => {
                           :field="cell.column.columnDef.field"
                           :model-value="
                             row.original.data[cell.column.columnDef.field.slug]
+                          "
+                          :color="
+                            getDateFieldColor(
+                              row.original,
+                              cell.column.columnDef.field
+                            )
                           "
                           rounded="0"
                           flex-fill
