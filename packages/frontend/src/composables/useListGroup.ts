@@ -333,7 +333,6 @@ export const useListGroup = ({
                 timeout: 5000,
               });
             }),
-        onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
         isLoading: isDeletingCard,
       },
     });
