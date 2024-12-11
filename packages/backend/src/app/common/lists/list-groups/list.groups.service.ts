@@ -6,10 +6,8 @@ import { ListStagesService } from "../list-stages/list.stages.service";
 import { CreateListGroupDto } from "./dto/create.list.group.dto";
 import { UpdateListGroupDto } from "./dto/update.list.group.dto";
 import { FieldsService } from "../../fields/fields.service";
-import { ListsService } from "../lists.service";
 import { FieldTypes } from "../../fields/types";
 import { ListGroupEntityTypes } from "../types";
-import { ProjectUsersService } from "../../projects/project-users/project.users.service";
 import { Field } from "../../fields/field.entity";
 import { isEqual } from "lodash";
 import {
@@ -20,7 +18,10 @@ import {
     IsOptional,
     ValidateIf,
 } from "class-validator";
-import { ListGroupOptions } from "@tillywork/shared";
+import { ListGroupOptions, PermissionLevel } from "@tillywork/shared";
+import { ProjectUser } from "../../projects/project-users/project.user.entity";
+import { ClsService } from "nestjs-cls";
+import { AccessControlService } from "../../auth/services/access.control.service";
 
 export class GenerateGroupsParams {
     @IsNotEmpty()
@@ -54,11 +55,19 @@ export class ListGroupsService {
         private listGroupsRepository: Repository<ListGroup>,
         private listStagesService: ListStagesService,
         private fieldsService: FieldsService,
-        private listsService: ListsService,
-        private projectUsersService: ProjectUsersService
+        private clsService: ClsService,
+        private accessControlService: AccessControlService
     ) {}
 
     async create(createListGroupDto: CreateListGroupDto): Promise<ListGroup> {
+        const user = this.clsService.get("user");
+        await this.accessControlService.authorize(
+            user,
+            "list",
+            createListGroupDto.listId,
+            PermissionLevel.VIEWER
+        );
+
         const listGroup = this.listGroupsRepository.create({
             ...createListGroupDto,
             list: {
@@ -73,7 +82,7 @@ export class ListGroupsService {
         return listGroup;
     }
 
-    findAll({
+    async findAll({
         listId,
         groupBy,
         fieldId,
@@ -82,6 +91,14 @@ export class ListGroupsService {
         groupBy?: ListGroupOptions;
         fieldId?: number;
     }): Promise<ListGroup[]> {
+        const user = this.clsService.get("user");
+        await this.accessControlService.authorize(
+            user,
+            "list",
+            listId,
+            PermissionLevel.VIEWER
+        );
+
         const query = this.listGroupsRepository
             .createQueryBuilder("listGroup")
             .innerJoinAndSelect("listGroup.list", "list")
@@ -106,6 +123,14 @@ export class ListGroupsService {
         groupBy,
         fieldId,
     }: GenerateGroupsParams): Promise<ListGroup[]> {
+        const user = this.clsService.get("user");
+        await this.accessControlService.authorize(
+            user,
+            "list",
+            listId,
+            PermissionLevel.VIEWER
+        );
+
         const existingGroups = await this.findAll({
             listId,
             groupBy,
@@ -113,8 +138,6 @@ export class ListGroupsService {
         });
 
         let generatedGroups: CreateListGroupDto[];
-
-        const list = await this.listsService.findOne(listId);
         let groupByField: Field;
 
         switch (groupBy) {
@@ -125,12 +148,7 @@ export class ListGroupsService {
                 break;
 
             case ListGroupOptions.FIELD:
-                groupByField = await this.fieldsService.findOneBy({
-                    id: fieldId,
-                    workspace: {
-                        id: list.workspaceId,
-                    },
-                });
+                groupByField = await this.fieldsService.findOne(fieldId);
                 break;
 
             case ListGroupOptions.ALL:
@@ -262,7 +280,7 @@ export class ListGroupsService {
         field?: Field;
     }) {
         const users = (
-            await this.projectUsersService.findAll({
+            await this.listGroupsRepository.manager.find(ProjectUser, {
                 where: {
                     project: {
                         workspaces: {

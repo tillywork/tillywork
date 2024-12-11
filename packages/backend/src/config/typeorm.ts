@@ -57,6 +57,9 @@ import { AddColumnsToOptionsColumnInViewTable1724762987440 } from "../migrations
 import { MigrateCardUsersToDataColumn1725792730053 } from "../migrations/1725792730053-migrate-card-users-to-data-column";
 import { FixDescriptionAndDueAtFields1726391466764 } from "../migrations/1726391466764-fix-description-and-due-at-fields";
 import { ResetViewsWithAssigneeGroupBy1726493876246 } from "../migrations/1726493876246-reset-views-with-assignee-group-by";
+import { CreateAccessControlTable1733140447674 } from "../migrations/1733140447674-create-access-control-table";
+import { SeedInitAccessControls1733140464829 } from "../migrations/1733140464829-seed-init-access-controls";
+import { AddAccessTypeToWorkspaceSpaceListAndCardTables1733166524606 } from "../migrations/1733166524606-add-access-type-to-workspace-space-list-and-card-tables";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -115,6 +118,9 @@ const migrations = [
     MigrateCardUsersToDataColumn1725792730053,
     FixDescriptionAndDueAtFields1726391466764,
     ResetViewsWithAssigneeGroupBy1726493876246,
+    CreateAccessControlTable1733140447674,
+    SeedInitAccessControls1733140464829,
+    AddAccessTypeToWorkspaceSpaceListAndCardTables1733166524606,
 ];
 
 const config: TypeOrmModuleOptions = {

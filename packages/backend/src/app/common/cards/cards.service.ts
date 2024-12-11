@@ -1,4 +1,10 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import {
+    forwardRef,
+    Inject,
+    Injectable,
+    Logger,
+    NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Brackets, FindOptionsWhere, Repository, UpdateResult } from "typeorm";
 import { Card } from "./card.entity";
@@ -13,6 +19,9 @@ import { RelationCountLoader } from "typeorm/query-builder/relation-count/Relati
 import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transformer/RawSqlResultsToEntityTransformer";
 import { RelationCountMetadataToAttributeTransformer } from "typeorm/query-builder/relation-count/RelationCountMetadataToAttributeTransformer";
 import { RelationIdMetadataToAttributeTransformer } from "typeorm/query-builder/relation-id/RelationIdMetadataToAttributeTransformer";
+import { ClsService } from "nestjs-cls";
+import { PermissionLevel } from "@tillywork/shared";
+import { AccessControlService } from "../auth/services/access.control.service";
 
 export type CardFindAllResult = {
     total: number;
@@ -39,7 +48,10 @@ export class CardsService {
     constructor(
         @InjectRepository(Card)
         private cardsRepository: Repository<Card>,
-        private cardListsService: CardListsService
+        private cardListsService: CardListsService,
+        @Inject(forwardRef(() => AccessControlService))
+        private accessControlService: AccessControlService,
+        private clsService: ClsService
     ) {}
 
     async findAll({
@@ -52,6 +64,15 @@ export class CardsService {
         filters,
         hideChildren,
     }: FindAllParams): Promise<CardFindAllResult> {
+        const user = this.clsService.get("user");
+
+        await this.accessControlService.authorize(
+            user,
+            "list",
+            listId,
+            PermissionLevel.VIEWER
+        );
+
         const skip = (page - 1) * limit;
         const take = limit != -1 ? limit : undefined;
 
@@ -161,6 +182,8 @@ export class CardsService {
     }
 
     async findOne(id: number): Promise<Card> {
+        const user = this.clsService.get("user");
+
         const card = await this.cardsRepository.findOne({
             where: { id },
             relations: [
@@ -171,10 +194,22 @@ export class CardsService {
                 "children.cardLists",
                 "children.cardLists.listStage",
             ],
+            loadRelationIds: {
+                relations: ["workspace"],
+            },
         });
+
         if (!card) {
             throw new NotFoundException(`Card with ID ${id} not found`);
         }
+
+        await this.accessControlService.authorize(
+            user,
+            "list",
+            card.cardLists.map((cardList) => cardList.listId),
+            PermissionLevel.VIEWER
+        );
+
         return card;
     }
 
@@ -236,7 +271,16 @@ export class CardsService {
     }
 
     async update(id: number, updateCardDto: UpdateCardDto): Promise<Card> {
+        const user = this.clsService.get("user");
         const card = await this.findOne(id);
+
+        await this.accessControlService.authorize(
+            user,
+            "workspace",
+            card.workspace as unknown as number,
+            PermissionLevel.EDITOR
+        );
+
         this.cardsRepository.merge(card, updateCardDto);
 
         return this.cardsRepository.save(card);
@@ -250,7 +294,16 @@ export class CardsService {
     }
 
     async remove(id: number): Promise<void> {
+        const user = this.clsService.get("user");
         const card = await this.findOne(id);
+
+        await this.accessControlService.authorize(
+            user,
+            "workspace",
+            card.workspace as unknown as number,
+            PermissionLevel.EDITOR
+        );
+
         await this.cardsRepository.softRemove(card);
     }
 }

@@ -2,14 +2,17 @@ import {
     BadRequestException,
     ConflictException,
     Injectable,
-    Logger,
     NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { FindOptionsWhere, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { Field } from "./field.entity";
 import { CreateFieldDto } from "./dto/create.field.dto";
 import { UpdateFieldDto } from "./dto/update.field.dto";
+import { ClsService } from "nestjs-cls";
+import { AccessControlService } from "../auth/services/access.control.service";
+import { PermissionLevel } from "@tillywork/shared";
+import { CardType } from "../card-types/card.type.entity";
 
 export type FindAllParams = {
     workspaceId?: number;
@@ -22,7 +25,9 @@ export type FindAllParams = {
 export class FieldsService {
     constructor(
         @InjectRepository(Field)
-        private fieldsRepository: Repository<Field>
+        private fieldsRepository: Repository<Field>,
+        private clsService: ClsService,
+        private accessControlService: AccessControlService
     ) {}
 
     async findAll({
@@ -34,6 +39,42 @@ export class FieldsService {
         if (!workspaceId && !listId && !cardTypeId) {
             throw new BadRequestException(
                 "[FieldsService#findAll] One of the following query params is required: workspaceId, listId, cardTypeId"
+            );
+        }
+
+        const user = this.clsService.get("user");
+
+        if (workspaceId) {
+            await this.accessControlService.authorize(
+                user,
+                "workspace",
+                workspaceId,
+                PermissionLevel.VIEWER
+            );
+        } else if (listId) {
+            await this.accessControlService.authorize(
+                user,
+                "list",
+                listId,
+                PermissionLevel.VIEWER
+            );
+        } else if (cardTypeId) {
+            const cardType = await this.fieldsRepository.manager
+                .getRepository(CardType)
+                .findOne({
+                    where: {
+                        id: cardTypeId,
+                    },
+                    loadRelationIds: {
+                        relations: ["workspace"],
+                    },
+                });
+
+            await this.accessControlService.authorize(
+                user,
+                "workspace",
+                cardType.workspace as unknown as number,
+                PermissionLevel.VIEWER
             );
         }
 
@@ -58,15 +99,26 @@ export class FieldsService {
     }
 
     async findOne(id: number): Promise<Field> {
-        const field = await this.fieldsRepository.findOne({ where: { id } });
+        const user = this.clsService.get("user");
+        const field = await this.fieldsRepository.findOne({
+            where: { id },
+            loadRelationIds: {
+                relations: ["workspace"],
+            },
+        });
+
         if (!field) {
             throw new NotFoundException(`Field with ID ${id} not found`);
         }
-        return field;
-    }
 
-    async findOneBy(where: FindOptionsWhere<Field>): Promise<Field> {
-        return this.fieldsRepository.findOne({ where });
+        await this.accessControlService.authorize(
+            user,
+            "workspace",
+            field.workspace as unknown as number,
+            PermissionLevel.VIEWER
+        );
+
+        return field;
     }
 
     async findOneBySlug({
@@ -76,7 +128,15 @@ export class FieldsService {
         slug: string;
         workspaceId: number;
     }) {
-        return this.findOneBy({
+        const user = this.clsService.get("user");
+        await this.accessControlService.authorize(
+            user,
+            "workspace",
+            workspaceId,
+            PermissionLevel.VIEWER
+        );
+
+        return this.fieldsRepository.findOneBy({
             slug,
             workspace: {
                 id: workspaceId,
@@ -85,6 +145,14 @@ export class FieldsService {
     }
 
     async create(createFieldDto: CreateFieldDto): Promise<Field> {
+        const user = this.clsService.get("user");
+        await this.accessControlService.authorize(
+            user,
+            "workspace",
+            createFieldDto.workspaceId,
+            PermissionLevel.EDITOR
+        );
+
         const slugExistsInWorkspace = await this.findOneBySlug({
             slug: createFieldDto.slug,
             workspaceId: createFieldDto.workspaceId,
@@ -110,16 +178,32 @@ export class FieldsService {
     }
 
     async update(id: number, updateFieldDto: UpdateFieldDto): Promise<Field> {
+        const user = this.clsService.get("user");
         const field = await this.findOne(id);
 
-        Logger.debug({ updateFieldDto });
+        await this.accessControlService.authorize(
+            user,
+            "workspace",
+            field.workspace as unknown as number,
+            PermissionLevel.EDITOR
+        );
+
         this.fieldsRepository.merge(field, updateFieldDto);
 
         return this.fieldsRepository.save(field);
     }
 
     async remove(id: number): Promise<void> {
+        const user = this.clsService.get("user");
         const field = await this.findOne(id);
+
+        await this.accessControlService.authorize(
+            user,
+            "workspace",
+            field.workspace as unknown as number,
+            PermissionLevel.EDITOR
+        );
+
         await this.fieldsRepository.softRemove(field);
     }
 }

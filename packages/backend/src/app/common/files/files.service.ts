@@ -9,10 +9,12 @@ import { LocalStorageAdapter } from "./adapters/local.storage.adapter";
 import { FileDto, TWFileType } from "./types";
 import { User } from "../users/user.entity";
 import { CreateFileDto } from "./dtos/create.file.dto";
-import { FileStorageType } from "@tillywork/shared";
+import { FileStorageType, PermissionLevel } from "@tillywork/shared";
 import { UpdateFileDto } from "./dtos/update.file.dto";
 import { join } from "path";
 import { AzureStorageAdapter } from "./adapters/azure.storage.adapter";
+import { AccessControlService } from "../auth/services/access.control.service";
+import { ClsService } from "nestjs-cls";
 
 @Injectable()
 export class FilesService {
@@ -21,7 +23,9 @@ export class FilesService {
     constructor(
         @InjectRepository(TWFile)
         private filesRepository: Repository<TWFile>,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        private accessControlService: AccessControlService,
+        private clsService: ClsService
     ) {
         const storageType = configService.get("TW_FILE_STORAGE_TYPE");
         const localStoragePath = "uploads";
@@ -69,6 +73,13 @@ export class FilesService {
         file: FileDto;
         createdBy: User;
     }): Promise<TWFile> {
+        await this.accessControlService.authorize(
+            createdBy,
+            "project",
+            createdBy.project.id,
+            PermissionLevel.EDITOR
+        );
+
         const fileNameWithTimestamp = this.prependTimestampToFilename(
             file.originalname
         );
@@ -114,11 +125,16 @@ export class FilesService {
         return Date.now().toString() + "-" + fileName;
     }
 
-    findOne({ id, projectId }: { id: string; projectId?: number }) {
-        return this.filesRepository.findOneBy({
-            id,
-            project: {
-                id: projectId,
+    async findOne({ id, projectId }: { id: string; projectId?: number }) {
+        return this.filesRepository.findOne({
+            where: {
+                id,
+                project: {
+                    id: projectId,
+                },
+            },
+            loadRelationIds: {
+                relations: ["project"],
             },
         });
     }
@@ -148,6 +164,13 @@ export class FilesService {
     }
 
     async create(createFileDto: CreateFileDto): Promise<TWFile> {
+        await this.accessControlService.authorize(
+            createFileDto.createdBy,
+            "project",
+            createFileDto.projectId,
+            PermissionLevel.EDITOR
+        );
+
         const fileEntity = this.filesRepository.create({
             ...createFileDto,
             project: { id: createFileDto.projectId },
@@ -159,7 +182,16 @@ export class FilesService {
     }
 
     async update(id: string, updateFileDto: UpdateFileDto) {
+        const user = this.clsService.get("user");
         const file = await this.findOne({ id });
+
+        await this.accessControlService.authorize(
+            user,
+            "project",
+            file.project as unknown as number,
+            PermissionLevel.EDITOR
+        );
+
         this.filesRepository.merge(file, updateFileDto);
         return this.filesRepository.save(file);
     }
