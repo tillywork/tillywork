@@ -16,6 +16,7 @@ import { leaderKey } from '@/utils/keyboard';
 import { useFields } from '@/composables/useFields';
 import BaseField from '../fields/BaseField.vue';
 import type { CardType } from '@tillywork/shared';
+import posthog from 'posthog-js';
 
 const dialog = useDialogStore();
 const { workspace } = storeToRefs(useAuthStore());
@@ -84,7 +85,6 @@ function closeDialog() {
 }
 
 async function createCard() {
-  console.log(createCardDto.value);
   if (
     createCardDto.value.data.title &&
     createCardDto.value.data.title.trim() !== '' &&
@@ -95,8 +95,8 @@ async function createCard() {
     createCardMutation
       .mutateAsync(createCardDto.value)
       .then((card) => {
-        console.log('card', card);
         handlePostCreate();
+        posthog.capture('card_created', { id: card.id });
       })
       .catch(() => {
         showSnackbar({

@@ -100,6 +100,8 @@ export class SpacesService {
         const space = this.spacesRepository.create(createSpaceDto);
         await this.spacesRepository.save(space);
 
+        await this.accessControlService.applyResourceAccess(space, "space");
+
         if (createSpaceDto.createOnboardingData) {
             const cardType = await this.spacesRepository.manager
                 .getRepository(CardType)
@@ -116,8 +118,6 @@ export class SpacesService {
             });
             space.lists = [list];
         }
-
-        this.accessControlService.applyResourceAccess(space, "space");
 
         return space;
     }

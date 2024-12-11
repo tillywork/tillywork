@@ -117,17 +117,17 @@ export class WorkspacesService {
         workspace.defaultCardType = defaultCardTypes[0];
         await this.workspacesRepository.save(workspace);
 
+        await this.accessControlService.applyResourceAccess(
+            workspace,
+            "workspace"
+        );
+
         if (createWorkspaceDto.createOnboardingData) {
             const space = await this.workspaceSideEffectsService.postCreate(
                 workspace
             );
             workspace.spaces = [space];
         }
-
-        await this.accessControlService.applyResourceAccess(
-            workspace,
-            "workspace"
-        );
 
         return workspace;
     }
