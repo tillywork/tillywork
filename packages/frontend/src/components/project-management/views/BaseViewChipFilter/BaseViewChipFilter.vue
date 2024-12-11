@@ -230,7 +230,7 @@ watch(
       <base-view-chip
         v-bind="props"
         :icon="isFiltersFilled ? 'mdi-filter' : 'mdi-filter-outline'"
-        :label="'Filters: ' + filtersCount"
+        :label="'Filters' + (isFiltersFilled ? `: ${filtersCount}` : '')"
         :is-filled="isFiltersFilled"
       >
         <template #append v-if="isFiltersFilled">
