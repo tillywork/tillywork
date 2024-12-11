@@ -6,7 +6,7 @@ import { ListGroupsController } from "./list.groups.controller";
 import { ListStagesModule } from "../list-stages/list.stages.module";
 import { FieldsModule } from "../../fields/fields.module";
 import { ListsModule } from "../lists.module";
-import { ProjectUsersModule } from "../../projects/project-users/project.users.module";
+import { AuthModule } from "../../auth/auth.module";
 
 @Module({
     imports: [
@@ -14,6 +14,7 @@ import { ProjectUsersModule } from "../../projects/project-users/project.users.m
         ListStagesModule,
         FieldsModule,
         forwardRef(() => ListsModule),
+        AuthModule,
     ],
     controllers: [ListGroupsController],
     providers: [ListGroupsService],

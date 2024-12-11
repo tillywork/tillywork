@@ -34,8 +34,6 @@ import { ListAccessStrategy } from "./strategies/access.strategy/list.access.str
         AuthService,
         LocalStrategy,
         JwtStrategy,
-        LocalAuthGuard,
-        JwtAuthGuard,
         AccessControlService,
         AccessStrategyFactory,
         WorkspaceAccessStrategy,

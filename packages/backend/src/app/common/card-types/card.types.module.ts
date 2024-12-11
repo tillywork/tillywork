@@ -7,6 +7,7 @@ import { ListsModule } from "../lists/lists.module";
 import { CardsModule } from "../cards/cards.module";
 import { FieldsModule } from "../fields/fields.module";
 import { CardTypeSubscriber } from "./card.type.subscriber";
+import { AuthModule } from "../auth/auth.module";
 
 @Module({
     imports: [
@@ -14,6 +15,7 @@ import { CardTypeSubscriber } from "./card.type.subscriber";
         ListsModule,
         CardsModule,
         FieldsModule,
+        AuthModule,
     ],
     controllers: [CardTypesController],
     providers: [CardTypesService, CardTypeSubscriber],
