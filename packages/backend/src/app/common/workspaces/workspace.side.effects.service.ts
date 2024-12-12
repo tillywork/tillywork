@@ -96,13 +96,13 @@ export class WorkspaceSideEffectsService {
 
         switch (workspace.type) {
             case WorkspaceTypes.CRM: {
+                const contactCardType = workspace.cardTypes.find(
+                    (cardType) => cardType.name === "Contact"
+                );
                 workspace.defaultCardType =
-                    workspace.cardTypes.find(
-                        (cardType) => cardType.name === "Contact"
-                    ) ?? workspace.cardTypes[0];
+                    contactCardType ?? workspace.cardTypes[0];
 
                 await this.createCrmWorkspaceLists(workspace);
-
                 break;
             }
 

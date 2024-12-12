@@ -1,20 +1,16 @@
 <script setup lang="ts">
-import UserListItem from '@/components/common/navigation/UserListItem.vue';
 import { useAuthStore } from '@/stores/auth';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
 import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
 import { useLogo } from '@/composables/useLogo';
-import { useDialogStore } from '@/stores/dialog';
-import { DIALOGS } from '@/components/common/dialogs/types';
 import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
+import UserMenu from '@/components/common/navigation/UserMenu.vue';
 
 const authStore = useAuthStore();
-const { isAuthenticated, logout } = authStore;
-const { workspace } = storeToRefs(authStore);
+const { isAuthenticated } = authStore;
 const { hideNavigationDrawer } = useHideNavigationDrawer();
 const navigationDrawer = ref(true);
 const logo = useLogo();
-const dialog = useDialogStore();
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
   {
@@ -119,82 +115,7 @@ if (isAuthenticated()) {
 
       <template v-slot:append>
         <!-- User content -->
-        <v-list v-if="isAuthenticated()" :slim="false">
-          <v-menu :close-on-content-click="false">
-            <template #activator="{ props }">
-              <user-list-item v-bind="props" avatar-size="small">
-                <template #append>
-                  <v-icon icon="mdi-dots-vertical" />
-                </template>
-              </user-list-item>
-            </template>
-            <v-card class="border-thin ms-n2">
-              <v-list>
-                <v-menu>
-                  <template #activator="{ props }">
-                    <v-list-item v-bind="props">
-                      <template #prepend>
-                        <v-icon icon="mdi-apps" />
-                      </template>
-                      <v-list-item-title>Apps</v-list-item-title>
-                    </v-list-item>
-                  </template>
-                  <v-card
-                    class="d-flex flex-wrap align-center justify-space-evenly py-4"
-                    width="275"
-                    rounded="lg"
-                  >
-                    <v-card
-                      class="d-flex flex-column align-center justify-center pt-2"
-                      width="70"
-                      height="70"
-                      border="none"
-                      link
-                      rounded="lg"
-                    >
-                      <v-icon icon="mdi-timeline-check" size="24" />
-                      <v-card-title class="text-caption">Projects</v-card-title>
-                    </v-card>
-                    <v-card
-                      class="d-flex flex-column align-center justify-center pt-2"
-                      width="70"
-                      height="70"
-                      border="none"
-                      link
-                      rounded="lg"
-                    >
-                      <v-icon icon="mdi-handshake" size="24" />
-                      <v-card-title class="text-caption">CRM</v-card-title>
-                    </v-card>
-                    <v-card
-                      class="d-flex flex-column align-center justify-center pt-2"
-                      width="70"
-                      height="70"
-                      border="none"
-                      link
-                      rounded="lg"
-                    >
-                      <v-icon icon="mdi-application-braces" size="24" />
-                      <v-card-title class="text-caption">Agile</v-card-title>
-                    </v-card>
-                  </v-card>
-                </v-menu>
-                <v-list-item to="/settings/theme">
-                  <template #prepend>
-                    <v-icon icon="mdi-cog" />
-                  </template>
-                  <v-list-item-title>Settings</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="logout()">
-                  <template #prepend>
-                    <v-icon icon="mdi-logout" />
-                  </template>
-                  <v-list-item-title>Logout</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-card>
-          </v-menu>
-        </v-list>
+        <user-menu />
       </template>
     </v-navigation-drawer>
 

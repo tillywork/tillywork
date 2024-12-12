@@ -1,9 +1,6 @@
 import { useHttp } from '@/composables/useHttp';
-import type {
-  Workspace,
-  WorkspaceTypes,
-} from '../../components/project-management/workspaces/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
+import type { Workspace, WorkspaceTypes } from '@tillywork/shared';
 import type { MaybeRef } from 'vue';
 
 export const useWorkspacesService = () => {
@@ -59,7 +56,7 @@ export const useWorkspacesService = () => {
     enabled?: Ref<boolean>;
   }) {
     return useQuery({
-      queryKey: ['workspaces', toValue(type)],
+      queryKey: ['workspaces', type],
       queryFn: () => getWorkspaces({ type }),
       enabled,
     });

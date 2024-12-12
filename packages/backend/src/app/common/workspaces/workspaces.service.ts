@@ -2,7 +2,6 @@ import {
     forwardRef,
     Inject,
     Injectable,
-    Logger,
     NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -115,12 +114,11 @@ export class WorkspacesService {
             "workspace"
         );
 
-        Logger.debug({ createWorkspaceDto });
-
         workspace = await this.workspaceSideEffectsService.postCreate({
             workspace,
             createOnboardingData: createWorkspaceDto.createOnboardingData,
         });
+        await this.workspacesRepository.save(workspace);
 
         return workspace;
     }
