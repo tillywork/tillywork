@@ -1,6 +1,10 @@
 import { WorkspaceTypes, type List } from '@tillywork/shared';
 
 export type ListState = {
+  [listId: number]: ListStateEntry;
+};
+
+export type ListStateEntry = {
   lastViewId?: number;
 };
 
@@ -20,7 +24,7 @@ export const useStateStore = defineStore('state', {
       /** Used to save which spaces are expanded in the workspace. */
       spaceExpansionState: {} as Record<number, number[]>,
       /** Saves the last view the user was on in a list. */
-      listState: {} as Record<number, ListState>,
+      listState: {} as ListState,
     };
   },
   actions: {
