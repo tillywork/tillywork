@@ -1,6 +1,7 @@
 import { IsEnum, IsNotEmpty } from "class-validator";
-import { ActivityContent, ActivityType } from "../card.activity.entity";
+import { ActivityContent } from "../card.activity.entity";
 import { User } from "../../../users/user.entity";
+import { ActivityType } from "@tillywork/shared";
 
 export class CreateCardActivityDto {
     card: number;

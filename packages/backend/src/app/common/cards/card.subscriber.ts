@@ -6,11 +6,9 @@ import {
 } from "typeorm";
 import { Card } from "./card.entity";
 import { Injectable } from "@nestjs/common";
-import {
-    ActivityType,
-    CardActivity,
-} from "./card-activities/card.activity.entity";
+import { CardActivity } from "./card-activities/card.activity.entity";
 import { CardType } from "../card-types/card.type.entity";
+import { ActivityType } from "@tillywork/shared";
 
 @Injectable()
 @EventSubscriber()

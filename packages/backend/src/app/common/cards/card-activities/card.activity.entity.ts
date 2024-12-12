@@ -8,11 +8,7 @@ import {
 } from "typeorm";
 import { Card } from "../card.entity";
 import { User } from "../../users/user.entity";
-
-export enum ActivityType {
-    UPDATE = "UPDATE",
-    COMMENT = "COMMENT",
-}
+import { ActivityType } from "@tillywork/shared";
 
 export type ActivityContent = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

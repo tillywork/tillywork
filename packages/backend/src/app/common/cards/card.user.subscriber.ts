@@ -8,11 +8,9 @@ import {
 } from "typeorm";
 import { Injectable } from "@nestjs/common";
 import { User } from "../users/user.entity";
-import {
-    ActivityType,
-    CardActivity,
-} from "./card-activities/card.activity.entity";
+import { CardActivity } from "./card-activities/card.activity.entity";
 import { ClsService } from "nestjs-cls";
+import { ActivityType } from "@tillywork/shared";
 
 @Injectable()
 @EventSubscriber()
