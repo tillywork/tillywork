@@ -8,6 +8,7 @@ defineProps<{
   label?: string;
   rules?: ((v: any) => true | string)[];
   icon?: boolean;
+  hideDetails?: boolean;
 }>();
 
 const menu = ref(false);
@@ -67,6 +68,7 @@ watch(
           v-bind="props"
           :label="label ?? 'Color'"
           :rules
+          :hide-details="hideDetails"
         >
           <template #prepend-inner>
             <v-icon icon="mdi-circle-slice-8" :color="colorModel" />
