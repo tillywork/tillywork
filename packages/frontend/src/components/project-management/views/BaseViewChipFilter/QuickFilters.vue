@@ -124,8 +124,6 @@ function buildFieldQuickFilterOptions(field: Field) {
     type: field.type,
   });
 
-  console.log(options);
-
   return options;
 }
 

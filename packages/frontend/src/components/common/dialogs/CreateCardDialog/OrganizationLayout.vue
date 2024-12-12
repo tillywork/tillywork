@@ -6,7 +6,6 @@ import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from '../types';
 import BaseListSelector from '../../inputs/BaseListSelector.vue';
 import { cloneDeep } from 'lodash';
-import { useStateStore } from '@/stores/state';
 import { useAuthStore } from '@/stores/auth';
 import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
 import { leaderKey } from '@/utils/keyboard';
@@ -22,7 +21,6 @@ import {
 const dialog = useDialogStore();
 const { workspace } = storeToRefs(useAuthStore());
 const { showSnackbar } = useSnackbarStore();
-const { currentList } = storeToRefs(useStateStore());
 
 const { meta, ctrl, enter } = useMagicKeys();
 
@@ -38,13 +36,7 @@ const currentDialogIndex = computed(() =>
 );
 const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
 
-const list = computed(() => {
-  if (currentDialog.value?.data?.list) {
-    return currentDialog.value.data.list;
-  } else {
-    return currentList.value;
-  }
-});
+const list = computed(() => currentDialog.value?.data?.list);
 
 const cardType = computed<CardType>(() => {
   if (currentDialog.value?.data && currentDialog.value.data?.type) {
@@ -77,7 +69,6 @@ function closeDialog() {
 
 async function handleCreateCard() {
   if (createCardDto.value.data.name?.trim()) {
-    console.log(createCardDto.value.data);
     createCard(createCardDto.value)
       .then(() => {
         handlePostCreate();

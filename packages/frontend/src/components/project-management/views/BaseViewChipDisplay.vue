@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { useViewsService } from '@/services/useViewsService';
 import BaseViewChip from './BaseViewChip.vue';
-import { useStateStore } from '@/stores/state';
 import { useFields } from '@/composables/useFields';
-import { type Field, type View, ViewTypes } from '@tillywork/shared';
+import { type Field, type List, type View, ViewTypes } from '@tillywork/shared';
 import { cloneDeep } from 'lodash';
 import draggable from 'vuedraggable';
 import { useSnackbarStore } from '@/stores/snackbar';
@@ -12,15 +11,18 @@ import posthog from 'posthog-js';
 const view = defineModel<View>({
   required: true,
 });
+const { list } = defineProps<{
+  list: List;
+}>();
 
-const { currentList } = storeToRefs(useStateStore());
+const listId = computed(() => view.value.listId);
+
 const { showSnackbar } = useSnackbarStore();
 
 const { useUpdateViewMutation } = useViewsService();
 const { mutateAsync: updateView } = useUpdateViewMutation();
 
-const cardTypeId = computed(() => currentList.value?.defaultCardType.id ?? 0);
-const listId = computed(() => currentList.value!.id);
+const cardTypeId = computed(() => list.defaultCardType.id);
 
 const { titleField, tableFields, sortFieldsByViewColumns } = useFields({
   cardTypeId,
@@ -145,7 +147,7 @@ function handleToggleColumn(field: Field) {
               />
             </template>
             <v-list-item-title>
-              Show sub {{ currentList?.defaultCardType.name.toLowerCase() }}s
+              Show sub {{ list?.defaultCardType.name.toLowerCase() }}s
             </v-list-item-title>
           </v-list-item>
           <v-menu

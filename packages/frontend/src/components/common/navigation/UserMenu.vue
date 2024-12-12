@@ -9,6 +9,7 @@ type AppOption = {
   title: string;
   icon: string;
   type: WorkspaceTypes;
+  route: string;
   enabled: boolean;
 };
 
@@ -20,18 +21,21 @@ const appOptions: AppOption[] = [
     title: 'Projects',
     icon: 'mdi-timeline-check',
     type: WorkspaceTypes.PROJECT_MANAGEMENT,
+    route: '/pm',
     enabled: true,
   },
   {
     title: 'CRM',
     icon: 'mdi-handshake',
     type: WorkspaceTypes.CRM,
+    route: '/crm',
     enabled: true,
   },
   {
-    title: 'Products',
+    title: 'Product',
     icon: 'mdi-application-braces',
     type: WorkspaceTypes.AGILE_PROJECTS,
+    route: '/product',
     enabled: false,
   },
 ];

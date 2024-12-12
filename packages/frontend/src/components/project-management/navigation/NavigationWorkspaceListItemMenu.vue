@@ -4,9 +4,9 @@ import { useListsService } from '@/services/useListsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
-import type { CardType } from '../cards/types';
 import { useDialogStore } from '@/stores/dialog';
 import { useAuthStore } from '@/stores/auth';
+import type { CardType } from '@tillywork/shared';
 
 const listMenu = ref(false);
 const { useDeleteListMutation, useUpdateListMutation } = useListsService();
@@ -26,8 +26,6 @@ const emit = defineEmits(['hover:freeze', 'hover:unfreeze']);
 const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
 );
-
-const router = useRouter();
 
 function handleListMenuClick() {
   listMenu.value = !listMenu.value;
@@ -59,8 +57,7 @@ function deleteList(list: List) {
       queryClient.invalidateQueries({ queryKey: ['list', list.id] });
       dialog.closeDialog(confirmDialogIndex.value);
     })
-    .catch((e) => {
-      console.log(e);
+    .catch(() => {
       showSnackbar({
         message: 'Something went wrong, please try again.',
         color: 'error',

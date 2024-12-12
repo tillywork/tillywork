@@ -1,28 +1,31 @@
 <script setup lang="ts">
 import type { ListGroupOption } from './types';
 import BaseViewChip from './BaseViewChip.vue';
-import { ListGroupOptions, type ViewGroupByOption } from '@tillywork/shared';
+import {
+  ListGroupOptions,
+  type List,
+  type ViewGroupByOption,
+} from '@tillywork/shared';
 import { useFields } from '@/composables/useFields';
-import { useStateStore } from '@/stores/state';
 import posthog from 'posthog-js';
 
 const groupBy = defineModel<ViewGroupByOption>();
+const { list } = defineProps<{
+  list: List;
+}>();
 
-const { currentList } = storeToRefs(useStateStore());
-const cardTypeId = computed(() => currentList.value?.defaultCardType.id ?? 0);
-const listId = computed(() => currentList.value?.id ?? 0);
-const fieldsEnabled = computed(() => !!currentList.value);
+const cardTypeId = computed(() => list.defaultCardType.id);
+const listId = computed(() => list.id);
 
 const { groupableFields } = useFields({
   cardTypeId,
   listId,
-  enabled: fieldsEnabled,
 });
 
 const groupByOptions = computed(() => {
   const arr = [];
 
-  if (currentList.value?.listStages.length) {
+  if (list.listStages?.length) {
     arr.push({
       label: 'Stage',
       value: ListGroupOptions.LIST_STAGE,

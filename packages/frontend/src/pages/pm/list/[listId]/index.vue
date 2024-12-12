@@ -15,27 +15,19 @@ const route = useRoute('/pm/list/[listId]/');
 const router = useRouter();
 
 const listId = computed(() => +route.params.listId);
-const listsService = useListsService();
-const { data: list, error, refetch } = listsService.useGetListQuery(listId);
+const { useGetListQuery } = useListsService();
+const { data: list, error, refetch } = useGetListQuery(listId);
 
 watch(error, (v: any) => {
-  if (v.response.status === 404) {
-    router.push('/');
-  }
+  router.push('/');
 });
 
-watch(
-  list,
-  (v) => {
-    if (v) {
-      setTitle(v.name);
-    }
+watch(list, (v) => {
+  if (v) {
+    setTitle(v.name);
     setCurrentList(v);
-  },
-  {
-    immediate: true,
   }
-);
+});
 
 watch(listId, () => refetch());
 </script>

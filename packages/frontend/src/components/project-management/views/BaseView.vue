@@ -198,19 +198,22 @@ watch(
       <div class="d-flex align-center ga-2">
         <base-view-chip-group-by
           v-model="groupBy"
+          :list
           @update:model-value="handleGroupBySelection"
         />
         <base-view-chip-filter
           :filters="(viewCopy.filters as ViewFilter)"
           :view-id="viewCopy.id"
+          :list
           @update="handleUpdateFilters"
           @save="handleSaveFilters"
         />
         <base-view-chip-sort
           v-model="sortBy"
+          :list
           @update:model-value="handleSortBySelection"
         />
-        <base-view-chip-display v-model="viewCopy" />
+        <base-view-chip-display v-model="viewCopy" :list />
       </div>
     </div>
 

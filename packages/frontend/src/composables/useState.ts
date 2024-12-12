@@ -18,7 +18,7 @@ import { useTheme } from 'vuetify';
  * @returns
  */
 export const useState = () => {
-  const { setSelectedModule } = useStateStore();
+  const { setSelectedModule, navigateToLastList } = useStateStore();
   const { selectedModule } = storeToRefs(useStateStore());
   const { isAuthenticated, setProject, setWorkspace } = useAuthStore();
   const { project, user, workspace } = storeToRefs(useAuthStore());
@@ -134,6 +134,10 @@ export const useState = () => {
     },
     { immediate: true }
   );
+
+  watch(selectedModule, () => {
+    navigateToLastList();
+  });
 
   return {
     selectedModule,
