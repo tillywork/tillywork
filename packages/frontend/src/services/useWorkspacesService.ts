@@ -56,7 +56,12 @@ export const useWorkspacesService = () => {
     enabled?: Ref<boolean>;
   }) {
     return useQuery({
-      queryKey: ['workspaces', type],
+      queryKey: [
+        'workspaces',
+        {
+          type,
+        },
+      ],
       queryFn: () => getWorkspaces({ type }),
       enabled,
     });

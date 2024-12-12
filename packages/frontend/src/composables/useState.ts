@@ -14,7 +14,7 @@ import posthog from 'posthog-js';
 import { useTheme } from 'vuetify';
 
 /**
- * Used in App.vue to handle application state, such as theme and selected module.
+ * Used in App.vue to handle application state. Sets the app's theme, selected module, and whether or not to trigger onboarding dialog.
  * @returns
  */
 export const useState = () => {
@@ -44,13 +44,6 @@ export const useState = () => {
   const { data: projects } = useGetProjectsQuery({
     enabled: projectsEnabled,
   });
-
-  if (import.meta.env.MODE === 'production' && isAuthenticated()) {
-    posthog.identify(`${user.value?.id}`, {
-      email: user.value?.email,
-      name: `${user.value?.firstName} ${user.value?.lastName}`,
-    });
-  }
 
   watch(
     route,
@@ -123,6 +116,19 @@ export const useState = () => {
         updateUser({
           ...user.value,
           project: v,
+        });
+      }
+    },
+    { immediate: true }
+  );
+
+  watch(
+    user,
+    (v) => {
+      if (import.meta.env.MODE === 'production' && isAuthenticated()) {
+        posthog.identify(`${v?.id}`, {
+          email: v?.email,
+          name: `${v?.firstName} ${v?.lastName}`,
         });
       }
     },

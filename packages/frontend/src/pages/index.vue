@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useStateStore } from '@/stores/state';
-import { useWorkspaceStore } from '@/stores/workspace';
 import { useAuthStore } from '@/stores/auth';
 import { useSpacesService } from '@/services/useSpacesService';
 import { useListsService } from '@/services/useListsService';
@@ -13,9 +12,9 @@ definePage({
 });
 
 const router = useRouter();
-const { setCurrentList } = useStateStore();
+
+const { setCurrentList, setSpaceExpansionState } = useStateStore();
 const { currentList, selectedModule } = storeToRefs(useStateStore());
-const workspaceStore = useWorkspaceStore();
 const authStore = useAuthStore();
 const { workspace } = storeToRefs(authStore);
 
@@ -58,7 +57,7 @@ function navigateToLastList() {
 
 watch(lists, (v) => {
   if (v && !currentList.value) {
-    workspaceStore.setSpaceExpansionState(
+    setSpaceExpansionState(
       workspace.value!.id,
       [spaces.value?.[0]?.id].filter(Boolean) as number[]
     );
