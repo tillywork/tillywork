@@ -164,6 +164,8 @@ export const useCardsService = () => {
       mutationFn: updateCard,
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['cards'] });
+        queryClient.invalidateQueries({ queryKey: ['cardActivities'] });
+        console.log('invalidating..');
       },
     });
   }

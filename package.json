@@ -75,6 +75,7 @@
         "@nestjs/platform-express": "^10.0.2",
         "axios": "^1.6.7",
         "dayjs": "^1.11.10",
+        "deep-object-diff": "^1.1.9",
         "jwt-decode": "^4.0.0",
         "lodash": "^4.17.21",
         "reflect-metadata": "^0.1.13",

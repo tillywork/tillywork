@@ -14,6 +14,25 @@ export const useFieldsService = () => {
   const { sendRequest } = useHttp();
   const queryClient = useQueryClient();
 
+  async function getField({ id }: { id: MaybeRef<number> }): Promise<Field> {
+    return sendRequest(`/fields/${toValue(id)}`);
+  }
+
+  function useFieldQuery({
+    id,
+    enabled,
+  }: {
+    id: MaybeRef<number>;
+    enabled: MaybeRef<boolean>;
+  }) {
+    return useQuery({
+      queryKey: ['fields', id],
+      queryFn: () => getField({ id }),
+      staleTime: 1000 * 60 * 1,
+      enabled,
+    });
+  }
+
   async function getFields({
     workspaceId,
     listId,
@@ -94,6 +113,7 @@ export const useFieldsService = () => {
   }
 
   return {
+    useFieldQuery,
     useFieldsQuery,
     updateFieldMutation,
     createFieldMutation,

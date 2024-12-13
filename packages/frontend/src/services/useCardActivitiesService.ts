@@ -4,7 +4,7 @@ import type {
   ActivityContent,
   ActivityType,
   CardActivity,
-} from '@/components/project-management/cards/types';
+} from '@tillywork/shared';
 import type { MaybeRef } from 'vue';
 
 export type FindAllParams = {
