@@ -14,6 +14,6 @@ const { activity, card } = defineProps<{
     <activity-timeline-item-update :activity :card />
   </template>
   <template v-else>
-    <activity-timeline-item-comment :activity />
+    <activity-timeline-item-comment :activity :card />
   </template>
 </template>

@@ -5,7 +5,7 @@ import { useUsersService } from '@/services/useUsersService';
 
 import type { CardActivity } from '../types';
 
-import { dayjs } from '@tillywork/shared';
+import { dayjs, type Card } from '@tillywork/shared';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useCardActivitiesService } from '@/services/useCardActivitiesService';
@@ -13,8 +13,9 @@ import { useSnackbarStore } from '@/stores/snackbar';
 
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
 
-const { activity } = defineProps<{
+const { activity, card } = defineProps<{
   activity: CardActivity;
+  card: Card;
 }>();
 
 const { user } = storeToRefs(useAuthStore());
@@ -45,7 +46,7 @@ function openConfirmDeleteDialog() {
 
 function deleteComment() {
   deleteActivity({
-    cardId: activity.card.id,
+    cardId: card.id,
     activityId: activity.id,
   })
     .catch(() => {
