@@ -60,6 +60,7 @@ import { ResetViewsWithAssigneeGroupBy1726493876246 } from "../migrations/172649
 import { CreateAccessControlTable1733140447674 } from "../migrations/1733140447674-create-access-control-table";
 import { SeedInitAccessControls1733140464829 } from "../migrations/1733140464829-seed-init-access-controls";
 import { AddAccessTypeToWorkspaceSpaceListAndCardTables1733166524606 } from "../migrations/1733166524606-add-access-type-to-workspace-space-list-and-card-tables";
+import { TruncateCardActivities1734112779468 } from "src/migrations/1734112779468-truncate-card-activities";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -121,6 +122,7 @@ const migrations = [
     CreateAccessControlTable1733140447674,
     SeedInitAccessControls1733140464829,
     AddAccessTypeToWorkspaceSpaceListAndCardTables1733166524606,
+    TruncateCardActivities1734112779468,
 ];
 
 const config: TypeOrmModuleOptions = {
