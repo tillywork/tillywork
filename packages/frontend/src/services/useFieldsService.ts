@@ -57,10 +57,10 @@ export const useFieldsService = () => {
       queryKey: [
         'fields',
         {
-          workspaceId: toValue(params.workspaceId),
-          listId: toValue(params.listId),
-          cardTypeId: toValue(params.cardTypeId),
-          createdByType: toValue(params.createdByType),
+          workspaceId: params.workspaceId,
+          listId: params.listId,
+          cardTypeId: params.cardTypeId,
+          createdByType: params.createdByType,
         },
       ],
       queryFn: () => getFields(params),

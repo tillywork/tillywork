@@ -75,25 +75,10 @@ const cardTypeId = computed(() => props.card.type.id);
 const {
   titleField,
   descriptionField,
-  cardTypeFieldsWithoutMainFields,
-  listFields,
+  fields,
   refetch: refetchCardTypeFields,
   getDateFieldColor,
 } = useFields({ cardTypeId, listId });
-
-const fields = computed(() => {
-  let arr: Field[] = [];
-
-  if (cardTypeFieldsWithoutMainFields.value) {
-    arr = [...arr, ...cardTypeFieldsWithoutMainFields.value];
-  }
-
-  if (listFields.value) {
-    arr = [...arr, ...listFields.value];
-  }
-
-  return arr;
-});
 
 const cardTitle = ref('');
 const debouncedTitle = useDebounce(cardTitle, 2000);
