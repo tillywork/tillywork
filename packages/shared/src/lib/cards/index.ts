@@ -1,5 +1,7 @@
 import { CardType, List, ListStage, User, Workspace } from '../..';
 
+export * from './card.activity';
+
 export interface Card {
   id: number;
   cardLists: CardList[];

@@ -25,7 +25,6 @@ export function useMentionNotifications() {
 
   function getMentionedUsers(content: Content) {
     const mentions = new Set<number>();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function traverse(node: any) {
       if (node?.type === 'mention') {
         mentions.add(node.attrs.id);

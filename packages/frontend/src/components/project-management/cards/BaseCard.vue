@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
+import ActivityTimeline from './BaseCardActivityTimeline/ActivityTimeline.vue';
 import type { User } from '@/components/common/users/types';
 import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 import { useCardsService } from '@/services/useCardsService';
@@ -9,8 +10,6 @@ import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { type Content } from '@tiptap/vue-3';
 import type { ListStage } from '../lists/types';
-import BaseCardActivityTimeline from './BaseCardActivityTimeline.vue';
-import { ActivityType, type ActivityContent, type Card } from './types';
 import { cloneDeep, lowerFirst } from 'lodash';
 import { useStateStore } from '@/stores/state';
 import { useDialogStore } from '@/stores/dialog';
@@ -25,7 +24,13 @@ import urlUtils from '@/utils/url';
 import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
 import BaseField from '../../common/fields/BaseField.vue';
-import type { Field, CardType } from '@tillywork/shared';
+import {
+  type Field,
+  type CardType,
+  type Card,
+  type ActivityContent,
+  ActivityType,
+} from '@tillywork/shared';
 
 const props = defineProps<{
   card: Card;
@@ -70,25 +75,10 @@ const cardTypeId = computed(() => props.card.type.id);
 const {
   titleField,
   descriptionField,
-  cardTypeFieldsWithoutMainFields,
-  listFields,
+  fields,
   refetch: refetchCardTypeFields,
   getDateFieldColor,
 } = useFields({ cardTypeId, listId });
-
-const fields = computed(() => {
-  let arr: Field[] = [];
-
-  if (cardTypeFieldsWithoutMainFields.value) {
-    arr = [...arr, ...cardTypeFieldsWithoutMainFields.value];
-  }
-
-  if (listFields.value) {
-    arr = [...arr, ...listFields.value];
-  }
-
-  return arr;
-});
 
 const cardTitle = ref('');
 const debouncedTitle = useDebounce(cardTitle, 2000);
@@ -491,10 +481,7 @@ function openDescriptionFileDialog() {
         <v-card>
           <v-card-subtitle class="text-body-3 ps-1">Activity</v-card-subtitle>
           <v-card-text class="pa-0">
-            <base-card-activity-timeline
-              :card-id="cardCopy.id"
-              @comment="createComment"
-            />
+            <activity-timeline :card @comment="createComment" />
           </v-card-text>
         </v-card>
       </div>

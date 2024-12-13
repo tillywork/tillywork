@@ -16,7 +16,6 @@ export const useCard = () => {
   }: {
     card: Card;
     field: Field;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     v: any;
   }) {
     let newValue: any;

@@ -7,7 +7,6 @@ export interface User {
   firstName: string;
   lastName: string;
   photo: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onboarding: any;
   /** The user's currently active project */
   project?: Project;

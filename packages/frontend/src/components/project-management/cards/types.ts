@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { User } from '@/components/common/users/types';
 import type { List, ListStage } from '../lists/types';
 import type { Workspace } from '../workspaces/types';

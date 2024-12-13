@@ -10,11 +10,10 @@ let axiosInstance: AxiosInstance;
  * @param error onReject param from Axios
  * @returns AxiosInstance
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const refreshTokenInterceptor = async (error: any) => {
   const authStore = useAuthStore();
   const { login, logout } = authStore;
-  const { token } = storeToRefs(authStore)
+  const { token } = storeToRefs(authStore);
 
   if (error.response.status === 401 && !error.config._retry && token.value) {
     // try {
@@ -42,7 +41,7 @@ const refreshTokenInterceptor = async (error: any) => {
  */
 const createAxiosInstance = () => {
   const authStore = useAuthStore();
-  const { token } = storeToRefs(authStore)
+  const { token } = storeToRefs(authStore);
 
   const instance = axios.create({
     baseURL: import.meta.env.TW_VITE_API_URL,

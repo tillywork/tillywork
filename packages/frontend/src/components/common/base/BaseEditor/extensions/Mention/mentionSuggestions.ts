@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { VueRenderer } from '@tiptap/vue-3';
 import tippy from 'tippy.js';
 

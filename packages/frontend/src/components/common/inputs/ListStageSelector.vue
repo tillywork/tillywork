@@ -43,7 +43,7 @@ function isStageSelected(stage: ListStage) {
       <template v-else>
         <v-chip
           v-bind="!readonly ? props : undefined"
-          link
+          :link="!readonly"
           rounded="md"
           :size="size ?? 'small'"
           density="comfortable"

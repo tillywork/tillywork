@@ -74,7 +74,6 @@ export class User {
      * Holds general data from the user's onboarding
      */
     @Column({ type: "jsonb", default: {}, nullable: true })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onboarding: any;
 
     /**
