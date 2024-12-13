@@ -11,7 +11,6 @@ import {
 import { Card } from "./card.entity";
 import { Injectable, Logger } from "@nestjs/common";
 import { CardActivity } from "./card-activities/card.activity.entity";
-import { CardType } from "../card-types/card.type.entity";
 import { diff } from "deep-object-diff";
 import { ClsService } from "nestjs-cls";
 import { Field } from "../fields/field.entity";
@@ -44,11 +43,6 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
      */
     async afterInsert(event: InsertEvent<Card>) {
         const activityRepo = event.manager.getRepository(CardActivity);
-        const cardTypeRepo = event.manager.getRepository(CardType);
-
-        const cardType = await cardTypeRepo.findOneBy({
-            id: event.entity.type.id,
-        });
 
         const activity = activityRepo.create({
             type: ActivityType.UPDATE,
@@ -60,7 +54,6 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                         newValue: event.entity,
                     },
                 ],
-                description: `created this ${cardType.name.toLocaleLowerCase()}`,
             },
             createdBy: event.entity.createdBy,
         });
@@ -107,7 +100,7 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                         recentActivity.content as UpdateActivityContent
                     ).changes.some(
                         (existingChange) =>
-                            existingChange.field.id === newChange.field.id &&
+                            existingChange.field?.id === newChange.field?.id &&
                             ((existingChange.addedItems &&
                                 newChange.addedItems) ||
                                 (existingChange.removedItems &&
