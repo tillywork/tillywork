@@ -27,7 +27,6 @@ type IndentOptions = {
   minIndentLevel: number;
   maxIndentLevel: number;
   defaultIndentLevel: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   HTMLAttributes: Record<string, any>;
 };
 export const Indent = Extension.create<IndentOptions, never>({

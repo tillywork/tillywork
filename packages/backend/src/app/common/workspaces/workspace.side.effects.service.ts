@@ -26,7 +26,6 @@ export class WorkspaceSideEffectsService {
 
         const result = await Promise.allSettled(spacePromises);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return (result[0] as any).value;
     }
 

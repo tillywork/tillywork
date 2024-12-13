@@ -82,7 +82,7 @@ export interface FieldChange {
     id: number;
     slug: string;
   };
-  type: 'created' | 'updated';
+  type: 'created' | 'updated' | 'stage_updated';
   oldValue?: any;
   newValue?: any;
 

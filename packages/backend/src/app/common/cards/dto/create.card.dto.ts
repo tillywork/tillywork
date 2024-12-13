@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { IsNotEmpty, IsObject, ValidateNested } from "class-validator";
 import { User } from "../../users/user.entity";
 import { Type } from "class-transformer";

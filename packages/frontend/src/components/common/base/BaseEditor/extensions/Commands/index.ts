@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Extension, Editor, type Range } from '@tiptap/core';
 import Suggestion from '@tiptap/suggestion';
 

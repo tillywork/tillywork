@@ -13,7 +13,9 @@ import {
 import { useFieldsService } from '@/services/useFieldsService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 
-import ActivityTimelineItemUpdateChanges from './ActivityTimelineItemUpdateChanges.vue';
+import ActivityTimelineItems from './ActivityTimelineItemUpdateItems.vue';
+import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
+import { useListStagesService } from '@/services/useListStagesService';
 
 const { activity, card } = defineProps<{
   activity: CardActivity;
@@ -25,6 +27,7 @@ const { user, project } = storeToRefs(useAuthStore());
 const { getUserFullName } = useUsersService();
 const { useFieldQuery } = useFieldsService();
 const { useProjectUsersQuery } = useProjectUsersService();
+const { useGetListStagesQuery } = useListStagesService();
 
 const change = computed(
   () => (activity.content as UpdateActivityContent).changes[0]
@@ -41,6 +44,18 @@ const { data: users } = useProjectUsersQuery({
   projectId: project.value!.id,
   select: (data) => data.map((projectUser) => projectUser.user),
 });
+
+const { data: listStages } = useGetListStagesQuery({
+  listId: card.cardLists[0].listId,
+});
+
+const listStage = computed(() =>
+  change.value.type === 'stage_updated'
+    ? listStages.value?.find(
+        (listStage) => listStage.id === change.value.newValue
+      )
+    : undefined
+);
 </script>
 
 <template>
@@ -61,7 +76,7 @@ const { data: users } = useProjectUsersQuery({
       <template v-if="change.type === 'updated'">
         <template v-if="change.removedItems">
           removed
-          <activity-timeline-item-update-changes
+          <activity-timeline-items
             v-if="field && users"
             :field
             :users
@@ -71,7 +86,7 @@ const { data: users } = useProjectUsersQuery({
         </template>
         <template v-else-if="change.addedItems">
           added
-          <activity-timeline-item-update-changes
+          <activity-timeline-items
             v-if="field && users"
             :field
             :users
@@ -93,6 +108,16 @@ const { data: users } = useProjectUsersQuery({
       </template>
       <template v-else-if="change.type === 'created'">
         created this {{ card.type.name.toLowerCase() }}
+      </template>
+      <template
+        v-else-if="change.type === 'stage_updated' && listStages && listStage"
+      >
+        moved this {{ card.type.name.toLowerCase() }} to &nbsp;
+        <list-stage-selector
+          :model-value="listStage"
+          :list-stages="[]"
+          readonly
+        />
       </template>
       <span class="ms-2 text-grey">
         {{ dayjs(activity.createdAt).fromNow() }}

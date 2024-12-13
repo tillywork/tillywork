@@ -36,7 +36,6 @@ export const useFilesService = () => {
         });
 
         fileUploads.push(fileUpload);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         let message: string;
 

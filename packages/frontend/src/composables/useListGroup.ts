@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useCardsService } from '@/services/useCardsService';
 import { useDialogStore } from '@/stores/dialog';

@@ -177,7 +177,6 @@ export class CardTypesService {
         });
 
         const promiseResults = await Promise.allSettled(cardTypes);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return promiseResults.map((pr) => (pr as any).value);
     }
 }

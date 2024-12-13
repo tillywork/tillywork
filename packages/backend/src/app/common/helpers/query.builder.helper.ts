@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Logger } from "@nestjs/common";
 import { WhereExpressionBuilder, Brackets, SelectQueryBuilder } from "typeorm";
 import {

@@ -5,7 +5,6 @@ import { Plugin, PluginKey } from '@tiptap/pm/state';
 
 export interface FileOptions {
   inline: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   HTMLAttributes: Record<string, any>;
 }
 

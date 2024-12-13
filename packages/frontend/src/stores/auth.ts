@@ -142,7 +142,6 @@ export const useAuthStore = defineStore('auth', {
       return response;
     },
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handleRegistrationError(response: any) {
       const { showSnackbar } = useSnackbarStore();
 
