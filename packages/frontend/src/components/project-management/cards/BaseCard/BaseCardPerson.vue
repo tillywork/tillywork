@@ -89,7 +89,8 @@ watch(
   <v-card
     v-if="cardCopy"
     class="d-flex flex-sm-row flex-column"
-    min-height="100vh"
+    min-height="calc(100vh - 49px)"
+    max-height="calc(100vh - 49px)"
   >
     <v-card
       width="350"
