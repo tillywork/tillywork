@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { alternateKey, leaderKey } from '@/utils/keyboard';
 import { Editor, VueRenderer, type Range } from '@tiptap/vue-3';
 import tippy from 'tippy.js';

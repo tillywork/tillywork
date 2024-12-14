@@ -10,7 +10,6 @@ let axiosInstance: AxiosInstance;
  * @param error onReject param from Axios
  * @returns AxiosInstance
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const refreshTokenInterceptor = async (error: any) => {
   const authStore = useAuthStore();
   const { login, logout } = authStore;

@@ -39,7 +39,7 @@ const { titleField } = useFields({
     <div class="d-inline-block text-truncate">
       <template v-if="cardCopy && titleField">
         <list-stage-selector
-          v-if="!hideStage"
+          v-if="!hideStage && cardCopy.cardLists[0].listStage"
           :model-value="cardCopy.cardLists[0].listStage"
           :list-stages="[]"
           theme="icon"

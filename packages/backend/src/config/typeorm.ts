@@ -64,6 +64,7 @@ import { AddTypeColumnToListTable1729608774525 } from "../migrations/17296087745
 import { AddLayoutToCardTypesTable1731493105407 } from "src/migrations/1731493105407-add-layout-to-card-types-table";
 import { MakeListStageIdNullableInCardListTable1731495327851 } from "src/migrations/1731495327851-make-list-stage-id-nullable-in-card-list-table";
 import { AddSlugToListTable1732707580057 } from "src/migrations/1732707580057-add-slug-to-list-table";
+import { TruncateCardActivities1734112779468 } from "src/migrations/1734112779468-truncate-card-activities";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -129,6 +130,7 @@ const migrations = [
     AddLayoutToCardTypesTable1731493105407,
     MakeListStageIdNullableInCardListTable1731495327851,
     AddSlugToListTable1732707580057,
+    TruncateCardActivities1734112779468,
 ];
 
 const config: TypeOrmModuleOptions = {

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DIALOG_WIDTHS, type DIALOGS } from '@/components/common/dialogs/types';
 
 export type DialogOptions = {

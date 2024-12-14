@@ -43,7 +43,6 @@ export type FilterOperator =
 export interface FieldFilter {
   field: string;
   operator: FilterOperator;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value?: any;
 }
 

@@ -18,7 +18,6 @@ export class UploadLimitInterceptor implements NestInterceptor {
         private filesService: FilesService
     ) {}
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async intercept(context: ExecutionContext, next: CallHandler<any>) {
         const request = context.switchToHttp().getRequest();
         const user = request.user;

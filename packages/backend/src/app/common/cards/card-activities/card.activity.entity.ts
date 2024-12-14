@@ -8,12 +8,7 @@ import {
 } from "typeorm";
 import { Card } from "../card.entity";
 import { User } from "../../users/user.entity";
-import { ActivityType } from "@tillywork/shared";
-
-export type ActivityContent = {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-};
+import { ActivityContent, ActivityType } from "@tillywork/shared";
 
 @Entity()
 export class CardActivity {

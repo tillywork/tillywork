@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 const validationUtils = {
   rules: {
     required: (v: any) =>

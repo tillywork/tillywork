@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { VueRenderer } from '@tiptap/vue-3';
 import tippy from 'tippy.js';
 import EmojiList from './EmojiList.vue';

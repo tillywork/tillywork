@@ -10,7 +10,7 @@ import { type Card } from '@tillywork/shared';
 import BaseField from '@/components/common/fields/BaseField.vue';
 import BaseCardStageBar from '../BaseCardStageBar.vue';
 import CrmActivityInput from '@/components/common/inputs/CrmActivityInput.vue';
-import BaseCardActivityTimeline from '../BaseCardActivityTimeline.vue';
+import ActivityTimeline from '../BaseCardActivityTimeline/ActivityTimeline.vue';
 
 const { card } = defineProps<{
   card: Card;
@@ -127,10 +127,7 @@ watch(
             class="mb-4"
             @submit="console.log"
           />
-          <base-card-activity-timeline
-            :card-id="cardCopy.id"
-            hide-comment-input
-          />
+          <activity-timeline :card hide-comment-input />
         </div>
       </div>
     </div>
