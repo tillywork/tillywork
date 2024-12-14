@@ -82,6 +82,7 @@ const { data: users } = useProjectUsersQuery({
       size="24"
       :fill="flexFill"
       :rounded
+      :multiple="field.multiple"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.CARD">
