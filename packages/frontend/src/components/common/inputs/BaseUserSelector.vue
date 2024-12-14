@@ -15,6 +15,7 @@ interface Props {
   returnId?: boolean;
   icon?: string;
   returnString?: boolean;
+  multiple?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -24,6 +25,7 @@ const props = withDefaults(defineProps<Props>(), {
   textField: false,
   returnId: false,
   icon: 'mdi-account',
+  multiple: true,
 });
 
 const userMenu = defineModel('menu', { type: Boolean, default: false });
@@ -51,9 +53,17 @@ const formattedUsers = computed(() =>
 function toggleUserSelection(user: User) {
   const index = selectedUsers.value.findIndex((u) => u.id === user.id);
   if (index === -1) {
-    selectedUsers.value.push(user);
+    if (props.multiple) {
+      selectedUsers.value.push(user);
+    } else {
+      selectedUsers.value = [user];
+    }
   } else {
-    selectedUsers.value.splice(index, 1);
+    if (props.multiple) {
+      selectedUsers.value.splice(index, 1);
+    } else {
+      selectedUsers.value = [];
+    }
   }
 }
 
@@ -100,7 +110,7 @@ defineExpose({ userMenu });
         single-line
         hide-details
         autocomplete="off"
-        multiple
+        :multiple
         width="90"
         :prepend-inner-icon="icon"
         chips

@@ -98,10 +98,28 @@ const listStage = computed(() =>
           set
           <strong class="mx-1">{{ field?.name.toLowerCase() }}</strong>
           to
-          <strong class="ms-1">
+          <strong>
             <template v-if="field?.type === FieldTypes.DATE">{{
               dayjs(change.newValue).format('MMM DD')
             }}</template>
+            <template
+              v-else-if="
+                field &&
+                [
+                  FieldTypes.DROPDOWN,
+                  FieldTypes.CARD,
+                  FieldTypes.USER,
+                  FieldTypes.LABEL,
+                ].includes(field.type)
+              "
+            >
+              <activity-timeline-items
+                v-if="field && users"
+                :field
+                :users
+                :items="change.newValue"
+              />
+            </template>
             <template v-else>{{ change.newValue }}</template>
           </strong>
         </template>

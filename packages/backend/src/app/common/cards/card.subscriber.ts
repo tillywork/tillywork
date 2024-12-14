@@ -89,23 +89,30 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                 },
                 order: { createdAt: "DESC" },
             });
+            const field = await this.getFieldFromChangeKey(
+                changes[0].field.slug,
+                event
+            );
 
             let activityToUse: CardActivity;
             let canGroupChanges = false;
 
             if (recentActivity) {
-                canGroupChanges = changes.every((newChange) =>
-                    (
-                        recentActivity.content as UpdateActivityContent
-                    ).changes.some(
-                        (existingChange) =>
-                            existingChange.field?.id === newChange.field?.id &&
-                            ((existingChange.addedItems &&
-                                newChange.addedItems) ||
-                                (existingChange.removedItems &&
-                                    newChange.removedItems))
-                    )
-                );
+                canGroupChanges =
+                    field.multiple &&
+                    changes.every((newChange) =>
+                        (
+                            recentActivity.content as UpdateActivityContent
+                        ).changes.some(
+                            (existingChange) =>
+                                existingChange.field?.id ===
+                                    newChange.field?.id &&
+                                ((existingChange.addedItems &&
+                                    newChange.addedItems) ||
+                                    (existingChange.removedItems &&
+                                        newChange.removedItems))
+                        )
+                    );
             }
 
             if (canGroupChanges) {
@@ -138,38 +145,11 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
         newData: Record<string, any>,
         event: UpdateEvent<Card>
     ): Promise<FieldChange[]> {
-        const fieldRepo = event.manager.getRepository(Field);
-
         const diffResult = diff(oldData, newData);
 
         const changes = await Promise.all(
             Object.keys(diffResult).map(async (key) => {
-                let field: Field | null = await fieldRepo.findOne({
-                    where: {
-                        slug: key,
-                        workspace: {
-                            id: event.entity.workspace.id,
-                        },
-                        cardType: {
-                            id: event.entity.type.id,
-                        },
-                    },
-                });
-
-                if (!field) {
-                    field = await fieldRepo.findOne({
-                        where: {
-                            slug: key,
-                            workspace: {
-                                id: event.entity.workspace.id,
-                            },
-                            cardType: {
-                                id: IsNull(),
-                            },
-                        },
-                    });
-                }
-
+                const field = await this.getFieldFromChangeKey(key, event);
                 if (!field) {
                     this.logger.error({
                         message:
@@ -193,26 +173,28 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     newValue: newData[key],
                 };
 
-                if (Array.isArray(newData[key])) {
-                    if (Array.isArray(oldData[key])) {
-                        const addedItems = newData[key].filter(
-                            (item) => !oldData[key].includes(item)
-                        );
-                        const removedItems = oldData[key].filter(
-                            (item) => !newData[key].includes(item)
-                        );
+                if (field.multiple) {
+                    if (Array.isArray(newData[key])) {
+                        if (Array.isArray(oldData[key])) {
+                            const addedItems = newData[key].filter(
+                                (item) => !oldData[key].includes(item)
+                            );
+                            const removedItems = oldData[key].filter(
+                                (item) => !newData[key].includes(item)
+                            );
 
-                        change.addedItems = addedItems.length
-                            ? addedItems
-                            : undefined;
-                        change.removedItems = removedItems.length
-                            ? removedItems
-                            : undefined;
-                    } else {
-                        change.addedItems = newData[key];
+                            change.addedItems = addedItems.length
+                                ? addedItems
+                                : undefined;
+                            change.removedItems = removedItems.length
+                                ? removedItems
+                                : undefined;
+                        } else {
+                            change.addedItems = newData[key];
+                        }
+                    } else if (Array.isArray(oldData[key])) {
+                        change.removedItems = oldData[key];
                     }
-                } else if (Array.isArray(oldData[key])) {
-                    change.removedItems = oldData[key];
                 }
 
                 return change;
@@ -273,5 +255,36 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
         });
 
         return mergedChanges;
+    }
+
+    private async getFieldFromChangeKey(key: string, event: UpdateEvent<Card>) {
+        const fieldRepo = event.manager.getRepository(Field);
+        let field: Field | null = await fieldRepo.findOne({
+            where: {
+                slug: key,
+                workspace: {
+                    id: event.entity.workspace.id,
+                },
+                cardType: {
+                    id: event.entity.type.id,
+                },
+            },
+        });
+
+        if (!field) {
+            field = await fieldRepo.findOne({
+                where: {
+                    slug: key,
+                    workspace: {
+                        id: event.entity.workspace.id,
+                    },
+                    cardType: {
+                        id: IsNull(),
+                    },
+                },
+            });
+        }
+
+        return field;
     }
 }
