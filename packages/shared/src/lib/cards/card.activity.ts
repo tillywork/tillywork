@@ -1,8 +1,13 @@
 import { User, Card, FieldTypes } from '../..';
 
 export enum ActivityType {
-  UPDATE = 'UPDATE',
-  COMMENT = 'COMMENT',
+  UPDATE = 'update',
+  COMMENT = 'comment',
+  EMAIL = 'email',
+  TASK = 'task',
+  CALL = 'call',
+  MESSAGE = 'message',
+  MEETING = 'meeting',
 }
 
 export interface CardActivity {
@@ -15,7 +20,7 @@ export interface CardActivity {
 }
 
 interface BaseActivityContent {
-  description?: string;
+  description?: TiptapContent;
 }
 
 export interface CommentActivityContent extends BaseActivityContent {
@@ -30,23 +35,29 @@ export interface EmailActivityContent extends BaseActivityContent {
   subject: string;
   body: string;
   recipient: string;
+  isCompleted: boolean;
 }
+
+export type TaskActivityStatus = 'pending' | 'in_progress' | 'completed';
 
 export interface TaskActivityContent extends BaseActivityContent {
   title: string;
-  dueDate?: Date;
-  status: 'pending' | 'completed' | 'in_progress';
+  dueDate?: string;
+  status: TaskActivityStatus;
+  isCompleted: boolean;
+  assignee?: number[];
 }
 
 export interface CallActivityContent extends BaseActivityContent {
   duration: number;
   phoneNumber: string;
   outcome?: string;
+  isCompleted: boolean;
 }
 
 export interface MessageActivityContent extends BaseActivityContent {
-  text: string;
   channel: 'sms' | 'whatsapp' | 'slack' | 'other';
+  isCompleted: boolean;
 }
 
 export interface MeetingActivityContent extends BaseActivityContent {
@@ -56,6 +67,7 @@ export interface MeetingActivityContent extends BaseActivityContent {
   participants: string[];
   location?: string;
   meetingLink?: string;
+  isCompleted: boolean;
 }
 
 export type ActivityContent =
@@ -71,10 +83,7 @@ export interface TiptapContent {
   type: string;
   content?: TiptapContent[];
   text?: string;
-  marks?: Array<{
-    type: string;
-    attrs?: Record<string, any>;
-  }>;
+  attrs?: Record<string, any>;
 }
 
 export interface FieldChange {
@@ -95,4 +104,22 @@ export const ACTIVITY_FIELD_TYPES = [
   FieldTypes.DROPDOWN,
   FieldTypes.LABEL,
   FieldTypes.USER,
+];
+
+export const TASK_STATUS_OPTIONS = [
+  {
+    title: 'Pending',
+    value: 'pending',
+    color: 'default',
+  },
+  {
+    title: 'In Progress',
+    value: 'in_progress',
+    color: 'primary',
+  },
+  {
+    title: 'Completed',
+    value: 'completed',
+    color: 'success',
+  },
 ];

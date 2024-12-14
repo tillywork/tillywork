@@ -3,7 +3,9 @@ import BaseCard from '@/components/project-management/cards/BaseCard/BaseCard.vu
 import { useCardsService } from '@/services/useCardsService';
 
 const route = useRoute('/card/[cardId]');
+
 const cardsService = useCardsService();
+
 const cardId = computed(() => +route.params.cardId);
 
 const { data: card, refetch } = cardsService.useGetCardQuery({

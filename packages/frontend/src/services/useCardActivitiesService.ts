@@ -92,9 +92,33 @@ export const useCardActivitiesService = () => {
     });
   }
 
+  function updateActivity({
+    cardId,
+    activity,
+  }: {
+    cardId: number;
+    activity: Partial<CardActivity>;
+  }) {
+    return sendRequest(`/cards/${cardId}/activities/${activity.id}`, {
+      method: 'PUT',
+      data: activity,
+    });
+  }
+
+  function useUpdateActivityMutation() {
+    return useMutation({
+      mutationFn: updateActivity,
+      onSuccess: () =>
+        queryClient.invalidateQueries({
+          queryKey: ['cardActivities'],
+        }),
+    });
+  }
+
   return {
     useFindAllQuery,
     useCreateActivityMutation,
     useDeleteActivityMutation,
+    useUpdateActivityMutation,
   };
 };

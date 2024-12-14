@@ -38,8 +38,6 @@ export class CardType {
 
     //TODO add hasSubCards
 
-    //TODO add layout -> default, person, organization,
-
     @Column({
         type: "enum",
         enum: CardTypeLayout,

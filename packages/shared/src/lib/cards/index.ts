@@ -38,8 +38,8 @@ export interface CreateCardDto {
 }
 
 export enum ActivityType {
-  UPDATE = 'UPDATE',
-  COMMENT = 'COMMENT',
+  UPDATE = 'update',
+  COMMENT = 'comment',
   EMAIL = 'email',
   TASK = 'task',
   CALL = 'call',

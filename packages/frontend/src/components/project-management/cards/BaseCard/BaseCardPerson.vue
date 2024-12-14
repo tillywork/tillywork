@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { cloneDeep } from 'lodash';
 
+import { useStateStore } from '@/stores/state';
+
 import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
 import { useCrm } from '@/composables/useCrm';
@@ -9,12 +11,14 @@ import { type Card } from '@tillywork/shared';
 
 import BaseField from '@/components/common/fields/BaseField.vue';
 import BaseCardStageBar from '../BaseCardStageBar.vue';
-import CrmActivityInput from '@/components/common/inputs/CrmActivityInput.vue';
+import ActivityInput from '@/components/common/inputs/CrmActivityInput/ActivityInput.vue';
 import ActivityTimeline from '../BaseCardActivityTimeline/ActivityTimeline.vue';
 
 const { card } = defineProps<{
   card: Card;
 }>();
+
+const { setTitle } = useStateStore();
 
 const cardCopy = ref(cloneDeep(card));
 
@@ -26,11 +30,28 @@ const list = computed(() => getListByCardType(card.type));
 
 const { fields, leadStageField } = useFields({ cardTypeId });
 
+function setPersonPageTitle() {
+  let title = '';
+
+  if (card.data.first_name) {
+    title = card.data.first_name;
+
+    if (card.data.last_name) title += ` ${card.data.last_name}`;
+  } else if (card.data.last_name) {
+    title = card.data.last_name;
+  } else if (card.data.email) {
+    title = card.data.email;
+  }
+
+  setTitle(title);
+}
+
 watch(
   () => card,
   (v) => {
     if (v) {
       cardCopy.value = cloneDeep(v);
+      setPersonPageTitle();
     }
   }
 );
@@ -122,11 +143,7 @@ watch(
     <div class="base-card-content-wrapper pa-4 flex-fill align-start">
       <div class="base-card-content mx-auto">
         <div>
-          <crm-activity-input
-            placeholder="Recent updates.."
-            class="mb-4"
-            @submit="console.log"
-          />
+          <activity-input class="mb-4" :card />
           <activity-timeline :card hide-comment-input />
         </div>
       </div>

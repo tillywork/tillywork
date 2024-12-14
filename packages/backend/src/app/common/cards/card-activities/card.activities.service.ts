@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { FindOptionsOrder, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { CardActivity } from "./card.activity.entity";
 import { CreateCardActivityDto } from "./dto/create.card.activity.dto";
+import { UpdateCardActivityDto } from "./dto/update.card.activity.dto";
 
 export interface FindAllParams {
     cardId: number;
@@ -62,6 +63,18 @@ export class CardActivitiesService {
         });
 
         return cardActivity.raw[0];
+    }
+
+    async update(
+        updateCardActivityDto: UpdateCardActivityDto
+    ): Promise<CardActivity> {
+        const cardActivity = await this.findOne(updateCardActivityDto.id);
+
+        this.cardActivitiesRepository.merge(
+            cardActivity,
+            updateCardActivityDto
+        );
+        return this.cardActivitiesRepository.save(cardActivity);
     }
 
     async remove(id: number): Promise<void> {

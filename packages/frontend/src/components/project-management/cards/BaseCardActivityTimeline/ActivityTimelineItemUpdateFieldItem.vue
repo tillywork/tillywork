@@ -20,10 +20,10 @@ const user = computed(() => users.find((user) => user.id === +item));
 </script>
 
 <template>
-  <template v-if="field.type === FieldTypes.LABEL">
+  <template v-if="[FieldTypes.LABEL, FieldTypes.DROPDOWN].includes(field.type)">
     <v-chip
       :color="fieldItem?.color"
-      rounded="pill"
+      :rounded="field.type === FieldTypes.LABEL ? 'pill' : 'md'"
       density="compact"
       class="text-caption"
       >{{ item }}</v-chip
@@ -32,11 +32,6 @@ const user = computed(() => users.find((user) => user.id === +item));
   <template v-else-if="field.type === FieldTypes.USER && !!user">
     <base-avatar :photo="user.photo" :text="getUserFullName(user)" />
     <span>{{ getUserFullName(user) }}</span>
-  </template>
-  <template v-else-if="field.type === FieldTypes.DROPDOWN">
-    <v-chip density="compact" class="text-caption">
-      {{ item }}
-    </v-chip>
   </template>
   <template v-else-if="field.type === FieldTypes.CARD">
     <base-card-chip :card="{ id: +item }" density="compact" height="24" />
