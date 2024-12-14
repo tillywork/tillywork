@@ -13,8 +13,10 @@ type AppOption = {
   enabled: boolean;
 };
 
+const userMenu = ref(false);
+
 const { isAuthenticated, logout } = useAuthStore();
-const { setSelectedModule } = useStateStore();
+const { setSelectedModule, toggleFreezeRail } = useStateStore();
 
 const appOptions: AppOption[] = [
   {
@@ -46,11 +48,13 @@ function handleSelectApp(app: AppOption) {
   //redirect to correct place
   setSelectedModule(app.type);
 }
+
+watch(userMenu, () => toggleFreezeRail());
 </script>
 
 <template>
   <v-list v-if="isAuthenticated()" :slim="false">
-    <v-menu :close-on-content-click="false">
+    <v-menu v-model="userMenu" :close-on-content-click="false">
       <template #activator="{ props }">
         <user-list-item v-bind="props" avatar-size="small">
           <template #append>

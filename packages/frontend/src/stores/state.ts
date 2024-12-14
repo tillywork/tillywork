@@ -25,6 +25,8 @@ export const useStateStore = defineStore('state', {
       spaceExpansionState: {} as Record<number, number[]>,
       /** Saves the last view the user was on in a list. */
       listState: {} as ListState,
+      /** Used to prevent rail navigation drawer from closing when a menu is open. */
+      isRailFrozen: false,
     };
   },
   actions: {
@@ -82,6 +84,9 @@ export const useStateStore = defineStore('state', {
     },
     getCrmListLink(list: List) {
       return `/crm/${list?.slug ?? 'contacts'}`;
+    },
+    toggleFreezeRail() {
+      this.isRailFrozen = !this.isRailFrozen;
     },
   },
 });

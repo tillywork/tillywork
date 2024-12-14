@@ -9,12 +9,16 @@ import { useStateStore } from '@/stores/state';
 
 const onlyIcon = defineModel<boolean>('onlyIcon');
 
+const workspaceSettingsMenu = ref(false);
+
 const dialog = useDialogStore();
 const workspacesService = useWorkspacesService();
 const selectWorkspaceMenu = ref(false);
 const authStore = useAuthStore();
 const { workspace: selectedWorkspace } = storeToRefs(authStore);
 const { selectedModule } = storeToRefs(useStateStore());
+const { toggleFreezeRail } = useStateStore();
+
 const workspaceQuery = workspacesService.useGetWorkspacesQuery({
   type: selectedModule,
 });
@@ -72,6 +76,10 @@ watch(
   },
   { deep: true }
 );
+
+watch([workspaceSettingsMenu, selectWorkspaceMenu], () => {
+  toggleFreezeRail();
+});
 </script>
 
 <template>
@@ -80,7 +88,7 @@ watch(
       density="compact"
       link
       id="workspace-menu-activator"
-      class="user-select-none w-100"
+      class="user-select-none flex-fill"
       rounded="md"
       color="transparent"
     >
@@ -104,16 +112,16 @@ watch(
       </v-card-title>
     </v-card>
 
-    <base-icon-btn
-      v-if="!onlyIcon"
-      id="workspace-menu-btn"
-      icon="mdi-dots-vertical"
-      class="ms-2"
-      @click.stop
-      v-show="selectedWorkspace"
-    />
-
-    <v-menu activator="#workspace-menu-btn">
+    <v-menu v-model="workspaceSettingsMenu">
+      <template #activator="{ props }">
+        <base-icon-btn
+          v-bind="props"
+          icon="mdi-dots-vertical"
+          class="ms-2 flex-0-0"
+          @click.stop
+          v-show="selectedWorkspace && !onlyIcon"
+        />
+      </template>
       <v-card>
         <v-list>
           <v-list-item to="/settings/workspace">

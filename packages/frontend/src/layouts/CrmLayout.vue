@@ -5,6 +5,9 @@ import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
 import { useLogo } from '@/composables/useLogo';
 import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
 import UserMenu from '@/components/common/navigation/UserMenu.vue';
+import { useStateStore } from '@/stores/state';
+
+const { isRailFrozen } = storeToRefs(useStateStore());
 
 const authStore = useAuthStore();
 const { isAuthenticated } = authStore;
@@ -72,7 +75,7 @@ if (isAuthenticated()) {
       v-model="navigationDrawer"
       v-model:rail="isRail"
       app
-      expand-on-hover
+      :expand-on-hover="!isRailFrozen"
     >
       <div class="position-relative">
         <v-img
