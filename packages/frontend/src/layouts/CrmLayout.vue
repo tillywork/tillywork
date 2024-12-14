@@ -10,6 +10,7 @@ const authStore = useAuthStore();
 const { isAuthenticated } = authStore;
 const { hideNavigationDrawer } = useHideNavigationDrawer();
 const navigationDrawer = ref(true);
+const isRail = ref(true);
 const logo = useLogo();
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
@@ -69,15 +70,35 @@ if (isAuthenticated()) {
     <v-navigation-drawer
       v-if="!hideNavigationDrawer"
       v-model="navigationDrawer"
+      v-model:rail="isRail"
       app
+      expand-on-hover
     >
-      <v-img
-        :src="logo.getLogoUrlByTheme()"
-        width="125"
-        class="ma-2 mt-4 hidden-md-and-down"
-      />
+      <div class="position-relative">
+        <v-img
+          :src="logo.getCheckUrl()"
+          min-height="25"
+          min-width="25"
+          height="25"
+          width="25"
+          class="ma-2 ms-4 mt-4 hidden-md-and-down"
+        />
+        <v-img
+          v-if="!isRail"
+          :src="logo.getLogoUrlByTheme()"
+          min-height="35"
+          min-width="125"
+          height="35"
+          width="125"
+          class="ms-2 hidden-md-and-down position-absolute"
+          :style="{ top: '-5px', left: '-1px' }"
+        />
+      </div>
       <v-divider class="hidden-md-and-down" />
-      <navigation-workspace-selector v-if="isAuthenticated()" />
+      <navigation-workspace-selector
+        v-if="isAuthenticated()"
+        v-model:only-icon="isRail"
+      />
 
       <v-list class="mt-2">
         <v-list-item
@@ -88,9 +109,11 @@ if (isAuthenticated()) {
           :exact="navigationItem.activeOnExactMatch"
         >
           <template #prepend v-if="navigationItem.icon">
-            <v-icon :icon="navigationItem.icon" />
+            <v-icon :icon="navigationItem.icon" class="ms-1" />
           </template>
-          <v-list-item-title>{{ navigationItem.title }}</v-list-item-title>
+          <v-list-item-title v-if="!isRail">{{
+            navigationItem.title
+          }}</v-list-item-title>
         </v-list-item>
 
         <v-divider />
@@ -106,7 +129,7 @@ if (isAuthenticated()) {
             :exact="navigationItem.activeOnExactMatch"
           >
             <template #prepend v-if="navigationItem.icon">
-              <v-icon :icon="navigationItem.icon" />
+              <v-icon :icon="navigationItem.icon" class="ms-1" />
             </template>
             <v-list-item-title>{{ navigationItem.title }}</v-list-item-title>
           </v-list-item>

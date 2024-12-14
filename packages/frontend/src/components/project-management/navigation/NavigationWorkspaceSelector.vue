@@ -7,6 +7,8 @@ import { useDialogStore } from '@/stores/dialog';
 import { useAuthStore } from '@/stores/auth';
 import { useStateStore } from '@/stores/state';
 
+const onlyIcon = defineModel<boolean>('onlyIcon');
+
 const dialog = useDialogStore();
 const workspacesService = useWorkspacesService();
 const selectWorkspaceMenu = ref(false);
@@ -78,7 +80,7 @@ watch(
       density="compact"
       link
       id="workspace-menu-activator"
-      class="me-2 user-select-none w-100"
+      class="user-select-none w-100"
       rounded="md"
       color="transparent"
     >
@@ -92,19 +94,21 @@ watch(
           class="text-caption"
           size="x-small"
         />
-        <span class="text-truncate text-body-3 mx-2">
+        <span class="text-truncate text-body-3 mx-2" v-if="!onlyIcon">
           {{ selectedWorkspace?.name ?? 'Select a workspace' }}
         </span>
-        <v-spacer />
-        <v-icon>
+        <v-spacer v-if="!onlyIcon" />
+        <v-icon v-if="!onlyIcon">
           {{ selectWorkspaceMenu ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
         </v-icon>
       </v-card-title>
     </v-card>
 
     <base-icon-btn
+      v-if="!onlyIcon"
       id="workspace-menu-btn"
       icon="mdi-dots-vertical"
+      class="ms-2"
       @click.stop
       v-show="selectedWorkspace"
     />
