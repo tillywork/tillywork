@@ -32,6 +32,9 @@ export const useStateStore = defineStore('state', {
   actions: {
     setSelectedModule(module: WorkspaceTypes) {
       this.selectedModule = module;
+      if (module === WorkspaceTypes.CRM) {
+        this.isRailFrozen = false;
+      }
     },
     setIsInputFocused(v: boolean) {
       this.isInputFocused = v;
