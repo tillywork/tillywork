@@ -107,6 +107,7 @@ const extensions = computed(() => {
 
 const textValue = defineModel<string>();
 const jsonValue = defineModel<Content>('json');
+const htmlValue = defineModel<string>('html');
 const isEmpty = defineModel<boolean>('empty');
 
 let editor: Ref<Editor | undefined>;
@@ -128,6 +129,7 @@ function initEditor() {
       enforceHeading();
       textValue.value = editor.value?.getText();
       jsonValue.value = editor.value?.getJSON();
+      htmlValue.value = editor.value?.getHTML();
       isEmpty.value = editor.value?.isEmpty;
     },
   });
@@ -143,6 +145,8 @@ function fillEditorFromModelValues() {
     setEditorText(textValue.value);
   } else if (jsonValue.value) {
     editor.value?.commands.setContent(jsonValue.value as Content, true);
+  } else if (htmlValue.value) {
+    editor.value?.commands.setContent(htmlValue.value as Content, true);
   }
 }
 
@@ -214,6 +218,18 @@ watch(jsonValue, (newJson) => {
 
     if (!areTheyEqual) {
       editor.value.commands.setContent(newJson as any, true);
+    }
+  }
+});
+
+// Watch for changes to htmlValue and update the editor content
+watch(htmlValue, (newHtml) => {
+  if (editor.value) {
+    const currentHtml = editor.value.getHTML();
+    const areTheyEqual = currentHtml === newHtml;
+
+    if (!areTheyEqual) {
+      editor.value.commands.setContent(newHtml as any, true);
     }
   }
 });

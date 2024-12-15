@@ -8,17 +8,14 @@ import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 
 import {
   dayjs,
-  TASK_STATUS_OPTIONS,
+  MESSAGE_CHANNEL_OPTIONS,
+  MessageActivityChannel,
   type Card,
   type CardActivity,
-  type TaskActivityStatus,
 } from '@tillywork/shared';
 import { DIALOGS } from '@/components/common/dialogs/types';
 
-import { useUsers } from '@/composables/useUsers';
-
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
-import BaseUserSelector from '@/components/common/inputs/BaseUserSelector.vue';
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 import SimpleDropdownSelector from '@/components/common/inputs/SimpleDropdownSelector.vue';
 
@@ -30,8 +27,6 @@ const { activity, card } = defineProps<{
 const { user } = storeToRefs(useAuthStore());
 const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
-
-const { users } = useUsers();
 
 const { getUserFullName } = useUsersService();
 const { useDeleteActivityMutation, useUpdateActivityMutation } =
@@ -51,15 +46,15 @@ function openConfirmDeleteDialog() {
     dialog: DIALOGS.CONFIRM,
     data: {
       title: 'Confirm',
-      message: 'Are you sure you want to delete this task?',
+      message: 'Are you sure you want to delete this message?',
       onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
-      onConfirm: () => deleteTask(),
+      onConfirm: () => deleteMessage(),
       isLoading: isDeleting.value,
     },
   });
 }
 
-function deleteTask() {
+function deleteMessage() {
   deleteActivity({
     cardId: card.id,
     activityId: activity.id,
@@ -76,7 +71,7 @@ function deleteTask() {
     });
 }
 
-function updateTask(data: Partial<CardActivity>) {
+function updateMessage(data: Partial<CardActivity>) {
   if (!isUpdating.value && !isDeleting.value) {
     updateActivity({
       cardId: card.id,
@@ -93,35 +88,24 @@ function updateTask(data: Partial<CardActivity>) {
   }
 }
 
-function updateTaskAssignee(assignee: number[]) {
+function updateMessageSentAt(sentAt: string) {
   const newContent = {
     ...activity.content,
-    assignee,
+    sentAt,
   };
 
-  updateTask({
+  updateMessage({
     content: newContent,
   });
 }
 
-function updateTaskStatus(status: TaskActivityStatus) {
+function updateMessageChannel(channel: MessageActivityChannel) {
   const newContent = {
     ...activity.content,
-    status,
+    channel,
   };
 
-  updateTask({
-    content: newContent,
-  });
-}
-
-function updateTaskDueDate(dueDate: string) {
-  const newContent = {
-    ...activity.content,
-    dueDate,
-  };
-
-  updateTask({
+  updateMessage({
     content: newContent,
   });
 }
@@ -149,7 +133,7 @@ function updateTaskDueDate(dueDate: string) {
           }}
         </span>
         <span class="text-surface-variant">
-          &nbsp;created a task
+          &nbsp;logged a message
           {{ dayjs(activity.createdAt).fromNow() }}
         </span>
         <v-spacer />
@@ -177,33 +161,21 @@ function updateTaskDueDate(dueDate: string) {
         </v-menu>
       </v-card-text>
       <v-card-text>
-        <base-editor-input :model-value="activity.content.title" :heading="3" />
-        <base-editor-input
-          v-if="activity.content.description"
-          v-model:json="activity.content.description"
-        />
+        <base-editor-input v-model:json="activity.content.description" />
       </v-card-text>
       <v-card-actions class="px-3 border-t-thin">
         <simple-dropdown-selector
-          :model-value="activity.content.status"
-          :items="TASK_STATUS_OPTIONS"
-          @update:model-value="(v) => updateTaskStatus(v as TaskActivityStatus)"
-          icon="mdi-circle-slice-8"
-        />
-        <base-user-selector
-          v-if="users"
-          :model-value="activity.content.assignee"
-          @update:model-value="(v) => updateTaskAssignee(v as number[])"
-          :users
-          label="Assignee"
-          return-id
+          :model-value="activity.content.channel"
+          @update:model-value="(v) => updateMessageChannel(v as MessageActivityChannel)"
+          :items="MESSAGE_CHANNEL_OPTIONS"
+          label="Channel"
         />
         <base-date-picker
-          :model-value="activity.content.dueDate"
+          :model-value="activity.content.sentAt"
+          @update:model-value="(v) => updateMessageSentAt(v as string)"
           include-time
-          label="Due date"
+          label="Sent At"
           icon="mdi-calendar"
-          @update:model-value="(v) => updateTaskDueDate(v as string)"
         />
       </v-card-actions>
     </v-card>

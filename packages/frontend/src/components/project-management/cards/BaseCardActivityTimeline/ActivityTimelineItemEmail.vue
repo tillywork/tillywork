@@ -6,21 +6,11 @@ import { useSnackbarStore } from '@/stores/snackbar';
 import { useUsersService } from '@/services/useUsersService';
 import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 
-import {
-  dayjs,
-  TASK_STATUS_OPTIONS,
-  type Card,
-  type CardActivity,
-  type TaskActivityStatus,
-} from '@tillywork/shared';
+import { dayjs, type Card, type CardActivity } from '@tillywork/shared';
 import { DIALOGS } from '@/components/common/dialogs/types';
 
-import { useUsers } from '@/composables/useUsers';
-
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
-import BaseUserSelector from '@/components/common/inputs/BaseUserSelector.vue';
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
-import SimpleDropdownSelector from '@/components/common/inputs/SimpleDropdownSelector.vue';
 
 const { activity, card } = defineProps<{
   activity: CardActivity;
@@ -30,8 +20,6 @@ const { activity, card } = defineProps<{
 const { user } = storeToRefs(useAuthStore());
 const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
-
-const { users } = useUsers();
 
 const { getUserFullName } = useUsersService();
 const { useDeleteActivityMutation, useUpdateActivityMutation } =
@@ -51,15 +39,15 @@ function openConfirmDeleteDialog() {
     dialog: DIALOGS.CONFIRM,
     data: {
       title: 'Confirm',
-      message: 'Are you sure you want to delete this task?',
+      message: 'Are you sure you want to delete this email?',
       onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
-      onConfirm: () => deleteTask(),
+      onConfirm: () => deleteEmail(),
       isLoading: isDeleting.value,
     },
   });
 }
 
-function deleteTask() {
+function deleteEmail() {
   deleteActivity({
     cardId: card.id,
     activityId: activity.id,
@@ -76,7 +64,7 @@ function deleteTask() {
     });
 }
 
-function updateTask(data: Partial<CardActivity>) {
+function updateEmail(data: Partial<CardActivity>) {
   if (!isUpdating.value && !isDeleting.value) {
     updateActivity({
       cardId: card.id,
@@ -93,35 +81,13 @@ function updateTask(data: Partial<CardActivity>) {
   }
 }
 
-function updateTaskAssignee(assignee: number[]) {
+function updateEmailSentAt(sentAt: string) {
   const newContent = {
     ...activity.content,
-    assignee,
+    sentAt,
   };
 
-  updateTask({
-    content: newContent,
-  });
-}
-
-function updateTaskStatus(status: TaskActivityStatus) {
-  const newContent = {
-    ...activity.content,
-    status,
-  };
-
-  updateTask({
-    content: newContent,
-  });
-}
-
-function updateTaskDueDate(dueDate: string) {
-  const newContent = {
-    ...activity.content,
-    dueDate,
-  };
-
-  updateTask({
+  updateEmail({
     content: newContent,
   });
 }
@@ -149,7 +115,7 @@ function updateTaskDueDate(dueDate: string) {
           }}
         </span>
         <span class="text-surface-variant">
-          &nbsp;created a task
+          &nbsp;logged an email
           {{ dayjs(activity.createdAt).fromNow() }}
         </span>
         <v-spacer />
@@ -177,33 +143,24 @@ function updateTaskDueDate(dueDate: string) {
         </v-menu>
       </v-card-text>
       <v-card-text>
-        <base-editor-input :model-value="activity.content.title" :heading="3" />
         <base-editor-input
-          v-if="activity.content.description"
-          v-model:json="activity.content.description"
+          v-if="activity.content.subject"
+          v-model="activity.content.subject"
+          :heading="4"
         />
+        <base-editor-input v-model:html="activity.content.body" />
       </v-card-text>
       <v-card-actions class="px-3 border-t-thin">
-        <simple-dropdown-selector
-          :model-value="activity.content.status"
-          :items="TASK_STATUS_OPTIONS"
-          @update:model-value="(v) => updateTaskStatus(v as TaskActivityStatus)"
-          icon="mdi-circle-slice-8"
-        />
-        <base-user-selector
-          v-if="users"
-          :model-value="activity.content.assignee"
-          @update:model-value="(v) => updateTaskAssignee(v as number[])"
-          :users
-          label="Assignee"
-          return-id
-        />
+        <span class="text-body-3 me-2">
+          <span class="font-weight-bold">To:&nbsp;</span>
+          <span>{{ activity.content.to }}</span>
+        </span>
         <base-date-picker
-          :model-value="activity.content.dueDate"
+          :model-value="activity.content.sentAt"
           include-time
-          label="Due date"
+          label="Sent At"
           icon="mdi-calendar"
-          @update:model-value="(v) => updateTaskDueDate(v as string)"
+          @update:model-value="(v) => updateEmailSentAt(v as string)"
         />
       </v-card-actions>
     </v-card>

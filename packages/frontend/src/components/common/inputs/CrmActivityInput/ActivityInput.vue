@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import BaseCardCommentBox from '@/components/project-management/cards/BaseCardCommentBox.vue';
-import TaskInput from './TaskInput.vue';
+import TaskActivityInput from './TaskActivityInput.vue';
+import EmailActivityInput from './EmailActivityInput.vue';
+import CallActivityInput from './CallActivityInput.vue';
+import MessageActivityInput from './MessageActivityInput.vue';
+import MeetingActivityInput from './MeetingActivityInput.vue';
 
 import {
   ActivityType,
@@ -93,7 +97,23 @@ function handleSubmit(value: TiptapContent) {
       />
     </template>
     <template v-else-if="activityType === ActivityType.TASK">
-      <task-input class="px-4" @submit="handleSubmit" />
+      <task-activity-input class="px-4" @submit="handleSubmit" />
+    </template>
+    <template v-else-if="activityType === ActivityType.EMAIL">
+      <email-activity-input
+        class="px-4"
+        @submit="handleSubmit"
+        :to="card.data.email"
+      />
+    </template>
+    <template v-else-if="activityType === ActivityType.CALL">
+      <call-activity-input class="px-4" @submit="handleSubmit" />
+    </template>
+    <template v-else-if="activityType === ActivityType.MESSAGE">
+      <message-activity-input class="px-4" @submit="handleSubmit" />
+    </template>
+    <template v-else-if="activityType === ActivityType.MEETING">
+      <meeting-activity-input class="px-4" @submit="handleSubmit" />
     </template>
   </v-card>
 </template>

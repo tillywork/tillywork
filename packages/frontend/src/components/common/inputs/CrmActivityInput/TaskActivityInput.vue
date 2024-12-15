@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { type TaskActivityContent, dayjs } from '@tillywork/shared';
+import {
+  TASK_STATUS_OPTIONS,
+  type TaskActivityContent,
+  dayjs,
+} from '@tillywork/shared';
 
 import BaseEditorInput from '../../base/BaseEditor/BaseEditorInput.vue';
 import BaseCardCommentBox from '@/components/project-management/cards/BaseCardCommentBox.vue';
 import BaseUserSelector from '../BaseUserSelector.vue';
-import TaskStatusSelector from './TaskStatusSelector.vue';
 import BaseDatePicker from '../BaseDatePicker.vue';
+import SimpleDropdownSelector from '../SimpleDropdownSelector.vue';
 
 import { useUsers } from '@/composables/useUsers';
 
@@ -54,7 +58,11 @@ function resetDto() {
       @submit="handleSubmit"
     >
       <template #appendActions>
-        <task-status-selector v-model="createTaskDto.status" />
+        <simple-dropdown-selector
+          v-model="createTaskDto.status"
+          :items="TASK_STATUS_OPTIONS"
+          icon="mdi-circle-slice-8"
+        />
         <base-user-selector
           v-if="users"
           v-model="createTaskDto.assignee"

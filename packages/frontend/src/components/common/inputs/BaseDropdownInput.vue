@@ -31,6 +31,7 @@ const attrs = useAttrs();
     <v-menu :close-on-content-click="false">
       <template #activator="{ props }">
         <v-card
+          color="transparent"
           v-bind="{
             ...attrs,
             ...props,
@@ -39,7 +40,6 @@ const attrs = useAttrs();
           :class="{
             'flex-fill': fill,
           }"
-          color="transparent"
           :rounded
           @click.prevent
         >

@@ -6,6 +6,7 @@ import { type Content } from '@tiptap/vue-3';
 import type { Slots } from 'vue';
 
 const value = defineModel<Content>();
+const htmlValue = defineModel<string>('html');
 const isEmpty = defineModel<boolean>('empty');
 const baseEditor = ref();
 
@@ -34,6 +35,7 @@ function handleSubmit() {
     <base-editor-input
       ref="baseEditor"
       v-model:json="value"
+      v-model:html="htmlValue"
       editable
       :placeholder
       v-model:empty="isEmpty"

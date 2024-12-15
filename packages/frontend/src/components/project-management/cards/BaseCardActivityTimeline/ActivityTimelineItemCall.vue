@@ -7,18 +7,17 @@ import { useUsersService } from '@/services/useUsersService';
 import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 
 import {
+  CALL_DIRECTION_OPTIONS,
+  CALL_OUTCOME_OPTIONS,
+  CallActivityDirection,
+  CallActivityOutcome,
   dayjs,
-  TASK_STATUS_OPTIONS,
   type Card,
   type CardActivity,
-  type TaskActivityStatus,
 } from '@tillywork/shared';
 import { DIALOGS } from '@/components/common/dialogs/types';
 
-import { useUsers } from '@/composables/useUsers';
-
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
-import BaseUserSelector from '@/components/common/inputs/BaseUserSelector.vue';
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 import SimpleDropdownSelector from '@/components/common/inputs/SimpleDropdownSelector.vue';
 
@@ -30,8 +29,6 @@ const { activity, card } = defineProps<{
 const { user } = storeToRefs(useAuthStore());
 const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
-
-const { users } = useUsers();
 
 const { getUserFullName } = useUsersService();
 const { useDeleteActivityMutation, useUpdateActivityMutation } =
@@ -51,15 +48,15 @@ function openConfirmDeleteDialog() {
     dialog: DIALOGS.CONFIRM,
     data: {
       title: 'Confirm',
-      message: 'Are you sure you want to delete this task?',
+      message: 'Are you sure you want to delete this call?',
       onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
-      onConfirm: () => deleteTask(),
+      onConfirm: () => deleteCall(),
       isLoading: isDeleting.value,
     },
   });
 }
 
-function deleteTask() {
+function deleteCall() {
   deleteActivity({
     cardId: card.id,
     activityId: activity.id,
@@ -76,7 +73,7 @@ function deleteTask() {
     });
 }
 
-function updateTask(data: Partial<CardActivity>) {
+function updateCall(data: Partial<CardActivity>) {
   if (!isUpdating.value && !isDeleting.value) {
     updateActivity({
       cardId: card.id,
@@ -93,35 +90,35 @@ function updateTask(data: Partial<CardActivity>) {
   }
 }
 
-function updateTaskAssignee(assignee: number[]) {
+function updateCallCalledAt(calledAt: string) {
   const newContent = {
     ...activity.content,
-    assignee,
+    calledAt,
   };
 
-  updateTask({
+  updateCall({
     content: newContent,
   });
 }
 
-function updateTaskStatus(status: TaskActivityStatus) {
+function updateCallOutcome(outcome: CallActivityOutcome) {
   const newContent = {
     ...activity.content,
-    status,
+    outcome,
   };
 
-  updateTask({
+  updateCall({
     content: newContent,
   });
 }
 
-function updateTaskDueDate(dueDate: string) {
+function updateCallDirection(direction: CallActivityDirection) {
   const newContent = {
     ...activity.content,
-    dueDate,
+    direction,
   };
 
-  updateTask({
+  updateCall({
     content: newContent,
   });
 }
@@ -149,7 +146,7 @@ function updateTaskDueDate(dueDate: string) {
           }}
         </span>
         <span class="text-surface-variant">
-          &nbsp;created a task
+          &nbsp;logged a call
           {{ dayjs(activity.createdAt).fromNow() }}
         </span>
         <v-spacer />
@@ -177,33 +174,27 @@ function updateTaskDueDate(dueDate: string) {
         </v-menu>
       </v-card-text>
       <v-card-text>
-        <base-editor-input :model-value="activity.content.title" :heading="3" />
-        <base-editor-input
-          v-if="activity.content.description"
-          v-model:json="activity.content.description"
-        />
+        <base-editor-input v-model:json="activity.content.description" />
       </v-card-text>
       <v-card-actions class="px-3 border-t-thin">
         <simple-dropdown-selector
-          :model-value="activity.content.status"
-          :items="TASK_STATUS_OPTIONS"
-          @update:model-value="(v) => updateTaskStatus(v as TaskActivityStatus)"
-          icon="mdi-circle-slice-8"
+          :model-value="activity.content.outcome"
+          @update:model-value="(v) => updateCallOutcome(v as CallActivityOutcome)"
+          :items="CALL_OUTCOME_OPTIONS"
+          label="Call Outcome"
         />
-        <base-user-selector
-          v-if="users"
-          :model-value="activity.content.assignee"
-          @update:model-value="(v) => updateTaskAssignee(v as number[])"
-          :users
-          label="Assignee"
-          return-id
+        <simple-dropdown-selector
+          :model-value="activity.content.direction"
+          @update:model-value="(v) => updateCallDirection(v as CallActivityDirection)"
+          :items="CALL_DIRECTION_OPTIONS"
+          label="Call Direction"
         />
         <base-date-picker
-          :model-value="activity.content.dueDate"
+          :model-value="activity.content.calledAt"
+          @update:model-value="(v) => updateCallCalledAt(v as string)"
           include-time
-          label="Due date"
+          label="Called At"
           icon="mdi-calendar"
-          @update:model-value="(v) => updateTaskDueDate(v as string)"
         />
       </v-card-actions>
     </v-card>
