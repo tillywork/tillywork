@@ -177,7 +177,7 @@ function updateTaskDueDate(dueDate: string) {
         </v-menu>
       </v-card-text>
       <v-card-text>
-        <base-editor-input :model-value="activity.content.title" :heading="3" />
+        <base-editor-input v-model="activity.content.title" :heading="3" />
         <base-editor-input
           v-if="activity.content.description"
           v-model:json="activity.content.description"
