@@ -78,9 +78,10 @@ export const useStateStore = defineStore('state', {
           break;
 
         case WorkspaceTypes.PROJECT_MANAGEMENT:
-        default:
-          link = `/pm/list/${currentModuleList.id}`;
+        default: {
+          if (currentModuleList) link = `/pm/list/${currentModuleList.id}`;
           break;
+        }
       }
 
       this.$router.push(link);
