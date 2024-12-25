@@ -34,12 +34,15 @@ export class ListStagesSubscriber
                 id: event.entity.listId,
             },
         });
-        listGroupRepo.merge(listGroup, {
-            name: event.entity.name,
-            color: event.entity.color,
-            order: event.entity.order,
-        });
-        listGroupRepo.save(listGroup);
+
+        if (listGroup) {
+            listGroupRepo.merge(listGroup, {
+                name: event.entity.name,
+                color: event.entity.color,
+                order: event.entity.order,
+            });
+            listGroupRepo.save(listGroup);
+        }
     }
 
     async beforeRemove(event: RemoveEvent<ListStage>) {
@@ -52,6 +55,9 @@ export class ListStagesSubscriber
                 id: event.entity.listId,
             },
         });
-        listGroupRepo.remove(listGroup);
+
+        if (listGroup) {
+            listGroupRepo.remove(listGroup);
+        }
     }
 }

@@ -1,7 +1,7 @@
 import type { MaybeRef } from 'vue';
 import { useHttp } from '@/composables/useHttp';
-import type { ListStage } from '../../components/project-management/lists/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
+import type { ListStage } from '@tillywork/shared';
 
 export const useListStagesService = () => {
   const { sendRequest } = useHttp();
@@ -144,6 +144,7 @@ export const useListStagesService = () => {
       mutationFn: reorderListStage,
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['listStages'] });
+        queryClient.invalidateQueries({ queryKey: ['listGroups'] });
       },
     });
   }
