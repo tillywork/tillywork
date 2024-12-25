@@ -9,6 +9,11 @@ export default {
                     api_host: 'https://us.i.posthog.com',
                 }
             );
+
+            posthog.people.set({
+                edition: import.meta.env.TW_VITE_EDITION,
+                app: 'tillywork',
+            })
         }
     },
 };
