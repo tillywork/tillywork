@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useCardsService } from '@/services/useCardsService';
-import type { Card } from './types';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import { useFields } from '@/composables/useFields';
+import type { Card } from '@tillywork/shared';
 
 const props = defineProps<{
   card: Pick<Card, 'id'>;

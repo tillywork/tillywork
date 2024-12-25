@@ -42,7 +42,7 @@ export type TaskActivityStatus = 'pending' | 'in_progress' | 'completed';
 
 export interface TaskActivityContent extends BaseActivityContent {
   title: string;
-  dueDate?: string;
+  dueAt?: string;
   status: TaskActivityStatus;
   isCompleted: boolean;
   assignee?: number[];

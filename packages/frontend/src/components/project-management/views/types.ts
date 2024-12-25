@@ -58,7 +58,7 @@ export const DEFAULT_PAGINATION_OPTIONS: PaginationParams = {
   sort: [
     {
       key: 'createdAt',
-      order: 'asc',
+      order: 'ASC',
     },
   ],
   page: 1,

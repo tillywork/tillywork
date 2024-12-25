@@ -61,7 +61,6 @@ function openConfirmDeleteDialog() {
 
 function deleteTask() {
   deleteActivity({
-    cardId: card.id,
     activityId: activity.id,
   })
     .catch(() => {
@@ -79,7 +78,6 @@ function deleteTask() {
 function updateTask(data: Partial<CardActivity>) {
   if (!isUpdating.value && !isDeleting.value) {
     updateActivity({
-      cardId: card.id,
       activity: {
         id: activity.id,
         ...data,
@@ -115,10 +113,10 @@ function updateTaskStatus(status: TaskActivityStatus) {
   });
 }
 
-function updateTaskDueDate(dueDate: string) {
+function updateTaskDueDate(dueAt: string) {
   const newContent = {
     ...activity.content,
-    dueDate,
+    dueAt,
   };
 
   updateTask({
@@ -199,7 +197,7 @@ function updateTaskDueDate(dueDate: string) {
           return-id
         />
         <base-date-picker
-          :model-value="activity.content.dueDate"
+          :model-value="activity.content.dueAt"
           include-time
           label="Due date"
           icon="mdi-calendar"

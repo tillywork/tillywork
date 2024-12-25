@@ -18,6 +18,7 @@ const props = defineProps<{
   total?: number;
   sortBy?: TableSortOption[];
   enableColumnResizing?: boolean;
+  disableSorting?: boolean;
   width?: string;
 }>();
 
@@ -60,6 +61,7 @@ const table = useVueTable({
   initialState: {
     sorting: tableSortState.value,
   },
+  enableSorting: !props.disableSorting,
 });
 
 const pageSizeDropdownOptions = [1, 5, 10, 25, 50];

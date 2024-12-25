@@ -67,6 +67,7 @@ import { AddSlugToListTable1732707580057 } from "src/migrations/1732707580057-ad
 import { TruncateCardActivities1734112779468 } from "src/migrations/1734112779468-truncate-card-activities";
 import { UpdateCardActivityTypesEnum1734190213126 } from "src/migrations/1734190213126-update-card-activity-types-enum";
 import { CreateCardActivityTypeIndex1734201598929 } from "src/migrations/1734201598929-create-card-activity-type-index";
+import { AddContentIndexToCardActivity1734530224432 } from "src/migrations/1734530224432-add-content-index-to-card-activity";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -135,6 +136,7 @@ const migrations = [
     TruncateCardActivities1734112779468,
     UpdateCardActivityTypesEnum1734190213126,
     CreateCardActivityTypeIndex1734201598929,
+    AddContentIndexToCardActivity1734530224432,
 ];
 
 const config: TypeOrmModuleOptions = {

@@ -19,7 +19,7 @@ const createTaskDto = ref<TaskActivityContent>({
   title: '',
   isCompleted: false,
   status: 'pending',
-  dueDate: dayjs().hour(12).minute(0).second(0).millisecond(0).toISOString(),
+  dueAt: dayjs().toISOString(),
 });
 
 const { users } = useUsers();
@@ -71,7 +71,7 @@ function resetDto() {
           label="Assignee"
         />
         <base-date-picker
-          v-model="createTaskDto.dueDate"
+          v-model="createTaskDto.dueAt"
           include-time
           label="Due date"
           icon="mdi-calendar"

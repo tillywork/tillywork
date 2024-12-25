@@ -49,7 +49,6 @@ function openConfirmDeleteDialog() {
 
 function deleteEmail() {
   deleteActivity({
-    cardId: card.id,
     activityId: activity.id,
   })
     .catch(() => {
@@ -67,7 +66,6 @@ function deleteEmail() {
 function updateEmail(data: Partial<CardActivity>) {
   if (!isUpdating.value && !isDeleting.value) {
     updateActivity({
-      cardId: card.id,
       activity: {
         id: activity.id,
         ...data,

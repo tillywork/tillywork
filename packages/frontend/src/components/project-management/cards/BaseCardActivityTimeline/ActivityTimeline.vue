@@ -28,7 +28,7 @@ const { data: activities, refetch } = useFindAllQuery({
   cardId,
   sortBy: {
     key: 'createdAt',
-    order: 'desc',
+    order: 'DESC',
   },
 });
 

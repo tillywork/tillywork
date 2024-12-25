@@ -56,7 +56,6 @@ function openConfirmDeleteDialog() {
 
 function deleteMessage() {
   deleteActivity({
-    cardId: card.id,
     activityId: activity.id,
   })
     .catch(() => {
@@ -74,7 +73,6 @@ function deleteMessage() {
 function updateMessage(data: Partial<CardActivity>) {
   if (!isUpdating.value && !isDeleting.value) {
     updateActivity({
-      cardId: card.id,
       activity: {
         id: activity.id,
         ...data,

@@ -4,13 +4,36 @@ import { Repository } from "typeorm";
 import { CardActivity } from "./card.activity.entity";
 import { CreateCardActivityDto } from "./dto/create.card.activity.dto";
 import { UpdateCardActivityDto } from "./dto/update.card.activity.dto";
+import { IsEnum, IsNumber, IsOptional } from "class-validator";
+import { ActivityType } from "@tillywork/shared";
+import { QueryBuilderHelper } from "../../helpers/query.builder.helper";
 
-export interface FindAllParams {
-    cardId: number;
-    sortBy?: {
-        key: string;
-        order: "asc" | "desc";
-    };
+export class FindAllParams {
+    @IsOptional()
+    workspaceId?: number;
+
+    @IsOptional()
+    cardId?: number;
+
+    @IsOptional()
+    @IsEnum(ActivityType)
+    type?: ActivityType;
+
+    @IsOptional()
+    @IsNumber()
+    assignee?: number;
+
+    @IsOptional()
+    sortBy?: string;
+
+    @IsOptional()
+    sortOrder?: "asc" | "desc";
+
+    @IsOptional()
+    dueDateStart?: string;
+
+    @IsOptional()
+    dueDateEnd?: string;
 }
 
 @Injectable()
@@ -21,25 +44,60 @@ export class CardActivitiesService {
     ) {}
 
     async findAll({
+        workspaceId,
         cardId,
-        sortBy = {
-            key: "createdAt",
-            order: "asc",
-        },
+        type,
+        assignee,
+        dueDateStart,
+        dueDateEnd,
+        sortBy = "createdAt",
+        sortOrder = "asc",
     }: FindAllParams): Promise<CardActivity[]> {
-        const cardActivities = await this.cardActivitiesRepository.find({
-            where: {
-                card: {
-                    id: cardId,
-                },
-            },
-            order: {
-                [sortBy.key]: sortBy.order,
-            },
-            relations: ["createdBy"],
-        });
+        const queryBuilder = this.cardActivitiesRepository
+            .createQueryBuilder("cardActivity")
+            .leftJoinAndSelect("cardActivity.card", "card")
+            .leftJoinAndSelect("cardActivity.createdBy", "createdBy");
 
-        return cardActivities;
+        if (workspaceId) {
+            queryBuilder.andWhere("card.workspace.id = :workspaceId", {
+                workspaceId,
+            });
+        }
+
+        if (cardId) {
+            queryBuilder.andWhere("card.id = :cardId", { cardId });
+        }
+
+        if (type) {
+            queryBuilder.andWhere("cardActivity.type = :type", { type });
+        }
+
+        if (assignee) {
+            queryBuilder.andWhere(
+                `"cardActivity".content->'assignee' @> :assignee`,
+                { assignee }
+            );
+        }
+
+        if (dueDateStart && dueDateEnd) {
+            const newStart = QueryBuilderHelper.processValue(dueDateStart);
+            const newEnd = QueryBuilderHelper.processValue(dueDateEnd);
+
+            queryBuilder.andWhere(
+                `"cardActivity".content->>'dueAt' BETWEEN :dueDateStart AND :dueDateEnd`,
+                {
+                    dueDateStart: newStart,
+                    dueDateEnd: newEnd,
+                }
+            );
+        }
+
+        queryBuilder.orderBy(
+            `cardActivity.${sortBy}`,
+            sortOrder.toUpperCase() as "ASC" | "DESC"
+        );
+
+        return queryBuilder.getMany();
     }
 
     async findOne(id: number): Promise<CardActivity> {

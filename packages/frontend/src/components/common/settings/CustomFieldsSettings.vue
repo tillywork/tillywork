@@ -20,6 +20,7 @@ import {
   FieldTypes,
   FIELD_TYPE_OPTIONS,
 } from '@tillywork/shared';
+import { useCreatedBy } from '@/composables/useCreatedBy';
 
 const selectedField = ref<Field>();
 const fieldDto = ref<Partial<Field> | CreateFieldDto>();
@@ -58,6 +59,8 @@ const isUpdateOrCreateLoading = computed(
 
 const { showSnackbar } = useSnackbarStore();
 const { workspace } = storeToRefs(useAuthStore());
+
+const { getCreatedByName, getCreatedByPhoto } = useCreatedBy();
 
 const {
   useFieldsQuery,
@@ -180,18 +183,6 @@ function handleDeleteField() {
   });
 }
 
-function getFieldCreatedByName(field: Field) {
-  return field.createdByType === 'system'
-    ? 'System'
-    : field.createdBy?.firstName + ' ' + field.createdBy?.lastName;
-}
-
-function getFieldCreatedByPhoto(field: Field) {
-  return field.createdByType === 'system'
-    ? useLogo().getCheckUrl()
-    : field.createdBy?.photo;
-}
-
 watch(selectedField, (v) => {
   fieldDto.value = cloneDeep(v);
 });
@@ -281,15 +272,15 @@ watch(
       <template #createdBy="{ row }">
         <v-card class="py-2">
           <base-avatar
-            :photo="getFieldCreatedByPhoto(row.original)"
-            :text="getFieldCreatedByName(row.original)"
+            :photo="getCreatedByPhoto(row.original)"
+            :text="getCreatedByName(row.original)"
             rounded="circle"
             :class="
               row.original.createdByType === 'system' ? 'pa-1 bg-accent' : ''
             "
           />
           <span class="text-body-3 ms-3">
-            {{ getFieldCreatedByName(row.original) }}
+            {{ getCreatedByName(row.original) }}
           </span>
         </v-card>
       </template>

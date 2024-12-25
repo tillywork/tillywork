@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import type { CardType } from '@/components/project-management/cards/types';
 import { useCardTypesService } from '@/services/useCardTypesService';
 import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
 import BaseTable from '../tables/BaseTable/BaseTable.vue';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from '../dialogs/types';
+import { useCreatedBy } from '@/composables/useCreatedBy';
+import type { CardType } from '@tillywork/shared';
 
 const { workspace } = storeToRefs(useAuthStore());
 const cardTypesService = useCardTypesService();
 const { data: fetchingCardTypes } = cardTypesService.useFindAllQuery({
   workspaceId: workspace.value!.id,
 });
+
+const { getCreatedByName, getCreatedByPhoto } = useCreatedBy();
 
 const dialog = useDialogStore();
 
@@ -28,18 +31,6 @@ function openRemoveCardTypeDialog(cardType: CardType) {
       cardType,
     },
   });
-}
-
-function getCardTypeCreatedByPhoto(cardType: CardType) {
-  return cardType.createdByType === 'system'
-    ? useLogo().getCheckUrl()
-    : cardType.createdBy.photo;
-}
-
-function getCardTypeCreatedByName(cardType: CardType) {
-  return cardType.createdByType === 'system'
-    ? 'System'
-    : cardType.createdBy.firstName + ' ' + cardType.createdBy.lastName;
 }
 </script>
 
@@ -127,15 +118,15 @@ function getCardTypeCreatedByName(cardType: CardType) {
     <template #createdBy="{ row }">
       <v-card class="py-2">
         <base-avatar
-          :photo="getCardTypeCreatedByPhoto(row.original)"
-          :text="getCardTypeCreatedByName(row.original)"
+          :photo="getCreatedByPhoto(row.original)"
+          :text="getCreatedByName(row.original)"
           rounded="circle"
           :class="
             row.original.createdByType === 'system' ? 'pa-1 bg-accent' : ''
           "
         />
         <span class="text-body-3 ms-3">
-          {{ getCardTypeCreatedByName(row.original) }}
+          {{ getCreatedByName(row.original) }}
         </span>
       </v-card>
     </template>

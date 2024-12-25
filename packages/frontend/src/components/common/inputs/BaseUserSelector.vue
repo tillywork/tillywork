@@ -35,6 +35,8 @@ const { getUserFullName } = useUsersService();
 const searchTerm = ref('');
 const selectedUsers = ref<User[]>(getSelectedUsersFromModel());
 
+const attrs = useAttrs();
+
 const searchedUsers = computed(() =>
   props.users.filter(
     (user) =>
@@ -100,6 +102,8 @@ defineExpose({ userMenu });
     <template #activator="{ props: menuProps }">
       <v-autocomplete
         v-if="textField"
+        width="90"
+        v-bind="attrs"
         v-model="selectedUsers"
         :label="label ?? 'Select'"
         placeholder="Search..."
@@ -111,7 +115,6 @@ defineExpose({ userMenu });
         hide-details
         autocomplete="off"
         :multiple
-        width="90"
         :prepend-inner-icon="icon"
         chips
         auto-select-first

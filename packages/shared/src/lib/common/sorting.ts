@@ -3,6 +3,6 @@ export type SortOption = {
   order: SortDirection;
 };
 
-export type SortDirection = 'asc' | 'desc';
+export type SortDirection = 'ASC' | 'DESC';
 
 export type SortState = SortOption[];

@@ -1,4 +1,8 @@
-import { FieldTypes, type FieldFilterOption } from '@tillywork/shared';
+import {
+  FieldTypes,
+  type FieldFilterOption,
+  type QuickFilterDateOption,
+} from '@tillywork/shared';
 
 export const quickFilterGroupsCustomFields = [
   FieldTypes.DROPDOWN,
@@ -7,7 +11,7 @@ export const quickFilterGroupsCustomFields = [
   FieldTypes.USER,
 ];
 
-export const quickFilterDateOptions: Omit<FieldFilterOption, 'field'>[] = [
+export const quickFilterDateOptions: QuickFilterDateOption[] = [
   {
     title: 'Today',
     type: FieldTypes.DATE,
