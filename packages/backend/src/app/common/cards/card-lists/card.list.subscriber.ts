@@ -3,12 +3,14 @@ import {
     EntitySubscriberInterface,
     Connection,
     UpdateEvent,
+    InsertEvent,
 } from "typeorm";
 import { Injectable, Logger } from "@nestjs/common";
 import { ClsService } from "nestjs-cls";
 import { CardList } from "./card.list.entity";
 import { ActivityType } from "@tillywork/shared";
 import { CardActivity } from "../card-activities/card.activity.entity";
+import { ListStage } from "../../lists/list-stages/list.stage.entity";
 
 @Injectable()
 @EventSubscriber()
@@ -21,6 +23,38 @@ export class CardListSubscriber implements EntitySubscriberInterface<CardList> {
 
     listenTo() {
         return CardList;
+    }
+
+    async afterInsert(event: InsertEvent<CardList>) {
+        const user = this.clsService.get("user");
+
+        const activityRepo = event.manager.getRepository(CardActivity);
+        const listStageRepo = event.manager.getRepository(ListStage);
+
+        const listStage = await listStageRepo.findOne({
+            where: {
+                id: event.entity.listStage.id,
+            },
+        });
+
+        if (listStage.order > 1) {
+            const activity = activityRepo.create({
+                type: ActivityType.UPDATE,
+                card: {
+                    id: event.entity.card.id,
+                },
+                content: {
+                    changes: [
+                        {
+                            type: "stage_updated",
+                            newValue: event.entity.listStageId,
+                        },
+                    ],
+                },
+                createdBy: { id: user.id },
+            });
+            await activityRepo.save(activity);
+        }
     }
 
     async afterUpdate(event: UpdateEvent<CardList>) {
