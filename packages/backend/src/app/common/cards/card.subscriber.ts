@@ -55,8 +55,34 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                 ],
             },
             createdBy: event.entity.createdBy,
+            createdAt: event.entity.createdAt,
         });
-        activityRepo.save(activity);
+        await activityRepo.save(activity);
+
+        const changes = await this.getFieldChanges(
+            {},
+            event.entity.data,
+            event
+        );
+
+        await new Promise((resolve) => {
+            setTimeout(resolve, 100);
+        });
+
+        await Promise.all(
+            changes.map((change) => {
+                const activity = activityRepo.create({
+                    type: ActivityType.UPDATE,
+                    card: event.entity,
+                    content: {
+                        changes: [change],
+                    },
+                    createdBy: event.entity.createdBy,
+                });
+
+                return activityRepo.save(activity);
+            })
+        );
     }
 
     async afterUpdate(event: UpdateEvent<Card>) {
@@ -143,7 +169,7 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
     private async getFieldChanges(
         oldData: Record<string, any>,
         newData: Record<string, any>,
-        event: UpdateEvent<Card>
+        event: UpdateEvent<Card> | InsertEvent<Card>
     ): Promise<FieldChange[]> {
         const diffResult = diff(oldData, newData);
 
@@ -257,7 +283,10 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
         return mergedChanges;
     }
 
-    private async getFieldFromChangeKey(key: string, event: UpdateEvent<Card>) {
+    private async getFieldFromChangeKey(
+        key: string,
+        event: UpdateEvent<Card> | InsertEvent<Card>
+    ) {
         const fieldRepo = event.manager.getRepository(Field);
         let field: Field | null = await fieldRepo.findOne({
             where: {
