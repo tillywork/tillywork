@@ -443,7 +443,7 @@ function openDescriptionFileDialog() {
               <v-list-item
                 v-for="child in cardCopy.children"
                 :key="child.id"
-                :to="'/pm/card/' + child.id"
+                :to="'/card/' + child.id"
               >
                 <!-- Title -->
                 <v-list-item-title>

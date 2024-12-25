@@ -30,7 +30,7 @@ const { titleField } = useFields({
   <v-card
     class="d-flex align-center text-caption pe-2"
     :class="hideStage && 'ps-2'"
-    :to="!disableLink ? `/pm/card/${card.id}` : undefined"
+    :to="!disableLink ? `/card/${card.id}` : undefined"
     :max-width="maxWidth ?? 250"
     color="surface-variant"
     variant="tonal"

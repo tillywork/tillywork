@@ -1,5 +1,4 @@
 import { DIALOGS } from '@/components/common/dialogs/types';
-import { WorkspaceTypes } from '@/components/project-management/workspaces/types';
 
 import { useProjectsService } from '@/services/useProjectsService';
 import { useUsersService } from '@/services/useUsersService';
@@ -9,6 +8,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useDialogStore } from '@/stores/dialog';
 import { useStateStore } from '@/stores/state';
 import { useThemeStore } from '@/stores/theme';
+import { WorkspaceTypes } from '@tillywork/shared';
 
 import posthog from 'posthog-js';
 import { useTheme } from 'vuetify';
@@ -98,6 +98,11 @@ export const useState = () => {
             workspace.value?.type !== selectedModule.value)
         ) {
           setWorkspace(v[0]);
+        } else {
+          const existingWorkspace = v.find((w) => w.id === workspace.value?.id);
+          if (existingWorkspace) {
+            setWorkspace(existingWorkspace);
+          }
         }
       }
     }

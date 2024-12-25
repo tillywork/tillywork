@@ -29,7 +29,11 @@ const cardType = computed<CardType>(() => {
 </script>
 
 <template>
-  <template v-if="cardType.layout === CardTypeLayout.DEFAULT">
+  <template
+    v-if="
+      [CardTypeLayout.DEFAULT, CardTypeLayout.DEAL].includes(cardType.layout)
+    "
+  >
     <default-layout />
   </template>
   <template v-else-if="cardType.layout === CardTypeLayout.PERSON">

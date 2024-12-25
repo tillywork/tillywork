@@ -3,9 +3,8 @@ import { List } from "./list.entity";
 import { ListStagesService } from "./list-stages/list.stages.service";
 import { DEFAULT_LIST_STAGES } from "./types";
 import { ViewsService } from "../views/views.service";
-import { DEFAULT_VIEWS } from "../views/types";
 import { ListStage } from "./list-stages/list.stage.entity";
-import { View } from "../views/view.entity";
+import { ListType, ViewTypes } from "@tillywork/shared";
 
 @Injectable()
 export class ListSideEffectsService {
@@ -16,16 +15,25 @@ export class ListSideEffectsService {
 
     async postCreate({
         list,
+        defaultViewType,
         createDefaultStages,
     }: {
         list: List;
+        defaultViewType?: ViewTypes;
         createDefaultStages: boolean;
     }) {
         if (createDefaultStages) {
-            list = await this.createDefaultStages(list);
+            if (list.type === ListType.DEALS) {
+                list = await this.createCrmDealStages(list);
+            } else {
+                list = await this.createDefaultStages(list);
+            }
         }
 
-        list = await this.createDefaultTableView(list);
+        list = await this.createDefaultTableView({
+            list,
+            defaultViewType,
+        });
 
         return list;
     }
@@ -50,20 +58,88 @@ export class ListSideEffectsService {
         return list;
     }
 
-    async createDefaultTableView(list: List): Promise<List> {
-        const defaultViewsPromises = DEFAULT_VIEWS.map((view) => {
-            return new Promise<View>((resolve) => {
-                this.viewsService
+    async createCrmDealStages(list: List): Promise<List> {
+        const dealStages = [
+            {
+                name: "Lead",
+                color: "default",
+            },
+            {
+                name: "Qualified",
+                color: "success",
+            },
+            {
+                name: "Meeting Scheduled",
+                color: "success",
+            },
+            {
+                name: "Demo",
+                color: "success",
+            },
+            {
+                name: "Proposal Made",
+                color: "success",
+            },
+            {
+                name: "Negotiations",
+                color: "success",
+            },
+            {
+                name: "Won",
+                color: "success",
+            },
+            {
+                name: "Lost",
+                color: "error",
+            },
+        ];
+
+        const defaultStagesPromises = dealStages.map((stage, index) => {
+            return new Promise<ListStage>((resolve) => {
+                this.listStagesService
                     .create({
-                        name: view.name,
+                        name: stage.name,
                         listId: list.id,
-                        type: view.type,
+                        color: stage.color,
+                        order: index + 1,
                     })
-                    .then((view) => resolve(view));
+                    .then((stage) => resolve(stage));
             });
         });
 
-        list.views = await Promise.all(defaultViewsPromises);
+        list.listStages = await Promise.all(defaultStagesPromises);
+
+        return list;
+    }
+
+    async createDefaultTableView({
+        list,
+        defaultViewType = ViewTypes.TABLE,
+    }: {
+        list: List;
+        defaultViewType: ViewTypes;
+    }): Promise<List> {
+        const viewOptions = [
+            {
+                name: "Table",
+                type: ViewTypes.TABLE,
+            },
+            {
+                name: "Board",
+                type: ViewTypes.BOARD,
+            },
+        ];
+        const selectedViewType = viewOptions.find(
+            (option) => option.type === defaultViewType
+        );
+
+        const defaultView = await this.viewsService.create({
+            name: selectedViewType.name,
+            listId: list.id,
+            type: selectedViewType.type,
+        });
+
+        list.views = [defaultView];
 
         return list;
     }

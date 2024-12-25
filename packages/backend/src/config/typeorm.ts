@@ -68,6 +68,8 @@ import { TruncateCardActivities1734112779468 } from "src/migrations/173411277946
 import { UpdateCardActivityTypesEnum1734190213126 } from "src/migrations/1734190213126-update-card-activity-types-enum";
 import { CreateCardActivityTypeIndex1734201598929 } from "src/migrations/1734201598929-create-card-activity-type-index";
 import { AddContentIndexToCardActivity1734530224432 } from "src/migrations/1734530224432-add-content-index-to-card-activity";
+import { AddCurrencyColumnToWorkspaceTable1735134777269 } from "src/migrations/1735134777269-add-currency-column-to-workspace-table";
+import { AddDealToCardTypeLayoutEnum1735135850545 } from "src/migrations/1735135850545-add-deal-to-card-type-layout-enum";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -137,6 +139,8 @@ const migrations = [
     UpdateCardActivityTypesEnum1734190213126,
     CreateCardActivityTypeIndex1734201598929,
     AddContentIndexToCardActivity1734530224432,
+    AddCurrencyColumnToWorkspaceTable1735134777269,
+    AddDealToCardTypeLayoutEnum1735135850545,
 ];
 
 const config: TypeOrmModuleOptions = {

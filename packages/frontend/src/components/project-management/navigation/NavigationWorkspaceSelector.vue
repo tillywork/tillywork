@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { type Workspace } from '../workspaces/types';
 import { useWorkspacesService } from '@/services/useWorkspacesService';
 import CreateWorkspaceBtn from './CreateWorkspaceBtn.vue';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 import { useAuthStore } from '@/stores/auth';
 import { useStateStore } from '@/stores/state';
+import type { Workspace } from '@tillywork/shared';
 
 const onlyIcon = defineModel<boolean>('onlyIcon');
 

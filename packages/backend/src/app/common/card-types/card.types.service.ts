@@ -182,6 +182,7 @@ export class CardTypesService {
                 });
                 defaultTypes.push({
                     name: "Deal",
+                    layout: CardTypeLayout.DEAL,
                 });
                 break;
             case WorkspaceTypes.AGILE_PROJECTS:

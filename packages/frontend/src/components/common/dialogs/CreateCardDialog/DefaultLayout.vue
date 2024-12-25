@@ -48,7 +48,7 @@ const cardType = computed<CardType>(() => {
   }
 });
 
-const { pinnedFields } = useFields({
+const { pinnedFields, titleField } = useFields({
   cardTypeId: cardType.value.id,
   listId: list.value.id,
 });
@@ -57,7 +57,6 @@ const createCardMutation = cardsService.useCreateCardMutation();
 const createCardDto = ref<CreateCardDto>({
   data: {
     ...(currentDialog.value.data.data ?? {}),
-    title: '',
   },
   listId: currentDialog.value?.data?.listId ?? list.value?.id,
   listStage: currentDialog.value?.data?.listStage ?? list.value?.listStages[0],
@@ -80,8 +79,8 @@ function closeDialog() {
 
 async function createCard() {
   if (
-    createCardDto.value.data.title &&
-    createCardDto.value.data.title.trim() !== '' &&
+    createCardDto.value.data[titleField.value!.slug] &&
+    createCardDto.value.data[titleField.value!.slug].trim() !== '' &&
     createCardDto.value.listId
   ) {
     createCardDto.value.listStageId = createCardDto.value.listStage?.id;
@@ -106,7 +105,7 @@ async function createCard() {
  * If create more is on, don't close the dialog.
  */
 function handlePostCreate() {
-  createCardDto.value.data.title = '';
+  createCardDto.value.data[titleField.value!.slug] = '';
   createCardDto.value.data.description = undefined;
 
   showSnackbar({
@@ -153,8 +152,9 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
     <v-form ref="createForm" @submit.prevent="createCard()">
       <div class="px-4 pb-2">
         <base-editor-input
-          v-model="createCardDto.data.title"
-          :placeholder="cardType.name + ' name'"
+          v-if="titleField"
+          v-model="createCardDto.data[titleField.slug]"
+          :placeholder="cardType.name + ` ${titleField.name.toLowerCase()}`"
           autofocus
           :heading="3"
           single-line

@@ -139,6 +139,23 @@ export class CardTypesSideEffectsService {
             },
         ];
 
+        const defaultDealFields = [
+            {
+                name: "Name",
+                type: FieldTypes.TEXT,
+                slug: "name",
+                icon: "mdi-domain",
+                isTitle: true,
+            },
+            {
+                name: "Value",
+                type: FieldTypes.CURRENCY,
+                slug: "value",
+                icon: "mdi-currency-usd",
+                isPinned: true,
+            },
+        ];
+
         let defaultFields;
 
         switch (cardType.workspace.type) {
@@ -146,6 +163,10 @@ export class CardTypesSideEffectsService {
                 switch (cardType.name) {
                     case "Organization":
                         defaultFields = defaultOrganizationFields;
+                        break;
+
+                    case "Deal":
+                        defaultFields = defaultDealFields;
                         break;
 
                     case "Contact":
@@ -169,8 +190,6 @@ export class CardTypesSideEffectsService {
                 });
             })
         );
-
-        Logger.debug({ fields: cardType.fields });
 
         return cardType;
     }

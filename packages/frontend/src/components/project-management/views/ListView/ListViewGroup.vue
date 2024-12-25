@@ -305,7 +305,7 @@ watch(
                   class="list-row text-body-3"
                   rounded="0"
                   height="36"
-                  :to="`/pm/card/${row.original.id}`"
+                  :to="`/card/${row.original.id}`"
                   :ripple="false"
                   v-bind="rowProps"
                 >

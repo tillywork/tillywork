@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { useProjectUsersService } from '@/services/useProjectUsersService';
 import BaseLabelSelector from '../inputs/BaseLabelSelector.vue';
 import BaseRelationInput from '../inputs/BaseRelationInput.vue';
 import BaseDropdownInput from '../inputs/BaseDropdownInput.vue';
-import { useAuthStore } from '@/stores/auth';
-import { type Field, FieldTypes } from '@tillywork/shared';
 import BaseNumberInput from '../inputs/BaseNumberInput.vue';
+import BaseCurrencyInput from '../inputs/BaseCurrencyInput.vue';
+
+import { useProjectUsersService } from '@/services/useProjectUsersService';
+
+import { useAuthStore } from '@/stores/auth';
+
+import { type Field, FieldTypes } from '@tillywork/shared';
+
 import validationUtils from '@/utils/validation';
 
 const value = defineModel<any>();
@@ -119,6 +124,15 @@ const { data: users } = useProjectUsersQuery({
       :placeholder="field.name"
       :prepend-inner-icon="field.icon"
       :rules="[validationUtils.rules.email]"
+    />
+  </template>
+  <template v-else-if="field.type === FieldTypes.CURRENCY">
+    <base-currency-input
+      v-model="value"
+      @click.prevent
+      :rounded
+      :fill="flexFill"
+      :tooltip="field.name"
     />
   </template>
 </template>

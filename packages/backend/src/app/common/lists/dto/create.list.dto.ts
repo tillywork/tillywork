@@ -8,7 +8,7 @@ import {
     ValidateIf,
 } from "class-validator";
 import { CardType } from "../../card-types/card.type.entity";
-import { ListType } from "@tillywork/shared";
+import { ListType, ViewTypes } from "@tillywork/shared";
 
 export class CreateListDto {
     @IsOptional()
@@ -39,6 +39,10 @@ export class CreateListDto {
     @IsBoolean()
     @IsOptional()
     createDefaultStages?: boolean;
+
+    @IsOptional()
+    @IsEnum(ViewTypes)
+    defaultViewType?: ViewTypes;
 
     @IsOptional()
     @IsEnum(ListType)

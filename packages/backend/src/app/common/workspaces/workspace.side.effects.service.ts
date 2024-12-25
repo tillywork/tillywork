@@ -6,7 +6,7 @@ import { CardTypesService } from "../card-types/card.types.service";
 import { ListsService } from "../lists/lists.service";
 import { List } from "../lists/list.entity";
 import { Space } from "../spaces/space.entity";
-import { ListType, WorkspaceTypes } from "@tillywork/shared";
+import { ListType, ViewTypes, WorkspaceTypes } from "@tillywork/shared";
 
 @Injectable()
 export class WorkspaceSideEffectsService {
@@ -75,6 +75,16 @@ export class WorkspaceSideEffectsService {
                 ),
                 icon: "mdi-domain",
                 type: ListType.ORGANIZATIONS,
+            },
+            {
+                name: "Deals",
+                defaultCardType: workspace.cardTypes.find(
+                    (cardType) => cardType.name === "Deal"
+                ),
+                icon: "mdi-handshake",
+                type: ListType.DEALS,
+                defaultViewType: ViewTypes.BOARD,
+                createDefaultStages: true,
             },
         ];
 

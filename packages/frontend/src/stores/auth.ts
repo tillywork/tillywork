@@ -4,8 +4,8 @@ import type { RouteLocation } from 'vue-router/auto';
 import { useAuthService } from '@/services/useAuthService';
 import { useSnackbarStore } from './snackbar';
 import type { Project } from '@/components/common/projects/types';
-import type { Workspace } from '@/components/project-management/workspaces/types';
 import { useStateStore } from './state';
+import type { Workspace } from '@tillywork/shared';
 
 export const useAuthStore = defineStore('auth', {
   persist: true,

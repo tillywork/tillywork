@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import BaseSnackbarWrapper from '@/components/common/base/BaseSnackbarWrapper.vue';
 import BaseDialog from '@/components/common/dialogs/BaseDialog.vue';
-import { WorkspaceTypes } from '@/components/project-management/workspaces/types';
 import { useCommands } from '@/composables/useCommands';
 import { useState } from '@/composables/useState';
 import CrmLayout from '@/layouts/CrmLayout.vue';
@@ -9,6 +8,7 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import ProjectLayout from '@/layouts/ProjectLayout.vue';
 import { VueQueryDevtools } from '@tanstack/vue-query-devtools';
 import BaseCommandPalette from '@/components/common/commands/BaseCommandPalette.vue';
+import { WorkspaceTypes } from '@tillywork/shared';
 
 const {
   registerInputFocusAndBlurListeners,

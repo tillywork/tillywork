@@ -27,4 +27,5 @@ export enum ListType {
   LIST = 'default_list',
   CONTACTS = 'crm_contacts',
   ORGANIZATIONS = 'crm_organizations',
+  DEALS = 'crm_deals',
 }

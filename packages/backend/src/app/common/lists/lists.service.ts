@@ -146,6 +146,7 @@ export class ListsService {
         await this.accessControlService.applyResourceAccess(list, "list");
         await this.listSideEffectsService.postCreate({
             list,
+            defaultViewType: createListDto.defaultViewType,
             createDefaultStages: createListDto.createDefaultStages,
         });
 

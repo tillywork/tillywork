@@ -26,4 +26,5 @@ export enum CardTypeLayout {
   DEFAULT = 'default',
   PERSON = 'person',
   ORGANIZATION = 'organization',
+  DEAL = 'deal',
 }

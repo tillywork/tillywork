@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { type List } from '@/components/project-management/lists/types';
-import { WorkspaceTypes } from '@/components/project-management/workspaces/types';
 import { useListsService } from '@/services/useListsService';
 import { useAuthStore } from '@/stores/auth';
+import { WorkspaceTypes } from '@tillywork/shared';
 
 const selectedList = defineModel<List>();
 

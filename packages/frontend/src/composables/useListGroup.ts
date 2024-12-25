@@ -93,7 +93,8 @@ export const useListGroup = ({
     dialog.openDialog({
       dialog: DIALOGS.CREATE_CARD,
       data: {
-        listId: listGroup.list.id,
+        list: props.list,
+        type: props.list.defaultCardType,
         listStage: getGroupStage(listGroup),
         data: cardData,
         listStages: props.listStages,

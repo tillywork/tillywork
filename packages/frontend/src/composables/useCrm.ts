@@ -1,7 +1,8 @@
-import { WorkspaceTypes } from '@/components/project-management/workspaces/types';
 import { useListsService } from '@/services/useListsService';
+
 import { useAuthStore } from '@/stores/auth';
-import type { CardType } from '@tillywork/shared';
+
+import { WorkspaceTypes, type CardType } from '@tillywork/shared';
 
 export const useCrm = () => {
   const { workspace } = storeToRefs(useAuthStore());
