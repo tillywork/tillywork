@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { DIALOGS, UpsertDialogMode } from './types';
+import type { ListStage } from '@tillywork/shared';
+
 import { useDialogStore } from '@/stores/dialog';
-
 import { useQueryClient } from '@tanstack/vue-query';
-import { useListStagesService } from '@/services/useListStagesService';
-import type { ListStage } from '@/components/project-management/lists/types';
-import draggable from 'vuedraggable';
 
+import { useListStagesService } from '@/services/useListStagesService';
+
+import draggable from 'vuedraggable';
+import { useSnackbarStore } from '@/stores/snackbar';
+
+const { showSnackbar } = useSnackbarStore();
 // Dialog
 const dialog = useDialogStore();
 const currentDialogIndex = computed(() =>
@@ -45,13 +49,14 @@ const selectedListId = ref<number | undefined>(
 const stagesEnabled = computed<boolean>(() => !!selectedListId.value);
 
 const queryClient = useQueryClient();
-const listStagesService = useListStagesService();
-const { data: listStages } = listStagesService.useGetListStagesQuery({
+
+const { useGetListStagesQuery, useReorderListStageMutation } =
+  useListStagesService();
+const { data: listStages } = useGetListStagesQuery({
   listId: selectedListId as Ref<number>,
   enabled: stagesEnabled,
 });
-const { mutateAsync: reorderListStage } =
-  listStagesService.useReorderListStageMutation();
+const { mutateAsync: reorderListStage } = useReorderListStageMutation();
 
 // Reorder
 const draggableListStages = ref<ListStage[]>([]);
@@ -59,8 +64,9 @@ watch(listStages, () => (draggableListStages.value = listStages.value!), {
   immediate: true,
 });
 
-// Hooks
-onUnmounted(() => {
+async function handleReorder() {
+  if (!selectedListId.value) return;
+
   const listStagesToReorder = draggableListStages.value
     .map((listStage, idx) => {
       if (listStage.order !== idx + 1)
@@ -71,19 +77,22 @@ onUnmounted(() => {
     })
     .filter(Boolean) as Pick<ListStage, 'id' | 'order'>[];
 
-  if (selectedListId.value && listStagesToReorder.length) {
+  if (listStagesToReorder.length) {
     const payload = {
       listId: selectedListId.value,
       listStages: listStagesToReorder,
     };
-    reorderListStage(payload).then(() => {
-      queryClient.invalidateQueries({ queryKey: ['listGroups'] });
-      queryClient.invalidateQueries({
-        queryKey: ['lists', selectedListId.value],
+
+    try {
+      await reorderListStage(payload);
+    } catch (error) {
+      showSnackbar({
+        message: 'Something went wrong while updating your list stages.',
+        color: 'error',
       });
-    });
+    }
   }
-});
+}
 </script>
 
 <template>
@@ -117,7 +126,12 @@ onUnmounted(() => {
             </th>
           </tr>
         </thead>
-        <draggable tag="tbody" v-model="draggableListStages" item-key="id">
+        <draggable
+          tag="tbody"
+          v-model="draggableListStages"
+          item-key="id"
+          @end="handleReorder"
+        >
           <template #item="{ element: row }">
             <tr class="cursor-grab">
               <td>
