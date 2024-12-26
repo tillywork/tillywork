@@ -44,6 +44,15 @@ const { data: users } = useProjectUsersQuery({
       :rounded
     />
   </template>
+  <template v-else-if="field.type === FieldTypes.DATETIME">
+    <base-date-picker
+      v-model="value"
+      :icon="field.icon ?? 'mdi-calendar'"
+      :label="field.name"
+      :rounded
+      include-time
+    />
+  </template>
   <template v-else-if="field.type === FieldTypes.TEXT">
     <v-text-field
       v-model="value"

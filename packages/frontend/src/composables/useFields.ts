@@ -91,6 +91,7 @@ export const useFields = ({
         FieldTypes.DROPDOWN,
         FieldTypes.LABEL,
         FieldTypes.DATE,
+        FieldTypes.DATETIME,
         FieldTypes.USER,
         FieldTypes.CHECKBOX,
       ].includes(field.type)
@@ -103,6 +104,7 @@ export const useFields = ({
         FieldTypes.DROPDOWN,
         FieldTypes.LABEL,
         FieldTypes.DATE,
+        FieldTypes.DATETIME,
         FieldTypes.USER,
         FieldTypes.CHECKBOX,
         FieldTypes.NUMBER,
@@ -142,7 +144,11 @@ export const useFields = ({
       (cardList) => cardList.listId === toValue(listId)
     )?.listStage;
 
-    if (listStage && field.type === FieldTypes.DATE && listStage.isCompleted) {
+    if (
+      listStage &&
+      [FieldTypes.DATE, FieldTypes.DATETIME].includes(field.type) &&
+      listStage.isCompleted
+    ) {
       return 'default';
     }
   }

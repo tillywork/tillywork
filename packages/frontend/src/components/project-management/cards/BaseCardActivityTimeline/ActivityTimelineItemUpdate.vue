@@ -99,9 +99,14 @@ const listStage = computed(() =>
           <strong class="mx-1">{{ field?.name.toLowerCase() }}</strong>
           to
           <strong>
-            <template v-if="field?.type === FieldTypes.DATE">{{
-              dayjs(change.newValue).format('MMM DD')
-            }}</template>
+            <template
+              v-if="
+                field &&
+                [FieldTypes.DATE, FieldTypes.DATETIME].includes(field.type)
+              "
+            >
+              {{ dayjs(change.newValue).format('MMM DD') }}
+            </template>
             <template
               v-else-if="
                 field &&

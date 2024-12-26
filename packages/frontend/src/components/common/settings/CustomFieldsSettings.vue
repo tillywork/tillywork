@@ -48,6 +48,7 @@ const pinnableField = computed(() =>
     FieldTypes.LABEL,
     FieldTypes.USER,
     FieldTypes.DATE,
+    FieldTypes.DATETIME,
     FieldTypes.CHECKBOX,
     FieldTypes.NUMBER,
   ].includes(fieldDto.value?.type as FieldTypes)

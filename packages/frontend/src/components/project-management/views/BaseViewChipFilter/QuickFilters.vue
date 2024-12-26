@@ -94,6 +94,7 @@ function buildFieldQuickFilterOptions(field: Field) {
         }) ?? [];
       break;
 
+    case FieldTypes.DATETIME:
     case FieldTypes.DATE:
       options = quickFilterDateOptions.map((option) => {
         return {

@@ -1,5 +1,5 @@
+import { FieldTypes } from "@tillywork/shared";
 import { MigrationInterface, QueryRunner, TableColumn } from "typeorm";
-import { FieldTypes } from "../app/common/fields/types";
 
 export class MigrateTitleDescriptionAndDueAtToDataColumnInCardTable1722869332518
     implements MigrationInterface

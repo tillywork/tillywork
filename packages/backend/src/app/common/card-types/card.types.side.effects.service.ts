@@ -59,14 +59,14 @@ export class CardTypesSideEffectsService {
             },
             {
                 name: "Due At",
-                type: FieldTypes.DATE,
+                type: FieldTypes.DATETIME,
                 slug: "due_at",
                 icon: "mdi-calendar",
                 isPinned: true,
             },
             {
                 name: "Starts At",
-                type: FieldTypes.DATE,
+                type: FieldTypes.DATETIME,
                 slug: "starts_at",
                 icon: "mdi-calendar",
             },

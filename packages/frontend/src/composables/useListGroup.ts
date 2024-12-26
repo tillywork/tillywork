@@ -84,6 +84,7 @@ export const useListGroup = ({
           cardData[listGroup.field!.slug] = value ? [value] : undefined;
           break;
 
+        case FieldTypes.DATETIME:
         case FieldTypes.DATE:
           cardData[listGroup.field!.slug] = getGroupValue();
           break;
@@ -124,6 +125,7 @@ export const useListGroup = ({
         )?.item;
         break;
 
+      case FieldTypes.DATETIME:
       case FieldTypes.DATE: {
         const filter: FieldFilter = listGroup.value.filter?.where?.and?.find(
           (condition) =>

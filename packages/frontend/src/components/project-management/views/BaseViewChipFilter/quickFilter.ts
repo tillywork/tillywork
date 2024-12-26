@@ -8,6 +8,7 @@ export const quickFilterGroupsCustomFields = [
   FieldTypes.DROPDOWN,
   FieldTypes.LABEL,
   FieldTypes.DATE,
+  FieldTypes.DATETIME,
   FieldTypes.USER,
 ];
 

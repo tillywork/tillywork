@@ -6,7 +6,6 @@ import { ListStagesService } from "../list-stages/list.stages.service";
 import { CreateListGroupDto } from "./dto/create.list.group.dto";
 import { UpdateListGroupDto } from "./dto/update.list.group.dto";
 import { FieldsService } from "../../fields/fields.service";
-import { FieldTypes } from "../../fields/types";
 import { ListGroupEntityTypes } from "../types";
 import { Field } from "../../fields/field.entity";
 import { isEqual } from "lodash";
@@ -18,7 +17,11 @@ import {
     IsOptional,
     ValidateIf,
 } from "class-validator";
-import { ListGroupOptions, PermissionLevel } from "@tillywork/shared";
+import {
+    FieldTypes,
+    ListGroupOptions,
+    PermissionLevel,
+} from "@tillywork/shared";
 import { ProjectUser } from "../../projects/project-users/project.user.entity";
 import { ClsService } from "nestjs-cls";
 import { AccessControlService } from "../../auth/services/access.control.service";
@@ -170,6 +173,7 @@ export class ListGroupsService {
                 });
                 break;
 
+            case FieldTypes.DATETIME:
             case FieldTypes.DATE:
                 generatedGroups = await this.generateGroupsByDate({
                     listId,

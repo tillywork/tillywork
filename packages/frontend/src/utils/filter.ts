@@ -14,6 +14,7 @@ export const filterUtils = {
       case FieldTypes.LABEL:
       case FieldTypes.CARD:
         return 'in';
+      case FieldTypes.DATETIME:
       case FieldTypes.DATE:
         return 'between';
 

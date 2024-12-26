@@ -168,6 +168,7 @@ function mapFilterOptionValueToOperator(value: string): FilterOperator {
       } else {
         return value as FilterOperator;
       }
+    case FieldTypes.DATETIME:
     case FieldTypes.DATE:
     case FieldTypes.NUMBER:
     default:
@@ -204,6 +205,7 @@ function mapFilterOperatorToFileringOption(
         return 'isFalse' as FilterOperator;
       }
       return 'isTrue' as FilterOperator;
+    case FieldTypes.DATETIME:
     case FieldTypes.DATE:
     case FieldTypes.NUMBER:
     default:
@@ -323,7 +325,12 @@ watch(
         closable-chips
       />
     </template>
-    <template v-else-if="selectedFilter?.type === FieldTypes.DATE">
+    <template
+      v-else-if="
+        selectedFilter &&
+        [FieldTypes.DATE, FieldTypes.DATETIME].includes(selectedFilter.type)
+      "
+    >
       <v-autocomplete
         :items="filteringOptions"
         v-model="filterOption"
