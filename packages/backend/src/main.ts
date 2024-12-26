@@ -5,8 +5,8 @@ import {
     NestFastifyApplication,
 } from "@nestjs/platform-fastify";
 import { AppModule } from "./app/app.module";
-// import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-// import metadata from "./metadata";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import metadata from "./metadata";
 import { FastifyAdapter as BullFastifyAdapter } from "@bull-board/fastify";
 import { getQueueToken } from "@nestjs/bull";
 import { createBullBoard } from "@bull-board/api";
@@ -44,15 +44,15 @@ async function bootstrap() {
 
     app.register(contentParser);
 
-    // await SwaggerModule.loadPluginMetadata(metadata);
-    // const config = new DocumentBuilder()
-    //     .setTitle("tillywork API")
-    //     .setVersion("1.0")
-    //     .addBearerAuth()
-    //     .addBasicAuth()
-    //     .build();
-    // const document = SwaggerModule.createDocument(app, config);
-    // SwaggerModule.setup("docs", app, document);
+    await SwaggerModule.loadPluginMetadata(metadata);
+    const config = new DocumentBuilder()
+        .setTitle("tillywork API")
+        .setVersion("1.0")
+        .addBearerAuth()
+        .addBasicAuth()
+        .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup("docs", app, document);
 
     if (configService.get("TW_MAIL_ENABLE")) {
         const serverAdapter = new BullFastifyAdapter();
