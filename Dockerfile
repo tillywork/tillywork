@@ -14,6 +14,9 @@ COPY . .
 # Install dependencies and cache them
 RUN --mount=type=cache,target=/root/.npm npm ci
 
+# Generate swagger metadata
+RUN npm run swagger
+
 # Build the app
 RUN npm run build
 
