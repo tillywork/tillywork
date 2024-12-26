@@ -57,6 +57,8 @@ For further details and support, please visit [our website](https://tilly.work) 
 
 We invite contributions to tillywork! If you have ideas for bug fixes, enhancements, or documentation improvements, please fork the repository and create a pull request.
 
+![tillywork history](https://repobeats.axiom.co/api/embed/411d452a74f8eeaddeab34d60a81f686ba994799.svg 'Repobeats analytics image')
+
 ## License
 
 tillywork is available under the [MIT License](LICENSE).
