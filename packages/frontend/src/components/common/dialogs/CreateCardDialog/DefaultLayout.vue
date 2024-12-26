@@ -1,28 +1,36 @@
 <script setup lang="ts">
-import { useCardsService } from '@/services/useCardsService';
-import { useSnackbarStore } from '@/stores/snackbar';
-import type { VForm } from 'vuetify/lib/components/index.mjs';
-import BaseEditorInput from '../../base/BaseEditor/BaseEditorInput.vue';
 import { useDialogStore } from '@/stores/dialog';
-import { DIALOGS } from '../types';
-import BaseListSelector from '../../inputs/BaseListSelector.vue';
-import { cloneDeep } from 'lodash';
 import { useAuthStore } from '@/stores/auth';
-import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
-import { leaderKey } from '@/utils/keyboard';
-import { useFields } from '@/composables/useFields';
-import BaseField from '../../fields/BaseField.vue';
-import posthog from 'posthog-js';
+import { useSnackbarStore } from '@/stores/snackbar';
+
+import { useCardsService } from '@/services/useCardsService';
+
+import type { VForm } from 'vuetify/lib/components/index.mjs';
+import { DIALOGS } from '../types';
 import {
   type CardType,
   type CreateCardDto,
   type List,
 } from '@tillywork/shared';
 
+import { cloneDeep } from 'lodash';
+import { leaderKey } from '@/utils/keyboard';
+
+import { useFields } from '@/composables/useFields';
+import { useCard } from '@/composables/useCard';
+
+import BaseField from '../../fields/BaseField.vue';
+import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
+import BaseListSelector from '../../inputs/BaseListSelector.vue';
+import BaseEditorInput from '../../base/BaseEditor/BaseEditorInput.vue';
+
+import posthog from 'posthog-js';
+
 const dialog = useDialogStore();
 const { workspace } = storeToRefs(useAuthStore());
 const { showSnackbar } = useSnackbarStore();
 
+const { normalizeFieldValue } = useCard();
 const { meta, ctrl, enter } = useMagicKeys();
 
 const createForm = ref<VForm>();
@@ -181,7 +189,13 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
             <base-field
               :field="field"
               v-model="createCardDto.data[field.slug]"
-              no-label
+              @update:model-value="
+                (v) =>
+                  (createCardDto.data[field.slug] = normalizeFieldValue({
+                    v,
+                    field,
+                  }))
+              "
             />
           </template>
         </div>

@@ -24,6 +24,10 @@ export class CreateFieldDto {
     @IsNumber()
     cardTypeId?: number;
 
+    @IsOptional()
+    @IsNumber()
+    dataCardTypeId?: number;
+
     @IsNotEmpty()
     @IsString()
     icon: string;

@@ -134,7 +134,7 @@ export const useCardActivitiesService = () => {
     const dueDateValues = toValue(dueDate);
     const dueDateStart = dueDateValues ? dueDateValues[0] : undefined;
     const dueDateEnd = dueDateValues ? dueDateValues[1] : undefined;
-    console.log('dueDateStart', dueDateStart);
+
     return sendRequest(`/cards/activities`, {
       method: 'GET',
       params: {

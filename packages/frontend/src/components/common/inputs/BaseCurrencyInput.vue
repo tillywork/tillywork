@@ -3,7 +3,12 @@ import { useAuthStore } from '@/stores/auth';
 
 import getSymbolFromCurrency from 'currency-symbol-map';
 
-const props = defineProps<{
+const {
+  modelValue,
+  rounded = 'pill',
+  fill = false,
+  tooltip,
+} = defineProps<{
   modelValue: number | undefined;
   rounded?: string;
   fill?: boolean;
@@ -12,11 +17,11 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue']);
 const { workspace } = storeToRefs(useAuthStore());
-const value = ref(formatCurrency(props.modelValue?.toString() ?? ''));
+const value = ref(formatCurrency(modelValue?.toString() ?? ''));
 const debouncedValue = useDebounce(value, 500);
 const isFocused = ref(false);
 const inputRef = ref<HTMLInputElement | null>(null);
-const inputWidth = ref(props.fill ? '100%' : '80px');
+const inputWidth = ref(fill ? '100%' : '80px');
 
 watch(debouncedValue, (newValue) => {
   emit(
@@ -28,7 +33,7 @@ watch(debouncedValue, (newValue) => {
 watch(
   value,
   () => {
-    if (!props.fill) {
+    if (!fill) {
       adjustWidth();
     }
   },
@@ -59,7 +64,7 @@ function updateValue(event: Event) {
   // Update value with formatted currency
   value.value = formatCurrency(numericValue);
 
-  if (!props.fill) adjustWidth();
+  if (!fill) adjustWidth();
 }
 
 function handleKeydown(event: KeyboardEvent) {
@@ -84,17 +89,17 @@ function adjustWidth() {
 
     document.body.removeChild(tempSpan);
 
-    inputWidth.value = `${Math.max(30, width + 4)}px`;
+    inputWidth.value = `${Math.max(30, width + 10)}px`;
   }
 }
 
 const cardClasses = computed(() => ({
   'is-focused': isFocused.value,
-  'flex-fill': props.fill,
+  'flex-fill': fill,
 }));
 
 onMounted(() => {
-  if (!props.fill) {
+  if (!fill) {
     adjustWidth();
   }
 });
@@ -102,7 +107,7 @@ onMounted(() => {
 
 <template>
   <v-card
-    class="base-currency-input d-flex align-center text-caption pa-2"
+    class="base-currency-input d-flex align-center px-3"
     :class="cardClasses"
     color="transparent"
     :rounded
@@ -110,13 +115,14 @@ onMounted(() => {
     <v-tooltip activator="parent" location="top" v-if="!fill">
       {{ tooltip }}
     </v-tooltip>
-    <span class="currency-symbol text-caption font-weight-medium">{{
+    <span class="text-caption">{{
       getSymbolFromCurrency(workspace?.currency ?? '')
     }}</span>
     <input
       v-model="value"
       ref="inputRef"
       type="text"
+      class="text-caption pa-2 pe-0 h-100"
       @input="updateValue"
       @focus="isFocused = true"
       @blur="isFocused = false"

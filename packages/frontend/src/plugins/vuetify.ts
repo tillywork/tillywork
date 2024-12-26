@@ -118,7 +118,7 @@ const vuetify = createVuetify({
       hideDetails: true,
     },
     VChip: {
-      rounded: 'md',
+      rounded: 'pill',
     },
     VAppBar: {
       color: 'navigation',

@@ -11,18 +11,19 @@ import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue
 import { leaderKey } from '@/utils/keyboard';
 import BaseField from '../../fields/BaseField.vue';
 import {
-  FieldTypes,
   type CardType,
-  type Field,
   type CreateCardDto,
   type List,
 } from '@tillywork/shared';
+import { useFields } from '@/composables/useFields';
+import { useCard } from '@/composables/useCard';
 
 const dialog = useDialogStore();
 const { workspace } = storeToRefs(useAuthStore());
 const { showSnackbar } = useSnackbarStore();
 
 const { meta, ctrl, enter } = useMagicKeys();
+const { normalizeFieldValue } = useCard();
 
 const createForm = ref<VForm>();
 const isCreatingMore = ref(false);
@@ -36,7 +37,12 @@ const currentDialogIndex = computed(() =>
 );
 const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
 
+dialog.updateDialogOptions(currentDialogIndex.value, {
+  width: 500,
+});
+
 const list = computed(() => currentDialog.value?.data?.list);
+const listId = computed(() => list.value!.id);
 
 const cardType = computed<CardType>(() => {
   if (currentDialog.value?.data && currentDialog.value.data?.type) {
@@ -46,6 +52,12 @@ const cardType = computed<CardType>(() => {
   } else {
     return workspace.value?.defaultCardType;
   }
+});
+const cardTypeId = computed(() => cardType.value.id);
+
+const { fields } = useFields({
+  cardTypeId,
+  listId,
 });
 
 const createCardDto = ref<CreateCardDto>({
@@ -129,30 +141,21 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
     </div>
     <v-form ref="createForm" @submit.prevent="createCard(createCardDto)">
       <div class="px-4 pb-2">
-        <base-field
-          :field="{
-            name: 'First Name',
-            type: FieldTypes.TEXT,
-          } as Field"
-          v-model="createCardDto.data.first_name"
-          class="mb-4"
-        />
-        <base-field
-          :field="{
-            name: 'Last Name',
-            type: FieldTypes.TEXT,
-          } as Field"
-          v-model="createCardDto.data.last_name"
-          class="mb-4"
-        />
-        <base-field
-          :field="{
-            name: 'Email',
-            type: FieldTypes.EMAIL,
-          } as Field"
-          v-model="createCardDto.data.email"
-          class="mb-4"
-        />
+        <template v-for="field in fields" :key="field.id">
+          <base-field
+            :field
+            v-model="createCardDto.data[field.slug]"
+            class="mb-4"
+            flex-fill
+            @update:model-value="
+              (v) =>
+                (createCardDto.data[field.slug] = normalizeFieldValue({
+                  v,
+                  field,
+                }))
+            "
+          />
+        </template>
       </div>
       <v-card-actions
         class="d-flex justify-start align-center py-0 px-4 border-t-thin"

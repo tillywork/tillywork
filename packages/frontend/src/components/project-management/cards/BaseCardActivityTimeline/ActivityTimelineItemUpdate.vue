@@ -13,7 +13,7 @@ import {
 import { useFieldsService } from '@/services/useFieldsService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 
-import ActivityTimelineItems from './ActivityTimelineItemUpdateItems.vue';
+import ActivityTimelineUpdateItems from './ActivityTimelineItemUpdateItems.vue';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import { useListStagesService } from '@/services/useListStagesService';
 
@@ -118,7 +118,7 @@ const listStage = computed(() =>
                 ].includes(field.type)
               "
             >
-              <activity-timeline-items
+              <activity-timeline-update-items
                 v-if="field && users"
                 :field
                 :users

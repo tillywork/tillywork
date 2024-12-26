@@ -11,18 +11,20 @@ import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue
 import { leaderKey } from '@/utils/keyboard';
 import BaseField from '../../fields/BaseField.vue';
 import {
-  FieldTypes,
+  ListType,
   type CardType,
-  type Field,
   type CreateCardDto,
   type List,
 } from '@tillywork/shared';
+import { useFields } from '@/composables/useFields';
+import { useCard } from '@/composables/useCard';
 
 const dialog = useDialogStore();
 const { workspace } = storeToRefs(useAuthStore());
 const { showSnackbar } = useSnackbarStore();
 
 const { meta, ctrl, enter } = useMagicKeys();
+const { normalizeFieldValue } = useCard();
 
 const createForm = ref<VForm>();
 const isCreatingMore = ref(false);
@@ -36,7 +38,12 @@ const currentDialogIndex = computed(() =>
 );
 const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
 
+dialog.updateDialogOptions(currentDialogIndex.value, {
+  width: 500,
+});
+
 const list = computed(() => currentDialog.value?.data?.list);
+const listId = computed(() => list.value!.id);
 
 const cardType = computed<CardType>(() => {
   if (currentDialog.value?.data && currentDialog.value.data?.type) {
@@ -47,20 +54,21 @@ const cardType = computed<CardType>(() => {
     return workspace.value?.defaultCardType;
   }
 });
+const cardTypeId = computed(() => cardType.value.id);
+
+const { fields, titleField } = useFields({
+  cardTypeId,
+  listId,
+});
 
 const createCardDto = ref<CreateCardDto>({
   listId: currentDialog.value?.data?.listId ?? list.value?.id,
   type: cardType.value?.id,
   workspaceId: workspace.value!.id,
   data: currentDialog.value?.data?.data ?? {},
-});
-
-const selectedList = ref<List>(cloneDeep(list.value));
-watch(selectedList, (v) => {
-  if (v) {
-    createCardDto.value.listStage = v.listStages[0];
-    createCardDto.value.listId = v.id;
-  }
+  listStage:
+    currentDialog.value?.data?.listStage ??
+    (list.value?.listStages ? list.value.listStages[0] : undefined),
 });
 
 function closeDialog() {
@@ -106,13 +114,23 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
     handleCreateCard();
   }
 });
+
+watch(list, (v) => {
+  if (v) {
+    createCardDto.value.listId = v.id;
+
+    if (v.listStages) {
+      createCardDto.value.listStage = v.listStages[0];
+    }
+  }
+});
 </script>
 
 <template>
   <v-card color="surface" elevation="24" :loading="isCreating">
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle class="d-flex align-center">
-        <base-list-selector v-model="selectedList" readonly />
+        <base-list-selector :model-value="list" readonly />
         <template v-if="createCardDto.parent">
           <v-icon icon="mdi-arrow-right-thin" class="mx-1" />
           <base-card-chip :card="createCardDto.parent" />
@@ -124,19 +142,38 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
       <base-icon-btn icon="mdi-close" color="default" @click="closeDialog()" />
     </div>
     <v-form ref="createForm" @submit.prevent="handleCreateCard()">
-      <div class="px-4 pb-2">
-        <base-field
-          :field="{
-            name: 'Name',
-            type: FieldTypes.TEXT,
-          } as Field"
-          v-model="createCardDto.data.name"
-          class="mb-4"
-        />
+      <div class="px-4 pb-4 d-flex flex-column ga-2">
+        <template v-if="titleField">
+          <base-field
+            :field="titleField"
+            v-model="createCardDto.data[titleField.slug]"
+            flex-fill
+          />
+        </template>
+        <template v-for="field in fields" :key="field.id">
+          <base-field
+            :field
+            v-model="createCardDto.data[field.slug]"
+            flex-fill
+            text-field
+            @update:model-value="
+              (v) =>
+                (createCardDto.data[field.slug] = normalizeFieldValue({
+                  v,
+                  field,
+                }))
+            "
+          />
+        </template>
       </div>
       <v-card-actions
         class="d-flex justify-start align-center py-0 px-4 border-t-thin"
       >
+        <list-stage-selector
+          v-if="list?.listStages.length"
+          v-model="createCardDto.listStage"
+          :listStages="list?.listStages ?? []"
+        />
         <v-spacer />
         <v-switch v-model="isCreatingMore" hide-details inset>
           <template #label>

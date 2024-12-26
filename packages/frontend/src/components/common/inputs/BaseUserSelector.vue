@@ -102,7 +102,7 @@ defineExpose({ userMenu });
     <template #activator="{ props: menuProps }">
       <v-autocomplete
         v-if="textField"
-        width="90"
+        :width="!fill ? 90 : undefined"
         v-bind="attrs"
         v-model="selectedUsers"
         :label="label ?? 'Select'"
@@ -177,6 +177,10 @@ defineExpose({ userMenu });
             size="small"
             color="surface-dark"
             class="text-none text-caption font-weight-regular"
+            :class="{
+              'flex-fill': fill,
+              'justify-start': fill,
+            }"
             @click.prevent
           >
             <template #prepend>

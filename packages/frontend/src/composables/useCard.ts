@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCardsService } from '@/services/useCardsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { FieldTypes, type Card, type Field } from '@tillywork/shared';
@@ -18,6 +17,18 @@ export const useCard = () => {
     field: Field;
     v: any;
   }) {
+    const cardCopy = ref(cloneDeep(card));
+    cardCopy.value.data[field.slug] = normalizeFieldValue({ v, field });
+
+    updateCard(cardCopy.value).catch(() => {
+      showSnackbar({
+        message: 'Something went wrong, please try again.',
+        color: 'error',
+      });
+    });
+  }
+
+  function normalizeFieldValue({ v, field }: { v: any; field: Field }) {
     let newValue: any;
     switch (field.type) {
       case FieldTypes.DROPDOWN:
@@ -42,22 +53,17 @@ export const useCard = () => {
           : undefined;
     }
 
-    const cardCopy = ref(cloneDeep(card));
-    cardCopy.value.data[field.slug] = Array.isArray(newValue)
+    newValue = Array.isArray(newValue)
       ? newValue.length && !!newValue[0]
         ? newValue
         : undefined
       : newValue;
 
-    updateCard(cardCopy.value).catch(() => {
-      showSnackbar({
-        message: 'Something went wrong, please try again.',
-        color: 'error',
-      });
-    });
+    return newValue;
   }
 
   return {
     updateFieldValue,
+    normalizeFieldValue,
   };
 };

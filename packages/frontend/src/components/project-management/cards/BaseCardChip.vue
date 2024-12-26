@@ -29,7 +29,9 @@ const { titleField } = useFields({
 <template>
   <v-card
     class="d-flex align-center text-caption pe-2"
-    :class="hideStage && 'ps-2'"
+    :class="{
+      'ps-2': hideStage || !cardCopy?.cardLists[0].listStageId,
+    }"
     :to="!disableLink ? `/card/${card.id}` : undefined"
     :max-width="maxWidth ?? 250"
     color="surface-variant"
@@ -45,7 +47,9 @@ const { titleField } = useFields({
           theme="icon"
           readonly
         />
-        {{ cardCopy.data[titleField.slug] }}
+        <span>
+          {{ cardCopy.data[titleField.slug] }}
+        </span>
       </template>
       <template v-else>
         <v-progress-circular

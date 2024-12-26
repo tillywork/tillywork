@@ -46,6 +46,7 @@ export enum FieldTypes {
   DATE = 'date',
   DATETIME = 'date_time',
   NUMBER = 'number',
+  PERCENTAGE = 'percentage',
   CHECKBOX = 'checkbox',
   EMAIL = 'email',
   URL = 'url',
@@ -91,6 +92,10 @@ export const FIELD_TYPE_OPTIONS = [
   {
     title: 'Number',
     value: FieldTypes.NUMBER,
+  },
+  {
+    title: 'Percentage',
+    value: FieldTypes.PERCENTAGE,
   },
   {
     title: 'Email',

@@ -21,13 +21,9 @@ const user = computed(() => users.find((user) => user.id === +item));
 
 <template>
   <template v-if="[FieldTypes.LABEL, FieldTypes.DROPDOWN].includes(field.type)">
-    <v-chip
-      :color="fieldItem?.color"
-      :rounded="field.type === FieldTypes.LABEL ? 'pill' : 'md'"
-      density="compact"
-      class="text-caption"
-      >{{ item }}</v-chip
-    >
+    <v-chip :color="fieldItem?.color" density="compact" class="text-caption">{{
+      item
+    }}</v-chip>
   </template>
   <template v-else-if="field.type === FieldTypes.USER && !!user">
     <base-avatar :photo="user.photo" :text="getUserFullName(user)" />

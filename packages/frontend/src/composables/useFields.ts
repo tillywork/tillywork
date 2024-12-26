@@ -56,8 +56,8 @@ export const useFields = ({
     cardTypeFields.value?.find((field) => field.isAssignee)
   );
 
-  const leadStageField = computed(() =>
-    cardTypeFields.value?.find((field) => field.slug === 'lead_stage')
+  const photoField = computed(() =>
+    cardTypeFields.value?.find((field) => field.isPhoto)
   );
 
   const cardTypeFieldsWithoutMainFields = computed(() =>
@@ -166,7 +166,7 @@ export const useFields = ({
     groupableFields,
     tableFields,
     filterableFields,
-    leadStageField,
+    photoField,
     refetch,
     sortFieldsByViewColumns,
     getDateFieldColor,

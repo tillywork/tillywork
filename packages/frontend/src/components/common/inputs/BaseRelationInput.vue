@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import type { Field } from '@/components/common/fields/types';
 import { useCardsService } from '@/services/useCardsService';
 import { useAuthStore } from '@/stores/auth';
 import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
 import { useFields } from '@/composables/useFields';
+import type { Field } from '@tillywork/shared';
 
 const model = defineModel();
 const props = defineProps<{
   field: Field;
   multiple?: boolean;
+  fill?: boolean;
   variant?:
     | 'outlined'
     | 'plain'
@@ -60,7 +61,7 @@ watch(debouncedKeyword, () => {
     autocomplete="off"
     chips
     :no-data-text="!searchEnabled ? 'Type to search..' : 'No results'"
-    width="160"
+    :width="!fill ? 160 : undefined"
   >
     <template #chip="{ item }">
       <base-card-chip :card="{ id: item.value }" disable-link hide-stage />

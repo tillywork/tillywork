@@ -12,12 +12,11 @@ const {
 }>();
 
 const emit = defineEmits(['update:modelValue']);
-
 const value = ref(modelValue);
 const debouncedValue = useDebounce(value, 300);
 const isFocused = ref(false);
 const inputRef = ref<HTMLInputElement | null>(null);
-const inputWidth = ref(fill ? '100%' : '30px'); // Initial width
+const inputWidth = ref(fill ? '100%' : '50px');
 
 watch(debouncedValue, (newValue) => {
   emit('update:modelValue', newValue);
@@ -26,7 +25,11 @@ watch(debouncedValue, (newValue) => {
 function updateValue(event: Event) {
   const input = event.target as HTMLInputElement;
   const numericValue = input.value.replace(/\D/g, ''); // Remove non-numeric characters
-  value.value = numericValue === '' ? undefined : Number(numericValue);
+  value.value =
+    numericValue === ''
+      ? undefined
+      : Math.min(Math.max(Number(numericValue), 0), 100);
+
   if (!fill) {
     adjustWidth();
   }
@@ -48,13 +51,14 @@ function adjustWidth() {
     tempSpan.style.font = window.getComputedStyle(inputRef.value).font;
     document.body.appendChild(tempSpan);
 
-    const inputValue = inputRef.value.value || inputRef.value.placeholder;
+    // Add extra space for the % symbol
+    const inputValue =
+      (inputRef.value.value || inputRef.value.placeholder) + '%';
     tempSpan.textContent = inputValue;
     const width = tempSpan.offsetWidth;
-
     document.body.removeChild(tempSpan);
 
-    inputWidth.value = `${Math.max(30, Math.min(300, width + 20))}px`; // Min 50px, max 300px
+    inputWidth.value = `${Math.max(50, Math.min(300, width + 20))}px`; // Min 50px, max 300px
   }
 }
 
@@ -72,19 +76,20 @@ onMounted(() => {
 
 <template>
   <v-card
-    class="base-number-input d-flex align-center"
+    class="base-percentage-input d-flex align-center px-3"
     :class="cardClasses"
     color="transparent"
-    :rounded
+    :rounded="rounded"
   >
     <v-tooltip activator="parent" location="top" v-if="!fill">
       {{ tooltip }}
     </v-tooltip>
+    <span>%</span>
     <input
       v-model="value"
       ref="inputRef"
       type="text"
-      class="text-caption pa-2 h-100"
+      class="text-caption pa-2 pe-0 h-100"
       :class="{
         'text-center': !fill,
       }"
@@ -99,14 +104,19 @@ onMounted(() => {
 </template>
 
 <style lang="scss">
-.base-number-input {
+.base-percentage-input {
+  .input-container {
+    position: relative;
+    width: 100%;
+  }
+
   input {
     border: none;
     outline: none;
   }
 
   input::placeholder {
-    color: #9e9e9e; /* Placeholder color */
+    color: #9e9e9e;
   }
 
   &.is-focused .v-card__overlay {

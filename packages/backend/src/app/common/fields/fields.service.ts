@@ -178,6 +178,9 @@ export class FieldsService {
             workspace: {
                 id: createFieldDto.workspaceId,
             },
+            dataCardType: {
+                id: createFieldDto.dataCardTypeId,
+            },
         });
 
         return this.fieldsRepository.save(field);

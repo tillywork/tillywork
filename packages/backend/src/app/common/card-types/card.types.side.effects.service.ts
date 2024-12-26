@@ -9,6 +9,8 @@ import { Repository } from "typeorm";
 @Injectable()
 export class CardTypesSideEffectsService {
     constructor(
+        @InjectRepository(CardType)
+        private cardTypesRepo: Repository<CardType>,
         private fieldsService: FieldsService,
         @InjectRepository(Workspace)
         private workspacesRepo: Repository<Workspace>
@@ -92,38 +94,48 @@ export class CardTypesSideEffectsService {
                 icon: "mdi-email",
             },
             {
+                name: "Job Title",
+                type: FieldTypes.TEXT,
+                slug: "job_title",
+                icon: "mdi-briefcase",
+            },
+            {
+                name: "Organization",
+                type: FieldTypes.CARD,
+                slug: "organization",
+                icon: "mdi-domain",
+                dataCardTypeName: "Organization",
+            },
+            {
                 name: "Lead Stage",
                 type: FieldTypes.DROPDOWN,
                 slug: "lead_stage",
                 icon: "mdi-circle-slice-8",
+                isPinned: true,
                 items: [
                     {
-                        item: "Lead",
-                        color: "default",
+                        item: "New Lead",
                     },
                     {
-                        item: "Qualified",
-                        color: "success",
+                        item: "Engaged",
                     },
                     {
-                        item: "Demo",
-                        color: "success",
+                        item: "Qualified Lead",
                     },
                     {
-                        item: "Proposal",
-                        color: "success",
+                        item: "Contacted",
                     },
                     {
-                        item: "Negotiations",
-                        color: "success",
+                        item: "Nurture",
                     },
                     {
-                        item: "Won",
-                        color: "success",
+                        item: "Customer",
                     },
                     {
-                        item: "Lost",
-                        color: "error",
+                        item: "Unqualified",
+                    },
+                    {
+                        item: "Bad timing",
                     },
                 ],
             },
@@ -144,8 +156,16 @@ export class CardTypesSideEffectsService {
                 name: "Name",
                 type: FieldTypes.TEXT,
                 slug: "name",
-                icon: "mdi-domain",
+                icon: "mdi-handshake",
                 isTitle: true,
+            },
+            {
+                name: "Owner",
+                type: FieldTypes.USER,
+                slug: "owner",
+                icon: "mdi-account",
+                isPinned: true,
+                isAssignee: true,
             },
             {
                 name: "Value",
@@ -153,6 +173,26 @@ export class CardTypesSideEffectsService {
                 slug: "value",
                 icon: "mdi-currency-usd",
                 isPinned: true,
+            },
+            {
+                name: "Expected Close Date",
+                type: FieldTypes.DATE,
+                slug: "expected_close_date",
+                icon: "mdi-draw",
+            },
+            {
+                name: "Closing Probability",
+                type: FieldTypes.PERCENTAGE,
+                slug: "closing_probability",
+                icon: "mdi-speedometer",
+            },
+            {
+                name: "Organization",
+                type: FieldTypes.CARD,
+                slug: "organization",
+                icon: "mdi-domain",
+                isPinned: true,
+                dataCardTypeName: "Organization",
             },
         ];
 
@@ -182,11 +222,25 @@ export class CardTypesSideEffectsService {
         }
 
         cardType.fields = await Promise.all(
-            defaultFields.map((field) => {
+            defaultFields.map(async (field) => {
+                let dataCardType;
+
+                if (field.dataCardTypeName) {
+                    dataCardType = await this.cardTypesRepo.findOne({
+                        where: {
+                            name: field.dataCardTypeName,
+                            workspace: {
+                                id: cardType.workspace.id,
+                            },
+                        },
+                    });
+                }
+
                 return this.fieldsService.create({
                     ...field,
                     workspaceId: cardType.workspace.id,
                     cardTypeId: cardType.id,
+                    dataCardTypeId: dataCardType?.id,
                 });
             })
         );
