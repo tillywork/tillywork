@@ -43,9 +43,6 @@ const appOptions: AppOption[] = [
 ];
 
 function handleSelectApp(app: AppOption) {
-  //change selected module in state store
-  //if no workspaces exist, begin onboarding for app
-  //redirect to correct place
   setSelectedModule(app.type);
 }
 

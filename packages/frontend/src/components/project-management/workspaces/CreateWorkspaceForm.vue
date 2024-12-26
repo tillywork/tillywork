@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { VForm } from 'vuetify/components';
-import { WorkspaceTypes, type Workspace } from './types';
 import { useAuthStore } from '@/stores/auth';
 import validationUtils from '@/utils/validation';
+import { WorkspaceTypes, type Workspace } from '@tillywork/shared';
 
 const props = defineProps<{
   loading?: boolean;
