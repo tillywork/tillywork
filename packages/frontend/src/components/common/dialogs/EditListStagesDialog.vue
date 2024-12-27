@@ -129,6 +129,9 @@ async function handleReorder() {
         <draggable
           tag="tbody"
           v-model="draggableListStages"
+          :delay="300"
+          delay-on-touch-only
+          :touch-start-threshold="5"
           item-key="id"
           @end="handleReorder"
         >
