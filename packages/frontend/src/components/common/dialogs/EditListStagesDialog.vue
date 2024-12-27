@@ -130,7 +130,7 @@ async function handleReorder() {
           tag="tbody"
           v-model="draggableListStages"
           :delay="300"
-          delay-on-touch-only
+          :delay-on-touch-only="true"
           :touch-start-threshold="5"
           item-key="id"
           @end="handleReorder"

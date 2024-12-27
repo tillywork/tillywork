@@ -189,7 +189,7 @@ function handleToggleColumn(field: Field) {
                 <draggable
                   v-model="enabledTableColumns"
                   :delay="300"
-                  delay-on-touch-only
+                  :delay-on-touch-only="true"
                   :touch-start-threshold="5"
                   item-key="id"
                   animation="100"
