@@ -204,6 +204,9 @@ watchEffect(() => {
         @end="onDragEnd"
         @add="onDragAdd"
         @update="onDragUpdate"
+        :delay="300"
+        delay-on-touch-only
+        :touch-start-threshold="5"
         item-key="id"
         animation="100"
         class="d-flex flex-column flex-0-0 ga-2 pa-2"

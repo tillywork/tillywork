@@ -289,6 +289,9 @@ watch(
           @end="onDragEnd"
           @add="onDragAdd"
           @update="onDragUpdate"
+          :delay="300"
+          delay-on-touch-only
+          :touch-start-threshold="5"
           :setData="setDragItem"
           item-key="id"
           animation="100"
