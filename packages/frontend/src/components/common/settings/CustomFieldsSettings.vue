@@ -19,6 +19,7 @@ import {
   type CreateFieldDto,
   FieldTypes,
   FIELD_TYPE_OPTIONS,
+  WorkspaceTypes,
 } from '@tillywork/shared';
 import { useCreatedBy } from '@/composables/useCreatedBy';
 
@@ -82,7 +83,7 @@ const { mutateAsync: deleteField } = deleteFieldMutation();
 const { useGetListsQuery } = useListsService();
 const { data: lists } = useGetListsQuery({
   workspaceId: workspace.value!.id,
-  throughSpace: true,
+  throughSpace: workspace.value?.type === WorkspaceTypes.PROJECT_MANAGEMENT,
 });
 
 const { useFindAllQuery } = useCardTypesService();
