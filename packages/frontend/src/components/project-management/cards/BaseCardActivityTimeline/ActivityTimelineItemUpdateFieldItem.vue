@@ -26,8 +26,10 @@ const user = computed(() => users.find((user) => user.id === +item));
     }}</v-chip>
   </template>
   <template v-else-if="field.type === FieldTypes.USER && !!user">
-    <base-avatar :photo="user.photo" :text="getUserFullName(user)" />
-    <span>{{ getUserFullName(user) }}</span>
+    <div class="d-inline-flex align-center ga-1">
+      <base-avatar :photo="user.photo" :text="getUserFullName(user)" />
+      <span>{{ getUserFullName(user) }}</span>
+    </div>
   </template>
   <template v-else-if="field.type === FieldTypes.CARD">
     <base-card-chip :card="{ id: +item }" density="compact" height="24" />

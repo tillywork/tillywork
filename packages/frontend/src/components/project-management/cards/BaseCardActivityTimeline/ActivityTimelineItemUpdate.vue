@@ -1,40 +1,43 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
-
 import { useUsersService } from '@/services/useUsersService';
-
 import {
   dayjs,
   FieldTypes,
   type Card,
   type CardActivity,
   type UpdateActivityContent,
+  type ListStage,
 } from '@tillywork/shared';
 import { useFieldsService } from '@/services/useFieldsService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
-
-import ActivityTimelineUpdateItems from './ActivityTimelineItemUpdateItems.vue';
+import ActivityTimelineItems from './ActivityTimelineItemUpdateItems.vue';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import { useListStagesService } from '@/services/useListStagesService';
 
-const { activity, card } = defineProps<{
+interface Props {
   activity: CardActivity;
   card: Card;
-}>();
+}
 
+const props = defineProps<Props>();
 const { user, project } = storeToRefs(useAuthStore());
-
 const { getUserFullName } = useUsersService();
 const { useFieldQuery } = useFieldsService();
 const { useProjectUsersQuery } = useProjectUsersService();
 const { useGetListStagesQuery } = useListStagesService();
 
-const change = computed(
-  () => (activity.content as UpdateActivityContent).changes[0]
+// Extract activity content and changes
+const activityContent = computed(
+  () => props.activity.content as UpdateActivityContent
 );
-const fieldId = computed(() => change.value.field?.id ?? 0);
-const fieldQueryEnabled = computed(() => !!change.value.field);
+const change = computed(() => activityContent.value.changes[0]);
 
+// Field-related computeds
+const fieldId = computed(() => change.value.field?.id ?? 0);
+const fieldQueryEnabled = computed(() => Boolean(change.value.field));
+
+// Queries
 const { data: field } = useFieldQuery({
   id: fieldId,
   enabled: fieldQueryEnabled,
@@ -46,16 +49,39 @@ const { data: users } = useProjectUsersQuery({
 });
 
 const { data: listStages } = useGetListStagesQuery({
-  listId: card.cardLists[0].listId,
+  listId: props.card.cardLists[0].listId,
 });
 
 const listStage = computed(() =>
   change.value.type === 'stage_updated'
-    ? listStages.value?.find(
-        (listStage) => listStage.id === change.value.newValue
-      )
+    ? listStages.value?.find((stage) => stage.id == change.value.newValue)
     : undefined
 );
+
+const isCurrentUser = computed(
+  () => user.value?.id === props.activity.createdBy.id
+);
+
+const displayName = computed(() =>
+  isCurrentUser.value ? 'You' : props.activity.createdBy.firstName
+);
+
+const itemType = computed(() => props.card.type.name.toLowerCase());
+
+const getActivityTypeDetails = (change: any) => {
+  if (change.type === 'updated') {
+    if (change.removedItems)
+      return { action: 'removed', items: change.removedItems, suffix: 'from' };
+    if (change.addedItems)
+      return { action: 'added', items: change.addedItems, suffix: 'to' };
+    if (change.newValue)
+      return { action: 'set', items: change.newValue, suffix: 'to' };
+    if (change.oldValue)
+      return { action: 'removed', items: change.oldValue, suffix: 'from' };
+    return { action: 'cleared', items: null, suffix: null };
+  }
+  return null;
+};
 </script>
 
 <template>
@@ -67,84 +93,65 @@ const listStage = computed(() =>
         class="text-xs"
       />
     </template>
-    <span class="d-flex align-start">
-      {{
-        user?.id === activity.createdBy.id
-          ? 'You'
-          : activity.createdBy.firstName
-      }}
-      <template v-if="change.type === 'updated'">
-        <template v-if="change.removedItems">
-          removed
-          <activity-timeline-items
-            v-if="field && users"
-            :field
-            :users
-            :items="change.removedItems"
-          />
-          from {{ field?.name }}
-        </template>
-        <template v-else-if="change.addedItems">
-          added
-          <activity-timeline-items
-            v-if="field && users"
-            :field
-            :users
-            :items="change.addedItems"
-          />
-          to {{ field?.name }}
-        </template>
-        <template v-else>
-          set
-          <strong class="mx-1">{{ field?.name.toLowerCase() }}</strong>
-          to
-          <strong>
-            <template
-              v-if="
-                field &&
-                [FieldTypes.DATE, FieldTypes.DATETIME].includes(field.type)
-              "
-            >
-              {{ dayjs(change.newValue).format('MMM DD') }}
+
+    <div class="d-flex flex-wrap align-center ga-1">
+      <span>{{ displayName }}</span>
+
+      <!-- Updated type activities -->
+      <template v-if="change.type === 'updated' && field">
+        <template v-if="field && users">
+          <span>{{ getActivityTypeDetails(change)?.action }}</span>
+
+          <template v-if="getActivityTypeDetails(change)?.action === 'set'">
+            <span>{{ field.name }}</span>
+
+            <template v-if="getActivityTypeDetails(change)?.suffix">
+              <span>{{ getActivityTypeDetails(change)?.suffix }}</span>
             </template>
-            <template
-              v-else-if="
-                field &&
-                [
-                  FieldTypes.DROPDOWN,
-                  FieldTypes.CARD,
-                  FieldTypes.USER,
-                  FieldTypes.LABEL,
-                ].includes(field.type)
-              "
-            >
-              <activity-timeline-update-items
-                v-if="field && users"
-                :field
-                :users
-                :items="change.newValue"
+
+            <template v-if="getActivityTypeDetails(change)?.items">
+              <activity-timeline-items
+                :field="field"
+                :users="users"
+                :items="getActivityTypeDetails(change)?.items"
               />
             </template>
-            <template v-else>{{ change.newValue }}</template>
-          </strong>
+          </template>
+          <template v-else>
+            <template v-if="getActivityTypeDetails(change)?.items">
+              <activity-timeline-items
+                :field="field"
+                :users="users"
+                :items="getActivityTypeDetails(change)?.items"
+              />
+            </template>
+
+            <template v-if="getActivityTypeDetails(change)?.suffix">
+              <span>{{ getActivityTypeDetails(change)?.suffix }}</span>
+            </template>
+            <span>{{ field.name }}</span>
+          </template>
         </template>
       </template>
+
+      <!-- Created type activities -->
       <template v-else-if="change.type === 'created'">
-        created this {{ card.type.name.toLowerCase() }}
+        <span>created this {{ itemType }}</span>
       </template>
+
+      <!-- Stage updated activities -->
       <template
         v-else-if="change.type === 'stage_updated' && listStages && listStage"
       >
-        moved this {{ card.type.name.toLowerCase() }} to &nbsp;
+        <span>moved this {{ itemType }} to</span>
         <list-stage-selector
           :model-value="listStage"
           :list-stages="[]"
           readonly
         />
       </template>
-      <span class="ms-2 text-grey">
-        {{ dayjs(activity.createdAt).fromNow() }}
-      </span>
-    </span>
+
+      <span class="text-grey">{{ dayjs(activity.createdAt).fromNow() }}</span>
+    </div>
   </v-timeline-item>
 </template>
