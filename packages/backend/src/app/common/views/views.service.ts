@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { View } from "./view.entity";
@@ -6,7 +6,8 @@ import { CreateViewDto } from "./dto/create.view.dto";
 import { UpdateViewDto } from "./dto/update.view.dto";
 import { ClsService } from "nestjs-cls";
 import { AccessControlService } from "../auth/services/access.control.service";
-import { PermissionLevel } from "@tillywork/shared";
+import { ListGroupOptions, PermissionLevel } from "@tillywork/shared";
+import { List } from "../lists/list.entity";
 
 @Injectable()
 export class ViewsService {
@@ -65,7 +66,26 @@ export class ViewsService {
             PermissionLevel.EDITOR
         );
 
-        const view = this.viewsRepository.create(createViewDto);
+        const list = await this.viewsRepository.manager
+            .getRepository(List)
+            .findOne({
+                where: {
+                    id: createViewDto.listId,
+                },
+                relations: ["listStages"],
+            });
+        Logger.debug({ list });
+
+        const view = this.viewsRepository.create({
+            options: {
+                groupBy: {
+                    type: list.listStages?.length
+                        ? ListGroupOptions.LIST_STAGE
+                        : ListGroupOptions.ALL,
+                },
+            },
+            ...createViewDto,
+        });
         return this.viewsRepository.save(view);
     }
 

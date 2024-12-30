@@ -4,7 +4,7 @@ import { ListStagesService } from "./list-stages/list.stages.service";
 import { DEFAULT_LIST_STAGES } from "./types";
 import { ViewsService } from "../views/views.service";
 import { ListStage } from "./list-stages/list.stage.entity";
-import { ListType, ViewTypes } from "@tillywork/shared";
+import { ListGroupOptions, ListType, ViewTypes } from "@tillywork/shared";
 
 @Injectable()
 export class ListSideEffectsService {
@@ -137,6 +137,13 @@ export class ListSideEffectsService {
             name: selectedViewType.name,
             listId: list.id,
             type: selectedViewType.type,
+            options: {
+                groupBy: {
+                    type: list.listStages?.length
+                        ? ListGroupOptions.LIST_STAGE
+                        : ListGroupOptions.ALL,
+                },
+            },
         });
 
         list.views = [defaultView];
