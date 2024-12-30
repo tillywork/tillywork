@@ -8,7 +8,6 @@ import {
     Put,
     UseGuards,
     Query,
-    Logger,
 } from "@nestjs/common";
 import { FieldsService, FindAllParams } from "./fields.service";
 import { Field } from "./field.entity";
@@ -44,7 +43,6 @@ export class FieldsController {
         @Body() createFieldDto: CreateFieldDto,
         @CurrentUser() user: User
     ): Promise<Field> {
-        Logger.debug({ createFieldDto });
         return this.fieldsService.create({
             ...createFieldDto,
             createdByType: "user",
@@ -57,7 +55,6 @@ export class FieldsController {
         @Param("id") id: number,
         @Body() updateFieldDto: UpdateFieldDto
     ): Promise<Field> {
-        Logger.debug({ updateFieldDto });
         return this.fieldsService.update(+id, updateFieldDto);
     }
 
