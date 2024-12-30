@@ -221,6 +221,8 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     } else if (Array.isArray(oldData[key])) {
                         change.removedItems = oldData[key];
                     }
+                } else if (!newData[key]) {
+                    change.oldValue = oldData[key];
                 }
 
                 return change;
@@ -292,7 +294,9 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
             where: {
                 slug: key,
                 workspace: {
-                    id: event.entity.workspace.id,
+                    id: event.entity.workspace?.id
+                        ? event.entity.workspace.id
+                        : event.entity.workspace,
                 },
                 cardType: {
                     id: event.entity.type.id,
@@ -305,7 +309,9 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                 where: {
                     slug: key,
                     workspace: {
-                        id: event.entity.workspace.id,
+                        id: event.entity.workspace?.id
+                            ? event.entity.workspace.id
+                            : event.entity.workspace,
                     },
                     cardType: {
                         id: IsNull(),

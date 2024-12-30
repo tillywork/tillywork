@@ -11,7 +11,7 @@ const { items } = defineProps<{
 </script>
 
 <template>
-  <div class="d-inline-flex ga-2 mx-2">
+  <div class="d-inline-flex flex-wrap align-center ga-2 px-1">
     <template v-for="item in items" :key="item">
       <activity-timeline-item-update-field-item
         v-if="field && users"
