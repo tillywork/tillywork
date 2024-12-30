@@ -149,6 +149,24 @@ export class CardTypesSideEffectsService {
                 icon: "mdi-domain",
                 isTitle: true,
             },
+            {
+                name: "Website",
+                type: FieldTypes.URL,
+                slug: "website",
+                icon: "mdi-web",
+            },
+            {
+                name: "Establishment Year",
+                type: FieldTypes.NUMBER,
+                slug: "establishment_year",
+                icon: "mdi-calendar-range",
+            },
+            {
+                name: "Annual Revenue",
+                type: FieldTypes.CURRENCY,
+                slug: "annual_revenue",
+                icon: "mdi-currency-usd",
+            },
         ];
 
         const defaultDealFields = [

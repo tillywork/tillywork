@@ -200,20 +200,19 @@ watch(
         </div>
       </div>
       <div class="pa-4 pb-0 text-body-2 font-weight-medium">
-        About this {{ cardCopy.type.name.toLowerCase() }}
+        <div class="d-flex align-center">
+          About this {{ cardCopy.type.name.toLowerCase() }}
+          <v-spacer />
+          <template v-if="listStages?.length">
+            <list-stage-selector
+              v-model="cardCopy.cardLists[0].listStage"
+              :listStages
+            />
+          </template>
+        </div>
         <v-divider class="mt-3" />
       </div>
       <v-card-text>
-        <div class="mb-4" v-if="listStages?.length">
-          <p class="field-label text-caption font-weight-light mb-1">
-            {{ cardCopy.type.name }} Stage
-          </p>
-          <list-stage-selector
-            v-model="cardCopy.cardLists[0].listStage"
-            :listStages
-            size="default"
-          />
-        </div>
         <template v-if="fields">
           <template v-for="field in fields" :key="field.id">
             <div class="my-4">
@@ -227,6 +226,7 @@ watch(
                     (v: any) => updateFieldValue({ card, field, v })
                   "
                 flex-fill
+                text-field
               />
             </div>
           </template>

@@ -10,6 +10,10 @@ const validationUtils = {
     },
     currency: (v: string) =>
       !v || /^\d+(\.\d{1,2})?$/.test(v) || 'Invalid currency format',
+    url: (v: string) =>
+      !v ||
+      /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-./?%&=]*)?$/i.test(v) ||
+      'Invalid URL format',
   },
 };
 

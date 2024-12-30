@@ -153,6 +153,16 @@ const { data: users } = useProjectUsersQuery({
       :rules="[validationUtils.rules.email]"
     />
   </template>
+  <template v-else-if="field.type === FieldTypes.URL">
+    <v-text-field
+      v-model="value"
+      hide-details
+      :rounded
+      :placeholder="field.name"
+      :prepend-inner-icon="field.icon"
+      :rules="[validationUtils.rules.url]"
+    />
+  </template>
   <template v-else-if="field.type === FieldTypes.CURRENCY">
     <base-currency-input
       v-model="value"
