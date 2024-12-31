@@ -5,7 +5,12 @@ import { useAuthStore } from '@/stores/auth';
 
 import { useUsers } from '@/composables/useUsers';
 
-import { type SortOption, type CardActivity } from '@tillywork/shared';
+import {
+  type SortOption,
+  type CardActivity,
+  type TaskActivityContent,
+  type Card,
+} from '@tillywork/shared';
 import type { ColumnDef } from '@tanstack/vue-table';
 
 import BaseTable from '../../common/tables/BaseTable/BaseTable.vue';
@@ -27,7 +32,7 @@ const sortBy = ref<SortOption>({
   order: 'DESC',
 });
 
-const { data: activities } = useFindAllTasksQuery({
+const { data: tasks } = useFindAllTasksQuery({
   workspaceId: workspace.value!.id,
   assignee,
   dueDate,
@@ -58,6 +63,32 @@ const columns: ColumnDef<CardActivity, any>[] = [
     minSize: 100,
   },
 ];
+
+function getPersonName(card: Card): string {
+  let name = '';
+
+  if (card.data.first_name) {
+    name = card.data.first_name;
+
+    if (card.data.last_name) name += ` ${card.data.last_name}`;
+  } else if (card.data.last_name) {
+    name = card.data.last_name;
+  }
+
+  return name;
+}
+
+function getTaskAssociatedCard(task: CardActivity) {
+  const card = task.card;
+
+  if (card.data.title) {
+    return card.data.title;
+  } else if (card.data.name) {
+    return card.data.name;
+  } else if (card.data.first_name || card.data.last_name || card.data.email) {
+    return getPersonName(card);
+  }
+}
 </script>
 
 <template>
@@ -74,8 +105,8 @@ const columns: ColumnDef<CardActivity, any>[] = [
         <assignee-filter-chip v-model="assignee" />
         <due-date-filter-chip v-model="dueDate" />
       </div>
-      <template v-if="activities">
-        <base-table :data="activities" :columns enable-column-resizing>
+      <template v-if="tasks">
+        <base-table :data="tasks" :columns enable-column-resizing>
           <template #title="{ row }">
             <v-card class="d-flex align-center ga-2">
               <v-checkbox
@@ -98,8 +129,7 @@ const columns: ColumnDef<CardActivity, any>[] = [
               :to="`/card/${row.original.card.id}`"
               class="text-primary"
             >
-              {{ row.original.card.data.first_name }}
-              {{ row.original.card.data.last_name }}
+              {{ getTaskAssociatedCard(row.original) }}
             </router-link>
           </template>
           <template #assignee="{ row }">
