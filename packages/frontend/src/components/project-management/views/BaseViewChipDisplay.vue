@@ -23,6 +23,7 @@ const { useUpdateViewMutation } = useViewsService();
 const { mutateAsync: updateView } = useUpdateViewMutation();
 
 const cardTypeId = computed(() => list.defaultCardType.id);
+const hasChildren = computed(() => list.defaultCardType.hasChildren);
 
 const { titleField, tableFields, sortFieldsByViewColumns } = useFields({
   cardTypeId,
@@ -135,7 +136,7 @@ function handleToggleColumn(field: Field) {
             </template>
             <v-list-item-title> Show completed </v-list-item-title>
           </v-list-item>
-          <v-list-item @click="handleToggleChildren">
+          <v-list-item @click="handleToggleChildren" v-if="hasChildren">
             <template #append>
               <v-switch
                 :model-value="!view.options.hideChildren"

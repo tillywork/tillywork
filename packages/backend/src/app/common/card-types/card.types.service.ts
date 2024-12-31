@@ -24,6 +24,7 @@ type DefaultWorkspaceCardType = {
     name: string;
     layout?: CardTypeLayout;
     dependsOn?: string[];
+    hasChildren?: boolean;
 };
 
 @Injectable()
@@ -177,15 +178,18 @@ export class CardTypesService {
                     name: "Contact",
                     layout: CardTypeLayout.PERSON,
                     dependsOn: ["Organization"],
+                    hasChildren: false,
                 });
                 defaultTypes.push({
                     name: "Organization",
                     layout: CardTypeLayout.ORGANIZATION,
+                    hasChildren: false,
                 });
                 defaultTypes.push({
                     name: "Deal",
                     layout: CardTypeLayout.DEAL,
                     dependsOn: ["Organization"],
+                    hasChildren: false,
                 });
                 break;
             case WorkspaceTypes.AGILE_PROJECTS:
@@ -224,6 +228,7 @@ export class CardTypesService {
             const cardType = await this.create({
                 name: type.name,
                 layout: type.layout,
+                hasChildren: type.hasChildren,
                 createdByType: "system",
                 workspaceId: workspace.id,
                 workspace,

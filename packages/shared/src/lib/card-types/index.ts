@@ -9,6 +9,7 @@ export type CardType = {
   id: number;
   name: string;
   layout: CardTypeLayout;
+  hasChildren: boolean;
   workspace: Workspace;
   fields: Field[];
   createdByType: 'system' | 'user';
@@ -20,6 +21,7 @@ export type CardType = {
 export type CreateCardTypeDto = {
   name: string;
   workspaceId: number;
+  hasChildren?: boolean;
 };
 
 export enum CardTypeLayout {

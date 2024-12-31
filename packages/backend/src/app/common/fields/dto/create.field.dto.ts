@@ -9,7 +9,7 @@ import {
     ValidateNested,
 } from "class-validator";
 import { User } from "../../users/user.entity";
-import { FieldTypes } from "@tillywork/shared";
+import { FieldItem, FieldTypes } from "@tillywork/shared";
 import { Type } from "class-transformer";
 
 export class CreateFieldDto {
@@ -50,7 +50,7 @@ export class CreateFieldDto {
     @IsOptional()
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => FieldItem)
+    @Type(() => FieldItemDto)
     items?: FieldItem[];
 
     @IsOptional()
@@ -60,7 +60,7 @@ export class CreateFieldDto {
     createdBy?: User;
 }
 
-class FieldItem {
+class FieldItemDto {
     @IsString()
     @IsNotEmpty()
     item: string;

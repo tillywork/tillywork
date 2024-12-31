@@ -36,7 +36,11 @@ export class CardType {
     })
     fields: Relation<Field[]>;
 
-    //TODO add hasSubCards
+    @Column({
+        type: "boolean",
+        default: true,
+    })
+    hasChildren: boolean;
 
     @Column({
         type: "enum",

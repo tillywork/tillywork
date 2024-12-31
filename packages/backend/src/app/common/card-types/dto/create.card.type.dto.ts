@@ -1,4 +1,5 @@
 import {
+    IsBoolean,
     IsEnum,
     IsInstance,
     IsNotEmpty,
@@ -22,6 +23,10 @@ export class CreateCardTypeDto {
     @IsOptional()
     @IsEnum(CardTypeLayout)
     layout?: CardTypeLayout;
+
+    @IsOptional()
+    @IsBoolean()
+    hasChildren?: boolean;
 
     @IsOptional()
     @IsInstance(Workspace)

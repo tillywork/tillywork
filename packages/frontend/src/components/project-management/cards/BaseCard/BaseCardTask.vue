@@ -84,6 +84,8 @@ const {
   getDateFieldColor,
 } = useFields({ cardTypeId, listId });
 
+const hasChildren = computed(() => props.card.type.hasChildren);
+
 const cardTitle = ref('');
 const debouncedTitle = useDebounce(cardTitle, 2000);
 
@@ -320,7 +322,7 @@ function openDescriptionFileDialog() {
       <div
         class="base-card-content-wrapper pa-md-12 pa-6 flex-fill align-start"
       >
-        <div class="base-card-content mx-auto mt-6">
+        <div class="base-card-content mx-auto">
           <div class="d-flex align-start">
             <template v-if="titleField">
               <base-editor-input
@@ -393,9 +395,13 @@ function openDescriptionFileDialog() {
           </div>
 
           <!-- Children -->
-          <div class="text-body-3 user-select-none mt-4" v-if="titleField">
+          <div
+            class="text-body-3 user-select-none mt-4"
+            v-if="hasChildren && titleField"
+          >
             <template v-if="!cardCopy.children.length">
               <v-btn
+                v-if="list"
                 class="text-none"
                 size="small"
                 prepend-icon="mdi-plus"
@@ -406,6 +412,7 @@ function openDescriptionFileDialog() {
                     data: {
                       type: cardCopy.type,
                       parent: cardCopy,
+                      list,
                     },
                   })
                 "
@@ -433,6 +440,7 @@ function openDescriptionFileDialog() {
               <base-card-children-progress :card="cardCopy" class="ms-2" />
               <v-spacer />
               <base-icon-btn
+                v-if="list"
                 icon="mdi-plus"
                 density="comfortable"
                 @click.stop="
@@ -441,6 +449,7 @@ function openDescriptionFileDialog() {
                     data: {
                       type: cardCopy.type,
                       parent: cardCopy,
+                      list,
                     },
                   })
                 "
@@ -469,18 +478,6 @@ function openDescriptionFileDialog() {
                     />
                     {{ child.data[titleField.slug] }}
                   </v-list-item-title>
-
-                  <template #append>
-                    <div class="d-flex ga-2 align-center">
-                      <!-- Users -->
-                      <base-user-selector
-                        v-model="child.users"
-                        :users="users ?? []"
-                        size="x-small"
-                        @update:model-value="(v: User[]) => updateCardAssignees(child, v)"
-                      />
-                    </div>
-                  </template>
                 </v-list-item>
               </v-list>
             </template>

@@ -62,6 +62,11 @@ function openRemoveCardTypeDialog(cardType: CardType) {
         accessorKey: 'name',
       },
       {
+        id: 'hasChildren',
+        header: 'Has Children',
+        accessorKey: 'hasChildren',
+      },
+      {
         id: 'createdBy',
         header: 'Created By',
         accessorKey: 'createdBy',
@@ -112,6 +117,10 @@ function openRemoveCardTypeDialog(cardType: CardType) {
           (default)
         </span>
       </span>
+    </template>
+
+    <template #hasChildren="{ row }">
+      <v-icon :icon="row.original.hasChildren ? 'mdi-check' : 'mdi-close'" />
     </template>
 
     <!-- ~ Created By -->
