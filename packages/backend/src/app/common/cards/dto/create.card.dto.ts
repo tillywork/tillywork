@@ -5,8 +5,8 @@ import {
     IsOptional,
     ValidateNested,
 } from "class-validator";
-import { User } from "../../users/user.entity";
 import { Type } from "class-transformer";
+import { ListStage } from "../../lists/list-stages/list.stage.entity";
 
 class CardData {
     title?: string;
@@ -27,7 +27,11 @@ export class CreateCardDto {
 
     @IsOptional()
     @IsNumber()
-    listStageId: number;
+    listStageId?: number;
+
+    @IsOptional()
+    @Type(() => ListStage)
+    listStage?: ListStage;
 
     @IsNotEmpty()
     type: number;
@@ -35,8 +39,11 @@ export class CreateCardDto {
     @IsNotEmpty()
     workspaceId: number;
 
-    users?: User[];
+    @IsOptional()
+    @IsNumber()
     createdBy: number;
 
+    @IsOptional()
+    @IsNumber()
     parentId?: number;
 }

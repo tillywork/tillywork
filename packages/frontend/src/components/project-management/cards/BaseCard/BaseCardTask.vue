@@ -22,6 +22,7 @@ import urlUtils from '@/utils/url';
 import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
 import BaseField from '../../../common/fields/BaseField.vue';
+import BaseCardToolbar from './BaseCardToolbar.vue';
 import {
   type CardType,
   ActivityType,
@@ -30,6 +31,7 @@ import {
   type ListStage,
   type User,
 } from '@tillywork/shared';
+import { useListsService } from '@/services/useListsService';
 
 const props = defineProps<{
   card: Card;
@@ -55,6 +57,7 @@ const cardsService = useCardsService();
 const cardActivitiesService = useCardActivitiesService();
 const projectUsersService = useProjectUsersService();
 const listStagesService = useListStagesService();
+const { useGetListQuery } = useListsService();
 
 const { updateFieldValue } = useCard();
 
@@ -66,9 +69,11 @@ const usersQuery = projectUsersService.useProjectUsersQuery({
 });
 
 const listId = computed(() => props.card.cardLists[0].listId);
-const listStagesQuery = listStagesService.useGetListStagesQuery({
+const { data: listStages } = listStagesService.useGetListStagesQuery({
   listId,
 });
+
+const { data: list } = useGetListQuery(listId);
 
 const cardTypeId = computed(() => props.card.type.id);
 const {
@@ -295,250 +300,254 @@ function openDescriptionFileDialog() {
 </script>
 
 <template>
-  <v-card
-    v-if="cardCopy"
-    :loading="isCardLoading"
-    class="d-flex flex-sm-row flex-column"
-    min-height="100vh"
-  >
-    <template #loader="{ isActive }">
-      <v-progress-linear
-        indeterminate
-        color="primary"
-        height="2"
-        :active="isActive"
-        absolute
-        location="top"
-      />
-    </template>
-    <div class="base-card-content-wrapper pa-md-12 pa-6 flex-fill align-start">
-      <div class="base-card-content mx-auto mt-6">
-        <div class="d-flex align-start">
-          <template v-if="titleField">
-            <base-editor-input
-              v-model="cardTitle"
-              placeholder="Task title"
-              :heading="2"
-              single-line
-              class="flex-1-1-100"
-              editable
-              disable-commands
-            />
-          </template>
-          <template v-else>
-            <v-skeleton-loader type="heading" width="100%"></v-skeleton-loader>
-          </template>
-          <v-spacer />
-          <div class="d-flex align-center ga-2 mt-2">
-            <base-icon-btn
-              icon="mdi-dock-right"
-              density="compact"
-              size="default"
-              @click="stateStore.toggleInfoDrawer"
-              v-tooltip="leaderKey + ' + I'"
-            />
-            <v-btn
-              v-if="props.showCloseButton"
-              variant="text"
-              icon="mdi-close"
-              density="comfortable"
-              color="default"
-              @click="emit('click:close')"
-            />
-          </div>
-        </div>
-
-        <!-- Parent -->
-        <div
-          v-if="cardCopy.parent"
-          class="d-flex ga-1 align-center text-caption"
-        >
-          Sub-{{ lowerFirst(cardCopy.type.name) }} of
-          <base-card-chip :card="cardCopy.parent" class="ms-1" />
-        </div>
-
-        <div class="mt-8">
-          <template v-if="descriptionField">
-            <base-editor-input
-              v-model:json="cardDescription"
-              ref="descriptionInput"
-              placeholder="Enter description.. (/ for commands)"
-              editable
-            />
-          </template>
-          <template v-else>
-            <v-skeleton-loader
-              type="paragraph"
-              width="100%"
-            ></v-skeleton-loader>
-          </template>
-        </div>
-        <div class="mt-8">
-          <base-icon-btn
-            icon="mdi-paperclip"
-            rounded="circle"
-            @click="openDescriptionFileDialog"
-          />
-        </div>
-
-        <!-- Children -->
-        <div class="text-body-3 user-select-none mt-4" v-if="titleField">
-          <template v-if="!cardCopy.children.length">
-            <v-btn
-              class="text-none"
-              size="small"
-              prepend-icon="mdi-plus"
-              color="default"
-              @click="
-                dialog.openDialog({
-                  dialog: DIALOGS.CREATE_CARD,
-                  data: {
-                    type: cardCopy.type,
-                    parent: cardCopy,
-                  },
-                })
-              "
-            >
-              Add sub {{ lowerFirst(cardCopy.type.name) + 's' }}
-            </v-btn>
-          </template>
-          <div
-            class="cursor-pointer d-flex align-center pb-1"
-            @click="stateStore.toggleChildCards"
-            v-else
-          >
-            <v-icon
-              :icon="
-                areChildCardsExpanded
-                  ? 'mdi-triangle-small-up'
-                  : 'mdi-triangle-small-down'
-              "
-              size="22"
-              style="margin-top: -2px"
-            />
-            <span class="ms-1"
-              >Sub {{ lowerFirst(cardCopy.type.name) + 's' }}</span
-            >
-            <base-card-children-progress :card="cardCopy" class="ms-2" />
+  <template v-if="cardCopy">
+    <base-card-toolbar v-model="cardCopy" :list />
+    <v-card
+      :loading="isCardLoading"
+      class="d-flex flex-sm-row flex-column"
+      min-height="100vh"
+    >
+      <template #loader="{ isActive }">
+        <v-progress-linear
+          indeterminate
+          color="primary"
+          height="2"
+          :active="isActive"
+          absolute
+          location="top"
+        />
+      </template>
+      <div
+        class="base-card-content-wrapper pa-md-12 pa-6 flex-fill align-start"
+      >
+        <div class="base-card-content mx-auto mt-6">
+          <div class="d-flex align-start">
+            <template v-if="titleField">
+              <base-editor-input
+                v-model="cardTitle"
+                placeholder="Task title"
+                :heading="2"
+                single-line
+                class="flex-1-1-100"
+                editable
+                disable-commands
+              />
+            </template>
+            <template v-else>
+              <v-skeleton-loader
+                type="heading"
+                width="100%"
+              ></v-skeleton-loader>
+            </template>
             <v-spacer />
+            <div class="d-flex align-center ga-2 mt-2">
+              <base-icon-btn
+                icon="mdi-dock-right"
+                density="compact"
+                size="default"
+                @click="stateStore.toggleInfoDrawer"
+                v-tooltip="leaderKey + ' + I'"
+              />
+              <v-btn
+                v-if="props.showCloseButton"
+                variant="text"
+                icon="mdi-close"
+                density="comfortable"
+                color="default"
+                @click="emit('click:close')"
+              />
+            </div>
+          </div>
+
+          <!-- Parent -->
+          <div
+            v-if="cardCopy.parent"
+            class="d-flex ga-1 align-center text-caption"
+          >
+            Sub-{{ lowerFirst(cardCopy.type.name) }} of
+            <base-card-chip :card="cardCopy.parent" class="ms-1" />
+          </div>
+
+          <div class="mt-8">
+            <template v-if="descriptionField">
+              <base-editor-input
+                v-model:json="cardDescription"
+                ref="descriptionInput"
+                placeholder="Enter description.. (/ for commands)"
+                editable
+              />
+            </template>
+            <template v-else>
+              <v-skeleton-loader
+                type="paragraph"
+                width="100%"
+              ></v-skeleton-loader>
+            </template>
+          </div>
+          <div class="mt-8">
             <base-icon-btn
-              icon="mdi-plus"
-              density="comfortable"
-              @click.stop="
-                dialog.openDialog({
-                  dialog: DIALOGS.CREATE_CARD,
-                  data: {
-                    type: cardCopy.type,
-                    parent: cardCopy,
-                  },
-                })
-              "
+              icon="mdi-paperclip"
+              rounded="circle"
+              @click="openDescriptionFileDialog"
             />
           </div>
 
-          <template v-if="areChildCardsExpanded">
-            <v-divider v-if="cardCopy.children.length > 0" />
-
-            <v-list class="user-select-none" :lines="false" nav>
-              <v-list-item
-                v-for="child in cardCopy.children"
-                :key="child.id"
-                :to="'/card/' + child.id"
+          <!-- Children -->
+          <div class="text-body-3 user-select-none mt-4" v-if="titleField">
+            <template v-if="!cardCopy.children.length">
+              <v-btn
+                class="text-none"
+                size="small"
+                prepend-icon="mdi-plus"
+                color="default"
+                @click="
+                  dialog.openDialog({
+                    dialog: DIALOGS.CREATE_CARD,
+                    data: {
+                      type: cardCopy.type,
+                      parent: cardCopy,
+                    },
+                  })
+                "
               >
-                <!-- Title -->
-                <v-list-item-title>
-                  <list-stage-selector
-                    v-model="child.cardLists[0].listStage"
-                    :listStages="listStagesQuery.data.value ?? []"
-                    size="default"
-                    @update:model-value="
+                Add sub {{ lowerFirst(cardCopy.type.name) + 's' }}
+              </v-btn>
+            </template>
+            <div
+              class="cursor-pointer d-flex align-center pb-1"
+              @click="stateStore.toggleChildCards"
+              v-else
+            >
+              <v-icon
+                :icon="
+                  areChildCardsExpanded
+                    ? 'mdi-triangle-small-up'
+                    : 'mdi-triangle-small-down'
+                "
+                size="22"
+                style="margin-top: -2px"
+              />
+              <span class="ms-1"
+                >Sub {{ lowerFirst(cardCopy.type.name) + 's' }}</span
+              >
+              <base-card-children-progress :card="cardCopy" class="ms-2" />
+              <v-spacer />
+              <base-icon-btn
+                icon="mdi-plus"
+                density="comfortable"
+                @click.stop="
+                  dialog.openDialog({
+                    dialog: DIALOGS.CREATE_CARD,
+                    data: {
+                      type: cardCopy.type,
+                      parent: cardCopy,
+                    },
+                  })
+                "
+              />
+            </div>
+
+            <template v-if="areChildCardsExpanded">
+              <v-divider v-if="cardCopy.children.length > 0" />
+
+              <v-list class="user-select-none" :lines="false" nav>
+                <v-list-item
+                  v-for="child in cardCopy.children"
+                  :key="child.id"
+                  :to="'/card/' + child.id"
+                >
+                  <!-- Title -->
+                  <v-list-item-title>
+                    <list-stage-selector
+                      v-model="child.cardLists[0].listStage"
+                      :listStages="listStages ?? []"
+                      size="default"
+                      @update:model-value="
                       (listStage: ListStage) => updateCardListStage(child, listStage)
                     "
-                    theme="icon"
-                  />
-                  {{ child.data[titleField.slug] }}
-                </v-list-item-title>
-
-                <template #append>
-                  <div class="d-flex ga-2 align-center">
-                    <!-- Users -->
-                    <base-user-selector
-                      v-model="child.users"
-                      :users="users ?? []"
-                      size="x-small"
-                      @update:model-value="(v: User[]) => updateCardAssignees(child, v)"
+                      theme="icon"
                     />
-                  </div>
-                </template>
-              </v-list-item>
-            </v-list>
-          </template>
+                    {{ child.data[titleField.slug] }}
+                  </v-list-item-title>
+
+                  <template #append>
+                    <div class="d-flex ga-2 align-center">
+                      <!-- Users -->
+                      <base-user-selector
+                        v-model="child.users"
+                        :users="users ?? []"
+                        size="x-small"
+                        @update:model-value="(v: User[]) => updateCardAssignees(child, v)"
+                      />
+                    </div>
+                  </template>
+                </v-list-item>
+              </v-list>
+            </template>
+          </div>
+
+          <v-divider class="my-8" />
+
+          <v-card>
+            <v-card-subtitle class="text-body-3 ps-1">Activity</v-card-subtitle>
+            <v-card-text class="pa-0">
+              <activity-timeline :card @comment="createComment" />
+            </v-card-text>
+          </v-card>
         </div>
-
-        <v-divider class="my-8" />
-
-        <v-card>
-          <v-card-subtitle class="text-body-3 ps-1">Activity</v-card-subtitle>
-          <v-card-text class="pa-0">
-            <activity-timeline :card @comment="createComment" />
-          </v-card-text>
-        </v-card>
       </div>
-    </div>
-    <v-navigation-drawer
-      v-model="isInfoDrawerOpen"
-      width="350"
-      location="end"
-      color="surface"
-      :key="cardCopy.id"
-    >
-      <v-card color="transparent">
-        <div class="pa-4 d-flex align-center">
-          Properties
-          <v-spacer />
-          <base-icon-btn
-            @click="openCustomFieldsSettings"
-            icon="mdi-pencil"
-            v-tooltip="'Edit fields'"
-          />
-        </div>
-        <v-card-text>
-          <div
-            class="d-flex align-center mb-4"
-            v-if="listStagesQuery.data.value?.length"
-          >
-            <p class="field-label text-caption">Stage</p>
-            <list-stage-selector
-              v-model="cardListStage"
-              :listStages="listStagesQuery.data.value ?? []"
-              size="default"
-              @update:model-value="
-                (listStage: ListStage) => updateCardListStage(cardCopy, listStage)
-              "
+      <v-navigation-drawer
+        v-model="isInfoDrawerOpen"
+        width="350"
+        location="end"
+        color="surface"
+        :key="cardCopy.id"
+      >
+        <v-card color="transparent">
+          <div class="pa-4 d-flex align-center">
+            Properties
+            <v-spacer />
+            <base-icon-btn
+              @click="openCustomFieldsSettings"
+              icon="mdi-pencil"
+              v-tooltip="'Edit fields'"
             />
           </div>
-          <template v-if="fields">
-            <template v-for="field in fields" :key="field.id">
-              <div class="d-flex align-center my-4">
-                <p class="field-label text-caption me-1">
-                  {{ field.name }}
-                </p>
-                <base-field
-                  :field="field"
-                  :color="getDateFieldColor(cardCopy, field)"
-                  v-model="cardCopy.data[field.slug]"
-                  @update:model-value="
+          <v-card-text>
+            <div class="d-flex align-center mb-4" v-if="listStages?.length">
+              <p class="field-label text-caption">Stage</p>
+              <list-stage-selector
+                v-model="cardListStage"
+                :listStages="listStages ?? []"
+                size="default"
+                @update:model-value="
+                (listStage: ListStage) => updateCardListStage(cardCopy, listStage)
+              "
+              />
+            </div>
+            <template v-if="fields">
+              <template v-for="field in fields" :key="field.id">
+                <div class="d-flex align-center my-4">
+                  <p class="field-label text-caption me-1">
+                    {{ field.name }}
+                  </p>
+                  <base-field
+                    :field="field"
+                    :color="getDateFieldColor(cardCopy, field)"
+                    v-model="cardCopy.data[field.slug]"
+                    @update:model-value="
                     (v: any) => updateFieldValue({ card: cardCopy, field, v })
                   "
-                  flex-fill
-                />
-              </div>
+                    flex-fill
+                  />
+                </div>
+              </template>
             </template>
-          </template>
-        </v-card-text>
-      </v-card>
-    </v-navigation-drawer>
-  </v-card>
+          </v-card-text>
+        </v-card>
+      </v-navigation-drawer>
+    </v-card>
+  </template>
 </template>
 
 <style lang="scss">

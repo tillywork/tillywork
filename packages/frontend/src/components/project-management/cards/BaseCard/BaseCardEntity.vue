@@ -2,6 +2,11 @@
 import { cloneDeep } from 'lodash';
 
 import { useStateStore } from '@/stores/state';
+import { useAuthStore } from '@/stores/auth';
+import { useSnackbarStore } from '@/stores/snackbar';
+
+import { useListStagesService } from '@/services/useListStagesService';
+import { useCardsService } from '@/services/useCardsService';
 
 import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
@@ -16,13 +21,9 @@ import {
 } from '@tillywork/shared';
 
 import BaseField from '@/components/common/fields/BaseField.vue';
-import BaseCardStageBar from '../BaseCardStageBar.vue';
 import ActivityInput from '@/components/common/inputs/CrmActivityInput/ActivityInput.vue';
 import ActivityTimeline from '../BaseCardActivityTimeline/ActivityTimeline.vue';
-import { useAuthStore } from '@/stores/auth';
-import { useListStagesService } from '@/services/useListStagesService';
-import { useCardsService } from '@/services/useCardsService';
-import { useSnackbarStore } from '@/stores/snackbar';
+import BaseCardToolbar from './BaseCardToolbar.vue';
 
 const { card } = defineProps<{
   card: Card;
@@ -122,133 +123,108 @@ watch(
 </script>
 
 <template>
-  <v-toolbar color="surface" class="px-2 border-b-thin" density="compact">
-    <v-btn
+  <template v-if="cardCopy">
+    <base-card-toolbar
       v-if="list"
-      class="text-caption me-4"
-      density="comfortable"
-      color="primary"
-      :to="`/crm/${list.slug}`"
-    >
-      <template #prepend>
-        <v-icon start icon="mdi-chevron-left" />
-      </template>
-      <v-icon :icon="list.icon" :color="list.iconColor" start />
-      {{ list.name }}
-    </v-btn>
-    <v-btn
-      class="text-caption me-2"
-      density="comfortable"
-      color="primary"
-      variant="tonal"
-    >
-      <template #append>
-        <v-icon icon="mdi-dots-vertical" />
-      </template>
-      Actions
-    </v-btn>
-    <div v-if="list?.type === ListType.DEALS && listStages" class="px-6">
-      <base-card-stage-bar
-        v-model="cardCopy.cardLists[0].listStage"
-        :listStages
-      />
-    </div>
-  </v-toolbar>
-  <v-card
-    v-if="cardCopy"
-    class="d-flex flex-sm-row flex-column"
-    min-height="calc(100vh - 49px)"
-    max-height="calc(100vh - 49px)"
-  >
+      v-model="cardCopy"
+      :list
+      :list-stages="listStages"
+    />
     <v-card
-      width="350"
-      min-width="350"
-      color="surface"
-      :key="cardCopy.id"
-      class="border-e-thin"
-      rounded="0"
+      class="d-flex flex-sm-row flex-column"
+      min-height="calc(100vh - 49px)"
+      max-height="calc(100vh - 49px)"
     >
-      <div class="pa-4 d-flex align-center">
-        <base-avatar
-          :photo="photoField ? cardCopy.data[photoField.slug] : undefined"
-          :text="getEntityName()"
-          size="64"
-          class="text-body-2 me-4"
-        />
-        <div>
-          <p class="text-body-1">
-            {{ getEntityName() }}
-          </p>
-          <p class="text-caption">
-            <template
-              v-if="
-                cardCopy.type.layout === CardTypeLayout.PERSON &&
-                cardCopy.data.email
-              "
-            >
-              {{ cardCopy.data.email }}
-            </template>
-            <template
-              v-else-if="
-                cardCopy.type.layout === CardTypeLayout.ORGANIZATION &&
-                cardCopy.data.website
-              "
-            >
-              {{ cardCopy.data.website }}
-            </template>
-          </p>
+      <v-card
+        width="350"
+        min-width="350"
+        color="surface"
+        :key="cardCopy.id"
+        class="border-e-thin"
+        rounded="0"
+      >
+        <div class="pa-4 d-flex align-center">
+          <base-avatar
+            :photo="photoField ? cardCopy.data[photoField.slug] : undefined"
+            :text="getEntityName()"
+            size="64"
+            class="text-body-2 me-4"
+          />
+          <div>
+            <p class="text-body-1">
+              {{ getEntityName() }}
+            </p>
+            <p class="text-caption">
+              <template
+                v-if="
+                  cardCopy.type.layout === CardTypeLayout.PERSON &&
+                  cardCopy.data.email
+                "
+              >
+                {{ cardCopy.data.email }}
+              </template>
+              <template
+                v-else-if="
+                  cardCopy.type.layout === CardTypeLayout.ORGANIZATION &&
+                  cardCopy.data.website
+                "
+              >
+                {{ cardCopy.data.website }}
+              </template>
+            </p>
+          </div>
         </div>
-      </div>
-      <div class="pa-4 pb-0 text-body-2 font-weight-medium">
-        <div class="d-flex align-center">
-          About this {{ cardCopy.type.name.toLowerCase() }}
-          <v-spacer />
-          <template v-if="listStages?.length">
-            <list-stage-selector
-              v-model="cardCopy.cardLists[0].listStage"
-              :listStages
-            />
-          </template>
+        <div class="pa-4 pb-0 text-body-2 font-weight-medium">
+          <div class="d-flex align-center">
+            About this {{ cardCopy.type.name.toLowerCase() }}
+            <v-spacer />
+            <template v-if="listStages?.length">
+              <list-stage-selector
+                v-model="cardCopy.cardLists[0].listStage"
+                :listStages
+              />
+            </template>
+          </div>
+          <v-divider class="mt-3" />
         </div>
-        <v-divider class="mt-3" />
-      </div>
-      <v-card-text>
-        <template v-if="fields">
-          <template v-for="field in fields" :key="field.id">
-            <div class="my-4">
-              <p class="field-label text-caption font-weight-light mb-1">
-                {{ field.name }}
-              </p>
-              <base-field
-                :field="field"
-                v-model="cardCopy.data[field.slug]"
-                @update:model-value="
+        <v-card-text>
+          <template v-if="fields">
+            <template v-for="field in fields" :key="field.id">
+              <div class="my-4">
+                <p class="field-label text-caption font-weight-light mb-1">
+                  {{ field.name }}
+                </p>
+                <base-field
+                  :field="field"
+                  v-model="cardCopy.data[field.slug]"
+                  @update:model-value="
                     (v: any) => updateFieldValue({ card, field, v })
                   "
-                flex-fill
-                text-field
-              />
-            </div>
+                  flex-fill
+                  text-field
+                />
+              </div>
+            </template>
           </template>
-        </template>
-      </v-card-text>
-    </v-card>
-    <div class="base-card-content-wrapper pa-4 flex-fill align-start">
-      <div class="base-card-content mx-auto">
-        <div>
-          <activity-input
-            v-if="workspace?.type === WorkspaceTypes.CRM"
-            class="mb-4"
-            :card
-          />
-          <activity-timeline
-            :card
-            :hide-comment-input="workspace?.type === WorkspaceTypes.CRM"
-          />
+        </v-card-text>
+      </v-card>
+      <div class="base-card-content-wrapper pa-4 flex-fill align-start">
+        <div class="base-card-content mx-auto">
+          <div>
+            <activity-input
+              v-if="workspace?.type === WorkspaceTypes.CRM"
+              class="mb-4"
+              :card
+            />
+            <activity-timeline
+              :card
+              :hide-comment-input="workspace?.type === WorkspaceTypes.CRM"
+            />
+          </div>
         </div>
       </div>
-    </div>
-  </v-card>
+    </v-card>
+  </template>
 </template>
 
 <style lang="scss" scoped>

@@ -271,7 +271,8 @@ export class CardsService {
             await this.cardListsService.create({
                 cardId: card.id,
                 listId: createCardDto.listId,
-                listStageId: createCardDto.listStageId,
+                listStageId:
+                    createCardDto.listStageId ?? createCardDto.listStage?.id,
             });
         }
 
