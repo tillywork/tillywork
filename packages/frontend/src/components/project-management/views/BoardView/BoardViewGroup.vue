@@ -91,8 +91,12 @@ const filters = computed<QueryFilter>(() => {
   }
 });
 
-const hideCompleted = computed<boolean>(() => props.view.options.hideCompleted);
-const hideChildren = computed<boolean>(() => props.view.options.hideChildren);
+const hideCompleted = computed<boolean>(
+  () => props.view.options.hideCompleted ?? false
+);
+const hideChildren = computed<boolean>(
+  () => props.view.options.hideChildren ?? false
+);
 
 const total = ref(0);
 

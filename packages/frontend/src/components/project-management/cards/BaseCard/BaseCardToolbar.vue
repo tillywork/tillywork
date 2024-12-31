@@ -50,7 +50,7 @@ function getListRoute() {
       <v-icon :icon="list.icon" :color="list.iconColor" start />
       {{ list.name }}
     </v-btn>
-    <base-card-actions :card></base-card-actions>
+    <base-card-actions :card />
     <div v-if="list?.type === ListType.DEALS && listStages" class="px-6">
       <base-card-stage-bar v-model="card.cardLists[0].listStage" :listStages />
     </div>

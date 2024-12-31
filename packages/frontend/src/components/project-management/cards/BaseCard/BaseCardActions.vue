@@ -6,9 +6,18 @@ import { useDialogStore } from '@/stores/dialog';
 import { useSnackbarStore } from '@/stores/snackbar';
 
 import type { Card } from '@tillywork/shared';
+import type { Slots } from 'vue';
 
 const { card } = defineProps<{
   card: Card;
+}>();
+
+const menu = defineModel({
+  default: false,
+});
+
+defineSlots<{
+  activator(props: { props: Record<string, unknown> }): void;
 }>();
 
 const dialog = useDialogStore();
@@ -40,7 +49,9 @@ function confirmDelete() {
   dialog.openDialog({
     dialog: DIALOGS.CONFIRM,
     data: {
-      message: `Are you sure you want to delete this ${card.type.name.toLowerCase()}?`,
+      message: `Are you sure you want to delete this ${
+        card.type?.name.toLowerCase() ?? 'card'
+      }?`,
       onConfirm: handleDeleteCard,
     },
   });
@@ -51,11 +62,14 @@ function handleDeleteCard() {
     deleteCard(card.id)
       .catch(() =>
         showSnackbar({
-          message: `Something went wrong while deleting this ${card.type.name.toLowerCase()}`,
+          message: `Something went wrong while deleting this ${
+            card.type?.name.toLowerCase() ?? 'card'
+          }`,
           color: 'error',
         })
       )
       .finally(() => {
+        closeMenu();
         dialog.closeDialog(dialog.getDialogIndex(DIALOGS.CONFIRM));
       });
   }
@@ -63,29 +77,39 @@ function handleDeleteCard() {
 
 function copyLink() {
   const fullUrl = `${window.location.origin}/card/${card.id}`;
-  copy(fullUrl).then(() =>
+  copy(fullUrl).then(() => {
     showSnackbar({
-      message: `${card.type.name} link was copied to your clipboard.`,
-    })
-  );
+      message: `${
+        card.type?.name ?? 'Card'
+      } link was copied to your clipboard.`,
+    });
+    closeMenu();
+  });
+}
+
+function closeMenu() {
+  menu.value = false;
 }
 </script>
 
 <template>
-  <v-menu :close-on-content-click="false" width="180">
+  <v-menu v-model="menu" :close-on-content-click="false" width="180">
     <template #activator="{ props }">
-      <v-btn
-        v-bind="props"
-        class="text-caption me-2"
-        density="comfortable"
-        color="primary"
-        variant="tonal"
-      >
-        <template #append>
-          <v-icon icon="mdi-dots-vertical" />
-        </template>
-        Actions
-      </v-btn>
+      <slot name="activator" :props>
+        <!-- Default activator if none is provided -->
+        <v-btn
+          v-bind="props"
+          class="text-caption me-2"
+          density="comfortable"
+          color="primary"
+          variant="tonal"
+        >
+          <template #append>
+            <v-icon icon="mdi-dots-vertical" />
+          </template>
+          Actions
+        </v-btn>
+      </slot>
     </template>
     <v-card>
       <v-list nav class="pa-1">

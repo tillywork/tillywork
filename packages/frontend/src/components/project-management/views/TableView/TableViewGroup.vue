@@ -29,6 +29,7 @@ import {
   CardTypeLayout,
 } from '@tillywork/shared';
 import BaseField from '@/components/common/fields/BaseField.vue';
+import BaseCardActions from '../../cards/BaseCard/BaseCardActions.vue';
 import { useListGroup } from '@/composables/useListGroup';
 
 const props = defineProps<{
@@ -65,7 +66,10 @@ const sortBy = computed<SortState>(() =>
 );
 const tableSortState = computed(() =>
   sortBy.value?.map((sortOption) => {
-    return { id: sortOption.key, desc: sortOption.order === 'desc' };
+    return {
+      id: sortOption.key,
+      desc: sortOption.order.toUpperCase() === 'DESC',
+    };
   })
 );
 const columns = computed(
@@ -358,7 +362,8 @@ watchEffect(() => {
                           class="d-flex flex-fill justify-end ga-1"
                           v-if="isRowHovering || rowMenuOpen?.id === row.id"
                         >
-                          <v-menu
+                          <base-card-actions
+                            :card="row.original"
                             @update:model-value="
                               (v: boolean) => handleCardMenuClick({ row, isOpen: v })
                             "
@@ -370,20 +375,7 @@ watchEffect(() => {
                                 @click.prevent
                               />
                             </template>
-                            <v-card class="border-thin">
-                              <v-list>
-                                <v-list-item
-                                  class="text-error"
-                                  @click="handleDeleteCard(row.original)"
-                                >
-                                  <template #prepend>
-                                    <v-icon icon="mdi-delete" />
-                                  </template>
-                                  <v-list-item-title>Delete</v-list-item-title>
-                                </v-list-item>
-                              </v-list>
-                            </v-card>
-                          </v-menu>
+                          </base-card-actions>
                         </div>
                       </v-card>
                     </template>
