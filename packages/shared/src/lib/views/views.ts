@@ -1,4 +1,5 @@
 import { SortOption } from '../common';
+import { Field } from '../fields';
 import { Filter } from '../filters';
 import { List, ListGroupOptions } from '../lists';
 
@@ -33,3 +34,15 @@ export type ViewGroupByOption = {
   type: ListGroupOptions;
   fieldId?: number;
 };
+
+export interface ViewSortOption {
+  label: string;
+  value: SortOption;
+  icon: string;
+}
+
+export interface ViewGroupOption {
+  label: string;
+  value: ListGroupOptions;
+  field?: Field;
+}

@@ -9,6 +9,7 @@ import { FieldsModule } from "../fields/fields.module";
 import { AuthModule } from "../auth/auth.module";
 import { CardTypesSideEffectsService } from "./card.types.side.effects.service";
 import { Workspace } from "../workspaces/workspace.entity";
+import { CardTypeFieldsFactory } from "./card.type.fields.factory";
 
 @Module({
     imports: [
@@ -19,7 +20,11 @@ import { Workspace } from "../workspaces/workspace.entity";
         AuthModule,
     ],
     controllers: [CardTypesController],
-    providers: [CardTypesService, CardTypesSideEffectsService],
+    providers: [
+        CardTypesService,
+        CardTypesSideEffectsService,
+        CardTypeFieldsFactory,
+    ],
     exports: [CardTypesService],
 })
 export class CardTypesModule {}

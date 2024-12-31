@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { ListGroupOption } from './types';
 import BaseViewChip from './BaseViewChip.vue';
 import {
   ListGroupOptions,
   type List,
   type ViewGroupByOption,
+  type ViewGroupOption,
 } from '@tillywork/shared';
 import { useFields } from '@/composables/useFields';
 import posthog from 'posthog-js';
@@ -55,7 +55,7 @@ const isGroupByFilled = computed(
   () => groupBy.value && groupBy.value.type !== ListGroupOptions.ALL
 );
 
-function handleGroupBySelection(option: ListGroupOption) {
+function handleGroupBySelection(option: ViewGroupOption) {
   groupBy.value = {
     type: option.value,
     fieldId: option.field?.id,
@@ -67,7 +67,7 @@ function handleGroupBySelection(option: ListGroupOption) {
   });
 }
 
-function isOptionSelected(option: ListGroupOption) {
+function isOptionSelected(option: ViewGroupOption) {
   return (
     option.value === groupBy.value?.type &&
     option.field?.id === groupBy.value.fieldId
@@ -86,7 +86,7 @@ function clearGroupBy() {
 </script>
 
 <template>
-  <v-menu>
+  <v-menu v-if="groupByOptions.length">
     <template #activator="{ props }">
       <base-view-chip
         v-bind="props"

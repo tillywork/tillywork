@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import { useFields } from '@/composables/useFields';
 import BaseViewChip from './BaseViewChip.vue';
-import {
-  type TableSortOption,
-  type ListSortOption,
-  DEFAULT_SORT_OPTIONS,
-} from './types';
+import { DEFAULT_SORT_OPTIONS } from './types';
 import posthog from 'posthog-js';
-import type { List } from '@tillywork/shared';
+import type { List, SortOption, ViewSortOption } from '@tillywork/shared';
 
-const sortBy = defineModel<TableSortOption>();
+const sortBy = defineModel<SortOption>();
 
 const { list } = defineProps<{
   list: List;
 }>();
+
+console.log('list', list);
 
 const cardTypeId = computed(() => list.defaultCardType.id);
 const listId = computed(() => list.id);
@@ -25,6 +23,17 @@ const { groupableFields } = useFields({
 
 const sortByOptions = computed(() => {
   const arr = [...DEFAULT_SORT_OPTIONS];
+
+  if (list.listStages?.length) {
+    arr.push({
+      label: 'Completed',
+      icon: 'mdi-list-status',
+      value: {
+        key: 'listStage.isCompleted',
+        order: 'ASC',
+      },
+    });
+  }
 
   if (groupableFields) {
     groupableFields.value?.forEach((field) => {
@@ -55,7 +64,7 @@ const sortDirectionIcon = computed(() => {
   return 'mdi-swap-vertical';
 });
 
-function handleSortBySelection(option: ListSortOption) {
+function handleSortBySelection(option: ViewSortOption) {
   posthog.capture('updated_sort_by', {
     option: option.value,
   });
@@ -68,7 +77,7 @@ function handleSortBySelection(option: ListSortOption) {
   }
 }
 
-function isOptionSelected(option: ListSortOption) {
+function isOptionSelected(option: ViewSortOption) {
   return option.value.key === sortBy.value?.key;
 }
 
