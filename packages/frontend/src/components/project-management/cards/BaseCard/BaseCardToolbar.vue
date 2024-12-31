@@ -8,6 +8,7 @@ import {
 } from '@tillywork/shared';
 
 import BaseCardStageBar from '../BaseCardStageBar.vue';
+import BaseCardActions from './BaseCardActions.vue';
 
 import { useAuthStore } from '@/stores/auth';
 
@@ -49,17 +50,7 @@ function getListRoute() {
       <v-icon :icon="list.icon" :color="list.iconColor" start />
       {{ list.name }}
     </v-btn>
-    <v-btn
-      class="text-caption me-2"
-      density="comfortable"
-      color="primary"
-      variant="tonal"
-    >
-      <template #append>
-        <v-icon icon="mdi-dots-vertical" />
-      </template>
-      Actions
-    </v-btn>
+    <base-card-actions :card></base-card-actions>
     <div v-if="list?.type === ListType.DEALS && listStages" class="px-6">
       <base-card-stage-bar v-model="card.cardLists[0].listStage" :listStages />
     </div>
