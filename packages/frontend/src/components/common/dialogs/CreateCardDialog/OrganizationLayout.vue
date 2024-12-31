@@ -141,7 +141,7 @@ watch(list, (v) => {
       <v-spacer />
       <base-icon-btn icon="mdi-close" color="default" @click="closeDialog()" />
     </div>
-    <v-form ref="createForm" @submit.prevent="handleCreateCard()">
+    <v-form ref="createForm" @submit.prevent="">
       <div class="px-4 pb-4 d-flex flex-column ga-2">
         <template v-if="titleField">
           <base-field
@@ -185,7 +185,7 @@ watch(list, (v) => {
           density="comfortable"
           variant="flat"
           class="text-caption px-4 ms-4"
-          type="submit"
+          @click="handleCreateCard()"
           :loading="isCreating"
         >
           Create {{ cardType.name }}

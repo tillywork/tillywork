@@ -76,7 +76,7 @@ function isUserSelected(user: User): boolean {
 function getSelectedUsersFromModel(): User[] {
   if (props.returnId) {
     return (value.value as number[])
-      .map((id) => props.users.find((user) => user.id == id))
+      .map((id) => props.users.find((user) => user.id == +id))
       .filter((user): user is User => user !== undefined);
   }
   return cloneDeep(value.value as User[]);
@@ -118,6 +118,10 @@ defineExpose({ userMenu });
         :prepend-inner-icon="icon"
         chips
         auto-select-first
+        @update:model-value="
+          (v) =>
+            Array.isArray(v) ? (selectedUsers = v) : (selectedUsers = v ? [v as User] : [])
+        "
       >
         <template #chip="{ item, props }">
           <v-chip v-bind="props" rounded="large">

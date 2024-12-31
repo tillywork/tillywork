@@ -139,7 +139,7 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
       <v-spacer />
       <base-icon-btn icon="mdi-close" color="default" @click="closeDialog()" />
     </div>
-    <v-form ref="createForm" @submit.prevent="createCard(createCardDto)">
+    <v-form ref="createForm" @submit.prevent="">
       <div class="px-4 pb-2">
         <template v-for="field in fields" :key="field.id">
           <base-field
@@ -171,7 +171,7 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
           density="comfortable"
           variant="flat"
           class="text-caption px-4 ms-4"
-          type="submit"
+          @click="handleCreateCard()"
           :loading="isCreating"
         >
           Create {{ cardType.name }}
