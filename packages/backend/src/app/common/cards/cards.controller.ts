@@ -21,7 +21,6 @@ import { Card } from "./card.entity";
 import { CreateCardDto } from "./dto/create.card.dto";
 import { UpdateCardDto } from "./dto/update.card.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
-import { CardListsService } from "./card-lists/card.lists.service";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { CurrentUser } from "../auth/decorators/current.user.decorator";
 import { User } from "../users/user.entity";
@@ -35,10 +34,7 @@ import { User } from "../users/user.entity";
 })
 export class CardsController {
     private readonly logger = new Logger("CardsController");
-    constructor(
-        private readonly cardsService: CardsService,
-        private readonly cardListsService: CardListsService
-    ) {}
+    constructor(private readonly cardsService: CardsService) {}
 
     @Get()
     search(
@@ -77,7 +73,6 @@ export class CardsController {
         @Body() createCardDto: CreateCardDto,
         @CurrentUser() user: User
     ): Promise<Card> {
-        this.logger.debug({ createCardDto });
         createCardDto.createdBy = user.id;
         return this.cardsService.create(createCardDto);
     }
