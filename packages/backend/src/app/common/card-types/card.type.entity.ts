@@ -12,6 +12,7 @@ import {
 import { Workspace } from "../workspaces/workspace.entity";
 import { User } from "../users/user.entity";
 import { Field } from "../fields/field.entity";
+import { CardTypeLayout } from "@tillywork/shared";
 
 /**
  * This is where entities like Task are derived from Card entity.
@@ -34,6 +35,19 @@ export class CardType {
         onDelete: "CASCADE",
     })
     fields: Relation<Field[]>;
+
+    @Column({
+        type: "boolean",
+        default: false,
+    })
+    hasChildren: boolean;
+
+    @Column({
+        type: "enum",
+        enum: CardTypeLayout,
+        default: CardTypeLayout.DEFAULT,
+    })
+    layout: CardTypeLayout;
 
     @Column({ type: "enum", enum: ["system", "user"], default: "user" })
     createdByType: "system" | "user";

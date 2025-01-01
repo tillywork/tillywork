@@ -3,9 +3,7 @@ import { useAuthStore } from '@/stores/auth';
 
 import { useUsersService } from '@/services/useUsersService';
 
-import type { CardActivity } from '../types';
-
-import { dayjs, type Card } from '@tillywork/shared';
+import { dayjs, type Card, type CardActivity } from '@tillywork/shared';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useCardActivitiesService } from '@/services/useCardActivitiesService';
@@ -46,7 +44,6 @@ function openConfirmDeleteDialog() {
 
 function deleteComment() {
   deleteActivity({
-    cardId: card.id,
     activityId: activity.id,
   })
     .catch(() => {

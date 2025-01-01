@@ -2,8 +2,13 @@
 import { type List } from '@/components/project-management/lists/types';
 import { useListsService } from '@/services/useListsService';
 import { useAuthStore } from '@/stores/auth';
+import { WorkspaceTypes } from '@tillywork/shared';
 
 const selectedList = defineModel<List>();
+
+const { readonly = false } = defineProps<{
+  readonly?: boolean;
+}>();
 
 const menu = ref(false);
 
@@ -12,7 +17,8 @@ const { workspace } = storeToRefs(useAuthStore());
 const { useGetListsQuery } = useListsService();
 const { data: lists } = useGetListsQuery({
   workspaceId: workspace.value!.id,
-  throughSpace: true,
+  throughSpace:
+    workspace.value?.type === WorkspaceTypes.PROJECT_MANAGEMENT ? true : false,
 });
 
 watch(lists, (v) => {
@@ -35,7 +41,7 @@ function isListSelected(list: List) {
   <v-menu v-model="menu" :close-on-content-click="false">
     <template #activator="{ props }">
       <v-chip
-        v-bind="props"
+        v-bind="!readonly ? props : undefined"
         label
         :text="selectedList?.name ?? 'List'"
         density="compact"

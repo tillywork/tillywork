@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import BaseCardPropertyValueBtn from '@/components/project-management/cards/BaseCardPropertyValueBtn.vue';
+import TimePicker from './TimePicker.vue';
+
 import { DATE_RANGE_SUGGESTIONS, type DateRangeSuggestion } from './types';
 import objectUtils from '@/utils/object';
 import { dayjs } from '@tillywork/shared';
@@ -16,12 +18,16 @@ const props = defineProps<{
   textField?: boolean;
   range?: boolean;
   rounded?: string;
+  includeTime?: boolean; // New prop to enable time selection
 }>();
+
 const dateDialog = defineModel<boolean>('dialog', {
   default: false,
 });
 
 const dateValue = ref<string | string[] | null | undefined>(dateModel.value);
+const timeValue = ref<string>('00:00');
+const isTimePickerVisible = ref(false);
 
 const processedDate = computed({
   get() {
@@ -55,12 +61,16 @@ const processedDate = computed({
     if (v) {
       if (Array.isArray(v)) {
         dateValue.value = v.map((dateObject) => {
-          const date = dateObject.setHours(23, 59, 59);
+          const date = dateObject.setHours(12, 0, 0);
           return dayjs(date).utc().format();
         });
       } else {
-        const date = v.setHours(23, 59, 59);
+        const date = v.setHours(12, 0, 0);
         dateValue.value = dayjs(date).utc().format();
+      }
+
+      if (props.includeTime) {
+        isTimePickerVisible.value = true;
       }
     }
   },
@@ -68,6 +78,8 @@ const processedDate = computed({
 
 function clearDate() {
   dateValue.value = null;
+  timeValue.value = '12:00';
+  isTimePickerVisible.value = false;
 }
 
 const selectedRangeSuggestion = computed(() => {
@@ -79,16 +91,31 @@ const selectedRangeSuggestion = computed(() => {
   });
 });
 
-watch(dateValue, (v) => {
-  if (Array.isArray(v)) {
-    if (v.length > 1) {
-      dateModel.value = [v[0], v[v.length - 1]];
-    } else {
-      dateModel.value = v;
-    }
+// Combine date and time when applicable
+const finalDateTime = computed(() => {
+  if (!dateValue.value) return null;
+
+  if (Array.isArray(dateValue.value)) {
+    return dateValue.value.map((date) => {
+      if (date.startsWith(':')) return date;
+
+      const baseDate = dayjs(date);
+      const [hours, minutes] = timeValue.value.split(':').map(Number);
+
+      return baseDate.hour(hours).minute(minutes).utc().format();
+    });
   } else {
-    dateModel.value = v;
+    if (dateValue.value.startsWith(':')) return dateValue.value;
+
+    const baseDate = dayjs(dateValue.value);
+    const [hours, minutes] = timeValue.value.split(':').map(Number);
+
+    return baseDate.hour(hours).minute(minutes).utc().format();
   }
+});
+
+watch(finalDateTime, (v) => {
+  dateModel.value = v;
 });
 
 watch(dateModel, (v) => {
@@ -99,9 +126,21 @@ watch(dateModel, (v) => {
   } else {
     if (v !== dateValue.value) {
       dateValue.value = v;
+
+      if (v && !Array.isArray(v)) {
+        const parsedDate = dayjs(v);
+        timeValue.value = parsedDate.isValid()
+          ? parsedDate.format('HH:mm')
+          : '00:00';
+      }
     }
   }
 });
+
+if (dateModel.value && !Array.isArray(dateModel.value)) {
+  const parsedDate = dayjs(dateModel.value);
+  timeValue.value = parsedDate.isValid() ? parsedDate.format('HH:mm') : '12:00';
+}
 
 const textColorClass = computed(() => {
   if (props.color) {
@@ -142,11 +181,29 @@ const dateToText = computed(() => {
         ' ~ ' + getTextFromDate(dateValue.value[dateValue.value.length - 1]);
     }
 
+    if (props.includeTime && !dateValue.value[0].startsWith(':')) {
+      text += ` ${formatTime(timeValue.value)}`;
+    }
+
     return text;
   }
 
-  return getTextFromDate(dateValue.value);
+  const baseText = getTextFromDate(dateValue.value);
+  return props.includeTime && !dateValue.value.startsWith(':')
+    ? `${baseText} ${formatTime(timeValue.value)}`
+    : baseText;
 });
+
+function formatTime(timeString: string) {
+  if (!timeString) return '';
+
+  const [hours, minutes] = timeString.split(':').map(Number);
+
+  const formattedHours = hours % 12 || 12;
+  const period = hours >= 12 ? 'PM' : 'AM';
+
+  return `${formattedHours}:${minutes.toString().padStart(2, '0')}${period}`;
+}
 
 function getTextFromDate(date: string) {
   /**
@@ -173,6 +230,11 @@ function getTextFromDate(date: string) {
 
 function handleSuggestionClick(suggestion: DateRangeSuggestion) {
   dateValue.value = suggestion.value;
+}
+
+function confirmDateTime() {
+  dateDialog.value = false;
+  isTimePickerVisible.value = false;
 }
 </script>
 
@@ -240,7 +302,7 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
       class="d-flex pa-0 border-thin rounded-md overflow-hidden"
     >
       <v-list
-        v-if="range"
+        v-if="range && !isTimePickerVisible"
         width="200"
         max-height="338"
         class="border-e-thin overflow-scroll"
@@ -257,15 +319,37 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
           </v-list-item>
         </template>
       </v-list>
-      <v-date-picker
-        v-model="processedDate"
-        show-adjacent-months
-        color="primary"
-        border="none"
-        hide-header
-        :multiple="range ? 'range' : undefined"
-        landscape
-      />
+
+      <v-sheet class="d-flex flex-column">
+        <v-date-picker
+          v-if="!isTimePickerVisible"
+          v-model="processedDate"
+          show-adjacent-months
+          color="primary"
+          border="none"
+          hide-header
+          :multiple="range ? 'range' : undefined"
+          landscape
+        />
+
+        <!-- Time Picker Section -->
+        <v-sheet
+          v-if="includeTime && isTimePickerVisible"
+          class="pa-4 border-t-thin"
+        >
+          <time-picker v-model="timeValue" />
+          <div class="d-flex justify-end mt-2">
+            <v-btn
+              color="primary"
+              variant="text"
+              class="text-none"
+              @click="confirmDateTime"
+            >
+              Confirm
+            </v-btn>
+          </div>
+        </v-sheet>
+      </v-sheet>
     </v-container>
   </v-menu>
 </template>

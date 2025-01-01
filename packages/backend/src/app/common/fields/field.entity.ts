@@ -11,10 +11,10 @@ import {
     JoinTable,
 } from "typeorm";
 import { Workspace } from "../workspaces/workspace.entity";
-import { FieldItem, FieldTypes } from "./types";
 import { User } from "../users/user.entity";
 import { List } from "../lists/list.entity";
 import { CardType } from "../card-types/card.type.entity";
+import { FieldItem, FieldTypes } from "@tillywork/shared";
 
 /**
  * This contains card fields.

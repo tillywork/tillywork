@@ -6,13 +6,6 @@ export enum ViewTypes {
     LIST = "list",
 }
 
-export const DEFAULT_VIEWS = [
-    {
-        name: "Table",
-        type: ViewTypes.TABLE,
-    },
-];
-
 export type SortDirection = "ASC" | "DESC";
 
 export interface ViewSortOption {

@@ -1,8 +1,13 @@
 import { User, Card, FieldTypes } from '../..';
 
 export enum ActivityType {
-  UPDATE = 'UPDATE',
-  COMMENT = 'COMMENT',
+  UPDATE = 'update',
+  COMMENT = 'comment',
+  EMAIL = 'email',
+  TASK = 'task',
+  CALL = 'call',
+  MESSAGE = 'message',
+  MEETING = 'meeting',
 }
 
 export interface CardActivity {
@@ -15,7 +20,7 @@ export interface CardActivity {
 }
 
 interface BaseActivityContent {
-  description?: string;
+  description?: TiptapContent;
 }
 
 export interface CommentActivityContent extends BaseActivityContent {
@@ -27,35 +32,123 @@ export interface UpdateActivityContent extends BaseActivityContent {
 }
 
 export interface EmailActivityContent extends BaseActivityContent {
-  subject: string;
+  subject?: string;
   body: string;
-  recipient: string;
+  to: string;
+  sentAt: string;
 }
+
+export type TaskActivityStatus = 'pending' | 'in_progress' | 'completed';
 
 export interface TaskActivityContent extends BaseActivityContent {
   title: string;
-  dueDate?: Date;
-  status: 'pending' | 'completed' | 'in_progress';
+  dueAt?: string;
+  status: TaskActivityStatus;
+  isCompleted: boolean;
+  assignee?: number[];
 }
 
 export interface CallActivityContent extends BaseActivityContent {
-  duration: number;
-  phoneNumber: string;
-  outcome?: string;
+  phoneNumber?: string;
+  outcome: string;
+  direction?: CallActivityDirection;
+  calledAt: string;
 }
+
+export enum CallActivityDirection {
+  INBOUND = 'inbound',
+  OUTBOUND = 'outbound',
+}
+
+export enum CallActivityOutcome {
+  BUSY = 'busy',
+  CONNECTED = 'connected',
+  LEFT_LIVE_MESSAGE = 'left_live_message',
+  LEFT_VOICEMAIL = 'left_voicemail',
+  NO_ANSWER = 'no_answer',
+  WRONG_NUMBER = 'wrong_number',
+}
+
+export enum MessageActivityChannel {
+  SMS = 'sms',
+  WHATSAPP = 'whatsapp',
+  SLACK = 'slack',
+  DISCORD = 'discord',
+  OTHER = 'other',
+}
+
+export const MESSAGE_CHANNEL_OPTIONS = [
+  {
+    title: 'SMS',
+    value: MessageActivityChannel.SMS,
+    icon: 'mdi-message-text',
+  },
+  {
+    title: 'WhatsApp',
+    value: MessageActivityChannel.WHATSAPP,
+    icon: 'mdi-whatsapp',
+  },
+  {
+    title: 'Slack',
+    value: MessageActivityChannel.SLACK,
+    icon: 'mdi-slack',
+  },
+  {
+    title: 'Discord',
+    value: MessageActivityChannel.DISCORD,
+    icon: 'mdi-message-outline',
+  },
+  {
+    title: 'Other',
+    value: MessageActivityChannel.OTHER,
+    icon: 'mdi-dots-horizontal',
+  },
+];
 
 export interface MessageActivityContent extends BaseActivityContent {
-  text: string;
-  channel: 'sms' | 'whatsapp' | 'slack' | 'other';
+  channel: MessageActivityChannel;
+  sentAt: string;
 }
 
+export enum MeetingActivityOutcome {
+  SCHEDULED = 'scheduled',
+  COMPLETED = 'completed',
+  RESCHEDULED = 'rescheduled',
+  NO_SHOW = 'no_show',
+  CANCELED = 'canceled',
+}
+
+export const MEETING_OUTCOME_OPTIONS = [
+  {
+    title: 'Scheduled',
+    value: MeetingActivityOutcome.SCHEDULED,
+    icon: 'mdi-calendar-clock',
+  },
+  {
+    title: 'Completed',
+    value: MeetingActivityOutcome.COMPLETED,
+    icon: 'mdi-calendar-check',
+  },
+  {
+    title: 'Rescheduled',
+    value: MeetingActivityOutcome.RESCHEDULED,
+    icon: 'mdi-calendar-sync',
+  },
+  {
+    title: 'No show',
+    value: MeetingActivityOutcome.NO_SHOW,
+    icon: 'mdi-calendar-remove',
+  },
+  {
+    title: 'Canceled',
+    value: MeetingActivityOutcome.CANCELED,
+    icon: 'mdi-calendar-minus',
+  },
+];
+
 export interface MeetingActivityContent extends BaseActivityContent {
-  title: string;
-  startTime: Date;
-  endTime: Date;
-  participants: string[];
-  location?: string;
-  meetingLink?: string;
+  outcome: MeetingActivityOutcome;
+  meetingAt: string;
 }
 
 export type ActivityContent =
@@ -71,10 +164,7 @@ export interface TiptapContent {
   type: string;
   content?: TiptapContent[];
   text?: string;
-  marks?: Array<{
-    type: string;
-    attrs?: Record<string, any>;
-  }>;
+  attrs?: Record<string, any>;
 }
 
 export interface FieldChange {
@@ -95,4 +185,68 @@ export const ACTIVITY_FIELD_TYPES = [
   FieldTypes.DROPDOWN,
   FieldTypes.LABEL,
   FieldTypes.USER,
+];
+
+export const TASK_STATUS_OPTIONS = [
+  {
+    title: 'Pending',
+    value: 'pending',
+    color: 'default',
+  },
+  {
+    title: 'In Progress',
+    value: 'in_progress',
+    color: 'primary',
+  },
+  {
+    title: 'Completed',
+    value: 'completed',
+    color: 'success',
+  },
+];
+
+export const CALL_OUTCOME_OPTIONS = [
+  {
+    title: 'Busy',
+    value: CallActivityOutcome.BUSY,
+    icon: 'mdi-phone-cancel',
+  },
+  {
+    title: 'Connected',
+    value: CallActivityOutcome.CONNECTED,
+    icon: 'mdi-phone-check',
+  },
+  {
+    title: 'Left live message',
+    value: CallActivityOutcome.LEFT_LIVE_MESSAGE,
+    icon: 'mdi-message-text',
+  },
+  {
+    title: 'Left voicemail',
+    value: CallActivityOutcome.LEFT_VOICEMAIL,
+    icon: 'mdi-voicemail',
+  },
+  {
+    title: 'No answer',
+    value: CallActivityOutcome.NO_ANSWER,
+    icon: 'mdi-phone-off',
+  },
+  {
+    title: 'Wrong number',
+    value: CallActivityOutcome.WRONG_NUMBER,
+    icon: 'mdi-phone-remove',
+  },
+];
+
+export const CALL_DIRECTION_OPTIONS = [
+  {
+    title: 'Inbound',
+    value: CallActivityDirection.INBOUND,
+    icon: 'mdi-phone-incoming',
+  },
+  {
+    title: 'Outbound',
+    value: CallActivityDirection.OUTBOUND,
+    icon: 'mdi-phone-outgoing',
+  },
 ];

@@ -56,6 +56,10 @@ export const useFields = ({
     cardTypeFields.value?.find((field) => field.isAssignee)
   );
 
+  const photoField = computed(() =>
+    cardTypeFields.value?.find((field) => field.isPhoto)
+  );
+
   const cardTypeFieldsWithoutMainFields = computed(() =>
     cardTypeFields.value?.filter(
       (field) => !field.isTitle && !field.isDescription && !field.isPhoto
@@ -87,6 +91,7 @@ export const useFields = ({
         FieldTypes.DROPDOWN,
         FieldTypes.LABEL,
         FieldTypes.DATE,
+        FieldTypes.DATETIME,
         FieldTypes.USER,
         FieldTypes.CHECKBOX,
       ].includes(field.type)
@@ -99,9 +104,12 @@ export const useFields = ({
         FieldTypes.DROPDOWN,
         FieldTypes.LABEL,
         FieldTypes.DATE,
+        FieldTypes.DATETIME,
         FieldTypes.USER,
         FieldTypes.CHECKBOX,
         FieldTypes.NUMBER,
+        FieldTypes.TEXT,
+        FieldTypes.EMAIL,
       ].includes(field.type)
     )
   );
@@ -136,7 +144,11 @@ export const useFields = ({
       (cardList) => cardList.listId === toValue(listId)
     )?.listStage;
 
-    if (listStage && field.type === FieldTypes.DATE && listStage.isCompleted) {
+    if (
+      listStage &&
+      [FieldTypes.DATE, FieldTypes.DATETIME].includes(field.type) &&
+      listStage.isCompleted
+    ) {
       return 'default';
     }
   }
@@ -154,6 +166,7 @@ export const useFields = ({
     groupableFields,
     tableFields,
     filterableFields,
+    photoField,
     refetch,
     sortFieldsByViewColumns,
     getDateFieldColor,

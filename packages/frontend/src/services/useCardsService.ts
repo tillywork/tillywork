@@ -1,9 +1,4 @@
 import { useHttp } from '@/composables/useHttp';
-import type {
-  Card,
-  CardList,
-  CreateCardDto,
-} from '@/components/project-management/cards/types';
 import type { TableSortOption } from '@/components/project-management/views/types';
 import {
   useInfiniteQuery,
@@ -12,7 +7,12 @@ import {
   useQueryClient,
 } from '@tanstack/vue-query';
 import type { MaybeRef } from 'vue';
-import type { QueryFilter } from '@tillywork/shared';
+import type {
+  Card,
+  CardList,
+  CreateCardDto,
+  QueryFilter,
+} from '@tillywork/shared';
 
 export interface CardsData {
   cards: Card[];
@@ -156,6 +156,7 @@ export const useCardsService = () => {
     return useQuery({
       queryKey: ['cards', cardId],
       queryFn: () => getCard(cardId.value),
+      retry: false,
     });
   }
 

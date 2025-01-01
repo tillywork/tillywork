@@ -1,10 +1,10 @@
+import { FieldTypes } from "@tillywork/shared";
 import {
     MigrationInterface,
     QueryRunner,
     TableColumn,
     TableForeignKey,
 } from "typeorm";
-import { FieldTypes } from "../app/common/fields/types";
 
 export class AddCardTypeIdToFieldTable1721214304859
     implements MigrationInterface

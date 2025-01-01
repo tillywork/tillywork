@@ -11,7 +11,7 @@ import { CreateSpaceDto } from "./dto/create.space.dto";
 import { UpdateSpaceDto } from "./dto/update.space.dto";
 import { SpaceSideEffectsService } from "./space.side.effects.service";
 import { CardType } from "../card-types/card.type.entity";
-import { IsNotEmpty, IsNumberString } from "class-validator";
+import { IsNotEmpty, IsNumber } from "class-validator";
 import { ClsService } from "nestjs-cls";
 import { AccessControl } from "../auth/entities/access.control.entity";
 import { PermissionLevel } from "@tillywork/shared";
@@ -24,7 +24,7 @@ export type SpaceFindAllResult = {
 
 export class FindAllParams {
     @IsNotEmpty()
-    @IsNumberString()
+    @IsNumber()
     workspaceId: number;
 }
 

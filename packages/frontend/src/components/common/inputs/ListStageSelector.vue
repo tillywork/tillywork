@@ -44,8 +44,7 @@ function isStageSelected(stage: ListStage) {
         <v-chip
           v-bind="!readonly ? props : undefined"
           :link="!readonly"
-          rounded="md"
-          :size="size ?? 'small'"
+          rounded="pill"
           density="comfortable"
           :color="mainChipColor"
           @click.prevent

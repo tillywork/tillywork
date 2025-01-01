@@ -4,8 +4,8 @@ import type { RouteLocation } from 'vue-router/auto';
 import { useAuthService } from '@/services/useAuthService';
 import { useSnackbarStore } from './snackbar';
 import type { Project } from '@/components/common/projects/types';
-import type { Workspace } from '@/components/project-management/workspaces/types';
-import { useWorkspaceStore } from './workspace';
+import { useStateStore } from './state';
+import type { Workspace } from '@tillywork/shared';
 
 export const useAuthStore = defineStore('auth', {
   persist: true,
@@ -57,13 +57,17 @@ export const useAuthStore = defineStore('auth', {
     },
 
     setWorkspace(workspace: Workspace) {
-      const workspaceStore = useWorkspaceStore();
+      const stateStore = useStateStore();
       this.workspace = workspace;
 
       // Ensure that this workspace's expansion state exists in the store
-      if (!workspaceStore.spaceExpansionState[workspace.id]) {
-        workspaceStore.$patch({ spaceExpansionState: { [workspace.id]: [] } });
+      if (!stateStore.spaceExpansionState[workspace.id]) {
+        stateStore.$patch({ spaceExpansionState: { [workspace.id]: [] } });
       }
+    },
+
+    clearWorkspace() {
+      this.workspace = null;
     },
 
     /**
@@ -72,11 +76,13 @@ export const useAuthStore = defineStore('auth', {
      * saved in store
      */
     logout(go?: RouteLocation) {
+      const stateStore = useStateStore();
       this.token = null;
       this.user = null;
       this.project = null;
       this.workspace = null;
-      this.$router.go(go ?? '/');
+      stateStore.clearCurrentList();
+      this.$router.push(go ?? '/');
     },
 
     /**

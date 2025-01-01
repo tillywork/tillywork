@@ -72,3 +72,5 @@ export type FieldFilterOption = FieldFilter & {
 };
 
 export type FilterViewOptions = 'quick' | 'advanced';
+
+export type QuickFilterDateOption = Omit<FieldFilterOption, 'field'>;

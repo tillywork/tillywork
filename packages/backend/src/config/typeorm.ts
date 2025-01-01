@@ -60,7 +60,19 @@ import { ResetViewsWithAssigneeGroupBy1726493876246 } from "../migrations/172649
 import { CreateAccessControlTable1733140447674 } from "../migrations/1733140447674-create-access-control-table";
 import { SeedInitAccessControls1733140464829 } from "../migrations/1733140464829-seed-init-access-controls";
 import { AddAccessTypeToWorkspaceSpaceListAndCardTables1733166524606 } from "../migrations/1733166524606-add-access-type-to-workspace-space-list-and-card-tables";
-import { TruncateCardActivities1734112779468 } from "src/migrations/1734112779468-truncate-card-activities";
+import { AddTypeColumnToListTable1729608774525 } from "../migrations/1729608774525-add-type-column-to-list-table";
+import { AddLayoutToCardTypesTable1731493105407 } from "../migrations/1731493105407-add-layout-to-card-types-table";
+import { MakeListStageIdNullableInCardListTable1731495327851 } from "../migrations/1731495327851-make-list-stage-id-nullable-in-card-list-table";
+import { AddSlugToListTable1732707580057 } from "../migrations/1732707580057-add-slug-to-list-table";
+import { TruncateCardActivities1734112779468 } from "../migrations/1734112779468-truncate-card-activities";
+import { UpdateCardActivityTypesEnum1734190213126 } from "../migrations/1734190213126-update-card-activity-types-enum";
+import { CreateCardActivityTypeIndex1734201598929 } from "../migrations/1734201598929-create-card-activity-type-index";
+import { AddContentIndexToCardActivity1734530224432 } from "../migrations/1734530224432-add-content-index-to-card-activity";
+import { AddCurrencyColumnToWorkspaceTable1735134777269 } from "../migrations/1735134777269-add-currency-column-to-workspace-table";
+import { AddDealToCardTypeLayoutEnum1735135850545 } from "../migrations/1735135850545-add-deal-to-card-type-layout-enum";
+import { AddDateTimeToFieldTypeEnums1735211235572 } from "../migrations/1735211235572-add-date-time-to-field-type-enums";
+import { RemoveOptionsDefaultValueInViewTable1735588046345 } from "../migrations/1735588046345-remove-options-default-value-in-view-table";
+import { AddHasChildCardsToCardTypeTable1735645745129 } from "../migrations/1735645745129-add-has-child-cards-to-card-type-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -122,7 +134,19 @@ const migrations = [
     CreateAccessControlTable1733140447674,
     SeedInitAccessControls1733140464829,
     AddAccessTypeToWorkspaceSpaceListAndCardTables1733166524606,
+    AddTypeColumnToListTable1729608774525,
+    AddLayoutToCardTypesTable1731493105407,
+    MakeListStageIdNullableInCardListTable1731495327851,
+    AddSlugToListTable1732707580057,
     TruncateCardActivities1734112779468,
+    UpdateCardActivityTypesEnum1734190213126,
+    CreateCardActivityTypeIndex1734201598929,
+    AddContentIndexToCardActivity1734530224432,
+    AddCurrencyColumnToWorkspaceTable1735134777269,
+    AddDealToCardTypeLayoutEnum1735135850545,
+    AddDateTimeToFieldTypeEnums1735211235572,
+    RemoveOptionsDefaultValueInViewTable1735588046345,
+    AddHasChildCardsToCardTypeTable1735645745129,
 ];
 
 const config: TypeOrmModuleOptions = {

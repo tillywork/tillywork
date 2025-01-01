@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useCardsService } from '@/services/useCardsService';
-import type { Card } from './types';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import { useFields } from '@/composables/useFields';
+import type { Card } from '@tillywork/shared';
 
 const props = defineProps<{
   card: Pick<Card, 'id'>;
@@ -29,8 +29,10 @@ const { titleField } = useFields({
 <template>
   <v-card
     class="d-flex align-center text-caption pe-2"
-    :class="hideStage && 'ps-2'"
-    :to="!disableLink ? `/pm/card/${card.id}` : undefined"
+    :class="{
+      'ps-2': hideStage || !cardCopy?.cardLists[0].listStageId,
+    }"
+    :to="!disableLink ? `/card/${card.id}` : undefined"
     :max-width="maxWidth ?? 250"
     color="surface-variant"
     variant="tonal"
@@ -45,7 +47,9 @@ const { titleField } = useFields({
           theme="icon"
           readonly
         />
-        {{ cardCopy.data[titleField.slug] }}
+        <span>
+          {{ cardCopy.data[titleField.slug] }}
+        </span>
       </template>
       <template v-else>
         <v-progress-circular

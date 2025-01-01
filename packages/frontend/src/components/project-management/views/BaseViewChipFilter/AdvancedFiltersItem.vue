@@ -1,38 +1,38 @@
 <script setup lang="ts">
 import validationUtils from '@/utils/validation';
 import type { User } from '@/components/common/users/types';
-import { useStateStore } from '@/stores/state';
 import BaseRelationInput from '@/components/common/inputs/BaseRelationInput.vue';
 import {
   type FieldFilter,
   type FieldFilterOption,
   type FilterOperator,
+  type List,
   FieldTypes,
 } from '@tillywork/shared';
 
 const filter = defineModel<FieldFilter>({
   required: true,
 });
-const props = defineProps<{
+const { index, fields, users, list } = defineProps<{
   index: number;
   fields: FieldFilterOption[];
   users: User[];
+  list: List;
 }>();
 const emit = defineEmits(['delete']);
 
-const { currentList } = storeToRefs(useStateStore());
 const { rules } = validationUtils;
 const filterOption = ref<string>();
 
 const selectedFilter = computed(() =>
-  props.fields.find((f) => f.field === filter.value.field)
+  fields.find((f) => f.field === filter.value.field)
 );
 
 const dropdownOptions = computed(() => {
   switch (filter.value.field) {
     case 'listStage.id':
       return (
-        currentList.value?.listStages.map((listStage) => {
+        list.listStages.map((listStage) => {
           return {
             title: listStage.name,
             value: listStage.id,
@@ -127,7 +127,7 @@ const numberOperators = [
 ];
 
 function removeFilter() {
-  emit('delete', props.index);
+  emit('delete', index);
 }
 
 /**
@@ -168,6 +168,7 @@ function mapFilterOptionValueToOperator(value: string): FilterOperator {
       } else {
         return value as FilterOperator;
       }
+    case FieldTypes.DATETIME:
     case FieldTypes.DATE:
     case FieldTypes.NUMBER:
     default:
@@ -204,6 +205,7 @@ function mapFilterOperatorToFileringOption(
         return 'isFalse' as FilterOperator;
       }
       return 'isTrue' as FilterOperator;
+    case FieldTypes.DATETIME:
     case FieldTypes.DATE:
     case FieldTypes.NUMBER:
     default:
@@ -323,7 +325,12 @@ watch(
         closable-chips
       />
     </template>
-    <template v-else-if="selectedFilter?.type === FieldTypes.DATE">
+    <template
+      v-else-if="
+        selectedFilter &&
+        [FieldTypes.DATE, FieldTypes.DATETIME].includes(selectedFilter.type)
+      "
+    >
       <v-autocomplete
         :items="filteringOptions"
         v-model="filterOption"

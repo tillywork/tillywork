@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import UserListItem from '@/components/common/navigation/UserListItem.vue';
+import UserMenu from '@/components/common/navigation/UserMenu.vue';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
 import NavigationWorkspace from '@/components/project-management/navigation/NavigationWorkspace.vue';
 import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
@@ -11,7 +11,7 @@ import CommandPaletteActivator from '@/components/common/navigation/CommandPalet
 const { hideNavigationDrawer } = useHideNavigationDrawer();
 const navigationDrawer = ref(true);
 const authStore = useAuthStore();
-const { logout, isAuthenticated } = authStore;
+const { isAuthenticated } = authStore;
 const logo = useLogo();
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
@@ -88,39 +88,7 @@ if (isAuthenticated()) {
       <navigation-workspace v-if="isAuthenticated()" />
 
       <template v-slot:append>
-        <v-list :slim="false">
-          <v-menu v-if="isAuthenticated()">
-            <template #activator="{ props }">
-              <user-list-item v-bind="props" avatar-size="small">
-                <template #append>
-                  <v-icon icon="mdi-dots-vertical" size="small" />
-                </template>
-              </user-list-item>
-            </template>
-            <v-card class="border-thin ms-n2">
-              <v-list>
-                <v-list-item to="/settings/theme">
-                  <template #prepend>
-                    <v-icon icon="mdi-cog" />
-                  </template>
-                  <v-list-item-title>Settings</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="logout()">
-                  <template #prepend>
-                    <v-icon icon="mdi-logout" />
-                  </template>
-                  <v-list-item-title>Logout</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-card>
-          </v-menu>
-          <v-list-item v-else to="/login">
-            <template #prepend>
-              <v-icon icon="mdi-login" />
-            </template>
-            <v-list-item-title>Login</v-list-item-title>
-          </v-list-item>
-        </v-list>
+        <user-menu />
       </template>
     </v-navigation-drawer>
 

@@ -35,6 +35,9 @@ export class Workspace {
     @Column({ type: "enum", enum: AccessType, default: AccessType.PUBLIC })
     accessType: AccessType;
 
+    @Column({ type: "varchar", length: 3, default: "USD" })
+    currency: string;
+
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;
     @UpdateDateColumn({ type: "timestamp" })

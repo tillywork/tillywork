@@ -9,7 +9,8 @@ const { setIsInputFocused } = useCommands();
 
 const dialogComponents = {
   [DIALOGS.CONFIRM]: () => import('./ConfirmDialog.vue'),
-  [DIALOGS.CREATE_CARD]: () => import('./CreateCardDialog.vue'),
+  [DIALOGS.CREATE_CARD]: () =>
+    import('./CreateCardDialog/CreateCardDialog.vue'),
   [DIALOGS.UPSERT_SPACE]: () => import('./UpsertSpaceDialog.vue'),
   [DIALOGS.UPSERT_LIST]: () => import('./UpsertListDialog.vue'),
   [DIALOGS.UPSERT_LIST_STAGE]: () => import('./UpsertListStageDialog.vue'),

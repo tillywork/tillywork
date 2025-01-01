@@ -1,29 +1,37 @@
 <script setup lang="ts">
 import { useFields } from '@/composables/useFields';
-import { useStateStore } from '@/stores/state';
 import BaseViewChip from './BaseViewChip.vue';
-import {
-  type TableSortOption,
-  type ListSortOption,
-  DEFAULT_SORT_OPTIONS,
-} from './types';
+import { DEFAULT_SORT_OPTIONS } from './types';
 import posthog from 'posthog-js';
+import type { List, SortOption, ViewSortOption } from '@tillywork/shared';
 
-const sortBy = defineModel<TableSortOption>();
+const sortBy = defineModel<SortOption>();
 
-const { currentList } = storeToRefs(useStateStore());
-const cardTypeId = computed(() => currentList.value?.defaultCardType.id ?? 0);
-const listId = computed(() => currentList.value?.id ?? 0);
-const fieldsEnabled = computed(() => !!currentList.value);
+const { list } = defineProps<{
+  list: List;
+}>();
+
+const cardTypeId = computed(() => list.defaultCardType.id);
+const listId = computed(() => list.id);
 
 const { groupableFields } = useFields({
   cardTypeId,
   listId,
-  enabled: fieldsEnabled,
 });
 
 const sortByOptions = computed(() => {
   const arr = [...DEFAULT_SORT_OPTIONS];
+
+  if (list.listStages?.length) {
+    arr.push({
+      label: 'Completed',
+      icon: 'mdi-list-status',
+      value: {
+        key: 'listStage.isCompleted',
+        order: 'ASC',
+      },
+    });
+  }
 
   if (groupableFields) {
     groupableFields.value?.forEach((field) => {
@@ -54,7 +62,7 @@ const sortDirectionIcon = computed(() => {
   return 'mdi-swap-vertical';
 });
 
-function handleSortBySelection(option: ListSortOption) {
+function handleSortBySelection(option: ViewSortOption) {
   posthog.capture('updated_sort_by', {
     option: option.value,
   });
@@ -67,7 +75,7 @@ function handleSortBySelection(option: ListSortOption) {
   }
 }
 
-function isOptionSelected(option: ListSortOption) {
+function isOptionSelected(option: ViewSortOption) {
   return option.value.key === sortBy.value?.key;
 }
 

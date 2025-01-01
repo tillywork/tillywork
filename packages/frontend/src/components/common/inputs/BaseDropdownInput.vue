@@ -31,6 +31,7 @@ const attrs = useAttrs();
     <v-menu :close-on-content-click="false">
       <template #activator="{ props }">
         <v-card
+          color="transparent"
           v-bind="{
             ...attrs,
             ...props,
@@ -39,10 +40,10 @@ const attrs = useAttrs();
           :class="{
             'flex-fill': fill,
           }"
-          color="transparent"
-          :rounded
+          :rounded="rounded ?? 'pill'"
           @click.prevent
         >
+          <v-icon v-if="icon" :icon start />
           <template v-if="selected && !!selected[0]">
             <v-card-text
               class="pa-0 text-caption"
@@ -54,7 +55,7 @@ const attrs = useAttrs();
             </v-card-text>
           </template>
           <template v-else>
-            <v-card-subtitle class="text-caption px-0">{{
+            <v-card-subtitle class="text-caption pa-0">{{
               label
             }}</v-card-subtitle>
           </template>

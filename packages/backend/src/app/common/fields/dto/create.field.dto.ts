@@ -1,13 +1,16 @@
 import {
+    IsArray,
     IsBoolean,
     IsEnum,
     IsNotEmpty,
     IsNumber,
     IsOptional,
     IsString,
+    ValidateNested,
 } from "class-validator";
 import { User } from "../../users/user.entity";
 import { FieldItem, FieldTypes } from "@tillywork/shared";
+import { Type } from "class-transformer";
 
 export class CreateFieldDto {
     @IsNotEmpty()
@@ -23,6 +26,10 @@ export class CreateFieldDto {
     @IsOptional()
     @IsNumber()
     cardTypeId?: number;
+
+    @IsOptional()
+    @IsNumber()
+    dataCardTypeId?: number;
 
     @IsNotEmpty()
     @IsString()
@@ -41,6 +48,9 @@ export class CreateFieldDto {
     multiple?: boolean = false;
 
     @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => FieldItemDto)
     items?: FieldItem[];
 
     @IsOptional()
@@ -48,4 +58,18 @@ export class CreateFieldDto {
 
     @IsOptional()
     createdBy?: User;
+}
+
+class FieldItemDto {
+    @IsString()
+    @IsNotEmpty()
+    item: string;
+
+    @IsString()
+    @IsOptional()
+    color?: string;
+
+    @IsString()
+    @IsOptional()
+    icon?: string;
 }

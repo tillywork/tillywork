@@ -5,14 +5,18 @@ import {
   useVueTable,
   type Column,
 } from '@tanstack/vue-table';
-import { type List, type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import TableViewGroup from './TableViewGroup.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useFields } from '@/composables/useFields';
 import type { TableColumnDef } from './types';
-import { type View } from '@tillywork/shared';
+import {
+  CardTypeLayout,
+  type View,
+  type List,
+  type ListGroup,
+} from '@tillywork/shared';
 
 const isLoading = defineModel<boolean>('loading');
 
@@ -34,6 +38,8 @@ const viewColumnIds = computed(() =>
 );
 
 const columns = computed<TableColumnDef[]>(() => {
+  const defaultColumns: TableColumnDef[] = [];
+
   const actionsColumn: TableColumnDef = {
     id: 'actions',
     enableResizing: false,
@@ -41,16 +47,35 @@ const columns = computed<TableColumnDef[]>(() => {
     size: 50,
     cellType: 'actions',
   };
+  defaultColumns.push(actionsColumn);
 
-  const titleColumn: TableColumnDef = {
-    id: `data.${titleField.value?.slug}`,
-    accessorKey: `data.${titleField.value?.slug}`,
-    header: titleField.value?.name,
-    size: 300,
-    minSize: 150,
-    cellType: 'title',
-    field: titleField.value,
-  };
+  if (titleField.value) {
+    const titleColumn: TableColumnDef = {
+      id: `data.${titleField.value?.slug}`,
+      accessorKey: `data.${titleField.value?.slug}`,
+      header: titleField.value?.name,
+      size: 300,
+      minSize: 150,
+      cellType: 'title',
+      field: titleField.value,
+    };
+
+    defaultColumns.push(titleColumn);
+  } else {
+    if (props.list.defaultCardType.layout === CardTypeLayout.PERSON) {
+      const nameColumn: TableColumnDef = {
+        id: `data.first_name`,
+        accessorKey: `data.first_name`,
+        accessorFn: (row) => `${row.data.first_name} ${row.data.last_name}`,
+        header: 'Name',
+        size: 300,
+        minSize: 150,
+        cellType: 'title',
+      };
+
+      defaultColumns.push(nameColumn);
+    }
+  }
 
   const viewColumns: TableColumnDef[] = sortFieldsByViewColumns(
     fields.value.filter((field) =>
@@ -67,7 +92,7 @@ const columns = computed<TableColumnDef[]>(() => {
     field,
   }));
 
-  return [actionsColumn, titleColumn, ...viewColumns];
+  return [...defaultColumns, ...viewColumns];
 });
 
 const { project } = storeToRefs(useAuthStore());

@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { useStateStore } from '@/stores/state';
-import { useWorkspaceStore } from '@/stores/workspace';
 import { useAuthStore } from '@/stores/auth';
-import { useSpacesService } from '@/services/useSpacesService';
 import { useListsService } from '@/services/useListsService';
+import { WorkspaceTypes } from '@tillywork/shared';
 
 definePage({
   meta: {
@@ -11,42 +10,37 @@ definePage({
   },
 });
 
-const router = useRouter();
-const { currentList } = useStateStore();
-const workspaceStore = useWorkspaceStore();
+const { setCurrentList, navigateToLastList, getCurrentListBySelectedModule } =
+  useStateStore();
 const authStore = useAuthStore();
 const { workspace } = storeToRefs(authStore);
 
-const isWorkspaceReady = computed(() => !!workspace.value && !currentList);
+const currentList = computed(() => getCurrentListBySelectedModule());
 const workspaceId = computed(() => workspace.value?.id ?? 0);
 
-const { useGetSpacesQuery } = useSpacesService();
-const { data: spaces } = useGetSpacesQuery({
-  workspaceId,
-  enabled: isWorkspaceReady,
-});
 const { useGetListsQuery } = useListsService();
+
 const { data: lists } = useGetListsQuery({
   workspaceId,
-  throughSpace: true,
-  enabled: isWorkspaceReady,
+  throughSpace: workspace.value?.type === WorkspaceTypes.PROJECT_MANAGEMENT,
 });
 
-watch(lists, (v) => {
-  if (v && !currentList) {
-    workspaceStore.setSpaceExpansionState(
-      workspace.value!.id,
-      [spaces.value?.[0]?.id].filter(Boolean) as number[]
-    );
-    router.push({ path: `/pm/list/${v[0].id}` });
-  }
-});
-
-onMounted(() => {
-  if (currentList) {
-    router.push('/pm/list/' + currentList.id);
-  }
-});
+watch(
+  lists,
+  (v) => {
+    if (v) {
+      if (!currentList.value) {
+        if (v[0]) {
+          setCurrentList(v[0]);
+          navigateToLastList();
+        }
+      } else {
+        navigateToLastList();
+      }
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>&nbsp;</template>

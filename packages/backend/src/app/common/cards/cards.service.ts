@@ -22,6 +22,7 @@ import { RelationIdMetadataToAttributeTransformer } from "typeorm/query-builder/
 import { ClsService } from "nestjs-cls";
 import { PermissionLevel } from "@tillywork/shared";
 import { AccessControlService } from "../auth/services/access.control.service";
+import { Field } from "../fields/field.entity";
 
 export type CardFindAllResult = {
     total: number;
@@ -90,9 +91,7 @@ export class CardsService {
             .where("cardLists.list.id = :listId", { listId });
 
         if (hideCompleted) {
-            queryBuilder.andWhere("listStage.isCompleted = :isCompleted", {
-                isCompleted: false,
-            });
+            queryBuilder.andWhere("listStage.isCompleted IS NOT TRUE");
         }
 
         if (hideChildren) {
@@ -219,25 +218,34 @@ export class CardsService {
         cardTypeId,
     }: {
         keyword: string;
-        cardTypeId?: number;
+        cardTypeId: number;
         workspaceId: number;
     }): Promise<Card[]> {
+        const titleField = await this.cardsRepository.manager
+            .getRepository(Field)
+            .findOne({
+                where: {
+                    cardType: {
+                        id: cardTypeId,
+                    },
+                    isTitle: true,
+                },
+            });
+
         const queryBuilder = this.cardsRepository
             .createQueryBuilder("card")
             .where(
                 new Brackets((qb) => {
-                    qb.where("card.data ->> 'title' ILIKE :keyword", {
-                        keyword: `%${keyword}%`,
-                    });
+                    qb.where(
+                        `card.data ->> '${titleField.slug}' ILIKE :keyword`,
+                        { keyword: `%${keyword}%` }
+                    );
                 })
             )
             .andWhere("card.workspaceId = :workspaceId", { workspaceId })
+            .andWhere(`card.typeId = :cardTypeId`, { cardTypeId })
             .orderBy("card.createdAt", "DESC")
             .limit(15);
-
-        if (cardTypeId) {
-            queryBuilder.andWhere(`card.typeId = :cardTypeId`, { cardTypeId });
-        }
 
         const cards = await queryBuilder.getMany();
         return cards;
@@ -263,7 +271,8 @@ export class CardsService {
             await this.cardListsService.create({
                 cardId: card.id,
                 listId: createCardDto.listId,
-                listStageId: createCardDto.listStageId,
+                listStageId:
+                    createCardDto.listStageId ?? createCardDto.listStage?.id,
             });
         }
 

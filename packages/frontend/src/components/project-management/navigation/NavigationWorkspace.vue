@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import CreateSpaceBtn from './CreateSpaceBtn.vue';
 import { useSpacesService } from '@/services/useSpacesService';
-import { useWorkspaceStore } from '@/stores/workspace';
 import NavigationWorkspaceSpaceItem from './NavigationWorkspaceSpaceItem.vue';
 import { useAuthStore } from '@/stores/auth';
+import { useStateStore } from '@/stores/state';
 
-const workspaceStore = useWorkspaceStore();
-const { spaceExpansionState } = storeToRefs(workspaceStore);
+const { setSpaceExpansionState } = useStateStore();
+const { spaceExpansionState } = storeToRefs(useStateStore());
 const { workspace } = storeToRefs(useAuthStore());
 
 const spacesService = useSpacesService();
@@ -27,7 +27,7 @@ const currentSpaceExpansionState = computed({
     workspace.value ? spaceExpansionState.value[workspace.value.id] : [],
   set: (state) => {
     if (workspace.value) {
-      workspaceStore.setSpaceExpansionState(workspace.value.id, state);
+      setSpaceExpansionState(workspace.value.id, state);
     }
   },
 });

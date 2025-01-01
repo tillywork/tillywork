@@ -26,13 +26,20 @@ const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
 const list = computed<List>(() => currentDialog.value.data.list);
 
 const listForm = ref<VForm>();
-const listDto = ref<Partial<List>>({
+const listDto = ref<
+  Partial<
+    List & {
+      createDefaultStages?: boolean;
+    }
+  >
+>({
   icon: list.value?.icon,
   iconColor: list.value?.iconColor,
   name: list.value?.name,
   spaceId: list.value?.spaceId ?? currentDialog.value?.data.space.id,
   defaultCardType:
     list.value?.defaultCardType ?? workspace.value?.defaultCardType,
+  createDefaultStages: true,
 });
 
 const { data: cardTypes } = useFindAllQuery({

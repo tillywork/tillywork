@@ -54,7 +54,7 @@ const attrs = useAttrs();
             ...attrs,
             ...props,
           }"
-          class="d-flex align-center h-100 ga-1 pa-1"
+          class="d-flex align-center h-100 ga-1 pa-2"
           :class="{
             'flex-fill': fill,
           }"
@@ -62,6 +62,7 @@ const attrs = useAttrs();
           :rounded
           @click.prevent
         >
+          <v-icon v-if="icon" :icon start class="ms-1" />
           <template v-if="selectedItems.length">
             <template v-for="item in selectedItems" :key="item.item">
               <v-chip

@@ -21,8 +21,8 @@ export class SpaceSideEffectsService {
                     .create({
                         name: list.name,
                         spaceId: space.id,
-                        createOnboardingData: true,
                         defaultCardType,
+                        createDefaultStages: true,
                     })
                     .then((list) => resolve(list));
             });
