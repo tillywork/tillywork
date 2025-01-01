@@ -72,6 +72,11 @@ export const useStateStore = defineStore('state', {
       let link = '/';
       const currentModuleList = this.currentList[this.selectedModule] as List;
 
+      if (!currentModuleList) {
+        this.$router.push(link);
+        return;
+      }
+
       switch (this.selectedModule) {
         case WorkspaceTypes.CRM:
           link = this.getCrmListLink(currentModuleList);
@@ -79,7 +84,7 @@ export const useStateStore = defineStore('state', {
 
         case WorkspaceTypes.PROJECT_MANAGEMENT:
         default: {
-          if (currentModuleList) link = `/pm/list/${currentModuleList.id}`;
+          link = this.getPmListLink(currentModuleList);
           break;
         }
       }
@@ -88,6 +93,9 @@ export const useStateStore = defineStore('state', {
     },
     getCrmListLink(list: List) {
       return `/crm/${list?.slug ?? 'contacts'}`;
+    },
+    getPmListLink(list: List) {
+      return `/pm/list/${list?.id}`;
     },
     toggleFreezeRail() {
       this.isRailFrozen = !this.isRailFrozen;

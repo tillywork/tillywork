@@ -4,6 +4,10 @@ definePage({
     requiresAuth: true,
   },
 });
+
+const router = useRouter();
+
+router.push('/');
 </script>
 
 <template>

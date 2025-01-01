@@ -11,8 +11,6 @@ const { list } = defineProps<{
   list: List;
 }>();
 
-console.log('list', list);
-
 const cardTypeId = computed(() => list.defaultCardType.id);
 const listId = computed(() => list.id);
 

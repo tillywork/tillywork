@@ -17,7 +17,8 @@ const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
 const { showSnackbar } = useSnackbarStore();
 const dialog = useDialogStore();
-const { setSpaceExpansionState } = useStateStore();
+const { setSpaceExpansionState, setCurrentList, navigateToLastList } =
+  useStateStore();
 
 const workspacesService = useWorkspacesService();
 const usersService = useUsersService();
@@ -66,8 +67,17 @@ async function createWorkspace(createWorkspaceDto: Partial<Workspace>) {
     .then((workspace) => {
       authStore.setWorkspace(workspace);
       dialog.closeDialog(currentDialogIndex.value);
-      setSpaceExpansionState(workspace.id, [workspace.spaces[0].id]);
-      router.push(`/pm/list/${workspace.spaces[0].lists[0].id}`);
+      switch (workspace.type) {
+        case WorkspaceTypes.PROJECT_MANAGEMENT:
+          setSpaceExpansionState(workspace.id, [workspace.spaces[0].id]);
+          setCurrentList(workspace.spaces[0].lists[0]);
+          break;
+        case WorkspaceTypes.CRM:
+        default:
+          break;
+      }
+
+      navigateToLastList();
     })
     .catch(() => {
       showSnackbar({
