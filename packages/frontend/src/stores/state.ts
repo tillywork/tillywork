@@ -12,7 +12,7 @@ export const useStateStore = defineStore('state', {
   persist: true,
   state: () => {
     return {
-      selectedModule: WorkspaceTypes.PROJECT_MANAGEMENT as WorkspaceTypes,
+      selectedModule: null as WorkspaceTypes | null,
       /** Used to disable command pallete when user is typing. */
       isInputFocused: false,
       /** Is information navigation drawer open. */
@@ -46,7 +46,9 @@ export const useStateStore = defineStore('state', {
       this.areChildCardsExpanded = !this.areChildCardsExpanded;
     },
     setCurrentList(list: undefined | List) {
-      this.currentList[this.selectedModule] = list;
+      if (this.selectedModule) {
+        this.currentList[this.selectedModule] = list;
+      }
     },
     clearCurrentList() {
       this.currentList = {
@@ -56,7 +58,9 @@ export const useStateStore = defineStore('state', {
       };
     },
     getCurrentListBySelectedModule() {
-      return this.currentList[this.selectedModule];
+      if (this.selectedModule) {
+        return this.currentList[this.selectedModule];
+      }
     },
     setTitle(title?: string) {
       document.title = `${title ? title + ' | tillywork' : 'tillywork'}`;
@@ -70,6 +74,11 @@ export const useStateStore = defineStore('state', {
     },
     navigateToLastList() {
       let link = '/';
+      if (!this.selectedModule) {
+        this.$router.push(link);
+        return;
+      }
+
       const currentModuleList = this.currentList[this.selectedModule] as List;
 
       if (!currentModuleList) {

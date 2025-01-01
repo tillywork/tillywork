@@ -7,5 +7,4 @@ export class CreateWorkspaceDto {
     type: WorkspaceTypes;
     accessType: AccessType;
     projectId: number;
-    createOnboardingData?: boolean;
 }

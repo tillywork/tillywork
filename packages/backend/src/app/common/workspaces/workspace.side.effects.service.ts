@@ -18,14 +18,12 @@ export class WorkspaceSideEffectsService {
 
     async postCreate({
         workspace,
-        createOnboardingData,
     }: {
         workspace: Workspace;
-        createOnboardingData?: boolean;
     }): Promise<Workspace> {
         workspace = await this.handleWorkspaceSetup(workspace);
 
-        if (createOnboardingData) {
+        if (workspace.type === WorkspaceTypes.PROJECT_MANAGEMENT) {
             workspace.spaces = await this.createWorkspaceOnboardingData(
                 workspace
             );

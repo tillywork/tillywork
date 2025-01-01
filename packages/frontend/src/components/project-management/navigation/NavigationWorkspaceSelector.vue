@@ -19,8 +19,10 @@ const { workspace: selectedWorkspace } = storeToRefs(authStore);
 const { selectedModule } = storeToRefs(useStateStore());
 const { toggleFreezeRail } = useStateStore();
 
+const workspacesEnabled = computed(() => !!selectedModule.value);
 const workspaceQuery = workspacesService.useGetWorkspacesQuery({
   type: selectedModule,
+  enabled: workspacesEnabled,
 });
 const { mutateAsync: deleteWorkspace, isPending: isDeleteLoading } =
   workspacesService.useDeleteWorkspaceMutation();

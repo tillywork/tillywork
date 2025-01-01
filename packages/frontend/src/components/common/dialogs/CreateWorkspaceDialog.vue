@@ -17,6 +17,7 @@ const { setSelectedModule } = useStateStore();
 const currentDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CREATE_WORKSPACE)
 );
+const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
 
 const { mutateAsync: createWorkspace, isPending } =
   workspacesService.useCreateWorkspaceMutation();
@@ -53,6 +54,7 @@ async function handleCreate(workspaceDto: Partial<Workspace>) {
       @submit="handleCreate"
       :loading="isPending"
       card-class="mt-16"
+      :data="currentDialog.data"
     />
   </v-card>
 </template>

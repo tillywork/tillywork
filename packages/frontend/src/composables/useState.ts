@@ -20,7 +20,8 @@ import { useTheme } from 'vuetify';
 export const useState = () => {
   const { setSelectedModule, navigateToLastList } = useStateStore();
   const { selectedModule } = storeToRefs(useStateStore());
-  const { isAuthenticated, setProject, setWorkspace } = useAuthStore();
+  const { isAuthenticated, setProject, setWorkspace, clearWorkspace } =
+    useAuthStore();
   const { project, user, workspace } = storeToRefs(useAuthStore());
 
   const projectsEnabled = computed(() => !project.value && isAuthenticated());
@@ -38,12 +39,65 @@ export const useState = () => {
   const { mutateAsync: updateUser } = updateUserMutation();
 
   const { data: workspaces } = useGetWorkspacesQuery({
-    type: selectedModule,
     enabled: workspacesEnabled,
   });
   const { data: projects } = useGetProjectsQuery({
     enabled: projectsEnabled,
   });
+
+  function updateAppState() {
+    if (!workspaces.value?.length) {
+      // If no workspaces exist, open onboarding dialog
+      dialog.openDialog({
+        dialog: DIALOGS.ONBOARDING,
+        options: {
+          fullscreen: true,
+          persistent: true,
+        },
+      });
+    } else if (workspaces.value?.length) {
+      if (selectedModule.value) {
+        // If a module is selected, check for existing workspaces
+        const moduleWorkspaces = workspaces.value?.filter(
+          (w) => w.type === selectedModule.value
+        );
+
+        if (moduleWorkspaces.length) {
+          // If module has workspaces, set the first one
+          setWorkspace(moduleWorkspaces[0]);
+        } else {
+          // If module has no workspaces, clear selected workspace
+          clearWorkspace();
+        }
+      } else {
+        if (workspace.value) {
+          // If a workspace is selected, make sure it still exists
+          const existingWorkspace = workspaces.value.find(
+            (w) => w.id === workspace.value?.id
+          );
+
+          if (existingWorkspace) {
+            setSelectedModule(existingWorkspace.type);
+            setWorkspace(existingWorkspace);
+          } else {
+            // If it doesn't exist, select first workspace
+            setFirstWorkspace();
+          }
+        } else {
+          // If no workspace is selected, and no module is selected, go to first workspace
+          setFirstWorkspace();
+        }
+      }
+    }
+  }
+
+  function setFirstWorkspace() {
+    if (workspaces.value) {
+      const fillerWorkspace = workspaces.value[0];
+      setSelectedModule(fillerWorkspace.type);
+      setWorkspace(fillerWorkspace);
+    }
+  }
 
   watch(
     route,
@@ -77,34 +131,7 @@ export const useState = () => {
 
   watch(workspaces, (v) => {
     if (v) {
-      if (!v.length) {
-        dialog.openDialog({
-          dialog: DIALOGS.ONBOARDING,
-          options: {
-            fullscreen: true,
-            persistent: true,
-          },
-        });
-      } else if (v.length) {
-        // If no module is currently selected, use the first workspace's module
-        if (!selectedModule.value) {
-          setSelectedModule(v[0].type);
-        }
-
-        // If no current workspace is selected, or the selected workspace type is different from the selected module, update current workspace
-        if (
-          !workspace.value ||
-          (selectedModule.value &&
-            workspace.value?.type !== selectedModule.value)
-        ) {
-          setWorkspace(v[0]);
-        } else {
-          const existingWorkspace = v.find((w) => w.id === workspace.value?.id);
-          if (existingWorkspace) {
-            setWorkspace(existingWorkspace);
-          }
-        }
-      }
+      updateAppState();
     }
   });
 
@@ -141,6 +168,7 @@ export const useState = () => {
   );
 
   watch(selectedModule, () => {
+    updateAppState();
     navigateToLastList();
   });
 

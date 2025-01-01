@@ -116,7 +116,6 @@ export class WorkspacesService {
 
         workspace = await this.workspaceSideEffectsService.postCreate({
             workspace,
-            createOnboardingData: createWorkspaceDto.createOnboardingData,
         });
         await this.workspacesRepository.save(workspace);
 

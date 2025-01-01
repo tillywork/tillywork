@@ -66,17 +66,23 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    clearWorkspace() {
+      this.workspace = null;
+    },
+
     /**
      * Logs the user out by
      * clearing the token and user object values
      * saved in store
      */
     logout(go?: RouteLocation) {
+      const stateStore = useStateStore();
       this.token = null;
       this.user = null;
       this.project = null;
       this.workspace = null;
-      this.$router.go(go ?? '/');
+      stateStore.clearCurrentList();
+      this.$router.push(go ?? '/');
     },
 
     /**

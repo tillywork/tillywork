@@ -17,8 +17,12 @@ const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
 const { showSnackbar } = useSnackbarStore();
 const dialog = useDialogStore();
-const { setSpaceExpansionState, setCurrentList, navigateToLastList } =
-  useStateStore();
+const {
+  setSpaceExpansionState,
+  setCurrentList,
+  navigateToLastList,
+  setSelectedModule,
+} = useStateStore();
 
 const workspacesService = useWorkspacesService();
 const usersService = useUsersService();
@@ -67,6 +71,7 @@ async function createWorkspace(createWorkspaceDto: Partial<Workspace>) {
     .then((workspace) => {
       authStore.setWorkspace(workspace);
       dialog.closeDialog(currentDialogIndex.value);
+      setSelectedModule(workspace.type);
       switch (workspace.type) {
         case WorkspaceTypes.PROJECT_MANAGEMENT:
           setSpaceExpansionState(workspace.id, [workspace.spaces[0].id]);
@@ -255,7 +260,6 @@ async function createWorkspace(createWorkspaceDto: Partial<Workspace>) {
           <create-workspace-form
             @submit="createWorkspace"
             :loading="createWorkspaceMutation.isPending.value"
-            onboarding
           />
         </template>
       </v-stepper>
