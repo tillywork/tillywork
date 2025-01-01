@@ -306,7 +306,12 @@ watchEffect(() => {
         :max-height="maxHeight"
         @load="handleGroupCardsLoad"
       >
-        <template #empty></template>
+        <template #empty>
+          <span class="text-body-2 mt-1"
+            >No data found. Add a
+            {{ list.defaultCardType.name.toLowerCase() }} to get started.</span
+          >
+        </template>
         <template #loading></template>
         <draggable
           v-model="draggableCards"

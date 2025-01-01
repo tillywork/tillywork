@@ -17,12 +17,12 @@ const isRail = ref(true);
 const logo = useLogo();
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
-  {
-    icon: 'mdi-home',
-    title: 'Home',
-    route: '/crm',
-    activeOnExactMatch: true,
-  },
+  //   {
+  //     icon: 'mdi-home',
+  //     title: 'Home',
+  //     route: '/crm',
+  //     activeOnExactMatch: true,
+  //   },
 ]);
 
 const salesMenuItems = ref<NavigationMenuItem[]>([
