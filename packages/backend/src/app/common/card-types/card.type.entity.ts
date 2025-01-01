@@ -38,7 +38,7 @@ export class CardType {
 
     @Column({
         type: "boolean",
-        default: true,
+        default: false,
     })
     hasChildren: boolean;
 
