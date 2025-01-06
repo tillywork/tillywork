@@ -31,6 +31,10 @@ export class CardListSubscriber implements EntitySubscriberInterface<CardList> {
         const activityRepo = event.manager.getRepository(CardActivity);
         const listStageRepo = event.manager.getRepository(ListStage);
 
+        if (!event.entity.listStage?.id) {
+            return;
+        }
+
         const listStage = await listStageRepo.findOne({
             where: {
                 id: event.entity.listStage.id,
