@@ -110,6 +110,10 @@ export const useFields = ({
         FieldTypes.NUMBER,
         FieldTypes.TEXT,
         FieldTypes.EMAIL,
+        FieldTypes.CURRENCY,
+        FieldTypes.PERCENTAGE,
+        FieldTypes.EMAIL,
+        FieldTypes.URL,
       ].includes(field.type)
     )
   );

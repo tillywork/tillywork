@@ -25,6 +25,7 @@ const attrs = useAttrs();
       :multiple
       autocomplete="off"
       auto-select-first
+      :rounded
     />
   </template>
   <template v-else>
