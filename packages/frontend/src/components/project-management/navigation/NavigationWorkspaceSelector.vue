@@ -57,28 +57,6 @@ function handleDeleteWorkspace(workspace: Workspace) {
   });
 }
 
-watch(
-  workspaceQuery.data,
-  (workspaces) => {
-    if (workspaces) {
-      if (workspaces.length && !selectedWorkspace.value) {
-        handleSelectWorkspace(workspaces[0]);
-      }
-
-      if (!workspaces.length) {
-        selectedWorkspace.value = null;
-      }
-
-      if (workspaces.length && selectedWorkspace.value) {
-        selectedWorkspace.value =
-          workspaces.find((w) => w.id === selectedWorkspace.value?.id) ??
-          workspaces[0];
-      }
-    }
-  },
-  { deep: true }
-);
-
 watch([workspaceSettingsMenu, selectWorkspaceMenu], () => {
   toggleFreezeRail();
 });

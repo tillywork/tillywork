@@ -16,7 +16,7 @@ const {
   watchForCommandChanges,
   isCommandsEnabled,
 } = useCommands();
-const { selectedModule } = useState();
+const { selectedModule, initWatchers } = useState();
 
 watch(
   isCommandsEnabled,
@@ -30,6 +30,7 @@ watch(
 );
 
 registerInputFocusAndBlurListeners();
+initWatchers();
 </script>
 
 <template>

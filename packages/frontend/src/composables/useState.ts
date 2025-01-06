@@ -46,8 +46,8 @@ export const useState = () => {
   });
 
   function updateAppState() {
+    // If no workspaces exist, open onboarding dialog
     if (!workspaces.value?.length) {
-      // If no workspaces exist, open onboarding dialog
       dialog.openDialog({
         dialog: DIALOGS.ONBOARDING,
         options: {
@@ -55,124 +55,129 @@ export const useState = () => {
           persistent: true,
         },
       });
-    } else if (workspaces.value?.length) {
-      if (selectedModule.value) {
-        // If a module is selected, check for existing workspaces
-        const moduleWorkspaces = workspaces.value?.filter(
-          (w) => w.type === selectedModule.value
-        );
+      return;
+    }
 
-        if (moduleWorkspaces.length) {
-          // If module has workspaces, set the first one
-          setWorkspace(moduleWorkspaces[0]);
-        } else {
-          // If module has no workspaces, clear selected workspace
-          clearWorkspace();
-        }
+    // If a workspace is selected, ensure it still exists
+    if (workspace.value) {
+      const existingWorkspace = workspaces.value.find(
+        (w) => w.id === workspace.value?.id
+      );
+      if (existingWorkspace) {
+        setSelectedModule(existingWorkspace.type);
+        setWorkspace(existingWorkspace);
+        return;
       } else {
-        if (workspace.value) {
-          // If a workspace is selected, make sure it still exists
-          const existingWorkspace = workspaces.value.find(
-            (w) => w.id === workspace.value?.id
-          );
-
-          if (existingWorkspace) {
-            setSelectedModule(existingWorkspace.type);
-            setWorkspace(existingWorkspace);
-          } else {
-            // If it doesn't exist, select first workspace
-            setFirstWorkspace();
-          }
-        } else {
-          // If no workspace is selected, and no module is selected, go to first workspace
-          setFirstWorkspace();
-        }
+        setFirstWorkspace();
+        return;
       }
     }
+
+    // If a module is selected, filter workspaces by module
+    if (selectedModule.value) {
+      const moduleWorkspaces = workspaces.value.filter(
+        (w) => w.type === selectedModule.value
+      );
+
+      if (moduleWorkspaces.length) {
+        setWorkspace(moduleWorkspaces[0]);
+        return;
+      } else {
+        clearWorkspace();
+        return;
+      }
+    }
+
+    // If no workspace or module is selected, set the first workspace
+    setFirstWorkspace();
   }
 
   function setFirstWorkspace() {
-    if (workspaces.value) {
-      const fillerWorkspace = workspaces.value[0];
-      setSelectedModule(fillerWorkspace.type);
-      setWorkspace(fillerWorkspace);
+    if (workspaces.value?.length) {
+      const firstWorkspace = workspaces.value[0];
+      setSelectedModule(firstWorkspace.type);
+      setWorkspace(firstWorkspace);
     }
   }
 
-  watch(
-    route,
-    () => {
-      if (route.path.startsWith('/pm')) {
-        setSelectedModule(WorkspaceTypes.PROJECT_MANAGEMENT);
-      } else if (route.path.startsWith('/crm')) {
-        setSelectedModule(WorkspaceTypes.CRM);
+  function initWatchers() {
+    watch(
+      route,
+      () => {
+        if (route.path.startsWith('/pm')) {
+          setSelectedModule(WorkspaceTypes.PROJECT_MANAGEMENT);
+        } else if (route.path.startsWith('/crm')) {
+          setSelectedModule(WorkspaceTypes.CRM);
+        }
+      },
+      { immediate: true }
+    );
+
+    /*
+     * This handles setting the user's theme mode (dark or light)
+     * across the application and setting it on Vuetify settings
+     * when the application is opened and when the value is changed.
+     * Default: dark
+     */
+    const { theme } = storeToRefs(useThemeStore());
+    const appTheme = useTheme();
+    watch(
+      theme,
+      (v) => {
+        appTheme.global.name.value = v;
+      },
+      {
+        immediate: true,
       }
-    },
-    { immediate: true }
-  );
+    );
 
-  /*
-   * This handles setting the user's theme mode (dark or light)
-   * across the application and setting it on Vuetify settings
-   * when the application is opened and when the value is changed.
-   * Default: dark
-   */
-  const { theme } = storeToRefs(useThemeStore());
-  const appTheme = useTheme();
-  watch(
-    theme,
-    (v) => {
-      appTheme.global.name.value = v;
-    },
-    {
-      immediate: true,
-    }
-  );
+    watch(workspaces, (v) => {
+      if (v) {
+        updateAppState();
+      }
+    });
 
-  watch(workspaces, (v) => {
-    if (v) {
+    watch(projects, (v) => {
+      if (v && v.length && !project.value) {
+        setProject(v[0]);
+      }
+    });
+
+    watch(
+      project,
+      (v) => {
+        if (v && user.value) {
+          updateUser({
+            ...user.value,
+            project: v,
+          });
+        }
+      },
+      { immediate: true }
+    );
+
+    watch(
+      user,
+      (v) => {
+        if (import.meta.env.MODE === 'production' && isAuthenticated()) {
+          posthog.identify(`${v?.id}`, {
+            email: v?.email,
+            name: `${v?.firstName} ${v?.lastName}`,
+          });
+        }
+      },
+      { immediate: true }
+    );
+
+    watch(selectedModule, () => {
       updateAppState();
-    }
-  });
-
-  watch(projects, (v) => {
-    if (v && v.length && !project.value) {
-      setProject(v[0]);
-    }
-  });
-
-  watch(
-    project,
-    (v) => {
-      if (v && user.value) {
-        updateUser({
-          ...user.value,
-          project: v,
-        });
-      }
-    },
-    { immediate: true }
-  );
-
-  watch(
-    user,
-    (v) => {
-      if (import.meta.env.MODE === 'production' && isAuthenticated()) {
-        posthog.identify(`${v?.id}`, {
-          email: v?.email,
-          name: `${v?.firstName} ${v?.lastName}`,
-        });
-      }
-    },
-    { immediate: true }
-  );
-
-  watch(selectedModule, () => {
-    updateAppState();
-    navigateToLastList();
-  });
+      navigateToLastList();
+    });
+  }
 
   return {
     selectedModule,
+    initWatchers,
+    updateAppState,
   };
 };
