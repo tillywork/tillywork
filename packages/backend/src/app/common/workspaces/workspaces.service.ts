@@ -114,9 +114,11 @@ export class WorkspacesService {
             "workspace"
         );
 
-        workspace = await this.workspaceSideEffectsService.postCreate({
-            workspace,
-        });
+        workspace = await this.workspaceSideEffectsService.handleWorkspaceSetup(
+            {
+                workspace,
+            }
+        );
         await this.workspacesRepository.save(workspace);
 
         return workspace;
