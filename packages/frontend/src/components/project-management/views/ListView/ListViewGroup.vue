@@ -28,6 +28,7 @@ import {
 } from '@tillywork/shared';
 import { useListGroup } from '@/composables/useListGroup';
 import BaseField from '@/components/common/fields/BaseField.vue';
+import BaseCardActions from '../../cards/BaseCard/BaseCardActions.vue';
 
 const props = defineProps<{
   listGroup: Row<ListGroup>;
@@ -60,7 +61,10 @@ const sortBy = computed<SortState>(() =>
 );
 const tableSortState = computed(() =>
   sortBy.value?.map((sortOption) => {
-    return { id: sortOption.key, desc: sortOption.order === 'desc' };
+    return {
+      id: sortOption.key,
+      desc: sortOption.order.toUpperCase() === 'DESC',
+    };
   })
 );
 
@@ -92,8 +96,12 @@ const filters = computed<QueryFilter>(() => {
   }
 });
 
-const hideCompleted = computed<boolean>(() => props.view.options.hideCompleted);
-const hideChildren = computed<boolean>(() => props.view.options.hideChildren);
+const hideCompleted = computed<boolean>(
+  () => props.view.options.hideCompleted ?? false
+);
+const hideChildren = computed<boolean>(
+  () => props.view.options.hideChildren ?? false
+);
 
 const cards = ref<Card[]>([]);
 const total = ref(0);
@@ -308,7 +316,7 @@ watch(
                   class="list-row text-body-3"
                   rounded="0"
                   height="36"
-                  :to="`/pm/card/${row.original.id}`"
+                  :to="`/card/${row.original.id}`"
                   :ripple="false"
                   v-bind="rowProps"
                 >
@@ -318,7 +326,8 @@ watch(
                       class="d-flex justify-end me-2"
                     >
                       <div v-if="isRowHovering || rowMenuOpen?.id === row.id">
-                        <v-menu
+                        <base-card-actions
+                          :card="row.original"
                           @update:model-value="
                             (v: boolean) => handleCardMenuClick({ row, isOpen: v })
                           "
@@ -330,20 +339,7 @@ watch(
                               @click.prevent
                             />
                           </template>
-                          <v-card class="border-thin">
-                            <v-list>
-                              <v-list-item
-                                class="text-error"
-                                @click="handleDeleteCard(row.original)"
-                              >
-                                <template #prepend>
-                                  <v-icon icon="mdi-delete" />
-                                </template>
-                                <v-list-item-title>Delete</v-list-item-title>
-                              </v-list-item>
-                            </v-list>
-                          </v-card>
-                        </v-menu>
+                        </base-card-actions>
                       </div>
                     </div>
                   </template>

@@ -28,9 +28,8 @@ export const useDialogStore = defineStore('dialog', {
       data?: any;
       options?: DialogOptions;
     }) {
-      console.debug(dialog, data, options);
       if (dialog && this.getDialogIndex(dialog) === -1) {
-        this.dialogs.push({
+        const newDialog = {
           dialog,
           data,
           options: {
@@ -40,11 +39,16 @@ export const useDialogStore = defineStore('dialog', {
                 : undefined,
             ...options,
           },
-        });
+        };
+
+        this.dialogs = [...this.dialogs, newDialog];
       }
     },
     closeDialog(index: number) {
-      this.dialogs.splice(index, 1);
+      this.dialogs = [
+        ...this.dialogs.slice(0, index),
+        ...this.dialogs.slice(index + 1),
+      ];
     },
     closeAllDialogs() {
       this.dialogs = [];

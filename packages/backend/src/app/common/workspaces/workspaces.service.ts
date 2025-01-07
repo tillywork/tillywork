@@ -106,15 +106,7 @@ export class WorkspacesService {
     }
 
     async create(createWorkspaceDto: CreateWorkspaceDto): Promise<Workspace> {
-        const workspace = this.workspacesRepository.create(createWorkspaceDto);
-        await this.workspacesRepository.save(workspace);
-
-        const defaultCardTypes =
-            await this.workspaceSideEffectsService.createDefaultCardTypes(
-                workspace
-            );
-
-        workspace.defaultCardType = defaultCardTypes[0];
+        let workspace = this.workspacesRepository.create(createWorkspaceDto);
         await this.workspacesRepository.save(workspace);
 
         await this.accessControlService.applyResourceAccess(
@@ -122,12 +114,12 @@ export class WorkspacesService {
             "workspace"
         );
 
-        if (createWorkspaceDto.createOnboardingData) {
-            const space = await this.workspaceSideEffectsService.postCreate(
-                workspace
-            );
-            workspace.spaces = [space];
-        }
+        workspace = await this.workspaceSideEffectsService.handleWorkspaceSetup(
+            {
+                workspace,
+            }
+        );
+        await this.workspacesRepository.save(workspace);
 
         return workspace;
     }

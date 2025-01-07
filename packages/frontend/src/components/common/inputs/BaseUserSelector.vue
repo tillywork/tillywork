@@ -35,6 +35,8 @@ const { getUserFullName } = useUsersService();
 const searchTerm = ref('');
 const selectedUsers = ref<User[]>(getSelectedUsersFromModel());
 
+const attrs = useAttrs();
+
 const searchedUsers = computed(() =>
   props.users.filter(
     (user) =>
@@ -74,7 +76,7 @@ function isUserSelected(user: User): boolean {
 function getSelectedUsersFromModel(): User[] {
   if (props.returnId) {
     return (value.value as number[])
-      .map((id) => props.users.find((user) => user.id == id))
+      .map((id) => props.users.find((user) => user.id == +id))
       .filter((user): user is User => user !== undefined);
   }
   return cloneDeep(value.value as User[]);
@@ -100,6 +102,8 @@ defineExpose({ userMenu });
     <template #activator="{ props: menuProps }">
       <v-autocomplete
         v-if="textField"
+        :width="!fill ? 90 : undefined"
+        v-bind="attrs"
         v-model="selectedUsers"
         :label="label ?? 'Select'"
         placeholder="Search..."
@@ -111,13 +115,16 @@ defineExpose({ userMenu });
         hide-details
         autocomplete="off"
         :multiple
-        width="90"
         :prepend-inner-icon="icon"
         chips
         auto-select-first
+        @update:model-value="
+          (v) =>
+            Array.isArray(v) ? (selectedUsers = v) : (selectedUsers = v ? [v as User] : [])
+        "
       >
         <template #chip="{ item, props }">
-          <v-chip v-bind="props" rounded="large">
+          <v-chip v-bind="props" rounded="pill">
             <template #prepend>
               <base-avatar
                 :photo="item.raw.photo"
@@ -174,6 +181,10 @@ defineExpose({ userMenu });
             size="small"
             color="surface-dark"
             class="text-none text-caption font-weight-regular"
+            :class="{
+              'flex-fill': fill,
+              'justify-start': fill,
+            }"
             @click.prevent
           >
             <template #prepend>

@@ -1,4 +1,5 @@
 import { SortOption } from '../common';
+import { Field } from '../fields';
 import { Filter } from '../filters';
 import { List, ListGroupOptions } from '../lists';
 
@@ -23,9 +24,9 @@ export enum ViewTypes {
 
 export type ViewOptions = {
   groupBy: ViewGroupByOption;
-  sortBy: SortOption;
-  hideCompleted: boolean;
-  hideChildren: boolean;
+  sortBy?: SortOption;
+  hideCompleted?: boolean;
+  hideChildren?: boolean;
   columns?: string[];
 };
 
@@ -33,3 +34,15 @@ export type ViewGroupByOption = {
   type: ListGroupOptions;
   fieldId?: number;
 };
+
+export interface ViewSortOption {
+  label: string;
+  value: SortOption;
+  icon: string;
+}
+
+export interface ViewGroupOption {
+  label: string;
+  value: ListGroupOptions;
+  field?: Field;
+}

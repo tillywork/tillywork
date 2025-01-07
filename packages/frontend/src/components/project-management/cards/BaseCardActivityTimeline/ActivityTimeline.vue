@@ -10,6 +10,7 @@ import type { Card } from '@tillywork/shared';
 
 const props = defineProps<{
   card: Card;
+  hideCommentInput?: boolean;
 }>();
 
 const emit = defineEmits(['comment']);
@@ -27,7 +28,7 @@ const { data: activities, refetch } = useFindAllQuery({
   cardId,
   sortBy: {
     key: 'createdAt',
-    order: 'desc',
+    order: 'DESC',
   },
 });
 
@@ -44,7 +45,7 @@ watch(cardId, () => {
 </script>
 
 <template>
-  <template v-if="user">
+  <template v-if="user && !hideCommentInput">
     <base-card-comment-box
       v-model="comment"
       v-model:empty="isCommentEmpty"

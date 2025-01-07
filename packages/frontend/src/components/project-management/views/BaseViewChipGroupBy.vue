@@ -1,27 +1,37 @@
 <script setup lang="ts">
-import { DEFAULT_LIST_GROUP_BY_OPTIONS } from '../lists/types';
-import type { ListGroupOption } from './types';
 import BaseViewChip from './BaseViewChip.vue';
-import { ListGroupOptions, type ViewGroupByOption } from '@tillywork/shared';
+import {
+  ListGroupOptions,
+  type List,
+  type ViewGroupByOption,
+  type ViewGroupOption,
+} from '@tillywork/shared';
 import { useFields } from '@/composables/useFields';
-import { useStateStore } from '@/stores/state';
 import posthog from 'posthog-js';
 
 const groupBy = defineModel<ViewGroupByOption>();
+const { list } = defineProps<{
+  list: List;
+}>();
 
-const { currentList } = storeToRefs(useStateStore());
-const cardTypeId = computed(() => currentList.value?.defaultCardType.id ?? 0);
-const listId = computed(() => currentList.value?.id ?? 0);
-const fieldsEnabled = computed(() => !!currentList.value);
+const cardTypeId = computed(() => list.defaultCardType.id);
+const listId = computed(() => list.id);
 
 const { groupableFields } = useFields({
   cardTypeId,
   listId,
-  enabled: fieldsEnabled,
 });
 
 const groupByOptions = computed(() => {
-  const arr = [...DEFAULT_LIST_GROUP_BY_OPTIONS];
+  const arr = [];
+
+  if (list.listStages?.length) {
+    arr.push({
+      label: 'Stage',
+      value: ListGroupOptions.LIST_STAGE,
+      icon: 'mdi-circle-slice-8',
+    });
+  }
 
   if (groupableFields.value) {
     groupableFields.value.forEach((field) => {
@@ -45,7 +55,7 @@ const isGroupByFilled = computed(
   () => groupBy.value && groupBy.value.type !== ListGroupOptions.ALL
 );
 
-function handleGroupBySelection(option: ListGroupOption) {
+function handleGroupBySelection(option: ViewGroupOption) {
   groupBy.value = {
     type: option.value,
     fieldId: option.field?.id,
@@ -57,7 +67,7 @@ function handleGroupBySelection(option: ListGroupOption) {
   });
 }
 
-function isOptionSelected(option: ListGroupOption) {
+function isOptionSelected(option: ViewGroupOption) {
   return (
     option.value === groupBy.value?.type &&
     option.field?.id === groupBy.value.fieldId
@@ -76,7 +86,7 @@ function clearGroupBy() {
 </script>
 
 <template>
-  <v-menu>
+  <v-menu v-if="groupByOptions.length">
     <template #activator="{ props }">
       <base-view-chip
         v-bind="props"

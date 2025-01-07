@@ -44,7 +44,9 @@ export enum FieldTypes {
   LABEL = 'label',
   USER = 'user',
   DATE = 'date',
+  DATETIME = 'date_time',
   NUMBER = 'number',
+  PERCENTAGE = 'percentage',
   CHECKBOX = 'checkbox',
   EMAIL = 'email',
   URL = 'url',
@@ -72,6 +74,10 @@ export const FIELD_TYPE_OPTIONS = [
     value: FieldTypes.DATE,
   },
   {
+    title: 'Date & Time',
+    value: FieldTypes.DATETIME,
+  },
+  {
     title: 'User',
     value: FieldTypes.USER,
   },
@@ -87,32 +93,13 @@ export const FIELD_TYPE_OPTIONS = [
     title: 'Number',
     value: FieldTypes.NUMBER,
   },
-];
-
-export const DEFAULT_CARD_FIELDS: Partial<Field>[] = [
   {
-    name: 'title',
-    type: FieldTypes.TEXT,
-    required: true,
-    multiple: false,
+    title: 'Percentage',
+    value: FieldTypes.PERCENTAGE,
   },
   {
-    name: 'description',
-    type: FieldTypes.RICH,
-    required: false,
-    multiple: false,
-  },
-  {
-    name: 'dueAt',
-    type: FieldTypes.DATE,
-    required: false,
-    multiple: false,
-  },
-  {
-    name: 'users',
-    type: FieldTypes.USER,
-    required: false,
-    multiple: true,
+    title: 'Email',
+    value: FieldTypes.EMAIL,
   },
 ];
 

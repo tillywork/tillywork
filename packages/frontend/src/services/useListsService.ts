@@ -1,6 +1,6 @@
 import { useHttp } from '@/composables/useHttp';
-import type { List } from '../../components/project-management/lists/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
+import type { List } from '@tillywork/shared';
 import type { MaybeRef } from 'vue';
 
 export const useListsService = () => {
@@ -73,9 +73,9 @@ export const useListsService = () => {
       queryKey: [
         'lists',
         {
-          spaceId: toValue(spaceId),
-          workspaceId: toValue(workspaceId),
-          throughSpace: toValue(throughSpace),
+          spaceId,
+          workspaceId,
+          throughSpace,
         },
       ],
       queryFn: () => getLists({ spaceId, workspaceId, throughSpace }),
@@ -86,8 +86,8 @@ export const useListsService = () => {
 
   function useGetListQuery(id: MaybeRef<number>) {
     return useQuery({
-      queryKey: ['lists', toValue(id)],
-      queryFn: () => getList(toValue(id)),
+      queryKey: ['lists', id],
+      queryFn: () => getList(id),
       retry: false,
       staleTime: 1 * 60 * 1000,
     });
@@ -122,6 +122,7 @@ export const useListsService = () => {
 
   return {
     getList,
+    getLists,
     useGetListsQuery,
     useGetListQuery,
     useCreateListMutation,

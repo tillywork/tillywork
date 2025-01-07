@@ -49,8 +49,7 @@ function deleteSpace(space: Space) {
       queryClient.invalidateQueries({ queryKey: ['space', space.id] });
       dialog.closeDialog(confirmDialogIndex.value);
     })
-    .catch((e) => {
-      console.log(e);
+    .catch(() => {
       showSnackbar({
         message: 'Something went wrong, please try again.',
         color: 'error',

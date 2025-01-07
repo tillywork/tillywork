@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { VForm } from 'vuetify/components';
-import { WorkspaceTypes, type Workspace } from './types';
 import { useAuthStore } from '@/stores/auth';
 import validationUtils from '@/utils/validation';
+import { WorkspaceTypes, type Workspace } from '@tillywork/shared';
 
 const props = defineProps<{
   loading?: boolean;
   cardClass?: string;
-  onboarding?: boolean;
+  data?: Partial<Workspace>;
 }>();
 const emit = defineEmits(['submit']);
 
@@ -16,19 +16,12 @@ const authStore = useAuthStore();
 const { user, project } = storeToRefs(authStore);
 
 const workspaceForm = ref<VForm>();
-const workspaceType = ref([WorkspaceTypes.PROJECT_MANAGEMENT]);
-const workspaceDto = ref<
-  Partial<Workspace> & { createOnboardingData: boolean }
->({
+const workspaceDto = ref<Partial<Workspace>>({
   name: '',
   projectId: project.value!.id,
   ownerId: user.value!.id,
   type: WorkspaceTypes.PROJECT_MANAGEMENT,
-  createOnboardingData: props.onboarding,
-});
-
-watch(workspaceType, (v) => {
-  workspaceDto.value.type = v[0];
+  ...props.data,
 });
 
 async function handleSubmit() {
@@ -55,17 +48,12 @@ async function handleSubmit() {
         autofocus
       />
       <p class="mt-6 ms-2 text-subtitle-2">Workspace App</p>
-      <v-list
-        v-model:selected="workspaceType"
-        selectable
-        lines="one"
-        mandatory
-        class="user-select-none"
-      >
+      <v-list selectable lines="one" mandatory class="user-select-none">
         <v-list-item
           class="text-body-3"
           rounded="md"
-          :value="WorkspaceTypes.PROJECT_MANAGEMENT"
+          @click="workspaceDto.type = WorkspaceTypes.PROJECT_MANAGEMENT"
+          :active="workspaceDto.type === WorkspaceTypes.PROJECT_MANAGEMENT"
         >
           <template #prepend="{ isSelected }">
             <v-icon
@@ -79,15 +67,15 @@ async function handleSubmit() {
         <v-list-item
           class="text-body-3"
           rounded="md"
-          :value="WorkspaceTypes.CRM"
-          disabled
+          @click="workspaceDto.type = WorkspaceTypes.CRM"
+          :active="workspaceDto.type === WorkspaceTypes.CRM"
         >
           <template #prepend="{ isSelected }">
             <v-icon
               :icon="isSelected ? 'mdi-handshake' : 'mdi-handshake-outline'"
             />
           </template>
-          Sales CRM (coming soon)
+          Sales CRM
         </v-list-item>
         <v-list-item class="text-body-3" rounded="md" disabled>
           <template #prepend="{ isSelected }">

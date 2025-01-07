@@ -34,7 +34,7 @@ const { data: projectUsers } = useProjectUsersQuery({
       </p>
     </div>
 
-    <v-list rounded="md" class="pa-2">
+    <v-list class="pa-2">
       <template v-for="user in projectUsers" :key="user.id">
         <v-list-item class="px-1">
           <!-- ~ Avatar -->

@@ -19,6 +19,7 @@ export interface UseInputsProps {
   density?: string;
   fill?: boolean;
   label?: string;
+  mandatory?: boolean;
 }
 
 interface UseInputsEmit {
@@ -56,6 +57,13 @@ export function useInputs(props: UseInputsProps, emit: UseInputsEmit) {
         : [...selected.value, item.item];
     } else {
       newSelected = isItemSelected(item) ? [] : [item.item];
+    }
+
+    if (props.mandatory && newSelected.length === 0) {
+      /** If mandatory is true and selection would become empty,
+       * revert to the current selection or do nothing
+       */
+      return;
     }
     selected.value = newSelected;
     emit('update:modelValue', newSelected);

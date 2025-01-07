@@ -6,19 +6,25 @@ import { CardTypesService } from "./card.types.service";
 import { ListsModule } from "../lists/lists.module";
 import { CardsModule } from "../cards/cards.module";
 import { FieldsModule } from "../fields/fields.module";
-import { CardTypeSubscriber } from "./card.type.subscriber";
 import { AuthModule } from "../auth/auth.module";
+import { CardTypesSideEffectsService } from "./card.types.side.effects.service";
+import { Workspace } from "../workspaces/workspace.entity";
+import { CardTypeFieldsFactory } from "./card.type.fields.factory";
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([CardType]),
+        TypeOrmModule.forFeature([CardType, Workspace]),
         ListsModule,
         CardsModule,
         FieldsModule,
         AuthModule,
     ],
     controllers: [CardTypesController],
-    providers: [CardTypesService, CardTypeSubscriber],
+    providers: [
+        CardTypesService,
+        CardTypesSideEffectsService,
+        CardTypeFieldsFactory,
+    ],
     exports: [CardTypesService],
 })
 export class CardTypesModule {}

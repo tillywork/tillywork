@@ -1,15 +1,22 @@
 <script setup lang="ts">
-import { useProjectUsersService } from '@/services/useProjectUsersService';
 import BaseLabelSelector from '../inputs/BaseLabelSelector.vue';
 import BaseRelationInput from '../inputs/BaseRelationInput.vue';
 import BaseDropdownInput from '../inputs/BaseDropdownInput.vue';
-import { useAuthStore } from '@/stores/auth';
-import { type Field, FieldTypes } from '@tillywork/shared';
 import BaseNumberInput from '../inputs/BaseNumberInput.vue';
+import BaseCurrencyInput from '../inputs/BaseCurrencyInput.vue';
+import BasePercentageInput from '../inputs/BasePercentageInput.vue';
+
+import { useProjectUsersService } from '@/services/useProjectUsersService';
+
+import { useAuthStore } from '@/stores/auth';
+
+import { type Field, FieldTypes } from '@tillywork/shared';
+
+import validationUtils from '@/utils/validation';
 
 const value = defineModel<any>();
 
-defineProps<{
+const { rounded = 'pill' } = defineProps<{
   field: Field;
   noLabel?: boolean;
   flexFill?: boolean;
@@ -38,10 +45,20 @@ const { data: users } = useProjectUsersQuery({
       :rounded
     />
   </template>
+  <template v-else-if="field.type === FieldTypes.DATETIME">
+    <base-date-picker
+      v-model="value"
+      :icon="field.icon ?? 'mdi-calendar'"
+      :label="field.name"
+      :rounded
+      include-time
+    />
+  </template>
   <template v-else-if="field.type === FieldTypes.TEXT">
     <v-text-field
       v-model="value"
       hide-details
+      :rounded
       :placeholder="field.name"
       :prepend-inner-icon="field.icon"
     />
@@ -86,7 +103,13 @@ const { data: users } = useProjectUsersQuery({
     />
   </template>
   <template v-else-if="field.type === FieldTypes.CARD">
-    <base-relation-input v-model="value" :field variant="outlined" />
+    <base-relation-input
+      v-model="value"
+      :field
+      variant="outlined"
+      :fill="flexFill"
+      :rounded
+    />
   </template>
   <template v-else-if="field.type === FieldTypes.CHECKBOX">
     <div
@@ -104,6 +127,44 @@ const { data: users } = useProjectUsersQuery({
   </template>
   <template v-else-if="field.type === FieldTypes.NUMBER">
     <base-number-input
+      v-model="value"
+      @click.prevent
+      :rounded
+      :fill="flexFill"
+      :tooltip="field.name"
+    />
+  </template>
+  <template v-else-if="field.type === FieldTypes.PERCENTAGE">
+    <base-percentage-input
+      v-model="value"
+      @click.prevent
+      :rounded
+      :fill="flexFill"
+      :tooltip="field.name"
+    />
+  </template>
+  <template v-else-if="field.type === FieldTypes.EMAIL">
+    <v-text-field
+      v-model="value"
+      hide-details
+      :rounded
+      :placeholder="field.name"
+      :prepend-inner-icon="field.icon"
+      :rules="[validationUtils.rules.email]"
+    />
+  </template>
+  <template v-else-if="field.type === FieldTypes.URL">
+    <v-text-field
+      v-model="value"
+      hide-details
+      :rounded
+      :placeholder="field.name"
+      :prepend-inner-icon="field.icon"
+      :rules="[validationUtils.rules.url]"
+    />
+  </template>
+  <template v-else-if="field.type === FieldTypes.CURRENCY">
+    <base-currency-input
       v-model="value"
       @click.prevent
       :rounded

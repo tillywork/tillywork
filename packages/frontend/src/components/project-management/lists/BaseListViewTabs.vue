@@ -2,10 +2,10 @@
 import { ViewTypes, type View } from '@tillywork/shared';
 import type { List } from './types';
 import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
-import { useWorkspaceStore } from '@/stores/workspace';
 import { useViewsService } from '@/services/useViewsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
+import { useStateStore } from '@/stores/state';
 
 const dialog = useDialogStore();
 const props = defineProps<{
@@ -17,8 +17,8 @@ const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
 );
 
-const workspaceStore = useWorkspaceStore();
-const { listState } = storeToRefs(workspaceStore);
+const { setListLastView } = useStateStore();
+const { listState } = storeToRefs(useStateStore());
 
 const { showSnackbar } = useSnackbarStore();
 
@@ -35,7 +35,7 @@ function handleTabSelection(view: View) {
   selectedView.value = view;
 
   if (view) {
-    workspaceStore.setListLastView({
+    setListLastView({
       listId: listCopy.value.id,
       viewId: view.id,
     });

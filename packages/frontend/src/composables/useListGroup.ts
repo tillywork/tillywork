@@ -84,6 +84,7 @@ export const useListGroup = ({
           cardData[listGroup.field!.slug] = value ? [value] : undefined;
           break;
 
+        case FieldTypes.DATETIME:
         case FieldTypes.DATE:
           cardData[listGroup.field!.slug] = getGroupValue();
           break;
@@ -93,7 +94,8 @@ export const useListGroup = ({
     dialog.openDialog({
       dialog: DIALOGS.CREATE_CARD,
       data: {
-        listId: listGroup.list.id,
+        list: props.list,
+        type: props.list.defaultCardType,
         listStage: getGroupStage(listGroup),
         data: cardData,
         listStages: props.listStages,
@@ -123,6 +125,7 @@ export const useListGroup = ({
         )?.item;
         break;
 
+      case FieldTypes.DATETIME:
       case FieldTypes.DATE: {
         const filter: FieldFilter = listGroup.value.filter?.where?.and?.find(
           (condition) =>

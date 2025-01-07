@@ -6,7 +6,6 @@ import { cloneDeep } from 'lodash';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useAuthStore } from '@/stores/auth';
-import { useStateStore } from '@/stores/state';
 import QuickFilters from './QuickFilters.vue';
 import AdvancedFilters from './AdvancedFilters.vue';
 import { filterUtils } from '@/utils/filter';
@@ -16,21 +15,23 @@ import {
   type FieldFilter,
   type FieldFilterOption,
   type FilterViewOptions,
+  type List,
 } from '@tillywork/shared';
 import { useFields } from '@/composables/useFields';
 import posthog from 'posthog-js';
 
-const props = defineProps<{
+const { filters, viewId, list } = defineProps<{
   filters?: ViewFilter;
   viewId: number;
+  list: List;
 }>();
 const emit = defineEmits(['save', 'update']);
 
 const filtersMenu = ref(false);
 const addAdvancedFilterMenu = ref(false);
 const filtersCopy = ref<ViewFilter>(
-  props.filters
-    ? cloneDeep({ ...props.filters })
+  filters
+    ? cloneDeep({ ...filters })
     : { where: { quick: { and: [] }, advanced: { and: [] } } }
 );
 const viewType = ref<FilterViewOptions>('quick');
@@ -39,11 +40,11 @@ const snackbarId = ref<number>();
 
 const { showSnackbar, closeSnackbar } = useSnackbarStore();
 const { project } = storeToRefs(useAuthStore());
-const { useProjectUsersQuery } = useProjectUsersService();
-const { currentList } = storeToRefs(useStateStore());
 
-const cardTypeId = computed(() => currentList.value?.defaultCardType.id ?? 0);
-const listId = computed(() => currentList.value!.id);
+const { useProjectUsersQuery } = useProjectUsersService();
+
+const cardTypeId = computed(() => list.defaultCardType.id);
+const listId = computed(() => list.id);
 
 const { filterableFields } = useFields({
   cardTypeId,
@@ -65,16 +66,18 @@ const filtersMenuWidth = computed(() =>
 );
 
 const fields = computed(() => {
-  const fields: FieldFilterOption[] = [
-    {
+  const fields: FieldFilterOption[] = [];
+
+  if (listStages.value?.length) {
+    fields.push({
       title: 'Stage',
       field: 'listStage.id',
       operator: 'in',
       value: [],
       type: FieldTypes.DROPDOWN,
       icon: 'mdi-circle-slice-8',
-    },
-  ];
+    });
+  }
 
   if (filterableFields.value) {
     filterableFields.value.forEach((field) => {
@@ -116,7 +119,7 @@ function clearFilters() {
 function applyFilters() {
   const areFiltersChanged = !objectUtils.isEqual(
     filtersCopy.value,
-    props.filters ?? {
+    filters ?? {
       where: {
         quick: {
           and: [],
@@ -141,7 +144,7 @@ function applyFilters() {
     }
 
     posthog.capture('updated_filters', {
-      viewId: props.viewId,
+      viewId: viewId,
     });
   }
 }
@@ -203,7 +206,7 @@ watch(
 );
 
 watch(
-  () => props.filters,
+  () => filters,
   (v) => {
     if (v) {
       if (!objectUtils.isEqual(filtersCopy.value, v)) {
@@ -218,7 +221,7 @@ watch(
 );
 
 watch(
-  () => props.viewId,
+  () => viewId,
   () => {
     closeSaveSnackbar();
   }

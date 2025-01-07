@@ -91,8 +91,12 @@ const filters = computed<QueryFilter>(() => {
   }
 });
 
-const hideCompleted = computed<boolean>(() => props.view.options.hideCompleted);
-const hideChildren = computed<boolean>(() => props.view.options.hideChildren);
+const hideCompleted = computed<boolean>(
+  () => props.view.options.hideCompleted ?? false
+);
+const hideChildren = computed<boolean>(
+  () => props.view.options.hideChildren ?? false
+);
 
 const total = ref(0);
 
@@ -214,11 +218,7 @@ watchEffect(() => {
         :style="`min-height: calc(100vh - (40px + 113px + 77px))`"
       >
         <template #item="{ element: card }">
-          <v-card
-            class="board-card"
-            :to="`/pm/card/${card.id}`"
-            :ripple="false"
-          >
+          <v-card class="board-card" :to="`/card/${card.id}`" :ripple="false">
             <v-card-item class="pa-2 align-start">
               <template #prepend>
                 <list-stage-selector
@@ -269,17 +269,16 @@ watchEffect(() => {
               </template>
             </v-card-item>
             <v-card-actions
-              class="px-2 py-1 align-end"
+              class="pa-2 align-end"
               style="min-height: fit-content"
             >
-              <div class="d-flex align-center flex-wrap flex-fill">
+              <div class="d-flex align-center flex-wrap flex-fill ga-2">
                 <template v-if="pinnedFieldsWithoutAssignee">
                   <template
                     v-for="field in pinnedFieldsWithoutAssignee"
                     :key="field.slug"
                   >
                     <base-field
-                      class="me-2"
                       :field
                       :color="getDateFieldColor(card, field)"
                       no-label

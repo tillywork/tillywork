@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const {
   modelValue,
-  rounded = 'md',
+  rounded = 'pill',
   fill = false,
   tooltip,
 } = defineProps<{

@@ -1,28 +1,36 @@
 <script setup lang="ts">
-import type { CreateCardDto } from '@/components/project-management/cards/types';
-import { type List } from '@/components/project-management/lists/types';
-import { useCardsService } from '@/services/useCardsService';
-import { useSnackbarStore } from '@/stores/snackbar';
-import type { VForm } from 'vuetify/lib/components/index.mjs';
-import BaseEditorInput from '../base/BaseEditor/BaseEditorInput.vue';
 import { useDialogStore } from '@/stores/dialog';
-import { DIALOGS } from './types';
-import BaseListSelector from '../inputs/BaseListSelector.vue';
-import { cloneDeep } from 'lodash';
-import { useStateStore } from '@/stores/state';
 import { useAuthStore } from '@/stores/auth';
-import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
+import { useSnackbarStore } from '@/stores/snackbar';
+
+import { useCardsService } from '@/services/useCardsService';
+
+import type { VForm } from 'vuetify/lib/components/index.mjs';
+import { DIALOGS } from '../types';
+import {
+  type CardType,
+  type CreateCardDto,
+  type List,
+} from '@tillywork/shared';
+
+import { cloneDeep } from 'lodash';
 import { leaderKey } from '@/utils/keyboard';
+
 import { useFields } from '@/composables/useFields';
-import BaseField from '../fields/BaseField.vue';
-import type { CardType } from '@tillywork/shared';
+import { useCard } from '@/composables/useCard';
+
+import BaseField from '../../fields/BaseField.vue';
+import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
+import BaseListSelector from '../../inputs/BaseListSelector.vue';
+import BaseEditorInput from '../../base/BaseEditor/BaseEditorInput.vue';
+
 import posthog from 'posthog-js';
 
 const dialog = useDialogStore();
 const { workspace } = storeToRefs(useAuthStore());
 const { showSnackbar } = useSnackbarStore();
-const { currentList } = storeToRefs(useStateStore());
 
+const { normalizeFieldValue } = useCard();
 const { meta, ctrl, enter } = useMagicKeys();
 
 const createForm = ref<VForm>();
@@ -36,13 +44,7 @@ const currentDialogIndex = computed(() =>
 );
 const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
 
-const list = computed(() => {
-  if (currentDialog.value?.data?.list) {
-    return currentDialog.value.data.list;
-  } else {
-    return currentList.value;
-  }
-});
+const list = computed(() => currentDialog.value?.data?.list);
 
 const cardType = computed<CardType>(() => {
   if (currentDialog.value?.data && currentDialog.value.data?.type) {
@@ -54,7 +56,7 @@ const cardType = computed<CardType>(() => {
   }
 });
 
-const { pinnedFields } = useFields({
+const { pinnedFields, titleField } = useFields({
   cardTypeId: cardType.value.id,
   listId: list.value.id,
 });
@@ -63,7 +65,6 @@ const createCardMutation = cardsService.useCreateCardMutation();
 const createCardDto = ref<CreateCardDto>({
   data: {
     ...(currentDialog.value.data.data ?? {}),
-    title: '',
   },
   listId: currentDialog.value?.data?.listId ?? list.value?.id,
   listStage: currentDialog.value?.data?.listStage ?? list.value?.listStages[0],
@@ -86,12 +87,11 @@ function closeDialog() {
 
 async function createCard() {
   if (
-    createCardDto.value.data.title &&
-    createCardDto.value.data.title.trim() !== '' &&
-    createCardDto.value.listStage &&
+    createCardDto.value.data[titleField.value!.slug] &&
+    createCardDto.value.data[titleField.value!.slug].trim() !== '' &&
     createCardDto.value.listId
   ) {
-    createCardDto.value.listStageId = createCardDto.value.listStage.id;
+    createCardDto.value.listStageId = createCardDto.value.listStage?.id;
     createCardMutation
       .mutateAsync(createCardDto.value)
       .then((card) => {
@@ -113,7 +113,7 @@ async function createCard() {
  * If create more is on, don't close the dialog.
  */
 function handlePostCreate() {
-  createCardDto.value.data.title = '';
+  createCardDto.value.data[titleField.value!.slug] = '';
   createCardDto.value.data.description = undefined;
 
   showSnackbar({
@@ -157,11 +157,12 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
       <v-spacer />
       <base-icon-btn icon="mdi-close" color="default" @click="closeDialog()" />
     </div>
-    <v-form ref="createForm" @submit.prevent="createCard">
+    <v-form ref="createForm" @submit.prevent="createCard()">
       <div class="px-4 pb-2">
         <base-editor-input
-          v-model="createCardDto.data.title"
-          :placeholder="cardType.name + ' name'"
+          v-if="titleField"
+          v-model="createCardDto.data[titleField.slug]"
+          :placeholder="cardType.name + ` ${titleField.name.toLowerCase()}`"
           autofocus
           :heading="3"
           single-line
@@ -179,6 +180,7 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
 
         <div class="d-flex ga-1 align-center">
           <list-stage-selector
+            v-if="list?.listStages.length"
             v-model="createCardDto.listStage"
             :listStages="list?.listStages ?? []"
           />
@@ -187,7 +189,13 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
             <base-field
               :field="field"
               v-model="createCardDto.data[field.slug]"
-              no-label
+              @update:model-value="
+                (v) =>
+                  (createCardDto.data[field.slug] = normalizeFieldValue({
+                    v,
+                    field,
+                  }))
+              "
             />
           </template>
         </div>
