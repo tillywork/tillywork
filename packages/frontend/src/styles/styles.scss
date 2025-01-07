@@ -2,84 +2,85 @@
 
 *:not(.excalidraw):not(.excalidraw *) {
   font-family: 'Inter', sans-serif !important;
-  .w-95px {
-    width: 95px;
-  }
-  .w-100px {
-    width: 100px;
-  }
-  .w-300px {
-    width: 300px;
-  }
-  .w-350px {
-    width: 350px;
-  }
-  .w-400px {
-    width: 400px !important;
-  }
-  .w-450px {
-    width: 450px;
-  }
+}
 
-  .w-100-95px {
-    width: calc(100% - 95px);
-  }
-  .w-100-400px {
-    width: calc(100% - 400px);
-  }
-  .w-100 {
-    width: 100%;
-  }
+.w-95px {
+  width: 95px;
+}
+.w-100px {
+  width: 100px;
+}
+.w-300px {
+  width: 300px;
+}
+.w-350px {
+  width: 350px;
+}
+.w-400px {
+  width: 400px !important;
+}
+.w-450px {
+  width: 450px;
+}
 
-  .h-40px {
-    height: 40px;
-  }
+.w-100-95px {
+  width: calc(100% - 95px);
+}
+.w-100-400px {
+  width: calc(100% - 400px);
+}
+.w-100 {
+  width: 100%;
+}
 
-  .h-100vh {
-    height: 100vh;
-  }
-  .max-h-100vh {
-    max-height: 100vh;
-  }
+.h-40px {
+  height: 40px;
+}
 
-  .user-select-none {
-    user-select: none !important;
-  }
+.h-100vh {
+  height: 100vh;
+}
+.max-h-100vh {
+  max-height: 100vh;
+}
 
-  .rounded-md {
-    border-radius: 6px !important;
-  }
+.user-select-none {
+  user-select: none !important;
+}
 
-  .pa-2px {
-    padding: 2px !important;
-  }
+.rounded-md {
+  border-radius: 6px !important;
+}
 
-  .text-color-subtitle {
-    opacity: var(
-      --v-card-subtitle-opacity,
-      var(--v-medium-emphasis-opacity)
-    ) !important;
-  }
+.pa-2px {
+  padding: 2px !important;
+}
 
-  .line-height-1 {
-    line-height: 1;
-  }
+.text-color-subtitle {
+  opacity: var(
+    --v-card-subtitle-opacity,
+    var(--v-medium-emphasis-opacity)
+  ) !important;
+}
 
-  textarea {
-    border: none !important;
-    resize: none !important;
-    outline: none !important;
-  }
+.line-height-1 {
+  line-height: 1;
+}
 
-  .border-b-primary {
-    border-block-end-color: rgb(var(--v-theme-primary)) !important;
-  }
+textarea {
+  border: none !important;
+  resize: none !important;
+  outline: none !important;
+}
 
-  .text-xs {
-    font-size: 0.6rem !important;
-  }
+.border-b-primary {
+  border-block-end-color: rgb(var(--v-theme-primary)) !important;
+}
 
-  .text-body-3 {
-    font-size: 0.8125rem !important;
-  }
+.text-xs {
+  font-size: 0.6rem !important;
+}
+
+.text-body-3 {
+  font-size: 0.8125rem !important;
 }
