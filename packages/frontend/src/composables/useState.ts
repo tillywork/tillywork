@@ -170,7 +170,6 @@ export const useState = () => {
     );
 
     watch(selectedModule, () => {
-      console.log(selectedModule.value);
       updateAppState();
       navigateToLastList();
     });
