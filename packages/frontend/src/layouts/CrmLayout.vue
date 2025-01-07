@@ -17,12 +17,12 @@ const isRail = ref(true);
 const logo = useLogo();
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
-  //   {
-  //     icon: 'mdi-home',
-  //     title: 'Home',
-  //     route: '/crm',
-  //     activeOnExactMatch: true,
-  //   },
+  {
+    icon: 'mdi-draw',
+    title: 'Whiteboard',
+    route: '/whiteboard',
+    activeOnExactMatch: true,
+  },
 ]);
 
 const salesMenuItems = ref<NavigationMenuItem[]>([
@@ -110,6 +110,7 @@ if (isAuthenticated()) {
           :to="navigationItem.route"
           @click="navigationItem.onClick"
           :exact="navigationItem.activeOnExactMatch"
+          rounded="md"
         >
           <template #prepend v-if="navigationItem.icon">
             <v-icon :icon="navigationItem.icon" class="ms-1" />

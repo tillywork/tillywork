@@ -18,7 +18,9 @@
         "@tiptap/starter-kit": "^2.3.1",
         "@tiptap/suggestion": "^2.3.1",
         "@tiptap/vue-3": "^2.4.0",
+        "@vitejs/plugin-react": "^4.3.4",
         "@vitejs/plugin-vue": "^5.0.4",
+        "@vitejs/plugin-vue-jsx": "^4.1.1",
         "@vueuse/core": "^10.9.0",
         "currency-symbol-map": "^5.1.0",
         "emoji-name-map": "^1.2.9",
@@ -30,7 +32,7 @@
         "pinia-plugin-persistedstate": "^3.2.1",
         "posthog-js": "^1.203.1",
         "v-phone-input": "^4.1.2",
-        "veaury": "^2.3.16",
+        "veaury": "^2.6.1",
         "vue-router": "^4.2.5",
         "vuedraggable": "^4.1.0",
         "vuetify": "^3.6.6"
