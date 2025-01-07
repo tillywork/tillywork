@@ -202,6 +202,7 @@ watch(
                   "
                   flex-fill
                   text-field
+                  type="field"
                 />
               </div>
             </template>

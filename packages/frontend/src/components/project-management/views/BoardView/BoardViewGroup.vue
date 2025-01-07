@@ -269,17 +269,16 @@ watchEffect(() => {
               </template>
             </v-card-item>
             <v-card-actions
-              class="px-2 py-1 align-end"
+              class="pa-2 align-end"
               style="min-height: fit-content"
             >
-              <div class="d-flex align-center flex-wrap flex-fill">
+              <div class="d-flex align-center flex-wrap flex-fill ga-2">
                 <template v-if="pinnedFieldsWithoutAssignee">
                   <template
                     v-for="field in pinnedFieldsWithoutAssignee"
                     :key="field.slug"
                   >
                     <base-field
-                      class="me-2"
                       :field
                       :color="getDateFieldColor(card, field)"
                       no-label

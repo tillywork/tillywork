@@ -38,7 +38,7 @@ const attrs = useAttrs();
           v-bind="props"
           :color="item.raw.color"
           variant="tonal"
-          rounded="xl"
+          rounded="pill"
           class="text-body-3"
           :density
         />
@@ -69,7 +69,7 @@ const attrs = useAttrs();
                 :color="item?.color"
                 variant="tonal"
                 link
-                rounded="xl"
+                rounded="pill"
                 class="text-body-3"
                 :density
               >
@@ -103,7 +103,7 @@ const attrs = useAttrs();
               <v-chip
                 :color="item.color"
                 variant="tonal"
-                rounded="xl"
+                rounded="pill"
                 class="text-body-3"
                 :density
               >

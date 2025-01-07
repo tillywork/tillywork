@@ -156,6 +156,7 @@ watch(list, (v) => {
             v-model="createCardDto.data[field.slug]"
             flex-fill
             text-field
+            type="field"
             @update:model-value="
               (v) =>
                 (createCardDto.data[field.slug] = normalizeFieldValue({

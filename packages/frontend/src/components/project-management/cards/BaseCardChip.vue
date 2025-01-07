@@ -34,9 +34,9 @@ const { titleField } = useFields({
     }"
     :to="!disableLink ? `/card/${card.id}` : undefined"
     :max-width="maxWidth ?? 250"
-    color="surface-variant"
     variant="tonal"
     height="28"
+    rounded="pill"
   >
     <div class="d-inline-block text-truncate">
       <template v-if="cardCopy && titleField">

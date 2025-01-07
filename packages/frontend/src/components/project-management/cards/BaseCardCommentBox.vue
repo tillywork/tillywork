@@ -31,7 +31,7 @@ function handleSubmit() {
 </script>
 
 <template>
-  <v-card rounded="md" border="thin" class="pa-4">
+  <v-card border="thin" class="pa-4">
     <base-editor-input
       ref="baseEditor"
       v-model:json="value"

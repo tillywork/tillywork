@@ -76,9 +76,8 @@ onMounted(() => {
 
 <template>
   <v-card
-    class="base-percentage-input d-flex align-center px-3"
+    class="base-percentage-input d-flex align-center px-3 bg-transparent"
     :class="cardClasses"
-    color="transparent"
     :rounded="rounded"
   >
     <v-tooltip activator="parent" location="top" v-if="!fill">

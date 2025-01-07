@@ -107,9 +107,8 @@ onMounted(() => {
 
 <template>
   <v-card
-    class="base-currency-input d-flex align-center px-3"
+    class="base-currency-input d-flex align-center px-3 bg-transparent"
     :class="cardClasses"
-    color="transparent"
     :rounded
   >
     <v-tooltip activator="parent" location="top" v-if="!fill">
@@ -122,7 +121,7 @@ onMounted(() => {
       v-model="value"
       ref="inputRef"
       type="text"
-      class="text-caption pa-2 pe-0 h-100"
+      class="text-caption px-2 py-1 pe-0 h-100"
       @input="updateValue"
       @focus="isFocused = true"
       @blur="isFocused = false"

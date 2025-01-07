@@ -63,7 +63,7 @@ function isStageSelected(stage: ListStage) {
       </template>
     </template>
     <v-card>
-      <v-list class="text-align-left" rounded="md">
+      <v-list class="text-align-left">
         <template v-for="stage in listStages" :key="stage.id">
           <v-list-item
             @click="handleStageClick(stage)"

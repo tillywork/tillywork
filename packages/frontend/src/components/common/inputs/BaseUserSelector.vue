@@ -124,7 +124,7 @@ defineExpose({ userMenu });
         "
       >
         <template #chip="{ item, props }">
-          <v-chip v-bind="props" rounded="large">
+          <v-chip v-bind="props" rounded="pill">
             <template #prepend>
               <base-avatar
                 :photo="item.raw.photo"

@@ -70,7 +70,7 @@ function handleSubmit(value: TiptapContent) {
 </script>
 
 <template>
-  <v-card rounded="md" border="thin">
+  <v-card border="thin">
     <v-card-item>
       <v-chip-group v-model="activityType" color="primary" mandatory>
         <template
