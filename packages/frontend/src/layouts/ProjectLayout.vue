@@ -15,12 +15,12 @@ const { isAuthenticated } = authStore;
 const logo = useLogo();
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
-  //   {
-  //     icon: 'mdi-home',
-  //     title: 'Home',
-  //     route: { name: 'Home' },
-  //     activeOnExactMatch: true,
-  //   },
+  {
+    icon: 'mdi-draw',
+    title: 'Whiteboard',
+    route: '/whiteboard',
+    activeOnExactMatch: true,
+  },
 ]);
 
 if (isAuthenticated()) {
@@ -69,13 +69,14 @@ if (isAuthenticated()) {
       <command-palette-activator class="mt-4 ms-3" />
 
       <!-- Sidebar content -->
-      <v-list v-if="navigationMenuItems.length > 0">
+      <v-list v-if="navigationMenuItems.length > 0" class="mt-4">
         <v-list-item
           v-for="navigationItem in navigationMenuItems"
           :key="navigationItem.title"
           :to="navigationItem.route"
           @click="navigationItem.onClick"
           :exact="navigationItem.activeOnExactMatch"
+          rounded="md"
         >
           <template #prepend v-if="navigationItem.icon">
             <v-icon :icon="navigationItem.icon" />

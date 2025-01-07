@@ -29,5 +29,6 @@ declare module 'vue-router/auto-routes' {
     '/register': RouteRecordInfo<'/register', '/register', Record<never, never>, Record<never, never>>,
     '/settings/': RouteRecordInfo<'/settings/', '/settings', Record<never, never>, Record<never, never>>,
     '/settings/[section]': RouteRecordInfo<'/settings/[section]', '/settings/:section', { section: ParamValue<true> }, { section: ParamValue<false> }>,
+    '/whiteboard': RouteRecordInfo<'/whiteboard', '/whiteboard', Record<never, never>, Record<never, never>>,
   }
 }
