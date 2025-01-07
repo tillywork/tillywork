@@ -154,6 +154,7 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
                   field,
                 }))
             "
+            type="field"
           />
         </template>
       </div>

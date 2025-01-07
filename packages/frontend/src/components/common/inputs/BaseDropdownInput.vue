@@ -37,14 +37,13 @@ const attrs = useAttrs();
             ...attrs,
             ...props,
           }"
-          class="pa-2 d-flex align-center text-truncate"
+          class="pa-2 d-flex align-center flex-wrap text-truncate"
           :class="{
             'flex-fill': fill,
           }"
           :rounded="rounded ?? 'pill'"
           @click.prevent
         >
-          <v-icon v-if="icon" :icon start />
           <template v-if="selected && !!selected[0]">
             <v-card-text
               class="pa-0 text-caption"
