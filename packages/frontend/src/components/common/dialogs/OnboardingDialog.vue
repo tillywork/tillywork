@@ -69,13 +69,10 @@ async function createWorkspace(createWorkspaceDto: Partial<Workspace>) {
   createWorkspaceMutation
     .mutateAsync(createWorkspaceDto)
     .then((workspace) => {
-      authStore.setWorkspace(workspace);
       dialog.closeDialog(currentDialogIndex.value);
-      setSelectedModule(workspace.type);
       switch (workspace.type) {
         case WorkspaceTypes.PROJECT_MANAGEMENT:
           setSpaceExpansionState(workspace.id, [workspace.spaces[0].id]);
-          setCurrentList(workspace.spaces[0].lists[0]);
           break;
         case WorkspaceTypes.CRM:
         default:

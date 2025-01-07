@@ -87,7 +87,7 @@ async function handleSubmit() {
               "
             />
           </template>
-          Agile Projects (coming soon)
+          Product (coming soon)
         </v-list-item>
       </v-list>
 
