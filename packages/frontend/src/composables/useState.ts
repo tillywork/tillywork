@@ -58,9 +58,24 @@ export const useState = () => {
       return;
     }
 
+    // If a module is selected, filter workspaces by module
+    if (selectedModule.value) {
+      const moduleWorkspaces = workspaces.value?.filter(
+        (w) => w.type === selectedModule.value
+      );
+
+      if (moduleWorkspaces?.length) {
+        setWorkspace(moduleWorkspaces[0]);
+        return;
+      } else {
+        clearWorkspace();
+        return;
+      }
+    }
+
     // If a workspace is selected, ensure it still exists
     if (workspace.value) {
-      const existingWorkspace = workspaces.value.find(
+      const existingWorkspace = workspaces.value?.find(
         (w) => w.id === workspace.value?.id
       );
       if (existingWorkspace) {
@@ -69,21 +84,6 @@ export const useState = () => {
         return;
       } else {
         setFirstWorkspace();
-        return;
-      }
-    }
-
-    // If a module is selected, filter workspaces by module
-    if (selectedModule.value) {
-      const moduleWorkspaces = workspaces.value.filter(
-        (w) => w.type === selectedModule.value
-      );
-
-      if (moduleWorkspaces.length) {
-        setWorkspace(moduleWorkspaces[0]);
-        return;
-      } else {
-        clearWorkspace();
         return;
       }
     }
@@ -170,6 +170,7 @@ export const useState = () => {
     );
 
     watch(selectedModule, () => {
+      console.log(selectedModule.value);
       updateAppState();
       navigateToLastList();
     });
