@@ -1,6 +1,6 @@
 {
     "name": "tillywork",
-    "version": "0.0.2",
+    "version": "0.1.0",
     "license": "MIT",
     "scripts": {
         "build": "nx run-many -t build -p frontend backend -c production --skip-nx-cache",
