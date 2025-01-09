@@ -7,7 +7,7 @@ import {
 
 import BaseEditorInput from '../../base/BaseEditor/BaseEditorInput.vue';
 import BaseCardCommentBox from '@/components/project-management/cards/BaseCardCommentBox.vue';
-import BaseUserSelector from '../BaseUserSelector.vue';
+import BaseUserSelector from '../BaseUserSelector/BaseUserSelector.vue';
 import BaseDatePicker from '../BaseDatePicker.vue';
 import SimpleDropdownSelector from '../SimpleDropdownSelector.vue';
 

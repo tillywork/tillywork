@@ -59,10 +59,10 @@ const createAxiosInstance = () => {
     }
   );
 
-  //   instance.interceptors.response.use(
-  //     (response) => response,
-  //     refreshTokenInterceptor
-  //   );
+  instance.interceptors.response.use(
+    (response) => response,
+    refreshTokenInterceptor
+  );
 
   return instance;
 };

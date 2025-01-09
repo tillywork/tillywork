@@ -7,7 +7,7 @@ import { VueQueryPlugin } from '@tanstack/vue-query';
 import posthog from './plugins/posthog';
 import BaseIconBtn from './components/common/base/BaseIconBtn.vue';
 import BaseAvatar from './components/common/base/BaseAvatar.vue';
-import BaseUserSelector from './components/common/inputs/BaseUserSelector.vue';
+import BaseUserSelector from './components/common/inputs/BaseUserSelector/BaseUserSelector.vue';
 import BaseDatePicker from './components/common/inputs/BaseDatePicker.vue';
 import ListStageSelector from './components/common/inputs/ListStageSelector.vue';
 

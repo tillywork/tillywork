@@ -7,12 +7,14 @@ const {
   modelValue,
   rounded = 'pill',
   fill = false,
-  tooltip,
+  label,
+  textField,
 } = defineProps<{
   modelValue: number | undefined;
   rounded?: string;
   fill?: boolean;
-  tooltip?: string;
+  label?: string;
+  textField?: boolean;
 }>();
 
 const emit = defineEmits(['update:modelValue']);
@@ -106,30 +108,49 @@ onMounted(() => {
 </script>
 
 <template>
-  <v-card
-    class="base-currency-input d-flex align-center px-3 bg-transparent"
-    :class="cardClasses"
-    :rounded
-  >
-    <v-tooltip activator="parent" location="top" v-if="!fill">
-      {{ tooltip }}
-    </v-tooltip>
-    <span class="text-caption">{{
-      getSymbolFromCurrency(workspace?.currency ?? '')
-    }}</span>
-    <input
+  <template v-if="textField">
+    <v-text-field
       v-model="value"
-      ref="inputRef"
-      type="text"
-      class="text-caption px-2 py-1 pe-0 h-100"
+      single-line
+      hide-details
+      :label
+      :rounded
       @input="updateValue"
-      @focus="isFocused = true"
-      @blur="isFocused = false"
-      @keydown="handleKeydown"
-      :placeholder="value ? '' : '0.00'"
-      :style="{ width: inputWidth }"
-    />
-  </v-card>
+    >
+      <template #prepend-inner>
+        <span class="text-body-3">{{
+          getSymbolFromCurrency(workspace?.currency ?? '')
+        }}</span>
+      </template>
+    </v-text-field>
+  </template>
+  <template v-else>
+    <v-card
+      class="base-currency-input d-flex align-center px-3 bg-transparent"
+      :class="cardClasses"
+      :rounded
+      height="28"
+    >
+      <v-tooltip activator="parent" location="top" v-if="!fill && label">
+        {{ label }}
+      </v-tooltip>
+      <span class="text-caption">{{
+        getSymbolFromCurrency(workspace?.currency ?? '')
+      }}</span>
+      <input
+        v-model="value"
+        ref="inputRef"
+        type="text"
+        class="text-caption pa-2 pe-0 h-100"
+        @input="updateValue"
+        @focus="isFocused = true"
+        @blur="isFocused = false"
+        @keydown="handleKeydown"
+        :placeholder="value ? '' : label ?? '0.00'"
+        :style="{ width: inputWidth }"
+      />
+    </v-card>
+  </template>
 </template>
 
 <style lang="scss">

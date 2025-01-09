@@ -511,8 +511,10 @@ function openDescriptionFileDialog() {
             />
           </div>
           <v-card-text>
-            <div class="d-flex align-center mb-4" v-if="listStages?.length">
-              <p class="field-label text-caption">Stage</p>
+            <div class="mb-4" v-if="listStages?.length">
+              <p class="field-label text-caption font-weight-light mb-1">
+                Stage
+              </p>
               <list-stage-selector
                 v-model="cardListStage"
                 :listStages="listStages ?? []"
@@ -524,18 +526,19 @@ function openDescriptionFileDialog() {
             </div>
             <template v-if="fields">
               <template v-for="field in fields" :key="field.id">
-                <div class="d-flex align-center my-4">
-                  <p class="field-label text-caption me-1">
+                <div class="my-4">
+                  <p class="field-label text-caption font-weight-light mb-1">
                     {{ field.name }}
                   </p>
                   <base-field
                     :field="field"
-                    :color="getDateFieldColor(cardCopy, field)"
                     v-model="cardCopy.data[field.slug]"
                     @update:model-value="
-                    (v: any) => updateFieldValue({ card: cardCopy, field, v })
+                    (v: any) => updateFieldValue({ card, field, v })
                   "
                     flex-fill
+                    text-field
+                    type="field"
                   />
                 </div>
               </template>

@@ -41,7 +41,6 @@ const attrs = useAttrs();
           variant="tonal"
           rounded="pill"
           class="text-body-3"
-          :density
         />
       </template>
     </v-autocomplete>
@@ -51,11 +50,12 @@ const attrs = useAttrs();
       <template #activator="{ props }">
         <v-card
           link
+          min-height="28"
           v-bind="{
             ...attrs,
             ...props,
           }"
-          class="pa-0 d-flex align-center flex-wrap text-truncate ga-1"
+          class="px-2 d-flex align-center text-truncate"
           :class="{
             'flex-fill': fill,
           }"
@@ -63,21 +63,28 @@ const attrs = useAttrs();
           :rounded
           @click.prevent
         >
+          <v-tooltip activator="parent" location="top" v-if="!fill && label">
+            {{ label }}
+          </v-tooltip>
           <template v-if="selectedItems.length">
-            <template v-for="item in selectedItems" :key="item.item">
-              <v-chip
-                :color="item?.color"
-                variant="tonal"
-                link
-                rounded="pill"
-                class="text-body-3"
-              >
-                {{ item?.item }}
-              </v-chip>
-            </template>
+            <div class="d-flex align-center flex-wrap text-truncate ga-1">
+              <template v-for="item in selectedItems" :key="item.item">
+                <v-chip
+                  :color="item?.color"
+                  variant="tonal"
+                  link
+                  rounded="pill"
+                  class="text-body-3"
+                  :density
+                >
+                  {{ item?.item }}
+                </v-chip>
+              </template>
+            </div>
           </template>
           <template v-else>
-            <v-card-subtitle class="pa-2 text-caption">{{
+            <v-icon :icon v-if="icon" class="me-2" size="x-small" />
+            <v-card-subtitle class="pa-0 text-caption">{{
               label
             }}</v-card-subtitle>
           </template>
@@ -92,6 +99,7 @@ const attrs = useAttrs();
           clearable
           autocomplete="off"
           variant="filled"
+          rounded="0"
         />
         <v-list>
           <template v-for="item in filteredItems" :key="item.item">

@@ -32,18 +32,23 @@ const attrs = useAttrs();
     <v-menu :close-on-content-click="false">
       <template #activator="{ props }">
         <v-card
-          color="transparent"
+          height="28"
+          min-width="30"
           v-bind="{
             ...attrs,
             ...props,
           }"
-          class="pa-2 d-flex align-center flex-wrap text-truncate"
+          class="px-2 d-flex align-center flex-wrap text-truncate"
           :class="{
             'flex-fill': fill,
           }"
+          color="transparent"
           :rounded="rounded ?? 'pill'"
           @click.prevent
         >
+          <v-tooltip activator="parent" location="top" v-if="!fill && label">
+            {{ label }}
+          </v-tooltip>
           <template v-if="selected && !!selected[0]">
             <v-card-text
               class="pa-0 text-caption"
@@ -55,6 +60,7 @@ const attrs = useAttrs();
             </v-card-text>
           </template>
           <template v-else>
+            <v-icon :icon v-if="icon" class="me-2" size="x-small" />
             <v-card-subtitle class="text-caption pa-0">{{
               label
             }}</v-card-subtitle>
@@ -70,6 +76,7 @@ const attrs = useAttrs();
           clearable
           autocomplete="off"
           variant="filled"
+          rounded="0"
         />
         <v-list>
           <template v-for="item in filteredItems" :key="item.item">
