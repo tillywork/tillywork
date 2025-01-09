@@ -400,7 +400,12 @@ watchEffect(() => {
                         />
 
                         <template v-if="titleField">
-                          <span class="text-truncate ms-2">
+                          <span
+                            class="ms-2"
+                            :class="{
+                              'text-truncate': !isRowHovering,
+                            }"
+                          >
                             {{ row.original.data[titleField.slug] }}
                           </span>
                         </template>
@@ -411,7 +416,12 @@ watchEffect(() => {
                               CardTypeLayout.PERSON
                             "
                           >
-                            <span class="text-truncate ms-2">
+                            <span
+                              class="ms-2"
+                              :class="{
+                                'text-truncate': !isRowHovering,
+                              }"
+                            >
                               {{ row.original.data.first_name }}
                               {{ row.original.data.last_name }}
                             </span>
