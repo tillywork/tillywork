@@ -1,4 +1,5 @@
 import type { FieldItem } from '@tillywork/shared';
+import { isEqual } from 'lodash';
 
 export interface UseInputsProps {
   modelValue?: string[];
@@ -16,7 +17,7 @@ export interface UseInputsProps {
     | 'solo-inverted'
     | 'solo-filled';
   rounded?: string;
-  density?: string;
+  density?: 'compact' | 'comfortable' | 'default';
   fill?: boolean;
   label?: string;
   mandatory?: boolean;
@@ -66,8 +67,13 @@ export function useInputs(props: UseInputsProps, emit: UseInputsEmit) {
       return;
     }
     selected.value = newSelected;
-    emit('update:modelValue', newSelected);
   }
+
+  watch(selected, (v) => {
+    if (!isEqual(v, props.modelValue)) {
+      emit('update:modelValue', v);
+    }
+  });
 
   return {
     selected,

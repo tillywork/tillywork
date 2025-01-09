@@ -138,6 +138,7 @@ watch(debouncedSearch, () => {
           clearable
           autocomplete="off"
           variant="filled"
+          rounded="0"
         />
         <v-list>
           <template v-if="!items || !items.length">

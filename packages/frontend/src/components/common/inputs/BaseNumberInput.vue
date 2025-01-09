@@ -3,12 +3,16 @@ const {
   modelValue,
   rounded = 'pill',
   fill = false,
-  tooltip,
+  label,
+  icon,
+  textField,
 } = defineProps<{
   modelValue: number | undefined;
   rounded?: string;
   fill?: boolean;
-  tooltip?: string;
+  label?: string;
+  icon?: string;
+  textField?: boolean;
 }>();
 
 const emit = defineEmits(['update:modelValue']);
@@ -48,13 +52,16 @@ function adjustWidth() {
     tempSpan.style.font = window.getComputedStyle(inputRef.value).font;
     document.body.appendChild(tempSpan);
 
-    const inputValue = inputRef.value.value || inputRef.value.placeholder;
+    const inputValue =
+      inputRef.value.value !== ''
+        ? inputRef.value.value
+        : inputRef.value.placeholder;
     tempSpan.textContent = inputValue;
     const width = tempSpan.offsetWidth;
 
     document.body.removeChild(tempSpan);
 
-    inputWidth.value = `${Math.max(30, Math.min(300, width + 20))}px`; // Min 50px, max 300px
+    inputWidth.value = `${Math.max(24, Math.min(300, width + 16))}px`; // Min 24px, max 300px
   }
 }
 
@@ -71,31 +78,44 @@ onMounted(() => {
 </script>
 
 <template>
-  <v-card
-    class="base-number-input d-flex align-center"
-    :class="cardClasses"
-    color="transparent"
-    :rounded
-  >
-    <v-tooltip activator="parent" location="top" v-if="!fill">
-      {{ tooltip }}
-    </v-tooltip>
-    <input
+  <template v-if="textField">
+    <v-number-input
       v-model="value"
-      ref="inputRef"
-      type="text"
-      class="text-caption pa-2 h-100"
-      :class="{
-        'text-center': !fill,
-      }"
-      @input="updateValue"
-      @focus="isFocused = true"
-      @blur="isFocused = false"
-      @keydown="handleKeydown"
-      :placeholder="value ? '' : 'Empty'"
-      :style="{ width: inputWidth }"
+      :prepend-inner-icon="icon"
+      single-line
+      hide-details
+      :label
+      :rounded
     />
-  </v-card>
+  </template>
+  <template v-else>
+    <v-card
+      class="base-number-input d-flex align-center ps-2 bg-transparent"
+      :class="cardClasses"
+      :rounded
+      height="28"
+    >
+      <v-tooltip activator="parent" location="top" v-if="!fill && label">
+        {{ label }}
+      </v-tooltip>
+      <v-icon :icon v-if="icon" size="x-small" start />
+      <input
+        v-model="value"
+        ref="inputRef"
+        type="text"
+        class="text-caption h-100"
+        :class="{
+          'text-center': !fill && !icon,
+        }"
+        @input="updateValue"
+        @focus="isFocused = true"
+        @blur="isFocused = false"
+        @keydown="handleKeydown"
+        :placeholder="label ?? 'Empty'"
+        :style="{ width: inputWidth }"
+      />
+    </v-card>
+  </template>
 </template>
 
 <style lang="scss">

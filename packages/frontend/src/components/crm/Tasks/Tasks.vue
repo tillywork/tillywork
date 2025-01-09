@@ -17,7 +17,7 @@ import BaseTable from '../../common/tables/BaseTable/BaseTable.vue';
 import BaseDatePicker from '../../common/inputs/BaseDatePicker.vue';
 import AssigneeFilterChip from './AssigneeFilterChip.vue';
 import DueDateFilterChip from './DueDateFilterChip.vue';
-import BaseUserSelector from '@/components/common/inputs/BaseUserSelector.vue';
+import BaseUserSelector from '@/components/common/inputs/BaseUserSelector/BaseUserSelector.vue';
 
 const { useFindAllTasksQuery } = useCardActivitiesService();
 

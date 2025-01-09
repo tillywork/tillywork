@@ -131,6 +131,12 @@ const vuetify = createVuetify({
         rounded: 'circle',
       },
     },
+    VField: {
+      rounded: 'pill',
+      VIcon: {
+        size: 'x-small',
+      },
+    },
   },
 });
 

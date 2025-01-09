@@ -18,7 +18,7 @@ import { DIALOGS } from '@/components/common/dialogs/types';
 import { useUsers } from '@/composables/useUsers';
 
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
-import BaseUserSelector from '@/components/common/inputs/BaseUserSelector.vue';
+import BaseUserSelector from '@/components/common/inputs/BaseUserSelector/BaseUserSelector.vue';
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 import SimpleDropdownSelector from '@/components/common/inputs/SimpleDropdownSelector.vue';
 

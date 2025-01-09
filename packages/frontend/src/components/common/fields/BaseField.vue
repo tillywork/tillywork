@@ -37,21 +37,14 @@ const { data: users } = useProjectUsersQuery({
 </script>
 
 <template>
-  <template v-if="field.type === FieldTypes.DATE">
+  <template v-if="[FieldTypes.DATE, FieldTypes.DATETIME].includes(field.type)">
     <base-date-picker
       v-model="value"
-      :icon="field.icon ?? 'mdi-calendar'"
+      :icon="field.icon"
       :label="field.name"
       :rounded
-    />
-  </template>
-  <template v-else-if="field.type === FieldTypes.DATETIME">
-    <base-date-picker
-      v-model="value"
-      :icon="field.icon ?? 'mdi-calendar'"
-      :label="field.name"
-      :rounded
-      include-time
+      :fill="flexFill"
+      :include-time="field.type === FieldTypes.DATETIME"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.TEXT">
@@ -92,7 +85,7 @@ const { data: users } = useProjectUsersQuery({
     <base-user-selector
       v-model="value"
       :users="users ?? []"
-      :label="!noLabel ? field.name : undefined"
+      :label="field.name"
       return-id
       return-string
       :icon="field.icon"
@@ -131,7 +124,8 @@ const { data: users } = useProjectUsersQuery({
       @click.prevent
       :rounded
       :fill="flexFill"
-      :tooltip="field.name"
+      :label="field.name"
+      :icon="field.icon"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.PERCENTAGE">
@@ -140,7 +134,16 @@ const { data: users } = useProjectUsersQuery({
       @click.prevent
       :rounded
       :fill="flexFill"
-      :tooltip="field.name"
+      :label="field.name"
+    />
+  </template>
+  <template v-else-if="field.type === FieldTypes.CURRENCY">
+    <base-currency-input
+      v-model="value"
+      @click.prevent
+      :rounded
+      :fill="flexFill"
+      :label="field.name"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.EMAIL">
@@ -161,15 +164,6 @@ const { data: users } = useProjectUsersQuery({
       :placeholder="field.name"
       :prepend-inner-icon="field.icon"
       :rules="[validationUtils.rules.url]"
-    />
-  </template>
-  <template v-else-if="field.type === FieldTypes.CURRENCY">
-    <base-currency-input
-      v-model="value"
-      @click.prevent
-      :rounded
-      :fill="flexFill"
-      :tooltip="field.name"
     />
   </template>
 </template>

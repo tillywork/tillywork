@@ -139,6 +139,7 @@ watch(locationMenu, (v) => {
         clearable
         placeholder="Search.."
         variant="filled"
+        rounded="0"
       />
       <v-list
         v-model:opened="openedListGroups"

@@ -51,6 +51,7 @@ async function saveWorkspace() {
         label="Name"
         hide-details
         variant="filled"
+        rounded="0"
       />
       <div class="d-flex justify-end">
         <v-btn

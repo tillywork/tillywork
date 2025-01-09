@@ -76,7 +76,6 @@ const columns = computed(
   () => props.table._getColumnDefs() as ColumnDef<Card, unknown>[]
 );
 
-const groupHeight = computed(() => (cards.value.length ?? 0) * 33 + 33);
 const maxHeight = computed(() =>
   props.listGroup.original.name === 'All' ? 'calc(100vh - 230px)' : 350
 );
@@ -297,15 +296,10 @@ watchEffect(() => {
     <v-list
       class="pa-0 overflow-scroll"
       rounded="0"
-      :height="groupHeight"
       :max-height="maxHeight"
       :lines="false"
     >
-      <v-infinite-scroll
-        :height="groupHeight"
-        :max-height="maxHeight"
-        @load="handleGroupCardsLoad"
-      >
+      <v-infinite-scroll :max-height="maxHeight" @load="handleGroupCardsLoad">
         <template #empty></template>
         <template #loading></template>
         <draggable
@@ -328,7 +322,7 @@ watchEffect(() => {
             <v-list-item
               class="pa-0"
               rounded="0"
-              height="33"
+              min-height="33"
               :to="`/card/${row.original.id}`"
               :ripple="false"
             >
@@ -339,8 +333,8 @@ watchEffect(() => {
                 <v-card
                   color="transparent"
                   v-bind="rowProps"
-                  height="33"
-                  class="table-row d-flex align-center text-body-3 flex-fill"
+                  min-height="33"
+                  class="table-row d-flex text-body-3 flex-fill align-items-stretch"
                   rounded="0"
                   link
                   :ripple="false"
@@ -354,7 +348,7 @@ watchEffect(() => {
                     >
                       <v-card
                         :width="getColumnSize(cell.column.columnDef.id)"
-                        class="table-cell d-flex align-center fill-height pe-1"
+                        class="table-cell d-flex align-center pe-1"
                         rounded="0"
                         color="transparent"
                       >
@@ -384,7 +378,7 @@ watchEffect(() => {
                     >
                       <v-card
                         :width="getColumnSize(cell.column.columnDef.id)"
-                        class="d-flex align-center fill-height text-body-3 px-2 table-cell"
+                        class="d-flex align-center text-body-3 px-2 table-cell"
                         rounded="0"
                         color="transparent"
                       >
@@ -395,13 +389,13 @@ watchEffect(() => {
                           rounded="circle"
                           :list-stages="listStages ?? []"
                           @update:modelValue="
-                        (modelValue: ListStage) =>
-                        handleUpdateCardStage({
-                            cardId: row.original.id,
-                            cardListId: row.original.cardLists[0].id,
-                            listStageId: modelValue.id,
-                        })
-                    "
+                            (modelValue: ListStage) =>
+                              handleUpdateCardStage({
+                                  cardId: row.original.id,
+                                  cardListId: row.original.cardLists[0].id,
+                                  listStageId: modelValue.id,
+                              })
+                          "
                           @click.prevent
                         />
 
@@ -442,7 +436,7 @@ watchEffect(() => {
                     <template v-else>
                       <v-card
                         :width="getColumnSize(cell.column.columnDef.id)"
-                        class="table-cell d-flex align-center fill-height"
+                        class="table-cell d-flex align-center"
                         rounded="0"
                         color="transparent"
                         link
@@ -453,7 +447,7 @@ watchEffect(() => {
                           "
                         >
                           <base-field
-                            class="flex-fill h-100"
+                            class="h-100"
                             :field="cell.column.columnDef.field"
                             :model-value="
                               row.original.data[
@@ -469,12 +463,12 @@ watchEffect(() => {
                             rounded="0"
                             flex-fill
                             @update:model-value="
-                            (v: any) => updateFieldValue({ 
-                                card: row.original,
-                                field: cell.column.columnDef.field,
-                                v
-                            })
-                          "
+                              (v: any) => updateFieldValue({ 
+                                  card: row.original,
+                                  field: cell.column.columnDef.field,
+                                  v
+                              })
+                            "
                             table
                             @click.stop
                           />

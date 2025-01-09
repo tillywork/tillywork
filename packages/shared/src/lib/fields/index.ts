@@ -98,6 +98,10 @@ export const FIELD_TYPE_OPTIONS = [
     value: FieldTypes.PERCENTAGE,
   },
   {
+    title: 'Currency',
+    value: FieldTypes.CURRENCY,
+  },
+  {
     title: 'Email',
     value: FieldTypes.EMAIL,
   },

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import BaseCardPropertyValueBtn from '@/components/project-management/cards/BaseCardPropertyValueBtn.vue';
 import TimePicker from './TimePicker.vue';
 
 import { DATE_RANGE_SUGGESTIONS, type DateRangeSuggestion } from './types';
@@ -18,7 +17,8 @@ const props = defineProps<{
   textField?: boolean;
   range?: boolean;
   rounded?: string;
-  includeTime?: boolean; // New prop to enable time selection
+  includeTime?: boolean;
+  fill?: boolean;
 }>();
 
 const dateDialog = defineModel<boolean>('dialog', {
@@ -28,6 +28,8 @@ const dateDialog = defineModel<boolean>('dialog', {
 const dateValue = ref<string | string[] | null | undefined>(dateModel.value);
 const timeValue = ref<string>('00:00');
 const isTimePickerVisible = ref(false);
+
+const attrs = useAttrs();
 
 const processedDate = computed({
   get() {
@@ -142,13 +144,13 @@ if (dateModel.value && !Array.isArray(dateModel.value)) {
   timeValue.value = parsedDate.isValid() ? parsedDate.format('HH:mm') : '12:00';
 }
 
-const textColorClass = computed(() => {
+const textColor = computed(() => {
   if (props.color) {
-    return `text-${props.color}`;
+    return `${props.color}`;
   }
 
   if (!dateValue.value) {
-    return 'text-default';
+    return 'default';
   }
 
   const date = dayjs(
@@ -156,16 +158,16 @@ const textColorClass = computed(() => {
   );
 
   if (date < dayjs().startOf('day')) {
-    return 'text-error';
+    return 'error';
   } else if (date > dayjs().endOf('day')) {
-    return 'text-default';
+    return 'default';
   } else {
-    return 'text-info';
+    return 'info';
   }
 });
 
 const textClass = computed(() => {
-  return textColorClass.value + ' ' + props.class;
+  return props.class + ' ' + (props.fill ? 'flex-fill' : '');
 });
 
 const dateToText = computed(() => {
@@ -273,9 +275,15 @@ function confirmDateTime() {
         </v-text-field>
       </template>
       <template v-else>
-        <base-card-property-value-btn
-          v-bind="props"
+        <v-btn
+          v-bind="{
+            ...attrs,
+            ...props,
+          }"
           class="text-none text-caption justify-start font-weight-regular"
+          variant="text"
+          :color="textColor"
+          density="comfortable"
           :class="textClass"
           @click.prevent
           :rounded
@@ -283,6 +291,9 @@ function confirmDateTime() {
           <template #prepend v-if="icon">
             <v-icon :icon color="default" />
           </template>
+          <v-tooltip activator="parent" location="top" v-if="!fill && label">
+            {{ label }}
+          </v-tooltip>
           {{ dateToText }}
           <template #append v-if="dateValue">
             <base-icon-btn
@@ -294,7 +305,7 @@ function confirmDateTime() {
               @click.prevent.stop="clearDate"
             />
           </template>
-        </base-card-property-value-btn>
+        </v-btn>
       </template>
     </template>
     <v-container

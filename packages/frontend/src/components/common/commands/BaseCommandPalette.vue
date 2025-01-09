@@ -175,6 +175,7 @@ onBeforeUnmount(() => {
         single-line
         hide-details
         variant="filled"
+        rounded="0"
         density="default"
         autocomplete="off"
         autofocus
