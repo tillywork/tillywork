@@ -2,6 +2,7 @@
 import Icons from './icons';
 
 import BaseColorPicker from '../BaseColorPicker.vue';
+import VirtualScroller from '../../base/VirtualScroller.vue';
 
 import stringUtils from '@/utils/string';
 
@@ -49,69 +50,6 @@ watch(
   },
   { immediate: true }
 );
-
-// Custom virtualized grid logic
-const gridContainer = ref<VCard | null>();
-const scrollTop = ref(0);
-const visibleItems = computed(() => {
-  if (!gridContainer.value) return [];
-
-  const containerHeight = gridContainer.value.$el.clientHeight;
-  const scrollOffset = scrollTop.value;
-
-  // Calculate the start and end indices of visible rows
-  const startRow = Math.floor(scrollOffset / ROW_HEIGHT);
-  const endRow = Math.ceil((scrollOffset + containerHeight) / ROW_HEIGHT);
-
-  // Calculate the start and end indices of visible items
-  const startIndex = startRow * COLUMNS;
-  const endIndex = endRow * COLUMNS;
-
-  // Update the visible items
-  const visibleItems = iconDictionary.value.icons.slice(startIndex, endIndex);
-  return visibleItems;
-});
-const iconGridHeight = computed(
-  () =>
-    `${Math.ceil(iconDictionary.value.icons.length / COLUMNS) * ROW_HEIGHT}px`
-);
-
-// Item size and grid configuration
-const ITEM_SIZE = 36; // Height of each item
-const COLUMNS = 8; // Number of columns
-const ROW_HEIGHT = ITEM_SIZE + 8; // Height of each row (including gap)
-
-const handleScroll = () => {
-  if (!gridContainer.value) return;
-  scrollTop.value = gridContainer.value.$el.scrollTop;
-};
-
-const getItemTop = (item: IconSelection) => {
-  const index = iconDictionary.value.icons.indexOf(item);
-  return `${Math.floor(index / COLUMNS) * ROW_HEIGHT}px`;
-};
-
-const getItemLeft = (item: IconSelection) => {
-  const index = iconDictionary.value.icons.indexOf(item);
-  return `${(index % COLUMNS) * (100 / COLUMNS)}%`;
-};
-
-watch(menu, (isOpen) => {
-  nextTick(() => {
-    if (isOpen && gridContainer.value) {
-      gridContainer.value.$el.addEventListener('scroll', handleScroll);
-      handleScroll();
-    } else if (gridContainer.value) {
-      gridContainer.value.$el.removeEventListener('scroll', handleScroll);
-    }
-  });
-});
-
-onUnmounted(() => {
-  if (gridContainer.value) {
-    gridContainer.value.$el.removeEventListener('scroll', handleScroll);
-  }
-});
 </script>
 
 <template>
@@ -137,27 +75,14 @@ onUnmounted(() => {
         variant="filled"
         rounded="0"
       />
-      <v-card
-        height="222"
-        border="none"
-        class="overflow-auto pa-2"
-        ref="gridContainer"
-      >
-        <div
-          class="icon-grid"
-          :style="{
-            height: iconGridHeight,
-          }"
+      <v-card height="222" border="none" class="overflow-auto pa-2">
+        <virtual-scroller
+          :items="iconDictionary.icons"
+          :columns="8"
+          :row-height="44"
+          :item-size="36"
         >
-          <div
-            v-for="item in visibleItems"
-            :key="item.icon"
-            class="icon-item"
-            :style="{
-              top: getItemTop(item),
-              left: getItemLeft(item),
-            }"
-          >
+          <template #="{ item }">
             <v-btn
               icon
               density="comfortable"
@@ -173,8 +98,8 @@ onUnmounted(() => {
                 >{{ item.icon }}</v-icon
               >
             </v-btn>
-          </div>
-        </div>
+          </template>
+        </virtual-scroller>
       </v-card>
     </v-card>
   </v-menu>
