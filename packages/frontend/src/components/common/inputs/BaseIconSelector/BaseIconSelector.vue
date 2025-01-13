@@ -99,18 +99,3 @@ watch(
     </v-card>
   </v-menu>
 </template>
-
-<style lang="scss" scoped>
-.icon-grid {
-  position: relative;
-
-  .icon-item {
-    position: absolute;
-    width: calc(100% / 8); /* Equal width for each column */
-    height: 36px; /* Height of each item */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-</style>
