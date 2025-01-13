@@ -204,7 +204,7 @@ export const useCommandStore = defineStore('command', () => {
         icon: 'mdi-delete-outline',
         title: `Delete ${currentCard.value.type.name.toLowerCase()}`,
         action: () => confirmDelete(currentCard.value as Card),
-        shortcut: ['D'],
+        shortcut: ['DEL'],
       });
     }
 

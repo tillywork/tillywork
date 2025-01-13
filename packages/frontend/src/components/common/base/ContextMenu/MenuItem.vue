@@ -8,7 +8,7 @@ const { item, tippy } = defineProps<{
 }>();
 
 function handleItemClick(item: ContextMenuItem) {
-  item.onClick();
+  item.action();
 
   if (tippy) {
     tippy.hide();

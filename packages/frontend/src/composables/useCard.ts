@@ -130,13 +130,13 @@ export const useCard = () => {
       {
         title: 'Copy link',
         icon: 'mdi-link',
-        onClick: () => copyLink(card, cb),
+        action: () => copyLink(card, cb),
       },
       {
         title: 'Delete',
         icon: 'mdi-delete-outline',
-        onClick: () => confirmDelete(card, cb),
-        shortcut: ['D'],
+        action: () => confirmDelete(card, cb),
+        shortcut: ['DEL'],
       },
     ];
   }

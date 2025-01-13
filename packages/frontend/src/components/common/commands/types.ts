@@ -1,10 +1,7 @@
-export type Command = {
+import type { ContextMenuItem } from '../base/ContextMenu/types';
+
+export type Command = ContextMenuItem & {
   id: string;
   section: string;
-  icon: string;
-  title: string;
   description?: string;
-  action: () => void;
-  shortcut?: string[];
-  condition?: () => boolean;
 };

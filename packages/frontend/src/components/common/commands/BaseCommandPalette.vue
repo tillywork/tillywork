@@ -130,10 +130,6 @@ function handleShortcut(event: KeyboardEvent) {
   );
 
   if (command) {
-    if (command.condition && !command.condition()) {
-      return;
-    }
-
     event.preventDefault();
     command.action();
   }
