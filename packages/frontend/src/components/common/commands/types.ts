@@ -1,11 +1,10 @@
 export type Command = {
-  id: number;
+  id: string;
   section: string;
   icon: string;
   title: string;
   description?: string;
   action: () => void;
   shortcut?: string[];
+  condition?: () => boolean;
 };
-
-export type CommandDto = Omit<Command, 'id'>;

@@ -5,17 +5,11 @@ import type { VForm } from 'vuetify/lib/components/index.mjs';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from '../types';
 import BaseListSelector from '../../inputs/BaseListSelector.vue';
-import { cloneDeep } from 'lodash';
 import { useAuthStore } from '@/stores/auth';
 import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
-import { leaderKey } from '@/utils/keyboard';
+import { leaderKey } from '@/utils/keys';
 import BaseField from '../../fields/BaseField.vue';
-import {
-  ListType,
-  type CardType,
-  type CreateCardDto,
-  type List,
-} from '@tillywork/shared';
+import { type CardType, type CreateCardDto } from '@tillywork/shared';
 import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
 

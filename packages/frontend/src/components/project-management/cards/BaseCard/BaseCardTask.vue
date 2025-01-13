@@ -16,7 +16,7 @@ import { useAuthStore } from '@/stores/auth';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import BaseCardChildrenProgress from '../BaseCardChildrenProgress.vue';
 import BaseCardChip from '../BaseCardChip.vue';
-import { leaderKey } from '@/utils/keyboard';
+import { leaderKey } from '@/utils/keys';
 import { useMentionNotifications } from '@/composables/useMentionNotifications';
 import urlUtils from '@/utils/url';
 import { useFields } from '@/composables/useFields';

@@ -14,7 +14,7 @@ import {
 } from '@tillywork/shared';
 
 import { cloneDeep } from 'lodash';
-import { leaderKey } from '@/utils/keyboard';
+import { leaderKey } from '@/utils/keys';
 
 import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';

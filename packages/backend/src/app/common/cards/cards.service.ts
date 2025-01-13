@@ -88,6 +88,7 @@ export class CardsService {
                 "childrenCardLists.listStage",
                 "childrenListStage"
             )
+            .innerJoinAndSelect("card.type", "type")
             .where("cardLists.list.id = :listId", { listId });
 
         if (hideCompleted) {
