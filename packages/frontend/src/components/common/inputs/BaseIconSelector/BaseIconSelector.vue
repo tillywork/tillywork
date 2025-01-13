@@ -56,14 +56,9 @@ watch(
   <base-icon-btn id="activator" v-bind="attrs" :icon :color="iconColor" />
   <v-menu v-model="menu" :close-on-content-click="false" activator="#activator">
     <v-card width="296">
-      <div class="py-2 px-4 border-b-thin">
+      <div class="py-2 px-4 border-b-thin" v-if="withColor">
         <span class="text-body-3 me-3">Color</span>
-        <base-color-picker
-          v-if="withColor"
-          v-model="iconColor"
-          hide-details
-          icon
-        />
+        <base-color-picker v-model="iconColor" hide-details icon />
       </div>
       <v-text-field
         v-model="searchIcon"
