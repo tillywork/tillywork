@@ -11,7 +11,7 @@ const { items, tippy } = defineProps<{
 </script>
 
 <template>
-  <v-card min-width="200" border="thin">
+  <v-card min-width="200" border="thin" elevation="1">
     <v-list nav class="pa-1">
       <template v-for="item in items" :key="item.title">
         <menu-item :item :tippy />
