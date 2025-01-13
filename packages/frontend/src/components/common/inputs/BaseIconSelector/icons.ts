@@ -262,12 +262,10 @@ export default [
   { name: 'Contract', icon: 'mdi-file-sign' },
   { name: 'Proposal', icon: 'mdi-file-presentation-box' },
   { name: 'Invoice', icon: 'mdi-file-chart' },
-  { name: 'Attachment', icon: 'mdi-paperclip' },
   { name: 'Signature', icon: 'mdi-draw' },
 
   // Time and Schedule
   { name: 'Calendar', icon: 'mdi-calendar' },
-  { name: 'Clock', icon: 'mdi-clock' },
   { name: 'Stopwatch', icon: 'mdi-timer' },
   { name: 'Hourglass', icon: 'mdi-timer-sand' },
   { name: 'Schedule', icon: 'mdi-calendar-clock' },
@@ -280,14 +278,11 @@ export default [
   { name: 'Wrench', icon: 'mdi-wrench' },
 
   // Notifications and Alerts
-  { name: 'Alert', icon: 'mdi-alert' },
   { name: 'Reminder', icon: 'mdi-alarm' },
   { name: 'Flag', icon: 'mdi-flag' },
 
   // Miscellaneous Business
-  { name: 'Handshake', icon: 'mdi-handshake' },
   { name: 'Briefcase', icon: 'mdi-briefcase' },
   { name: 'Presentation', icon: 'mdi-presentation' },
   { name: 'Lightbulb', icon: 'mdi-lightbulb-on' },
-  { name: 'Target', icon: 'mdi-target' },
 ];
