@@ -1,13 +1,28 @@
 <script setup lang="ts">
 import type { ContextMenuItem } from './types';
+import { type Instance } from 'tippy.js';
 
-const { item } = defineProps<{
+const { item, tippy } = defineProps<{
   item: ContextMenuItem;
+  tippy?: Instance;
 }>();
+
+function handleItemClick(item: ContextMenuItem) {
+  item.onClick();
+
+  if (tippy) {
+    tippy.hide();
+  }
+}
 </script>
 
 <template>
-  <v-list-item @click="item.onClick()" height="30" class="py-0" min-height="30">
+  <v-list-item
+    @click="handleItemClick(item)"
+    height="30"
+    class="py-0"
+    min-height="30"
+  >
     <div class="d-flex align-center ga-2">
       <v-icon :icon="item.icon" />
       <v-list-item-title>{{ item.title }}</v-list-item-title>

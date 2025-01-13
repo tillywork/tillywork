@@ -60,12 +60,6 @@ onMounted(() => {
 
   const menuContainer = document.createElement('div');
 
-  menuApp = createApp(MenuWrapper, {
-    items,
-  });
-  menuApp.use(vuetify);
-  menuApp.mount(menuContainer);
-
   tippyInstance = tippy(triggerElement.value, {
     content: menuContainer,
     trigger: 'manual',
@@ -76,6 +70,13 @@ onMounted(() => {
     animateFill: true,
     plugins: [animateFill],
   });
+
+  menuApp = createApp(MenuWrapper, {
+    items,
+    tippy: tippyInstance,
+  });
+  menuApp.use(vuetify);
+  menuApp.mount(menuContainer);
 
   triggerElement.value.addEventListener('contextmenu', handleContextMenu);
 });
