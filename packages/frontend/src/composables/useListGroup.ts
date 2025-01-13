@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useCardsService } from '@/services/useCardsService';
 import { useDialogStore } from '@/stores/dialog';
@@ -21,6 +20,7 @@ import { useCard } from './useCard';
 import type { Row } from '@tanstack/vue-table';
 import { useListGroupsService } from '@/services/useListGroupsService';
 import { useQueryClient } from '@tanstack/vue-query';
+import { useStateStore } from '@/stores/state';
 
 export const useListGroup = ({
   props,
@@ -55,6 +55,8 @@ export const useListGroup = ({
 
   const dialog = useDialogStore();
   const { showSnackbar } = useSnackbarStore();
+  const { setHoveredCard } = useStateStore();
+
   const queryClient = useQueryClient();
 
   const { updateFieldValue } = useCard();
@@ -369,6 +371,20 @@ export const useListGroup = ({
     });
   }
 
+  function handleHoverCard({
+    isHovering,
+    card,
+  }: {
+    isHovering: boolean;
+    card: Card;
+  }) {
+    if (isHovering) {
+      setHoveredCard(card);
+    } else {
+      setHoveredCard(null);
+    }
+  }
+
   return {
     openCreateCardDialog,
     onDragAdd,
@@ -382,5 +398,6 @@ export const useListGroup = ({
     handleDeleteCard,
     handleUpdateCardOrder,
     handleUpdateCardStage,
+    handleHoverCard,
   };
 };

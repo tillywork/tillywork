@@ -7,13 +7,8 @@ import {
   type Row,
   type Table,
 } from '@tanstack/vue-table';
-import { useCardsService } from '@/services/useCardsService';
 import draggable from 'vuedraggable';
-import objectUtils from '@/utils/object';
-import { cloneDeep } from 'lodash';
-import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
-import { useCard } from '@/composables/useCard';
-import { useFields } from '@/composables/useFields';
+
 import {
   ListGroupOptions,
   type QueryFilter,
@@ -28,9 +23,19 @@ import {
   type SortState,
   CardTypeLayout,
 } from '@tillywork/shared';
-import BaseField from '@/components/common/fields/BaseField.vue';
-import BaseCardActions from '../../cards/BaseCard/BaseCardActions.vue';
+
+import objectUtils from '@/utils/object';
+import { cloneDeep } from 'lodash';
+
+import { useCardsService } from '@/services/useCardsService';
+
 import { useListGroup } from '@/composables/useListGroup';
+import { useCard } from '@/composables/useCard';
+import { useFields } from '@/composables/useFields';
+
+import BaseField from '@/components/common/fields/BaseField.vue';
+import ContextMenu from '@/components/common/base/ContextMenu/ContextMenu.vue';
+import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 
 const props = defineProps<{
   listGroup: Row<ListGroup>;
@@ -46,14 +51,13 @@ const props = defineProps<{
   list: List;
 }>();
 
-const rowMenuOpen = ref<Row<Card> | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
 
 const cards = ref<Card[]>([]);
 
 const { useGetGroupCardsInfinite } = useCardsService();
 
-const { updateFieldValue } = useCard();
+const { updateFieldValue, getCardContextMenuItems } = useCard();
 
 const { titleField, getDateFieldColor } = useFields({
   cardTypeId: props.list.defaultCardType.id,
@@ -152,8 +156,8 @@ const {
   onDragStart,
   onDragUpdate,
   toggleGroupExpansion,
-  handleDeleteCard,
   handleUpdateCardStage,
+  handleHoverCard,
 } = useListGroup({
   props,
   cards: draggableCards,
@@ -175,20 +179,6 @@ async function handleGroupCardsLoad({
     }
   } else {
     done('ok');
-  }
-}
-
-function handleCardMenuClick({
-  row,
-  isOpen,
-}: {
-  row: Row<Card>;
-  isOpen: boolean;
-}) {
-  if (isOpen) {
-    rowMenuOpen.value = row;
-  } else {
-    rowMenuOpen.value = null;
   }
 }
 
@@ -319,76 +309,75 @@ watchEffect(() => {
           group="cards"
         >
           <template #item="{ element: row }">
-            <v-list-item
-              class="pa-0"
-              rounded="0"
-              min-height="33"
-              :to="`/card/${row.original.id}`"
-              :ripple="false"
+            <context-menu
+              :items="getCardContextMenuItems(row.original)"
+              #="{ showMenu }"
             >
-              <v-hover
-                #="{ isHovering: isRowHovering, props: rowProps }"
-                :disabled="isDragging"
+              <v-list-item
+                class="pa-0"
+                rounded="0"
+                min-height="33"
+                :to="`/card/${row.original.id}`"
+                :ripple="false"
               >
-                <v-card
-                  color="transparent"
-                  v-bind="rowProps"
-                  min-height="33"
-                  class="table-row d-flex text-body-3 flex-fill align-items-stretch"
-                  rounded="0"
-                  link
-                  :ripple="false"
+                <v-hover
+                  #="{ isHovering: isRowHovering, props: rowProps }"
+                  :disabled="isDragging"
+                  @update:model-value="
+                    (v) =>
+                      handleHoverCard({ isHovering: v, card: row.original })
+                  "
                 >
-                  <template
-                    v-for="cell in row.getVisibleCells()"
-                    :key="cell.id"
+                  <v-card
+                    color="transparent"
+                    v-bind="rowProps"
+                    min-height="33"
+                    class="table-row d-flex text-body-3 flex-fill align-items-stretch"
+                    rounded="0"
+                    link
+                    :ripple="false"
                   >
                     <template
-                      v-if="cell.column.columnDef.cellType === 'actions'"
+                      v-for="cell in row.getVisibleCells()"
+                      :key="cell.id"
                     >
-                      <v-card
-                        :width="getColumnSize(cell.column.columnDef.id)"
-                        class="table-cell d-flex align-center pe-1"
-                        rounded="0"
-                        color="transparent"
+                      <template
+                        v-if="cell.column.columnDef.cellType === 'actions'"
                       >
-                        <div
-                          class="d-flex flex-fill justify-end ga-1"
-                          v-if="isRowHovering || rowMenuOpen?.id === row.id"
+                        <v-card
+                          :width="getColumnSize(cell.column.columnDef.id)"
+                          class="table-cell d-flex align-center pe-1"
+                          rounded="0"
+                          color="transparent"
                         >
-                          <base-card-actions
-                            :card="row.original"
-                            @update:model-value="
-                              (v: boolean) => handleCardMenuClick({ row, isOpen: v })
-                            "
+                          <div
+                            class="d-flex flex-fill justify-end ga-1"
+                            v-if="isRowHovering"
                           >
-                            <template #activator="{ props }">
-                              <base-icon-btn
-                                v-bind="props"
-                                icon="mdi-dots-vertical"
-                                @click.prevent
-                              />
-                            </template>
-                          </base-card-actions>
-                        </div>
-                      </v-card>
-                    </template>
-                    <template
-                      v-else-if="cell.column.columnDef.cellType === 'title'"
-                    >
-                      <v-card
-                        :width="getColumnSize(cell.column.columnDef.id)"
-                        class="d-flex align-center text-body-3 px-2 table-cell"
-                        rounded="0"
-                        color="transparent"
+                            <base-icon-btn
+                              v-bind="props"
+                              icon="mdi-dots-vertical"
+                              @click.prevent="showMenu"
+                            />
+                          </div>
+                        </v-card>
+                      </template>
+                      <template
+                        v-else-if="cell.column.columnDef.cellType === 'title'"
                       >
-                        <list-stage-selector
-                          v-if="list.listStages.length"
-                          :model-value="row.original.cardLists[0].listStage"
-                          theme="icon"
-                          rounded="circle"
-                          :list-stages="listStages ?? []"
-                          @update:modelValue="
+                        <v-card
+                          :width="getColumnSize(cell.column.columnDef.id)"
+                          class="d-flex align-center text-body-3 px-2 table-cell"
+                          rounded="0"
+                          color="transparent"
+                        >
+                          <list-stage-selector
+                            v-if="list.listStages.length"
+                            :model-value="row.original.cardLists[0].listStage"
+                            theme="icon"
+                            rounded="circle"
+                            :list-stages="listStages ?? []"
+                            @update:modelValue="
                             (modelValue: ListStage) =>
                               handleUpdateCardStage({
                                   cardId: row.original.id,
@@ -396,107 +385,112 @@ watchEffect(() => {
                                   listStageId: modelValue.id,
                               })
                           "
-                          @click.prevent
-                        />
+                            @click.prevent
+                          />
 
-                        <template v-if="titleField">
-                          <span
-                            class="ms-2"
-                            :class="{
-                              'text-truncate': !isRowHovering,
-                            }"
-                          >
-                            {{ row.original.data[titleField.slug] }}
-                          </span>
-                        </template>
-                        <template v-else>
-                          <template
-                            v-if="
-                              list.defaultCardType.layout ===
-                              CardTypeLayout.PERSON
-                            "
-                          >
+                          <template v-if="titleField">
                             <span
                               class="ms-2"
                               :class="{
                                 'text-truncate': !isRowHovering,
                               }"
                             >
-                              {{ row.original.data.first_name }}
-                              {{ row.original.data.last_name }}
+                              {{ row.original.data[titleField.slug] }}
                             </span>
                           </template>
-                          <v-skeleton-loader v-else type="text" width="100%" />
-                        </template>
+                          <template v-else>
+                            <template
+                              v-if="
+                                list.defaultCardType.layout ===
+                                CardTypeLayout.PERSON
+                              "
+                            >
+                              <span
+                                class="ms-2"
+                                :class="{
+                                  'text-truncate': !isRowHovering,
+                                }"
+                              >
+                                {{ row.original.data.first_name }}
+                                {{ row.original.data.last_name }}
+                              </span>
+                            </template>
+                            <v-skeleton-loader
+                              v-else
+                              type="text"
+                              width="100%"
+                            />
+                          </template>
 
-                        <!-- Progress -->
-                        <base-card-children-progress
-                          v-if="row.original.children.length > 0"
-                          :card="row.original"
-                          border="thin"
-                          min-width="fit-content"
-                          class="text-caption ms-2"
-                          style="
-                            padding-top: 2px !important;
-                            padding-bottom: 2px !important;
-                          "
-                        />
-                      </v-card>
-                    </template>
-                    <template v-else>
-                      <v-card
-                        :width="getColumnSize(cell.column.columnDef.id)"
-                        class="table-cell d-flex align-center"
-                        rounded="0"
-                        color="transparent"
-                        link
-                      >
-                        <template
-                          v-if="
-                            shouldRenderField(cell.column.columnDef.cellType)
-                          "
+                          <!-- Progress -->
+                          <base-card-children-progress
+                            v-if="row.original.children.length > 0"
+                            :card="row.original"
+                            border="thin"
+                            min-width="fit-content"
+                            class="text-caption ms-2"
+                            style="
+                              padding-top: 2px !important;
+                              padding-bottom: 2px !important;
+                            "
+                          />
+                        </v-card>
+                      </template>
+                      <template v-else>
+                        <v-card
+                          :width="getColumnSize(cell.column.columnDef.id)"
+                          class="table-cell d-flex align-center"
+                          rounded="0"
+                          color="transparent"
+                          link
                         >
-                          <base-field
-                            class="h-100"
-                            :field="cell.column.columnDef.field"
-                            :model-value="
-                              row.original.data[
-                                cell.column.columnDef.field.slug
-                              ]
+                          <template
+                            v-if="
+                              shouldRenderField(cell.column.columnDef.cellType)
                             "
-                            :color="
-                              getDateFieldColor(
-                                row.original,
-                                cell.column.columnDef.field
-                              )
-                            "
-                            rounded="0"
-                            flex-fill
-                            @update:model-value="
+                          >
+                            <base-field
+                              class="h-100"
+                              :field="cell.column.columnDef.field"
+                              :model-value="
+                                row.original.data[
+                                  cell.column.columnDef.field.slug
+                                ]
+                              "
+                              :color="
+                                getDateFieldColor(
+                                  row.original,
+                                  cell.column.columnDef.field
+                                )
+                              "
+                              rounded="0"
+                              flex-fill
+                              @update:model-value="
                               (v: any) => updateFieldValue({ 
                                   card: row.original,
                                   field: cell.column.columnDef.field,
                                   v
                               })
                             "
-                            table
-                            @click.stop
-                          />
-                        </template>
-                        <template v-else>
-                          <div class="pa-2">
-                            <flex-render
-                              :render="cell.column.columnDef.cell"
-                              :props="cell.getContext()"
+                              table
+                              @click.stop
                             />
-                          </div>
-                        </template>
-                      </v-card>
+                          </template>
+                          <template v-else>
+                            <div class="pa-2">
+                              <flex-render
+                                :render="cell.column.columnDef.cell"
+                                :props="cell.getContext()"
+                              />
+                            </div>
+                          </template>
+                        </v-card>
+                      </template>
                     </template>
-                  </template>
-                </v-card>
-              </v-hover>
-            </v-list-item>
+                  </v-card>
+                </v-hover>
+              </v-list-item>
+            </context-menu>
           </template>
         </draggable>
       </v-infinite-scroll>

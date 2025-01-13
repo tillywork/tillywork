@@ -5,13 +5,8 @@ import {
   type Row,
   type Table,
 } from '@tanstack/vue-table';
-import { useCardsService } from '@/services/useCardsService';
 import draggable from 'vuedraggable';
-import objectUtils from '@/utils/object';
-import { cloneDeep } from 'lodash';
-import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
-import { useFields } from '@/composables/useFields';
-import { useCard } from '@/composables/useCard';
+
 import {
   ListGroupOptions,
   type QueryFilter,
@@ -26,9 +21,19 @@ import {
   type SortState,
   type Field,
 } from '@tillywork/shared';
+
+import objectUtils from '@/utils/object';
+import { cloneDeep } from 'lodash';
+
+import { useCardsService } from '@/services/useCardsService';
+
 import { useListGroup } from '@/composables/useListGroup';
+import { useFields } from '@/composables/useFields';
+import { useCard } from '@/composables/useCard';
+
 import BaseField from '@/components/common/fields/BaseField.vue';
-import BaseCardActions from '../../cards/BaseCard/BaseCardActions.vue';
+import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
+import ContextMenu from '@/components/common/base/ContextMenu/ContextMenu.vue';
 
 const props = defineProps<{
   listGroup: Row<ListGroup>;
@@ -43,7 +48,7 @@ const isGroupCardsLoading = defineModel<boolean>('loading');
 
 const cardsService = useCardsService();
 
-const { updateFieldValue } = useCard();
+const { updateFieldValue, getCardContextMenuItems } = useCard();
 
 const {
   titleField,
@@ -143,8 +148,8 @@ const {
   onDragStart,
   onDragUpdate,
   toggleGroupExpansion,
-  handleDeleteCard,
   handleUpdateCardStage,
+  handleHoverCard,
 } = useListGroup({
   props,
   cards: draggableCards,
@@ -307,10 +312,16 @@ watch(
           group="cards"
         >
           <template #item="{ element: row }">
-            <div class="list-row-wrapper">
+            <context-menu
+              :items="getCardContextMenuItems(row.original)"
+              #="{ showMenu }"
+            >
               <v-hover
                 #="{ isHovering: isRowHovering, props: rowProps }"
                 :disabled="isDragging"
+                @update:model-value="
+                  (v) => handleHoverCard({ isHovering: v, card: row.original })
+                "
               >
                 <v-list-item
                   class="list-row text-body-3"
@@ -325,22 +336,13 @@ watch(
                       :style="{ width: '30px' }"
                       class="d-flex justify-end me-2"
                     >
-                      <div v-if="isRowHovering || rowMenuOpen?.id === row.id">
-                        <base-card-actions
-                          :card="row.original"
-                          @update:model-value="
-                            (v: boolean) => handleCardMenuClick({ row, isOpen: v })
-                          "
-                        >
-                          <template #activator="{ props }">
-                            <base-icon-btn
-                              v-bind="props"
-                              icon="mdi-dots-vertical"
-                              @click.prevent
-                            />
-                          </template>
-                        </base-card-actions>
-                      </div>
+                      <template v-if="isRowHovering">
+                        <base-icon-btn
+                          v-bind="props"
+                          icon="mdi-dots-vertical"
+                          @click.prevent="showMenu"
+                        />
+                      </template>
                     </div>
                   </template>
                   <v-list-item-title class="d-flex align-center ga-1">
@@ -420,7 +422,7 @@ watch(
                   </template>
                 </v-list-item>
               </v-hover>
-            </div>
+            </context-menu>
           </template>
         </draggable>
       </v-infinite-scroll>

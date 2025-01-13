@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { useCommands } from '@/composables/useCommands';
-import { leaderKey } from '@/utils/keyboard';
+import { useCommandStore } from '@/stores/command';
+import { leaderKey } from '@/utils/keys';
 
-const { setIsCommandPaletteOpen } = useCommands();
+const { isOpen } = storeToRefs(useCommandStore());
+
+function openCommandPalette() {
+  isOpen.value = true;
+}
 </script>
 
 <template>
@@ -13,7 +17,7 @@ const { setIsCommandPaletteOpen } = useCommands();
     border="thin"
     color="default"
     prepend-icon="mdi-help-circle-outline"
-    @click="setIsCommandPaletteOpen(true)"
+    @click="openCommandPalette()"
   >
     Commands
     <template #append>

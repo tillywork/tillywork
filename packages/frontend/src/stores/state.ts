@@ -1,4 +1,5 @@
-import { WorkspaceTypes, type List } from '@tillywork/shared';
+import { WorkspaceTypes, type Card, type List } from '@tillywork/shared';
+import { useCommandStore } from './command';
 
 export type ListState = {
   [listId: number]: ListStateEntry;
@@ -27,6 +28,8 @@ export const useStateStore = defineStore('state', {
       listState: {} as ListState,
       /** Used to prevent rail navigation drawer from closing when a menu is open. */
       isRailFrozen: false,
+      /** Current hovered or opened card. */
+      currentCard: null as Card | null,
     };
   },
   actions: {
@@ -108,6 +111,16 @@ export const useStateStore = defineStore('state', {
     },
     toggleFreezeRail() {
       this.isRailFrozen = !this.isRailFrozen;
+    },
+    setCurrentCard(card: Card | null) {
+      this.currentCard = card;
+    },
+    setHoveredCard(card: Card | null) {
+      const { isOpen } = storeToRefs(useCommandStore());
+
+      if (!isOpen.value) {
+        this.currentCard = card;
+      }
     },
   },
 });

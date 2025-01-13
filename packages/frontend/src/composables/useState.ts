@@ -19,7 +19,7 @@ import { useTheme } from 'vuetify';
  */
 export const useState = () => {
   const { setSelectedModule, navigateToLastList } = useStateStore();
-  const { selectedModule } = storeToRefs(useStateStore());
+  const { selectedModule, currentCard } = storeToRefs(useStateStore());
   const { isAuthenticated, setProject, setWorkspace, clearWorkspace } =
     useAuthStore();
   const { project, user, workspace } = storeToRefs(useAuthStore());

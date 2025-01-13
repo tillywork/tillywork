@@ -1,4 +1,4 @@
-import { alternateKey, leaderKey } from '@/utils/keyboard';
+import { alternateKey, leaderKey } from '@/utils/keys';
 import { Editor, VueRenderer, type Range } from '@tiptap/vue-3';
 import tippy from 'tippy.js';
 import BaseEditorCommands from './BaseEditorCommands.vue';
