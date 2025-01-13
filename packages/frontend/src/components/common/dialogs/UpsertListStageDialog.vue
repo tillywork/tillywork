@@ -9,7 +9,7 @@ import { useDialogStore } from '@/stores/dialog';
 
 import { useQueryClient } from '@tanstack/vue-query';
 import type { ListStage } from '@/components/project-management/lists/types';
-import { useListStagesService } from '@/composables/services/useListStagesService';
+import { useListStagesService } from '@/services/useListStagesService';
 
 const { rules } = validationUtils;
 const { showSnackbar } = useSnackbarStore();

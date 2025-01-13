@@ -1,35 +1,92 @@
 <script setup lang="ts">
-import {
-  DEFAULT_LIST_GROUP_BY_OPTIONS,
-  ListGroupOptions,
-} from '../lists/types';
-import type { ListGroupOption } from './types';
 import BaseViewChip from './BaseViewChip.vue';
+import {
+  ListGroupOptions,
+  type List,
+  type ViewGroupByOption,
+  type ViewGroupOption,
+} from '@tillywork/shared';
+import { useFields } from '@/composables/useFields';
+import posthog from 'posthog-js';
 
-const groupBy = defineModel<ListGroupOptions>();
-const groupByOptions = ref(DEFAULT_LIST_GROUP_BY_OPTIONS);
-const selectedOption = computed(() =>
-  groupByOptions.value.find((option) => option.value === groupBy.value)
-);
+const groupBy = defineModel<ViewGroupByOption>();
+const { list } = defineProps<{
+  list: List;
+}>();
+
+const cardTypeId = computed(() => list.defaultCardType.id);
+const listId = computed(() => list.id);
+
+const { groupableFields } = useFields({
+  cardTypeId,
+  listId,
+});
+
+const groupByOptions = computed(() => {
+  const arr = [];
+
+  if (list.listStages?.length) {
+    arr.push({
+      label: 'Stage',
+      value: ListGroupOptions.LIST_STAGE,
+      icon: 'mdi-circle-slice-8',
+    });
+  }
+
+  if (groupableFields.value) {
+    groupableFields.value.forEach((field) => {
+      arr.push({
+        label: field.name,
+        value: ListGroupOptions.FIELD,
+        icon: field.icon,
+        field,
+      });
+    });
+  }
+
+  return arr;
+});
+
+const selectedOption = computed(() => {
+  return groupByOptions.value.find((option) => isOptionSelected(option));
+});
+
 const isGroupByFilled = computed(
-  () => groupBy.value && groupBy.value !== ListGroupOptions.ALL
+  () => groupBy.value && groupBy.value.type !== ListGroupOptions.ALL
 );
 
-function handleGroupBySelection(option: ListGroupOption) {
-  groupBy.value = option.value;
+function handleGroupBySelection(option: ViewGroupOption) {
+  groupBy.value = {
+    type: option.value,
+    fieldId: option.field?.id,
+  };
+
+  posthog.capture('update_group_by', {
+    groupBy: option.value,
+    field: option.field,
+  });
 }
 
-function isOptionSelected(option: ListGroupOption) {
-  return option.value === groupBy.value;
+function isOptionSelected(option: ViewGroupOption) {
+  return (
+    option.value === groupBy.value?.type &&
+    option.field?.id === groupBy.value.fieldId
+  );
 }
 
 function clearGroupBy() {
-  groupBy.value = ListGroupOptions.ALL;
+  groupBy.value = {
+    type: ListGroupOptions.ALL,
+  };
+
+  posthog.capture('update_group_by', {
+    groupBy: ListGroupOptions.ALL,
+  });
 }
 </script>
 
 <template>
-  <v-menu>
+  <v-menu v-if="groupByOptions.length">
     <template #activator="{ props }">
       <base-view-chip
         v-bind="props"
@@ -61,11 +118,9 @@ function clearGroupBy() {
             :active="isOptionSelected(option)"
           >
             <template #prepend>
-              <v-icon
-                :color="isOptionSelected(option) ? 'primary' : 'grey'"
-                size="small"
-                >{{ option.icon ?? 'mdi-circle-slice-8' }}</v-icon
-              >
+              <v-icon :color="isOptionSelected(option) ? 'primary' : 'grey'">{{
+                option.icon ?? 'mdi-circle-slice-8'
+              }}</v-icon>
             </template>
             <v-list-item-title
               class="user-select-none"

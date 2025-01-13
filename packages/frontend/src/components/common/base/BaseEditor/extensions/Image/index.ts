@@ -5,7 +5,6 @@ import { PluginKey, Plugin } from '@tiptap/pm/state';
 
 export interface ImageOptions {
   inline: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   HTMLAttributes: Record<string, any>;
 }
 

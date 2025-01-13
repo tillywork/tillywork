@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ViewTypes, type View } from '../views/types';
+import { ViewTypes, type View } from '@tillywork/shared';
 import type { List } from './types';
 import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
-import { useWorkspaceStore } from '@/stores/workspace';
-import { useViewsService } from '@/composables/services/useViewsService';
+import { useViewsService } from '@/services/useViewsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
+import { useStateStore } from '@/stores/state';
 
 const dialog = useDialogStore();
 const props = defineProps<{
@@ -17,8 +17,8 @@ const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
 );
 
-const workspaceStore = useWorkspaceStore();
-const { listState } = storeToRefs(workspaceStore);
+const { setListLastView } = useStateStore();
+const { listState } = storeToRefs(useStateStore());
 
 const { showSnackbar } = useSnackbarStore();
 
@@ -35,7 +35,7 @@ function handleTabSelection(view: View) {
   selectedView.value = view;
 
   if (view) {
-    workspaceStore.setListLastView({
+    setListLastView({
       listId: listCopy.value.id,
       viewId: view.id,
     });
@@ -141,7 +141,7 @@ watch(
           v-bind="props"
           rounded="0"
           variant="text"
-          class="text-capitalize"
+          class="text-none text-caption"
           color="default"
           @click="handleTabSelection(view)"
           size="small"
@@ -203,7 +203,7 @@ watch(
       </v-hover>
     </template>
     <v-btn
-      class="text-capitalize"
+      class="text-none text-caption"
       variant="text"
       size="small"
       rounded="0"

@@ -5,15 +5,17 @@ import { md3 } from 'vuetify/blueprints';
 import '@mdi/font/css/materialdesignicons.css';
 import 'vuetify/styles';
 import '@/styles/vuetify.scss';
+import { VNumberInput } from 'vuetify/labs/VNumberInput';
 
 const themes = {
   light: {
     dark: false,
     colors: {
-      primary: '#1976D2',
-      background: '#FEFFFE',
-      surface: '#FEFEFE',
-      accent: '#F7F7F7',
+      primary: '#126ac2',
+      background: '#F3F3F3',
+      surface: '#F7F7F7',
+      accent: '#EAEAEA',
+      navigation: '#EAEAEA',
       secondary: '#BCFFCD',
       error: '#E53935',
     },
@@ -21,10 +23,11 @@ const themes = {
   dark: {
     dark: true,
     colors: {
-      primary: '#1976D2',
+      primary: '#3692ed',
       background: '#090909',
       surface: '#101112',
       accent: '#17191A',
+      navigation: '#131516',
       secondary: '#88FA9D',
       error: '#EF5350',
       'surface-variant': '#FEFEFE',
@@ -34,7 +37,10 @@ const themes = {
 
 const vuetify = createVuetify({
   blueprint: md3,
-  components,
+  components: {
+    ...components,
+    VNumberInput,
+  },
   directives,
   theme: {
     defaultTheme: 'light',
@@ -46,15 +52,18 @@ const vuetify = createVuetify({
     },
     VBtn: {
       color: 'primary',
-      rounded: 'md',
+      class: 'text-body-3',
     },
     VSwitch: {
       color: 'primary',
       flat: true,
+      inset: true,
+      density: 'comfortable',
     },
     VTextField: {
       color: 'primary',
       density: 'compact',
+      variant: 'outlined',
     },
     VDataTable: {
       density: 'compact',
@@ -80,11 +89,12 @@ const vuetify = createVuetify({
         slim: true,
         nav: true,
       },
+      color: 'navigation',
     },
     VMenu: {
-      transition: 'none',
       offset: 3,
       width: 200,
+      transition: 'none',
     },
     VIcon: {
       size: 'small',
@@ -92,12 +102,15 @@ const vuetify = createVuetify({
     },
     VSelect: {
       density: 'compact',
+      variant: 'outlined',
     },
     VAutocomplete: {
       density: 'compact',
+      variant: 'outlined',
     },
     VCombobox: {
       density: 'compact',
+      variant: 'outlined',
     },
     VCheckbox: {
       density: 'compact',
@@ -105,7 +118,24 @@ const vuetify = createVuetify({
       hideDetails: true,
     },
     VChip: {
-      rounded: 'md',
+      rounded: 'pill',
+    },
+    VAppBar: {
+      color: 'navigation',
+    },
+    VNumberInput: {
+      density: 'compact',
+      variant: 'outlined',
+      VBtn: {
+        color: 'default',
+        rounded: 'circle',
+      },
+    },
+    VField: {
+      rounded: 'pill',
+      VIcon: {
+        size: 'x-small',
+      },
     },
   },
 });

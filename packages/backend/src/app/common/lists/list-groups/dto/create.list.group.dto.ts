@@ -1,43 +1,58 @@
 import {
     IsBoolean,
     IsEnum,
+    IsNotEmpty,
     IsNumber,
     IsOptional,
     IsString,
+    ValidateIf,
 } from "class-validator";
-import { FilterGroup } from "../../../filters/types";
-import { ListGroupEntityTypes, ListGroupOptions } from "../../types";
-import { List } from "../../list.entity";
+import { ListGroupEntityTypes } from "../../types";
+import { ListGroupOptions, QueryFilter } from "@tillywork/shared";
 
 export class CreateListGroupDto {
-    @IsNumber()
-    @IsOptional()
-    entityId?: number;
-    @IsEnum(List)
-    @IsOptional()
-    entityType?: ListGroupEntityTypes;
-    @IsEnum(ListGroupOptions)
-    @IsOptional()
-    type?: ListGroupOptions;
     @IsString()
     @IsOptional()
     name?: string;
+
     @IsOptional()
-    filter?: {
-        where: FilterGroup;
-    };
+    filter?: QueryFilter;
+
+    @IsEnum(ListGroupOptions)
+    @IsNotEmpty()
+    type: ListGroupOptions;
+
+    @ValidateIf((o) => o.entityType)
+    @IsNotEmpty()
+    @IsNumber()
+    entityId?: number;
+
+    @ValidateIf((o) => o.entityId)
+    @IsNotEmpty()
+    @IsEnum(ListGroupEntityTypes)
+    entityType?: ListGroupEntityTypes;
+
     @IsString()
     @IsOptional()
     color?: string;
+
     @IsString()
     @IsOptional()
     icon?: string;
+
     @IsNumber()
     @IsOptional()
     order?: number;
+
     @IsBoolean()
     @IsOptional()
     isExpanded?: boolean;
+
+    @IsOptional()
+    @IsNumber()
+    fieldId?: number;
+
+    @IsNotEmpty()
     @IsNumber()
     listId?: number;
 }

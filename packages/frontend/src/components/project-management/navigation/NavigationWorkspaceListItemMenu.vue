@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import type { List } from '../lists/types';
-import { useListsService } from '@/composables/services/useListsService';
+import { useListsService } from '@/services/useListsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
-import type { CardType } from '../cards/types';
 import { useDialogStore } from '@/stores/dialog';
-import { SettingsTabs } from '@/components/common/dialogs/types';
 import { useAuthStore } from '@/stores/auth';
+import type { CardType } from '@tillywork/shared';
 
 const listMenu = ref(false);
 const { useDeleteListMutation, useUpdateListMutation } = useListsService();
@@ -33,6 +32,10 @@ function handleListMenuClick() {
   emit('hover:freeze');
 }
 
+function closeListMenu() {
+  listMenu.value = false;
+}
+
 function handleDeleteList(list: List) {
   dialog.openDialog({
     dialog: DIALOGS.CONFIRM,
@@ -54,8 +57,7 @@ function deleteList(list: List) {
       queryClient.invalidateQueries({ queryKey: ['list', list.id] });
       dialog.closeDialog(confirmDialogIndex.value);
     })
-    .catch((e) => {
-      console.log(e);
+    .catch(() => {
       showSnackbar({
         message: 'Something went wrong, please try again.',
         color: 'error',
@@ -95,18 +97,6 @@ function handleUpdateDefaultCardType(cardType: CardType) {
   }
 }
 
-function openSettingsDialog(activeTab: SettingsTabs) {
-  dialog.openDialog({
-    dialog: DIALOGS.SETTINGS,
-    data: {
-      activeTab,
-    },
-    options: {
-      fullscreen: true,
-    },
-  });
-}
-
 function openEditStagesDialog(list: List) {
   listMenu.value = false;
   dialog.openDialog({
@@ -125,11 +115,11 @@ function openUpdateListDialog(list: List) {
       mode: UpsertDialogMode.UPDATE,
     },
   });
-  listMenu.value = false;
+  closeListMenu();
 }
 
-watch(listMenu, () => {
-  if (!listMenu.value) {
+watch(listMenu, (v) => {
+  if (!v) {
     emit('hover:unfreeze');
   }
 });
@@ -157,7 +147,7 @@ watch(listMenu, () => {
           </template>
           <v-list-item-title>Edit</v-list-item-title>
         </v-list-item>
-        <v-list-item @click="openSettingsDialog(SettingsTabs.FIELDS)">
+        <v-list-item to="/settings/custom-fields" @click="closeListMenu">
           <template #prepend>
             <v-icon icon="mdi-form-select" />
           </template>
@@ -183,9 +173,11 @@ watch(listMenu, () => {
                 size="small"
                 variant="text"
                 class="text-capitalize"
-                @click="openSettingsDialog(SettingsTabs.CARD_TYPES)"
-                >Edit</v-btn
+                to="/settings/card-types"
+                @click="closeListMenu"
               >
+                Edit
+              </v-btn>
             </v-card-title>
             <v-list min-height="200">
               <template

@@ -1,7 +1,7 @@
 import { Extension } from '@tiptap/core';
 import { EditorView } from 'prosemirror-view';
 import { Plugin } from 'prosemirror-state';
-import type { TWFile } from '@/composables/services/useFilesService';
+import type { TWFile } from '@/services/useFilesService';
 
 interface FileHandlerOptions {
   uploadFn: (files: File[]) => Promise<TWFile[]>; // Function to handle the file upload

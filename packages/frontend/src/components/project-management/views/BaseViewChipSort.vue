@@ -1,13 +1,54 @@
 <script setup lang="ts">
+import { useFields } from '@/composables/useFields';
 import BaseViewChip from './BaseViewChip.vue';
-import type { TableSortOption, ListSortOption } from './types';
+import { DEFAULT_SORT_OPTIONS } from './types';
+import posthog from 'posthog-js';
+import type { List, SortOption, ViewSortOption } from '@tillywork/shared';
 
-const props = defineProps<{
-  sortByOptions: ListSortOption[];
+const sortBy = defineModel<SortOption>();
+
+const { list } = defineProps<{
+  list: List;
 }>();
 
-const sortBy = defineModel<TableSortOption>();
-const sortByOptions = computed(() => props.sortByOptions);
+const cardTypeId = computed(() => list.defaultCardType.id);
+const listId = computed(() => list.id);
+
+const { groupableFields } = useFields({
+  cardTypeId,
+  listId,
+});
+
+const sortByOptions = computed(() => {
+  const arr = [...DEFAULT_SORT_OPTIONS];
+
+  if (list.listStages?.length) {
+    arr.push({
+      label: 'Completed',
+      icon: 'mdi-list-status',
+      value: {
+        key: 'listStage.isCompleted',
+        order: 'ASC',
+      },
+    });
+  }
+
+  if (groupableFields) {
+    groupableFields.value?.forEach((field) => {
+      arr.push({
+        label: field.name,
+        icon: field.icon,
+        value: {
+          key: `card.data->>'${field.slug}'`,
+          order: 'ASC',
+        },
+      });
+    });
+  }
+
+  return arr;
+});
+
 const selectedOption = computed(() =>
   sortByOptions.value.find((option) => isOptionSelected(option))
 );
@@ -21,7 +62,11 @@ const sortDirectionIcon = computed(() => {
   return 'mdi-swap-vertical';
 });
 
-function handleSortBySelection(option: ListSortOption) {
+function handleSortBySelection(option: ViewSortOption) {
+  posthog.capture('updated_sort_by', {
+    option: option.value,
+  });
+
   if (isOptionSelected(option)) {
     toggleSortDirection();
   } else {
@@ -30,11 +75,15 @@ function handleSortBySelection(option: ListSortOption) {
   }
 }
 
-function isOptionSelected(option: ListSortOption) {
+function isOptionSelected(option: ViewSortOption) {
   return option.value.key === sortBy.value?.key;
 }
 
 function clearSortBy() {
+  posthog.capture('updated_sort_by', {
+    option: null,
+  });
+
   sortBy.value = undefined;
 }
 
@@ -83,9 +132,9 @@ function toggleSortDirection() {
             :active="isOptionSelected(option)"
           >
             <template #prepend>
-              <v-icon v-if="isOptionSelected(option)" size="x-small">
-                {{ sortDirectionIcon }}
-              </v-icon>
+              <v-icon :color="isOptionSelected(option) ? 'primary' : 'grey'">{{
+                option.icon ?? 'mdi-circle-slice-8'
+              }}</v-icon>
             </template>
             <v-list-item-title
               class="user-select-none"
@@ -94,11 +143,9 @@ function toggleSortDirection() {
               {{ option.label }}
             </v-list-item-title>
             <template #append>
-              <v-icon
-                icon="mdi-check"
-                size="12"
-                v-if="isOptionSelected(option)"
-              />
+              <v-icon v-if="isOptionSelected(option)" size="x-small">
+                {{ sortDirectionIcon }}
+              </v-icon>
             </template>
           </v-list-item>
         </template>

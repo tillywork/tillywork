@@ -1,61 +1,20 @@
 <script setup lang="ts">
-import type { FieldItem } from '@/components/project-management/fields/types';
+import { useInputs, type UseInputsProps } from '@/composables/useInputs';
 
-const selected = defineModel<string[]>({
-  default: [],
-});
+const props = defineProps<UseInputsProps>();
 
-const selectedItems = computed(() =>
-  selected.value?.map((label) =>
-    props.items?.find((item) => item.item === label)
-  )
-);
+const emit = defineEmits(['update:modelValue']);
 
-const searchLabels = ref<string>();
-const searchedLabels = computed(() => {
-  if (searchLabels.value) {
-    return props.items?.filter((item) =>
-      item.item
-        .toLocaleLowerCase()
-        .includes(searchLabels.value!.toLocaleLowerCase())
-    );
-  }
+const {
+  selected,
+  selectedItems,
+  search,
+  filteredItems,
+  isItemSelected,
+  toggleItemSelection,
+} = useInputs(props, emit);
 
-  return props.items;
-});
-
-const props = defineProps<{
-  items?: FieldItem[];
-  placeholder?: string;
-  multiple?: boolean;
-  icon?: string;
-  textField?: boolean;
-}>();
-
-function isItemSelected(item: FieldItem) {
-  return !!selected.value?.find((label) => item.item === label);
-}
-
-function toggleItemSelection(item: FieldItem) {
-  if (props.multiple) {
-    if (!isItemSelected(item)) {
-      selected.value = [...selected.value, item.item];
-    } else {
-      const index = selected.value.findIndex((label) => label === item.item);
-
-      selected.value = [
-        ...selected.value.slice(0, index),
-        ...selected.value.slice(index + 1),
-      ];
-    }
-  } else {
-    if (!isItemSelected(item)) {
-      selected.value = [item.item];
-    } else {
-      selected.value = [];
-    }
-  }
-}
+const attrs = useAttrs();
 </script>
 
 <template>
@@ -65,6 +24,7 @@ function toggleItemSelection(item: FieldItem) {
       :items
       item-title="item"
       item-value="item"
+      :variant
       hide-details
       :placeholder
       :multiple
@@ -72,47 +32,88 @@ function toggleItemSelection(item: FieldItem) {
       autocomplete="off"
       chips
       auto-select-first
+      :rounded
     >
       <template #chip="{ item, props }">
-        <v-chip v-bind="props" :color="item.raw.color" variant="flat" />
+        <v-chip
+          v-bind="props"
+          :color="item.raw.color"
+          variant="tonal"
+          rounded="pill"
+          class="text-body-3"
+        />
       </template>
     </v-autocomplete>
   </template>
   <template v-else>
-    <v-menu
-      :close-on-content-click="false"
-      @update:model-value="searchLabels = ''"
-    >
+    <v-menu :close-on-content-click="false" @update:model-value="search = ''">
       <template #activator="{ props }">
-        <div v-bind="props" class="d-flex ga-1">
+        <v-card
+          link
+          min-height="28"
+          v-bind="{
+            ...attrs,
+            ...props,
+          }"
+          class="px-2 d-flex align-center text-truncate"
+          :class="{
+            'flex-fill': fill,
+          }"
+          color="transparent"
+          :rounded
+          @click.prevent
+        >
+          <v-tooltip activator="parent" location="top" v-if="!fill && label">
+            {{ label }}
+          </v-tooltip>
           <template v-if="selectedItems.length">
-            <template v-for="item in selectedItems" :key="item.item">
-              <v-chip :color="item?.color" variant="flat" link size="small">
-                {{ item?.item }}
-              </v-chip>
-            </template>
+            <div class="d-flex align-center flex-wrap text-truncate ga-1">
+              <template v-for="item in selectedItems" :key="item.item">
+                <v-chip
+                  :color="item?.color"
+                  variant="tonal"
+                  link
+                  rounded="pill"
+                  class="text-body-3"
+                  :density
+                >
+                  {{ item?.item }}
+                </v-chip>
+              </template>
+            </div>
           </template>
           <template v-else>
-            <base-icon-btn :icon />
+            <v-icon :icon v-if="icon" class="me-2" size="x-small" />
+            <v-card-subtitle class="pa-0 text-caption">{{
+              label
+            }}</v-card-subtitle>
           </template>
-        </div>
+        </v-card>
       </template>
       <v-card>
         <v-text-field
-          v-model="searchLabels"
+          v-model="search"
           placeholder="Search.."
           autofocus
           hide-details
           clearable
           autocomplete="off"
+          variant="filled"
+          rounded="0"
         />
         <v-list>
-          <template v-for="item in searchedLabels" :key="item.item">
+          <template v-for="item in filteredItems" :key="item.item">
             <v-list-item
               :active="isItemSelected(item)"
               @click="toggleItemSelection(item)"
             >
-              <v-chip :color="item.color" variant="flat" size="small">
+              <v-chip
+                :color="item.color"
+                variant="tonal"
+                rounded="pill"
+                class="text-body-3"
+                :density
+              >
                 {{ item.item }}
               </v-chip>
               <template #append>

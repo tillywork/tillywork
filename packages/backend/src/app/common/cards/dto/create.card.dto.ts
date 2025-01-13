@@ -1,22 +1,49 @@
-import { IsNotEmpty } from "class-validator";
-import { User } from "../../users/user.entity";
+import {
+    IsNotEmpty,
+    IsNumber,
+    IsObject,
+    IsOptional,
+    ValidateNested,
+} from "class-validator";
+import { Type } from "class-transformer";
+import { ListStage } from "../../lists/list-stages/list.stage.entity";
+
+class CardData {
+    title?: string;
+    description?: any;
+    starts_at?: Date;
+    due_at?: Date;
+    [key: string]: any; // Allow for additional dynamic fields
+}
 
 export class CreateCardDto {
-    @IsNotEmpty()
-    title: string;
+    @IsObject()
+    @ValidateNested()
+    @Type(() => CardData)
+    data: CardData;
+
     @IsNotEmpty()
     listId: number;
-    @IsNotEmpty()
-    listStageId: number;
+
+    @IsOptional()
+    @IsNumber()
+    listStageId?: number;
+
+    @IsOptional()
+    @Type(() => ListStage)
+    listStage?: ListStage;
+
     @IsNotEmpty()
     type: number;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    description?: any;
-    startsAt?: Date;
-    dueAt?: Date;
-    users?: User[];
+    @IsNotEmpty()
+    workspaceId: number;
+
+    @IsOptional()
+    @IsNumber()
     createdBy: number;
 
+    @IsOptional()
+    @IsNumber()
     parentId?: number;
 }

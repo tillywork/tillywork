@@ -1,6 +1,6 @@
 @import './fonts';
 
-body * {
+*:not(.excalidraw):not(.excalidraw *) {
   font-family: 'Inter', sans-serif !important;
 }
 
@@ -83,4 +83,8 @@ textarea {
 
 .text-body-3 {
   font-size: 0.8125rem !important;
+}
+
+.tippy-box {
+  overflow: visible !important;
 }

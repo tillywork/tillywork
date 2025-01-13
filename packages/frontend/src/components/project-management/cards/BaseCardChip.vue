@@ -1,38 +1,56 @@
 <script setup lang="ts">
-import { useCardsService } from '@/composables/services/useCardsService';
-import type { Card } from './types';
+import { useCardsService } from '@/services/useCardsService';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
+import { useFields } from '@/composables/useFields';
+import type { Card } from '@tillywork/shared';
 
 const props = defineProps<{
-  card: Card;
+  card: Pick<Card, 'id'>;
   maxWidth?: number;
+  disableLink?: boolean;
+  hideStage?: boolean;
 }>();
 
 const cardId = computed(() => props.card.id);
+const cardTypeId = computed(() => cardCopy.value?.type.id ?? 0);
+const cardTypeFieldsEnabled = computed(() => !!cardCopy.value);
 
 const { useGetCardQuery } = useCardsService();
 const { data: cardCopy } = useGetCardQuery({
   cardId,
+});
+
+const { titleField } = useFields({
+  cardTypeId,
+  enabled: cardTypeFieldsEnabled,
 });
 </script>
 
 <template>
   <v-card
     class="d-flex align-center text-caption pe-2"
-    :to="`/pm/card/${card.id}`"
+    :class="{
+      'ps-2': hideStage || !cardCopy?.cardLists[0].listStageId,
+    }"
+    :to="!disableLink ? `/card/${card.id}` : undefined"
     :max-width="maxWidth ?? 250"
-    color="surface-variant"
     variant="tonal"
     height="28"
+    rounded="pill"
   >
     <div class="d-inline-block text-truncate">
-      <list-stage-selector
-        v-if="cardCopy"
-        :model-value="cardCopy.cardLists[0].listStage"
-        :list-stages="[]"
-        theme="icon"
-        readonly
-      />
+      <template v-if="cardCopy && titleField">
+        <list-stage-selector
+          v-if="!hideStage && cardCopy.cardLists[0].listStage"
+          :model-value="cardCopy.cardLists[0].listStage"
+          :list-stages="[]"
+          theme="icon"
+          readonly
+        />
+        <span>
+          {{ cardCopy.data[titleField.slug] }}
+        </span>
+      </template>
       <template v-else>
         <v-progress-circular
           indeterminate
@@ -42,7 +60,6 @@ const { data: cardCopy } = useGetCardQuery({
           width="2"
         />
       </template>
-      {{ card.title }}
     </div>
   </v-card>
 </template>

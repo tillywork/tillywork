@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import BaseCardPropertyValueBtn from '@/components/project-management/cards/BaseCardPropertyValueBtn.vue';
-import { useDate } from '@/composables/useDate';
+import TimePicker from './TimePicker.vue';
+
 import { DATE_RANGE_SUGGESTIONS, type DateRangeSuggestion } from './types';
 import objectUtils from '@/utils/object';
-
-const { dayjs } = useDate();
+import { dayjs } from '@tillywork/shared';
 
 const dateModel = defineModel<string | string[] | null>();
 
@@ -17,12 +16,20 @@ const props = defineProps<{
   activatorColor?: string;
   textField?: boolean;
   range?: boolean;
+  rounded?: string;
+  includeTime?: boolean;
+  fill?: boolean;
 }>();
+
 const dateDialog = defineModel<boolean>('dialog', {
   default: false,
 });
 
 const dateValue = ref<string | string[] | null | undefined>(dateModel.value);
+const timeValue = ref<string>('00:00');
+const isTimePickerVisible = ref(false);
+
+const attrs = useAttrs();
 
 const processedDate = computed({
   get() {
@@ -56,10 +63,16 @@ const processedDate = computed({
     if (v) {
       if (Array.isArray(v)) {
         dateValue.value = v.map((dateObject) => {
-          return dateObject.toISOString();
+          const date = dateObject.setHours(12, 0, 0);
+          return dayjs(date).utc().format();
         });
       } else {
-        dateValue.value = v.toISOString();
+        const date = v.setHours(12, 0, 0);
+        dateValue.value = dayjs(date).utc().format();
+      }
+
+      if (props.includeTime) {
+        isTimePickerVisible.value = true;
       }
     }
   },
@@ -67,6 +80,8 @@ const processedDate = computed({
 
 function clearDate() {
   dateValue.value = null;
+  timeValue.value = '12:00';
+  isTimePickerVisible.value = false;
 }
 
 const selectedRangeSuggestion = computed(() => {
@@ -78,16 +93,31 @@ const selectedRangeSuggestion = computed(() => {
   });
 });
 
-watch(dateValue, (v) => {
-  if (Array.isArray(v)) {
-    if (v.length > 1) {
-      dateModel.value = [v[0], v[v.length - 1]];
-    } else {
-      dateModel.value = v;
-    }
+// Combine date and time when applicable
+const finalDateTime = computed(() => {
+  if (!dateValue.value) return null;
+
+  if (Array.isArray(dateValue.value)) {
+    return dateValue.value.map((date) => {
+      if (date.startsWith(':')) return date;
+
+      const baseDate = dayjs(date);
+      const [hours, minutes] = timeValue.value.split(':').map(Number);
+
+      return baseDate.hour(hours).minute(minutes).utc().format();
+    });
   } else {
-    dateModel.value = v;
+    if (dateValue.value.startsWith(':')) return dateValue.value;
+
+    const baseDate = dayjs(dateValue.value);
+    const [hours, minutes] = timeValue.value.split(':').map(Number);
+
+    return baseDate.hour(hours).minute(minutes).utc().format();
   }
+});
+
+watch(finalDateTime, (v) => {
+  dateModel.value = v;
 });
 
 watch(dateModel, (v) => {
@@ -98,17 +128,29 @@ watch(dateModel, (v) => {
   } else {
     if (v !== dateValue.value) {
       dateValue.value = v;
+
+      if (v && !Array.isArray(v)) {
+        const parsedDate = dayjs(v);
+        timeValue.value = parsedDate.isValid()
+          ? parsedDate.format('HH:mm')
+          : '00:00';
+      }
     }
   }
 });
 
-const textColorClass = computed(() => {
+if (dateModel.value && !Array.isArray(dateModel.value)) {
+  const parsedDate = dayjs(dateModel.value);
+  timeValue.value = parsedDate.isValid() ? parsedDate.format('HH:mm') : '12:00';
+}
+
+const textColor = computed(() => {
   if (props.color) {
-    return `text-${props.color}`;
+    return `${props.color}`;
   }
 
   if (!dateValue.value) {
-    return 'text-default';
+    return 'default';
   }
 
   const date = dayjs(
@@ -116,16 +158,16 @@ const textColorClass = computed(() => {
   );
 
   if (date < dayjs().startOf('day')) {
-    return 'text-error';
+    return 'error';
   } else if (date > dayjs().endOf('day')) {
-    return 'text-default';
+    return 'default';
   } else {
-    return 'text-info';
+    return 'info';
   }
 });
 
 const textClass = computed(() => {
-  return textColorClass.value + ' ' + props.class;
+  return props.class + ' ' + (props.fill ? 'flex-fill' : '');
 });
 
 const dateToText = computed(() => {
@@ -141,11 +183,29 @@ const dateToText = computed(() => {
         ' ~ ' + getTextFromDate(dateValue.value[dateValue.value.length - 1]);
     }
 
+    if (props.includeTime && !dateValue.value[0].startsWith(':')) {
+      text += ` ${formatTime(timeValue.value)}`;
+    }
+
     return text;
   }
 
-  return getTextFromDate(dateValue.value);
+  const baseText = getTextFromDate(dateValue.value);
+  return props.includeTime && !dateValue.value.startsWith(':')
+    ? `${baseText} ${formatTime(timeValue.value)}`
+    : baseText;
 });
+
+function formatTime(timeString: string) {
+  if (!timeString) return '';
+
+  const [hours, minutes] = timeString.split(':').map(Number);
+
+  const formattedHours = hours % 12 || 12;
+  const period = hours >= 12 ? 'PM' : 'AM';
+
+  return `${formattedHours}:${minutes.toString().padStart(2, '0')}${period}`;
+}
 
 function getTextFromDate(date: string) {
   /**
@@ -157,19 +217,26 @@ function getTextFromDate(date: string) {
     return selectedRangeSuggestion.value?.title ?? date;
   }
 
-  if (dayjs(date).isToday()) {
+  const localDate = dayjs(date).local();
+
+  if (localDate.isToday()) {
     return 'Today';
-  } else if (dayjs(date).isTomorrow()) {
+  } else if (localDate.isTomorrow()) {
     return 'Tomorrow';
-  } else if (dayjs(date).isYesterday()) {
+  } else if (localDate.isYesterday()) {
     return 'Yesterday';
   } else {
-    return dayjs(date).format('MMM D');
+    return localDate.format('MMM D');
   }
 }
 
 function handleSuggestionClick(suggestion: DateRangeSuggestion) {
   dateValue.value = suggestion.value;
+}
+
+function confirmDateTime() {
+  dateDialog.value = false;
+  isTimePickerVisible.value = false;
 }
 </script>
 
@@ -187,6 +254,7 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
           readonly
           single-line
           hide-details
+          :rounded
         >
           <template #prepend-inner v-if="icon">
             <v-icon
@@ -201,33 +269,43 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
               class="ms-2 align-self-center"
               variant="text"
               rounded="circle"
-              @click.prevent="clearDate"
+              @click.prevent.stop="clearDate"
             />
           </template>
         </v-text-field>
       </template>
       <template v-else>
-        <base-card-property-value-btn
-          v-bind="props"
-          class="text-capitalize justify-space-between"
+        <v-btn
+          v-bind="{
+            ...attrs,
+            ...props,
+          }"
+          class="text-none text-caption justify-start font-weight-regular"
+          variant="text"
+          :color="textColor"
+          density="comfortable"
           :class="textClass"
           @click.prevent
+          :rounded
         >
           <template #prepend v-if="icon">
             <v-icon :icon color="default" />
           </template>
+          <v-tooltip activator="parent" location="top" v-if="!fill && label">
+            {{ label }}
+          </v-tooltip>
           {{ dateToText }}
           <template #append v-if="dateValue">
             <base-icon-btn
               icon="mdi-close"
-              class="ms-2 align-self-center"
+              class="align-self-center"
               variant="text"
               rounded="circle"
               size="x-small"
-              @click.prevent="clearDate"
+              @click.prevent.stop="clearDate"
             />
           </template>
-        </base-card-property-value-btn>
+        </v-btn>
       </template>
     </template>
     <v-container
@@ -235,7 +313,7 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
       class="d-flex pa-0 border-thin rounded-md overflow-hidden"
     >
       <v-list
-        v-if="range"
+        v-if="range && !isTimePickerVisible"
         width="200"
         max-height="338"
         class="border-e-thin overflow-scroll"
@@ -252,15 +330,37 @@ function handleSuggestionClick(suggestion: DateRangeSuggestion) {
           </v-list-item>
         </template>
       </v-list>
-      <v-date-picker
-        v-model="processedDate"
-        show-adjacent-months
-        color="primary"
-        border="none"
-        hide-header
-        :multiple="range ? 'range' : undefined"
-        landscape
-      />
+
+      <v-sheet class="d-flex flex-column">
+        <v-date-picker
+          v-if="!isTimePickerVisible"
+          v-model="processedDate"
+          show-adjacent-months
+          color="primary"
+          border="none"
+          hide-header
+          :multiple="range ? 'range' : undefined"
+          landscape
+        />
+
+        <!-- Time Picker Section -->
+        <v-sheet
+          v-if="includeTime && isTimePickerVisible"
+          class="pa-4 border-t-thin"
+        >
+          <time-picker v-model="timeValue" />
+          <div class="d-flex justify-end mt-2">
+            <v-btn
+              color="primary"
+              variant="text"
+              class="text-none"
+              @click="confirmDateTime"
+            >
+              Confirm
+            </v-btn>
+          </div>
+        </v-sheet>
+      </v-sheet>
     </v-container>
   </v-menu>
 </template>

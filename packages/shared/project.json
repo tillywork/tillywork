@@ -1,0 +1,31 @@
+{
+    "name": "shared",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "packages/shared/src",
+    "projectType": "library",
+    "tags": [],
+    "targets": {
+        "build": {
+            "executor": "@nx/js:tsc",
+            "outputs": [
+                "{options.outputPath}"
+            ],
+            "options": {
+                "outputPath": "dist/packages/shared",
+                "main": "packages/shared/src/index.ts",
+                "tsConfig": "packages/shared/tsconfig.lib.json",
+                "assets": [
+                    "packages/shared/*.md"
+                ],
+                "buildableProjectDepsInPackageJsonType": "dependencies",
+                "updateBuildableProjectDepsInPackageJson": true
+            }
+        },
+        "lint": {
+            "executor": "@nx/eslint:lint",
+            "outputs": [
+                "{options.outputFile}"
+            ]
+        }
+    }
+}

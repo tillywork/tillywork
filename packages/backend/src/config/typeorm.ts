@@ -40,6 +40,39 @@ import { AddProjectIdToUserTable1720082507515 } from "../migrations/172008250751
 import { AddIconAndIconColorColumnsToSpaceAndListTables1720414956770 } from "../migrations/1720414956770-add-icon-and-iconColor-columns-to-space-and-list-tables";
 import { AddIgnoreChildrenToViewTable1720514522438 } from "../migrations/1720514522438-add-ignore-children-to-view-table";
 import { CreateListFieldsTable1720527075305 } from "../migrations/1720527075305-create-list-fields-table";
+import { AddWorkspaceIdToCardTable1721207599200 } from "../migrations/1721207599200-add-workspaceId-to-card-table";
+import { AddCardTypeIdToFieldTable1721214304859 } from "../migrations/1721214304859-add-cardTypeId-to-field-table";
+import { UpdateFilterWhereColumnForViews1721641078360 } from "../migrations/1721641078360-update-filter-where-column-for-views";
+import { CreateEmailTable1721766012987 } from "../migrations/1721766012987-create-email-table";
+import { AddWorkspaceIdToListTable1721829339753 } from "../migrations/1721829339753-add-workspaceId-to-list-table";
+import { AddSlugToFieldTable1722503000613 } from "../migrations/1722503000613-add-slug-to-field-table";
+import { AddIsTitleAndIsPhotoToFieldTable1722852559605 } from "../migrations/1722852559605-add-isTitle-and-isPhoto-to-field-table";
+import { RenameCardTypeColumnInFieldTable1722854552647 } from "../migrations/1722854552647-rename-cardType-column-in-field-table";
+import { MigrateTitleDescriptionAndDueAtToDataColumnInCardTable1722869332518 } from "../migrations/1722869332518-migrate-title-description-and-dueAt-to-data-column-in-card-table";
+import { AddFieldIdAndFilterToListGroupTable1723106937425 } from "../migrations/1723106937425-add-fieldId-and-filter-to-list-group-table";
+import { AddOptionsToViewTable1723129297915 } from "../migrations/1723129297915-add-options-to-view-table";
+import { AddDeletedAtToListTable1724584476422 } from "../migrations/1724584476422-add-deletedAt-to-list-table";
+import { AddEmailOpenTrackingToEmailTable1724673051203 } from "../migrations/1724673051203-add-email-open-tracking-to-email-table";
+import { AddColumnsToOptionsColumnInViewTable1724762987440 } from "../migrations/1724762987440-add-columns-to-options-column-in-view-table";
+import { MigrateCardUsersToDataColumn1725792730053 } from "../migrations/1725792730053-migrate-card-users-to-data-column";
+import { FixDescriptionAndDueAtFields1726391466764 } from "../migrations/1726391466764-fix-description-and-due-at-fields";
+import { ResetViewsWithAssigneeGroupBy1726493876246 } from "../migrations/1726493876246-reset-views-with-assignee-group-by";
+import { CreateAccessControlTable1733140447674 } from "../migrations/1733140447674-create-access-control-table";
+import { SeedInitAccessControls1733140464829 } from "../migrations/1733140464829-seed-init-access-controls";
+import { AddAccessTypeToWorkspaceSpaceListAndCardTables1733166524606 } from "../migrations/1733166524606-add-access-type-to-workspace-space-list-and-card-tables";
+import { AddTypeColumnToListTable1729608774525 } from "../migrations/1729608774525-add-type-column-to-list-table";
+import { AddLayoutToCardTypesTable1731493105407 } from "../migrations/1731493105407-add-layout-to-card-types-table";
+import { MakeListStageIdNullableInCardListTable1731495327851 } from "../migrations/1731495327851-make-list-stage-id-nullable-in-card-list-table";
+import { AddSlugToListTable1732707580057 } from "../migrations/1732707580057-add-slug-to-list-table";
+import { TruncateCardActivities1734112779468 } from "../migrations/1734112779468-truncate-card-activities";
+import { UpdateCardActivityTypesEnum1734190213126 } from "../migrations/1734190213126-update-card-activity-types-enum";
+import { CreateCardActivityTypeIndex1734201598929 } from "../migrations/1734201598929-create-card-activity-type-index";
+import { AddContentIndexToCardActivity1734530224432 } from "../migrations/1734530224432-add-content-index-to-card-activity";
+import { AddCurrencyColumnToWorkspaceTable1735134777269 } from "../migrations/1735134777269-add-currency-column-to-workspace-table";
+import { AddDealToCardTypeLayoutEnum1735135850545 } from "../migrations/1735135850545-add-deal-to-card-type-layout-enum";
+import { AddDateTimeToFieldTypeEnums1735211235572 } from "../migrations/1735211235572-add-date-time-to-field-type-enums";
+import { RemoveOptionsDefaultValueInViewTable1735588046345 } from "../migrations/1735588046345-remove-options-default-value-in-view-table";
+import { AddHasChildCardsToCardTypeTable1735645745129 } from "../migrations/1735645745129-add-has-child-cards-to-card-type-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -81,6 +114,39 @@ const migrations = [
     AddIconAndIconColorColumnsToSpaceAndListTables1720414956770,
     AddIgnoreChildrenToViewTable1720514522438,
     CreateListFieldsTable1720527075305,
+    AddWorkspaceIdToCardTable1721207599200,
+    AddCardTypeIdToFieldTable1721214304859,
+    UpdateFilterWhereColumnForViews1721641078360,
+    CreateEmailTable1721766012987,
+    AddWorkspaceIdToListTable1721829339753,
+    AddSlugToFieldTable1722503000613,
+    AddIsTitleAndIsPhotoToFieldTable1722852559605,
+    RenameCardTypeColumnInFieldTable1722854552647,
+    MigrateTitleDescriptionAndDueAtToDataColumnInCardTable1722869332518,
+    AddFieldIdAndFilterToListGroupTable1723106937425,
+    AddOptionsToViewTable1723129297915,
+    AddDeletedAtToListTable1724584476422,
+    AddEmailOpenTrackingToEmailTable1724673051203,
+    AddColumnsToOptionsColumnInViewTable1724762987440,
+    MigrateCardUsersToDataColumn1725792730053,
+    FixDescriptionAndDueAtFields1726391466764,
+    ResetViewsWithAssigneeGroupBy1726493876246,
+    CreateAccessControlTable1733140447674,
+    SeedInitAccessControls1733140464829,
+    AddAccessTypeToWorkspaceSpaceListAndCardTables1733166524606,
+    AddTypeColumnToListTable1729608774525,
+    AddLayoutToCardTypesTable1731493105407,
+    MakeListStageIdNullableInCardListTable1731495327851,
+    AddSlugToListTable1732707580057,
+    TruncateCardActivities1734112779468,
+    UpdateCardActivityTypesEnum1734190213126,
+    CreateCardActivityTypeIndex1734201598929,
+    AddContentIndexToCardActivity1734530224432,
+    AddCurrencyColumnToWorkspaceTable1735134777269,
+    AddDealToCardTypeLayoutEnum1735135850545,
+    AddDateTimeToFieldTypeEnums1735211235572,
+    RemoveOptionsDefaultValueInViewTable1735588046345,
+    AddHasChildCardsToCardTypeTable1735645745129,
 ];
 
 const config: TypeOrmModuleOptions = {

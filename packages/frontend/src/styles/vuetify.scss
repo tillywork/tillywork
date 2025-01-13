@@ -8,6 +8,18 @@
   }
 }
 
+.v-field__input,
+.v-field__field,
+.v-field-label,
+.v-label {
+  font-size: 0.875rem;
+}
+
+.v-input__details {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
 .v-menu {
   .v-card {
     border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
@@ -54,4 +66,15 @@
 
 .base-icon-btn.v-btn:hover > .v-btn__overlay {
   opacity: 0.1;
+}
+
+.v-list-item--slim .v-list-item__prepend > .v-icon ~ .v-list-item__spacer {
+  width: 10px;
+}
+.v-list-group__items .v-list-item {
+  padding-inline-start: 24px !important;
+}
+
+.v-number-input .v-field.v-field--prepended {
+  padding-inline-start: 12px !important;
 }

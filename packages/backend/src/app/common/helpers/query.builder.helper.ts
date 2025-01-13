@@ -1,86 +1,93 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Logger } from "@nestjs/common";
 import { WhereExpressionBuilder, Brackets, SelectQueryBuilder } from "typeorm";
-import { FieldFilter, FilterGroup, FilterOperator } from "../filters/types";
-import dayjs from "dayjs";
+import {
+    dayjs,
+    FieldFilter,
+    FilterGroup,
+    FilterOperator,
+} from "@tillywork/shared";
 
 @Injectable()
 export class QueryBuilderHelper {
     private static readonly logger = new Logger("QueryBuilderHelper");
 
     static processValue(value: any) {
+        const utcDayjs = dayjs.utc;
         const datePlaceholders = {
-            ":startOfDay": dayjs().startOf("day").toISOString(),
-            ":endOfDay": dayjs().endOf("day").toISOString(),
-            ":startOfYesterday": dayjs()
+            ":startOfDay": utcDayjs().startOf("day").toISOString(),
+            ":endOfDay": utcDayjs().endOf("day").toISOString(),
+            ":startOfYesterday": utcDayjs()
                 .subtract(1, "day")
                 .startOf("day")
                 .toISOString(),
-            ":endOfYesterday": dayjs()
+            ":endOfYesterday": utcDayjs()
                 .subtract(1, "day")
                 .endOf("day")
                 .toISOString(),
-            ":startOfTomorrow": dayjs()
+            ":startOfTomorrow": utcDayjs()
                 .add(1, "day")
                 .startOf("day")
                 .toISOString(),
-            ":endOfTomorrow": dayjs().add(1, "day").endOf("day").toISOString(),
-            ":startOfLastWeek": dayjs()
+            ":endOfTomorrow": utcDayjs()
+                .add(1, "day")
+                .endOf("day")
+                .toISOString(),
+            ":startOfLastWeek": utcDayjs()
                 .subtract(1, "week")
                 .startOf("week")
                 .toISOString(),
-            ":endOfLastWeek": dayjs()
+            ":endOfLastWeek": utcDayjs()
                 .subtract(1, "week")
                 .endOf("week")
                 .toISOString(),
-            ":startOfWeek": dayjs().startOf("week").toISOString(),
-            ":endOfWeek": dayjs().endOf("week").toISOString(),
-            ":startOfNextWeek": dayjs()
+            ":startOfWeek": utcDayjs().startOf("week").toISOString(),
+            ":endOfWeek": utcDayjs().endOf("week").toISOString(),
+            ":startOfNextWeek": utcDayjs()
                 .add(1, "week")
                 .startOf("week")
                 .toISOString(),
-            ":endOfNextWeek": dayjs()
+            ":endOfNextWeek": utcDayjs()
                 .add(1, "week")
                 .endOf("week")
                 .toISOString(),
-            ":startOfLastMonth": dayjs()
+            ":startOfLastMonth": utcDayjs()
                 .subtract(1, "month")
                 .startOf("month")
                 .toISOString(),
-            ":endOfLastMonth": dayjs()
+            ":endOfLastMonth": utcDayjs()
                 .subtract(1, "month")
                 .endOf("month")
                 .toISOString(),
-            ":startOfMonth": dayjs().startOf("month").toISOString(),
-            ":endOfMonth": dayjs().endOf("month").toISOString(),
-            ":startOfNextMonth": dayjs()
+            ":startOfMonth": utcDayjs().startOf("month").toISOString(),
+            ":endOfMonth": utcDayjs().endOf("month").toISOString(),
+            ":startOfNextMonth": utcDayjs()
                 .add(1, "month")
                 .startOf("month")
                 .toISOString(),
-            ":endOfNextMonth": dayjs()
+            ":endOfNextMonth": utcDayjs()
                 .add(1, "month")
                 .endOf("month")
                 .toISOString(),
-            ":startOfLastYear": dayjs()
+            ":startOfLastYear": utcDayjs()
                 .subtract(1, "year")
                 .startOf("year")
                 .toISOString(),
-            ":endOfLastYear": dayjs()
+            ":endOfLastYear": utcDayjs()
                 .subtract(1, "year")
                 .endOf("year")
                 .toISOString(),
-            ":startOfYear": dayjs().startOf("year").toISOString(),
-            ":endOfYear": dayjs().endOf("year").toISOString(),
-            ":startOfNextYear": dayjs()
+            ":startOfYear": utcDayjs().startOf("year").toISOString(),
+            ":endOfYear": utcDayjs().endOf("year").toISOString(),
+            ":startOfNextYear": utcDayjs()
                 .add(1, "year")
                 .startOf("year")
                 .toISOString(),
-            ":endOfNextYear": dayjs()
+            ":endOfNextYear": utcDayjs()
                 .add(1, "year")
                 .endOf("year")
                 .toISOString(),
-            ":startOfTime": dayjs(0).toISOString(),
-            ":endOfTime": dayjs("2500").toISOString(),
+            ":startOfTime": utcDayjs(0).toISOString(),
+            ":endOfTime": utcDayjs("2500").toISOString(),
         };
 
         if (Array.isArray(value)) {
@@ -98,6 +105,12 @@ export class QueryBuilderHelper {
         } else {
             return value;
         }
+    }
+
+    static getRandomInt({ min = 1, max = Number.MAX_SAFE_INTEGER }) {
+        const minCeiled = Math.ceil(min);
+        const maxFloored = Math.floor(max);
+        return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
     }
 
     /**
@@ -189,6 +202,13 @@ export class QueryBuilderHelper {
                 return queryBuilder.andWhere(`${fieldName} != :${field}`, {
                     [field]: processedValue,
                 });
+            case "neOrNull":
+                return queryBuilder.andWhere(
+                    `${fieldName} != :${field} OR ${fieldName} IS NULL`,
+                    {
+                        [field]: processedValue,
+                    }
+                );
             case "gt":
                 return queryBuilder.andWhere(`${fieldName} > :${field}`, {
                     [field]: processedValue,
@@ -205,31 +225,40 @@ export class QueryBuilderHelper {
                 return queryBuilder.andWhere(`${fieldName} <= :${field}`, {
                     [field]: processedValue,
                 });
-            case "in": {
-                let operator: "in" | "@>";
-
-                let value = `(${processedValue.join(",")})`;
+            case "in":
                 if (fieldName.startsWith(cardPrefix)) {
-                    operator = "@>";
-                    value = `'["${processedValue.join('","')}"]'`;
-                } else operator = "in";
-
-                return queryBuilder.andWhere(
-                    `${fieldName} ${operator} ${value}`
-                );
-            }
-            case "nin": {
-                let operator: "not in" | "@>" = "not in";
-                let value = `(${processedValue.join(",")})`;
-                let query = `${fieldName} ${operator} ${value}`;
-
-                if (fieldName.startsWith(cardPrefix)) {
-                    operator = "@>";
-                    value = `'["${processedValue.join('","')}"]'`;
-                    query = `NOT (${fieldName} ${operator} ${value})`;
+                    return queryBuilder.andWhere(
+                        new Brackets((qb) =>
+                            processedValue.map((value: string) => {
+                                return qb.orWhere(
+                                    `${fieldName} @> '["${value}"]'`
+                                );
+                            })
+                        )
+                    );
                 }
 
-                return queryBuilder.andWhere(query);
+                return queryBuilder.andWhere(
+                    `${fieldName} ${operator} (${processedValue.join(",")})`
+                );
+            case "nin": {
+                if (fieldName.startsWith(cardPrefix)) {
+                    return queryBuilder
+                        .andWhere(
+                            new Brackets((qb) =>
+                                processedValue.map((value: string) => {
+                                    return qb.andWhere(
+                                        `NOT (${fieldName} @> '["${value}"]')`
+                                    );
+                                })
+                            )
+                        )
+                        .orWhere(`${fieldName} IS NULL`);
+                }
+
+                return queryBuilder.andWhere(
+                    `${fieldName} NOT ${operator} (${processedValue.join(",")})`
+                );
             }
             case "like":
                 return queryBuilder.andWhere(`${fieldName} LIKE :${field}`, {
@@ -244,21 +273,22 @@ export class QueryBuilderHelper {
                     [field]: `%${processedValue}`,
                 });
             case "between":
+            case "nbetween": {
+                const randomNumber1 = this.getRandomInt({});
+                const randomNumber2 = randomNumber1 + 1;
+
+                const betweenOperator = `${
+                    operator[0] === "n" ? "NOT " : ""
+                }BETWEEN`;
+
                 return queryBuilder.andWhere(
-                    `${fieldName} BETWEEN :${field}1 AND :${field}2`,
+                    `${fieldName} ${betweenOperator} :${field}${randomNumber1} AND :${field}${randomNumber2}`,
                     {
-                        [`${field}1`]: processedValue[0],
-                        [`${field}2`]: processedValue[1],
+                        [`${field}${randomNumber1}`]: processedValue[0],
+                        [`${field}${randomNumber2}`]: processedValue[1],
                     }
                 );
-            case "nbetween":
-                return queryBuilder.andWhere(
-                    `${fieldName} NOT BETWEEN :${field}1 AND :${field}2`,
-                    {
-                        [`${field}1`]: processedValue[0],
-                        [`${field}2`]: processedValue[1],
-                    }
-                );
+            }
             case "isNull":
                 return queryBuilder.andWhere(`${fieldName} IS NULL`);
             case "isNotNull":
@@ -271,41 +301,30 @@ export class QueryBuilderHelper {
     }
 
     static buildQuery(
-        queryBuilder: SelectQueryBuilder<any>,
-        filterGroup: FilterGroup
-    ): SelectQueryBuilder<any> {
-        if (filterGroup.and && filterGroup.and.length > 0) {
-            queryBuilder.andWhere(
-                new Brackets((qb) => {
-                    filterGroup.and.forEach((condition) => {
-                        if (!this.isFilterGroup(condition)) {
-                            this.fieldFilterToQuery(qb, condition);
-                        } else {
-                            //TODO support filter groups inside of filter groups
-                        }
+        queryBuilder: SelectQueryBuilder<any> | WhereExpressionBuilder,
+        filterGroup: FilterGroup | FieldFilter,
+        whereOperator: "and" | "or" = "and"
+    ): SelectQueryBuilder<any> | WhereExpressionBuilder {
+        queryBuilder[`${whereOperator}Where`](
+            new Brackets((qb) => {
+                if (this.isFilterGroup(filterGroup)) {
+                    (filterGroup.and ?? []).forEach((condition) => {
+                        this.buildQuery(qb, condition, "and");
                     });
-                })
-            );
-        }
-        if (filterGroup.or && filterGroup.or.length > 0) {
-            queryBuilder.orWhere(
-                new Brackets((qb) => {
-                    filterGroup.or.forEach((condition) => {
-                        if (!this.isFilterGroup(condition)) {
-                            this.fieldFilterToQuery(qb, condition);
-                        } else {
-                            //TODO support filter groups inside of filter groups
-                        }
+                    (filterGroup.or ?? []).forEach((condition) => {
+                        this.buildQuery(qb, condition, "or");
                     });
-                })
-            );
-        }
+                } else {
+                    this.fieldFilterToQuery(qb, filterGroup);
+                }
+            })
+        );
 
         return queryBuilder;
     }
 
     static isFilterGroup(
-        condition: FieldFilter | FilterGroup
+        condition: FilterGroup | FieldFilter
     ): condition is FilterGroup {
         return "and" in condition || "or" in condition;
     }

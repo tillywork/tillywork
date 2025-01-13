@@ -6,13 +6,15 @@ import validationUtils from '@/utils/validation';
 import type { VForm } from 'vuetify/components';
 
 const logo = useLogo();
+const route = useRoute('/login');
+
 const loginForm = ref<VForm>();
 const email = ref('');
 const password = ref('');
 const errorMessage = ref<string[] | null>(null);
-const { rules } = validationUtils;
 const loading = ref(false);
-const route = useRoute('/login');
+
+const { rules } = validationUtils;
 
 const login = async () => {
   errorMessage.value = null;
@@ -51,12 +53,11 @@ const login = async () => {
         <v-img
           :src="logo.getLogoUrlByTheme()"
           alt="tillywork"
-          width="225"
+          width="150"
           class="mx-auto mb-3"
         />
         <v-form ref="loginForm" @submit.prevent="login">
-          <v-card color="accent" class="pa-4">
-            <v-card-title class="text-h5 mb-4">Welcome back!</v-card-title>
+          <v-card color="transparent" class="pa-4 mx-auto" max-width="470">
             <v-card-text>
               <v-text-field
                 v-model="email"
@@ -64,6 +65,7 @@ const login = async () => {
                 required
                 :rules="[rules.required, rules.email]"
                 :error="!!errorMessage?.length"
+                autofocus
               />
               <v-text-field
                 v-model="password"
@@ -75,17 +77,15 @@ const login = async () => {
               />
             </v-card-text>
             <v-card-actions class="px-4 pt-0">
-              <p>
-                Don't have an account?
-                <router-link to="/register">Register</router-link>
-              </p>
+              <span class="text-caption"> Don't have an account? </span>
+              <v-btn class="text-none ms-1" to="/register">Register</v-btn>
               <v-spacer />
               <v-btn
                 type="submit"
                 variant="flat"
                 color="primary"
                 :loading="loading"
-                class="text-body-3"
+                class="text-none"
               >
                 Login
               </v-btn>

@@ -3,11 +3,11 @@ import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
-import { useCardTypesService } from '@/composables/services/useCardTypesService';
-import type { CreateCardTypeDto } from '@/components/project-management/cards/types';
+import { useCardTypesService } from '@/services/useCardTypesService';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from './types';
 import { useAuthStore } from '@/stores/auth';
+import type { CreateCardTypeDto } from '@tillywork/shared';
 
 const { rules } = validationUtils;
 const dialog = useDialogStore();
@@ -77,6 +77,7 @@ async function handleCreate() {
           label="Name*"
           autofocus
         />
+        <v-checkbox v-model="cardTypeDto.hasChildren" label="Has children" />
       </div>
       <v-card-actions class="d-flex justify-start align-center py-0 px-4">
         <v-spacer />

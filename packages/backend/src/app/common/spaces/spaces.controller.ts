@@ -9,7 +9,7 @@ import {
     UseGuards,
     Query,
 } from "@nestjs/common";
-import { SpacesService } from "./spaces.service";
+import { FindAllParams, SpacesService } from "./spaces.service";
 import { Space } from "./space.entity";
 import { CreateSpaceDto } from "./dto/create.space.dto";
 import { UpdateSpaceDto } from "./dto/update.space.dto";
@@ -27,13 +27,9 @@ export class SpacesController {
     constructor(private readonly spacesService: SpacesService) {}
 
     @Get()
-    findAll(@Query() query: { workspaceId: number }): Promise<Space[]> {
+    findAll(@Query() query: FindAllParams): Promise<Space[]> {
         const { workspaceId } = query;
-        return this.spacesService.findAllBy({
-            where: {
-                workspaceId,
-            },
-        });
+        return this.spacesService.findAll({ workspaceId });
     }
 
     @Get(":id")

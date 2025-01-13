@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import CreateSpaceBtn from './CreateSpaceBtn.vue';
-import { useSpacesService } from '../../../composables/services/useSpacesService';
-import { useWorkspaceStore } from '@/stores/workspace';
+import { useSpacesService } from '@/services/useSpacesService';
 import NavigationWorkspaceSpaceItem from './NavigationWorkspaceSpaceItem.vue';
 import { useAuthStore } from '@/stores/auth';
+import { useStateStore } from '@/stores/state';
 
-const workspaceStore = useWorkspaceStore();
-const { spaceExpansionState } = storeToRefs(workspaceStore);
+const { setSpaceExpansionState } = useStateStore();
+const { spaceExpansionState } = storeToRefs(useStateStore());
 const { workspace } = storeToRefs(useAuthStore());
 
 const spacesService = useSpacesService();
@@ -15,10 +15,10 @@ const freezeListHoverId = ref<number | null>();
 
 const enableSpacesFetch = ref(false);
 
-const workspaceId = computed(() => workspace.value?.id);
+const workspaceId = computed(() => workspace.value?.id ?? 0);
 
 const spacesQuery = spacesService.useGetSpacesQuery({
-  workspaceId: workspaceId,
+  workspaceId,
   enabled: enableSpacesFetch,
 });
 
@@ -27,7 +27,7 @@ const currentSpaceExpansionState = computed({
     workspace.value ? spaceExpansionState.value[workspace.value.id] : [],
   set: (state) => {
     if (workspace.value) {
-      workspaceStore.setSpaceExpansionState(workspace.value.id, state);
+      setSpaceExpansionState(workspace.value.id, state);
     }
   },
 });

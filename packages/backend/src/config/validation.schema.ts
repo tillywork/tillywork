@@ -1,3 +1,4 @@
+import { FileStorageType } from "@tillywork/shared";
 import Joi from "joi";
 
 export const validationSchema = Joi.object({
@@ -69,7 +70,7 @@ export const validationSchema = Joi.object({
         otherwise: Joi.number().port().allow("").optional(),
     }),
 
-    TW_FILE_STORAGE_TYPE: Joi.string().valid("s3", "local").default("local"),
+    TW_FILE_STORAGE_TYPE: Joi.string().default("local"),
 
     TW_AWS_ACCESS_KEY_ID: Joi.string().allow("").optional(),
 
@@ -80,10 +81,22 @@ export const validationSchema = Joi.object({
     TW_AWS_S3_ENDPOINT: Joi.string().allow("").optional(),
 
     TW_AWS_S3_BUCKET: Joi.when("TW_FILE_STORAGE_TYPE", {
-        is: "s3",
+        is: FileStorageType.S3,
         then: Joi.string().required(),
         otherwise: Joi.string().optional(),
     }),
 
     TW_CDN_URL: Joi.string().optional(),
+
+    TW_AZURE_CONNECTION_STRING: Joi.when("TW_FILE_STORAGE_TYPE", {
+        is: FileStorageType.AZURE,
+        then: Joi.string().required(),
+        otherwise: Joi.string().optional(),
+    }),
+
+    TW_AZURE_CONTAINER_NAME: Joi.when("TW_FILE_STORAGE_TYPE", {
+        is: FileStorageType.AZURE,
+        then: Joi.string().required(),
+        otherwise: Joi.string().optional(),
+    }),
 });

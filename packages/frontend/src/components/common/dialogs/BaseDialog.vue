@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from './types';
-import { useCommands } from '@/composables/useCommands';
+import { useStateStore } from '@/stores/state';
 
 const dialogStore = useDialogStore();
 const { width: windowWidth, height: windowHeight } = useWindowSize();
-const { setIsInputFocused } = useCommands();
+const { setIsInputFocused } = useStateStore();
 
 const dialogComponents = {
   [DIALOGS.CONFIRM]: () => import('./ConfirmDialog.vue'),
-  [DIALOGS.CREATE_CARD]: () => import('./CreateCardDialog.vue'),
+  [DIALOGS.CREATE_CARD]: () =>
+    import('./CreateCardDialog/CreateCardDialog.vue'),
   [DIALOGS.UPSERT_SPACE]: () => import('./UpsertSpaceDialog.vue'),
   [DIALOGS.UPSERT_LIST]: () => import('./UpsertListDialog.vue'),
   [DIALOGS.UPSERT_LIST_STAGE]: () => import('./UpsertListStageDialog.vue'),
@@ -17,7 +18,6 @@ const dialogComponents = {
   [DIALOGS.UPSERT_VIEW]: () => import('./UpsertViewDialog.vue'),
   [DIALOGS.CREATE_WORKSPACE]: () => import('./CreateWorkspaceDialog.vue'),
   [DIALOGS.ONBOARDING]: () => import('./OnboardingDialog.vue'),
-  [DIALOGS.SETTINGS]: () => import('./SettingsDialog/SettingsDialog.vue'),
   [DIALOGS.CREATE_CARD_TYPE]: () => import('./CreateCardTypeDialog.vue'),
   [DIALOGS.REMOVE_CARD_TYPE]: () => import('./RemoveCardTypeDialog.vue'),
   [DIALOGS.EDIT_LIST_STAGES]: () => import('./EditListStagesDialog.vue'),

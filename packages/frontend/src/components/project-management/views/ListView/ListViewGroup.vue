@@ -2,63 +2,75 @@
 import {
   getCoreRowModel,
   useVueTable,
-  type ColumnDef,
   type Row,
   type Table,
 } from '@tanstack/vue-table';
+import draggable from 'vuedraggable';
+
 import {
   ListGroupOptions,
+  type QueryFilter,
+  type ViewFilter,
+  FieldTypes,
+  type View,
+  type List,
+  type Card,
   type ListGroup,
   type ListStage,
-} from '../../lists/types';
-import { useCardsService } from '@/composables/services/useCardsService';
-import type { TableSortOption, View } from '../types';
-import type { ProjectUser } from '@/components/common/projects/types';
-import { DIALOGS } from '@/components/common/dialogs/types';
-import type { Card } from '../../cards/types';
-import { FlexRender } from '@tanstack/vue-table';
-import draggable from 'vuedraggable';
-import type { User } from '@/components/common/users/types';
-import { useSnackbarStore } from '@/stores/snackbar';
+  type ProjectUser,
+  type SortState,
+  type Field,
+} from '@tillywork/shared';
+
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
-import type { QueryFilter } from '../../filters/types';
-import { useDialogStore } from '@/stores/dialog';
-import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 
-const emit = defineEmits([
-  'toggle:group',
-  'row:delete',
-  'row:update:stage',
-  'row:update:due-date',
-  'row:update:assignees',
-  'row:update:order',
-]);
+import { useCardsService } from '@/services/useCardsService';
+
+import { useListGroup } from '@/composables/useListGroup';
+import { useFields } from '@/composables/useFields';
+import { useCard } from '@/composables/useCard';
+
+import BaseField from '@/components/common/fields/BaseField.vue';
+import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
+import ContextMenu from '@/components/common/base/ContextMenu/ContextMenu.vue';
+
 const props = defineProps<{
   listGroup: Row<ListGroup>;
   listStages: ListStage[];
   projectUsers: ProjectUser[];
   table: Table<ListGroup>;
   view: View;
+  list: List;
 }>();
 const rowMenuOpen = ref<Row<Card> | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
 
-const dialog = useDialogStore();
 const cardsService = useCardsService();
-const { showSnackbar } = useSnackbarStore();
 
-const groupCopy = ref(cloneDeep(props.listGroup));
-const sortBy = computed<TableSortOption[]>(() =>
-  props.view.sortBy ? [cloneDeep(props.view.sortBy)] : []
+const { updateFieldValue, getCardContextMenuItems } = useCard();
+
+const {
+  titleField,
+  assigneeField,
+  pinnedFieldsWithoutAssignee,
+  getDateFieldColor,
+} = useFields({
+  cardTypeId: props.list.defaultCardType.id,
+  listId: props.list.id,
+});
+
+const groupCopy = ref(cloneDeep(props.listGroup.original));
+const sortBy = computed<SortState>(() =>
+  props.view.options.sortBy ? [cloneDeep(props.view.options.sortBy)] : []
 );
 const tableSortState = computed(() =>
   sortBy.value?.map((sortOption) => {
-    return { id: sortOption.key, desc: sortOption.order === 'desc' };
+    return {
+      id: sortOption.key,
+      desc: sortOption.order.toUpperCase() === 'DESC',
+    };
   })
-);
-const columns = computed(
-  () => props.table._getColumnDefs() as ColumnDef<Card, unknown>[]
 );
 
 const groupHeight = computed(() => (cards.value.length ?? 0) * 33 + 33);
@@ -66,18 +78,22 @@ const maxHeight = computed(() =>
   props.listGroup.original.name === 'All' ? 'calc(100vh - 230px)' : 350
 );
 
-const isDraggingDisabled = computed(() => {
-  return sortBy.value && sortBy.value.length > 0;
-});
-
-const users = computed(() =>
-  props.projectUsers.map((projectUser) => projectUser.user)
-);
-
 const filters = computed<QueryFilter>(() => {
   if (props.view.filters) {
+    const viewFilters = {
+      where: {
+        and: [
+          ...(cloneDeep((props.view.filters as ViewFilter).where.quick?.and) ??
+            []),
+          ...(cloneDeep(
+            (props.view.filters as ViewFilter).where.advanced?.and
+          ) ?? []),
+        ],
+      },
+    };
+
     return objectUtils.deepMergeObjects(
-      cloneDeep(props.view.filters),
+      viewFilters,
       cloneDeep(props.listGroup.original.filter) ?? {}
     );
   } else {
@@ -85,18 +101,22 @@ const filters = computed<QueryFilter>(() => {
   }
 });
 
-const ignoreCompleted = computed<boolean>(() => props.view.ignoreCompleted);
-const ignoreChildren = computed<boolean>(() => props.view.ignoreChildren);
+const hideCompleted = computed<boolean>(
+  () => props.view.options.hideCompleted ?? false
+);
+const hideChildren = computed<boolean>(
+  () => props.view.options.hideChildren ?? false
+);
 
 const cards = ref<Card[]>([]);
 const total = ref(0);
 
 const { fetchNextPage, isFetching, hasNextPage, refetch, data } =
   cardsService.useGetGroupCardsInfinite({
-    listId: groupCopy.value.original.listId,
-    groupId: groupCopy.value.original.id,
-    ignoreCompleted,
-    ignoreChildren,
+    listId: groupCopy.value.list.id,
+    groupId: groupCopy.value.id,
+    hideCompleted,
+    hideChildren,
     filters,
     sortBy,
   });
@@ -105,7 +125,7 @@ const groupTable = useVueTable({
   get data() {
     return cards.value;
   },
-  columns: columns.value,
+  columns: [],
   getCoreRowModel: getCoreRowModel(),
   getRowId: (row) => `${row.id}`,
   manualPagination: true,
@@ -118,7 +138,23 @@ const groupTable = useVueTable({
 });
 
 const draggableCards = ref(groupTable.getCoreRowModel().rows);
-const isDragging = ref(false);
+const {
+  openCreateCardDialog,
+  isDragging,
+  setDragItem,
+  onDragAdd,
+  onDragEnd,
+  onDragMove,
+  onDragStart,
+  onDragUpdate,
+  toggleGroupExpansion,
+  handleUpdateCardStage,
+  handleHoverCard,
+} = useListGroup({
+  props,
+  cards: draggableCards,
+  reactiveGroup: groupCopy,
+});
 
 async function handleGroupCardsLoad({
   done,
@@ -138,116 +174,6 @@ async function handleGroupCardsLoad({
   }
 }
 
-function toggleGroupExpansion(listGroup: Row<ListGroup>) {
-  emit('toggle:group', listGroup);
-}
-
-function openCreateCardDialog(listGroup: ListGroup) {
-  dialog.openDialog({
-    dialog: DIALOGS.CREATE_CARD,
-    data: {
-      listId: listGroup.listId,
-      listStage: getCurrentStage(listGroup),
-      users: getCurrentAssignee(listGroup),
-      listStages: props.listStages,
-    },
-  });
-}
-
-function getCurrentStage(group: ListGroup) {
-  let stage: ListStage | undefined;
-
-  if (group.type === ListGroupOptions.LIST_STAGE) {
-    stage = props.listStages.find((stage) => {
-      return stage.id == group.entityId;
-    });
-  }
-
-  return stage ? { ...stage } : undefined;
-}
-
-function getCurrentAssignee(group: ListGroup) {
-  let user: User | undefined;
-
-  if (group.type === ListGroupOptions.ASSIGNEES) {
-    user = props.projectUsers.find((user: ProjectUser) => {
-      return user.user.id == group.entityId;
-    })?.user;
-  }
-
-  return user ? [user] : undefined;
-}
-
-function onDragMove() {
-  if (isDraggingDisabled.value) {
-    isDragging.value = false;
-    return false;
-  }
-}
-
-function onDragStart() {
-  isDragging.value = true;
-
-  if (isDraggingDisabled.value) {
-    showSnackbar({
-      message: 'Dragging cards is only enabled when sorting is disabled.',
-      color: 'error',
-      timeout: 5000,
-    });
-  }
-}
-
-function onDragEnd() {
-  isDragging.value = false;
-}
-
-function onDragUpdate(event: any) {
-  const { newIndex } = event;
-  isDragging.value = false;
-
-  const previousCard = draggableCards.value[newIndex - 1]?.original;
-  const currentCard = draggableCards.value[newIndex]?.original;
-  const nextCard = draggableCards.value[newIndex + 1]?.original;
-
-  handleUpdateCardOrder({
-    currentCard,
-    previousCard,
-    nextCard,
-  });
-}
-
-function onDragAdd(event: any) {
-  const { newIndex } = event;
-  isDragging.value = false;
-
-  const previousCard = draggableCards.value[newIndex - 1]?.original;
-  const currentCard = draggableCards.value[newIndex]?.original;
-  const nextCard = draggableCards.value[newIndex + 1]?.original;
-
-  const newOrder = cardsService.calculateCardOrder({ previousCard, nextCard });
-
-  handleUpdateCardStage({
-    cardId: currentCard.id,
-    cardListId: currentCard.cardLists[0].id,
-    listStageId: props.listGroup.original.entityId!,
-    order: newOrder,
-  });
-}
-
-function handleUpdateCardOrder(data: {
-  currentCard: Card;
-  previousCard?: Card;
-  nextCard?: Card;
-}) {
-  emit('row:update:order', data);
-}
-
-function setDragItem(data: DataTransfer) {
-  const img = new Image();
-  img.src = 'https://en.wikipedia.org/wiki/File:1x1.png#/media/File:1x1.png';
-  data.setDragImage(img, 0, 0);
-}
-
 function handleCardMenuClick({
   row,
   isOpen,
@@ -260,39 +186,6 @@ function handleCardMenuClick({
   } else {
     rowMenuOpen.value = null;
   }
-}
-
-function handleDeleteCard(card: Card) {
-  emit('row:delete', card);
-}
-
-function handleUpdateCardStage(data: {
-  cardId: number;
-  cardListId: number;
-  listStageId: number;
-  order?: number;
-}) {
-  emit('row:update:stage', data);
-}
-
-function handleUpdateDueDate({
-  newDueDate,
-  card,
-}: {
-  newDueDate: string;
-  card: Card;
-}) {
-  emit('row:update:due-date', {
-    newDueDate,
-    card,
-  });
-}
-
-function handleUserSelection({ users, card }: { users: User[]; card: Card }) {
-  emit('row:update:assignees', {
-    users,
-    card,
-  });
 }
 
 watch(
@@ -322,13 +215,23 @@ watchEffect(() => {
     isGroupCardsLoading.value = false;
   }
 });
+
+watch(
+  () => props.listGroup,
+  (v) => {
+    if (v) {
+      groupCopy.value = cloneDeep(v.original);
+    }
+  }
+);
 </script>
 
 <template>
   <v-banner
     sticky
     lines="one"
-    :border="listGroup.getIsExpanded() ? 'b-thin' : 'none'"
+    density="comfortable"
+    :border="groupCopy.isExpanded ? 'b-thin' : 'none'"
     bg-color="accent"
     style="z-index: 10"
   >
@@ -336,15 +239,18 @@ watchEffect(() => {
       variant="text"
       density="comfortable"
       size="small"
-      :icon="
-        listGroup.getIsExpanded() ? 'mdi-chevron-down' : 'mdi-chevron-right'
-      "
-      :color="listGroup.getIsExpanded() ? 'info' : 'default'"
+      :icon="groupCopy.isExpanded ? 'mdi-chevron-down' : 'mdi-chevron-right'"
+      :color="groupCopy.isExpanded ? 'info' : 'default'"
       class="me-2"
-      @click="toggleGroupExpansion(listGroup)"
+      @click="toggleGroupExpansion"
     />
     <div>
-      <template v-if="listGroup.original.type === ListGroupOptions.ASSIGNEES">
+      <template
+        v-if="
+          listGroup.original.type === ListGroupOptions.FIELD &&
+          listGroup.original.field?.type === FieldTypes.USER
+        "
+      >
         <base-avatar
           :photo="listGroup.original.icon"
           :text="listGroup.original.name"
@@ -357,19 +263,12 @@ watchEffect(() => {
           {{ listGroup.original.icon ?? 'mdi-circle-slice-8' }}
         </v-icon>
       </template>
-      <v-chip
-        rounded="md"
-        density="comfortable"
-        :color="listGroup.original.color"
-        class="ms-3"
-      >
+      <span class="text-body-3 ms-3">
         {{ listGroup.original.name }}
-        <template #append>
-          <span class="text-caption ms-4 font-weight-bold">
-            {{ total }}
-          </span>
-        </template>
-      </v-chip>
+        <span class="ms-2 text-caption text-color-subtitle">
+          {{ total }}
+        </span>
+      </span>
     </div>
     <v-btn
       variant="text"
@@ -381,9 +280,9 @@ watchEffect(() => {
       @click="openCreateCardDialog(listGroup.original)"
     />
   </v-banner>
-  <template v-if="listGroup.getIsExpanded()">
+  <template v-if="groupCopy.isExpanded">
     <v-list
-      class="pa-0 overflow-scroll"
+      class="pa-0"
       rounded="0"
       :height="groupHeight"
       :max-height="maxHeight"
@@ -403,6 +302,9 @@ watchEffect(() => {
           @end="onDragEnd"
           @add="onDragAdd"
           @update="onDragUpdate"
+          :delay="300"
+          :delay-on-touch-only="true"
+          :touch-start-threshold="5"
           :setData="setDragItem"
           item-key="id"
           animation="100"
@@ -410,91 +312,46 @@ watchEffect(() => {
           group="cards"
         >
           <template #item="{ element: row }">
-            <v-list-item
-              class="pa-0"
-              rounded="0"
-              height="33"
-              :to="`/pm/card/${row.original.id}`"
-              :ripple="false"
-              :base-color="
-                row.original.cardLists[0].listStage.isCompleted ? 'success' : ''
-              "
-              :variant="
-                row.original.cardLists[0].listStage.isCompleted
-                  ? 'tonal'
-                  : undefined
-              "
+            <context-menu
+              :items="getCardContextMenuItems(row.original)"
+              #="{ showMenu }"
             >
               <v-hover
                 #="{ isHovering: isRowHovering, props: rowProps }"
                 :disabled="isDragging"
+                @update:model-value="
+                  (v) => handleHoverCard({ isHovering: v, card: row.original })
+                "
               >
-                <v-card
-                  color="transparent"
-                  v-bind="rowProps"
-                  height="33"
-                  class="list-row d-flex align-center text-body-3"
+                <v-list-item
+                  class="list-row text-body-3"
                   rounded="0"
-                  link
+                  height="36"
+                  :to="`/card/${row.original.id}`"
                   :ripple="false"
+                  v-bind="rowProps"
                 >
-                  <template
-                    v-for="cell in row.getVisibleCells()"
-                    :key="cell.id"
-                  >
-                    <template v-if="cell.column.columnDef.id === 'actions'">
-                      <v-card
-                        :width="cell.column.getSize()"
-                        class="list-cell d-flex align-center fill-height"
-                        rounded="0"
-                        color="transparent"
-                      >
-                        <div
-                          class="d-flex flex-fill justify-end ga-1"
-                          v-if="isRowHovering || rowMenuOpen?.id === row.id"
-                        >
-                          <v-menu
-                            @update:model-value="
-                              (v) => handleCardMenuClick({ row, isOpen: v })
-                            "
-                          >
-                            <template #activator="{ props }">
-                              <base-icon-btn
-                                v-bind="props"
-                                icon="mdi-dots-vertical"
-                                @click.prevent
-                              />
-                            </template>
-                            <v-card class="border-thin">
-                              <v-list>
-                                <v-list-item
-                                  class="text-error"
-                                  @click="handleDeleteCard(row.original)"
-                                >
-                                  <template #prepend>
-                                    <v-icon icon="mdi-delete" />
-                                  </template>
-                                  <v-list-item-title>Delete</v-list-item-title>
-                                </v-list-item>
-                              </v-list>
-                            </v-card>
-                          </v-menu>
-                        </div>
-                      </v-card>
-                    </template>
-                    <template v-else-if="cell.column.columnDef.id === 'title'">
-                      <v-card
-                        :width="cell.column.getSize()"
-                        class="d-flex align-center fill-height text-body-3 px-2 list-cell"
-                        rounded="0"
-                        color="transparent"
-                      >
-                        <list-stage-selector
-                          :model-value="row.original.cardLists[0].listStage"
-                          theme="icon"
-                          rounded="circle"
-                          :list-stages="listStages ?? []"
-                          @update:modelValue="
+                  <template #prepend>
+                    <div
+                      :style="{ width: '30px' }"
+                      class="d-flex justify-end me-2"
+                    >
+                      <template v-if="isRowHovering">
+                        <base-icon-btn
+                          v-bind="props"
+                          icon="mdi-dots-vertical"
+                          @click.prevent="showMenu"
+                        />
+                      </template>
+                    </div>
+                  </template>
+                  <v-list-item-title class="d-flex align-center ga-1">
+                    <list-stage-selector
+                      :model-value="row.original.cardLists[0].listStage"
+                      theme="icon"
+                      rounded="circle"
+                      :list-stages="listStages ?? []"
+                      @update:modelValue="
                         (modelValue: ListStage) =>
                         handleUpdateCardStage({
                             cardId: row.original.id,
@@ -502,90 +359,70 @@ watchEffect(() => {
                             listStageId: modelValue.id,
                         })
                     "
-                          @click.prevent
-                        />
-                        <span class="text-truncate ms-2">
-                          {{ row.original.title }}
-                        </span>
+                      @click.prevent
+                    />
 
-                        <!-- Progress -->
-                        <base-card-children-progress
-                          v-if="row.original.children.length > 0"
-                          :card="row.original"
-                          border="thin"
-                          rounded="pill"
-                          class="text-caption ms-2"
-                          min-width="fit-content"
-                          style="
-                            padding-top: 2px !important;
-                            padding-bottom: 2px !important;
-                          "
-                        />
-                      </v-card>
-                    </template>
-                    <template v-else-if="cell.column.columnDef.id === 'dueAt'">
-                      <v-card
-                        :width="cell.column.getSize()"
-                        class="list-cell d-flex align-center fill-height"
-                        rounded="0"
-                        color="transparent"
-                        link
-                      >
-                        <base-date-picker
-                          :model-value="row.original.dueAt"
-                          @update:model-value="(newValue: string) => handleUpdateDueDate({
-                            card: row.original,
-                            newDueDate: newValue ?? null,
-                          })"
-                          class="text-caption d-flex flex-fill h-100 justify-start rounded-0"
-                          :color="
-                            row.original.cardLists[0].listStage.isCompleted
-                              ? 'success'
-                              : undefined
-                          "
-                          label="Set due date"
-                          @click.prevent
-                        />
-                      </v-card>
-                    </template>
-                    <template v-else-if="cell.column.columnDef.id === 'users'">
-                      <v-card
-                        :width="cell.column.getSize()"
-                        class="list-cell d-flex align-center fill-height px-1"
-                        rounded="0"
-                        color="transparent"
-                        link
-                      >
-                        <base-user-selector
-                          :model-value="row.original.users"
-                          :users
-                          fill
-                          @update:model-value="
-                            (users: User[]) => handleUserSelection({
-                                users, card: row.original
-                            })
-                          "
-                          @click.stop
-                        />
-                      </v-card>
+                    <template v-if="titleField">
+                      <span class="text-truncate ms-2">
+                        {{ row.original.data[titleField.slug] }}
+                      </span>
                     </template>
                     <template v-else>
-                      <v-card
-                        :width="cell.column.getSize()"
-                        class="list-cell d-flex align-center fill-height"
-                        rounded="0"
-                        color="transparent"
-                      >
-                        <FlexRender
-                          :render="cell.column.columnDef.cell"
-                          :props="cell.getContext()"
-                        />
-                      </v-card>
+                      <v-skeleton-loader type="text" width="100%" />
                     </template>
+
+                    <!-- Progress -->
+                    <base-card-children-progress
+                      v-if="row.original.children.length > 0"
+                      :card="row.original"
+                      border="thin"
+                      class="text-caption ms-2"
+                      style="
+                        padding-top: 2px !important;
+                        padding-bottom: 2px !important;
+                      "
+                    />
+                  </v-list-item-title>
+                  <template #append>
+                    <div
+                      class="d-flex align-center ga-2 me-6"
+                      :style="{
+                        maxHeight: '28px',
+                      }"
+                    >
+                      <template
+                        v-for="field in pinnedFieldsWithoutAssignee"
+                        :key="field.slug"
+                      >
+                        <base-field
+                          :field
+                          :color="getDateFieldColor(row.original, field)"
+                          no-label
+                          :model-value="row.original.data[field.slug]"
+                          @update:model-value="(v: string) => updateFieldValue({
+                                card: row.original,
+                                field,
+                                v
+                            })"
+                        />
+                      </template>
+                      <template v-if="assigneeField">
+                        <base-field
+                          :field="assigneeField"
+                          no-label
+                          :model-value="row.original.data[assigneeField.slug]"
+                          @update:model-value="(v: string) => updateFieldValue({
+                                card: row.original,
+                                field: assigneeField as Field,
+                                v
+                            })"
+                        />
+                      </template>
+                    </div>
                   </template>
-                </v-card>
+                </v-list-item>
               </v-hover>
-            </v-list-item>
+            </context-menu>
           </template>
         </draggable>
       </v-infinite-scroll>

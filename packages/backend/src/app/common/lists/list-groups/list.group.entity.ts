@@ -9,20 +9,14 @@ import {
     Relation,
 } from "typeorm";
 import { List } from "../list.entity";
-import { ListGroupEntityTypes, ListGroupOptions } from "../types";
-import { Filter } from "../../filters/filter.entity";
-import { CardFindAllResult } from "../../cards/cards.service";
+import { Field } from "../../fields/field.entity";
+import { ListGroupEntityTypes } from "../types";
+import { ListGroupOptions, QueryFilter } from "@tillywork/shared";
 
 @Entity()
 export class ListGroup {
     @PrimaryGeneratedColumn("increment")
     id: number;
-
-    @Column({ type: "bigint", nullable: true })
-    entityId: number;
-
-    @Column({ type: "enum", enum: ListGroupEntityTypes, nullable: true })
-    entityType: ListGroupEntityTypes;
 
     @Column({ type: "varchar", length: 255 })
     name: string;
@@ -30,6 +24,13 @@ export class ListGroup {
     @Column({ type: "enum", enum: ListGroupOptions })
     type: ListGroupOptions;
 
+    @Column({ type: "bigint", nullable: true })
+    entityId: number;
+
+    @Column({ type: "enum", enum: ListGroupEntityTypes, nullable: true })
+    entityType: ListGroupEntityTypes;
+
+    /** TODO move this to view level */
     @Column({ type: "boolean", default: true })
     isExpanded: boolean;
 
@@ -42,6 +43,12 @@ export class ListGroup {
     @Column({ type: "varchar", nullable: true })
     icon: string;
 
+    @Column({ type: "jsonb", nullable: true })
+    filter?: QueryFilter;
+
+    @ManyToOne(() => Field, { nullable: false })
+    field: Relation<Field>;
+
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;
     @UpdateDateColumn({ type: "timestamp" })
@@ -53,11 +60,4 @@ export class ListGroup {
     })
     @JoinColumn()
     list: Relation<List>;
-
-    @Column({ type: "bigint" })
-    listId: number;
-
-    filter?: Relation<Filter>;
-
-    cards?: CardFindAllResult;
 }

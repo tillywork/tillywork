@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { useEditor, EditorContent, Editor, type Content } from '@tiptap/vue-3';
+import {
+  useEditor,
+  EditorContent,
+  Editor,
+  type Content,
+  VueNodeViewRenderer,
+} from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import { NoNewLine } from './extensions/NoNewLine';
@@ -15,9 +21,16 @@ import {
   TWFileType,
   useFilesService,
   type TWFile,
-} from '@/composables/services/useFilesService';
+} from '@/services/useFilesService';
 import { File } from './extensions/File';
 import { TrailingNode } from './extensions/TrailingNode';
+import { Link } from '@tiptap/extension-link';
+import { CustomKeymap } from './extensions/CustomKeymap';
+import { Mention } from '@tiptap/extension-mention';
+import mentionSuggestions from './extensions/Mention/mentionSuggestions';
+import MentionChip from './extensions/Mention/MentionChip.vue';
+import { Emoji } from './extensions/Emoji';
+import objectUtils from '@/utils/object';
 
 const props = defineProps<{
   autofocus?: boolean;
@@ -55,6 +68,11 @@ const extensions = computed(() => {
     Image,
     FileHandler.configure({ uploadFn: uploadFiles }),
     File,
+    Link.configure({
+      defaultProtocol: 'https',
+    }),
+    CustomKeymap,
+    Emoji,
   ];
 
   if (props.singleLine) {
@@ -69,6 +87,15 @@ const extensions = computed(() => {
         suggestion,
       })
     );
+    extensions.push(
+      Mention.extend({
+        addNodeView() {
+          return VueNodeViewRenderer(MentionChip);
+        },
+      }).configure({
+        suggestion: mentionSuggestions,
+      })
+    );
   }
 
   if (props.editable && !props.singleLine) {
@@ -80,6 +107,7 @@ const extensions = computed(() => {
 
 const textValue = defineModel<string>();
 const jsonValue = defineModel<Content>('json');
+const htmlValue = defineModel<string>('html');
 const isEmpty = defineModel<boolean>('empty');
 
 let editor: Ref<Editor | undefined>;
@@ -101,6 +129,7 @@ function initEditor() {
       enforceHeading();
       textValue.value = editor.value?.getText();
       jsonValue.value = editor.value?.getJSON();
+      htmlValue.value = editor.value?.getHTML();
       isEmpty.value = editor.value?.isEmpty;
     },
   });
@@ -116,6 +145,8 @@ function fillEditorFromModelValues() {
     setEditorText(textValue.value);
   } else if (jsonValue.value) {
     editor.value?.commands.setContent(jsonValue.value as Content, true);
+  } else if (htmlValue.value) {
+    editor.value?.commands.setContent(htmlValue.value as Content, true);
   }
 }
 
@@ -180,9 +211,25 @@ watch(textValue, (newText) => {
 watch(jsonValue, (newJson) => {
   if (editor.value) {
     const currentJson = editor.value.getJSON();
-    // Using JSON.stringify to compare JSON objects
-    if (JSON.stringify(newJson) !== JSON.stringify(currentJson)) {
+    const areTheyEqual = objectUtils.isEqual(
+      currentJson,
+      newJson ?? ({} as any)
+    );
+
+    if (!areTheyEqual) {
       editor.value.commands.setContent(newJson as any, true);
+    }
+  }
+});
+
+// Watch for changes to htmlValue and update the editor content
+watch(htmlValue, (newHtml) => {
+  if (editor.value) {
+    const currentHtml = editor.value.getHTML();
+    const areTheyEqual = currentHtml === newHtml;
+
+    if (!areTheyEqual) {
+      editor.value.commands.setContent(newHtml as any, true);
     }
   }
 });
@@ -247,7 +294,8 @@ defineExpose({
 
 <style lang="scss">
 .tiptap {
-  line-height: 1.5;
+  line-height: 1.65;
+  font-size: 0.9rem;
 
   > * {
     padding: 3px 0;

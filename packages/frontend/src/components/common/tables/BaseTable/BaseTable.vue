@@ -10,6 +10,7 @@ import {
   getSortedRowModel,
 } from '@tanstack/vue-table';
 import type { PaginationParams, TableSortOption } from './types';
+import type { Slots } from 'vue';
 
 const props = defineProps<{
   columns?: ColumnDef<any, any>[];
@@ -17,11 +18,14 @@ const props = defineProps<{
   total?: number;
   sortBy?: TableSortOption[];
   enableColumnResizing?: boolean;
+  disableSorting?: boolean;
   width?: string;
 }>();
 
 const emit = defineEmits(['update:options', 'click:row']);
-const slots = defineSlots();
+const slots = useSlots() as Slots & {
+  empty?: (props: { props: any }) => VNode[];
+};
 
 const options = defineModel<PaginationParams>('options');
 
@@ -57,6 +61,7 @@ const table = useVueTable({
   initialState: {
     sorting: tableSortState.value,
   },
+  enableSorting: !props.disableSorting,
 });
 
 const pageSizeDropdownOptions = [1, 5, 10, 25, 50];
@@ -224,29 +229,42 @@ function generateColumnDefs(): ColumnDef<any, any>[] {
                     rounded="0"
                     color="transparent"
                   >
-                    <!-- Check for named slot that matches columnId, and use template to define slot content -->
-                    <template
-                      v-if="
-                        cell.column.columnDef.id &&
-                        !!slots[cell.column.columnDef.id]
-                      "
-                    >
-                      <slot
-                        :name="cell.column.columnDef.id"
-                        v-bind="cell.getContext()"
-                      ></slot>
-                    </template>
-                    <template v-else>
-                      <FlexRender
-                        :render="cell.column.columnDef.cell"
-                        :props="cell.getContext()"
-                      />
-                    </template>
+                    <div class="text-truncate">
+                      <!-- Check for named slot that matches columnId, and use template to define slot content -->
+                      <template
+                        v-if="
+                          cell.column.columnDef.id &&
+                          !!slots[cell.column.columnDef.id]
+                        "
+                      >
+                        <slot
+                          :name="cell.column.columnDef.id"
+                          v-bind="cell.getContext()"
+                        ></slot>
+                      </template>
+                      <template v-else>
+                        <FlexRender
+                          :render="cell.column.columnDef.cell"
+                          :props="cell.getContext()"
+                        />
+                      </template>
+                    </div>
                   </v-card>
                 </template>
               </v-card>
             </v-hover>
           </v-list-item>
+        </template>
+
+        <template v-if="!table.getRowCount()">
+          <template v-if="!!slots.empty">
+            <slot name="empty" />
+          </template>
+          <template v-else>
+            <v-list-item lines="two">
+              <v-list-item-title> No data found. </v-list-item-title>
+            </v-list-item>
+          </template>
         </template>
       </v-list>
       <v-card class="table-footer">

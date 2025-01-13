@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import type { Card } from './types';
 
-const props = defineProps<{
-  card: Card;
-  border?: string;
-  rounded?: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    card: Card;
+    border?: string;
+    rounded?: string;
+  }>(),
+  {
+    rounded: 'pill',
+    border: 'thin',
+  }
+);
 
 const totalChildren = computed(() => props.card.children.length);
 const totalCompletedChildren = computed(

@@ -1,17 +1,15 @@
 {
     "name": "tillywork",
-    "version": "0.0.2",
+    "version": "0.1.0",
     "license": "MIT",
     "scripts": {
-        "build": "nx run-many -t build -p frontend backend -c production",
-        "dev": "nx run-many -t serve -p frontend backend",
-        "dev:reset": "npm run reset && npm run dev",
+        "build": "nx run-many -t build -p frontend backend -c production --skip-nx-cache",
+        "dev": "nx run-many -t serve -p frontend backend --skip-nx-cache",
         "format": "nx run-many -t format -p frontend backend",
         "lint": "nx run-many -t lint -p frontend backend",
         "reset": "nx run backend:db:reset",
         "swagger": "nx run backend:metadata"
     },
-    "private": true,
     "devDependencies": {
         "@nestjs/schematics": "^10.0.1",
         "@nestjs/testing": "^10.0.2",
@@ -56,36 +54,43 @@
         "jest-environment-jsdom": "^29.4.1",
         "jest-environment-node": "^29.4.1",
         "jsdom": "~22.1.0",
-        "nuxt": "^3.10.0",
         "nx": "19.1.0",
         "prettier": "^2.6.2",
         "sass": "1.62.1",
         "swc-loader": "0.1.15",
         "ts-jest": "^29.1.0",
-        "ts-node": "10.9.1",
-        "typescript": "5.4.5",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.5.4",
         "vite": "^5.2.11",
         "vitest": "1.6.0",
-        "vue": "^3.4.25",
+        "vue": "^3.5.4",
         "vue-router": "^4.2.4",
         "vue-tsc": "^1.8.8",
         "webpack-cli": "^5.1.4"
     },
     "dependencies": {
+        "@excalidraw/excalidraw": "^0.17.6",
         "@faker-js/faker": "^8.4.1",
         "@nestjs/common": "^10.0.2",
         "@nestjs/core": "^10.0.2",
         "@nestjs/platform-express": "^10.0.2",
         "axios": "^1.6.7",
         "dayjs": "^1.11.10",
+        "deep-object-diff": "^1.1.9",
         "jwt-decode": "^4.0.0",
         "lodash": "^4.17.21",
         "reflect-metadata": "^0.1.13",
         "rxjs": "^7.8.0",
+        "slugify": "^1.6.6",
+        "ts-patch": "^3.2.1",
         "tslib": "^2.3.0",
-        "vuetify": "^3.6.1"
+        "typeorm": "^0.3.20",
+        "typescript-transform-paths": "^3.5.0",
+        "vuetify": "^3.7.1"
     },
     "workspaces": [
-        "packages/*"
+        "packages/frontend",
+        "packages/backend",
+        "packages/docs"
     ]
 }

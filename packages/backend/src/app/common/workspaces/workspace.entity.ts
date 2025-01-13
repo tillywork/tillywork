@@ -16,6 +16,7 @@ import { Space } from "../spaces/space.entity";
 import { Project } from "../projects/project.entity";
 import { WorkspaceTypes } from "./types";
 import { CardType } from "../card-types/card.type.entity";
+import { AccessType } from "@tillywork/shared";
 
 @Entity()
 export class Workspace {
@@ -30,6 +31,12 @@ export class Workspace {
 
     @Column({ type: "enum", enum: WorkspaceTypes })
     type: WorkspaceTypes;
+
+    @Column({ type: "enum", enum: AccessType, default: AccessType.PUBLIC })
+    accessType: AccessType;
+
+    @Column({ type: "varchar", length: 3, default: "USD" })
+    currency: string;
 
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;

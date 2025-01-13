@@ -7,7 +7,6 @@ import {
     Delete,
     Put,
     UseGuards,
-    Request,
     Logger,
     Query,
 } from "@nestjs/common";
@@ -18,7 +17,8 @@ import { UpdateWorkspaceDto } from "./dto/update.workspace.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
 import { WorkspaceTypes } from "./types";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { FindOptionsWhere } from "typeorm";
+import { CurrentUser } from "../auth/decorators/current.user.decorator";
+import { User } from "../users/user.entity";
 
 @ApiBearerAuth()
 @ApiTags("workspaces")
@@ -33,27 +33,15 @@ export class WorkspacesController {
 
     @Get()
     findAll(
-        @Request() req,
         @Query()
         query: {
             type?: WorkspaceTypes;
         }
     ): Promise<Workspace[]> {
-        const { user } = req;
         const { type } = query;
 
-        const where: FindOptionsWhere<Workspace> = {
-            project: {
-                id: user.project.id,
-            },
-        };
-
-        if (type) {
-            where["type"] = type;
-        }
-
         return this.workspacesService.findAll({
-            where,
+            type,
         });
     }
 
@@ -65,11 +53,11 @@ export class WorkspacesController {
     @Post()
     create(
         @Body() createWorkspaceDto: CreateWorkspaceDto,
-        @Request() req
+        @CurrentUser() user: User
     ): Promise<Workspace> {
         return this.workspacesService.create({
             ...createWorkspaceDto,
-            ownerId: req.user.id,
+            ownerId: user.id,
         });
     }
 

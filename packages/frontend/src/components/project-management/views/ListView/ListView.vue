@@ -3,48 +3,26 @@ import {
   FlexRender,
   getCoreRowModel,
   useVueTable,
-  type ColumnDef,
-  type Row,
   type Column,
 } from '@tanstack/vue-table';
-import type { View } from '../types';
-import { useListGroupsService } from '@/composables/services/useListGroupsService';
-import type { Card } from '../../cards/types';
-import { type ListGroup } from '../../lists/types';
-import { useListStagesService } from '@/composables/services/useListStagesService';
-import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { type List, type ListGroup } from '../../lists/types';
+import { useListStagesService } from '@/services/useListStagesService';
+import { useProjectUsersService } from '@/services/useProjectUsersService';
 import ListViewGroup from './ListViewGroup.vue';
-import type { User } from '@/components/common/users/types';
-import { useSnackbarStore } from '@/stores/snackbar';
 import { useAuthStore } from '@/stores/auth';
+import type { View } from '@tillywork/shared';
 
 const isLoading = defineModel<boolean>('loading');
 
 const props = defineProps<{
-  columns: ColumnDef<ListGroup, any>[];
-  noHeaders?: boolean;
+  list: List;
   view: View;
   groups: ListGroup[];
 }>();
 
-const emit = defineEmits([
-  'row:delete',
-  'submit',
-  'load',
-  'row:update:stage',
-  'row:update:due-date',
-  'row:update:assignees',
-  'row:update:order',
-]);
-
 const expandedState = ref<Record<string, boolean>>();
 
-const { showSnackbar } = useSnackbarStore();
 const { project } = storeToRefs(useAuthStore());
-
-const listGroupsService = useListGroupsService();
-const { mutateAsync: updateListGroup } =
-  listGroupsService.useUpdateListGroupMutation();
 
 const listsStagesService = useListStagesService();
 const { data: listStages } = listsStagesService.useGetListStagesQuery({
@@ -60,13 +38,12 @@ const table = useVueTable({
   get data() {
     return props.groups;
   },
-  columns: props.columns as ColumnDef<ListGroup, any>[],
+  columns: [],
   getCoreRowModel: getCoreRowModel(),
   getRowId: (row) => `${row.id}`,
   manualPagination: true,
   manualGrouping: true,
   manualSorting: true,
-  columnResizeMode: 'onChange',
   enableColumnResizing: false,
   enableSorting: false,
 });
@@ -92,70 +69,10 @@ function getColumnSortIcon(column: Column<ListGroup, unknown>) {
       return 'mdi-arrow-up';
   }
 }
-
-function toggleGroupExpansion(listGroup: Row<ListGroup>) {
-  listGroup.toggleExpanded();
-  isLoading.value = true;
-  updateListGroup({
-    ...listGroup.original,
-    isExpanded: listGroup.getIsExpanded(),
-  })
-    .catch(() => {
-      showSnackbar({
-        message: 'Something went wrong, please try again.',
-        color: 'error',
-        timeout: 5000,
-      });
-    })
-    .finally(() => {
-      isLoading.value = false;
-    });
-}
-
-function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
-  emit('row:update:assignees', {
-    users,
-    card,
-  });
-}
-
-function handleUpdateDueDate({
-  newDueDate,
-  card,
-}: {
-  newDueDate: string;
-  card: Card;
-}) {
-  emit('row:update:due-date', {
-    newDueDate,
-    card,
-  });
-}
-
-function handleDeleteCard(card: Card) {
-  emit('row:delete', card);
-}
-
-function handleUpdateCardStage(data: {
-  cardId: number;
-  cardListId: number;
-  listStageId: number;
-  order?: number;
-}) {
-  emit('row:update:stage', data);
-}
-
-function handleUpdateCardOrder(data: {
-  currentCard: Card;
-  previousCard?: Card;
-  nextCard?: Card;
-}) {
-  emit('row:update:order', data);
-}
 </script>
 
 <template>
-  <div class="list-container">
+  <div class="list-view overflow-auto">
     <div
       class="list d-flex flex-column"
       :style="`max-height: calc(100vh - 160px${
@@ -169,12 +86,12 @@ function handleUpdateCardOrder(data: {
         >
           <div
             class="list-header-group d-flex border-b-thin border-collapse"
-            v-if="!noHeaders"
+            v-if="false"
           >
             <template v-for="header in headerGroup.headers" :key="header.id">
               <v-hover
                 #="{ isHovering: isHeaderHovering, props: headerProps }"
-                v-if="!noHeaders"
+                v-if="false"
               >
                 <v-card
                   v-bind="headerProps"
@@ -182,7 +99,7 @@ function handleUpdateCardOrder(data: {
                   rounded="0"
                   color="accent"
                   :width="header.getSize()"
-                  :height="noHeaders ? 0 : 28"
+                  :height="true ? 0 : 28"
                 >
                   <!-- Header Content -->
                   <FlexRender
@@ -206,24 +123,6 @@ function handleUpdateCardOrder(data: {
                       {{ getColumnSortIcon(header.column) }}
                     </v-icon>
                   </template>
-                  <!-- Column Resizer -->
-                  <template
-                    v-if="isHeaderHovering && header.column.getCanResize()"
-                  >
-                    <div class="column-resizer">
-                      <div
-                        @mousedown="header.getResizeHandler()?.($event)"
-                        @touchstart="header.getResizeHandler()?.($event)"
-                        v-show="
-                          isHeaderHovering || header.column.getIsResizing()
-                        "
-                        @click.stop
-                      >
-                        &nbsp;
-                      </div>
-                      &nbsp;
-                    </div>
-                  </template>
                 </v-card>
               </v-hover>
             </template>
@@ -244,15 +143,10 @@ function handleUpdateCardOrder(data: {
             v-model:loading="isLoading"
             :list-group="listGroup"
             :list-stages="listStages ?? []"
+            :list
             :view
             :project-users="projectUsers ?? []"
             :table
-            @toggle:group="toggleGroupExpansion"
-            @row:delete="handleDeleteCard"
-            @row:update:stage="handleUpdateCardStage"
-            @row:update:due-date="handleUpdateDueDate"
-            @row:update:assignees="handleUpdateAssignees"
-            @row:update:order="handleUpdateCardOrder"
           />
         </template>
       </v-card>
@@ -274,21 +168,6 @@ $list-cell-padding-y: 0;
   .list {
     min-width: 100%;
     width: fit-content;
-  }
-
-  .column-resizer {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 5px;
-    height: 100%;
-    cursor: ew-resize;
-    z-index: 1;
-
-    > div {
-      border-right: 3px solid #2196f3;
-      height: 100%;
-    }
   }
 }
 </style>

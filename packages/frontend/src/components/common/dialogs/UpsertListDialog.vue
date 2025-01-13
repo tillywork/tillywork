@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { useListsService } from '@/composables/services/useListsService';
+import { useListsService } from '@/services/useListsService';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
 import BaseIconSelector from '../../common/inputs/BaseIconSelector/BaseIconSelector.vue';
 import type { List } from '@/components/project-management/lists/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
-import { useCardTypesService } from '@/composables/services/useCardTypesService';
+import { useCardTypesService } from '@/services/useCardTypesService';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS, UpsertDialogMode } from './types';
 import { useAuthStore } from '@/stores/auth';
@@ -26,13 +26,20 @@ const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
 const list = computed<List>(() => currentDialog.value.data.list);
 
 const listForm = ref<VForm>();
-const listDto = ref<Partial<List>>({
+const listDto = ref<
+  Partial<
+    List & {
+      createDefaultStages?: boolean;
+    }
+  >
+>({
   icon: list.value?.icon,
   iconColor: list.value?.iconColor,
   name: list.value?.name,
   spaceId: list.value?.spaceId ?? currentDialog.value?.data.space.id,
   defaultCardType:
     list.value?.defaultCardType ?? workspace.value?.defaultCardType,
+  createDefaultStages: true,
 });
 
 const { data: cardTypes } = useFindAllQuery({

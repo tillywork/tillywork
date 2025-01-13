@@ -1,18 +1,28 @@
 <script setup lang="ts">
-import { WorkspaceTypes, type Workspace } from '../workspaces/types';
-import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
+import { useWorkspacesService } from '@/services/useWorkspacesService';
 import CreateWorkspaceBtn from './CreateWorkspaceBtn.vue';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 import { useAuthStore } from '@/stores/auth';
+import { useStateStore } from '@/stores/state';
+import type { Workspace } from '@tillywork/shared';
+
+const onlyIcon = defineModel<boolean>('onlyIcon');
+
+const workspaceSettingsMenu = ref(false);
 
 const dialog = useDialogStore();
 const workspacesService = useWorkspacesService();
 const selectWorkspaceMenu = ref(false);
 const authStore = useAuthStore();
 const { workspace: selectedWorkspace } = storeToRefs(authStore);
+const { selectedModule } = storeToRefs(useStateStore());
+const { toggleFreezeRail } = useStateStore();
+
+const workspacesEnabled = computed(() => !!selectedModule.value);
 const workspaceQuery = workspacesService.useGetWorkspacesQuery({
-  type: WorkspaceTypes.PROJECT_MANAGEMENT,
+  type: selectedModule,
+  enabled: workspacesEnabled,
 });
 const { mutateAsync: deleteWorkspace, isPending: isDeleteLoading } =
   workspacesService.useDeleteWorkspaceMutation();
@@ -47,39 +57,9 @@ function handleDeleteWorkspace(workspace: Workspace) {
   });
 }
 
-function openUpdateWorkspaceDialog() {
-  dialog.openDialog({
-    dialog: DIALOGS.SETTINGS,
-    data: {
-      activeTab: 'workspace',
-    },
-    options: {
-      fullscreen: true,
-    },
-  });
-}
-
-watch(
-  workspaceQuery.data,
-  (workspaces) => {
-    if (workspaces) {
-      if (workspaces.length && !selectedWorkspace.value) {
-        handleSelectWorkspace(workspaces[0]);
-      }
-
-      if (!workspaces.length) {
-        selectedWorkspace.value = null;
-      }
-
-      if (workspaces.length && selectedWorkspace.value) {
-        selectedWorkspace.value =
-          workspaces.find((w) => w.id === selectedWorkspace.value?.id) ??
-          selectedWorkspace.value;
-      }
-    }
-  },
-  { deep: true }
-);
+watch([workspaceSettingsMenu, selectWorkspaceMenu], () => {
+  toggleFreezeRail();
+});
 </script>
 
 <template>
@@ -88,7 +68,7 @@ watch(
       density="compact"
       link
       id="workspace-menu-activator"
-      class="me-2 user-select-none w-100"
+      class="user-select-none flex-fill"
       rounded="md"
       color="transparent"
     >
@@ -102,27 +82,29 @@ watch(
           class="text-caption"
           size="x-small"
         />
-        <span class="text-truncate text-body-3 mx-2">
+        <span class="text-truncate text-body-3 mx-2" v-if="!onlyIcon">
           {{ selectedWorkspace?.name ?? 'Select a workspace' }}
         </span>
-        <v-spacer />
-        <v-icon>
+        <v-spacer v-if="!onlyIcon" />
+        <v-icon v-if="!onlyIcon">
           {{ selectWorkspaceMenu ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
         </v-icon>
       </v-card-title>
     </v-card>
 
-    <base-icon-btn
-      id="workspace-menu-btn"
-      icon="mdi-dots-vertical"
-      @click.stop
-      v-show="selectedWorkspace"
-    />
-
-    <v-menu activator="#workspace-menu-btn">
+    <v-menu v-model="workspaceSettingsMenu">
+      <template #activator="{ props }">
+        <base-icon-btn
+          v-bind="props"
+          icon="mdi-dots-vertical"
+          class="ms-2 flex-0-0"
+          @click.stop
+          v-show="selectedWorkspace && !onlyIcon"
+        />
+      </template>
       <v-card>
         <v-list>
-          <v-list-item @click="openUpdateWorkspaceDialog">
+          <v-list-item to="/settings/workspace">
             <template #prepend>
               <v-icon icon="mdi-briefcase-edit" />
             </template>

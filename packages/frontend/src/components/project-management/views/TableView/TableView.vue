@@ -3,47 +3,99 @@ import {
   FlexRender,
   getCoreRowModel,
   useVueTable,
-  type ColumnDef,
-  type Row,
   type Column,
 } from '@tanstack/vue-table';
-import { type View } from '../types';
-import { useListGroupsService } from '@/composables/services/useListGroupsService';
-import type { Card } from '../../cards/types';
-import { type ListGroup } from '../../lists/types';
-import { useListStagesService } from '@/composables/services/useListStagesService';
-import { useProjectUsersService } from '@/composables/services/useProjectUsersService';
+import { useListStagesService } from '@/services/useListStagesService';
+import { useProjectUsersService } from '@/services/useProjectUsersService';
 import TableViewGroup from './TableViewGroup.vue';
-import type { User } from '@/components/common/users/types';
-import { useSnackbarStore } from '@/stores/snackbar';
 import { useAuthStore } from '@/stores/auth';
+import { useFields } from '@/composables/useFields';
+import type { TableColumnDef } from './types';
+import {
+  CardTypeLayout,
+  type View,
+  type List,
+  type ListGroup,
+} from '@tillywork/shared';
 
 const isLoading = defineModel<boolean>('loading');
 
 const props = defineProps<{
-  columns: ColumnDef<ListGroup, any>[];
+  list: List;
   view: View;
   groups: ListGroup[];
 }>();
 
-const emit = defineEmits([
-  'row:delete',
-  'submit',
-  'load',
-  'row:update:stage',
-  'row:update:due-date',
-  'row:update:assignees',
-  'row:update:order',
-]);
-
 const expandedState = ref<Record<string, boolean>>();
 
-const { showSnackbar } = useSnackbarStore();
-const { project } = storeToRefs(useAuthStore());
+const { titleField, fields, sortFieldsByViewColumns } = useFields({
+  cardTypeId: props.list.defaultCardType.id,
+  listId: props.list.id,
+});
 
-const listGroupsService = useListGroupsService();
-const { mutateAsync: updateListGroup } =
-  listGroupsService.useUpdateListGroupMutation();
+const viewColumnIds = computed(() =>
+  props.view.options.columns?.map((columnId) => columnId)
+);
+
+const columns = computed<TableColumnDef[]>(() => {
+  const defaultColumns: TableColumnDef[] = [];
+
+  const actionsColumn: TableColumnDef = {
+    id: 'actions',
+    enableResizing: false,
+    enableSorting: false,
+    size: 50,
+    cellType: 'actions',
+  };
+  defaultColumns.push(actionsColumn);
+
+  if (titleField.value) {
+    const titleColumn: TableColumnDef = {
+      id: `data.${titleField.value?.slug}`,
+      accessorKey: `data.${titleField.value?.slug}`,
+      header: titleField.value?.name,
+      size: 300,
+      minSize: 150,
+      cellType: 'title',
+      field: titleField.value,
+    };
+
+    defaultColumns.push(titleColumn);
+  } else {
+    if (props.list.defaultCardType.layout === CardTypeLayout.PERSON) {
+      const nameColumn: TableColumnDef = {
+        id: `data.first_name`,
+        accessorKey: `data.first_name`,
+        accessorFn: (row) => `${row.data.first_name} ${row.data.last_name}`,
+        header: 'Name',
+        size: 300,
+        minSize: 150,
+        cellType: 'title',
+      };
+
+      defaultColumns.push(nameColumn);
+    }
+  }
+
+  const viewColumns: TableColumnDef[] = sortFieldsByViewColumns(
+    fields.value.filter((field) =>
+      viewColumnIds.value?.includes(field.id.toString())
+    ),
+    viewColumnIds.value ?? []
+  ).map((field) => ({
+    id: `data.${field.slug}`,
+    accessorKey: `data.${field.slug}`,
+    header: field.name,
+    size: 150,
+    minSize: 100,
+    cellType: field.type,
+    field,
+  }));
+
+  return [...defaultColumns, ...viewColumns];
+});
+
+const { project } = storeToRefs(useAuthStore());
 
 const listsStagesService = useListStagesService();
 const { data: listStages } = listsStagesService.useGetListStagesQuery({
@@ -59,7 +111,9 @@ const table = useVueTable({
   get data() {
     return props.groups;
   },
-  columns: props.columns as ColumnDef<ListGroup, any>[],
+  get columns() {
+    return columns.value;
+  },
   getCoreRowModel: getCoreRowModel(),
   getRowId: (row) => `${row.id}`,
   manualPagination: true,
@@ -103,70 +157,10 @@ function getColumnSortIcon(column: Column<ListGroup, unknown>) {
       return 'mdi-arrow-up';
   }
 }
-
-function toggleGroupExpansion(listGroup: Row<ListGroup>) {
-  listGroup.toggleExpanded();
-  isLoading.value = true;
-  updateListGroup({
-    ...listGroup.original,
-    isExpanded: listGroup.getIsExpanded(),
-  })
-    .catch(() => {
-      showSnackbar({
-        message: 'Something went wrong, please try again.',
-        color: 'error',
-        timeout: 5000,
-      });
-    })
-    .finally(() => {
-      isLoading.value = false;
-    });
-}
-
-function handleUpdateAssignees({ users, card }: { users: User[]; card: Card }) {
-  emit('row:update:assignees', {
-    users,
-    card,
-  });
-}
-
-function handleUpdateDueDate({
-  newDueDate,
-  card,
-}: {
-  newDueDate: string;
-  card: Card;
-}) {
-  emit('row:update:due-date', {
-    newDueDate,
-    card,
-  });
-}
-
-function handleDeleteCard(card: Card) {
-  emit('row:delete', card);
-}
-
-function handleUpdateCardStage(data: {
-  cardId: number;
-  cardListId: number;
-  listStageId: number;
-  order?: number;
-}) {
-  emit('row:update:stage', data);
-}
-
-function handleUpdateCardOrder(data: {
-  currentCard: Card;
-  previousCard?: Card;
-  nextCard?: Card;
-}) {
-  emit('row:update:order', data);
-}
 </script>
 
 <template>
-  <div class="table-container px-6 position-relative overflow-auto">
+  <div class="table-view mx-6 position-relative overflow-auto">
     <div
       class="table d-flex flex-column my-2"
       :style="`max-height: calc(100vh - 180px${
@@ -188,6 +182,7 @@ function handleUpdateCardOrder(data: {
                   class="table-header-cell py-1 px-4 text-caption user-select-none d-flex align-center text-truncate"
                   rounded="0"
                   color="accent"
+                  height="33"
                   :width="header.getSize()"
                 >
                   <!-- Header Content -->
@@ -250,17 +245,12 @@ function handleUpdateCardOrder(data: {
             v-model:loading="isLoading"
             :list-group="listGroup"
             :list-stages="listStages ?? []"
+            :list
             :view
             :project-users="projectUsers ?? []"
             :table
             :column-sizes="columnSizes"
             :no-group-banners="noGroupBanners"
-            @toggle:group="toggleGroupExpansion"
-            @row:delete="handleDeleteCard"
-            @row:update:stage="handleUpdateCardStage"
-            @row:update:due-date="handleUpdateDueDate"
-            @row:update:assignees="handleUpdateAssignees"
-            @row:update:order="handleUpdateCardOrder"
           />
         </template>
       </v-card>
@@ -268,11 +258,11 @@ function handleUpdateCardOrder(data: {
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 $table-border-color: var(--v-border-color);
 $table-border-opacity: var(--v-border-opacity);
 
-.table-container {
+.table-view {
   .table {
     max-height: calc(100vh - 180px);
     min-width: 100%;
@@ -284,6 +274,17 @@ $table-border-opacity: var(--v-border-opacity);
     .table-header {
       border-bottom: 0.25px solid
         rgba($table-border-color, $table-border-opacity);
+    }
+
+    .table-header-cell,
+    .table-cell {
+      border-inline-end: 0.25px solid
+        rgba(var(--v-border-color), var(--v-border-opacity));
+    }
+
+    .table-row {
+      border-bottom: 0.25px solid
+        rgba(var(--v-border-color), var(--v-border-opacity));
     }
   }
 

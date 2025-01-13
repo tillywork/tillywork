@@ -4,13 +4,18 @@ FROM node:bullseye-slim AS build
 # Set working directory
 WORKDIR /app
 
+ARG TW_VITE_POSTHOG_KEY
+ENV TW_VITE_POSTHOG_KEY=${TW_VITE_POSTHOG_KEY}
 ENV TW_VITE_API_URL=/api/v1
 
 # Copy source code
 COPY . .
 
-# Install dependencies
-RUN npm ci
+# Install dependencies and cache them
+RUN --mount=type=cache,target=/root/.npm npm ci
+
+# Generate swagger metadata
+RUN npm run swagger
 
 # Build the app
 RUN npm run build
@@ -31,6 +36,9 @@ RUN npm install pm2 -g
 
 # Copy backend build
 COPY --from=build /app/dist/packages/backend ./dist/backend
+
+# Copy shared package
+COPY --from=build /app/dist/packages/shared ./dist/shared
 
 # Copy frontend build
 COPY --from=build /app/dist/packages/frontend /usr/share/nginx/html

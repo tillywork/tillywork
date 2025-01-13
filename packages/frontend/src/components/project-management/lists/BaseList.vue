@@ -2,8 +2,8 @@
 import BaseListViewTabs from './BaseListViewTabs.vue';
 import BaseView from '../views/BaseView.vue';
 import type { List } from './types';
-import type { View } from '../views/types';
-import { useViewsService } from '@/composables/services/useViewsService';
+import { useViewsService } from '@/services/useViewsService';
+import type { View } from '@tillywork/shared';
 
 const props = defineProps<{
   list: List;
@@ -18,18 +18,16 @@ const view = ref<View>();
 
 <template>
   <div class="position-relative">
-    <div class="pa-4 pb-0">
-      <div class="px-9">
-        <div class="d-flex align-center mb-3">
-          <v-icon :icon="list.icon" :color="list.iconColor" disabled start />
-          <span class="text-h5 ms-2">{{ list.name }}</span>
-        </div>
-        <base-list-view-tabs v-if="views" v-model="view" :list :views />
+    <div class="px-6 pt-2 pb-0">
+      <div class="d-flex align-center mb-2 px-2 pt-1">
+        <v-icon :icon="list.icon" :color="list.iconColor" size="small" start />
+        <span class="text-h6 font-weight-regular">{{ list.name }}</span>
       </div>
+      <base-list-view-tabs v-if="views" v-model="view" :list :views />
     </div>
     <v-divider />
     <template v-if="view">
-      <base-view :view :list />
+      <base-view :view :list :key="view.id" />
     </template>
   </div>
 </template>

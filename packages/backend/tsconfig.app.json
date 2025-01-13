@@ -2,10 +2,12 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "outDir": "../../dist/out-tsc",
-        "module": "commonjs",
+        "module": "CommonJS",
         "types": ["node"],
         "emitDecoratorMetadata": true,
-        "target": "es2021"
+        "paths": {
+            "@tillywork/shared": ["../shared/src/index.ts"]
+        }
     },
     "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"],
     "include": ["src/**/*.ts"]

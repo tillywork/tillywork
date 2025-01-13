@@ -8,7 +8,6 @@ import {
     Put,
     UseGuards,
     Query,
-    Request,
 } from "@nestjs/common";
 import { FieldsService, FindAllParams } from "./fields.service";
 import { Field } from "./field.entity";
@@ -16,6 +15,8 @@ import { CreateFieldDto } from "./dto/create.field.dto";
 import { UpdateFieldDto } from "./dto/update.field.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { CurrentUser } from "../auth/decorators/current.user.decorator";
+import { User } from "../users/user.entity";
 
 @ApiBearerAuth()
 @ApiTags("fields")
@@ -40,9 +41,8 @@ export class FieldsController {
     @Post()
     create(
         @Body() createFieldDto: CreateFieldDto,
-        @Request() req
+        @CurrentUser() user: User
     ): Promise<Field> {
-        const { user } = req;
         return this.fieldsService.create({
             ...createFieldDto,
             createdByType: "user",

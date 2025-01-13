@@ -1,21 +1,26 @@
 <script setup lang="ts">
-import BaseThemeSwitch from '@/components/common/base/BaseThemeSwitch.vue';
-import UserListItem from '@/components/common/navigation/UserListItem.vue';
 import { useAuthStore } from '@/stores/auth';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
 import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
 import { useLogo } from '@/composables/useLogo';
+import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
+import UserMenu from '@/components/common/navigation/UserMenu.vue';
+import { useStateStore } from '@/stores/state';
+
+const { isRailFrozen } = storeToRefs(useStateStore());
 
 const authStore = useAuthStore();
-const { isAuthenticated, logout } = authStore;
-const { navigationDrawer } = useHideNavigationDrawer();
+const { isAuthenticated } = authStore;
+const { hideNavigationDrawer } = useHideNavigationDrawer();
+const navigationDrawer = ref(true);
+const isRail = ref(true);
 const logo = useLogo();
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
   {
-    icon: 'mdi-home',
-    title: 'Home',
-    route: '/crm',
+    icon: 'mdi-draw',
+    title: 'Whiteboard',
+    route: '/whiteboard',
     activeOnExactMatch: true,
   },
 ]);
@@ -49,32 +54,70 @@ if (isAuthenticated()) {
 
 <template>
   <v-app>
-    <v-navigation-drawer
-      v-model="navigationDrawer"
-      app
-      rail
-      expand-on-hover
-      color="background"
+    <v-app-bar
+      v-if="!hideNavigationDrawer && $vuetify.display.mdAndDown"
+      color="accent"
+      height="40"
+      class="border-b-thin"
     >
-      <!-- User content -->
-      <v-list v-if="isAuthenticated()" lines="one" :nav="false" :slim="false">
-        <user-list-item />
-      </v-list>
+      <v-app-bar-nav-icon
+        variant="text"
+        @click.stop="navigationDrawer = !navigationDrawer"
+      />
 
-      <v-divider></v-divider>
+      <v-toolbar-title>
+        <v-img :src="logo.getLogoUrlByTheme()" width="125" />
+      </v-toolbar-title>
+    </v-app-bar>
 
-      <v-list density="compact" nav lines="one">
+    <v-navigation-drawer
+      v-if="!hideNavigationDrawer"
+      v-model="navigationDrawer"
+      v-model:rail="isRail"
+      app
+      :expand-on-hover="!isRailFrozen"
+    >
+      <div class="position-relative">
+        <v-img
+          :src="logo.getCheckUrl()"
+          min-height="25"
+          min-width="25"
+          height="25"
+          width="25"
+          class="ma-2 ms-4 mt-4 hidden-md-and-down"
+        />
+        <v-img
+          v-if="!isRail"
+          :src="logo.getLogoUrlByTheme()"
+          min-height="35"
+          min-width="125"
+          height="35"
+          width="125"
+          class="ms-2 hidden-md-and-down position-absolute"
+          :style="{ top: '-5px', left: '-1px' }"
+        />
+      </div>
+      <v-divider class="hidden-md-and-down" />
+      <navigation-workspace-selector
+        v-if="isAuthenticated()"
+        v-model:only-icon="isRail"
+      />
+
+      <v-list class="mt-2">
         <v-list-item
           v-for="navigationItem in navigationMenuItems"
           :key="navigationItem.title"
           :to="navigationItem.route"
           @click="navigationItem.onClick"
           :exact="navigationItem.activeOnExactMatch"
+          rounded="md"
         >
           <template #prepend v-if="navigationItem.icon">
-            <v-icon :icon="navigationItem.icon" />
+            <v-icon :icon="navigationItem.icon" class="ms-1" />
           </template>
-          <v-list-item-title>{{ navigationItem.title }}</v-list-item-title>
+          <v-list-item-title v-if="!isRail">{{
+            navigationItem.title
+          }}</v-list-item-title>
         </v-list-item>
 
         <v-divider />
@@ -90,7 +133,7 @@ if (isAuthenticated()) {
             :exact="navigationItem.activeOnExactMatch"
           >
             <template #prepend v-if="navigationItem.icon">
-              <v-icon :icon="navigationItem.icon" />
+              <v-icon :icon="navigationItem.icon" class="ms-1" />
             </template>
             <v-list-item-title>{{ navigationItem.title }}</v-list-item-title>
           </v-list-item>
@@ -98,30 +141,10 @@ if (isAuthenticated()) {
       </v-list>
 
       <template v-slot:append>
-        <v-list>
-          <v-list-item @click="logout()" v-if="isAuthenticated()">
-            <template #prepend>
-              <v-icon icon="mdi-logout" />
-            </template>
-            <v-list-item-title>Logout</v-list-item-title>
-          </v-list-item>
-          <v-list-item :to="'/login'" v-else>
-            <template #prepend>
-              <v-icon icon="mdi-login" />
-            </template>
-            <v-list-item-title>Login</v-list-item-title>
-          </v-list-item>
-        </v-list>
+        <!-- User content -->
+        <user-menu />
       </template>
     </v-navigation-drawer>
-
-    <v-app-bar app class="pr-4" density="compact" color="background">
-      <v-toolbar-title>
-        <v-img :src="logo.getLogoUrlByTheme()" width="125" />
-      </v-toolbar-title>
-      <v-spacer />
-      <base-theme-switch />
-    </v-app-bar>
 
     <v-main>
       <router-view />

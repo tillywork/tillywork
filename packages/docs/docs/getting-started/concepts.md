@@ -24,26 +24,30 @@ The card entity is tillywork's "atomic entity", that is used to define card type
 To create a new card type:
 
 :::tip Using the command dialog
-You can use the keyboard shortcut `Ctrl+K` or `Cmd+K` to open the command dialog, then search for card types to open the settings dialog to skip the first 2 steps.
+You can use the keyboard shortcut `Ctrl+K` or `Cmd+K` to open the command dialog, then search for **Card Types** to open its settings, skipping the first two steps.
 :::
 
-1. Open the Settings dialog
-2. Go to Card types tab
-3. Click the + next to the tab title
-4. Enter card type name (e.g Contact)
-5. Click create, and close the Settings dialog
+1. Open Tillywork's **Settings**
+2. Go to the **Card Types** section
+3. Click the + icon next to the section's title
+4. Enter the card type name (e.g Contact)
+5. Click create, and go back to what you were working on
 6. In the navigation drawer (where your spaces and lists show), find the list you want to assign this card type to
-7. Open the list menu by hovering on the list and clicking the 3 dot icon
-8. Go to Default card type
+7. Open the list menu by hovering on the list and clicking the 3-dot icon
+8. Go to **Default card type**
 9. Select the card type you want for the list
+
+:::tip
+After clicking on **Default card type,** you can see an **Edit** button that takes you directly to the **Card Types** settings.
+:::
 
 ### Deleting Card Types
 
 To delete a card type:
 
-1. Go to the Settings dialog, card types tab
-2. Click the 3 dot icon next to the card type you want to delete
-3. From the list, click Delete
+1. Go to the **Card Types** settings
+2. Click the 3-dot icon next to the card type you want to delete
+3. From the list, click **Delete**
 4. You will have to select a replacement card type. The lists and cards that are assigned to the deleted card type will be replaced with the type you select here
 5. Click Delete
 
@@ -70,7 +74,7 @@ Field types that are currently supported:
 To create a new custom field:
 
 1. Open the command dialog with `Ctrl+K` or `Cmd+K`
-2. Search for custom fields and hit enter
+2. Search for **Custom Fields** and hit enter
 3. Click the + icon next to the title
 4. Enter a field name and select the field type
 5. For dropdown and label inputs, make sure to add the options
@@ -84,9 +88,9 @@ Currently, any custom field you create will show up under all lists and card typ
 To update a custom field:
 
 1. Open the command dialog with `Ctrl+K` or `Cmd+K`
-2. Search for custom fields and hit enter
+2. Search for **Custom Fields** and hit enter
 3. Click on the field you want to edit
-4. Update the field and click save
+4. Update the field and click **Save**
 
 :::info Limitations
 When updating custom fields, you cannot change the field type. You can only change the name and the options (in case the field is a label or dropdown field)

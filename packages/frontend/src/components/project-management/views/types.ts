@@ -1,82 +1,21 @@
-import type { Filter } from '../filters/types';
-import type { List, ListGroupOptions } from '../lists/types';
+import type { PaginationParams, ViewSortOption } from '@tillywork/shared';
 
-export interface View {
-  id: number;
-  name: string;
-  type: ViewTypes;
-  listId: number;
-  list: List;
-  ignoreCompleted: boolean;
-  ignoreChildren: boolean;
-  groupBy: ListGroupOptions;
-  sortBy?: TableSortOption;
-  updatedAt: string;
-  filters?: Filter;
-}
-
-export enum ViewTypes {
-  TABLE = 'table',
-  BOARD = 'board',
-  CALENDAR = 'calendar',
-  GANTT = 'gantt',
-  LIST = 'list',
-}
-
-export interface ListGroupOption {
-  label: string;
-  value: ListGroupOptions;
-}
-
-export type SortDirection = 'ASC' | 'DESC';
-
-export interface ListSortOption {
-  label: string;
-  value: TableSortOption;
-}
-
-export const DEFAULT_SORT_OPTIONS: ListSortOption[] = [
+export const DEFAULT_SORT_OPTIONS: ViewSortOption[] = [
   {
     label: 'Creation Date',
+    icon: 'mdi-clock-edit',
     value: {
       key: 'card.createdAt',
       order: 'ASC',
     },
   },
-  {
-    label: 'Due Date',
-    value: {
-      key: 'card.dueAt',
-      order: 'ASC',
-    },
-  },
-  {
-    label: 'Completed',
-    value: {
-      key: 'listStage.isCompleted',
-      order: 'ASC',
-    },
-  },
 ];
-
-export interface PaginationParams {
-  page?: number;
-  itemsPerPage?: number;
-  sort?: TableSortState;
-}
-
-export interface TableSortOption {
-  key: string;
-  order: string;
-}
-
-export type TableSortState = TableSortOption[];
 
 export const DEFAULT_PAGINATION_OPTIONS: PaginationParams = {
   sort: [
     {
       key: 'createdAt',
-      order: 'asc',
+      order: 'ASC',
     },
   ],
   page: 1,

@@ -20,10 +20,15 @@ declare module 'vue-router/auto-routes' {
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
     '/[...path]': RouteRecordInfo<'/[...path]', '/:path(.*)', { path: ParamValue<true> }, { path: ParamValue<false> }>,
+    '/card/[cardId]': RouteRecordInfo<'/card/[cardId]', '/card/:cardId', { cardId: ParamValue<true> }, { cardId: ParamValue<false> }>,
+    '/crm/[slug]': RouteRecordInfo<'/crm/[slug]', '/crm/:slug', { slug: ParamValue<true> }, { slug: ParamValue<false> }>,
+    '/crm/tasks': RouteRecordInfo<'/crm/tasks', '/crm/tasks', Record<never, never>, Record<never, never>>,
     '/invite/[inviteCode]': RouteRecordInfo<'/invite/[inviteCode]', '/invite/:inviteCode', { inviteCode: ParamValue<true> }, { inviteCode: ParamValue<false> }>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
-    '/pm/card/[cardId]': RouteRecordInfo<'/pm/card/[cardId]', '/pm/card/:cardId', { cardId: ParamValue<true> }, { cardId: ParamValue<false> }>,
     '/pm/list/[listId]/': RouteRecordInfo<'/pm/list/[listId]/', '/pm/list/:listId', { listId: ParamValue<true> }, { listId: ParamValue<false> }>,
     '/register': RouteRecordInfo<'/register', '/register', Record<never, never>, Record<never, never>>,
+    '/settings/': RouteRecordInfo<'/settings/', '/settings', Record<never, never>, Record<never, never>>,
+    '/settings/[section]': RouteRecordInfo<'/settings/[section]', '/settings/:section', { section: ParamValue<true> }, { section: ParamValue<false> }>,
+    '/whiteboard': RouteRecordInfo<'/whiteboard', '/whiteboard', Record<never, never>, Record<never, never>>,
   }
 }

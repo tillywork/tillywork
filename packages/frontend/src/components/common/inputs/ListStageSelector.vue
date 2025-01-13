@@ -43,9 +43,8 @@ function isStageSelected(stage: ListStage) {
       <template v-else>
         <v-chip
           v-bind="!readonly ? props : undefined"
-          link
-          rounded="md"
-          :size="size ?? 'small'"
+          :link="!readonly"
+          rounded="pill"
           density="comfortable"
           :color="mainChipColor"
           @click.prevent
@@ -64,7 +63,7 @@ function isStageSelected(stage: ListStage) {
       </template>
     </template>
     <v-card>
-      <v-list class="text-align-left" rounded="md">
+      <v-list class="text-align-left">
         <template v-for="stage in listStages" :key="stage.id">
           <v-list-item
             @click="handleStageClick(stage)"

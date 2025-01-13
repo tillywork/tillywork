@@ -9,6 +9,8 @@ import {
     UseGuards,
     Logger,
     Request,
+    Query,
+    BadRequestException,
 } from "@nestjs/common";
 import {
     CardFindAllResult,
@@ -19,8 +21,9 @@ import { Card } from "./card.entity";
 import { CreateCardDto } from "./dto/create.card.dto";
 import { UpdateCardDto } from "./dto/update.card.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
-import { CardListsService } from "./card-lists/card.lists.service";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { CurrentUser } from "../auth/decorators/current.user.decorator";
+import { User } from "../users/user.entity";
 
 @ApiBearerAuth()
 @ApiTags("cards")
@@ -31,10 +34,26 @@ import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 })
 export class CardsController {
     private readonly logger = new Logger("CardsController");
-    constructor(
-        private readonly cardsService: CardsService,
-        private readonly cardListsService: CardListsService
-    ) {}
+    constructor(private readonly cardsService: CardsService) {}
+
+    @Get()
+    search(
+        @Query("q") q: string,
+        @Query("workspaceId") workspaceId: number,
+        @Query("cardTypeId") cardTypeId: number
+    ): Promise<Card[]> {
+        if (!q || !workspaceId) {
+            throw new BadRequestException(
+                "The following query params are required: q, workspaceId"
+            );
+        }
+
+        return this.cardsService.searchCards({
+            keyword: q,
+            workspaceId,
+            cardTypeId,
+        });
+    }
 
     @Post("search")
     findAll(
@@ -52,9 +71,8 @@ export class CardsController {
     @Post()
     create(
         @Body() createCardDto: CreateCardDto,
-        @Request() req
+        @CurrentUser() user: User
     ): Promise<Card> {
-        const { user } = req;
         createCardDto.createdBy = user.id;
         return this.cardsService.create(createCardDto);
     }

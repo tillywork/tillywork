@@ -1,5 +1,5 @@
+import { FieldTypes } from "@tillywork/shared";
 import { MigrationInterface, QueryRunner, Table } from "typeorm";
-import { FieldTypes } from "../app/common/fields/types";
 
 export class RenamePropTableToFields1718818041867
     implements MigrationInterface
