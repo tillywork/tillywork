@@ -124,16 +124,12 @@ function handleAfterLeave() {
 function handleShortcut(event: KeyboardEvent) {
   if (isInputFocused.value) return;
 
-  console.debug('Keys clicked: ', currentKeyCombo.value);
-
-  // Get command with shortcut clicked
   const command = commands.value.find(
     (c) =>
       c.shortcut && c.shortcut.join('+').toUpperCase() === currentKeyCombo.value
   );
 
   if (command) {
-    console.debug('Executing command..', command);
     if (command.condition && !command.condition()) {
       return;
     }
