@@ -13,7 +13,7 @@ interface Props {
 
 const {
   size = 'x-small',
-  icon = 'mdi-account',
+  icon,
   fill = false,
   rounded = 'pill',
 } = defineProps<Props>();
@@ -37,7 +37,7 @@ const { getUserFullName } = useUsersService();
       :rounded
       @click.prevent
     >
-      <template #prepend>
+      <template #prepend v-if="icon">
         <v-icon :icon size="small" />
       </template>
       {{ label }}

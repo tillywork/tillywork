@@ -397,7 +397,6 @@ watch(
                         <base-field
                           :field
                           :color="getDateFieldColor(row.original, field)"
-                          no-label
                           :model-value="row.original.data[field.slug]"
                           @update:model-value="(v: string) => updateFieldValue({
                                 card: row.original,
@@ -409,13 +408,13 @@ watch(
                       <template v-if="assigneeField">
                         <base-field
                           :field="assigneeField"
-                          no-label
                           :model-value="row.original.data[assigneeField.slug]"
                           @update:model-value="(v: string) => updateFieldValue({
-                                card: row.original,
-                                field: assigneeField as Field,
-                                v
-                            })"
+                            card: row.original,
+                            field: assigneeField as Field,
+                            v
+                          })"
+                          hide-label
                         />
                       </template>
                     </div>
