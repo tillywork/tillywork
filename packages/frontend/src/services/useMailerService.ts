@@ -1,6 +1,5 @@
-import type { User } from '@/components/common/users/types';
 import { useHttp } from '@/composables/useHttp';
-import type { CardType } from '@/components/project-management/cards/types';
+import type { User, CardType } from '@tillywork/shared';
 
 export type SendMentionNotificationParams = {
   userId: number;

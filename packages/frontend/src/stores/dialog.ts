@@ -1,4 +1,5 @@
 import { DIALOG_WIDTHS, type DIALOGS } from '@/components/common/dialogs/types';
+import posthog from 'posthog-js';
 
 export type DialogOptions = {
   width?: string | number;
@@ -15,7 +16,6 @@ export type Dialog = {
 export const useDialogStore = defineStore('dialog', {
   state: () => ({
     dialogs: [] as Dialog[],
-    isCommandPaletteOpen: false,
   }),
 
   actions: {
@@ -42,6 +42,7 @@ export const useDialogStore = defineStore('dialog', {
         };
 
         this.dialogs = [...this.dialogs, newDialog];
+        posthog.capture('Dialog Opened', { dialog });
       }
     },
     closeDialog(index: number) {
@@ -68,10 +69,6 @@ export const useDialogStore = defineStore('dialog', {
     },
     getDialogIndex(dialog: DIALOGS) {
       return this.dialogs.findIndex((d) => d.dialog === dialog);
-    },
-
-    setIsCommandPaletteOpen(isOpen: boolean) {
-      this.isCommandPaletteOpen = isOpen;
     },
   },
 });

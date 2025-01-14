@@ -1,6 +1,6 @@
 import { useHttp } from '@/composables/useHttp';
 import { useQuery } from '@tanstack/vue-query';
-import type { Project } from '@/components/common/projects/types';
+import type { Project } from '@tillywork/shared';
 import type { MaybeRef } from 'vue';
 
 export const useProjectsService = () => {

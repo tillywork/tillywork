@@ -1,6 +1,6 @@
 import { useHttp } from '@/composables/useHttp';
 import { useQuery } from '@tanstack/vue-query';
-import type { ProjectUser } from '@/components/common/projects/types';
+import type { ProjectUser } from '@tillywork/shared';
 
 export const useProjectUsersService = () => {
   const { sendRequest } = useHttp();

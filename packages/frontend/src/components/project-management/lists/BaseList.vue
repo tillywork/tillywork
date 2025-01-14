@@ -4,16 +4,25 @@ import BaseView from '../views/BaseView.vue';
 import type { List } from './types';
 import { useViewsService } from '@/services/useViewsService';
 import type { View } from '@tillywork/shared';
+import posthog from 'posthog-js';
 
-const props = defineProps<{
+const { list } = defineProps<{
   list: List;
 }>();
 
-const listId = computed(() => props.list.id);
+const listId = computed(() => list.id);
 
 const { useGetViewsQuery } = useViewsService();
 const { data: views } = useGetViewsQuery({ listId });
 const view = ref<View>();
+
+watch(
+  () => list,
+  (v) => {
+    posthog.capture('List Opened', { id: v.id, name: v.name });
+  },
+  { immediate: true }
+);
 </script>
 
 <template>

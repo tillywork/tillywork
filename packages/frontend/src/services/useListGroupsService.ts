@@ -1,15 +1,17 @@
 import type { MaybeRef } from 'vue';
 import { useHttp } from '@/composables/useHttp';
-import type { ListGroup } from '@/components/project-management/lists/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
-import type { TableSortOption } from '@/components/project-management/views/types';
-import type { ViewGroupByOption } from '@tillywork/shared';
+import type {
+  ListGroup,
+  SortOption,
+  ViewGroupByOption,
+} from '@tillywork/shared';
 
 export interface GetListGroupsByOptionParams {
   listId: MaybeRef<number>;
   hideCompleted: MaybeRef<boolean>;
   groupBy: MaybeRef<ViewGroupByOption>;
-  sortCardsBy?: MaybeRef<TableSortOption[]>;
+  sortCardsBy?: MaybeRef<SortOption[]>;
 }
 
 export type GetListGroupsQueryParams = GetListGroupsByOptionParams & {

@@ -1,5 +1,4 @@
 import { useHttp } from '@/composables/useHttp';
-import type { TableSortOption } from '@/components/project-management/views/types';
 import {
   useInfiniteQuery,
   useMutation,
@@ -12,7 +11,9 @@ import type {
   CardList,
   CreateCardDto,
   QueryFilter,
+  SortOption,
 } from '@tillywork/shared';
+import posthog from 'posthog-js';
 
 export interface CardsData {
   cards: Card[];
@@ -25,7 +26,7 @@ export interface GetCardsParams {
   hideChildren?: MaybeRef<boolean>;
   page: number;
   limit: number;
-  sortBy?: TableSortOption[];
+  sortBy?: SortOption[];
   filters?: QueryFilter;
 }
 
@@ -36,7 +37,7 @@ export interface GetGroupCardsInfiniteQueryParams {
   hideChildren?: MaybeRef<boolean>;
   initialCards?: CardsData;
   filters?: Ref<QueryFilter>;
-  sortBy?: Ref<TableSortOption[] | undefined>;
+  sortBy?: Ref<SortOption[] | undefined>;
 }
 
 export interface SearchCardsParams {
@@ -58,7 +59,7 @@ export const useCardsService = () => {
     sortBy = [
       {
         key: 'cardLists.order',
-        order: 'asc',
+        order: 'ASC',
       },
     ],
     filters,
@@ -146,8 +147,9 @@ export const useCardsService = () => {
   function useCreateCardMutation() {
     return useMutation({
       mutationFn: createCard,
-      onSuccess: () => {
+      onSuccess: (card) => {
         queryClient.invalidateQueries({ queryKey: ['cards'] });
+        posthog.capture('Card Created', { id: card.id });
       },
     });
   }
