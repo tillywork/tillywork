@@ -9,20 +9,15 @@ import { useDialogStore } from '@/stores/dialog';
 import { WorkspaceTypes, type Workspace } from '@tillywork/shared';
 import { DIALOGS } from './types';
 import { useStateStore } from '@/stores/state';
+import posthog from 'posthog-js';
 
 const logo = useLogo();
-const router = useRouter();
 
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
 const { showSnackbar } = useSnackbarStore();
 const dialog = useDialogStore();
-const {
-  setSpaceExpansionState,
-  setCurrentList,
-  navigateToLastList,
-  setSelectedModule,
-} = useStateStore();
+const { setSpaceExpansionState, navigateToLastList } = useStateStore();
 
 const workspacesService = useWorkspacesService();
 const usersService = useUsersService();
@@ -52,6 +47,8 @@ const selectedModuleNames = computed(() =>
 );
 
 function submitStepTwo() {
+  posthog.capture('Onboarding', { step: 2, value: selectedModuleNames.value });
+
   updateUserMutation.mutate({
     ...user.value,
     onboarding: {
@@ -69,6 +66,8 @@ async function createWorkspace(createWorkspaceDto: Partial<Workspace>) {
   createWorkspaceMutation
     .mutateAsync(createWorkspaceDto)
     .then((workspace) => {
+      posthog.capture('Onboarding', { step: 3, value: workspace.type });
+
       dialog.closeDialog(currentDialogIndex.value);
       switch (workspace.type) {
         case WorkspaceTypes.PROJECT_MANAGEMENT:
@@ -89,6 +88,10 @@ async function createWorkspace(createWorkspaceDto: Partial<Workspace>) {
       });
     });
 }
+
+onMounted(() => {
+  posthog.capture('Onboarding', { step: 1 });
+});
 </script>
 
 <template>

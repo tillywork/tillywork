@@ -63,7 +63,7 @@ const sortDirectionIcon = computed(() => {
 });
 
 function handleSortBySelection(option: ViewSortOption) {
-  posthog.capture('updated_sort_by', {
+  posthog.capture('Updated Sort By', {
     option: option.value,
   });
 
@@ -80,7 +80,7 @@ function isOptionSelected(option: ViewSortOption) {
 }
 
 function clearSortBy() {
-  posthog.capture('updated_sort_by', {
+  posthog.capture('Updated Sort By', {
     option: null,
   });
 

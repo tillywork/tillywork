@@ -1,6 +1,6 @@
-import type { User } from '@/components/common/users/types';
 import { useHttp } from '@/composables/useHttp';
 import { useSnackbarStore } from '@/stores/snackbar';
+import type { User } from '@tillywork/shared';
 
 export type TWFile = {
   id: number;

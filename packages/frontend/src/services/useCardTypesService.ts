@@ -1,11 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import { useHttp } from '@/composables/useHttp';
-import type {
-  CardType,
-  CreateCardTypeDto,
-} from '@/components/project-management/cards/types';
 import type { MaybeRef } from 'vue';
 import { useAuthStore } from '@/stores/auth';
+import type { CardType, CreateCardTypeDto } from '@tillywork/shared';
 
 export type FindAllParams = {
   workspaceId: MaybeRef<number>;

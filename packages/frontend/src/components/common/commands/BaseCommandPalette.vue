@@ -8,6 +8,7 @@ import { useStateStore } from '@/stores/state';
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts';
 
 import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
+import posthog from 'posthog-js';
 
 const search = ref('');
 const activeIndex = ref(0);
@@ -109,6 +110,7 @@ function ensureActiveCommandVisible() {
 
 function executeCommand(command: Command) {
   command.action();
+  posthog.capture('Command Executed', { command: command.id });
   closeCommandPalette();
 }
 
@@ -183,6 +185,8 @@ onBeforeUnmount(() => {
 watch(isOpen, (v) => {
   if (!v) {
     isInputFocused.value = false;
+  } else {
+    posthog.capture('Command Palette Opened');
   }
 });
 </script>

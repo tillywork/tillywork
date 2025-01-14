@@ -1,6 +1,6 @@
-import type { User } from '@/components/common/users/types';
 import { useHttp } from '@/composables/useHttp';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import type { User } from '@tillywork/shared';
 
 export interface UsersData {
   users: User[];

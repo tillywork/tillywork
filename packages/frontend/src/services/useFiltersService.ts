@@ -1,9 +1,6 @@
 import { useMutation } from '@tanstack/vue-query';
 import { useHttp } from '@/composables/useHttp';
-import type {
-  CreateFilterDto,
-  Filter,
-} from '@/components/project-management/filters/types';
+import type { CreateFilterDto, Filter } from '@tillywork/shared';
 
 export const useFitlersService = () => {
   const { sendRequest } = useHttp();

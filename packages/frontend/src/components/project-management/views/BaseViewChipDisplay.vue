@@ -40,7 +40,7 @@ const enabledTableColumns = computed({
   set(v) {
     const newColumnOrder = v.map((field) => field.id.toString());
     view.value.options.columns = newColumnOrder;
-    posthog.capture('order_table_columns', { viewId: view.value.id });
+    posthog.capture('Updated Table Column Order');
 
     updateView(view.value).catch(() => {
       showSnackbar({
@@ -56,7 +56,7 @@ const disabledTableColumns = computed(() =>
 );
 
 function handleToggleCompleted() {
-  posthog.capture('toggle_hide_completed', {
+  posthog.capture('Toggled Hide Completed', {
     viewId: view.value.id,
     value: !view.value.options.hideCompleted,
   });
@@ -71,7 +71,7 @@ function handleToggleCompleted() {
 }
 
 function handleToggleChildren() {
-  posthog.capture('toggle_hide_children', {
+  posthog.capture('Toggled Hide Children', {
     viewId: view.value.id,
     value: !view.value.options.hideChildren,
   });
@@ -90,8 +90,10 @@ function isColumnEnabledInView(field: Field) {
 }
 
 function handleToggleColumn(field: Field) {
-  posthog.capture('toggle_table_column', {
+  posthog.capture('Toggled Table Column', {
     viewId: view.value.id,
+    field: field.slug,
+    fieldType: field.type,
   });
 
   let viewColumns = cloneDeep(view.value.options.columns) ?? [];

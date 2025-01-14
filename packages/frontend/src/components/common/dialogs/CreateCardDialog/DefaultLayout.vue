@@ -24,8 +24,6 @@ import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue
 import BaseListSelector from '../../inputs/BaseListSelector.vue';
 import BaseEditorInput from '../../base/BaseEditor/BaseEditorInput.vue';
 
-import posthog from 'posthog-js';
-
 const dialog = useDialogStore();
 const { workspace } = storeToRefs(useAuthStore());
 const { showSnackbar } = useSnackbarStore();
@@ -94,9 +92,8 @@ async function createCard() {
     createCardDto.value.listStageId = createCardDto.value.listStage?.id;
     createCardMutation
       .mutateAsync(createCardDto.value)
-      .then((card) => {
+      .then(() => {
         handlePostCreate();
-        posthog.capture('card_created', { id: card.id });
       })
       .catch(() => {
         showSnackbar({
