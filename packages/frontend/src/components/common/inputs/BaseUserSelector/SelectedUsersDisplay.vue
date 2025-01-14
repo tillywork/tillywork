@@ -19,8 +19,6 @@ const {
 } = defineProps<Props>();
 
 const { getUserFullName } = useUsersService();
-
-console.log(icon);
 </script>
 
 <template>
