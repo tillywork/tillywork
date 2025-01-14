@@ -16,6 +16,7 @@ interface Props {
   contentClass?: string;
   showFirstNames?: boolean;
   label?: string;
+  tooltip?: string;
   fill?: boolean;
   textField?: boolean;
   returnId?: boolean;
@@ -33,7 +34,6 @@ const props = withDefaults(defineProps<Props>(), {
   fill: false,
   textField: false,
   returnId: false,
-  icon: 'mdi-account',
   multiple: true,
   minSearchChars: 1,
   loading: false,
@@ -186,7 +186,7 @@ defineExpose({ userMenu });
         @click.prevent
       >
         <v-tooltip activator="parent" location="top" v-if="!fill">
-          {{ label }}
+          {{ tooltip ?? label }}
         </v-tooltip>
         <SelectedUsersDisplay
           :users="selectedUsers"

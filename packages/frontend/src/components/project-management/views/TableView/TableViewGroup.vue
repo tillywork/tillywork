@@ -466,12 +466,13 @@ watchEffect(() => {
                               rounded="0"
                               flex-fill
                               @update:model-value="
-                              (v: any) => updateFieldValue({ 
-                                  card: row.original,
-                                  field: cell.column.columnDef.field,
-                                  v
-                              })
-                            "
+                                (v: any) => updateFieldValue({ 
+                                    card: row.original,
+                                    field: cell.column.columnDef.field,
+                                    v
+                                })
+                              "
+                              hide-icon
                               table
                               @click.stop
                             />

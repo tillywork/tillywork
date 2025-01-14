@@ -16,12 +16,17 @@ import validationUtils from '@/utils/validation';
 
 const value = defineModel<any>();
 
-const { rounded = 'pill' } = defineProps<{
+const {
+  rounded = 'pill',
+  hideIcon = false,
+  hideLabel = false,
+} = defineProps<{
   field: Field;
-  noLabel?: boolean;
+  hideLabel?: boolean;
   flexFill?: boolean;
   rounded?: string;
   table?: boolean;
+  hideIcon?: boolean;
 }>();
 
 const { project, user } = storeToRefs(useAuthStore());
@@ -34,14 +39,26 @@ const { data: users } = useProjectUsersQuery({
       .map((projectUser) => projectUser.user)
       .sort((a) => (a.id === user.value!.id ? 0 : 1)),
 });
+
+function getFieldIcon(field: Field) {
+  if (!hideIcon) {
+    return field.icon;
+  }
+}
+
+function getFieldLabel(field: Field) {
+  if (!hideLabel) {
+    return field.name;
+  }
+}
 </script>
 
 <template>
   <template v-if="[FieldTypes.DATE, FieldTypes.DATETIME].includes(field.type)">
     <base-date-picker
       v-model="value"
-      :icon="field.icon"
-      :label="field.name"
+      :icon="getFieldIcon(field)"
+      :label="getFieldLabel(field)"
       :rounded
       :fill="flexFill"
       :include-time="field.type === FieldTypes.DATETIME"
@@ -53,42 +70,43 @@ const { data: users } = useProjectUsersQuery({
       hide-details
       :rounded
       :placeholder="field.name"
-      :prepend-inner-icon="field.icon"
+      :prepend-inner-icon="getFieldIcon(field)"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.DROPDOWN">
     <base-dropdown-input
       v-model="value"
       :items="field.items"
-      :icon="field.icon"
+      :icon="getFieldIcon(field)"
       :placeholder="field.name"
       :multiple="field.multiple"
       :rounded
       :fill="flexFill"
-      :label="field.name"
+      :label="getFieldLabel(field)"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.LABEL">
     <base-label-selector
       v-model="value"
       :items="field.items"
-      :icon="field.icon"
+      :icon="getFieldIcon(field)"
       :placeholder="field.name"
       :multiple="field.multiple"
       density="compact"
       :rounded
       :fill="flexFill"
-      :label="field.name"
+      :label="getFieldLabel(field)"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.USER">
     <base-user-selector
       v-model="value"
       :users="users ?? []"
-      :label="field.name"
+      :label="getFieldLabel(field)"
+      :tooltip="field.name"
       return-id
       return-string
-      :icon="field.icon"
+      :icon="getFieldIcon(field)"
       size="24"
       :fill="flexFill"
       :rounded
@@ -112,7 +130,7 @@ const { data: users } = useProjectUsersQuery({
     >
       <v-checkbox v-model="value" hide-details />
       <v-label
-        v-if="!table"
+        v-if="!hideLabel"
         class="flex-fill fill-height text-caption cursor-pointer"
         >{{ field.name }}</v-label
       >
@@ -124,8 +142,8 @@ const { data: users } = useProjectUsersQuery({
       @click.prevent
       :rounded
       :fill="flexFill"
-      :label="field.name"
-      :icon="field.icon"
+      :label="getFieldLabel(field)"
+      :icon="getFieldIcon(field)"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.PERCENTAGE">
@@ -134,7 +152,7 @@ const { data: users } = useProjectUsersQuery({
       @click.prevent
       :rounded
       :fill="flexFill"
-      :label="field.name"
+      :label="getFieldLabel(field)"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.CURRENCY">
@@ -143,7 +161,7 @@ const { data: users } = useProjectUsersQuery({
       @click.prevent
       :rounded
       :fill="flexFill"
-      :label="field.name"
+      :label="getFieldLabel(field)"
     />
   </template>
   <template v-else-if="field.type === FieldTypes.EMAIL">
@@ -152,7 +170,7 @@ const { data: users } = useProjectUsersQuery({
       hide-details
       :rounded
       :placeholder="field.name"
-      :prepend-inner-icon="field.icon"
+      :prepend-inner-icon="getFieldIcon(field)"
       :rules="[validationUtils.rules.email]"
     />
   </template>
@@ -162,7 +180,7 @@ const { data: users } = useProjectUsersQuery({
       hide-details
       :rounded
       :placeholder="field.name"
-      :prepend-inner-icon="field.icon"
+      :prepend-inner-icon="getFieldIcon(field)"
       :rules="[validationUtils.rules.url]"
     />
   </template>

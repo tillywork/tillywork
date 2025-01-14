@@ -266,18 +266,16 @@ watchEffect(() => {
 
                   <template #append>
                     <template v-if="assigneeField">
-                      <base-user-selector
+                      <base-field
+                        :field="assigneeField"
+                        :color="getDateFieldColor(card, assigneeField)"
                         :model-value="card.data[assigneeField.slug]"
-                        :users
-                        fill
-                        return-id
-                        return-string
-                        @update:model-value="
-                        (v: string[]) => updateFieldValue({
-                          card, field: assigneeField as Field, v
-                        })
-                      "
-                        @click.stop
+                        @update:model-value="(v: string) => updateFieldValue({
+                          card,
+                          field: assigneeField as Field,
+                          v
+                        })"
+                        hide-label
                       />
                     </template>
                   </template>
@@ -295,13 +293,12 @@ watchEffect(() => {
                         <base-field
                           :field
                           :color="getDateFieldColor(card, field)"
-                          no-label
                           :model-value="card.data[field.slug]"
                           @update:model-value="(v: string) => updateFieldValue({
-                          card,
-                          field,
-                          v
-                        })"
+                            card,
+                            field,
+                            v
+                          })"
                         />
                       </template>
                     </template>
