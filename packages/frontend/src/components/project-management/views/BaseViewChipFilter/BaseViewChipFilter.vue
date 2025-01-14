@@ -143,7 +143,7 @@ function applyFilters() {
       isSnackbarOpen.value = true;
     }
 
-    posthog.capture('updated_filters', {
+    posthog.capture('Updated Filters', {
       viewId: viewId,
     });
   }

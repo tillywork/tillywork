@@ -110,6 +110,7 @@ function ensureActiveCommandVisible() {
 
 function executeCommand(command: Command) {
   command.action();
+  posthog.capture('Command Executed', { command: command.id });
   closeCommandPalette();
 }
 

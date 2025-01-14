@@ -61,7 +61,7 @@ function handleGroupBySelection(option: ViewGroupOption) {
     fieldId: option.field?.id,
   };
 
-  posthog.capture('update_group_by', {
+  posthog.capture('Updated Group By', {
     groupBy: option.value,
     field: option.field,
   });
@@ -79,7 +79,7 @@ function clearGroupBy() {
     type: ListGroupOptions.ALL,
   };
 
-  posthog.capture('update_group_by', {
+  posthog.capture('Updated Group By', {
     groupBy: ListGroupOptions.ALL,
   });
 }
