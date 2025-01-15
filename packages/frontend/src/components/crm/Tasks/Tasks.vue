@@ -2,13 +2,11 @@
 import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 
 import { useAuthStore } from '@/stores/auth';
-
-import { useUsers } from '@/composables/useUsers';
+import { useQueryStore } from '@/stores/query';
 
 import {
   type SortOption,
   type CardActivity,
-  type TaskActivityContent,
   type Card,
 } from '@tillywork/shared';
 import type { ColumnDef } from '@tanstack/vue-table';
@@ -21,8 +19,7 @@ import BaseUserSelector from '@/components/common/inputs/BaseUserSelector/BaseUs
 
 const { useFindAllTasksQuery } = useCardActivitiesService();
 
-const { users } = useUsers();
-
+const { users } = storeToRefs(useQueryStore());
 const { workspace, user } = storeToRefs(useAuthStore());
 
 const assignee = ref<number[]>([user.value!.id]);

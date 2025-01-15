@@ -30,12 +30,13 @@ import {
   type List,
 } from '@tillywork/shared';
 
-const props = defineProps<{
+const { view, list } = defineProps<{
   view: View;
   list: List;
 }>();
-const listId = computed(() => props.list.id);
-const viewCopy = ref<View>(cloneDeep(props.view));
+const listId = computed(() => list.id);
+const viewId = computed(() => view.id);
+const viewCopy = ref<View>(cloneDeep(view));
 const viewsService = useViewsService();
 const { useGetListGroupsByOptionQuery } = useListGroupsService();
 const { useCreateFilterMutation, useUpdateFilterMutation } =
@@ -44,12 +45,10 @@ const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
 const queryClient = useQueryClient();
 
-const hideCompleted = computed(
-  () => viewCopy.value.options.hideCompleted ?? false
-);
+const hideCompleted = computed(() => view.options.hideCompleted ?? false);
 const groupBy = computed({
   get() {
-    return viewCopy.value.options.groupBy;
+    return view.options.groupBy;
   },
   set(v) {
     viewCopy.value = {
@@ -77,17 +76,14 @@ const sortBy = computed({
   },
 });
 
-const isViewLoading = ref(false);
-
 const updateViewMutation = viewsService.useUpdateViewMutation();
 
-const { data: listGroups, refetch: refetchListGroups } =
-  useGetListGroupsByOptionQuery({
-    listId,
-    viewId: viewCopy.value.id,
-    hideCompleted,
-    groupBy,
-  });
+const { data: listGroups } = useGetListGroupsByOptionQuery({
+  listId,
+  viewId,
+  hideCompleted,
+  groupBy,
+});
 
 const { mutateAsync: createFilter } = useCreateFilterMutation();
 const { mutateAsync: updateFilter } = useUpdateFilterMutation();
@@ -110,8 +106,8 @@ function openCreateCardDialog() {
   dialog.openDialog({
     dialog: DIALOGS.CREATE_CARD,
     data: {
-      list: props.list,
-      type: props.list.defaultCardType,
+      list,
+      type: list.defaultCardType,
     },
   });
 }
@@ -124,7 +120,7 @@ function handleUpdateFilters(filters: QueryFilter | null) {
 }
 
 function handleSaveFilters() {
-  if (!props.view.filters) {
+  if (!view.filters) {
     createFilter({
       entityId: viewCopy.value.id,
       entityType: FilterEntityTypes.VIEW,
@@ -149,7 +145,7 @@ function handleSaveFilters() {
       });
   } else {
     updateFilter({
-      id: props.view.filters.id,
+      id: view.filters.id,
       updateFilterDto: {
         where: viewCopy.value.filters?.where,
       },
@@ -174,13 +170,8 @@ function handleSaveFilters() {
 }
 
 watch(
-  () => props.view,
-  (v) => {
-    if (v) {
-      viewCopy.value = { ...v };
-      refetchListGroups();
-    }
-  }
+  () => view,
+  (v) => (viewCopy.value = cloneDeep(v))
 );
 </script>
 
@@ -226,25 +217,14 @@ watch(
 
     <div class="view">
       <template v-if="viewCopy.type === ViewTypes.TABLE">
-        <table-view
-          v-model:loading="isViewLoading"
-          :list
-          :view="viewCopy"
-          :groups="listGroups ?? []"
-        >
+        <table-view :list :view="viewCopy" :groups="listGroups ?? []">
         </table-view>
       </template>
       <template v-else-if="viewCopy.type === ViewTypes.BOARD">
         <board-view :view="viewCopy" :list :list-groups="listGroups ?? []" />
       </template>
       <template v-else-if="viewCopy.type === ViewTypes.LIST">
-        <list-view
-          v-model:loading="isViewLoading"
-          :list
-          :view="viewCopy"
-          :groups="listGroups ?? []"
-          no-headers
-        >
+        <list-view :list :view="viewCopy" :groups="listGroups ?? []" no-headers>
         </list-view>
       </template>
       <template v-else>

@@ -7,6 +7,7 @@ const listStageMenu = ref(false);
 defineExpose({
   listStageMenu,
 });
+
 defineProps<{
   listStages: ListStage[];
   theme?: 'icon' | 'text' | 'default';

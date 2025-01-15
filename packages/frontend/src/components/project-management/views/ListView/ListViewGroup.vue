@@ -17,7 +17,6 @@ import {
   type Card,
   type ListGroup,
   type ListStage,
-  type ProjectUser,
   type SortState,
   type Field,
 } from '@tillywork/shared';
@@ -39,13 +38,10 @@ import ContextMenu from '@/components/common/base/ContextMenu/ContextMenu.vue';
 
 const props = defineProps<{
   listGroup: Row<ListGroup>;
-  listStages: ListStage[];
-  projectUsers: ProjectUser[];
   table: Table<ListGroup>;
   view: View;
   list: List;
 }>();
-const isGroupCardsLoading = defineModel<boolean>('loading');
 
 const cardsService = useCardsService();
 
@@ -189,14 +185,6 @@ watch(
   },
   { deep: true }
 );
-
-watchEffect(() => {
-  if (isFetching.value) {
-    isGroupCardsLoading.value = true;
-  } else {
-    isGroupCardsLoading.value = false;
-  }
-});
 
 watch(
   () => props.listGroup,

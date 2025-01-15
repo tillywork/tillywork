@@ -3,19 +3,14 @@ import { VueRenderer } from '@tiptap/vue-3';
 import tippy from 'tippy.js';
 
 import MentionList from './MentionList.vue';
-import { useProjectUsersService } from '@/services/useProjectUsersService';
-import { useAuthStore } from '@/stores/auth';
+import { useQueryStore } from '@/stores/query';
 
 export default {
   items: async ({ query }: { query: string }) => {
-    const { project } = storeToRefs(useAuthStore());
-    const { getProjectUsers } = useProjectUsersService();
-    const users = (await getProjectUsers({ projectId: project.value!.id })).map(
-      (pU) => pU.user
-    );
+    const { users } = storeToRefs(useQueryStore());
 
-    return users
-      .filter((user) =>
+    return users.value
+      ?.filter((user) =>
         `${user.firstName} ${user.lastName}`
           .toLowerCase()
           .startsWith(query.toLowerCase())

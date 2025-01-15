@@ -11,9 +11,11 @@ import BaseUserSelector from '../BaseUserSelector/BaseUserSelector.vue';
 import BaseDatePicker from '../BaseDatePicker.vue';
 import SimpleDropdownSelector from '../SimpleDropdownSelector.vue';
 
-import { useUsers } from '@/composables/useUsers';
+import { useQueryStore } from '@/stores/query';
 
 const emit = defineEmits(['submit']);
+
+const { users } = storeToRefs(useQueryStore());
 
 const createTaskDto = ref<TaskActivityContent>({
   title: '',
@@ -21,8 +23,6 @@ const createTaskDto = ref<TaskActivityContent>({
   status: 'pending',
   dueAt: dayjs().toISOString(),
 });
-
-const { users } = useUsers();
 
 function handleSubmit() {
   if (createTaskDto.value.title !== '') {

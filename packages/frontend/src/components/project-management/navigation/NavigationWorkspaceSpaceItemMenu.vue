@@ -1,22 +1,23 @@
 <script setup lang="ts">
 import { useSpacesService } from '@/services/useSpacesService';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { useQueryClient } from '@tanstack/vue-query';
+
 import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
-import { useDialogStore } from '@/stores/dialog';
 import type { Space } from '@tillywork/shared';
 
+import { useDialogStore } from '@/stores/dialog';
+
 const spaceMenu = ref(false);
-const spacesService = useSpacesService();
+const { useDeleteSpaceMutation } = useSpacesService();
 const { showSnackbar } = useSnackbarStore();
-const queryClient = useQueryClient();
 const dialog = useDialogStore();
 
 const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
 );
 
-const deleteSpaceMutation = spacesService.useDeleteSpaceMutation();
+const { mutateAsync: deleteSpace, isPending: isDeleting } =
+  useDeleteSpaceMutation();
 
 defineProps<{
   space: Space;
@@ -28,25 +29,22 @@ function handleSpaceMenuClick() {
   emit('hover:freeze');
 }
 
-function handleDeleteSpace(space: Space) {
+function confirmDeleteSpace(space: Space) {
   dialog.openDialog({
     dialog: DIALOGS.CONFIRM,
     data: {
       title: 'Confirm',
       message: 'Are you sure you want to delete this space?',
       onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
-      onConfirm: () => deleteSpace(space),
-      isLoading: deleteSpaceMutation.isPending.value,
+      onConfirm: () => handleDeleteSpace(space),
+      isLoading: isDeleting.value,
     },
   });
 }
 
-function deleteSpace(space: Space) {
-  deleteSpaceMutation
-    .mutateAsync(space.id)
+function handleDeleteSpace(space: Space) {
+  deleteSpace(space.id)
     .then(() => {
-      queryClient.invalidateQueries({ queryKey: ['spaces'] });
-      queryClient.invalidateQueries({ queryKey: ['space', space.id] });
       dialog.closeDialog(confirmDialogIndex.value);
     })
     .catch(() => {
@@ -89,7 +87,7 @@ watch(spaceMenu, () => {
     target="#space-menu-btn"
     :close-on-content-click="false"
   >
-    <v-card :loading="deleteSpaceMutation.isPending.value">
+    <v-card :loading="isDeleting">
       <v-list>
         <v-list-item @click="openUpdateSpaceDialog(space)">
           <template #prepend>
@@ -97,7 +95,7 @@ watch(spaceMenu, () => {
           </template>
           <v-list-item-title>Edit</v-list-item-title>
         </v-list-item>
-        <v-list-item class="text-error" @click="handleDeleteSpace(space)">
+        <v-list-item class="text-error" @click="confirmDeleteSpace(space)">
           <template #prepend>
             <v-icon icon="mdi-delete" />
           </template>

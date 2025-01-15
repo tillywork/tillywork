@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useCardsService } from '@/services/useCardsService';
 import { useDialogStore } from '@/stores/dialog';
@@ -6,7 +7,6 @@ import {
   type ListStage,
   ListGroupOptions,
   FieldTypes,
-  type ProjectUser,
   type View,
   type SortOption,
   type ListGroup,
@@ -29,8 +29,6 @@ export const useListGroup = ({
 }: {
   props: {
     listGroup: ListGroup | Row<ListGroup>;
-    listStages: ListStage[];
-    projectUsers: ProjectUser[];
     view: View;
     list: List;
   };
@@ -100,7 +98,7 @@ export const useListGroup = ({
         type: props.list.defaultCardType,
         listStage: getGroupStage(listGroup),
         data: cardData,
-        listStages: props.listStages,
+        listStages: props.list.listStages,
       },
     });
   }
@@ -109,7 +107,7 @@ export const useListGroup = ({
     let stage: ListStage | undefined;
 
     if (group.type === ListGroupOptions.LIST_STAGE) {
-      stage = props.listStages.find((stage) => {
+      stage = props.list.listStages.find((stage) => {
         return stage.id == group.entityId;
       });
     }

@@ -16,7 +16,6 @@ const currentDialogIndex = computed(() =>
 const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
 
 const list = computed(() => currentDialog.value.data.list);
-
 const cardType = computed<CardType>(() => {
   if (currentDialog.value?.data && currentDialog.value.data?.type) {
     return currentDialog.value.data.type;

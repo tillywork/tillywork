@@ -3,7 +3,7 @@ import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 import type { Space } from '@tillywork/shared';
 
-const props = defineProps<{
+const { space } = defineProps<{
   space: Space;
 }>();
 
@@ -13,7 +13,7 @@ function openCreateListDialog() {
   dialog.openDialog({
     dialog: DIALOGS.UPSERT_LIST,
     data: {
-      space: props.space,
+      space,
       mode: UpsertDialogMode.CREATE,
     },
   });

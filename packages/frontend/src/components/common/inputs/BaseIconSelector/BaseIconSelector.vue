@@ -6,8 +6,6 @@ import VirtualScroller from '../../base/VirtualScroller.vue';
 
 import stringUtils from '@/utils/string';
 
-import type { VCard } from 'vuetify/components';
-
 export type IconSelection = {
   name: string;
   icon: string;
@@ -77,7 +75,7 @@ watch(
           :row-height="44"
           :item-size="36"
         >
-          <template #="{ item }">
+          <template #default="{ item }">
             <v-btn
               icon
               density="comfortable"

@@ -12,7 +12,6 @@ import {
   type List,
   type SortState,
   type Field,
-  type ProjectUser,
 } from '@tillywork/shared';
 
 import objectUtils from '@/utils/object';
@@ -32,13 +31,9 @@ import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 
 const props = defineProps<{
   listGroup: ListGroup;
-  listStages: ListStage[];
   view: View;
   list: List;
-  projectUsers: ProjectUser[];
 }>();
-
-const isGroupCardsLoading = defineModel<boolean>('loading');
 
 const cards = ref<Card[]>([]);
 
@@ -145,14 +140,6 @@ watch(
   },
   { deep: true }
 );
-
-watchEffect(() => {
-  if (isFetching.value) {
-    isGroupCardsLoading.value = true;
-  } else {
-    isGroupCardsLoading.value = false;
-  }
-});
 </script>
 
 <template>
@@ -237,7 +224,7 @@ watchEffect(() => {
                       :model-value="card.cardLists[0].listStage"
                       theme="icon"
                       rounded="circle"
-                      :list-stages="listStages ?? []"
+                      :list-stages="list.listStages"
                       @update:modelValue="
                     (modelValue: ListStage) =>
                       handleUpdateCardStage({

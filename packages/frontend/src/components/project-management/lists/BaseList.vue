@@ -2,20 +2,16 @@
 import BaseListViewTabs from './BaseListViewTabs.vue';
 import BaseView from '../views/BaseView.vue';
 
-import { useViewsService } from '@/services/useViewsService';
-
 import type { List, View } from '@tillywork/shared';
 
 import posthog from 'posthog-js';
+import { useQueryStore } from '@/stores/query';
 
 const { list } = defineProps<{
   list: List;
 }>();
 
-const listId = computed(() => list.id);
-
-const { useGetViewsQuery } = useViewsService();
-const { data: views } = useGetViewsQuery({ listId });
+const { views } = storeToRefs(useQueryStore());
 const view = ref<View>();
 
 watch(

@@ -1,20 +1,14 @@
 <script setup lang="ts">
-import { useUsersService } from '@/services/useUsersService';
 import BaseAvatar from '../../../BaseAvatar.vue';
 import { nodeViewProps } from '@tiptap/vue-3';
 import { NodeViewWrapper } from '@tiptap/vue-3';
 import { useAuthStore } from '@/stores/auth';
-import { useProjectUsersService } from '@/services/useProjectUsersService';
+import { useQueryStore } from '@/stores/query';
 
 const props = defineProps(nodeViewProps);
 
-const { user: currentUser, project } = storeToRefs(useAuthStore());
-
-const { useProjectUsersQuery } = useProjectUsersService();
-const { data: users } = useProjectUsersQuery({
-  projectId: project.value!.id,
-  select: (data) => data.map((pu) => pu.user),
-});
+const { user: currentUser } = storeToRefs(useAuthStore());
+const { users } = storeToRefs(useQueryStore());
 
 const user = computed(() =>
   users.value?.find((user) => user.id === props.node.attrs.id)

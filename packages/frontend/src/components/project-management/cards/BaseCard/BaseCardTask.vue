@@ -1,26 +1,32 @@
 <script setup lang="ts">
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
 import ActivityTimeline from '../BaseCardActivityTimeline/ActivityTimeline.vue';
-import { useCardActivitiesService } from '@/services/useCardActivitiesService';
-import { useCardsService } from '@/services/useCardsService';
-import { useListStagesService } from '@/services/useListStagesService';
-import { useSnackbarStore } from '@/stores/snackbar';
-import objectUtils from '@/utils/object';
-import { type Content } from '@tiptap/vue-3';
-import { cloneDeep, lowerFirst } from 'lodash';
-import { useStateStore } from '@/stores/state';
-import { useDialogStore } from '@/stores/dialog';
-import { DIALOGS } from '@/components/common/dialogs/types';
-import { useAuthStore } from '@/stores/auth';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import BaseCardChildrenProgress from '../BaseCardChildrenProgress.vue';
 import BaseCardChip from '../BaseCardChip.vue';
-import { leaderKey } from '@/utils/keys';
-import { useMentionNotifications } from '@/composables/useMentionNotifications';
-import urlUtils from '@/utils/url';
-import { useCard } from '@/composables/useCard';
 import BaseField from '../../../common/fields/BaseField.vue';
 import BaseCardToolbar from './BaseCardToolbar.vue';
+
+import { useCardActivitiesService } from '@/services/useCardActivitiesService';
+import { useCardsService } from '@/services/useCardsService';
+
+import { useSnackbarStore } from '@/stores/snackbar';
+import { useStateStore } from '@/stores/state';
+import { useDialogStore } from '@/stores/dialog';
+import { useAuthStore } from '@/stores/auth';
+import { useFieldQueryStore } from '@/stores/field.query';
+import { useQueryStore } from '@/stores/query';
+
+import objectUtils from '@/utils/object';
+import { cloneDeep, lowerFirst } from 'lodash';
+import { leaderKey } from '@/utils/keys';
+import urlUtils from '@/utils/url';
+
+import { useMentionNotifications } from '@/composables/useMentionNotifications';
+import { useCard } from '@/composables/useCard';
+
+import { type Content } from '@tiptap/vue-3';
+import { DIALOGS } from '@/components/common/dialogs/types';
 import {
   type CardType,
   ActivityType,
@@ -28,52 +34,38 @@ import {
   type Card,
   type ListStage,
 } from '@tillywork/shared';
-import { useListsService } from '@/services/useListsService';
-import { useFieldQueryStore } from '@/stores/field.query';
 
-const props = defineProps<{
+const { card } = defineProps<{
   card: Card;
-  showCloseButton?: boolean;
 }>();
 
-const emit = defineEmits(['click:close']);
-
-const cardCopy = ref<Card>(cloneDeep(props.card));
+const cardCopy = ref<Card>(cloneDeep(card));
 const descriptionInput = ref();
-
 const cardListStage = ref(cardCopy.value.cardLists[0].listStage);
 
 const { user } = storeToRefs(useAuthStore());
-const snackbar = useSnackbarStore();
-const stateStore = useStateStore();
-const { areChildCardsExpanded, isInfoDrawerOpen } = storeToRefs(stateStore);
+const { showSnackbar } = useSnackbarStore();
+const { toggleInfoDrawer, toggleChildCards } = useStateStore();
+const { areChildCardsExpanded, isInfoDrawerOpen, isInputFocused } = storeToRefs(
+  useStateStore()
+);
 const dialog = useDialogStore();
+
 const keys = useMagicKeys();
 const { getNewMentions, notifyMentionedUser } = useMentionNotifications();
-
-const cardsService = useCardsService();
-const cardActivitiesService = useCardActivitiesService();
-const listStagesService = useListStagesService();
-const { useGetListQuery } = useListsService();
-
 const { updateFieldValue } = useCard();
 
-const { mutateAsync: updateCard, isPending: isUpdating } =
-  cardsService.useUpdateCardMutation();
+const { useUpdateCardMutation, useUpdateCardListMutation } = useCardsService();
+const { useCreateActivityMutation } = useCardActivitiesService();
 
-const listId = computed(() => props.card.cardLists[0].listId);
-const { data: listStages } = listStagesService.useGetListStagesQuery({
-  listId,
-});
+const { mutateAsync: updateCard } = useUpdateCardMutation();
 
-const { data: list } = useGetListQuery(listId);
-
-const { refetch: refetchCardTypeFields } = useFieldQueryStore();
+const { list, listStages } = useQueryStore();
 const { titleField, descriptionField, fields } = storeToRefs(
   useFieldQueryStore()
 );
 
-const hasChildren = computed(() => props.card.type.hasChildren);
+const hasChildren = computed(() => card.type.hasChildren);
 
 const cardTitle = ref('');
 const debouncedTitle = useDebounce(cardTitle, 2000);
@@ -81,26 +73,15 @@ const debouncedTitle = useDebounce(cardTitle, 2000);
 const cardDescription = ref<Content>();
 const debouncedDescription = useDebounce(cardDescription, 2000);
 
-const createActivityMutation =
-  cardActivitiesService.useCreateActivityMutation();
-
-const updateCardListMutation = cardsService.useUpdateCardListMutation();
-
-const isCardLoading = computed(() => {
-  return (
-    isUpdating.value ||
-    createActivityMutation.isPending.value ||
-    updateCardListMutation.isPending.value
-  );
-});
+const { mutateAsync: createActivity } = useCreateActivityMutation();
+const { mutateAsync: updateCardList } = useUpdateCardListMutation();
 
 const router = useRouter();
 
 watch(
-  () => props.card,
+  () => card,
   (v) => {
     if (v) {
-      refetchCardTypeFields();
       cardCopy.value = cloneDeep(v);
       cardListStage.value = cardCopy.value.cardLists[0].listStage;
       initTitle();
@@ -138,8 +119,8 @@ watch(debouncedTitle, () => {
 });
 
 watch(keys[[leaderKey, 'I'].join('+')], (v) => {
-  if (v && !stateStore.isInputFocused) {
-    stateStore.toggleInfoDrawer();
+  if (v && !isInputFocused) {
+    toggleInfoDrawer();
   }
 });
 
@@ -158,10 +139,10 @@ function initDescription() {
 
 function updateTitle() {
   const newTitle = cardTitle.value.trim();
-  if (newTitle !== '' && newTitle !== props.card.data[titleField.value!.slug]) {
+  if (newTitle !== '' && newTitle !== card.data[titleField.value!.slug]) {
     cardCopy.value.data[titleField.value!.slug] = newTitle;
     updateCard(cardCopy.value).then(() => {
-      snackbar.showSnackbar({
+      showSnackbar({
         message: 'Task title updated.',
         color: 'success',
         timeout: 2000,
@@ -171,7 +152,7 @@ function updateTitle() {
 }
 
 function updateDescription(newDescription: Content | undefined) {
-  const oldDescription = props.card.data[descriptionField.value!.slug];
+  const oldDescription = card.data[descriptionField.value!.slug];
 
   if (
     newDescription &&
@@ -186,7 +167,7 @@ function updateDescription(newDescription: Content | undefined) {
     const newMentions = getNewMentions(newDescription, oldDescription ?? {});
 
     updateCard(cardCopy.value).then(async () => {
-      snackbar.showSnackbar({
+      showSnackbar({
         message: 'Task description updated.',
         color: 'success',
         timeout: 2000,
@@ -207,12 +188,11 @@ function updateDescription(newDescription: Content | undefined) {
 }
 
 function createComment(content: ActivityContent) {
-  createActivityMutation
-    .mutateAsync({
-      cardId: cardCopy.value.id,
-      type: ActivityType.COMMENT,
-      content,
-    })
+  createActivity({
+    cardId: cardCopy.value.id,
+    type: ActivityType.COMMENT,
+    content,
+  })
     .then(async () => {
       const newMentions = getNewMentions(content, {});
       for (const userId of newMentions) {
@@ -227,7 +207,7 @@ function createComment(content: ActivityContent) {
       }
     })
     .catch((e) => {
-      snackbar.showSnackbar({
+      showSnackbar({
         color: 'error',
         message:
           e.response.data.message ?? 'Something went wrong, please try again.',
@@ -237,24 +217,22 @@ function createComment(content: ActivityContent) {
 }
 
 function updateCardListStage(card: Card, listStage: ListStage) {
-  updateCardListMutation
-    .mutateAsync({
-      cardId: card.id,
-      cardListId: card.cardLists[0].id,
-      updateCardListDto: {
-        listStageId: listStage.id,
-      },
-    })
-    .catch((e) => {
-      snackbar.showSnackbar({
-        color: 'error',
-        message:
-          e.response.data.message ?? 'Something went wrong, please try again.',
-        timeout: 5000,
-      });
-
-      cardListStage.value = props.card.cardLists[0].listStage;
+  updateCardList({
+    cardId: card.id,
+    cardListId: card.cardLists[0].id,
+    updateCardListDto: {
+      listStageId: listStage.id,
+    },
+  }).catch((e) => {
+    showSnackbar({
+      color: 'error',
+      message:
+        e.response.data.message ?? 'Something went wrong, please try again.',
+      timeout: 5000,
     });
+
+    cardListStage.value = card.cardLists[0].listStage;
+  });
 }
 
 function openCustomFieldsSettings() {
@@ -268,25 +246,9 @@ function openDescriptionFileDialog() {
 
 <template>
   <template v-if="cardCopy">
-    <base-card-toolbar v-model="cardCopy" :list />
-    <v-card
-      :loading="isCardLoading"
-      class="d-flex flex-sm-row flex-column"
-      min-height="100vh"
-    >
-      <template #loader="{ isActive }">
-        <v-progress-linear
-          indeterminate
-          color="primary"
-          height="2"
-          :active="isActive"
-          absolute
-          location="top"
-        />
-      </template>
-      <div
-        class="base-card-content-wrapper pa-md-12 pa-6 flex-fill align-start"
-      >
+    <v-card class="d-flex flex-column" min-height="100vh">
+      <base-card-toolbar v-model="cardCopy" :list />
+      <div class="base-card-content-wrapper pa-md-6 pa-6 align-start">
         <div class="base-card-content mx-auto">
           <div class="d-flex align-start">
             <template v-if="titleField">
@@ -312,16 +274,8 @@ function openDescriptionFileDialog() {
                 icon="mdi-dock-right"
                 density="compact"
                 size="default"
-                @click="stateStore.toggleInfoDrawer"
+                @click="toggleInfoDrawer"
                 v-tooltip="leaderKey + ' + I'"
-              />
-              <v-btn
-                v-if="props.showCloseButton"
-                variant="text"
-                icon="mdi-close"
-                density="comfortable"
-                color="default"
-                @click="emit('click:close')"
               />
             </div>
           </div>
@@ -387,7 +341,7 @@ function openDescriptionFileDialog() {
             </template>
             <div
               class="cursor-pointer d-flex align-center pb-1"
-              @click="stateStore.toggleChildCards"
+              @click="toggleChildCards"
               v-else
             >
               <v-icon

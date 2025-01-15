@@ -59,7 +59,7 @@ export const useSpacesService = () => {
     enabled?: Ref<boolean>;
   }) {
     return useQuery({
-      queryKey: ['spaces', { workspaceId: toValue(workspaceId) }],
+      queryKey: ['spaces', { workspaceId }],
       queryFn: () =>
         getSpaces({
           workspaceId: workspaceId,

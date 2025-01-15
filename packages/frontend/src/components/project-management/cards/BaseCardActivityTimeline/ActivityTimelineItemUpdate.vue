@@ -3,17 +3,14 @@ import { useAuthStore } from '@/stores/auth';
 import { useUsersService } from '@/services/useUsersService';
 import {
   dayjs,
-  FieldTypes,
   type Card,
   type CardActivity,
   type UpdateActivityContent,
-  type ListStage,
 } from '@tillywork/shared';
 import { useFieldsService } from '@/services/useFieldsService';
-import { useProjectUsersService } from '@/services/useProjectUsersService';
 import ActivityTimelineItems from './ActivityTimelineItemUpdateItems.vue';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
-import { useListStagesService } from '@/services/useListStagesService';
+import { useQueryStore } from '@/stores/query';
 
 interface Props {
   activity: CardActivity;
@@ -21,11 +18,12 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { user, project } = storeToRefs(useAuthStore());
+
+const { user } = storeToRefs(useAuthStore());
+const { users, listStages } = storeToRefs(useQueryStore());
+
 const { getUserFullName } = useUsersService();
 const { useFieldQuery } = useFieldsService();
-const { useProjectUsersQuery } = useProjectUsersService();
-const { useGetListStagesQuery } = useListStagesService();
 
 // Extract activity content and changes
 const activityContent = computed(
@@ -41,15 +39,6 @@ const fieldQueryEnabled = computed(() => Boolean(change.value.field));
 const { data: field } = useFieldQuery({
   id: fieldId,
   enabled: fieldQueryEnabled,
-});
-
-const { data: users } = useProjectUsersQuery({
-  projectId: project.value!.id,
-  select: (data) => data.map((projectUser) => projectUser.user),
-});
-
-const { data: listStages } = useGetListStagesQuery({
-  listId: props.card.cardLists[0].listId,
 });
 
 const listStage = computed(() =>

@@ -1,26 +1,17 @@
 <script setup lang="ts">
 import CreateSpaceBtn from './CreateSpaceBtn.vue';
-import { useSpacesService } from '@/services/useSpacesService';
 import NavigationWorkspaceSpaceItem from './NavigationWorkspaceSpaceItem.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useStateStore } from '@/stores/state';
+import { useQueryStore } from '@/stores/query';
 
 const { setSpaceExpansionState } = useStateStore();
 const { spaceExpansionState } = storeToRefs(useStateStore());
 const { workspace } = storeToRefs(useAuthStore());
+const { spaces } = storeToRefs(useQueryStore());
 
-const spacesService = useSpacesService();
 const listMenu = ref(false);
 const freezeListHoverId = ref<number | null>();
-
-const enableSpacesFetch = ref(false);
-
-const workspaceId = computed(() => workspace.value?.id ?? 0);
-
-const spacesQuery = spacesService.useGetSpacesQuery({
-  workspaceId,
-  enabled: enableSpacesFetch,
-});
 
 const currentSpaceExpansionState = computed({
   get: () =>
@@ -31,17 +22,6 @@ const currentSpaceExpansionState = computed({
     }
   },
 });
-
-watch(
-  workspace,
-  async (workspace) => {
-    if (workspace) {
-      enableSpacesFetch.value = true;
-      spacesQuery.refetch();
-    }
-  },
-  { immediate: true }
-);
 
 watch(listMenu, (isOpen) => {
   if (!isOpen) {
@@ -58,15 +38,13 @@ watch(listMenu, (isOpen) => {
       open-strategy="multiple"
       v-if="workspace"
     >
-      <template
-        v-if="spacesQuery.data.value && spacesQuery.data.value.length > 0"
-      >
+      <template v-if="spaces && spaces.length > 0">
         <div class="d-flex mb-2 pa-2">
           <span class="text-caption">Spaces</span>
           <v-spacer />
           <create-space-btn />
         </div>
-        <template v-for="space in spacesQuery.data.value" :key="space.id">
+        <template v-for="space in spaces" :key="space.id">
           <navigation-workspace-space-item :space="space" />
         </template>
       </template>

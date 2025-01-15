@@ -6,13 +6,11 @@ import BaseNumberInput from '../inputs/BaseNumberInput.vue';
 import BaseCurrencyInput from '../inputs/BaseCurrencyInput.vue';
 import BasePercentageInput from '../inputs/BasePercentageInput.vue';
 
-import { useProjectUsersService } from '@/services/useProjectUsersService';
-
-import { useAuthStore } from '@/stores/auth';
-
 import { type Field, FieldTypes } from '@tillywork/shared';
 
 import validationUtils from '@/utils/validation';
+
+import { useQueryStore } from '@/stores/query';
 
 const value = defineModel<any>();
 
@@ -29,16 +27,7 @@ const {
   hideIcon?: boolean;
 }>();
 
-const { project, user } = storeToRefs(useAuthStore());
-const { useProjectUsersQuery } = useProjectUsersService();
-
-const { data: users } = useProjectUsersQuery({
-  projectId: project.value!.id,
-  select: (projectUsers) =>
-    projectUsers
-      .map((projectUser) => projectUser.user)
-      .sort((a) => (a.id === user.value!.id ? 0 : 1)),
-});
+const { users } = storeToRefs(useQueryStore());
 
 function getFieldIcon(field: Field) {
   if (!hideIcon) {

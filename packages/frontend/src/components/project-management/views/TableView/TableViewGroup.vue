@@ -41,8 +41,6 @@ import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 
 const props = defineProps<{
   listGroup: Row<ListGroup>;
-  listStages: ListStage[];
-  projectUsers: ProjectUser[];
   table: Table<ListGroup>;
   columnSizes: {
     id: string;
@@ -52,8 +50,6 @@ const props = defineProps<{
   view: View;
   list: List;
 }>();
-
-const isGroupCardsLoading = defineModel<boolean>('loading');
 
 const cards = ref<Card[]>([]);
 
@@ -221,14 +217,6 @@ watch(
     }
   }
 );
-
-watchEffect(() => {
-  if (isFetching.value) {
-    isGroupCardsLoading.value = true;
-  } else {
-    isGroupCardsLoading.value = false;
-  }
-});
 </script>
 
 <template>

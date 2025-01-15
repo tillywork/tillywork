@@ -94,9 +94,8 @@ export const useViewsService = () => {
   function useUpdateViewMutation() {
     return useMutation({
       mutationFn: updateView,
-      onSuccess: (updatedView) => {
+      onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['views'] });
-        queryClient.invalidateQueries({ queryKey: ['view', updatedView.id] });
       },
     });
   }

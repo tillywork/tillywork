@@ -48,8 +48,6 @@ function toggleItemSelection(item: Card): void {
     newSelected = isItemSelected(item) ? [] : [stringId];
   }
 
-  console.log(newSelected);
-
   model.value = newSelected;
 }
 
