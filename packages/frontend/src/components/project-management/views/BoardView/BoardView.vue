@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { useListGroupsService } from '@/services/useListGroupsService';
-import { type List, type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import BoardViewGroup from './BoardViewGroup.vue';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useAuthStore } from '@/stores/auth';
-import type { View } from '@tillywork/shared';
+import type { List, ListGroup, View } from '@tillywork/shared';
 
 const isLoading = defineModel<boolean>('loading');
 

@@ -231,9 +231,10 @@ watch(
     sticky
     lines="one"
     density="comfortable"
-    :border="groupCopy.isExpanded ? 'b-thin' : 'none'"
-    bg-color="accent"
+    :border="groupCopy.isExpanded ? 'b-thin t-thin' : 'none'"
+    bg-color="accent-lighten"
     style="z-index: 10"
+    rounded="0"
   >
     <v-btn
       variant="text"
@@ -287,6 +288,7 @@ watch(
       :height="groupHeight"
       :max-height="maxHeight"
       :lines="false"
+      bg-color="card"
     >
       <v-infinite-scroll
         :height="groupHeight"
@@ -324,7 +326,7 @@ watch(
                 "
               >
                 <v-list-item
-                  class="list-row text-body-3"
+                  class="list-row text-body-3 border-b-thin"
                   rounded="0"
                   height="36"
                   :to="`/card/${row.original.id}`"

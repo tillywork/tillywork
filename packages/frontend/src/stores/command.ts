@@ -10,22 +10,33 @@ import { type Command } from '@/components/common/commands/types';
 import { useAuthStore } from './auth';
 import { lowerFirst } from 'lodash';
 import { useStateStore } from './state';
-import { WorkspaceTypes, type Card } from '@tillywork/shared';
+import { WorkspaceTypes, type Card, type Field } from '@tillywork/shared';
 import { leaderKey } from '@/utils/keys';
 import { useCard } from '@/composables/useCard';
+import { useFields } from '@/composables/useFields';
 
 export const useCommandStore = defineStore('command', () => {
   const isOpen = ref(false);
+  const currentList = computed(() => getCurrentList());
+  const currentListId = computed(() => currentList.value?.id);
+  const cardTypeId = computed(() => currentCard.value?.type.id);
+  const fieldsEnabled = computed(
+    () => !!currentList.value && !!cardTypeId.value
+  );
 
   const dialogStore = useDialogStore();
   const themeStore = useThemeStore();
   const { workspace } = storeToRefs(useAuthStore());
-  const { currentList, selectedModule, currentCard } = storeToRefs(
-    useStateStore()
-  );
+  const { getCurrentList } = useStateStore();
+  const { selectedModule, currentCard } = storeToRefs(useStateStore());
 
   const { confirmDelete, copyLink } = useCard();
   const router = useRouter();
+  const { fields, assigneeField } = useFields({
+    cardTypeId: cardTypeId as Ref<number>,
+    listId: currentListId as Ref<number>,
+    enabled: fieldsEnabled,
+  });
 
   const systemCommands = computed(() => {
     const commands = [
@@ -163,7 +174,7 @@ export const useCommandStore = defineStore('command', () => {
               },
               data: {
                 type: cardType,
-                list: currentList.value[selectedModule.value as WorkspaceTypes],
+                list: currentList.value,
               },
             }),
           shortcut:
@@ -181,14 +192,37 @@ export const useCommandStore = defineStore('command', () => {
     const commands: Command[] = [];
 
     if (currentCard.value) {
-      commands.push({
-        id: 'open-card',
-        section: '',
-        icon: 'mdi-open-in-new',
-        title: `Open ${currentCard.value.type.name.toLowerCase()}`,
-        action: () => router.push(`/card/${currentCard.value?.id}`),
-        shortcut: ['O'],
-      });
+      if (assigneeField.value) {
+        commands.push({
+          id: 'assign-to',
+          section: '',
+          icon: assigneeField.value.icon,
+          title: 'Assign to..',
+          action: () => console.log('assign-to'),
+          shortcut: ['A'],
+        });
+
+        commands.push({
+          id: 'assign-to-me',
+          section: '',
+          icon: assigneeField.value.icon,
+          title: 'Assign to me',
+          action: () => console.log('assign-to-me'),
+          shortcut: ['I'],
+        });
+      }
+
+      const fieldCommands = fields.value
+        .filter((f) => !f.isAssignee)
+        .map((field) => ({
+          id: `update-${field.slug}`,
+          section: '',
+          icon: field.icon,
+          title: setCommandTitleByField(field),
+          action: () => console.log(field.type),
+        }));
+
+      fieldCommands.forEach((fc) => commands.push(fc));
 
       commands.push({
         id: 'copy-link',
@@ -196,6 +230,15 @@ export const useCommandStore = defineStore('command', () => {
         icon: 'mdi-link',
         title: `Copy ${currentCard.value.type.name.toLowerCase()} link`,
         action: () => copyLink(currentCard.value as Card),
+      });
+
+      commands.push({
+        id: 'open-card',
+        section: 'Navigation',
+        icon: 'mdi-open-in-new',
+        title: `Open ${currentCard.value.type.name.toLowerCase()}`,
+        action: () => router.push(`/card/${currentCard.value?.id}`),
+        shortcut: ['O'],
       });
 
       commands.push({
@@ -216,6 +259,14 @@ export const useCommandStore = defineStore('command', () => {
     ...cardTypeCommands.value,
     ...systemCommands.value,
   ]);
+
+  function setCommandTitleByField(field: Field) {
+    if (currentCard.value && !currentCard.value.data[field.slug]) {
+      return `Set ${field.name.toLowerCase()}`;
+    }
+
+    return `Update ${field.name.toLowerCase()}`;
+  }
 
   return {
     isOpen,

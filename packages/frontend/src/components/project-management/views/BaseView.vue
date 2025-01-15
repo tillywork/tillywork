@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { type List } from '../lists/types';
 import { useViewsService } from '@/services/useViewsService';
 import { useListGroupsService } from '@/services/useListGroupsService';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
-import { type TableSortOption } from './types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useSnackbarStore } from '@/stores/snackbar';
@@ -23,6 +21,8 @@ import {
   type ViewFilter,
   type View,
   ViewTypes,
+  type SortOption,
+  type List,
 } from '@tillywork/shared';
 
 const props = defineProps<{
@@ -39,7 +39,9 @@ const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
 const queryClient = useQueryClient();
 
-const hideCompleted = computed(() => viewCopy.value.options.hideCompleted);
+const hideCompleted = computed(
+  () => viewCopy.value.options.hideCompleted ?? false
+);
 const groupBy = computed({
   get() {
     return viewCopy.value.options.groupBy;
@@ -89,7 +91,7 @@ function handleGroupBySelection() {
   updateViewMutation.mutateAsync(viewCopy.value);
 }
 
-function handleSortBySelection(option: TableSortOption) {
+function handleSortBySelection(option: SortOption) {
   updateViewMutation.mutateAsync({
     ...viewCopy.value,
     options: {

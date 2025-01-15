@@ -196,37 +196,48 @@ watch(isOpen, (v) => {
     v-model="isOpen"
     :scrim="false"
     @after-leave="handleAfterLeave"
+    location="bottom"
+    location-strategy="static"
     width="100%"
     max-width="600"
   >
-    <v-card elevation="8">
-      <v-text-field
-        v-model="search"
-        placeholder="Type a command or search..."
-        single-line
-        hide-details
-        variant="filled"
-        rounded="0"
-        density="default"
-        autocomplete="off"
-        autofocus
-        @input="activeIndex = 0"
-        :prepend-inner-icon="!currentCard ? 'mdi-magnify' : undefined"
-      >
-        <template #prepend-inner v-if="currentCard" class="pa-2">
-          <base-card-chip :card="currentCard" />
-        </template>
-        <template #append-inner v-if="search">
-          <v-kbd class="text-caption">Esc</v-kbd>
-        </template>
-      </v-text-field>
+    <v-card class="command-palette" elevation="12" color="dialog" border="thin">
+      <div class="px-4 pb-2 border-b-thin">
+        <div v-if="currentCard" class="ms-n2 pt-4">
+          <base-card-chip
+            :card="currentCard"
+            width="fit-content"
+            disable-link
+          />
+        </div>
+        <v-text-field
+          v-model="search"
+          placeholder="Type a command or search..."
+          single-line
+          hide-details
+          variant="plain"
+          rounded="0"
+          density="default"
+          autocomplete="off"
+          autofocus
+          @input="activeIndex = 0"
+          prepend-inner-icon="mdi-magnify"
+        >
+          <template #append-inner v-if="search">
+            <v-kbd class="text-caption elevation-0 font-weight-medium"
+              >Esc</v-kbd
+            >
+          </template>
+        </v-text-field>
+      </div>
 
       <v-list
         ref="listRef"
         tabindex="-1"
-        max-height="50vh"
+        max-height="400"
         nav
         density="compact"
+        bg-color="transparent"
         :selected="[activeCommand?.id]"
       >
         <template v-if="!filteredCommands.length">
@@ -259,13 +270,18 @@ watch(isOpen, (v) => {
               :active="command === activeCommand"
               :lines="command.description ? 'two' : 'one'"
               @click="executeCommand(command)"
+              class="px-3"
+              :class="{
+                'opacity-70': command !== activeCommand,
+              }"
+              rounded="pill"
               tabindex="-1"
             >
               <template #prepend>
                 <v-icon :icon="command.icon" size="x-small" />
               </template>
 
-              <v-list-item-title>
+              <v-list-item-title class="font-weight-regular">
                 {{ command.title }}
               </v-list-item-title>
 
@@ -279,7 +295,7 @@ watch(isOpen, (v) => {
                     v-for="(key, index) in command.shortcut"
                     :key="index"
                   >
-                    <v-kbd class="text-xs elevation-0 bg-accent">
+                    <v-kbd class="text-xs elevation-0 font-weight-medium">
                       {{ key }}
                     </v-kbd>
                   </template>
@@ -300,6 +316,16 @@ watch(isOpen, (v) => {
   .v-list-item {
     scroll-margin-top: 8px;
     scroll-margin-bottom: 8px;
+  }
+}
+</style>
+
+<style lang="scss">
+.command-palette {
+  .v-field--variant-plain {
+    .v-field__prepend-inner {
+      align-items: center !important;
+    }
   }
 }
 </style>

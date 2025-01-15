@@ -80,10 +80,6 @@ const columns = computed(
   () => props.table._getColumnDefs() as ColumnDef<Card, unknown>[]
 );
 
-const maxHeight = computed(() =>
-  props.listGroup.original.name === 'All' ? 'calc(100vh - 230px)' : 350
-);
-
 const filters = computed<QueryFilter>(() => {
   if (props.view.filters) {
     const viewFilters = {
@@ -241,6 +237,7 @@ watchEffect(() => {
     lines="one"
     density="comfortable"
     :border="groupCopy.isExpanded ? 'b-thin' : 'none'"
+    bg-color="accent-lighten"
     style="z-index: 10"
     v-if="!noGroupBanners"
   >
@@ -286,10 +283,10 @@ watchEffect(() => {
     <v-list
       class="pa-0 overflow-scroll"
       rounded="0"
-      :max-height="maxHeight"
       :lines="false"
+      bg-color="card"
     >
-      <v-infinite-scroll :max-height="maxHeight" @load="handleGroupCardsLoad">
+      <v-infinite-scroll @load="handleGroupCardsLoad">
         <template #empty></template>
         <template #loading></template>
         <draggable

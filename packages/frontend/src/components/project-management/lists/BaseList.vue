@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import BaseListViewTabs from './BaseListViewTabs.vue';
 import BaseView from '../views/BaseView.vue';
-import type { List } from './types';
 import { useViewsService } from '@/services/useViewsService';
-import type { View } from '@tillywork/shared';
+import type { List, View } from '@tillywork/shared';
 import posthog from 'posthog-js';
 
 const { list } = defineProps<{
@@ -26,7 +25,7 @@ watch(
 </script>
 
 <template>
-  <div class="position-relative">
+  <div class="position-relative bg-surface d-flex flex-column fill-height">
     <div class="px-6 pt-2 pb-0">
       <div class="d-flex align-center mb-2 px-2 pt-1">
         <v-icon :icon="list.icon" :color="list.iconColor" size="small" start />

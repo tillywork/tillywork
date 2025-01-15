@@ -70,10 +70,6 @@ const sortBy = computed<SortState>(() =>
   props.view.options.sortBy ? [cloneDeep(props.view.options.sortBy)] : []
 );
 
-const users = computed(() =>
-  props.projectUsers.map((projectUser) => projectUser.user)
-);
-
 const filters = computed<QueryFilter>(() => {
   if (props.view.filters) {
     const viewFilters = {
@@ -163,12 +159,12 @@ watchEffect(() => {
 </script>
 
 <template>
-  <v-card class="board-group" width="275" color="accent">
+  <v-card class="board-group" width="275" color="accent-lighten">
     <v-banner
       sticky
       lines="one"
       border="none"
-      bg-color="accent"
+      bg-color="accent-lighten"
       style="z-index: 10"
     >
       <div>
@@ -232,7 +228,12 @@ watchEffect(() => {
                 (v) => handleHoverCard({ isHovering: v, card })
               "
             >
-              <v-card :to="`/card/${card.id}`" :ripple="false" v-bind="props">
+              <v-card
+                :to="`/card/${card.id}`"
+                :ripple="false"
+                v-bind="props"
+                color="card"
+              >
                 <v-card-item class="pa-2 align-start">
                   <template #prepend>
                     <list-stage-selector

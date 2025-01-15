@@ -5,12 +5,11 @@ import {
   useVueTable,
   type Column,
 } from '@tanstack/vue-table';
-import { type List, type ListGroup } from '../../lists/types';
 import { useListStagesService } from '@/services/useListStagesService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import ListViewGroup from './ListViewGroup.vue';
 import { useAuthStore } from '@/stores/auth';
-import type { View } from '@tillywork/shared';
+import type { List, ListGroup, View } from '@tillywork/shared';
 
 const isLoading = defineModel<boolean>('loading');
 
@@ -129,7 +128,7 @@ function getColumnSortIcon(column: Column<ListGroup, unknown>) {
           </div>
         </template>
       </div>
-      <v-card class="list-groups overflow-scroll">
+      <v-card class="list-groups overflow-scroll" rounded="0">
         <template
           v-for="listGroup in table.getCoreRowModel().rows"
           :key="
