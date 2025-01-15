@@ -9,7 +9,6 @@ import { useListStagesService } from '@/services/useListStagesService';
 import { useProjectUsersService } from '@/services/useProjectUsersService';
 import TableViewGroup from './TableViewGroup.vue';
 import { useAuthStore } from '@/stores/auth';
-import { useFields } from '@/composables/useFields';
 import type { TableColumnDef } from './types';
 import {
   CardTypeLayout,
@@ -17,6 +16,8 @@ import {
   type List,
   type ListGroup,
 } from '@tillywork/shared';
+import { useFieldQueryStore } from '@/stores/field.query';
+import { useFields } from '@/composables/useFields';
 
 const isLoading = defineModel<boolean>('loading');
 
@@ -28,10 +29,9 @@ const props = defineProps<{
 
 const expandedState = ref<Record<string, boolean>>();
 
-const { titleField, fields, sortFieldsByViewColumns } = useFields({
-  cardTypeId: props.list.defaultCardType.id,
-  listId: props.list.id,
-});
+const { sortFieldsByViewColumns } = useFields({});
+
+const { titleField, fields } = storeToRefs(useFieldQueryStore());
 
 const viewColumnIds = computed(() =>
   props.view.options.columns?.map((columnId) => columnId)

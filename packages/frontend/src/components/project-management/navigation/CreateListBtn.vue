@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
-import type { Space } from '../spaces/types';
 import { useDialogStore } from '@/stores/dialog';
+import type { Space } from '@tillywork/shared';
 
 const props = defineProps<{
   space: Space;

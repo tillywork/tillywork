@@ -9,14 +9,18 @@ import {
   FlexRender,
   getSortedRowModel,
 } from '@tanstack/vue-table';
-import type { PaginationParams, TableSortOption } from './types';
+import type {
+  PaginationParams,
+  SortDirection,
+  SortOption,
+} from '@tillywork/shared';
 import type { Slots } from 'vue';
 
 const props = defineProps<{
   columns?: ColumnDef<any, any>[];
   data: any[];
   total?: number;
-  sortBy?: TableSortOption[];
+  sortBy?: SortOption[];
   enableColumnResizing?: boolean;
   disableSorting?: boolean;
   width?: string;
@@ -29,10 +33,10 @@ const slots = useSlots() as Slots & {
 
 const options = defineModel<PaginationParams>('options');
 
-const sortBy = computed<TableSortOption[]>(() => props.sortBy ?? []);
+const sortBy = computed<SortOption[]>(() => props.sortBy ?? []);
 const tableSortState = computed(() =>
   sortBy.value?.map((sortOption) => {
-    return { id: sortOption.key, desc: sortOption.order === 'desc' };
+    return { id: sortOption.key, desc: sortOption.order === 'DESC' };
   })
 );
 
@@ -84,7 +88,9 @@ function handleSortingChange(header: Header<unknown, unknown>) {
       options.value.sort = [
         {
           key: header.column.id,
-          order: header.column.getIsSorted() as string,
+          order: (
+            header.column.getIsSorted() as SortDirection
+          ).toUpperCase() as SortDirection,
         },
       ];
     } else {

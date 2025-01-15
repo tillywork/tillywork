@@ -7,7 +7,7 @@ export const useFields = ({
   listId,
   enabled,
 }: {
-  cardTypeId: MaybeRef<number>;
+  cardTypeId?: MaybeRef<number>;
   listId?: MaybeRef<number>;
   enabled?: MaybeRef<boolean>;
 }) => {

@@ -1,19 +1,24 @@
 <script setup lang="ts">
-import { useViewsService } from '@/services/useViewsService';
-import { useListGroupsService } from '@/services/useListGroupsService';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
-import { DIALOGS } from '@/components/common/dialogs/types';
-import { useQueryClient } from '@tanstack/vue-query';
-import { useSnackbarStore } from '@/stores/snackbar';
 import BoardView from './BoardView/BoardView.vue';
 import ListView from './ListView/ListView.vue';
 import BaseViewChipFilter from './BaseViewChipFilter/BaseViewChipFilter.vue';
-import { useFitlersService } from '@/services/useFiltersService';
-import { cloneDeep } from 'lodash';
-import { useDialogStore } from '@/stores/dialog';
 import BaseViewChipDisplay from './BaseViewChipDisplay.vue';
+
+import { useFitlersService } from '@/services/useFiltersService';
+import { useViewsService } from '@/services/useViewsService';
+import { useListGroupsService } from '@/services/useListGroupsService';
+
+import { useDialogStore } from '@/stores/dialog';
+import { useSnackbarStore } from '@/stores/snackbar';
+
+import { useQueryClient } from '@tanstack/vue-query';
+
+import { cloneDeep } from 'lodash';
+
+import { DIALOGS } from '@/components/common/dialogs/types';
 import {
   type QueryFilter,
   type Filter,

@@ -7,8 +7,8 @@ import type { VForm } from 'vuetify/components';
 // import 'v-phone-input/dist/v-phone-input.css';
 // import { VPhoneInput } from 'v-phone-input';
 import { useLogo } from '@/composables/useLogo';
-import { type CreateUserDto } from '../users/types';
 import posthog from 'posthog-js';
+import type { CreateUserDto } from '@tillywork/shared';
 
 defineProps<{
   header?: string;

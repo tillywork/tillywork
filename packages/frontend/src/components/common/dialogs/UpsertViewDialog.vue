@@ -79,7 +79,12 @@ async function handleCreate() {
 </script>
 
 <template>
-  <v-card color="surface" elevation="24" :loading="isCreating || isUpdating">
+  <v-card
+    color="dialog"
+    elevation="12"
+    border="thin"
+    :loading="isCreating || isUpdating"
+  >
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle>
         <span class="text-capitalize">{{ currentDialog?.data.mode }}</span>

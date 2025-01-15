@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type ListStage } from '../../project-management/lists/types';
+import type { ListStage } from '@tillywork/shared';
 
 const selectedStage = defineModel<ListStage>();
 const listStageMenu = ref(false);

@@ -33,6 +33,8 @@ import { useListGroup } from '@/composables/useListGroup';
 import { useCard } from '@/composables/useCard';
 import { useFields } from '@/composables/useFields';
 
+import { useFieldQueryStore } from '@/stores/field.query';
+
 import BaseField from '@/components/common/fields/BaseField.vue';
 import ContextMenu from '@/components/common/base/ContextMenu/ContextMenu.vue';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
@@ -59,10 +61,8 @@ const { useGetGroupCardsInfinite } = useCardsService();
 
 const { updateFieldValue, getCardContextMenuItems } = useCard();
 
-const { titleField, getDateFieldColor } = useFields({
-  cardTypeId: props.list.defaultCardType.id,
-  listId: props.list.id,
-});
+const { getDateFieldColor } = useFields({});
+const { titleField } = storeToRefs(useFieldQueryStore());
 
 const groupCopy = ref(cloneDeep(props.listGroup.original));
 const sortBy = computed<SortState>(() =>

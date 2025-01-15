@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useFields } from '@/composables/useFields';
 import BaseViewChip from './BaseViewChip.vue';
 import { DEFAULT_SORT_OPTIONS } from './types';
 import posthog from 'posthog-js';
 import type { List, SortOption, ViewSortOption } from '@tillywork/shared';
+import { useFieldQueryStore } from '@/stores/field.query';
 
 const sortBy = defineModel<SortOption>();
 
@@ -11,13 +11,7 @@ const { list } = defineProps<{
   list: List;
 }>();
 
-const cardTypeId = computed(() => list.defaultCardType.id);
-const listId = computed(() => list.id);
-
-const { groupableFields } = useFields({
-  cardTypeId,
-  listId,
-});
+const { groupableFields } = storeToRefs(useFieldQueryStore());
 
 const sortByOptions = computed(() => {
   const arr = [...DEFAULT_SORT_OPTIONS];

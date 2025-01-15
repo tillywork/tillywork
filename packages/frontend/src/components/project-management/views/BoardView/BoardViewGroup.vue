@@ -21,8 +21,10 @@ import { cloneDeep } from 'lodash';
 import { useCardsService } from '@/services/useCardsService';
 
 import { useListGroup } from '@/composables/useListGroup';
-import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
+import { useFields } from '@/composables/useFields';
+
+import { useFieldQueryStore } from '@/stores/field.query';
 
 import BaseField from '@/components/common/fields/BaseField.vue';
 import ContextMenu from '@/components/common/base/ContextMenu/ContextMenu.vue';
@@ -54,16 +56,11 @@ const {
 } = useListGroup({ props, cards });
 
 const { updateFieldValue, getCardContextMenuItems } = useCard();
+const { getDateFieldColor } = useFields({});
 
-const {
-  titleField,
-  assigneeField,
-  pinnedFieldsWithoutAssignee,
-  getDateFieldColor,
-} = useFields({
-  cardTypeId: props.list.defaultCardType.id,
-  listId: props.list.id,
-});
+const { titleField, assigneeField, pinnedFieldsWithoutAssignee } = storeToRefs(
+  useFieldQueryStore()
+);
 
 const groupCopy = ref(cloneDeep(props.listGroup));
 const sortBy = computed<SortState>(() =>

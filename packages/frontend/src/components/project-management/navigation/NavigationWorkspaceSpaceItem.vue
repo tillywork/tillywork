@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { type Space } from '../spaces/types';
 import NavigationWorkspaceListItem from './NavigationWorkspaceListItem.vue';
 import NavigationWorkspaceSpaceItemMenu from './NavigationWorkspaceSpaceItemMenu.vue';
 import CreateListBtn from './CreateListBtn.vue';
 import { useListsService } from '@/services/useListsService';
+import type { Space } from '@tillywork/shared';
 
 const { space } = defineProps<{
   space: Space;

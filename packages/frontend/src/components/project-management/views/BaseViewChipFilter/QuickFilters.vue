@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { User } from '@/components/common/users/types';
-import type { ListStage } from '../../lists/types';
 import {
   type QuickFilter,
   type QuickFilterGroup,
@@ -16,6 +14,8 @@ import {
   type FilterOperator,
   FieldTypes,
   type FieldFilterOption,
+  type ListStage,
+  type User,
 } from '@tillywork/shared';
 
 const quickFilters = defineModel<FilterGroup>({

@@ -16,8 +16,8 @@ import {
 import { cloneDeep } from 'lodash';
 import { leaderKey } from '@/utils/keys';
 
-import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
+import { useFields } from '@/composables/useFields';
 
 import BaseField from '../../fields/BaseField.vue';
 import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
@@ -55,8 +55,8 @@ const cardType = computed<CardType>(() => {
 });
 
 const { pinnedFields, titleField } = useFields({
-  cardTypeId: cardType.value.id,
-  listId: list.value.id,
+  listId: computed(() => list.value.id),
+  cardTypeId: computed(() => cardType.value.id),
 });
 
 const createCardMutation = cardsService.useCreateCardMutation();
@@ -76,6 +76,7 @@ watch(selectedList, (v) => {
   if (v) {
     createCardDto.value.listStage = v.listStages[0];
     createCardDto.value.listId = v.id;
+    currentDialog.value.data.list = v;
   }
 });
 
@@ -137,8 +138,9 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
 
 <template>
   <v-card
-    color="surface"
-    elevation="24"
+    color="dialog"
+    elevation="12"
+    border="thin"
     :loading="createCardMutation.isPending.value"
   >
     <div class="d-flex align-center ps-0 pa-4">

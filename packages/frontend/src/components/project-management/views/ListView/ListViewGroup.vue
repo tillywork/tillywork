@@ -28,8 +28,10 @@ import { cloneDeep } from 'lodash';
 import { useCardsService } from '@/services/useCardsService';
 
 import { useListGroup } from '@/composables/useListGroup';
-import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
+import { useFields } from '@/composables/useFields';
+
+import { useFieldQueryStore } from '@/stores/field.query';
 
 import BaseField from '@/components/common/fields/BaseField.vue';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
@@ -43,22 +45,16 @@ const props = defineProps<{
   view: View;
   list: List;
 }>();
-const rowMenuOpen = ref<Row<Card> | null>();
 const isGroupCardsLoading = defineModel<boolean>('loading');
 
 const cardsService = useCardsService();
 
 const { updateFieldValue, getCardContextMenuItems } = useCard();
+const { getDateFieldColor } = useFields({});
 
-const {
-  titleField,
-  assigneeField,
-  pinnedFieldsWithoutAssignee,
-  getDateFieldColor,
-} = useFields({
-  cardTypeId: props.list.defaultCardType.id,
-  listId: props.list.id,
-});
+const { titleField, assigneeField, pinnedFieldsWithoutAssignee } = storeToRefs(
+  useFieldQueryStore()
+);
 
 const groupCopy = ref(cloneDeep(props.listGroup.original));
 const sortBy = computed<SortState>(() =>
@@ -171,20 +167,6 @@ async function handleGroupCardsLoad({
     }
   } else {
     done('ok');
-  }
-}
-
-function handleCardMenuClick({
-  row,
-  isOpen,
-}: {
-  row: Row<Card>;
-  isOpen: boolean;
-}) {
-  if (isOpen) {
-    rowMenuOpen.value = row;
-  } else {
-    rowMenuOpen.value = null;
   }
 }
 

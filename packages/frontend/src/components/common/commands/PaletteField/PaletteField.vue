@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import type { Card } from '@tillywork/shared';
+import { useCommandStore } from '@/stores/command';
+import { useStateStore } from '@/stores/state';
 
-const { card } = defineProps<{
-  card: Card;
-}>();
+const { currentCard } = storeToRefs(useStateStore());
+const { currentField } = storeToRefs(useCommandStore());
 </script>
 
 <template>
-  <v-card>
-    {{ card }}
-  </v-card>
+  <v-card color="transparent"> </v-card>
 </template>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import validationUtils from '@/utils/validation';
-import type { User } from '@/components/common/users/types';
 import BaseRelationInput from '@/components/common/inputs/BaseRelationInput.vue';
 import {
   type FieldFilter,
   type FieldFilterOption,
   type FilterOperator,
   type List,
+  type User,
   FieldTypes,
 } from '@tillywork/shared';
 

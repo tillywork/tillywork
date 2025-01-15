@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { useViewsService } from '@/services/useViewsService';
 import BaseViewChip from './BaseViewChip.vue';
-import { useFields } from '@/composables/useFields';
 import { type Field, type List, type View, ViewTypes } from '@tillywork/shared';
 import { cloneDeep } from 'lodash';
 import draggable from 'vuedraggable';
 import { useSnackbarStore } from '@/stores/snackbar';
 import posthog from 'posthog-js';
+import { useFieldQueryStore } from '@/stores/field.query';
+import { useFields } from '@/composables/useFields';
 
 const view = defineModel<View>({
   required: true,
@@ -15,20 +16,16 @@ const { list } = defineProps<{
   list: List;
 }>();
 
-const listId = computed(() => view.value.listId);
-
 const { showSnackbar } = useSnackbarStore();
 
 const { useUpdateViewMutation } = useViewsService();
 const { mutateAsync: updateView } = useUpdateViewMutation();
 
-const cardTypeId = computed(() => list.defaultCardType.id);
 const hasChildren = computed(() => list.defaultCardType.hasChildren);
 
-const { titleField, tableFields, sortFieldsByViewColumns } = useFields({
-  cardTypeId,
-  listId,
-});
+const { sortFieldsByViewColumns } = useFields({});
+
+const { titleField, tableFields } = storeToRefs(useFieldQueryStore());
 
 const enabledTableColumns = computed({
   get() {

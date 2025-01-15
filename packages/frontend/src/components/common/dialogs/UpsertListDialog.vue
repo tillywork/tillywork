@@ -3,13 +3,13 @@ import { useListsService } from '@/services/useListsService';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
 import BaseIconSelector from '../../common/inputs/BaseIconSelector/BaseIconSelector.vue';
-import type { List } from '@/components/project-management/lists/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useCardTypesService } from '@/services/useCardTypesService';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS, UpsertDialogMode } from './types';
 import { useAuthStore } from '@/stores/auth';
+import type { List } from '@tillywork/shared';
 
 const listsService = useListsService();
 const dialog = useDialogStore();
@@ -81,7 +81,12 @@ async function handleSubmitForm() {
 </script>
 
 <template>
-  <v-card color="surface" elevation="24" :loading="isCreating || isUpdating">
+  <v-card
+    color="dialog"
+    elevation="12"
+    border="thin"
+    :loading="isCreating || isUpdating"
+  >
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle>
         <span class="text-capitalize">{{ currentDialog?.data.mode }}</span>

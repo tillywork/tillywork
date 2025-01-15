@@ -40,7 +40,7 @@ async function handleCreate(workspaceDto: Partial<Workspace>) {
 </script>
 
 <template>
-  <v-card color="surface" elevation="24" :loading="isPending">
+  <v-card color="dialog" elevation="12" border="thin" :loading="isPending">
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle class="text-h6">Create workspace</v-card-subtitle>
       <v-spacer />

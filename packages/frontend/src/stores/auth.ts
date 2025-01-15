@@ -1,11 +1,9 @@
 import { jwtDecode } from 'jwt-decode';
-import type { CreateUserDto, User } from '@/components/common/users/types';
 import type { RouteLocation } from 'vue-router/auto';
 import { useAuthService } from '@/services/useAuthService';
 import { useSnackbarStore } from './snackbar';
-import type { Project } from '@/components/common/projects/types';
 import { useStateStore } from './state';
-import type { Workspace } from '@tillywork/shared';
+import type { Project, User, Workspace } from '@tillywork/shared';
 
 export const useAuthStore = defineStore('auth', {
   persist: true,

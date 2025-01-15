@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { type List } from '../lists/types';
+import type { List } from '@tillywork/shared';
 import NavigationWorkspaceListItemMenu from './NavigationWorkspaceListItemMenu.vue';
 
-const route = useRoute();
+const route = useRoute('/pm/list/[listId]/');
 const router = useRouter();
 
 defineProps<{

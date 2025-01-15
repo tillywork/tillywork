@@ -16,20 +16,22 @@ const router = useRouter();
 
 const listId = computed(() => +route.params.listId);
 const { useGetListQuery } = useListsService();
-const { data: list, error, refetch } = useGetListQuery(listId);
+const { data: list, error } = useGetListQuery(listId);
 
-watch(error, (v: any) => {
+watch(error, () => {
   router.push('/');
 });
 
-watch(list, (v) => {
-  if (v) {
-    setTitle(v.name);
-    setCurrentList(v);
-  }
-});
-
-watch(listId, () => refetch());
+watch(
+  list,
+  (v) => {
+    if (v) {
+      setTitle(v.name);
+      setCurrentList(v);
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>

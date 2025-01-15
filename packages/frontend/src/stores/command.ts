@@ -10,19 +10,20 @@ import { type Command } from '@/components/common/commands/types';
 import { useAuthStore } from './auth';
 import { lowerFirst } from 'lodash';
 import { useStateStore } from './state';
-import { WorkspaceTypes, type Card, type Field } from '@tillywork/shared';
+import {
+  FieldTypes,
+  WorkspaceTypes,
+  type Card,
+  type Field,
+} from '@tillywork/shared';
 import { leaderKey } from '@/utils/keys';
 import { useCard } from '@/composables/useCard';
-import { useFields } from '@/composables/useFields';
+import { useFieldQueryStore } from './field.query';
 
 export const useCommandStore = defineStore('command', () => {
   const isOpen = ref(false);
+  const currentField = ref<Field | null>(null);
   const currentList = computed(() => getCurrentList());
-  const currentListId = computed(() => currentList.value?.id);
-  const cardTypeId = computed(() => currentCard.value?.type.id);
-  const fieldsEnabled = computed(
-    () => !!currentList.value && !!cardTypeId.value
-  );
 
   const dialogStore = useDialogStore();
   const themeStore = useThemeStore();
@@ -32,11 +33,7 @@ export const useCommandStore = defineStore('command', () => {
 
   const { confirmDelete, copyLink } = useCard();
   const router = useRouter();
-  const { fields, assigneeField } = useFields({
-    cardTypeId: cardTypeId as Ref<number>,
-    listId: currentListId as Ref<number>,
-    enabled: fieldsEnabled,
-  });
+  const { fields, assigneeField } = storeToRefs(useFieldQueryStore());
 
   const systemCommands = computed(() => {
     const commands = [
@@ -198,8 +195,9 @@ export const useCommandStore = defineStore('command', () => {
           section: '',
           icon: assigneeField.value.icon,
           title: 'Assign to..',
-          action: () => console.log('assign-to'),
+          action: () => (currentField.value = assigneeField.value as Field),
           shortcut: ['A'],
+          keepPaletteOpen: true,
         });
 
         commands.push({
@@ -207,19 +205,27 @@ export const useCommandStore = defineStore('command', () => {
           section: '',
           icon: assigneeField.value.icon,
           title: 'Assign to me',
-          action: () => console.log('assign-to-me'),
+          action: () => (currentField.value = assigneeField.value as Field),
           shortcut: ['I'],
+          keepPaletteOpen: true,
         });
       }
 
       const fieldCommands = fields.value
-        .filter((f) => !f.isAssignee)
+        .filter(
+          (f) =>
+            !f.isAssignee &&
+            [FieldTypes.DROPDOWN, FieldTypes.LABEL, FieldTypes.USER].includes(
+              f.type
+            )
+        )
         .map((field) => ({
           id: `update-${field.slug}`,
           section: '',
           icon: field.icon,
           title: setCommandTitleByField(field),
-          action: () => console.log(field.type),
+          action: () => (currentField.value = field),
+          keepPaletteOpen: true,
         }));
 
       fieldCommands.forEach((fc) => commands.push(fc));
@@ -271,5 +277,6 @@ export const useCommandStore = defineStore('command', () => {
   return {
     isOpen,
     commands,
+    currentField,
   };
 });

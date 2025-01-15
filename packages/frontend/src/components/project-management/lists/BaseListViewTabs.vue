@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { ViewTypes, type View } from '@tillywork/shared';
-import type { List } from './types';
+import { ViewTypes, type List, type View } from '@tillywork/shared';
+
 import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
+
 import { useViewsService } from '@/services/useViewsService';
+
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
 import { useStateStore } from '@/stores/state';
 
 const dialog = useDialogStore();
-const props = defineProps<{
+const { list, views } = defineProps<{
   views: View[];
   list: List;
 }>();
@@ -29,14 +31,12 @@ const { mutateAsync: mutateDeleteView, isPending: isDeletingView } =
 const selectedView = defineModel<View | null>();
 const freezeHoverViewId = ref<number>();
 
-const listCopy = computed(() => props.list);
-
 function handleTabSelection(view: View) {
   selectedView.value = view;
 
   if (view) {
     setListLastView({
-      listId: listCopy.value.id,
+      listId: list.id,
       viewId: view.id,
     });
   }
@@ -59,7 +59,7 @@ function openCreateViewDialog() {
   dialog.openDialog({
     dialog: DIALOGS.UPSERT_VIEW,
     data: {
-      list: listCopy,
+      list,
       mode: UpsertDialogMode.CREATE,
     },
   });
@@ -77,17 +77,14 @@ function openUpdateViewDialog(view: View) {
 
 function selectViewFromListStateOrFirstView() {
   let viewToSelect: View | undefined;
-  if (
-    listState.value[listCopy.value.id] &&
-    listState.value[listCopy.value.id].lastViewId
-  ) {
-    viewToSelect = props.views.find(
-      (v) => v.id === listState.value[listCopy.value.id].lastViewId
+  if (listState.value[list.id] && listState.value[list.id].lastViewId) {
+    viewToSelect = views.find(
+      (v) => v.id === listState.value[list.id].lastViewId
     );
   }
 
   if (!viewToSelect) {
-    viewToSelect = props.views[0];
+    viewToSelect = views[0];
   }
 
   handleTabSelection(viewToSelect);
@@ -124,7 +121,7 @@ function deleteView(view: View) {
 }
 
 watch(
-  () => props.views,
+  () => views,
   () => {
     selectViewFromListStateOrFirstView();
   },

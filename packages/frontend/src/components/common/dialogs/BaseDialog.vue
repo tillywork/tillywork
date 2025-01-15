@@ -62,7 +62,7 @@ function handleAfterLeave(index: number) {
   >
     <v-dialog
       :model-value="true"
-      opacity="0.1"
+      :scrim="false"
       :width="
         dialog.options?.fullscreen ? undefined : dialog.options?.width ?? 750
       "

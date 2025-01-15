@@ -8,16 +8,20 @@ import { useStateStore } from '@/stores/state';
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts';
 
 import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
+import PaletteField from './PaletteField/PaletteField.vue';
+
 import posthog from 'posthog-js';
 
 const search = ref('');
 const activeIndex = ref(0);
 const listRef = ref<VList>();
 
-const { commands, isOpen } = storeToRefs(useCommandStore());
+const { commands, isOpen, currentField } = storeToRefs(useCommandStore());
 const { isInputFocused, currentCard } = storeToRefs(useStateStore());
 
 const { currentKeyCombo } = useKeyboardShortcuts();
+
+const isFieldMode = computed(() => !!currentField.value);
 
 const filteredCommands = computed(() => {
   const searchTerm = search.value.toLowerCase();
@@ -69,13 +73,22 @@ function handleKeyDown(e: KeyboardEvent) {
       }
       break;
     case 'Escape':
+      e.stopImmediatePropagation();
       if (search.value) {
-        e.stopImmediatePropagation();
         search.value = '';
+      } else if (isFieldMode.value) {
+        exitFieldMode();
       } else {
         closeCommandPalette();
       }
       break;
+    case 'Backspace':
+      if (isFieldMode.value && !search.value) {
+        e.preventDefault();
+        exitFieldMode();
+      }
+      break;
+
     default:
       handleShortcut(e);
   }
@@ -111,7 +124,16 @@ function ensureActiveCommandVisible() {
 function executeCommand(command: Command) {
   command.action();
   posthog.capture('Command Executed', { command: command.id });
-  closeCommandPalette();
+
+  if (!command.keepPaletteOpen) {
+    closeCommandPalette();
+  }
+}
+
+function exitFieldMode() {
+  currentField.value = null;
+  search.value = '';
+  activeIndex.value = 0;
 }
 
 function closeCommandPalette() {
@@ -240,71 +262,79 @@ watch(isOpen, (v) => {
         bg-color="transparent"
         :selected="[activeCommand?.id]"
       >
-        <template v-if="!filteredCommands.length">
-          <v-list-item>
-            <template #prepend>
-              <v-icon size="x-small" color="warning">
-                mdi-alert-circle-outline
-              </v-icon>
+        <template v-if="!isFieldMode">
+          <template v-if="!filteredCommands.length">
+            <v-list-item>
+              <template #prepend>
+                <v-icon size="x-small" color="warning">
+                  mdi-alert-circle-outline
+                </v-icon>
+              </template>
+              <v-list-item-title>
+                No matching commands found
+              </v-list-item-title>
+              <v-list-item-subtitle>
+                Try a different search term
+              </v-list-item-subtitle>
+            </v-list-item>
+          </template>
+
+          <template v-else>
+            <template
+              v-for="(commands, section) in groupedCommands"
+              :key="section"
+            >
+              <v-list-subheader class="text-caption" v-if="section">
+                {{ section }}
+              </v-list-subheader>
+
+              <v-list-item
+                v-for="command in commands"
+                :key="command.id"
+                :value="command.id"
+                :active="command === activeCommand"
+                :lines="command.description ? 'two' : 'one'"
+                @click="executeCommand(command)"
+                class="px-3"
+                :class="{
+                  'opacity-70': command !== activeCommand,
+                }"
+                rounded="pill"
+                tabindex="-1"
+              >
+                <template #prepend>
+                  <v-icon :icon="command.icon" size="x-small" />
+                </template>
+
+                <v-list-item-title class="font-weight-regular">
+                  {{ command.title }}
+                </v-list-item-title>
+
+                <v-list-item-subtitle v-if="command.description">
+                  {{ command.description }}
+                </v-list-item-subtitle>
+
+                <template v-if="command.shortcut" #append>
+                  <div class="d-flex align-center ga-1 pe-2">
+                    <template
+                      v-for="(key, index) in command.shortcut"
+                      :key="index"
+                    >
+                      <v-kbd class="text-xs elevation-0 font-weight-medium">
+                        {{ key }}
+                      </v-kbd>
+                    </template>
+                  </div>
+                </template>
+              </v-list-item>
+
+              <v-divider />
             </template>
-            <v-list-item-title> No matching commands found </v-list-item-title>
-            <v-list-item-subtitle>
-              Try a different search term
-            </v-list-item-subtitle>
-          </v-list-item>
+          </template>
         </template>
 
         <template v-else>
-          <template
-            v-for="(commands, section) in groupedCommands"
-            :key="section"
-          >
-            <v-list-subheader class="text-caption" v-if="section">
-              {{ section }}
-            </v-list-subheader>
-
-            <v-list-item
-              v-for="command in commands"
-              :key="command.id"
-              :value="command.id"
-              :active="command === activeCommand"
-              :lines="command.description ? 'two' : 'one'"
-              @click="executeCommand(command)"
-              class="px-3"
-              :class="{
-                'opacity-70': command !== activeCommand,
-              }"
-              rounded="pill"
-              tabindex="-1"
-            >
-              <template #prepend>
-                <v-icon :icon="command.icon" size="x-small" />
-              </template>
-
-              <v-list-item-title class="font-weight-regular">
-                {{ command.title }}
-              </v-list-item-title>
-
-              <v-list-item-subtitle v-if="command.description">
-                {{ command.description }}
-              </v-list-item-subtitle>
-
-              <template v-if="command.shortcut" #append>
-                <div class="d-flex align-center ga-1 pe-2">
-                  <template
-                    v-for="(key, index) in command.shortcut"
-                    :key="index"
-                  >
-                    <v-kbd class="text-xs elevation-0 font-weight-medium">
-                      {{ key }}
-                    </v-kbd>
-                  </template>
-                </div>
-              </template>
-            </v-list-item>
-
-            <v-divider />
-          </template>
+          <palette-field />
         </template>
       </v-list>
     </v-card>

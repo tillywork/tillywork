@@ -1,6 +1,7 @@
 import { useHttp } from '@/composables/useHttp';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import type { View } from '@tillywork/shared';
+import type { MaybeRef } from 'vue';
 
 export interface ViewsData {
   views: View[];
@@ -46,7 +47,13 @@ export const useViewsService = () => {
     });
   }
 
-  function useGetViewsQuery({ listId }: { listId: Ref<number> }) {
+  function useGetViewsQuery({
+    listId,
+    enabled,
+  }: {
+    listId: Ref<number>;
+    enabled?: MaybeRef<boolean>;
+  }) {
     return useQuery({
       queryKey: [
         'views',
@@ -56,6 +63,7 @@ export const useViewsService = () => {
       ],
       queryFn: () => getViews({ listId: listId.value }),
       staleTime: 1 * 60 * 1000,
+      enabled,
     });
   }
 

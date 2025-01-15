@@ -17,7 +17,11 @@
     "paths": {
       "@tillywork/shared": ["./packages/shared"]
     },
-    "plugins": [{ "transform": "typescript-transform-paths" }]
+    "plugins": [
+      {
+        "transform": "typescript-transform-paths"
+      }
+    ]
   },
   "exclude": ["node_modules", "tmp"]
 }

@@ -6,21 +6,15 @@ import {
   type ViewGroupByOption,
   type ViewGroupOption,
 } from '@tillywork/shared';
-import { useFields } from '@/composables/useFields';
 import posthog from 'posthog-js';
+import { useFieldQueryStore } from '@/stores/field.query';
 
 const groupBy = defineModel<ViewGroupByOption>();
 const { list } = defineProps<{
   list: List;
 }>();
 
-const cardTypeId = computed(() => list.defaultCardType.id);
-const listId = computed(() => list.id);
-
-const { groupableFields } = useFields({
-  cardTypeId,
-  listId,
-});
+const { groupableFields } = storeToRefs(useFieldQueryStore());
 
 const groupByOptions = computed(() => {
   const arr = [];

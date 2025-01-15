@@ -4,7 +4,6 @@ import ActivityTimeline from '../BaseCardActivityTimeline/ActivityTimeline.vue';
 import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 import { useCardsService } from '@/services/useCardsService';
 import { useListStagesService } from '@/services/useListStagesService';
-import { useProjectUsersService } from '@/services/useProjectUsersService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { type Content } from '@tiptap/vue-3';
@@ -19,7 +18,6 @@ import BaseCardChip from '../BaseCardChip.vue';
 import { leaderKey } from '@/utils/keys';
 import { useMentionNotifications } from '@/composables/useMentionNotifications';
 import urlUtils from '@/utils/url';
-import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
 import BaseField from '../../../common/fields/BaseField.vue';
 import BaseCardToolbar from './BaseCardToolbar.vue';
@@ -29,9 +27,9 @@ import {
   type ActivityContent,
   type Card,
   type ListStage,
-  type User,
 } from '@tillywork/shared';
 import { useListsService } from '@/services/useListsService';
+import { useFieldQueryStore } from '@/stores/field.query';
 
 const props = defineProps<{
   card: Card;
@@ -45,7 +43,7 @@ const descriptionInput = ref();
 
 const cardListStage = ref(cardCopy.value.cardLists[0].listStage);
 
-const { project, user } = storeToRefs(useAuthStore());
+const { user } = storeToRefs(useAuthStore());
 const snackbar = useSnackbarStore();
 const stateStore = useStateStore();
 const { areChildCardsExpanded, isInfoDrawerOpen } = storeToRefs(stateStore);
@@ -55,7 +53,6 @@ const { getNewMentions, notifyMentionedUser } = useMentionNotifications();
 
 const cardsService = useCardsService();
 const cardActivitiesService = useCardActivitiesService();
-const projectUsersService = useProjectUsersService();
 const listStagesService = useListStagesService();
 const { useGetListQuery } = useListsService();
 
@@ -64,10 +61,6 @@ const { updateFieldValue } = useCard();
 const { mutateAsync: updateCard, isPending: isUpdating } =
   cardsService.useUpdateCardMutation();
 
-const usersQuery = projectUsersService.useProjectUsersQuery({
-  projectId: project.value!.id,
-});
-
 const listId = computed(() => props.card.cardLists[0].listId);
 const { data: listStages } = listStagesService.useGetListStagesQuery({
   listId,
@@ -75,14 +68,10 @@ const { data: listStages } = listStagesService.useGetListStagesQuery({
 
 const { data: list } = useGetListQuery(listId);
 
-const cardTypeId = computed(() => props.card.type.id);
-const {
-  titleField,
-  descriptionField,
-  fields,
-  refetch: refetchCardTypeFields,
-  getDateFieldColor,
-} = useFields({ cardTypeId, listId });
+const { refetch: refetchCardTypeFields } = useFieldQueryStore();
+const { titleField, descriptionField, fields } = storeToRefs(
+  useFieldQueryStore()
+);
 
 const hasChildren = computed(() => props.card.type.hasChildren);
 
@@ -96,19 +85,6 @@ const createActivityMutation =
   cardActivitiesService.useCreateActivityMutation();
 
 const updateCardListMutation = cardsService.useUpdateCardListMutation();
-
-const users = computed(
-  () =>
-    usersQuery.data.value
-      ?.map((projectUser) => {
-        const user = projectUser.user;
-        return {
-          ...user,
-          fullName: `${user.firstName} ${user.lastName}`,
-        };
-      })
-      .sort((a) => (a.id === user.value!.id ? 0 : 1)) ?? []
-);
 
 const isCardLoading = computed(() => {
   return (
@@ -228,17 +204,6 @@ function updateDescription(newDescription: Content | undefined) {
       }
     });
   }
-}
-
-function updateCardAssignees(card: Card, assignees: User[]) {
-  card.users = assignees;
-  updateCard(card).then(() => {
-    snackbar.showSnackbar({
-      message: 'Task assignees updated.',
-      color: 'success',
-      timeout: 2000,
-    });
-  });
 }
 
 function createComment(content: ActivityContent) {

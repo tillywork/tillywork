@@ -4,4 +4,5 @@ export type Command = ContextMenuItem & {
   id: string;
   section: string;
   description?: string;
+  keepPaletteOpen?: boolean;
 };

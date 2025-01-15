@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import BaseListViewTabs from './BaseListViewTabs.vue';
 import BaseView from '../views/BaseView.vue';
+
 import { useViewsService } from '@/services/useViewsService';
+
 import type { List, View } from '@tillywork/shared';
+
 import posthog from 'posthog-js';
 
 const { list } = defineProps<{

@@ -1,5 +1,5 @@
-import type { CreateUserDto } from '@/components/common/users/types';
 import { useHttp } from '@/composables/useHttp';
+import type { CreateUserDto } from '@tillywork/shared';
 
 export const useAuthService = () => {
   const { sendRequest } = useHttp();

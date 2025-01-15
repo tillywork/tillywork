@@ -95,7 +95,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <v-card class="onboarding-dialog">
+  <v-card class="onboarding-dialog" color="dialog" elevation="12" border="thin">
     <v-card-text class="pt-0">
       <v-stepper v-model="currentStep" :items="onboardingSteps" hide-actions>
         <template #item.1>

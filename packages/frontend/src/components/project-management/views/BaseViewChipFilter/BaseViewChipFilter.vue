@@ -17,8 +17,8 @@ import {
   type FilterViewOptions,
   type List,
 } from '@tillywork/shared';
-import { useFields } from '@/composables/useFields';
 import posthog from 'posthog-js';
+import { useFieldQueryStore } from '@/stores/field.query';
 
 const { filters, viewId, list } = defineProps<{
   filters?: ViewFilter;
@@ -43,13 +43,9 @@ const { project } = storeToRefs(useAuthStore());
 
 const { useProjectUsersQuery } = useProjectUsersService();
 
-const cardTypeId = computed(() => list.defaultCardType.id);
 const listId = computed(() => list.id);
 
-const { filterableFields } = useFields({
-  cardTypeId,
-  listId,
-});
+const { filterableFields } = storeToRefs(useFieldQueryStore());
 
 const { data: users } = useProjectUsersQuery({
   projectId: project.value!.id,

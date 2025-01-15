@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import type { List } from '../lists/types';
 import { useListsService } from '@/services/useListsService';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 import { DIALOGS, UpsertDialogMode } from '@/components/common/dialogs/types';
 import { useDialogStore } from '@/stores/dialog';
 import { useAuthStore } from '@/stores/auth';
-import type { CardType } from '@tillywork/shared';
+import type { CardType, List } from '@tillywork/shared';
 
 const listMenu = ref(false);
 const { useDeleteListMutation, useUpdateListMutation } = useListsService();
