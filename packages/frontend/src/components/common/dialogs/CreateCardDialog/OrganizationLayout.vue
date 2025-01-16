@@ -10,8 +10,8 @@ import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue
 import { leaderKey } from '@/utils/keys';
 import BaseField from '../../fields/BaseField.vue';
 import { type CardType, type CreateCardDto } from '@tillywork/shared';
-import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
+import { useFieldQueryStore } from '@/stores/field.query';
 
 const dialog = useDialogStore();
 const { workspace } = storeToRefs(useAuthStore());
@@ -37,7 +37,6 @@ dialog.updateDialogOptions(currentDialogIndex.value, {
 });
 
 const list = computed(() => currentDialog.value?.data?.list);
-const listId = computed(() => list.value!.id);
 
 const cardType = computed<CardType>(() => {
   if (currentDialog.value?.data && currentDialog.value.data?.type) {
@@ -48,12 +47,8 @@ const cardType = computed<CardType>(() => {
     return workspace.value?.defaultCardType;
   }
 });
-const cardTypeId = computed(() => cardType.value.id);
 
-const { fields, titleField } = useFields({
-  cardTypeId,
-  listId,
-});
+const { fields, titleField } = storeToRefs(useFieldQueryStore());
 
 const createCardDto = ref<CreateCardDto>({
   listId: currentDialog.value?.data?.listId ?? list.value?.id,
@@ -121,7 +116,7 @@ watch(list, (v) => {
 </script>
 
 <template>
-  <v-card color="surface" elevation="24" :loading="isCreating">
+  <v-card color="dialog" elevation="12" border="thin" :loading="isCreating">
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle class="d-flex align-center">
         <base-list-selector :model-value="list" readonly />
@@ -136,7 +131,7 @@ watch(list, (v) => {
       <base-icon-btn icon="mdi-close" color="default" @click="closeDialog()" />
     </div>
     <v-form ref="createForm" @submit.prevent="">
-      <div class="px-4 pb-4 d-flex flex-column ga-2">
+      <div class="pa-4 pt-0 d-flex flex-column ga-4">
         <template v-if="titleField">
           <base-field
             :field="titleField"

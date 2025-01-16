@@ -12,7 +12,6 @@ import {
   type List,
   type SortState,
   type Field,
-  type ProjectUser,
 } from '@tillywork/shared';
 
 import objectUtils from '@/utils/object';
@@ -21,8 +20,10 @@ import { cloneDeep } from 'lodash';
 import { useCardsService } from '@/services/useCardsService';
 
 import { useListGroup } from '@/composables/useListGroup';
-import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
+import { useFields } from '@/composables/useFields';
+
+import { useFieldQueryStore } from '@/stores/field.query';
 
 import BaseField from '@/components/common/fields/BaseField.vue';
 import ContextMenu from '@/components/common/base/ContextMenu/ContextMenu.vue';
@@ -30,13 +31,9 @@ import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 
 const props = defineProps<{
   listGroup: ListGroup;
-  listStages: ListStage[];
   view: View;
   list: List;
-  projectUsers: ProjectUser[];
 }>();
-
-const isGroupCardsLoading = defineModel<boolean>('loading');
 
 const cards = ref<Card[]>([]);
 
@@ -54,24 +51,15 @@ const {
 } = useListGroup({ props, cards });
 
 const { updateFieldValue, getCardContextMenuItems } = useCard();
+const { getDateFieldColor } = useFields({});
 
-const {
-  titleField,
-  assigneeField,
-  pinnedFieldsWithoutAssignee,
-  getDateFieldColor,
-} = useFields({
-  cardTypeId: props.list.defaultCardType.id,
-  listId: props.list.id,
-});
+const { titleField, assigneeField, pinnedFieldsWithoutAssignee } = storeToRefs(
+  useFieldQueryStore()
+);
 
 const groupCopy = ref(cloneDeep(props.listGroup));
 const sortBy = computed<SortState>(() =>
   props.view.options.sortBy ? [cloneDeep(props.view.options.sortBy)] : []
-);
-
-const users = computed(() =>
-  props.projectUsers.map((projectUser) => projectUser.user)
 );
 
 const filters = computed<QueryFilter>(() => {
@@ -152,23 +140,15 @@ watch(
   },
   { deep: true }
 );
-
-watchEffect(() => {
-  if (isFetching.value) {
-    isGroupCardsLoading.value = true;
-  } else {
-    isGroupCardsLoading.value = false;
-  }
-});
 </script>
 
 <template>
-  <v-card class="board-group" width="275" color="accent">
+  <v-card class="board-group" width="275" color="accent-lighten">
     <v-banner
       sticky
       lines="one"
       border="none"
-      bg-color="accent"
+      bg-color="accent-lighten"
       style="z-index: 10"
     >
       <div>
@@ -232,14 +212,19 @@ watchEffect(() => {
                 (v) => handleHoverCard({ isHovering: v, card })
               "
             >
-              <v-card :to="`/card/${card.id}`" :ripple="false" v-bind="props">
+              <v-card
+                :to="`/card/${card.id}`"
+                :ripple="false"
+                v-bind="props"
+                color="card"
+              >
                 <v-card-item class="pa-2 align-start">
                   <template #prepend>
                     <list-stage-selector
                       :model-value="card.cardLists[0].listStage"
                       theme="icon"
                       rounded="circle"
-                      :list-stages="listStages ?? []"
+                      :list-stages="list.listStages"
                       @update:modelValue="
                     (modelValue: ListStage) =>
                       handleUpdateCardStage({

@@ -55,7 +55,7 @@ export const useListGroupsService = () => {
     const getListGroupsQuery = useQuery({
       queryKey: [
         'listGroups',
-        { listId: toValue(listId), viewId: toValue(viewId) },
+        { listId, viewId, hideCompleted, groupBy, sortCardsBy },
       ],
       queryFn: () =>
         getListGroupsByOption({

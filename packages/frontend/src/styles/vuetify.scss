@@ -68,6 +68,13 @@
   opacity: 0.1;
 }
 
+.v-list {
+  .v-list-item {
+    scroll-margin-top: 8px;
+    scroll-margin-bottom: 8px;
+  }
+}
+
 .v-list-item--slim .v-list-item__prepend > .v-icon ~ .v-list-item__spacer {
   width: 10px;
 }

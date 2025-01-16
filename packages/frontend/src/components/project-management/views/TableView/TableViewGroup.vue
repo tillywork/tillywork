@@ -33,14 +33,14 @@ import { useListGroup } from '@/composables/useListGroup';
 import { useCard } from '@/composables/useCard';
 import { useFields } from '@/composables/useFields';
 
+import { useFieldQueryStore } from '@/stores/field.query';
+
 import BaseField from '@/components/common/fields/BaseField.vue';
 import ContextMenu from '@/components/common/base/ContextMenu/ContextMenu.vue';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
 
 const props = defineProps<{
   listGroup: Row<ListGroup>;
-  listStages: ListStage[];
-  projectUsers: ProjectUser[];
   table: Table<ListGroup>;
   columnSizes: {
     id: string;
@@ -51,18 +51,14 @@ const props = defineProps<{
   list: List;
 }>();
 
-const isGroupCardsLoading = defineModel<boolean>('loading');
-
 const cards = ref<Card[]>([]);
 
 const { useGetGroupCardsInfinite } = useCardsService();
 
 const { updateFieldValue, getCardContextMenuItems } = useCard();
 
-const { titleField, getDateFieldColor } = useFields({
-  cardTypeId: props.list.defaultCardType.id,
-  listId: props.list.id,
-});
+const { getDateFieldColor } = useFields({});
+const { titleField } = storeToRefs(useFieldQueryStore());
 
 const groupCopy = ref(cloneDeep(props.listGroup.original));
 const sortBy = computed<SortState>(() =>
@@ -78,10 +74,6 @@ const tableSortState = computed(() =>
 );
 const columns = computed(
   () => props.table._getColumnDefs() as ColumnDef<Card, unknown>[]
-);
-
-const maxHeight = computed(() =>
-  props.listGroup.original.name === 'All' ? 'calc(100vh - 230px)' : 350
 );
 
 const filters = computed<QueryFilter>(() => {
@@ -225,14 +217,6 @@ watch(
     }
   }
 );
-
-watchEffect(() => {
-  if (isFetching.value) {
-    isGroupCardsLoading.value = true;
-  } else {
-    isGroupCardsLoading.value = false;
-  }
-});
 </script>
 
 <template>
@@ -241,6 +225,7 @@ watchEffect(() => {
     lines="one"
     density="comfortable"
     :border="groupCopy.isExpanded ? 'b-thin' : 'none'"
+    bg-color="accent-lighten"
     style="z-index: 10"
     v-if="!noGroupBanners"
   >
@@ -286,10 +271,10 @@ watchEffect(() => {
     <v-list
       class="pa-0 overflow-scroll"
       rounded="0"
-      :max-height="maxHeight"
       :lines="false"
+      bg-color="card"
     >
-      <v-infinite-scroll :max-height="maxHeight" @load="handleGroupCardsLoad">
+      <v-infinite-scroll @load="handleGroupCardsLoad">
         <template #empty></template>
         <template #loading></template>
         <draggable

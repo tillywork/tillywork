@@ -63,7 +63,7 @@ async function handleCreate() {
 </script>
 
 <template>
-  <v-card color="surface" elevation="24" :loading="isPending">
+  <v-card color="dialog" elevation="12" border="thin" :loading="isPending">
     <v-card-item>
       <v-card-title class="d-flex align-start">
         Delete card type

@@ -10,22 +10,33 @@ import { type Command } from '@/components/common/commands/types';
 import { useAuthStore } from './auth';
 import { lowerFirst } from 'lodash';
 import { useStateStore } from './state';
-import { WorkspaceTypes, type Card } from '@tillywork/shared';
+import {
+  FieldTypes,
+  WorkspaceTypes,
+  type Card,
+  type Field,
+} from '@tillywork/shared';
 import { leaderKey } from '@/utils/keys';
 import { useCard } from '@/composables/useCard';
+import { useFieldQueryStore } from './field.query';
 
 export const useCommandStore = defineStore('command', () => {
   const isOpen = ref(false);
+  const search = ref('');
+  const searchPlaceholder = ref<string | null>();
+  const searchIcon = ref<string | null>();
+  const currentField = ref<Field | null>();
+  const currentList = computed(() => getCurrentList());
 
   const dialogStore = useDialogStore();
   const themeStore = useThemeStore();
-  const { workspace } = storeToRefs(useAuthStore());
-  const { currentList, selectedModule, currentCard } = storeToRefs(
-    useStateStore()
-  );
+  const { workspace, user } = storeToRefs(useAuthStore());
+  const { getCurrentList } = useStateStore();
+  const { selectedModule, currentCard } = storeToRefs(useStateStore());
 
-  const { confirmDelete, copyLink } = useCard();
+  const { confirmDelete, copyLink, updateFieldValue } = useCard();
   const router = useRouter();
+  const { fields, assigneeField } = storeToRefs(useFieldQueryStore());
 
   const systemCommands = computed(() => {
     const commands = [
@@ -163,7 +174,7 @@ export const useCommandStore = defineStore('command', () => {
               },
               data: {
                 type: cardType,
-                list: currentList.value[selectedModule.value as WorkspaceTypes],
+                list: currentList.value,
               },
             }),
           shortcut:
@@ -181,14 +192,58 @@ export const useCommandStore = defineStore('command', () => {
     const commands: Command[] = [];
 
     if (currentCard.value) {
-      commands.push({
-        id: 'open-card',
-        section: '',
-        icon: 'mdi-open-in-new',
-        title: `Open ${currentCard.value.type.name.toLowerCase()}`,
-        action: () => router.push(`/card/${currentCard.value?.id}`),
-        shortcut: ['O'],
-      });
+      if (assigneeField.value) {
+        commands.push({
+          id: 'assign-to',
+          section: '',
+          icon: assigneeField.value.icon,
+          title: 'Assign to..',
+          action: (command: Command) => setCommandPaletteField(command),
+          shortcut: ['A'],
+          keepPaletteOpen: true,
+          field: assigneeField.value,
+        });
+
+        commands.push({
+          id: 'assign-to-me',
+          section: '',
+          icon: assigneeField.value.icon,
+          title: 'Assign to me',
+          action: () => {
+            if (!currentCard.value || !assigneeField.value || !user.value)
+              return;
+
+            updateFieldValue({
+              card: currentCard.value,
+              field: assigneeField.value,
+              v: [user.value.id.toString()],
+            }).then((card) => {
+              currentCard.value = card;
+            });
+          },
+          shortcut: ['I'],
+        });
+      }
+
+      const fieldCommands = fields.value
+        .filter(
+          (f) =>
+            !f.isAssignee &&
+            [FieldTypes.DROPDOWN, FieldTypes.LABEL, FieldTypes.USER].includes(
+              f.type
+            )
+        )
+        .map((field) => ({
+          id: `update-${field.slug}`,
+          section: '',
+          icon: field.icon,
+          title: setCommandTitleByField(field),
+          action: (command: Command) => setCommandPaletteField(command),
+          keepPaletteOpen: true,
+          field,
+        }));
+
+      fieldCommands.forEach((fc) => commands.push(fc));
 
       commands.push({
         id: 'copy-link',
@@ -206,6 +261,15 @@ export const useCommandStore = defineStore('command', () => {
         action: () => confirmDelete(currentCard.value as Card),
         shortcut: ['DEL'],
       });
+
+      commands.push({
+        id: 'open-card',
+        section: 'Navigation',
+        icon: 'mdi-open-in-new',
+        title: `Open ${currentCard.value.type.name.toLowerCase()}`,
+        action: () => router.push(`/card/${currentCard.value?.id}`),
+        shortcut: ['O'],
+      });
     }
 
     return commands;
@@ -217,8 +281,32 @@ export const useCommandStore = defineStore('command', () => {
     ...systemCommands.value,
   ]);
 
+  function setCommandTitleByField(field: Field) {
+    if (currentCard.value && !currentCard.value.data[field.slug]) {
+      return `Set ${field.name.toLowerCase()}`;
+    }
+
+    return `Update ${field.name.toLowerCase()}`;
+  }
+
+  function setCommandPaletteField(command: Command) {
+    if (command.field) {
+      currentField.value = command.field;
+      searchIcon.value = command.field.icon;
+      searchPlaceholder.value = command.title;
+    }
+
+    if (!isOpen.value) {
+      isOpen.value = true;
+    }
+  }
+
   return {
     isOpen,
+    search,
+    searchIcon,
+    searchPlaceholder,
     commands,
+    currentField,
   };
 });

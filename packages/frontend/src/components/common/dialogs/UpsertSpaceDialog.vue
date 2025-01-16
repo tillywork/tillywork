@@ -3,11 +3,11 @@ import { useSpacesService } from '@/services/useSpacesService';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
 import BaseIconSelector from '../../common/inputs/BaseIconSelector/BaseIconSelector.vue';
-import type { Space } from '@/components/project-management/spaces/types';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS, UpsertDialogMode } from './types';
 import { useAuthStore } from '@/stores/auth';
+import type { Space } from '@tillywork/shared';
 
 const { workspace } = storeToRefs(useAuthStore());
 const spacesService = useSpacesService();
@@ -65,7 +65,12 @@ async function handleSubmitForm() {
 </script>
 
 <template>
-  <v-card color="surface" elevation="24" :loading="isCreating || isUpdating">
+  <v-card
+    color="dialog"
+    elevation="12"
+    border="thin"
+    :loading="isCreating || isUpdating"
+  >
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle>
         <span class="text-capitalize">{{ currentDialog?.data.mode }}</span>

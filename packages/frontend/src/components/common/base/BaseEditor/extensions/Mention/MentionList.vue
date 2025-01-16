@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import type { User } from '@/components/common/users/types';
+import type { User } from '@tillywork/shared';
 import BaseAvatar from '../../../BaseAvatar.vue';
 
 const props = defineProps<{
   items: User[];
   command: any;
 }>();
-const emit = defineEmits(['selectItem']);
 
 const selected = ref(0);
 

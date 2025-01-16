@@ -5,14 +5,8 @@ import {
   useVueTable,
   type Column,
 } from '@tanstack/vue-table';
-import { type List, type ListGroup } from '../../lists/types';
-import { useListStagesService } from '@/services/useListStagesService';
-import { useProjectUsersService } from '@/services/useProjectUsersService';
 import ListViewGroup from './ListViewGroup.vue';
-import { useAuthStore } from '@/stores/auth';
-import type { View } from '@tillywork/shared';
-
-const isLoading = defineModel<boolean>('loading');
+import type { List, ListGroup, View } from '@tillywork/shared';
 
 const props = defineProps<{
   list: List;
@@ -21,18 +15,6 @@ const props = defineProps<{
 }>();
 
 const expandedState = ref<Record<string, boolean>>();
-
-const { project } = storeToRefs(useAuthStore());
-
-const listsStagesService = useListStagesService();
-const { data: listStages } = listsStagesService.useGetListStagesQuery({
-  listId: props.view.listId,
-});
-
-const projectUsersService = useProjectUsersService();
-const { data: projectUsers } = projectUsersService.useProjectUsersQuery({
-  projectId: project.value!.id,
-});
 
 const table = useVueTable({
   get data() {
@@ -129,7 +111,7 @@ function getColumnSortIcon(column: Column<ListGroup, unknown>) {
           </div>
         </template>
       </div>
-      <v-card class="list-groups overflow-scroll">
+      <v-card class="list-groups overflow-scroll" rounded="0">
         <template
           v-for="listGroup in table.getCoreRowModel().rows"
           :key="
@@ -139,15 +121,7 @@ function getColumnSortIcon(column: Column<ListGroup, unknown>) {
             listGroup.subRows.length
           "
         >
-          <list-view-group
-            v-model:loading="isLoading"
-            :list-group="listGroup"
-            :list-stages="listStages ?? []"
-            :list
-            :view
-            :project-users="projectUsers ?? []"
-            :table
-          />
+          <list-view-group :list-group="listGroup" :list :view :table />
         </template>
       </v-card>
     </div>

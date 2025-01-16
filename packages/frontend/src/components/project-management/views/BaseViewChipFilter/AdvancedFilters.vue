@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import type { User } from '@/components/common/users/types';
 import AdvancedFiltersItem from './AdvancedFiltersItem.vue';
 import type { VForm } from 'vuetify/components';
-import type { FilterGroup, FieldFilterOption, List } from '@tillywork/shared';
+import type {
+  FilterGroup,
+  FieldFilterOption,
+  List,
+  User,
+} from '@tillywork/shared';
 
 const advancedFilters = defineModel<FilterGroup>({
   required: true,
@@ -14,7 +18,7 @@ const advancedFilters = defineModel<FilterGroup>({
 defineProps<{
   fields: FieldFilterOption[];
   users: User[];
-  list: List[];
+  list: List;
 }>();
 
 const filtersForm = ref<VForm>();

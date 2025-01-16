@@ -19,8 +19,8 @@ function handleCancelClick() {
 </script>
 
 <template>
-  <v-card color="accent" class="border-thin">
-    <v-card-title class="text-body-1 pa-4 pb-1 bg-accent">
+  <v-card color="dialog" elevation="12" border="thin">
+    <v-card-title class="text-body-1 pa-4 pb-1">
       {{ currentDialog?.data.title ?? 'Confirm' }}
     </v-card-title>
     <v-card-text class="text-body-3 pa-4">

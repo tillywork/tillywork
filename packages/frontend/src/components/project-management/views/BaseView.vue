@@ -1,21 +1,24 @@
 <script setup lang="ts">
-import { type List } from '../lists/types';
-import { useViewsService } from '@/services/useViewsService';
-import { useListGroupsService } from '@/services/useListGroupsService';
 import BaseViewChipGroupBy from './BaseViewChipGroupBy.vue';
 import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
-import { type TableSortOption } from './types';
-import { DIALOGS } from '@/components/common/dialogs/types';
-import { useQueryClient } from '@tanstack/vue-query';
-import { useSnackbarStore } from '@/stores/snackbar';
 import BoardView from './BoardView/BoardView.vue';
 import ListView from './ListView/ListView.vue';
 import BaseViewChipFilter from './BaseViewChipFilter/BaseViewChipFilter.vue';
-import { useFitlersService } from '@/services/useFiltersService';
-import { cloneDeep } from 'lodash';
-import { useDialogStore } from '@/stores/dialog';
 import BaseViewChipDisplay from './BaseViewChipDisplay.vue';
+
+import { useFitlersService } from '@/services/useFiltersService';
+import { useViewsService } from '@/services/useViewsService';
+import { useListGroupsService } from '@/services/useListGroupsService';
+
+import { useDialogStore } from '@/stores/dialog';
+import { useSnackbarStore } from '@/stores/snackbar';
+
+import { useQueryClient } from '@tanstack/vue-query';
+
+import { cloneDeep } from 'lodash';
+
+import { DIALOGS } from '@/components/common/dialogs/types';
 import {
   type QueryFilter,
   type Filter,
@@ -23,14 +26,17 @@ import {
   type ViewFilter,
   type View,
   ViewTypes,
+  type SortOption,
+  type List,
 } from '@tillywork/shared';
 
-const props = defineProps<{
+const { view, list } = defineProps<{
   view: View;
   list: List;
 }>();
-const listId = computed(() => props.list.id);
-const viewCopy = ref<View>(cloneDeep(props.view));
+const listId = computed(() => list.id);
+const viewId = computed(() => view.id);
+const viewCopy = ref<View>(cloneDeep(view));
 const viewsService = useViewsService();
 const { useGetListGroupsByOptionQuery } = useListGroupsService();
 const { useCreateFilterMutation, useUpdateFilterMutation } =
@@ -39,10 +45,10 @@ const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
 const queryClient = useQueryClient();
 
-const hideCompleted = computed(() => viewCopy.value.options.hideCompleted);
+const hideCompleted = computed(() => view.options.hideCompleted ?? false);
 const groupBy = computed({
   get() {
-    return viewCopy.value.options.groupBy;
+    return view.options.groupBy;
   },
   set(v) {
     viewCopy.value = {
@@ -70,17 +76,14 @@ const sortBy = computed({
   },
 });
 
-const isViewLoading = ref(false);
-
 const updateViewMutation = viewsService.useUpdateViewMutation();
 
-const { data: listGroups, refetch: refetchListGroups } =
-  useGetListGroupsByOptionQuery({
-    listId,
-    viewId: viewCopy.value.id,
-    hideCompleted,
-    groupBy,
-  });
+const { data: listGroups } = useGetListGroupsByOptionQuery({
+  listId,
+  viewId,
+  hideCompleted,
+  groupBy,
+});
 
 const { mutateAsync: createFilter } = useCreateFilterMutation();
 const { mutateAsync: updateFilter } = useUpdateFilterMutation();
@@ -89,7 +92,7 @@ function handleGroupBySelection() {
   updateViewMutation.mutateAsync(viewCopy.value);
 }
 
-function handleSortBySelection(option: TableSortOption) {
+function handleSortBySelection(option: SortOption) {
   updateViewMutation.mutateAsync({
     ...viewCopy.value,
     options: {
@@ -103,8 +106,8 @@ function openCreateCardDialog() {
   dialog.openDialog({
     dialog: DIALOGS.CREATE_CARD,
     data: {
-      list: props.list,
-      type: props.list.defaultCardType,
+      list,
+      type: list.defaultCardType,
     },
   });
 }
@@ -117,7 +120,7 @@ function handleUpdateFilters(filters: QueryFilter | null) {
 }
 
 function handleSaveFilters() {
-  if (!props.view.filters) {
+  if (!view.filters) {
     createFilter({
       entityId: viewCopy.value.id,
       entityType: FilterEntityTypes.VIEW,
@@ -142,7 +145,7 @@ function handleSaveFilters() {
       });
   } else {
     updateFilter({
-      id: props.view.filters.id,
+      id: view.filters.id,
       updateFilterDto: {
         where: viewCopy.value.filters?.where,
       },
@@ -167,13 +170,8 @@ function handleSaveFilters() {
 }
 
 watch(
-  () => props.view,
-  (v) => {
-    if (v) {
-      viewCopy.value = { ...v };
-      refetchListGroups();
-    }
-  }
+  () => view,
+  (v) => (viewCopy.value = cloneDeep(v))
 );
 </script>
 
@@ -219,25 +217,14 @@ watch(
 
     <div class="view">
       <template v-if="viewCopy.type === ViewTypes.TABLE">
-        <table-view
-          v-model:loading="isViewLoading"
-          :list
-          :view="viewCopy"
-          :groups="listGroups ?? []"
-        >
+        <table-view :list :view="viewCopy" :groups="listGroups ?? []">
         </table-view>
       </template>
       <template v-else-if="viewCopy.type === ViewTypes.BOARD">
         <board-view :view="viewCopy" :list :list-groups="listGroups ?? []" />
       </template>
       <template v-else-if="viewCopy.type === ViewTypes.LIST">
-        <list-view
-          v-model:loading="isViewLoading"
-          :list
-          :view="viewCopy"
-          :groups="listGroups ?? []"
-          no-headers
-        >
+        <list-view :list :view="viewCopy" :groups="listGroups ?? []" no-headers>
         </list-view>
       </template>
       <template v-else>

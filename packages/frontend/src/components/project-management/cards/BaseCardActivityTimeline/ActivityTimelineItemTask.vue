@@ -9,29 +9,25 @@ import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 import {
   dayjs,
   TASK_STATUS_OPTIONS,
-  type Card,
   type CardActivity,
   type TaskActivityStatus,
 } from '@tillywork/shared';
 import { DIALOGS } from '@/components/common/dialogs/types';
 
-import { useUsers } from '@/composables/useUsers';
-
 import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
 import BaseUserSelector from '@/components/common/inputs/BaseUserSelector/BaseUserSelector.vue';
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 import SimpleDropdownSelector from '@/components/common/inputs/SimpleDropdownSelector.vue';
+import { useQueryStore } from '@/stores/query';
 
-const { activity, card } = defineProps<{
+const { activity } = defineProps<{
   activity: CardActivity;
-  card: Card;
 }>();
 
 const { user } = storeToRefs(useAuthStore());
 const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
-
-const { users } = useUsers();
+const { users } = storeToRefs(useQueryStore());
 
 const { getUserFullName } = useUsersService();
 const { useDeleteActivityMutation, useUpdateActivityMutation } =

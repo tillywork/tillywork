@@ -17,7 +17,6 @@ import {
   type Card,
   type ListGroup,
   type ListStage,
-  type ProjectUser,
   type SortState,
   type Field,
 } from '@tillywork/shared';
@@ -28,8 +27,10 @@ import { cloneDeep } from 'lodash';
 import { useCardsService } from '@/services/useCardsService';
 
 import { useListGroup } from '@/composables/useListGroup';
-import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
+import { useFields } from '@/composables/useFields';
+
+import { useFieldQueryStore } from '@/stores/field.query';
 
 import BaseField from '@/components/common/fields/BaseField.vue';
 import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
@@ -37,28 +38,19 @@ import ContextMenu from '@/components/common/base/ContextMenu/ContextMenu.vue';
 
 const props = defineProps<{
   listGroup: Row<ListGroup>;
-  listStages: ListStage[];
-  projectUsers: ProjectUser[];
   table: Table<ListGroup>;
   view: View;
   list: List;
 }>();
-const rowMenuOpen = ref<Row<Card> | null>();
-const isGroupCardsLoading = defineModel<boolean>('loading');
 
 const cardsService = useCardsService();
 
 const { updateFieldValue, getCardContextMenuItems } = useCard();
+const { getDateFieldColor } = useFields({});
 
-const {
-  titleField,
-  assigneeField,
-  pinnedFieldsWithoutAssignee,
-  getDateFieldColor,
-} = useFields({
-  cardTypeId: props.list.defaultCardType.id,
-  listId: props.list.id,
-});
+const { titleField, assigneeField, pinnedFieldsWithoutAssignee } = storeToRefs(
+  useFieldQueryStore()
+);
 
 const groupCopy = ref(cloneDeep(props.listGroup.original));
 const sortBy = computed<SortState>(() =>
@@ -174,20 +166,6 @@ async function handleGroupCardsLoad({
   }
 }
 
-function handleCardMenuClick({
-  row,
-  isOpen,
-}: {
-  row: Row<Card>;
-  isOpen: boolean;
-}) {
-  if (isOpen) {
-    rowMenuOpen.value = row;
-  } else {
-    rowMenuOpen.value = null;
-  }
-}
-
 watch(
   data,
   (v) => {
@@ -208,14 +186,6 @@ watch(
   { deep: true }
 );
 
-watchEffect(() => {
-  if (isFetching.value) {
-    isGroupCardsLoading.value = true;
-  } else {
-    isGroupCardsLoading.value = false;
-  }
-});
-
 watch(
   () => props.listGroup,
   (v) => {
@@ -231,9 +201,10 @@ watch(
     sticky
     lines="one"
     density="comfortable"
-    :border="groupCopy.isExpanded ? 'b-thin' : 'none'"
-    bg-color="accent"
+    :border="groupCopy.isExpanded ? 'b-thin t-thin' : 'none'"
+    bg-color="accent-lighten"
     style="z-index: 10"
+    rounded="0"
   >
     <v-btn
       variant="text"
@@ -287,6 +258,7 @@ watch(
       :height="groupHeight"
       :max-height="maxHeight"
       :lines="false"
+      bg-color="card"
     >
       <v-infinite-scroll
         :height="groupHeight"
@@ -324,7 +296,7 @@ watch(
                 "
               >
                 <v-list-item
-                  class="list-row text-body-3"
+                  class="list-row text-body-3 border-b-thin"
                   rounded="0"
                   height="36"
                   :to="`/card/${row.original.id}`"

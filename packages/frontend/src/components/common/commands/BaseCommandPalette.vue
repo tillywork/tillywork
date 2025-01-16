@@ -8,15 +8,26 @@ import { useStateStore } from '@/stores/state';
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts';
 
 import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
+import PaletteField from './PaletteField/PaletteField.vue';
+
 import posthog from 'posthog-js';
+import { useListKeyboardNavigation } from '@/composables/useListKeyboardNavigation';
 
-const search = ref('');
-const activeIndex = ref(0);
-const listRef = ref<VList>();
-
-const { commands, isOpen } = storeToRefs(useCommandStore());
+const {
+  commands,
+  isOpen,
+  currentField,
+  searchIcon,
+  searchPlaceholder,
+  search,
+} = storeToRefs(useCommandStore());
 const { isInputFocused, currentCard } = storeToRefs(useStateStore());
 
+const isFieldMode = computed(() => !!currentField.value);
+
+const { activeIndex, containerRef } = useListKeyboardNavigation({
+  enabled: computed(() => isOpen.value && !isFieldMode.value),
+});
 const { currentKeyCombo } = useKeyboardShortcuts();
 
 const filteredCommands = computed(() => {
@@ -54,14 +65,6 @@ function handleKeyDown(e: KeyboardEvent) {
   }
 
   switch (e.key) {
-    case 'ArrowDown':
-      e.preventDefault();
-      navigateList('down');
-      break;
-    case 'ArrowUp':
-      e.preventDefault();
-      navigateList('up');
-      break;
     case 'Enter':
       e.preventDefault();
       if (activeCommand.value) {
@@ -69,49 +72,42 @@ function handleKeyDown(e: KeyboardEvent) {
       }
       break;
     case 'Escape':
+      e.stopImmediatePropagation();
       if (search.value) {
-        e.stopImmediatePropagation();
         search.value = '';
+      } else if (isFieldMode.value) {
+        exitFieldMode();
       } else {
         closeCommandPalette();
       }
       break;
+    case 'Backspace':
+      if (isFieldMode.value && !search.value) {
+        e.preventDefault();
+        exitFieldMode();
+      }
+      break;
+
     default:
       handleShortcut(e);
   }
 }
 
-function navigateList(direction: 'up' | 'down') {
-  const totalCommands = filteredCommands.value.length;
-  if (totalCommands === 0) return;
+function executeCommand(command: Command, viaShortcut: boolean = false) {
+  command.action(command);
+  posthog.capture('Command Executed', { command: command.id, viaShortcut });
 
-  if (direction === 'down') {
-    activeIndex.value = (activeIndex.value + 1) % totalCommands;
-  } else {
-    activeIndex.value = (activeIndex.value - 1 + totalCommands) % totalCommands;
-  }
-
-  nextTick(() => {
-    ensureActiveCommandVisible();
-  });
-}
-
-function ensureActiveCommandVisible() {
-  const list = listRef.value?.$el;
-  const activeItem = list?.querySelector('.v-list-item--active');
-
-  if (activeItem) {
-    activeItem.scrollIntoView({
-      behavior: 'smooth',
-      block: 'nearest',
-    });
+  if (!command.keepPaletteOpen) {
+    closeCommandPalette();
   }
 }
 
-function executeCommand(command: Command) {
-  command.action();
-  posthog.capture('Command Executed', { command: command.id });
-  closeCommandPalette();
+function exitFieldMode() {
+  currentField.value = null;
+  search.value = '';
+  searchIcon.value = null;
+  searchPlaceholder.value = null;
+  activeIndex.value = 0;
 }
 
 function closeCommandPalette() {
@@ -133,7 +129,7 @@ function handleShortcut(event: KeyboardEvent) {
 
   if (command) {
     event.preventDefault();
-    command.action();
+    executeCommand(command, true);
   }
 }
 
@@ -185,6 +181,7 @@ onBeforeUnmount(() => {
 watch(isOpen, (v) => {
   if (!v) {
     isInputFocused.value = false;
+    currentField.value = null;
   } else {
     posthog.capture('Command Palette Opened');
   }
@@ -198,97 +195,120 @@ watch(isOpen, (v) => {
     @after-leave="handleAfterLeave"
     width="100%"
     max-width="600"
+    content-class="command-palette-dialog"
   >
-    <v-card elevation="8">
-      <v-text-field
-        v-model="search"
-        placeholder="Type a command or search..."
-        single-line
-        hide-details
-        variant="filled"
-        rounded="0"
-        density="default"
-        autocomplete="off"
-        autofocus
-        @input="activeIndex = 0"
-        :prepend-inner-icon="!currentCard ? 'mdi-magnify' : undefined"
-      >
-        <template #prepend-inner v-if="currentCard" class="pa-2">
-          <base-card-chip :card="currentCard" />
-        </template>
-        <template #append-inner v-if="search">
-          <v-kbd class="text-caption">Esc</v-kbd>
-        </template>
-      </v-text-field>
+    <v-card class="command-palette" elevation="12" color="dialog" border="thin">
+      <div class="px-4 pb-2 border-b-thin">
+        <div v-if="currentCard" class="pt-4">
+          <base-card-chip
+            :card="currentCard"
+            width="fit-content"
+            disable-link
+          />
+        </div>
+        <v-text-field
+          v-model="search"
+          :placeholder="searchPlaceholder ?? 'Type a command or search...'"
+          single-line
+          hide-details
+          variant="plain"
+          rounded="0"
+          density="default"
+          autocomplete="off"
+          autofocus
+          @input="activeIndex = 0"
+          :prepend-inner-icon="searchIcon ?? 'mdi-magnify'"
+        >
+          <template #append-inner v-if="search">
+            <v-kbd class="text-caption elevation-0 font-weight-medium"
+              >Esc</v-kbd
+            >
+          </template>
+        </v-text-field>
+      </div>
 
       <v-list
-        ref="listRef"
+        ref="containerRef"
         tabindex="-1"
-        max-height="50vh"
+        max-height="400"
         nav
         density="compact"
+        bg-color="transparent"
         :selected="[activeCommand?.id]"
       >
-        <template v-if="!filteredCommands.length">
-          <v-list-item>
-            <template #prepend>
-              <v-icon size="x-small" color="warning">
-                mdi-alert-circle-outline
-              </v-icon>
+        <template v-if="!isFieldMode">
+          <template v-if="!filteredCommands.length">
+            <v-list-item>
+              <template #prepend>
+                <v-icon size="x-small" color="warning">
+                  mdi-alert-circle-outline
+                </v-icon>
+              </template>
+              <v-list-item-title>
+                No matching commands found
+              </v-list-item-title>
+              <v-list-item-subtitle>
+                Try a different search term
+              </v-list-item-subtitle>
+            </v-list-item>
+          </template>
+
+          <template v-else>
+            <template
+              v-for="(commands, section) in groupedCommands"
+              :key="section"
+            >
+              <v-list-subheader class="text-caption" v-if="section">
+                {{ section }}
+              </v-list-subheader>
+
+              <v-list-item
+                v-for="command in commands"
+                :key="command.id"
+                :value="command.id"
+                :active="command === activeCommand"
+                :lines="command.description ? 'two' : 'one'"
+                @click="executeCommand(command)"
+                class="px-3"
+                :class="{
+                  'opacity-70': command !== activeCommand,
+                }"
+                rounded="pill"
+                tabindex="-1"
+              >
+                <template #prepend>
+                  <v-icon :icon="command.icon" size="x-small" />
+                </template>
+
+                <v-list-item-title class="font-weight-regular">
+                  {{ command.title }}
+                </v-list-item-title>
+
+                <v-list-item-subtitle v-if="command.description">
+                  {{ command.description }}
+                </v-list-item-subtitle>
+
+                <template v-if="command.shortcut" #append>
+                  <div class="d-flex align-center ga-1 pe-2">
+                    <template
+                      v-for="(key, index) in command.shortcut"
+                      :key="index"
+                    >
+                      <v-kbd class="text-xs elevation-0 font-weight-medium">
+                        {{ key }}
+                      </v-kbd>
+                    </template>
+                  </div>
+                </template>
+              </v-list-item>
+
+              <v-divider />
             </template>
-            <v-list-item-title> No matching commands found </v-list-item-title>
-            <v-list-item-subtitle>
-              Try a different search term
-            </v-list-item-subtitle>
-          </v-list-item>
+          </template>
         </template>
 
         <template v-else>
-          <template
-            v-for="(commands, section) in groupedCommands"
-            :key="section"
-          >
-            <v-list-subheader class="text-caption" v-if="section">
-              {{ section }}
-            </v-list-subheader>
-
-            <v-list-item
-              v-for="command in commands"
-              :key="command.id"
-              :value="command.id"
-              :active="command === activeCommand"
-              :lines="command.description ? 'two' : 'one'"
-              @click="executeCommand(command)"
-              tabindex="-1"
-            >
-              <template #prepend>
-                <v-icon :icon="command.icon" size="x-small" />
-              </template>
-
-              <v-list-item-title>
-                {{ command.title }}
-              </v-list-item-title>
-
-              <v-list-item-subtitle v-if="command.description">
-                {{ command.description }}
-              </v-list-item-subtitle>
-
-              <template v-if="command.shortcut" #append>
-                <div class="d-flex align-center ga-1 pe-2">
-                  <template
-                    v-for="(key, index) in command.shortcut"
-                    :key="index"
-                  >
-                    <v-kbd class="text-xs elevation-0 bg-accent">
-                      {{ key }}
-                    </v-kbd>
-                  </template>
-                </div>
-              </template>
-            </v-list-item>
-
-            <v-divider />
-          </template>
+          <palette-field />
         </template>
       </v-list>
     </v-card>
@@ -296,10 +316,19 @@ watch(isOpen, (v) => {
 </template>
 
 <style scoped lang="scss">
-.v-list {
-  .v-list-item {
-    scroll-margin-top: 8px;
-    scroll-margin-bottom: 8px;
+:deep(.command-palette-dialog) {
+  position: fixed !important;
+  top: 80px !important;
+  margin-top: 0 !important;
+}
+</style>
+
+<style lang="scss">
+.command-palette {
+  .v-field--variant-plain {
+    .v-field__prepend-inner {
+      align-items: center !important;
+    }
   }
 }
 </style>

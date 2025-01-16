@@ -3,9 +3,6 @@ import BaseViewChip from '../BaseViewChip.vue';
 import { useSnackbarStore } from '@/stores/snackbar';
 import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
-import { useProjectUsersService } from '@/services/useProjectUsersService';
-import { useListStagesService } from '@/services/useListStagesService';
-import { useAuthStore } from '@/stores/auth';
 import QuickFilters from './QuickFilters.vue';
 import AdvancedFilters from './AdvancedFilters.vue';
 import { filterUtils } from '@/utils/filter';
@@ -15,15 +12,14 @@ import {
   type FieldFilter,
   type FieldFilterOption,
   type FilterViewOptions,
-  type List,
 } from '@tillywork/shared';
-import { useFields } from '@/composables/useFields';
 import posthog from 'posthog-js';
+import { useFieldQueryStore } from '@/stores/field.query';
+import { useQueryStore } from '@/stores/query';
 
-const { filters, viewId, list } = defineProps<{
+const { filters, viewId } = defineProps<{
   filters?: ViewFilter;
   viewId: number;
-  list: List;
 }>();
 const emit = defineEmits(['save', 'update']);
 
@@ -39,27 +35,8 @@ const isSnackbarOpen = ref(false);
 const snackbarId = ref<number>();
 
 const { showSnackbar, closeSnackbar } = useSnackbarStore();
-const { project } = storeToRefs(useAuthStore());
-
-const { useProjectUsersQuery } = useProjectUsersService();
-
-const cardTypeId = computed(() => list.defaultCardType.id);
-const listId = computed(() => list.id);
-
-const { filterableFields } = useFields({
-  cardTypeId,
-  listId,
-});
-
-const { data: users } = useProjectUsersQuery({
-  projectId: project.value!.id,
-  select: (projectUsers) => projectUsers.map((pj) => pj.user),
-});
-
-const listStagesService = useListStagesService();
-const { data: listStages } = listStagesService.useGetListStagesQuery({
-  listId,
-});
+const { listStages, users } = storeToRefs(useQueryStore());
+const { filterableFields } = storeToRefs(useFieldQueryStore());
 
 const filtersMenuWidth = computed(() =>
   viewType.value === 'quick' ? 300 : 750
@@ -196,7 +173,10 @@ function toggleViewType() {
   }
 }
 
-//TODO debounce changes
+onBeforeUnmount(() => {
+  closeSaveSnackbar();
+});
+
 watch(
   filtersCopy,
   () => {

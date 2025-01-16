@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { useInputs, type UseInputsProps } from '@/composables/useInputs';
-import { useUsers } from '@/composables/useUsers';
+import { useQueryStore } from '@/stores/query';
 
 const props = defineProps<UseInputsProps>();
+const emit = defineEmits(['update:modelValue']);
 
 const attrs = useAttrs();
-const emit = defineEmits();
-const { users } = useUsers();
 const { isItemSelected, toggleItemSelection, selected } = useInputs(
   props,
   emit
 );
+
+const { users } = storeToRefs(useQueryStore());
 
 function getUser(id: number) {
   return users.value?.find((user) => user.id === id);
@@ -37,7 +38,7 @@ function getUser(id: number) {
         <template v-if="!selected.length"> Assignee </template>
         <template v-else>
           <template v-if="selected.length === 1">
-            {{ getUser(selected[0])?.firstName }}
+            {{ getUser(+selected[0])?.firstName }}
           </template>
           <template v-else> Assignee ({{ selected.length }}) </template>
         </template>

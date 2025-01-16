@@ -60,7 +60,7 @@ export const useStateStore = defineStore('state', {
         [WorkspaceTypes.AGILE_PROJECTS]: undefined,
       };
     },
-    getCurrentListBySelectedModule() {
+    getCurrentList() {
       if (this.selectedModule) {
         return this.currentList[this.selectedModule];
       }

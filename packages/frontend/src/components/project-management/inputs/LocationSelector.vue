@@ -2,11 +2,10 @@
 import { useListsService } from '@/services/useListsService';
 import { useSpacesService } from '@/services/useSpacesService';
 import { useAuthStore } from '@/stores/auth';
-import type { Space } from '../spaces/types';
-import type { List } from '../lists/types';
 import stringUtils from '@/utils/string';
 import { VTextField } from 'vuetify/components';
 import type { VNode } from 'vue';
+import type { List, Space } from '@tillywork/shared';
 
 export type LocationSelection = {
   location: Space | List;

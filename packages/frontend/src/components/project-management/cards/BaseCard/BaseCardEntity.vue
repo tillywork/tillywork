@@ -5,16 +5,12 @@ import { useStateStore } from '@/stores/state';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
 
-import { useListStagesService } from '@/services/useListStagesService';
 import { useCardsService } from '@/services/useCardsService';
 
-import { useFields } from '@/composables/useFields';
 import { useCard } from '@/composables/useCard';
-import { useCrm } from '@/composables/useCrm';
 
 import {
   CardTypeLayout,
-  ListType,
   WorkspaceTypes,
   type Card,
   type ListStage,
@@ -24,6 +20,8 @@ import BaseField from '@/components/common/fields/BaseField.vue';
 import ActivityInput from '@/components/common/inputs/CrmActivityInput/ActivityInput.vue';
 import ActivityTimeline from '../BaseCardActivityTimeline/ActivityTimeline.vue';
 import BaseCardToolbar from './BaseCardToolbar.vue';
+import { useFieldQueryStore } from '@/stores/field.query';
+import { useQueryStore } from '@/stores/query';
 
 const { card } = defineProps<{
   card: Card;
@@ -32,28 +30,16 @@ const { card } = defineProps<{
 const { workspace } = storeToRefs(useAuthStore());
 const { setTitle } = useStateStore();
 const { showSnackbar } = useSnackbarStore();
+const { listStages, list } = storeToRefs(useQueryStore());
 
 const cardCopy = ref(cloneDeep(card));
 
 const { updateFieldValue } = useCard();
-const { getListByCardType } = useCrm();
-
-const cardTypeId = computed(() => card.type.id);
-const list = computed(() => getListByCardType(card.type));
-const listId = computed(() => list.value?.id ?? 0);
-const listStagesEnabled = computed(() => !!list.value);
 
 const { useUpdateCardListMutation } = useCardsService();
 const { mutateAsync: updateCardStage } = useUpdateCardListMutation();
-const { useGetListStagesQuery } = useListStagesService();
-const { data: listStages } = useGetListStagesQuery({
-  listId,
-  enabled: listStagesEnabled,
-});
 
-const { fields, titleField, photoField } = useFields({
-  cardTypeId,
-});
+const { fields, titleField, photoField } = storeToRefs(useFieldQueryStore());
 
 function getPersonName(): string {
   let name = '';

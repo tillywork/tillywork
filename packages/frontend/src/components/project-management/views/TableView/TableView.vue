@@ -5,11 +5,7 @@ import {
   useVueTable,
   type Column,
 } from '@tanstack/vue-table';
-import { useListStagesService } from '@/services/useListStagesService';
-import { useProjectUsersService } from '@/services/useProjectUsersService';
 import TableViewGroup from './TableViewGroup.vue';
-import { useAuthStore } from '@/stores/auth';
-import { useFields } from '@/composables/useFields';
 import type { TableColumnDef } from './types';
 import {
   CardTypeLayout,
@@ -17,8 +13,8 @@ import {
   type List,
   type ListGroup,
 } from '@tillywork/shared';
-
-const isLoading = defineModel<boolean>('loading');
+import { useFieldQueryStore } from '@/stores/field.query';
+import { useFields } from '@/composables/useFields';
 
 const props = defineProps<{
   list: List;
@@ -28,10 +24,9 @@ const props = defineProps<{
 
 const expandedState = ref<Record<string, boolean>>();
 
-const { titleField, fields, sortFieldsByViewColumns } = useFields({
-  cardTypeId: props.list.defaultCardType.id,
-  listId: props.list.id,
-});
+const { sortFieldsByViewColumns } = useFields({});
+
+const { titleField, fields } = storeToRefs(useFieldQueryStore());
 
 const viewColumnIds = computed(() =>
   props.view.options.columns?.map((columnId) => columnId)
@@ -93,18 +88,6 @@ const columns = computed<TableColumnDef[]>(() => {
   }));
 
   return [...defaultColumns, ...viewColumns];
-});
-
-const { project } = storeToRefs(useAuthStore());
-
-const listsStagesService = useListStagesService();
-const { data: listStages } = listsStagesService.useGetListStagesQuery({
-  listId: props.view.listId,
-});
-
-const projectUsersService = useProjectUsersService();
-const { data: projectUsers } = projectUsersService.useProjectUsersQuery({
-  projectId: project.value!.id,
 });
 
 const table = useVueTable({
@@ -242,12 +225,9 @@ function getColumnSortIcon(column: Column<ListGroup, unknown>) {
           "
         >
           <table-view-group
-            v-model:loading="isLoading"
             :list-group="listGroup"
-            :list-stages="listStages ?? []"
             :list
             :view
-            :project-users="projectUsers ?? []"
             :table
             :column-sizes="columnSizes"
             :no-group-banners="noGroupBanners"

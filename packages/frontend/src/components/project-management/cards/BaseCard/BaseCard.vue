@@ -17,6 +17,10 @@ watch(
   (v) => setCurrentCard(v),
   { immediate: true }
 );
+
+onBeforeUnmount(() => {
+  setCurrentCard(null);
+});
 </script>
 
 <template>

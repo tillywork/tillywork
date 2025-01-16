@@ -6,26 +6,23 @@ import { useDialogStore } from '@/stores/dialog';
 import { useAuthStore } from '@/stores/auth';
 import { useStateStore } from '@/stores/state';
 import type { Workspace } from '@tillywork/shared';
+import { useQueryStore } from '@/stores/query';
 
 const onlyIcon = defineModel<boolean>('onlyIcon');
 
 const workspaceSettingsMenu = ref(false);
+const selectWorkspaceMenu = ref(false);
 
 const dialog = useDialogStore();
-const workspacesService = useWorkspacesService();
-const selectWorkspaceMenu = ref(false);
 const authStore = useAuthStore();
 const { workspace: selectedWorkspace } = storeToRefs(authStore);
-const { selectedModule } = storeToRefs(useStateStore());
 const { toggleFreezeRail } = useStateStore();
+const { workspaces } = storeToRefs(useQueryStore());
 
-const workspacesEnabled = computed(() => !!selectedModule.value);
-const workspaceQuery = workspacesService.useGetWorkspacesQuery({
-  type: selectedModule,
-  enabled: workspacesEnabled,
-});
+const { useDeleteWorkspaceMutation } = useWorkspacesService();
+
 const { mutateAsync: deleteWorkspace, isPending: isDeleteLoading } =
-  workspacesService.useDeleteWorkspaceMutation();
+  useDeleteWorkspaceMutation();
 
 const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
@@ -136,7 +133,7 @@ watch([workspaceSettingsMenu, selectWorkspaceMenu], () => {
       </div>
       <v-list class="px-3" nav :lines="false">
         <v-list-item
-          v-for="workspace in workspaceQuery.data.value"
+          v-for="workspace in workspaces"
           :key="workspace.id"
           @click="handleSelectWorkspace(workspace)"
           :active="selectedWorkspace?.id === workspace.id"

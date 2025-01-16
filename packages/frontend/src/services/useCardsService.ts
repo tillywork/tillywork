@@ -86,8 +86,8 @@ export const useCardsService = () => {
     });
   }
 
-  async function getCard(cardId: number): Promise<Card> {
-    return sendRequest(`/cards/${cardId}`, {
+  async function getCard(cardId: MaybeRef<number>): Promise<Card> {
+    return sendRequest(`/cards/${toValue(cardId)}`, {
       method: 'GET',
     });
   }
@@ -154,11 +154,17 @@ export const useCardsService = () => {
     });
   }
 
-  function useGetCardQuery({ cardId }: { cardId: Ref<number> }) {
+  function useGetCardQuery({
+    cardId,
+    enabled,
+  }: {
+    cardId: MaybeRef<number>;
+    enabled?: MaybeRef<boolean>;
+  }) {
     return useQuery({
       queryKey: ['cards', cardId],
-      queryFn: () => getCard(cardId.value),
-      retry: false,
+      queryFn: () => getCard(cardId),
+      enabled,
     });
   }
 
@@ -229,8 +235,8 @@ export const useCardsService = () => {
       queryKey: [
         'cards',
         {
-          workspaceId: toValue(workspaceId),
-          cardTypeId: toValue(cardTypeId),
+          workspaceId,
+          cardTypeId,
         },
       ],
       queryFn: () => searchCards({ keyword, workspaceId, cardTypeId }),

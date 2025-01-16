@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Card } from './types';
+import type { Card } from '@tillywork/shared';
 
 const props = withDefaults(
   defineProps<{

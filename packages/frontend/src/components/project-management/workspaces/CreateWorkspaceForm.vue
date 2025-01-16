@@ -4,16 +4,14 @@ import { useAuthStore } from '@/stores/auth';
 import validationUtils from '@/utils/validation';
 import { WorkspaceTypes, type Workspace } from '@tillywork/shared';
 
-const props = defineProps<{
+const { loading, cardClass, data } = defineProps<{
   loading?: boolean;
   cardClass?: string;
   data?: Partial<Workspace>;
 }>();
 const emit = defineEmits(['submit']);
 
-const { rules } = validationUtils;
-const authStore = useAuthStore();
-const { user, project } = storeToRefs(authStore);
+const { user, project } = storeToRefs(useAuthStore());
 
 const workspaceForm = ref<VForm>();
 const workspaceDto = ref<Partial<Workspace>>({
@@ -21,8 +19,10 @@ const workspaceDto = ref<Partial<Workspace>>({
   projectId: project.value!.id,
   ownerId: user.value!.id,
   type: WorkspaceTypes.PROJECT_MANAGEMENT,
-  ...props.data,
+  ...data,
 });
+
+const { rules } = validationUtils;
 
 async function handleSubmit() {
   const isValid = await workspaceForm.value?.validate();
@@ -38,7 +38,12 @@ async function handleSubmit() {
     @submit.prevent="handleSubmit"
     validate-on="submit"
   >
-    <v-card width="350" class="pt-2 mt-6 mx-auto" :class="cardClass">
+    <v-card
+      width="350"
+      class="pt-2 mt-6 mx-auto"
+      :class="cardClass"
+      color="transparent"
+    >
       <v-text-field
         label="Name"
         hint="The name of your workspace"
@@ -48,7 +53,13 @@ async function handleSubmit() {
         autofocus
       />
       <p class="mt-6 ms-2 text-subtitle-2">Workspace App</p>
-      <v-list selectable lines="one" mandatory class="user-select-none">
+      <v-list
+        selectable
+        lines="one"
+        mandatory
+        class="user-select-none"
+        bg-color="transparent"
+      >
         <v-list-item
           class="text-body-3"
           rounded="md"

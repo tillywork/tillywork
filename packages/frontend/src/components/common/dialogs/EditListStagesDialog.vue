@@ -3,7 +3,6 @@ import { DIALOGS, UpsertDialogMode } from './types';
 import type { ListStage } from '@tillywork/shared';
 
 import { useDialogStore } from '@/stores/dialog';
-import { useQueryClient } from '@tanstack/vue-query';
 
 import { useListStagesService } from '@/services/useListStagesService';
 
@@ -47,8 +46,6 @@ const selectedListId = ref<number | undefined>(
 );
 
 const stagesEnabled = computed<boolean>(() => !!selectedListId.value);
-
-const queryClient = useQueryClient();
 
 const { useGetListStagesQuery, useReorderListStageMutation } =
   useListStagesService();
@@ -98,8 +95,9 @@ async function handleReorder() {
 <template>
   <v-card
     v-if="selectedListId"
-    color="surface"
-    elevation="24"
+    color="dialog"
+    elevation="12"
+    border="thin"
     class="py-4 px-2"
   >
     <v-card-title class="d-flex align-center">
@@ -115,7 +113,7 @@ async function handleReorder() {
       Define your work processes and pipelines using list stages.
     </v-card-subtitle>
     <v-card-text class="pa-2">
-      <v-table>
+      <v-table class="bg-transparent">
         <thead>
           <tr>
             <th>Current stages</th>

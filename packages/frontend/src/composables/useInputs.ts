@@ -1,9 +1,10 @@
 import type { FieldItem } from '@tillywork/shared';
 import { isEqual } from 'lodash';
+import type { MaybeRef } from 'vue';
 
 export interface UseInputsProps {
   modelValue?: string[];
-  items?: FieldItem[];
+  items?: MaybeRef<FieldItem[]>;
   placeholder?: string;
   multiple?: boolean;
   icon?: string;
@@ -33,17 +34,17 @@ export function useInputs(props: UseInputsProps, emit: UseInputsEmit) {
 
   const selectedItems = computed(() =>
     selected.value
-      .map((label) => props.items?.find((item) => item.item === label))
+      .map((label) => toValue(props.items)?.find((item) => item.item === label))
       .filter((item): item is FieldItem => item !== undefined)
   );
 
   const filteredItems = computed(() => {
     if (search.value) {
-      return props.items?.filter((item) =>
+      return toValue(props.items)?.filter((item) =>
         item.item.toLocaleLowerCase().includes(search.value.toLocaleLowerCase())
       );
     }
-    return props.items;
+    return toValue(props.items);
   });
 
   function isItemSelected(item: FieldItem): boolean {

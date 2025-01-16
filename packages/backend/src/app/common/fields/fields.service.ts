@@ -2,6 +2,7 @@ import {
     BadRequestException,
     ConflictException,
     Injectable,
+    Logger,
     NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -61,7 +62,7 @@ export class FieldsService {
         } else if (cardTypeId) {
             const cardType = await this.fieldsRepository.manager
                 .getRepository(CardType)
-                .findOne({
+                .findOneOrFail({
                     where: {
                         id: cardTypeId,
                     },

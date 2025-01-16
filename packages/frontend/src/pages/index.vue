@@ -10,12 +10,11 @@ definePage({
   },
 });
 
-const { setCurrentList, navigateToLastList, getCurrentListBySelectedModule } =
-  useStateStore();
+const { setCurrentList, navigateToLastList, getCurrentList } = useStateStore();
 const authStore = useAuthStore();
 const { workspace } = storeToRefs(authStore);
 
-const currentList = computed(() => getCurrentListBySelectedModule());
+const currentList = computed(() => getCurrentList());
 const workspaceId = computed(() => workspace.value?.id ?? 0);
 
 const { useGetListsQuery } = useListsService();

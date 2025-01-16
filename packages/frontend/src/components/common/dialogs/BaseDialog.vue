@@ -62,7 +62,7 @@ function handleAfterLeave(index: number) {
   >
     <v-dialog
       :model-value="true"
-      opacity="0.1"
+      :scrim="false"
       :width="
         dialog.options?.fullscreen ? undefined : dialog.options?.width ?? 750
       "
@@ -75,8 +75,19 @@ function handleAfterLeave(index: number) {
       :fullscreen="dialog.options?.fullscreen"
       :persistent="dialog.options?.persistent"
       @after-leave="handleAfterLeave(index)"
+      content-class="base-dialog"
     >
       <component :is="dialog.component" />
     </v-dialog>
   </template>
 </template>
+
+
+
+<style scoped lang="scss">
+:deep(.base-dialog) {
+  position: fixed !important;
+  top: 80px !important;
+  margin-top: 0 !important;
+}
+</style>
