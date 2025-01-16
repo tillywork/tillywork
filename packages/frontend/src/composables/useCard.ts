@@ -28,16 +28,11 @@ export const useCard = () => {
     card: Card;
     field: Field;
     v: any;
-  }) {
+  }): Promise<Card> {
     const cardCopy = ref(cloneDeep(card));
     cardCopy.value.data[field.slug] = normalizeFieldValue({ v, field });
 
-    updateCard(cardCopy.value).catch(() => {
-      showSnackbar({
-        message: 'Something went wrong, please try again.',
-        color: 'error',
-      });
-    });
+    return updateCard(cardCopy.value);
   }
 
   function normalizeFieldValue({ v, field }: { v: any; field: Field }) {

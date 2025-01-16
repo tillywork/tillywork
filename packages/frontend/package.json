@@ -4,6 +4,7 @@
     "scripts": {},
     "license": "MIT",
     "dependencies": {
+        "@github/hotkey": "^3.1.1",
         "@mdi/font": "^7.4.47",
         "@tanstack/vue-query": "^5.31.0",
         "@tanstack/vue-query-devtools": "^5.32.0",

@@ -11,17 +11,24 @@ import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue
 import PaletteField from './PaletteField/PaletteField.vue';
 
 import posthog from 'posthog-js';
+import { useListKeyboardNavigation } from '@/composables/useListKeyboardNavigation';
 
-const search = ref('');
-const activeIndex = ref(0);
-const listRef = ref<VList>();
-
-const { commands, isOpen, currentField } = storeToRefs(useCommandStore());
+const {
+  commands,
+  isOpen,
+  currentField,
+  searchIcon,
+  searchPlaceholder,
+  search,
+} = storeToRefs(useCommandStore());
 const { isInputFocused, currentCard } = storeToRefs(useStateStore());
 
-const { currentKeyCombo } = useKeyboardShortcuts();
-
 const isFieldMode = computed(() => !!currentField.value);
+
+const { activeIndex, containerRef } = useListKeyboardNavigation({
+  enabled: computed(() => isOpen.value && !isFieldMode.value),
+});
+const { currentKeyCombo } = useKeyboardShortcuts();
 
 const filteredCommands = computed(() => {
   const searchTerm = search.value.toLowerCase();
@@ -58,14 +65,6 @@ function handleKeyDown(e: KeyboardEvent) {
   }
 
   switch (e.key) {
-    case 'ArrowDown':
-      e.preventDefault();
-      navigateList('down');
-      break;
-    case 'ArrowUp':
-      e.preventDefault();
-      navigateList('up');
-      break;
     case 'Enter':
       e.preventDefault();
       if (activeCommand.value) {
@@ -94,36 +93,9 @@ function handleKeyDown(e: KeyboardEvent) {
   }
 }
 
-function navigateList(direction: 'up' | 'down') {
-  const totalCommands = filteredCommands.value.length;
-  if (totalCommands === 0) return;
-
-  if (direction === 'down') {
-    activeIndex.value = (activeIndex.value + 1) % totalCommands;
-  } else {
-    activeIndex.value = (activeIndex.value - 1 + totalCommands) % totalCommands;
-  }
-
-  nextTick(() => {
-    ensureActiveCommandVisible();
-  });
-}
-
-function ensureActiveCommandVisible() {
-  const list = listRef.value?.$el;
-  const activeItem = list?.querySelector('.v-list-item--active');
-
-  if (activeItem) {
-    activeItem.scrollIntoView({
-      behavior: 'smooth',
-      block: 'nearest',
-    });
-  }
-}
-
-function executeCommand(command: Command) {
-  command.action();
-  posthog.capture('Command Executed', { command: command.id });
+function executeCommand(command: Command, viaShortcut: boolean = false) {
+  command.action(command);
+  posthog.capture('Command Executed', { command: command.id, viaShortcut });
 
   if (!command.keepPaletteOpen) {
     closeCommandPalette();
@@ -133,6 +105,8 @@ function executeCommand(command: Command) {
 function exitFieldMode() {
   currentField.value = null;
   search.value = '';
+  searchIcon.value = null;
+  searchPlaceholder.value = null;
   activeIndex.value = 0;
 }
 
@@ -155,7 +129,7 @@ function handleShortcut(event: KeyboardEvent) {
 
   if (command) {
     event.preventDefault();
-    command.action();
+    executeCommand(command, true);
   }
 }
 
@@ -207,6 +181,7 @@ onBeforeUnmount(() => {
 watch(isOpen, (v) => {
   if (!v) {
     isInputFocused.value = false;
+    currentField.value = null;
   } else {
     posthog.capture('Command Palette Opened');
   }
@@ -218,14 +193,13 @@ watch(isOpen, (v) => {
     v-model="isOpen"
     :scrim="false"
     @after-leave="handleAfterLeave"
-    location="bottom"
-    location-strategy="static"
     width="100%"
     max-width="600"
+    content-class="command-palette-dialog"
   >
     <v-card class="command-palette" elevation="12" color="dialog" border="thin">
       <div class="px-4 pb-2 border-b-thin">
-        <div v-if="currentCard" class="ms-n2 pt-4">
+        <div v-if="currentCard" class="pt-4">
           <base-card-chip
             :card="currentCard"
             width="fit-content"
@@ -234,7 +208,7 @@ watch(isOpen, (v) => {
         </div>
         <v-text-field
           v-model="search"
-          placeholder="Type a command or search..."
+          :placeholder="searchPlaceholder ?? 'Type a command or search...'"
           single-line
           hide-details
           variant="plain"
@@ -243,7 +217,7 @@ watch(isOpen, (v) => {
           autocomplete="off"
           autofocus
           @input="activeIndex = 0"
-          prepend-inner-icon="mdi-magnify"
+          :prepend-inner-icon="searchIcon ?? 'mdi-magnify'"
         >
           <template #append-inner v-if="search">
             <v-kbd class="text-caption elevation-0 font-weight-medium"
@@ -254,7 +228,7 @@ watch(isOpen, (v) => {
       </div>
 
       <v-list
-        ref="listRef"
+        ref="containerRef"
         tabindex="-1"
         max-height="400"
         nav
@@ -342,11 +316,10 @@ watch(isOpen, (v) => {
 </template>
 
 <style scoped lang="scss">
-.v-list {
-  .v-list-item {
-    scroll-margin-top: 8px;
-    scroll-margin-bottom: 8px;
-  }
+:deep(.command-palette-dialog) {
+  position: fixed !important;
+  top: 80px !important;
+  margin-top: 0 !important;
 }
 </style>
 

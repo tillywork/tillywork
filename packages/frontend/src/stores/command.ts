@@ -22,16 +22,19 @@ import { useFieldQueryStore } from './field.query';
 
 export const useCommandStore = defineStore('command', () => {
   const isOpen = ref(false);
-  const currentField = ref<Field | null>(null);
+  const search = ref('');
+  const searchPlaceholder = ref<string | null>();
+  const searchIcon = ref<string | null>();
+  const currentField = ref<Field | null>();
   const currentList = computed(() => getCurrentList());
 
   const dialogStore = useDialogStore();
   const themeStore = useThemeStore();
-  const { workspace } = storeToRefs(useAuthStore());
+  const { workspace, user } = storeToRefs(useAuthStore());
   const { getCurrentList } = useStateStore();
   const { selectedModule, currentCard } = storeToRefs(useStateStore());
 
-  const { confirmDelete, copyLink } = useCard();
+  const { confirmDelete, copyLink, updateFieldValue } = useCard();
   const router = useRouter();
   const { fields, assigneeField } = storeToRefs(useFieldQueryStore());
 
@@ -195,9 +198,10 @@ export const useCommandStore = defineStore('command', () => {
           section: '',
           icon: assigneeField.value.icon,
           title: 'Assign to..',
-          action: () => (currentField.value = assigneeField.value as Field),
+          action: (command: Command) => setCommandPaletteField(command),
           shortcut: ['A'],
           keepPaletteOpen: true,
+          field: assigneeField.value,
         });
 
         commands.push({
@@ -205,9 +209,19 @@ export const useCommandStore = defineStore('command', () => {
           section: '',
           icon: assigneeField.value.icon,
           title: 'Assign to me',
-          action: () => (currentField.value = assigneeField.value as Field),
+          action: () => {
+            if (!currentCard.value || !assigneeField.value || !user.value)
+              return;
+
+            updateFieldValue({
+              card: currentCard.value,
+              field: assigneeField.value,
+              v: [user.value.id.toString()],
+            }).then((card) => {
+              currentCard.value = card;
+            });
+          },
           shortcut: ['I'],
-          keepPaletteOpen: true,
         });
       }
 
@@ -224,8 +238,9 @@ export const useCommandStore = defineStore('command', () => {
           section: '',
           icon: field.icon,
           title: setCommandTitleByField(field),
-          action: () => (currentField.value = field),
+          action: (command: Command) => setCommandPaletteField(command),
           keepPaletteOpen: true,
+          field,
         }));
 
       fieldCommands.forEach((fc) => commands.push(fc));
@@ -239,21 +254,21 @@ export const useCommandStore = defineStore('command', () => {
       });
 
       commands.push({
-        id: 'open-card',
-        section: 'Navigation',
-        icon: 'mdi-open-in-new',
-        title: `Open ${currentCard.value.type.name.toLowerCase()}`,
-        action: () => router.push(`/card/${currentCard.value?.id}`),
-        shortcut: ['O'],
-      });
-
-      commands.push({
         id: 'delete-card',
         section: '',
         icon: 'mdi-delete-outline',
         title: `Delete ${currentCard.value.type.name.toLowerCase()}`,
         action: () => confirmDelete(currentCard.value as Card),
         shortcut: ['DEL'],
+      });
+
+      commands.push({
+        id: 'open-card',
+        section: 'Navigation',
+        icon: 'mdi-open-in-new',
+        title: `Open ${currentCard.value.type.name.toLowerCase()}`,
+        action: () => router.push(`/card/${currentCard.value?.id}`),
+        shortcut: ['O'],
       });
     }
 
@@ -274,8 +289,23 @@ export const useCommandStore = defineStore('command', () => {
     return `Update ${field.name.toLowerCase()}`;
   }
 
+  function setCommandPaletteField(command: Command) {
+    if (command.field) {
+      currentField.value = command.field;
+      searchIcon.value = command.field.icon;
+      searchPlaceholder.value = command.title;
+    }
+
+    if (!isOpen.value) {
+      isOpen.value = true;
+    }
+  }
+
   return {
     isOpen,
+    search,
+    searchIcon,
+    searchPlaceholder,
     commands,
     currentField,
   };
