@@ -14,15 +14,13 @@ export class CardTypesSideEffectsService {
     ) {}
 
     async postCreate({ cardType }: { cardType: CardType }): Promise<CardType> {
-        if (cardType.createdByType === "system") {
-            cardType.workspace = await this.workspacesRepo.findOne({
-                where: {
-                    id: cardType.workspace.id,
-                },
-            });
+        cardType.workspace = await this.workspacesRepo.findOne({
+            where: {
+                id: cardType.workspace.id,
+            },
+        });
 
-            await this.cardTypeFieldsFactory.createFields(cardType);
-        }
+        await this.cardTypeFieldsFactory.createFields(cardType);
 
         return cardType;
     }
