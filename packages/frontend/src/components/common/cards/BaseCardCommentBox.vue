@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
+import BaseEditorInput from '@/components/common/inputs/BaseEditor/BaseEditorInput.vue';
 import { useBaseEditor } from '@/composables/useBaseEditor';
 import { leaderKey } from '@/utils/keys';
 import { type Content } from '@tiptap/vue-3';

@@ -8,26 +8,25 @@ import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 
 import {
   dayjs,
-  TASK_STATUS_OPTIONS,
+  MEETING_OUTCOME_OPTIONS,
+  MeetingActivityOutcome,
+  type Card,
   type CardActivity,
-  type TaskActivityStatus,
 } from '@tillywork/shared';
 import { DIALOGS } from '@/components/common/dialogs/types';
 
-import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
-import BaseUserSelector from '@/components/common/inputs/BaseUserSelector/BaseUserSelector.vue';
+import BaseEditorInput from '@/components/common/inputs/BaseEditor/BaseEditorInput.vue';
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 import SimpleDropdownSelector from '@/components/common/inputs/SimpleDropdownSelector.vue';
-import { useQueryStore } from '@/stores/query';
 
-const { activity } = defineProps<{
+const { activity, card } = defineProps<{
   activity: CardActivity;
+  card: Card;
 }>();
 
 const { user } = storeToRefs(useAuthStore());
 const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
-const { users } = storeToRefs(useQueryStore());
 
 const { getUserFullName } = useUsersService();
 const { useDeleteActivityMutation, useUpdateActivityMutation } =
@@ -47,15 +46,15 @@ function openConfirmDeleteDialog() {
     dialog: DIALOGS.CONFIRM,
     data: {
       title: 'Confirm',
-      message: 'Are you sure you want to delete this task?',
+      message: 'Are you sure you want to delete this meeting?',
       onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
-      onConfirm: () => deleteTask(),
+      onConfirm: () => deleteMeeting(),
       isLoading: isDeleting.value,
     },
   });
 }
 
-function deleteTask() {
+function deleteMeeting() {
   deleteActivity({
     activityId: activity.id,
   })
@@ -71,7 +70,7 @@ function deleteTask() {
     });
 }
 
-function updateTask(data: Partial<CardActivity>) {
+function updateMeeting(data: Partial<CardActivity>) {
   if (!isUpdating.value && !isDeleting.value) {
     updateActivity({
       activity: {
@@ -87,35 +86,24 @@ function updateTask(data: Partial<CardActivity>) {
   }
 }
 
-function updateTaskAssignee(assignee: number[]) {
+function updateMeetingAt(meetingAt: string) {
   const newContent = {
     ...activity.content,
-    assignee,
+    meetingAt,
   };
 
-  updateTask({
+  updateMeeting({
     content: newContent,
   });
 }
 
-function updateTaskStatus(status: TaskActivityStatus) {
+function updateMeetingOutcome(outcome: MeetingActivityOutcome) {
   const newContent = {
     ...activity.content,
-    status,
+    outcome,
   };
 
-  updateTask({
-    content: newContent,
-  });
-}
-
-function updateTaskDueDate(dueAt: string) {
-  const newContent = {
-    ...activity.content,
-    dueAt,
-  };
-
-  updateTask({
+  updateMeeting({
     content: newContent,
   });
 }
@@ -143,7 +131,7 @@ function updateTaskDueDate(dueAt: string) {
           }}
         </span>
         <span class="text-surface-variant">
-          &nbsp;created a task
+          &nbsp;logged a meeting
           {{ dayjs(activity.createdAt).fromNow() }}
         </span>
         <v-spacer />
@@ -171,33 +159,21 @@ function updateTaskDueDate(dueAt: string) {
         </v-menu>
       </v-card-text>
       <v-card-text>
-        <base-editor-input v-model="activity.content.title" :heading="3" />
-        <base-editor-input
-          v-if="activity.content.description"
-          v-model:json="activity.content.description"
-        />
+        <base-editor-input v-model:json="activity.content.description" />
       </v-card-text>
       <v-card-actions class="px-3 border-t-thin">
         <simple-dropdown-selector
-          :model-value="activity.content.status"
-          :items="TASK_STATUS_OPTIONS"
-          @update:model-value="(v) => updateTaskStatus(v as TaskActivityStatus)"
-          icon="mdi-circle-slice-8"
-        />
-        <base-user-selector
-          v-if="users"
-          :model-value="activity.content.assignee"
-          @update:model-value="(v) => updateTaskAssignee(v as number[])"
-          :users
-          label="Assignee"
-          return-id
+          :model-value="activity.content.outcome"
+          @update:model-value="(v) => updateMeetingOutcome(v as MeetingActivityOutcome)"
+          :items="MEETING_OUTCOME_OPTIONS"
+          label="Meeting Outcome"
         />
         <base-date-picker
-          :model-value="activity.content.dueAt"
+          :model-value="activity.content.meetingAt"
+          @update:model-value="(v) => updateMeetingAt(v as string)"
           include-time
-          label="Due date"
+          label="Meeting At"
           icon="mdi-calendar"
-          @update:model-value="(v) => updateTaskDueDate(v as string)"
         />
       </v-card-actions>
     </v-card>

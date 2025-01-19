@@ -7,7 +7,7 @@ import { useCommandStore } from '@/stores/command';
 import { useStateStore } from '@/stores/state';
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts';
 
-import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
+import BaseCardChip from '@/components/common/cards/BaseCardChip.vue';
 import PaletteField from './PaletteField/PaletteField.vue';
 
 import posthog from 'posthog-js';

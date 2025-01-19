@@ -5,8 +5,8 @@ import {
   dayjs,
 } from '@tillywork/shared';
 
-import BaseEditorInput from '../../base/BaseEditor/BaseEditorInput.vue';
-import BaseCardCommentBox from '@/components/project-management/cards/BaseCardCommentBox.vue';
+import BaseEditorInput from '../../inputs/BaseEditor/BaseEditorInput.vue';
+import BaseCardCommentBox from '@/components/common/cards/BaseCardCommentBox.vue';
 import BaseUserSelector from '../BaseUserSelector/BaseUserSelector.vue';
 import BaseDatePicker from '../BaseDatePicker.vue';
 import SimpleDropdownSelector from '../SimpleDropdownSelector.vue';

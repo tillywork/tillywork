@@ -1,15 +1,23 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
-
-import { useUsersService } from '@/services/useUsersService';
-
-import { dayjs, type Card, type CardActivity } from '@tillywork/shared';
 import { useDialogStore } from '@/stores/dialog';
-import { DIALOGS } from '@/components/common/dialogs/types';
-import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 import { useSnackbarStore } from '@/stores/snackbar';
 
-import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
+import { useUsersService } from '@/services/useUsersService';
+import { useCardActivitiesService } from '@/services/useCardActivitiesService';
+
+import {
+  dayjs,
+  MESSAGE_CHANNEL_OPTIONS,
+  MessageActivityChannel,
+  type Card,
+  type CardActivity,
+} from '@tillywork/shared';
+import { DIALOGS } from '@/components/common/dialogs/types';
+
+import BaseEditorInput from '@/components/common/inputs/BaseEditor/BaseEditorInput.vue';
+import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
+import SimpleDropdownSelector from '@/components/common/inputs/SimpleDropdownSelector.vue';
 
 const { activity, card } = defineProps<{
   activity: CardActivity;
@@ -21,9 +29,13 @@ const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
 
 const { getUserFullName } = useUsersService();
-const { useDeleteActivityMutation } = useCardActivitiesService();
+const { useDeleteActivityMutation, useUpdateActivityMutation } =
+  useCardActivitiesService();
+
 const { mutateAsync: deleteActivity, isPending: isDeleting } =
   useDeleteActivityMutation();
+const { mutateAsync: updateActivity, isPending: isUpdating } =
+  useUpdateActivityMutation();
 
 const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
@@ -34,15 +46,15 @@ function openConfirmDeleteDialog() {
     dialog: DIALOGS.CONFIRM,
     data: {
       title: 'Confirm',
-      message: 'Are you sure you want to delete this comment?',
+      message: 'Are you sure you want to delete this message?',
       onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
-      onConfirm: () => deleteComment(),
+      onConfirm: () => deleteMessage(),
       isLoading: isDeleting.value,
     },
   });
 }
 
-function deleteComment() {
+function deleteMessage() {
   deleteActivity({
     activityId: activity.id,
   })
@@ -56,6 +68,44 @@ function deleteComment() {
     .finally(() => {
       dialog.closeDialog(confirmDialogIndex.value);
     });
+}
+
+function updateMessage(data: Partial<CardActivity>) {
+  if (!isUpdating.value && !isDeleting.value) {
+    updateActivity({
+      activity: {
+        id: activity.id,
+        ...data,
+      },
+    }).catch(() => {
+      showSnackbar({
+        message: 'Something went wrong, please try again.',
+        color: 'error',
+      });
+    });
+  }
+}
+
+function updateMessageSentAt(sentAt: string) {
+  const newContent = {
+    ...activity.content,
+    sentAt,
+  };
+
+  updateMessage({
+    content: newContent,
+  });
+}
+
+function updateMessageChannel(channel: MessageActivityChannel) {
+  const newContent = {
+    ...activity.content,
+    channel,
+  };
+
+  updateMessage({
+    content: newContent,
+  });
 }
 </script>
 
@@ -81,7 +131,7 @@ function deleteComment() {
           }}
         </span>
         <span class="text-surface-variant">
-          &nbsp;commented
+          &nbsp;logged a message
           {{ dayjs(activity.createdAt).fromNow() }}
         </span>
         <v-spacer />
@@ -109,8 +159,23 @@ function deleteComment() {
         </v-menu>
       </v-card-text>
       <v-card-text>
-        <base-editor-input v-model:json="activity.content" />
+        <base-editor-input v-model:json="activity.content.description" />
       </v-card-text>
+      <v-card-actions class="px-3 border-t-thin">
+        <simple-dropdown-selector
+          :model-value="activity.content.channel"
+          @update:model-value="(v) => updateMessageChannel(v as MessageActivityChannel)"
+          :items="MESSAGE_CHANNEL_OPTIONS"
+          label="Channel"
+        />
+        <base-date-picker
+          :model-value="activity.content.sentAt"
+          @update:model-value="(v) => updateMessageSentAt(v as string)"
+          include-time
+          label="Sent At"
+          icon="mdi-calendar"
+        />
+      </v-card-actions>
     </v-card>
   </v-timeline-item>
 </template>

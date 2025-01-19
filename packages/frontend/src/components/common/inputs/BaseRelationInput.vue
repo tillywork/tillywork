@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCardsService } from '@/services/useCardsService';
 import { useAuthStore } from '@/stores/auth';
-import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
+import BaseCardChip from '@/components/common/cards/BaseCardChip.vue';
 import type { Card, Field } from '@tillywork/shared';
 import { useFieldQueryStore } from '@/stores/field.query';
 

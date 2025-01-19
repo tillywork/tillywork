@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import BaseCard from '@/components/project-management/cards/BaseCard/BaseCard.vue';
+import BaseCard from '@/components/common/cards/BaseCard/BaseCard.vue';
 
 import { useCardsService } from '@/services/useCardsService';
 import { useStateStore } from '@/stores/state';

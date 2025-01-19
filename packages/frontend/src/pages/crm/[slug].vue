@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCrm } from '@/composables/useCrm';
-import BaseList from '@/components/project-management/lists/BaseList.vue';
+import BaseList from '@/components/common/lists/BaseList.vue';
 import { useStateStore } from '@/stores/state';
 import type { List } from '@tillywork/shared';
 

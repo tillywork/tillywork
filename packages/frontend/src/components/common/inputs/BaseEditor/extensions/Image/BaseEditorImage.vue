@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NodeViewWrapper, nodeViewProps } from '@tiptap/vue-3';
-import BaseResizable from '../../../BaseResizable.vue';
+import BaseResizable from '@/components/common/base/BaseResizable.vue';
 
 const props = defineProps(nodeViewProps);
 const menu = ref(false);

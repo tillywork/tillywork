@@ -20,9 +20,9 @@ import { useCard } from '@/composables/useCard';
 import { useFields } from '@/composables/useFields';
 
 import BaseField from '../../fields/BaseField.vue';
-import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
+import BaseCardChip from '@/components/common/cards/BaseCardChip.vue';
 import BaseListSelector from '../../inputs/BaseListSelector.vue';
-import BaseEditorInput from '../../base/BaseEditor/BaseEditorInput.vue';
+import BaseEditorInput from '../../inputs/BaseEditor/BaseEditorInput.vue';
 
 const dialog = useDialogStore();
 const { workspace } = storeToRefs(useAuthStore());

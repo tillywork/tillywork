@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { quickFilterDateOptions } from '@/components/project-management/views/BaseViewChipFilter/quickFilter';
+import { quickFilterDateOptions } from '@/components/common/views/BaseViewChipFilter/quickFilter';
 import type { QuickFilterDateOption } from '@tillywork/shared';
 import { isEqual } from 'lodash';
 

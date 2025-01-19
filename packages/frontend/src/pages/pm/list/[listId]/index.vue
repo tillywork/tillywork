@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import BaseList from '@/components/project-management/lists/BaseList.vue';
+import BaseList from '@/components/common/lists/BaseList.vue';
 import { useListsService } from '@/services/useListsService';
 import { useStateStore } from '@/stores/state';
 
