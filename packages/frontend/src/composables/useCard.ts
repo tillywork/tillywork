@@ -142,5 +142,6 @@ export const useCard = () => {
     confirmDelete,
     copyLink,
     getCardContextMenuItems,
+    updateCard,
   };
 };

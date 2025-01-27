@@ -4,6 +4,8 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
+  type InfiniteData,
+  type UseInfiniteQueryReturnType,
 } from '@tanstack/vue-query';
 import type { MaybeRef } from 'vue';
 import type {
@@ -23,7 +25,7 @@ export interface CardsData {
 export interface GetCardsParams {
   listId: number;
   hideCompleted: boolean;
-  hideChildren?: MaybeRef<boolean>;
+  hideChildren?: boolean;
   page: number;
   limit: number;
   sortBy?: SortOption[];
@@ -36,8 +38,8 @@ export interface GetGroupCardsInfiniteQueryParams {
   hideCompleted: MaybeRef<boolean>;
   hideChildren?: MaybeRef<boolean>;
   initialCards?: CardsData;
-  filters?: Ref<QueryFilter>;
-  sortBy?: Ref<SortOption[] | undefined>;
+  filters?: MaybeRef<QueryFilter>;
+  sortBy?: MaybeRef<SortOption[] | undefined>;
 }
 
 export interface SearchCardsParams {
@@ -69,7 +71,7 @@ export const useCardsService = () => {
       data: {
         listId,
         hideCompleted,
-        hideChildren: toValue(hideChildren),
+        hideChildren,
         page,
         limit,
         sortBy: sortBy[0]?.key,
@@ -113,13 +115,16 @@ export const useCardsService = () => {
     hideChildren,
     filters,
     sortBy,
-  }: GetGroupCardsInfiniteQueryParams) {
+  }: GetGroupCardsInfiniteQueryParams): UseInfiniteQueryReturnType<
+    InfiniteData<CardsData, unknown>,
+    Error
+  > {
     return useInfiniteQuery({
       queryFn: ({ pageParam = 1 }) =>
         getCards({
           listId: listId,
           hideCompleted: toValue(hideCompleted),
-          hideChildren,
+          hideChildren: toValue(hideChildren),
           page: pageParam,
           limit: 15,
           filters: toValue(filters),
@@ -134,13 +139,10 @@ export const useCardsService = () => {
         return lastPageParam + 1;
       },
       initialPageParam: 1,
-      initialData: () =>
-        initialCards
-          ? {
-              pages: [initialCards],
-              pageParams: [1],
-            }
-          : undefined,
+      initialData: () => ({
+        pages: [initialCards ? initialCards : { cards: [], total: 0 }],
+        pageParams: [1],
+      }),
     });
   }
 

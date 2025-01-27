@@ -4,6 +4,7 @@ import BaseViewChipSort from './BaseViewChipSort.vue';
 import TableView from './TableView/TableView.vue';
 import BoardView from './BoardView/BoardView.vue';
 import ListView from './ListView/ListView.vue';
+import GanttView from './GanttView/GanttView.vue';
 import BaseViewChipFilter from './BaseViewChipFilter/BaseViewChipFilter.vue';
 import BaseViewChipDisplay from './BaseViewChipDisplay.vue';
 
@@ -28,6 +29,7 @@ import {
   ViewTypes,
   type SortOption,
   type List,
+  ListGroupOptions,
 } from '@tillywork/shared';
 
 const { view, list } = defineProps<{
@@ -48,6 +50,11 @@ const queryClient = useQueryClient();
 const hideCompleted = computed(() => view.options.hideCompleted ?? false);
 const groupBy = computed({
   get() {
+    if (view.type === ViewTypes.GANTT) {
+      return {
+        type: ListGroupOptions.ALL,
+      };
+    }
     return view.options.groupBy;
   },
   set(v) {
@@ -226,6 +233,9 @@ watch(
       <template v-else-if="viewCopy.type === ViewTypes.LIST">
         <list-view :list :view="viewCopy" :groups="listGroups ?? []" no-headers>
         </list-view>
+      </template>
+      <template v-else-if="viewCopy.type === ViewTypes.GANTT">
+        <gantt-view :view="viewCopy" :list="list" :groups="listGroups ?? []" />
       </template>
       <template v-else>
         <span class="text-body-3 text-error">Error: Unknown view type</span>

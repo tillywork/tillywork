@@ -14,6 +14,8 @@ import {
   type FieldFilter,
   dayjs,
   type List,
+  type QueryFilter,
+  type ViewFilter,
 } from '@tillywork/shared';
 import { cloneDeep } from 'lodash';
 import { useCard } from './useCard';
@@ -21,6 +23,15 @@ import type { Row } from '@tanstack/vue-table';
 import { useListGroupsService } from '@/services/useListGroupsService';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useStateStore } from '@/stores/state';
+import objectUtils from '@/utils/object';
+import type { MaybeRef } from 'vue';
+
+interface QueryConfig {
+  hideCompleted: MaybeRef<boolean>;
+  hideChildren: MaybeRef<boolean>;
+  filters?: MaybeRef<QueryFilter>;
+  sortBy?: MaybeRef<SortOption[]>;
+}
 
 export const useListGroup = ({
   props,
@@ -37,11 +48,56 @@ export const useListGroup = ({
 }) => {
   const isDragging = ref(false);
 
-  const listGroup = computed(() =>
-    'original' in props.listGroup ? props.listGroup.original : props.listGroup
-  );
   const sortBy = computed<SortOption[]>(() =>
     props.view.options.sortBy ? [cloneDeep(props.view.options.sortBy)] : []
+  );
+  const hideCompleted = computed<boolean>(
+    () => props.view.options.hideCompleted ?? false
+  );
+  const hideChildren = computed<boolean>(
+    () => props.view.options.hideChildren ?? false
+  );
+  const filters = computed<QueryFilter>(() => {
+    let listGroup: ListGroup;
+
+    if ('original' in props.listGroup) {
+      listGroup = props.listGroup.original as ListGroup;
+    } else {
+      listGroup = props.listGroup;
+    }
+
+    if (props.view.filters) {
+      const viewFilters = {
+        where: {
+          and: [
+            ...(cloneDeep(
+              (props.view.filters as ViewFilter).where.quick?.and
+            ) ?? []),
+            ...(cloneDeep(
+              (props.view.filters as ViewFilter).where.advanced?.and
+            ) ?? []),
+          ],
+        },
+      };
+
+      return objectUtils.deepMergeObjects(
+        viewFilters,
+        cloneDeep(listGroup.filter) ?? {}
+      );
+    } else {
+      return listGroup.filter ?? {};
+    }
+  });
+
+  const queryConfig = computed<QueryConfig>(() => ({
+    filters,
+    hideChildren,
+    hideCompleted,
+    sortBy,
+  }));
+
+  const listGroup = computed(() =>
+    'original' in props.listGroup ? props.listGroup.original : props.listGroup
   );
   const isDraggingDisabled = computed(() => {
     return sortBy.value && sortBy.value.length > 0;
@@ -397,5 +453,6 @@ export const useListGroup = ({
     handleUpdateCardOrder,
     handleUpdateCardStage,
     handleHoverCard,
+    queryConfig,
   };
 };

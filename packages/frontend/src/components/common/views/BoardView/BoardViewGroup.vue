@@ -2,19 +2,15 @@
 import draggable from 'vuedraggable';
 import {
   ListGroupOptions,
-  type QueryFilter,
-  type ViewFilter,
   FieldTypes,
   type View,
   type Card,
   type ListGroup,
   type ListStage,
   type List,
-  type SortState,
   type Field,
 } from '@tillywork/shared';
 
-import objectUtils from '@/utils/object';
 import { cloneDeep } from 'lodash';
 
 import { useCardsService } from '@/services/useCardsService';
@@ -48,6 +44,7 @@ const {
   onDragUpdate,
   handleUpdateCardStage,
   handleHoverCard,
+  queryConfig,
 } = useListGroup({ props, cards });
 
 const { updateFieldValue, getCardContextMenuItems } = useCard();
@@ -58,39 +55,6 @@ const { titleField, assigneeField, pinnedFieldsWithoutAssignee } = storeToRefs(
 );
 
 const groupCopy = ref(cloneDeep(props.listGroup));
-const sortBy = computed<SortState>(() =>
-  props.view.options.sortBy ? [cloneDeep(props.view.options.sortBy)] : []
-);
-
-const filters = computed<QueryFilter>(() => {
-  if (props.view.filters) {
-    const viewFilters = {
-      where: {
-        and: [
-          ...(cloneDeep((props.view.filters as ViewFilter).where.quick?.and) ??
-            []),
-          ...(cloneDeep(
-            (props.view.filters as ViewFilter).where.advanced?.and
-          ) ?? []),
-        ],
-      },
-    };
-
-    return objectUtils.deepMergeObjects(
-      viewFilters,
-      cloneDeep(props.listGroup.filter) ?? {}
-    );
-  } else {
-    return props.listGroup.filter ?? {};
-  }
-});
-
-const hideCompleted = computed<boolean>(
-  () => props.view.options.hideCompleted ?? false
-);
-const hideChildren = computed<boolean>(
-  () => props.view.options.hideChildren ?? false
-);
 
 const total = ref(0);
 
@@ -98,10 +62,7 @@ const { fetchNextPage, isFetching, hasNextPage, refetch, data } =
   cardsService.useGetGroupCardsInfinite({
     listId: groupCopy.value.list.id,
     groupId: groupCopy.value.id,
-    hideCompleted,
-    hideChildren,
-    filters,
-    sortBy,
+    ...queryConfig.value,
   });
 
 async function handleGroupCardsLoad({
