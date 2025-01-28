@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
-import { useDialogStore } from '@/stores/dialog';
-import { useSnackbarStore } from '@/stores/snackbar';
 
 import { useUsersService } from '@/services/useUsersService';
-import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 
 import { dayjs, type Card, type CardActivity } from '@tillywork/shared';
+import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
+import { useCardActivitiesService } from '@/services/useCardActivitiesService';
+import { useSnackbarStore } from '@/stores/snackbar';
 
-import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
-import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
+import BaseEditorInput from '@/components/common/inputs/BaseEditor/BaseEditorInput.vue';
 
 const { activity, card } = defineProps<{
   activity: CardActivity;
@@ -22,13 +21,9 @@ const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
 
 const { getUserFullName } = useUsersService();
-const { useDeleteActivityMutation, useUpdateActivityMutation } =
-  useCardActivitiesService();
-
+const { useDeleteActivityMutation } = useCardActivitiesService();
 const { mutateAsync: deleteActivity, isPending: isDeleting } =
   useDeleteActivityMutation();
-const { mutateAsync: updateActivity, isPending: isUpdating } =
-  useUpdateActivityMutation();
 
 const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
@@ -39,15 +34,15 @@ function openConfirmDeleteDialog() {
     dialog: DIALOGS.CONFIRM,
     data: {
       title: 'Confirm',
-      message: 'Are you sure you want to delete this email?',
+      message: 'Are you sure you want to delete this comment?',
       onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
-      onConfirm: () => deleteEmail(),
+      onConfirm: () => deleteComment(),
       isLoading: isDeleting.value,
     },
   });
 }
 
-function deleteEmail() {
+function deleteComment() {
   deleteActivity({
     activityId: activity.id,
   })
@@ -61,33 +56,6 @@ function deleteEmail() {
     .finally(() => {
       dialog.closeDialog(confirmDialogIndex.value);
     });
-}
-
-function updateEmail(data: Partial<CardActivity>) {
-  if (!isUpdating.value && !isDeleting.value) {
-    updateActivity({
-      activity: {
-        id: activity.id,
-        ...data,
-      },
-    }).catch(() => {
-      showSnackbar({
-        message: 'Something went wrong, please try again.',
-        color: 'error',
-      });
-    });
-  }
-}
-
-function updateEmailSentAt(sentAt: string) {
-  const newContent = {
-    ...activity.content,
-    sentAt,
-  };
-
-  updateEmail({
-    content: newContent,
-  });
 }
 </script>
 
@@ -113,7 +81,7 @@ function updateEmailSentAt(sentAt: string) {
           }}
         </span>
         <span class="text-surface-variant">
-          &nbsp;logged an email
+          &nbsp;commented
           {{ dayjs(activity.createdAt).fromNow() }}
         </span>
         <v-spacer />
@@ -141,26 +109,8 @@ function updateEmailSentAt(sentAt: string) {
         </v-menu>
       </v-card-text>
       <v-card-text>
-        <base-editor-input
-          v-if="activity.content.subject"
-          v-model="activity.content.subject"
-          :heading="4"
-        />
-        <base-editor-input v-model:html="activity.content.body" />
+        <base-editor-input v-model:json="activity.content" />
       </v-card-text>
-      <v-card-actions class="px-3 border-t-thin">
-        <span class="text-body-3 me-2">
-          <span class="font-weight-bold">To:&nbsp;</span>
-          <span>{{ activity.content.to }}</span>
-        </span>
-        <base-date-picker
-          :model-value="activity.content.sentAt"
-          include-time
-          label="Sent At"
-          icon="mdi-calendar"
-          @update:model-value="(v) => updateEmailSentAt(v as string)"
-        />
-      </v-card-actions>
     </v-card>
   </v-timeline-item>
 </template>

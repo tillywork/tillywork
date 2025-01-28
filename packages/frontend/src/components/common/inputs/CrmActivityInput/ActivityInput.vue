@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import BaseCardCommentBox from '@/components/project-management/cards/BaseCardCommentBox.vue';
+import BaseCardCommentBox from '@/components/common/cards/BaseCardCommentBox.vue';
 import TaskActivityInput from './TaskActivityInput.vue';
 import EmailActivityInput from './EmailActivityInput.vue';
 import CallActivityInput from './CallActivityInput.vue';

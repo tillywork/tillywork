@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useWorkspacesService } from '@/services/useWorkspacesService';
 import { useSnackbarStore } from '@/stores/snackbar';
-import CreateWorkspaceForm from '@/components/project-management/workspaces/CreateWorkspaceForm.vue';
+import CreateWorkspaceForm from '@/components/common/workspaces/CreateWorkspaceForm.vue';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from './types';
 import { useAuthStore } from '@/stores/auth';

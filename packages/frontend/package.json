@@ -24,6 +24,7 @@
         "@vitejs/plugin-vue-jsx": "^4.1.1",
         "@vueuse/core": "^10.9.0",
         "currency-symbol-map": "^5.1.0",
+        "date-fns": "^4.1.0",
         "emoji-name-map": "^1.2.9",
         "flag-icons": "^7.2.1",
         "highlight.js": "^11.9.0",

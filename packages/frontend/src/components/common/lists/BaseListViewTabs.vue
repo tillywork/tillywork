@@ -50,6 +50,8 @@ function getViewIconByType(type: ViewTypes) {
       return 'mdi-view-column';
     case ViewTypes.LIST:
       return 'mdi-list-box-outline';
+    case ViewTypes.GANTT:
+      return 'mdi-chart-gantt';
     default:
       return 'mdi-view-carousel';
   }

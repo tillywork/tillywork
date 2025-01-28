@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import UserMenu from '@/components/common/navigation/UserMenu.vue';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
-import NavigationWorkspace from '@/components/project-management/navigation/NavigationWorkspace.vue';
-import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
+import NavigationWorkspace from '@/components/common/navigation/NavigationWorkspace.vue';
+import NavigationWorkspaceSelector from '@/components/common/navigation/NavigationWorkspaceSelector.vue';
 import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
 import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';

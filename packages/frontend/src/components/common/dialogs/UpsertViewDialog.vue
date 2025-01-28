@@ -41,6 +41,11 @@ const viewTypeOptions = ref([
     value: ViewTypes.LIST,
     icon: 'mdi-list-box-outline',
   },
+  {
+    title: 'Gantt Chart',
+    value: ViewTypes.GANTT,
+    icon: 'mdi-chart-gantt',
+  },
 ]);
 
 const { mutateAsync: createView, isPending: isCreating } =

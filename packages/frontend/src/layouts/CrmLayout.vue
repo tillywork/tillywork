@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
 import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
 import { useLogo } from '@/composables/useLogo';
-import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
+import NavigationWorkspaceSelector from '@/components/common/navigation/NavigationWorkspaceSelector.vue';
 import UserMenu from '@/components/common/navigation/UserMenu.vue';
 import { useStateStore } from '@/stores/state';
 

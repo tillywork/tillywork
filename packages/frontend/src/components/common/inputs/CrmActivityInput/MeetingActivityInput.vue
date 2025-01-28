@@ -5,7 +5,7 @@ import {
   type MeetingActivityContent,
 } from '@tillywork/shared';
 
-import BaseCardCommentBox from '@/components/project-management/cards/BaseCardCommentBox.vue';
+import BaseCardCommentBox from '@/components/common/cards/BaseCardCommentBox.vue';
 import BaseDatePicker from '../BaseDatePicker.vue';
 import SimpleDropdownSelector from '../SimpleDropdownSelector.vue';
 

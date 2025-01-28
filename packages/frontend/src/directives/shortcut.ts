@@ -21,7 +21,7 @@ const shortcutDirective = <Directive<HTMLElement, string>>{
       {
         class: 'v-kbd ms-2 text-xs elevation-0 font-weight-medium',
       },
-      value
+      value.toUpperCase()
     );
     render(vnode, slot);
   },

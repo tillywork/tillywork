@@ -6,7 +6,7 @@ import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from '../types';
 import BaseListSelector from '../../inputs/BaseListSelector.vue';
 import { useAuthStore } from '@/stores/auth';
-import BaseCardChip from '@/components/project-management/cards/BaseCardChip.vue';
+import BaseCardChip from '@/components/common/cards/BaseCardChip.vue';
 import { leaderKey } from '@/utils/keys';
 import BaseField from '../../fields/BaseField.vue';
 import { type CardType, type CreateCardDto } from '@tillywork/shared';

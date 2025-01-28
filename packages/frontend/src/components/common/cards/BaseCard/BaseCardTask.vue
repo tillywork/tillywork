@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
+import BaseEditorInput from '@/components/common/inputs/BaseEditor/BaseEditorInput.vue';
 import ActivityTimeline from '../BaseCardActivityTimeline/ActivityTimeline.vue';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import BaseCardChildrenProgress from '../BaseCardChildrenProgress.vue';

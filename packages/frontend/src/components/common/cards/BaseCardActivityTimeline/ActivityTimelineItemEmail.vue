@@ -6,20 +6,11 @@ import { useSnackbarStore } from '@/stores/snackbar';
 import { useUsersService } from '@/services/useUsersService';
 import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 
-import {
-  CALL_DIRECTION_OPTIONS,
-  CALL_OUTCOME_OPTIONS,
-  CallActivityDirection,
-  CallActivityOutcome,
-  dayjs,
-  type Card,
-  type CardActivity,
-} from '@tillywork/shared';
+import { dayjs, type Card, type CardActivity } from '@tillywork/shared';
 import { DIALOGS } from '@/components/common/dialogs/types';
 
-import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
+import BaseEditorInput from '@/components/common/inputs/BaseEditor/BaseEditorInput.vue';
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
-import SimpleDropdownSelector from '@/components/common/inputs/SimpleDropdownSelector.vue';
 
 const { activity, card } = defineProps<{
   activity: CardActivity;
@@ -48,15 +39,15 @@ function openConfirmDeleteDialog() {
     dialog: DIALOGS.CONFIRM,
     data: {
       title: 'Confirm',
-      message: 'Are you sure you want to delete this call?',
+      message: 'Are you sure you want to delete this email?',
       onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
-      onConfirm: () => deleteCall(),
+      onConfirm: () => deleteEmail(),
       isLoading: isDeleting.value,
     },
   });
 }
 
-function deleteCall() {
+function deleteEmail() {
   deleteActivity({
     activityId: activity.id,
   })
@@ -72,7 +63,7 @@ function deleteCall() {
     });
 }
 
-function updateCall(data: Partial<CardActivity>) {
+function updateEmail(data: Partial<CardActivity>) {
   if (!isUpdating.value && !isDeleting.value) {
     updateActivity({
       activity: {
@@ -88,35 +79,13 @@ function updateCall(data: Partial<CardActivity>) {
   }
 }
 
-function updateCallCalledAt(calledAt: string) {
+function updateEmailSentAt(sentAt: string) {
   const newContent = {
     ...activity.content,
-    calledAt,
+    sentAt,
   };
 
-  updateCall({
-    content: newContent,
-  });
-}
-
-function updateCallOutcome(outcome: CallActivityOutcome) {
-  const newContent = {
-    ...activity.content,
-    outcome,
-  };
-
-  updateCall({
-    content: newContent,
-  });
-}
-
-function updateCallDirection(direction: CallActivityDirection) {
-  const newContent = {
-    ...activity.content,
-    direction,
-  };
-
-  updateCall({
+  updateEmail({
     content: newContent,
   });
 }
@@ -144,7 +113,7 @@ function updateCallDirection(direction: CallActivityDirection) {
           }}
         </span>
         <span class="text-surface-variant">
-          &nbsp;logged a call
+          &nbsp;logged an email
           {{ dayjs(activity.createdAt).fromNow() }}
         </span>
         <v-spacer />
@@ -172,27 +141,24 @@ function updateCallDirection(direction: CallActivityDirection) {
         </v-menu>
       </v-card-text>
       <v-card-text>
-        <base-editor-input v-model:json="activity.content.description" />
+        <base-editor-input
+          v-if="activity.content.subject"
+          v-model="activity.content.subject"
+          :heading="4"
+        />
+        <base-editor-input v-model:html="activity.content.body" />
       </v-card-text>
       <v-card-actions class="px-3 border-t-thin">
-        <simple-dropdown-selector
-          :model-value="activity.content.outcome"
-          @update:model-value="(v) => updateCallOutcome(v as CallActivityOutcome)"
-          :items="CALL_OUTCOME_OPTIONS"
-          label="Call Outcome"
-        />
-        <simple-dropdown-selector
-          :model-value="activity.content.direction"
-          @update:model-value="(v) => updateCallDirection(v as CallActivityDirection)"
-          :items="CALL_DIRECTION_OPTIONS"
-          label="Call Direction"
-        />
+        <span class="text-body-3 me-2">
+          <span class="font-weight-bold">To:&nbsp;</span>
+          <span>{{ activity.content.to }}</span>
+        </span>
         <base-date-picker
-          :model-value="activity.content.calledAt"
-          @update:model-value="(v) => updateCallCalledAt(v as string)"
+          :model-value="activity.content.sentAt"
           include-time
-          label="Called At"
+          label="Sent At"
           icon="mdi-calendar"
+          @update:model-value="(v) => updateEmailSentAt(v as string)"
         />
       </v-card-actions>
     </v-card>

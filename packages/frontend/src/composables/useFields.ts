@@ -60,6 +60,14 @@ export const useFields = ({
     cardTypeFields.value?.find((field) => field.isPhoto)
   );
 
+  const dueAtField = computed(() =>
+    fields.value?.find((f) => f.slug === 'due_at')
+  );
+
+  const startsAtField = computed(() =>
+    fields.value?.find((f) => f.slug === 'starts_at')
+  );
+
   const cardTypeFieldsWithoutMainFields = computed(() =>
     cardTypeFields.value?.filter(
       (field) => !field.isTitle && !field.isDescription && !field.isPhoto
@@ -171,6 +179,8 @@ export const useFields = ({
     tableFields,
     filterableFields,
     photoField,
+    dueAtField,
+    startsAtField,
     refetch,
     sortFieldsByViewColumns,
     getDateFieldColor,

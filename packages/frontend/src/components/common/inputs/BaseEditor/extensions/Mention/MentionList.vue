@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { User } from '@tillywork/shared';
-import BaseAvatar from '../../../BaseAvatar.vue';
+import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
 
 const props = defineProps<{
   items: User[];

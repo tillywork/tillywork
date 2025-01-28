@@ -4,7 +4,7 @@ import { useWorkspacesService } from '@/services/useWorkspacesService';
 import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
-import CreateWorkspaceForm from '@/components/project-management/workspaces/CreateWorkspaceForm.vue';
+import CreateWorkspaceForm from '@/components/common/workspaces/CreateWorkspaceForm.vue';
 import { useDialogStore } from '@/stores/dialog';
 import { WorkspaceTypes, type Workspace } from '@tillywork/shared';
 import { DIALOGS } from './types';

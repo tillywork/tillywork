@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import BaseAvatar from '../../../BaseAvatar.vue';
+import BaseAvatar from '@/components/common/base/BaseAvatar.vue';
 import { nodeViewProps } from '@tiptap/vue-3';
 import { NodeViewWrapper } from '@tiptap/vue-3';
 import { useAuthStore } from '@/stores/auth';

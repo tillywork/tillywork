@@ -7,15 +7,17 @@ import { useUsersService } from '@/services/useUsersService';
 import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 
 import {
+  CALL_DIRECTION_OPTIONS,
+  CALL_OUTCOME_OPTIONS,
+  CallActivityDirection,
+  CallActivityOutcome,
   dayjs,
-  MESSAGE_CHANNEL_OPTIONS,
-  MessageActivityChannel,
   type Card,
   type CardActivity,
 } from '@tillywork/shared';
 import { DIALOGS } from '@/components/common/dialogs/types';
 
-import BaseEditorInput from '@/components/common/base/BaseEditor/BaseEditorInput.vue';
+import BaseEditorInput from '@/components/common/inputs/BaseEditor/BaseEditorInput.vue';
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 import SimpleDropdownSelector from '@/components/common/inputs/SimpleDropdownSelector.vue';
 
@@ -46,15 +48,15 @@ function openConfirmDeleteDialog() {
     dialog: DIALOGS.CONFIRM,
     data: {
       title: 'Confirm',
-      message: 'Are you sure you want to delete this message?',
+      message: 'Are you sure you want to delete this call?',
       onCancel: () => dialog.closeDialog(confirmDialogIndex.value),
-      onConfirm: () => deleteMessage(),
+      onConfirm: () => deleteCall(),
       isLoading: isDeleting.value,
     },
   });
 }
 
-function deleteMessage() {
+function deleteCall() {
   deleteActivity({
     activityId: activity.id,
   })
@@ -70,7 +72,7 @@ function deleteMessage() {
     });
 }
 
-function updateMessage(data: Partial<CardActivity>) {
+function updateCall(data: Partial<CardActivity>) {
   if (!isUpdating.value && !isDeleting.value) {
     updateActivity({
       activity: {
@@ -86,24 +88,35 @@ function updateMessage(data: Partial<CardActivity>) {
   }
 }
 
-function updateMessageSentAt(sentAt: string) {
+function updateCallCalledAt(calledAt: string) {
   const newContent = {
     ...activity.content,
-    sentAt,
+    calledAt,
   };
 
-  updateMessage({
+  updateCall({
     content: newContent,
   });
 }
 
-function updateMessageChannel(channel: MessageActivityChannel) {
+function updateCallOutcome(outcome: CallActivityOutcome) {
   const newContent = {
     ...activity.content,
-    channel,
+    outcome,
   };
 
-  updateMessage({
+  updateCall({
+    content: newContent,
+  });
+}
+
+function updateCallDirection(direction: CallActivityDirection) {
+  const newContent = {
+    ...activity.content,
+    direction,
+  };
+
+  updateCall({
     content: newContent,
   });
 }
@@ -131,7 +144,7 @@ function updateMessageChannel(channel: MessageActivityChannel) {
           }}
         </span>
         <span class="text-surface-variant">
-          &nbsp;logged a message
+          &nbsp;logged a call
           {{ dayjs(activity.createdAt).fromNow() }}
         </span>
         <v-spacer />
@@ -163,16 +176,22 @@ function updateMessageChannel(channel: MessageActivityChannel) {
       </v-card-text>
       <v-card-actions class="px-3 border-t-thin">
         <simple-dropdown-selector
-          :model-value="activity.content.channel"
-          @update:model-value="(v) => updateMessageChannel(v as MessageActivityChannel)"
-          :items="MESSAGE_CHANNEL_OPTIONS"
-          label="Channel"
+          :model-value="activity.content.outcome"
+          @update:model-value="(v) => updateCallOutcome(v as CallActivityOutcome)"
+          :items="CALL_OUTCOME_OPTIONS"
+          label="Call Outcome"
+        />
+        <simple-dropdown-selector
+          :model-value="activity.content.direction"
+          @update:model-value="(v) => updateCallDirection(v as CallActivityDirection)"
+          :items="CALL_DIRECTION_OPTIONS"
+          label="Call Direction"
         />
         <base-date-picker
-          :model-value="activity.content.sentAt"
-          @update:model-value="(v) => updateMessageSentAt(v as string)"
+          :model-value="activity.content.calledAt"
+          @update:model-value="(v) => updateCallCalledAt(v as string)"
           include-time
-          label="Sent At"
+          label="Called At"
           icon="mdi-calendar"
         />
       </v-card-actions>
