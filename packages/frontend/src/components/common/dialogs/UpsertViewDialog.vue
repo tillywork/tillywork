@@ -2,15 +2,17 @@
 import { useViewsService } from '@/services/useViewsService';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
-import { ViewTypes, type View } from '@tillywork/shared';
+import { ViewTypes, WorkspaceTypes, type View } from '@tillywork/shared';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS, UpsertDialogMode } from './types';
+import { useAuthStore } from '@/stores/auth';
 
 const viewsService = useViewsService();
 const dialog = useDialogStore();
 const { rules } = validationUtils;
 const { showSnackbar } = useSnackbarStore();
+const { workspace } = storeToRefs(useAuthStore());
 
 const currentDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.UPSERT_VIEW)
@@ -25,28 +27,35 @@ const viewDto = ref<Partial<View>>({
   listId: view.value?.listId ?? currentDialog.value?.data.list.id,
 });
 
-const viewTypeOptions = ref([
-  {
-    title: 'Table',
-    value: ViewTypes.TABLE,
-    icon: 'mdi-table',
-  },
-  {
-    title: 'Board',
-    value: ViewTypes.BOARD,
-    icon: 'mdi-view-column',
-  },
-  {
-    title: 'List',
-    value: ViewTypes.LIST,
-    icon: 'mdi-list-box-outline',
-  },
-  {
-    title: 'Gantt Chart',
-    value: ViewTypes.GANTT,
-    icon: 'mdi-chart-gantt',
-  },
-]);
+const viewTypeOptions = computed(() => {
+  const options = [
+    {
+      title: 'Table',
+      value: ViewTypes.TABLE,
+      icon: 'mdi-table',
+    },
+    {
+      title: 'Board',
+      value: ViewTypes.BOARD,
+      icon: 'mdi-view-column',
+    },
+    {
+      title: 'List',
+      value: ViewTypes.LIST,
+      icon: 'mdi-list-box-outline',
+    },
+  ];
+
+  if (workspace.value?.type !== WorkspaceTypes.CRM) {
+    options.push({
+      title: 'Gantt',
+      value: ViewTypes.GANTT,
+      icon: 'mdi-chart-gantt',
+    });
+  }
+
+  return options;
+});
 
 const { mutateAsync: createView, isPending: isCreating } =
   viewsService.useCreateViewMutation();
