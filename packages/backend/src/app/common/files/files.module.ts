@@ -5,9 +5,14 @@ import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { TWFile } from "./file.entity";
 import { Project } from "../projects/project.entity";
+import { AuthModule } from "../auth/auth.module";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([TWFile, Project]), ConfigModule],
+    imports: [
+        TypeOrmModule.forFeature([TWFile, Project]),
+        ConfigModule,
+        AuthModule,
+    ],
     controllers: [FilesController],
     providers: [FilesService],
 })

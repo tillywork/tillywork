@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { useAutomationService } from '@/composables/services/useAutomationService';
 import { useAuthStore } from '@/stores/auth';
+
 import type { Automation } from './types';
+
+import { useAutomationService } from '@/services/useAutomationService';
 import LocationSelector, {
   type LocationSelection,
 } from '@/components/project-management/inputs/LocationSelector.vue';
@@ -40,7 +42,7 @@ watch(location, () => {
 </script>
 
 <template>
-  <v-container>
+  <v-container class="bg-surface" min-height="100vh">
     <h3>Automations</h3>
 
     <v-divider class="my-4" />

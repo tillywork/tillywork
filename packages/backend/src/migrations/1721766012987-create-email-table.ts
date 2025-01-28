@@ -1,5 +1,5 @@
 import { MigrationInterface, QueryRunner, Table } from "typeorm";
-import { EmailStatus } from "../app/common/mailer/email.entity";
+import { EmailStatus } from "../app/common/mailer/types";
 
 export class CreateEmailTable1721766012987 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {

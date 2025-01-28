@@ -1,11 +1,9 @@
 import {
   type Field,
+  type FilterOperator,
   FieldTypes,
-} from '@/components/project-management/fields/types';
-import type {
-  FieldFilter,
-  FilterOperator,
-} from '@/components/project-management/filters/types';
+  type FieldFilter,
+} from '@tillywork/shared';
 import objectUtils from './object';
 
 export const filterUtils = {
@@ -16,6 +14,7 @@ export const filterUtils = {
       case FieldTypes.LABEL:
       case FieldTypes.CARD:
         return 'in';
+      case FieldTypes.DATETIME:
       case FieldTypes.DATE:
         return 'between';
 

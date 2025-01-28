@@ -1,16 +1,16 @@
 {
     "name": "backend",
     "version": "0.0.1",
-    "main": "main.ts",
-    "scripts": {},
     "keywords": [
         "nest"
     ],
     "license": "MIT",
     "dependencies": {
         "@aws-sdk/client-s3": "^3.609.0",
+        "@azure/storage-blob": "^12.26.0",
         "@bull-board/api": "^5.20.5",
         "@bull-board/fastify": "^5.20.5",
+        "@fastify/static": "^7.0.4",
         "@nest-lab/fastify-multer": "^1.2.0",
         "@nestjs/bull": "^10.1.1",
         "@nestjs/config": "^3.2.0",

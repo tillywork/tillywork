@@ -6,7 +6,8 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"],
-      "~/*": ["src/*"]
+      "~/*": ["src/*"],
+      "@tillywork/shared": ["../shared/src/index.ts"]
     },
     "moduleResolution": "Bundler"
   },
@@ -22,6 +23,7 @@
     "src/**/*.ts",
     "src/**/*.vue",
     "./typed-router.d.ts",
-    "./auto-imports.d.ts"
+    "./auto-imports.d.ts",
+    "veaury.d.ts"
   ]
 }

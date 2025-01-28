@@ -3,7 +3,7 @@ import type { Content } from '@tiptap/vue-3';
 import {
   useMailerService,
   type SendMentionNotificationParams,
-} from './services/useMailerService';
+} from '@/services/useMailerService';
 
 export function useMentionNotifications() {
   const { sendMentionNotificationEmail } = useMailerService();
@@ -25,7 +25,6 @@ export function useMentionNotifications() {
 
   function getMentionedUsers(content: Content) {
     const mentions = new Set<number>();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function traverse(node: any) {
       if (node?.type === 'mention') {
         mentions.add(node.attrs.id);

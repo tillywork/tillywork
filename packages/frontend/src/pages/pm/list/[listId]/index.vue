@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import BaseList from '@/components/project-management/lists/BaseList.vue';
-import { useListsService } from '@/composables/services/useListsService';
+import BaseList from '@/components/common/lists/BaseList.vue';
+import { useListsService } from '@/services/useListsService';
 import { useStateStore } from '@/stores/state';
 
 definePage({
@@ -9,35 +9,29 @@ definePage({
   },
 });
 
-const { setCurrentList } = useStateStore();
+const { setCurrentList, setTitle } = useStateStore();
 
 const route = useRoute('/pm/list/[listId]/');
 const router = useRouter();
 
 const listId = computed(() => +route.params.listId);
-const listsService = useListsService();
-const { data: list, error, refetch } = listsService.useGetListQuery(listId);
+const { useGetListQuery } = useListsService();
+const { data: list, error } = useGetListQuery(listId);
 
-watch(error, (v: any) => {
-  if (v.response.status === 404) {
-    router.push('/');
-  }
+watch(error, () => {
+  router.push('/');
 });
 
 watch(
   list,
   (v) => {
     if (v) {
-      document.title = `${v.name} - tillywork`;
+      setTitle(v.name);
+      setCurrentList(v);
     }
-    setCurrentList(v);
   },
-  {
-    immediate: true,
-  }
+  { immediate: true }
 );
-
-watch(listId, () => refetch());
 </script>
 
 <template>

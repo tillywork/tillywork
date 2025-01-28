@@ -1,256 +1,314 @@
 <script setup lang="ts">
-import { useCommands } from '@/composables/useCommands';
-import stringUtils from '@/utils/string';
+import type { VList } from 'vuetify/components';
 import type { Command } from './types';
-import { type VList } from 'vuetify/components';
+
+import { useCommandStore } from '@/stores/command';
+
+import { useStateStore } from '@/stores/state';
+import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts';
+
+import BaseCardChip from '@/components/common/cards/BaseCardChip.vue';
+import PaletteField from './PaletteField/PaletteField.vue';
+
+import posthog from 'posthog-js';
+import { useListKeyboardNavigation } from '@/composables/useListKeyboardNavigation';
 
 const {
-  executeCommand,
-  setIsInputFocused,
-  isCommandPaletteOpen,
-  setIsCommandPaletteOpen,
-  keys,
   commands,
-} = useCommands();
-const { width: windowWidth, height: windowHeight } = useWindowSize();
+  isOpen,
+  currentField,
+  searchIcon,
+  searchPlaceholder,
+  search,
+} = storeToRefs(useCommandStore());
+const { isInputFocused, currentCard } = storeToRefs(useStateStore());
 
-const search = ref('');
-const activeCommandIndex = ref<number>(-1);
-const commandsList = ref<VList>();
+const isFieldMode = computed(() => !!currentField.value);
 
-const searchedCommands = computed(() =>
-  commands.value.filter(
-    (command) =>
-      stringUtils.fuzzySearch(search.value, command.title) ||
-      (command.shortcut
-        ? stringUtils.fuzzySearch(search.value, command.shortcut.join('+'))
-        : false)
-  )
-);
+const { activeIndex, containerRef } = useListKeyboardNavigation({
+  enabled: computed(() => isOpen.value && !isFieldMode.value),
+});
+const { currentKeyCombo } = useKeyboardShortcuts();
 
-/** Searched commands, grouped by section. */
-const groupedSearchedCommands = computed(() =>
-  searchedCommands.value.reduce((acc, command) => {
+const filteredCommands = computed(() => {
+  const searchTerm = search.value.toLowerCase();
+  if (!searchTerm) return commands.value;
+
+  return commands.value.filter((command) => {
+    const matchTitle = command.title.toLowerCase().includes(searchTerm);
+    const matchShortcut = command.shortcut
+      ?.join('+')
+      .toLowerCase()
+      .includes(searchTerm);
+    const matchSection = command.section.toLowerCase().includes(searchTerm);
+    return matchTitle || matchShortcut || matchSection;
+  });
+});
+
+const groupedCommands = computed(() => {
+  return filteredCommands.value.reduce((groups, command) => {
     const section = command.section;
-    if (!acc[section]) {
-      acc[section] = [];
+    if (!groups[section]) {
+      groups[section] = [];
     }
-    acc[section].push(command);
-    return acc;
-  }, {} as Record<string, Command[]>)
-);
-
-const activeCommand = computed(() =>
-  activeCommandIndex.value !== -1
-    ? searchedCommands.value[activeCommandIndex.value]
-    : undefined
-);
-
-/**
- * The main key listener for the command palette.
- * Ctrl+K or Cmd+K.
- */
-watch([keys['Cmd+K'], keys['Ctrl+K']], ([cmd, ctrl]) => {
-  if (cmd || ctrl) {
-    setIsCommandPaletteOpen(!isCommandPaletteOpen.value);
-  }
+    groups[section].push(command);
+    return groups;
+  }, {} as Record<string, Command[]>);
 });
 
-// Reset the input focus when command palette is closed
-watch(isCommandPaletteOpen, (v) => {
-  if (!v) {
-    setIsInputFocused(false);
-  }
-});
+const activeCommand = computed(() => filteredCommands.value[activeIndex.value]);
 
-/**
- * Handles keyboard events
- * when the command palette
- * is open.
- * @param e The keydown event
- */
 function handleKeyDown(e: KeyboardEvent) {
-  if (!isCommandPaletteOpen.value) {
+  if (!isOpen.value) {
+    handleShortcut(e);
     return;
   }
 
-  const commandsCount = searchedCommands.value.length;
+  switch (e.key) {
+    case 'Enter':
+      e.preventDefault();
+      if (activeCommand.value) {
+        executeCommand(activeCommand.value);
+      }
+      break;
+    case 'Escape':
+      e.stopImmediatePropagation();
+      if (search.value) {
+        search.value = '';
+      } else if (isFieldMode.value) {
+        exitFieldMode();
+      } else {
+        closeCommandPalette();
+      }
+      break;
+    case 'Backspace':
+      if (isFieldMode.value && !search.value) {
+        e.preventDefault();
+        exitFieldMode();
+      }
+      break;
 
-  if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    if (activeCommandIndex.value < commandsCount - 1) {
-      activeCommandIndex.value++;
-    } else {
-      activeCommandIndex.value = 0;
-    }
-    ensureSelectedCommandIsVisible();
-  }
-
-  if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    if (activeCommandIndex.value > 0) {
-      activeCommandIndex.value--;
-    } else {
-      activeCommandIndex.value = commandsCount - 1;
-    }
-    ensureSelectedCommandIsVisible();
-  }
-
-  if (e.key === 'Enter' && activeCommand.value) {
-    e.preventDefault();
-    handleExecuteCommand(activeCommand.value);
+    default:
+      handleShortcut(e);
   }
 }
 
-function ensureSelectedCommandIsVisible() {
-  nextTick(() => {
-    const list = commandsList.value;
+function executeCommand(command: Command, viaShortcut: boolean = false) {
+  command.action(command);
+  posthog.capture('Command Executed', { command: command.id, viaShortcut });
 
-    if (list && list.$el) {
-      const selectedItem = list.$el.querySelector(`.v-list-item--active`);
+  if (!command.keepPaletteOpen) {
+    closeCommandPalette();
+  }
+}
 
-      const scrollOption = {
-        behavior: 'smooth',
-        block: 'nearest',
-      };
+function exitFieldMode() {
+  currentField.value = null;
+  search.value = '';
+  searchIcon.value = null;
+  searchPlaceholder.value = null;
+  activeIndex.value = 0;
+}
 
-      if (selectedItem) {
-        selectedItem.scrollIntoView(scrollOption);
-      }
-    }
-  });
+function closeCommandPalette() {
+  isOpen.value = false;
 }
 
 function handleAfterLeave() {
   search.value = '';
-  activeCommandIndex.value = -1;
+  activeIndex.value = 0;
 }
 
-function handleExecuteCommand(command: Command) {
-  setIsCommandPaletteOpen(false);
-  executeCommand(command);
+function handleShortcut(event: KeyboardEvent) {
+  if (isInputFocused.value) return;
+
+  const command = commands.value.find(
+    (c) =>
+      c.shortcut && c.shortcut.join('+').toUpperCase() === currentKeyCombo.value
+  );
+
+  if (command) {
+    event.preventDefault();
+    executeCommand(command, true);
+  }
 }
 
-/**
- * Set up a global event listener to prevent the default action.
- * Only add commands that have browser specific events here
- * @param event the keydown event
- */
-const onKeydown = (event: KeyboardEvent) => {
-  // WARN: Pay attention to capitalization.
-  if ((event.metaKey || event.ctrlKey) && ['k', 'i'].includes(event.key)) {
-    event.preventDefault();
-  } else if (event.key === 'F1') {
-    event.preventDefault();
+const handleInputFocus = (event: Event) => {
+  const target = event.target as HTMLElement;
+  if (isTextInput(target)) {
+    isInputFocused.value = true;
   }
 };
 
+const handleInputBlur = (event: Event) => {
+  const target = event.target as HTMLElement;
+  if (isTextInput(target)) {
+    isInputFocused.value = false;
+  }
+};
+
+function isTextInput(target: HTMLElement) {
+  return (
+    target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.classList.contains('ProseMirror')
+  );
+}
+
 onMounted(() => {
-  window.addEventListener('keydown', onKeydown);
   window.addEventListener('keydown', handleKeyDown);
+  window.addEventListener('focusin', handleInputFocus);
+  window.addEventListener('focusout', handleInputBlur);
+
+  // Register command to open command palette
+  const handleShortcut = (e: KeyboardEvent) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      isOpen.value = true;
+    }
+  };
+
+  window.addEventListener('keydown', handleShortcut);
+  onBeforeUnmount(() => window.removeEventListener('keydown', handleShortcut));
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeydown);
-  window.removeEventListener('keydown', handleKeyDown);
+  window.addEventListener('keydown', handleKeyDown);
+  window.removeEventListener('focusin', handleInputFocus);
+  window.removeEventListener('focusout', handleInputBlur);
+});
+
+watch(isOpen, (v) => {
+  if (!v) {
+    isInputFocused.value = false;
+    currentField.value = null;
+  } else {
+    posthog.capture('Command Palette Opened');
+  }
 });
 </script>
 
 <template>
   <v-dialog
-    v-model="isCommandPaletteOpen"
+    v-model="isOpen"
     :scrim="false"
     @after-leave="handleAfterLeave"
     width="100%"
     max-width="600"
-    location-strategy="connected"
-    :target="[windowWidth / 2, windowHeight / 2.3]"
+    content-class="command-palette-dialog"
   >
-    <v-card elevation="8">
-      <!-- ~ Search Field -->
-      <!-- TODO make clicking esc when search is focused clear the value, not close the dialog -->
-      <v-text-field
-        v-model="search"
-        placeholder="Type a command or search..."
-        single-line
-        hide-details
-        variant="filled"
-        density="default"
-        autocomplete="off"
-        autofocus
-        class="flex-grow-0"
-        @input="activeCommandIndex = 0"
-      />
+    <v-card class="command-palette" elevation="12" color="dialog" border="thin">
+      <div class="px-4 pb-2 border-b-thin">
+        <div v-if="currentCard" class="pt-4">
+          <base-card-chip
+            :card="currentCard"
+            width="fit-content"
+            disable-link
+          />
+        </div>
+        <v-text-field
+          v-model="search"
+          :placeholder="searchPlaceholder ?? 'Type a command or search...'"
+          single-line
+          hide-details
+          variant="plain"
+          rounded="0"
+          density="default"
+          autocomplete="off"
+          autofocus
+          @input="activeIndex = 0"
+          :prepend-inner-icon="searchIcon ?? 'mdi-magnify'"
+        >
+          <template #append-inner v-if="search">
+            <v-kbd class="text-caption elevation-0 font-weight-medium"
+              >Esc</v-kbd
+            >
+          </template>
+        </v-text-field>
+      </div>
 
-      <!-- ~ Grouped List of Commands -->
       <v-list
-        ref="commandsList"
+        ref="containerRef"
         tabindex="-1"
-        max-height="50vh"
+        max-height="400"
         nav
-        density="comfortable"
+        density="compact"
+        bg-color="transparent"
         :selected="[activeCommand?.id]"
-        class="user-select-none"
       >
-        <template v-if="!searchedCommands.length">
-          <v-list-item>
-            <v-list-item-title> No results. </v-list-item-title>
-            <v-list-item-subtitle>
-              Can't find what you're looking for? Request a feature on
-              <a href="https://github.com/tillywork/tillywork/issues"
-                >GitHub!</a
+        <template v-if="!isFieldMode">
+          <template v-if="!filteredCommands.length">
+            <v-list-item>
+              <template #prepend>
+                <v-icon size="x-small" color="warning">
+                  mdi-alert-circle-outline
+                </v-icon>
+              </template>
+              <v-list-item-title>
+                No matching commands found
+              </v-list-item-title>
+              <v-list-item-subtitle>
+                Try a different search term
+              </v-list-item-subtitle>
+            </v-list-item>
+          </template>
+
+          <template v-else>
+            <template
+              v-for="(commands, section) in groupedCommands"
+              :key="section"
+            >
+              <v-list-subheader class="text-caption" v-if="section">
+                {{ section }}
+              </v-list-subheader>
+
+              <v-list-item
+                v-for="command in commands"
+                :key="command.id"
+                :value="command.id"
+                :active="command === activeCommand"
+                :lines="command.description ? 'two' : 'one'"
+                @click="executeCommand(command)"
+                class="px-3"
+                :class="{
+                  'opacity-70': command !== activeCommand,
+                }"
+                rounded="pill"
+                tabindex="-1"
               >
-            </v-list-item-subtitle>
-          </v-list-item>
+                <template #prepend>
+                  <v-icon :icon="command.icon" size="x-small" />
+                </template>
+
+                <v-list-item-title class="font-weight-regular">
+                  {{ command.title }}
+                </v-list-item-title>
+
+                <v-list-item-subtitle v-if="command.description">
+                  {{ command.description }}
+                </v-list-item-subtitle>
+
+                <template v-if="command.shortcut" #append>
+                  <div class="d-flex align-center ga-1 pe-2">
+                    <template
+                      v-for="(key, index) in command.shortcut"
+                      :key="index"
+                    >
+                      <v-kbd class="text-xs elevation-0 font-weight-medium">
+                        {{ key }}
+                      </v-kbd>
+                    </template>
+                  </div>
+                </template>
+              </v-list-item>
+
+              <v-divider />
+            </template>
+          </template>
         </template>
 
         <template v-else>
-          <template
-            v-for="(commands, section) in groupedSearchedCommands"
-            :key="section"
-          >
-            <!-- ~ Section Marker -->
-            <v-list-subheader>
-              {{ section }}
-            </v-list-subheader>
-
-            <!-- ~ List of Commands -->
-            <v-list-item
-              v-for="(command, index) in commands"
-              :key="index"
-              :value="command.id"
-              :lines="command.description ? 'two' : 'one'"
-              @click="handleExecuteCommand(command)"
-              tabindex="-1"
-            >
-              <!-- ~ Icon -->
-              <template #prepend>
-                <v-icon size="x-small" class="px-3">
-                  {{ command.icon }}
-                </v-icon>
-              </template>
-              <!-- ~ Title -->
-              <v-list-item-title>
-                {{ command.title }}
-              </v-list-item-title>
-              <!-- ~ Description -->
-              <v-list-item-subtitle v-if="command.description">
-                {{ command.description }}
-              </v-list-item-subtitle>
-              <!-- ~ Shortcut Keys -->
-              <template v-if="command.shortcut" #append>
-                <v-code
-                  v-for="key in command.shortcut"
-                  :key="key"
-                  tag="kbd"
-                  class="mx-1 text-xs"
-                >
-                  {{ key }}
-                </v-code>
-              </template>
-            </v-list-item>
-            <v-divider />
-          </template>
+          <palette-field />
         </template>
       </v-list>
     </v-card>
@@ -258,10 +316,19 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped lang="scss">
-.v-list {
-  .v-list-item {
-    scroll-margin-top: 8px;
-    scroll-margin-bottom: 8px;
+:deep(.command-palette-dialog) {
+  position: fixed !important;
+  top: 80px !important;
+  margin-top: 0 !important;
+}
+</style>
+
+<style lang="scss">
+.command-palette {
+  .v-field--variant-plain {
+    .v-field__prepend-inner {
+      align-items: center !important;
+    }
   }
 }
 </style>

@@ -5,8 +5,6 @@ import {
     NestFastifyApplication,
 } from "@nestjs/platform-fastify";
 import { AppModule } from "./app/app.module";
-import { Connection } from "typeorm";
-import { seedUserData } from "./seeders/user.seeder";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import metadata from "./metadata";
 import { FastifyAdapter as BullFastifyAdapter } from "@bull-board/fastify";
@@ -38,6 +36,9 @@ async function bootstrap() {
     app.useGlobalPipes(
         new ValidationPipe({
             transform: true,
+            transformOptions: {
+                enableImplicitConversion: true,
+            },
         })
     );
 
@@ -76,11 +77,6 @@ async function bootstrap() {
     }
 
     await app.listen(port, "0.0.0.0");
-
-    if (environment === "development") {
-        const connection = app.get(Connection);
-        await seedUserData(connection);
-    }
 
     logger.log(`🚀 tillywork API is running on: http://localhost:${port}`);
     logger.log(`Environment: ${environment}`);

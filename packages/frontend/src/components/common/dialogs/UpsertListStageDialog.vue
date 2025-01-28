@@ -8,8 +8,8 @@ import { DIALOGS, UpsertDialogMode } from './types';
 import { useDialogStore } from '@/stores/dialog';
 
 import { useQueryClient } from '@tanstack/vue-query';
-import type { ListStage } from '@/components/project-management/lists/types';
-import { useListStagesService } from '@/composables/services/useListStagesService';
+import { useListStagesService } from '@/services/useListStagesService';
+import type { ListStage } from '@tillywork/shared';
 
 const { rules } = validationUtils;
 const { showSnackbar } = useSnackbarStore();
@@ -75,7 +75,12 @@ async function handleSubmitForm() {
 </script>
 
 <template>
-  <v-card color="surface" elevation="24" :loading="isCreating || isUpdating">
+  <v-card
+    color="dialog"
+    elevation="12"
+    border="thin"
+    :loading="isCreating || isUpdating"
+  >
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle>
         <span class="text-capitalize">{{ currentDialog?.data.mode }}</span>

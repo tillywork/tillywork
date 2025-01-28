@@ -1,86 +1,93 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Logger } from "@nestjs/common";
 import { WhereExpressionBuilder, Brackets, SelectQueryBuilder } from "typeorm";
-import { FieldFilter, FilterGroup, FilterOperator } from "../filters/types";
-import dayjs from "dayjs";
+import {
+    dayjs,
+    FieldFilter,
+    FilterGroup,
+    FilterOperator,
+} from "@tillywork/shared";
 
 @Injectable()
 export class QueryBuilderHelper {
     private static readonly logger = new Logger("QueryBuilderHelper");
 
     static processValue(value: any) {
+        const utcDayjs = dayjs.utc;
         const datePlaceholders = {
-            ":startOfDay": dayjs().startOf("day").toISOString(),
-            ":endOfDay": dayjs().endOf("day").toISOString(),
-            ":startOfYesterday": dayjs()
+            ":startOfDay": utcDayjs().startOf("day").toISOString(),
+            ":endOfDay": utcDayjs().endOf("day").toISOString(),
+            ":startOfYesterday": utcDayjs()
                 .subtract(1, "day")
                 .startOf("day")
                 .toISOString(),
-            ":endOfYesterday": dayjs()
+            ":endOfYesterday": utcDayjs()
                 .subtract(1, "day")
                 .endOf("day")
                 .toISOString(),
-            ":startOfTomorrow": dayjs()
+            ":startOfTomorrow": utcDayjs()
                 .add(1, "day")
                 .startOf("day")
                 .toISOString(),
-            ":endOfTomorrow": dayjs().add(1, "day").endOf("day").toISOString(),
-            ":startOfLastWeek": dayjs()
+            ":endOfTomorrow": utcDayjs()
+                .add(1, "day")
+                .endOf("day")
+                .toISOString(),
+            ":startOfLastWeek": utcDayjs()
                 .subtract(1, "week")
                 .startOf("week")
                 .toISOString(),
-            ":endOfLastWeek": dayjs()
+            ":endOfLastWeek": utcDayjs()
                 .subtract(1, "week")
                 .endOf("week")
                 .toISOString(),
-            ":startOfWeek": dayjs().startOf("week").toISOString(),
-            ":endOfWeek": dayjs().endOf("week").toISOString(),
-            ":startOfNextWeek": dayjs()
+            ":startOfWeek": utcDayjs().startOf("week").toISOString(),
+            ":endOfWeek": utcDayjs().endOf("week").toISOString(),
+            ":startOfNextWeek": utcDayjs()
                 .add(1, "week")
                 .startOf("week")
                 .toISOString(),
-            ":endOfNextWeek": dayjs()
+            ":endOfNextWeek": utcDayjs()
                 .add(1, "week")
                 .endOf("week")
                 .toISOString(),
-            ":startOfLastMonth": dayjs()
+            ":startOfLastMonth": utcDayjs()
                 .subtract(1, "month")
                 .startOf("month")
                 .toISOString(),
-            ":endOfLastMonth": dayjs()
+            ":endOfLastMonth": utcDayjs()
                 .subtract(1, "month")
                 .endOf("month")
                 .toISOString(),
-            ":startOfMonth": dayjs().startOf("month").toISOString(),
-            ":endOfMonth": dayjs().endOf("month").toISOString(),
-            ":startOfNextMonth": dayjs()
+            ":startOfMonth": utcDayjs().startOf("month").toISOString(),
+            ":endOfMonth": utcDayjs().endOf("month").toISOString(),
+            ":startOfNextMonth": utcDayjs()
                 .add(1, "month")
                 .startOf("month")
                 .toISOString(),
-            ":endOfNextMonth": dayjs()
+            ":endOfNextMonth": utcDayjs()
                 .add(1, "month")
                 .endOf("month")
                 .toISOString(),
-            ":startOfLastYear": dayjs()
+            ":startOfLastYear": utcDayjs()
                 .subtract(1, "year")
                 .startOf("year")
                 .toISOString(),
-            ":endOfLastYear": dayjs()
+            ":endOfLastYear": utcDayjs()
                 .subtract(1, "year")
                 .endOf("year")
                 .toISOString(),
-            ":startOfYear": dayjs().startOf("year").toISOString(),
-            ":endOfYear": dayjs().endOf("year").toISOString(),
-            ":startOfNextYear": dayjs()
+            ":startOfYear": utcDayjs().startOf("year").toISOString(),
+            ":endOfYear": utcDayjs().endOf("year").toISOString(),
+            ":startOfNextYear": utcDayjs()
                 .add(1, "year")
                 .startOf("year")
                 .toISOString(),
-            ":endOfNextYear": dayjs()
+            ":endOfNextYear": utcDayjs()
                 .add(1, "year")
                 .endOf("year")
                 .toISOString(),
-            ":startOfTime": dayjs(0).toISOString(),
-            ":endOfTime": dayjs("2500").toISOString(),
+            ":startOfTime": utcDayjs(0).toISOString(),
+            ":endOfTime": utcDayjs("2500").toISOString(),
         };
 
         if (Array.isArray(value)) {
@@ -195,6 +202,13 @@ export class QueryBuilderHelper {
                 return queryBuilder.andWhere(`${fieldName} != :${field}`, {
                     [field]: processedValue,
                 });
+            case "neOrNull":
+                return queryBuilder.andWhere(
+                    `${fieldName} != :${field} OR ${fieldName} IS NULL`,
+                    {
+                        [field]: processedValue,
+                    }
+                );
             case "gt":
                 return queryBuilder.andWhere(`${fieldName} > :${field}`, {
                     [field]: processedValue,
@@ -227,7 +241,6 @@ export class QueryBuilderHelper {
                 return queryBuilder.andWhere(
                     `${fieldName} ${operator} (${processedValue.join(",")})`
                 );
-                break;
             case "nin": {
                 if (fieldName.startsWith(cardPrefix)) {
                     return queryBuilder
@@ -267,6 +280,7 @@ export class QueryBuilderHelper {
                 const betweenOperator = `${
                     operator[0] === "n" ? "NOT " : ""
                 }BETWEEN`;
+
                 return queryBuilder.andWhere(
                     `${fieldName} ${betweenOperator} :${field}${randomNumber1} AND :${field}${randomNumber2}`,
                     {

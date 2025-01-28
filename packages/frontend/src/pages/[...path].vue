@@ -1,3 +1,15 @@
+<script setup lang="ts">
+definePage({
+  meta: {
+    requiresAuth: true,
+  },
+});
+
+const router = useRouter();
+
+router.push('/');
+</script>
+
 <template>
   <v-container>
     <v-row>

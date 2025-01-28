@@ -9,6 +9,7 @@ import {
     OneToMany,
     Relation,
     ManyToMany,
+    DeleteDateColumn,
 } from "typeorm";
 import { Space } from "../spaces/space.entity";
 import { CardList } from "../cards/card-lists/card.list.entity";
@@ -18,6 +19,8 @@ import { ListGroup } from "./list-groups/list.group.entity";
 import { CardType } from "../card-types/card.type.entity";
 import { Field } from "../fields/field.entity";
 import { Workspace } from "../workspaces/workspace.entity";
+import { AccessType } from "@tillywork/shared";
+import { ListType } from "@tillywork/shared";
 
 @Entity()
 export class List {
@@ -33,12 +36,17 @@ export class List {
     @Column({ type: "varchar", length: 255 })
     name: string;
 
+    @Column({ type: "enum", enum: AccessType, default: AccessType.PUBLIC })
+    accessType: AccessType;
+
     @CreateDateColumn({ type: "timestamp" })
     createdAt: Date;
     @UpdateDateColumn({ type: "timestamp" })
     updatedAt: Date;
+    @DeleteDateColumn({ type: "timestamp" })
+    deletedAt?: Date;
 
-    @ManyToOne(() => Space, { nullable: true })
+    @ManyToOne(() => Space, { nullable: true, onDelete: "CASCADE" })
     @JoinTable()
     space: Relation<Space>;
     @Column({ type: "bigint" })
@@ -49,6 +57,12 @@ export class List {
     workspace: Relation<Workspace>;
     @Column({ type: "bigint" })
     workspaceId: number;
+
+    @Column({ type: "enum", enum: ListType })
+    type: ListType;
+
+    @Column({ type: "varchar", length: 255 })
+    slug: string;
 
     @OneToMany(() => ListStage, (listStage) => listStage.list)
     listStages: Relation<ListStage[]>;

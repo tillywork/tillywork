@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type ListStage } from '../../project-management/lists/types';
+import type { ListStage } from '@tillywork/shared';
 
 const selectedStage = defineModel<ListStage>();
 const listStageMenu = ref(false);
@@ -7,6 +7,7 @@ const listStageMenu = ref(false);
 defineExpose({
   listStageMenu,
 });
+
 defineProps<{
   listStages: ListStage[];
   theme?: 'icon' | 'text' | 'default';
@@ -43,9 +44,8 @@ function isStageSelected(stage: ListStage) {
       <template v-else>
         <v-chip
           v-bind="!readonly ? props : undefined"
-          link
-          rounded="md"
-          :size="size ?? 'small'"
+          :link="!readonly"
+          rounded="pill"
           density="comfortable"
           :color="mainChipColor"
           @click.prevent
@@ -64,7 +64,7 @@ function isStageSelected(stage: ListStage) {
       </template>
     </template>
     <v-card>
-      <v-list class="text-align-left" rounded="md">
+      <v-list class="text-align-left">
         <template v-for="stage in listStages" :key="stage.id">
           <v-list-item
             @click="handleStageClick(stage)"

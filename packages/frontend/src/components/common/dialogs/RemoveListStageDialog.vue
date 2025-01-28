@@ -1,5 +1,5 @@
 <template>
-  <v-card color="surface" elevation="24" :loading="isDeleting">
+  <v-card color="dialog" elevation="12" border="thin" :loading="isDeleting">
     <v-card-item>
       <v-card-title class="d-flex align-start">
         Delete list stage
@@ -59,8 +59,8 @@ import { DIALOGS } from './types';
 import { useDialogStore } from '@/stores/dialog';
 
 import { useQueryClient } from '@tanstack/vue-query';
-import type { ListStage } from '@/components/project-management/lists/types';
-import { useListStagesService } from '@/composables/services/useListStagesService';
+import { useListStagesService } from '@/services/useListStagesService';
+import type { ListStage } from '@tillywork/shared';
 
 const { rules } = validationUtils;
 const { showSnackbar } = useSnackbarStore();
@@ -103,7 +103,7 @@ async function handleSubmitForm() {
     });
     dialog.closeDialog(currentDialogIndex.value);
     queryClient.invalidateQueries({ queryKey: ['listGroups'] });
-    queryClient.invalidateQueries({ queryKey: ['cards'] }); // TODO: Improvement, only related groupIds (current & replacement)
+    queryClient.invalidateQueries({ queryKey: ['cards'] });
   } catch (err) {
     showSnackbar({
       message: 'Something went wrong, please try again.',

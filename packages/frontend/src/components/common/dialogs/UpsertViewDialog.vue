@@ -1,19 +1,18 @@
 <script setup lang="ts">
-import { useViewsService } from '@/composables/services/useViewsService';
+import { useViewsService } from '@/services/useViewsService';
 import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
-import {
-  ViewTypes,
-  type View,
-} from '@/components/project-management/views/types';
+import { ViewTypes, WorkspaceTypes, type View } from '@tillywork/shared';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS, UpsertDialogMode } from './types';
+import { useAuthStore } from '@/stores/auth';
 
 const viewsService = useViewsService();
 const dialog = useDialogStore();
 const { rules } = validationUtils;
 const { showSnackbar } = useSnackbarStore();
+const { workspace } = storeToRefs(useAuthStore());
 
 const currentDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.UPSERT_VIEW)
@@ -28,23 +27,35 @@ const viewDto = ref<Partial<View>>({
   listId: view.value?.listId ?? currentDialog.value?.data.list.id,
 });
 
-const viewTypeOptions = ref([
-  {
-    title: 'Table',
-    value: ViewTypes.TABLE,
-    icon: 'mdi-table',
-  },
-  {
-    title: 'Board',
-    value: ViewTypes.BOARD,
-    icon: 'mdi-view-column',
-  },
-  {
-    title: 'List',
-    value: ViewTypes.LIST,
-    icon: 'mdi-list-box-outline',
-  },
-]);
+const viewTypeOptions = computed(() => {
+  const options = [
+    {
+      title: 'Table',
+      value: ViewTypes.TABLE,
+      icon: 'mdi-table',
+    },
+    {
+      title: 'Board',
+      value: ViewTypes.BOARD,
+      icon: 'mdi-view-column',
+    },
+    {
+      title: 'List',
+      value: ViewTypes.LIST,
+      icon: 'mdi-list-box-outline',
+    },
+  ];
+
+  if (workspace.value?.type !== WorkspaceTypes.CRM) {
+    options.push({
+      title: 'Gantt',
+      value: ViewTypes.GANTT,
+      icon: 'mdi-chart-gantt',
+    });
+  }
+
+  return options;
+});
 
 const { mutateAsync: createView, isPending: isCreating } =
   viewsService.useCreateViewMutation();
@@ -82,7 +93,12 @@ async function handleCreate() {
 </script>
 
 <template>
-  <v-card color="surface" elevation="24" :loading="isCreating || isUpdating">
+  <v-card
+    color="dialog"
+    elevation="12"
+    border="thin"
+    :loading="isCreating || isUpdating"
+  >
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle>
         <span class="text-capitalize">{{ currentDialog?.data.mode }}</span>

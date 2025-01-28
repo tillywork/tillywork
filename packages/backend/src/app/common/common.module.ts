@@ -15,7 +15,7 @@ import { FiltersModule } from "./filters/filters.module";
 import { ClsModule } from "nestjs-cls";
 import { CardTypesModule } from "./card-types/card.types.module";
 import { MailerModule } from "./mailer/mailer.module";
-import { ConditionalModule, ConfigModule, ConfigService } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { FilesModule } from "./files/files.module";
 import { AutomationsModule } from "./automations/automations.module";
 import { BullModule } from "@nestjs/bull";
@@ -50,8 +50,7 @@ import { BullModule } from "@nestjs/bull";
         FieldsModule,
         FiltersModule,
         CardTypesModule,
-        // Only add this module if TW_MAIL_ENABLE env variable is true
-        ConditionalModule.registerWhen(MailerModule, "TW_MAIL_ENABLE"),
+        MailerModule,
         FilesModule,
         AutomationsModule,
     ],

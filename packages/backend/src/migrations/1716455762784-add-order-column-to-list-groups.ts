@@ -1,4 +1,5 @@
 import { MigrationInterface, QueryRunner, TableColumn } from "typeorm";
+import { ListGroupOptions } from "@tillywork/shared";
 
 export class AddOrderColumnToListGroups1716455762784
     implements MigrationInterface
@@ -14,7 +15,7 @@ export class AddOrderColumnToListGroups1716455762784
         );
 
         await queryRunner.query(
-            `DELETE FROM list_group WHERE type = 'LIST_STAGE'`
+            `DELETE FROM list_group WHERE type = '${ListGroupOptions.LIST_STAGE}'`
         );
     }
 

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import UserListItem from '@/components/common/navigation/UserListItem.vue';
+import UserMenu from '@/components/common/navigation/UserMenu.vue';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
-import NavigationWorkspace from '@/components/project-management/navigation/NavigationWorkspace.vue';
-import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
+import NavigationWorkspace from '@/components/common/navigation/NavigationWorkspace.vue';
+import NavigationWorkspaceSelector from '@/components/common/navigation/NavigationWorkspaceSelector.vue';
 import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
 import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
@@ -11,16 +11,16 @@ import CommandPaletteActivator from '@/components/common/navigation/CommandPalet
 const { hideNavigationDrawer } = useHideNavigationDrawer();
 const navigationDrawer = ref(true);
 const authStore = useAuthStore();
-const { logout, isAuthenticated } = authStore;
+const { isAuthenticated } = authStore;
 const logo = useLogo();
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
-  //   {
-  //     icon: 'mdi-home',
-  //     title: 'Home',
-  //     route: { name: 'Home' },
-  //     activeOnExactMatch: true,
-  //   },
+  {
+    icon: 'mdi-draw',
+    title: 'Whiteboard',
+    route: '/whiteboard',
+    activeOnExactMatch: true,
+  },
 ]);
 
 if (isAuthenticated()) {
@@ -40,7 +40,6 @@ if (isAuthenticated()) {
   <v-app>
     <v-app-bar
       v-if="!hideNavigationDrawer && $vuetify.display.mdAndDown"
-      color="accent"
       height="40"
       class="border-b-thin"
     >
@@ -58,7 +57,6 @@ if (isAuthenticated()) {
       v-if="!hideNavigationDrawer"
       v-model="navigationDrawer"
       app
-      color="background"
     >
       <v-img
         :src="logo.getLogoUrlByTheme()"
@@ -68,16 +66,17 @@ if (isAuthenticated()) {
       <v-divider class="hidden-md-and-down" />
       <navigation-workspace-selector v-if="isAuthenticated()" />
 
-      <command-palette-activator class="mt-4 ms-4" />
+      <command-palette-activator class="mt-4 ms-3" />
 
       <!-- Sidebar content -->
-      <v-list v-if="navigationMenuItems.length > 0">
+      <v-list v-if="navigationMenuItems.length > 0" class="mt-4">
         <v-list-item
           v-for="navigationItem in navigationMenuItems"
           :key="navigationItem.title"
           :to="navigationItem.route"
           @click="navigationItem.onClick"
           :exact="navigationItem.activeOnExactMatch"
+          rounded="md"
         >
           <template #prepend v-if="navigationItem.icon">
             <v-icon :icon="navigationItem.icon" />
@@ -90,39 +89,7 @@ if (isAuthenticated()) {
       <navigation-workspace v-if="isAuthenticated()" />
 
       <template v-slot:append>
-        <v-list :slim="false">
-          <v-menu v-if="isAuthenticated()">
-            <template #activator="{ props }">
-              <user-list-item v-bind="props" avatar-size="small">
-                <template #append>
-                  <v-icon icon="mdi-dots-vertical" size="small" />
-                </template>
-              </user-list-item>
-            </template>
-            <v-card class="border-thin ms-n2">
-              <v-list>
-                <v-list-item to="/settings/theme">
-                  <template #prepend>
-                    <v-icon icon="mdi-cog" />
-                  </template>
-                  <v-list-item-title>Settings</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="logout()">
-                  <template #prepend>
-                    <v-icon icon="mdi-logout" />
-                  </template>
-                  <v-list-item-title>Logout</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-card>
-          </v-menu>
-          <v-list-item v-else to="/login">
-            <template #prepend>
-              <v-icon icon="mdi-login" />
-            </template>
-            <v-list-item-title>Login</v-list-item-title>
-          </v-list-item>
-        </v-list>
+        <user-menu />
       </template>
     </v-navigation-drawer>
 

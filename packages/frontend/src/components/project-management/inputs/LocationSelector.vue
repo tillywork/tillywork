@@ -1,26 +1,22 @@
 <script setup lang="ts">
-import { useListsService } from '@/composables/services/useListsService';
-import { useSpacesService } from '@/composables/services/useSpacesService';
+import { useListsService } from '@/services/useListsService';
+import { useSpacesService } from '@/services/useSpacesService';
 import { useAuthStore } from '@/stores/auth';
-import type { Space } from '../spaces/types';
-import type { List } from '../lists/types';
 import stringUtils from '@/utils/string';
 import { VTextField } from 'vuetify/components';
 import type { VNode } from 'vue';
+import type { List, Space } from '@tillywork/shared';
 
 export type LocationSelection = {
   location: Space | List;
   locationType: 'space' | 'list';
 };
 
-const props = withDefaults(
-  defineProps<{
-    mode: 'all' | 'spaces' | 'lists';
-  }>(),
-  {
-    mode: 'all',
-  }
-);
+export type LocationMode = 'all' | 'spaces' | 'lists';
+
+const { mode = 'all' } = defineProps<{
+  mode?: LocationMode;
+}>();
 const selection = defineModel<LocationSelection>();
 
 const attrs = useAttrs();
@@ -33,8 +29,8 @@ const searchField = ref<VTextField>();
 const locationMenu = ref(false);
 const openedListGroups = ref<number[]>([]);
 
-const enableSpaceSelection = computed(() => !['lists'].includes(props.mode));
-const enableListSelection = computed(() => !['spaces'].includes(props.mode));
+const enableSpaceSelection = computed(() => !['lists'].includes(mode));
+const enableListSelection = computed(() => !['spaces'].includes(mode));
 
 const filteredLocations = computed(() => {
   const filteredSpaces = spaces.value?.filter(
@@ -67,6 +63,7 @@ const { workspace } = storeToRefs(useAuthStore());
 const { useGetSpacesQuery } = useSpacesService();
 const { data: spaces } = useGetSpacesQuery({
   workspaceId: workspace.value!.id,
+  lists: true,
 });
 
 const { useGetListsQuery } = useListsService();
@@ -138,6 +135,8 @@ watch(locationMenu, (v) => {
         autocomplete="off"
         clearable
         placeholder="Search.."
+        variant="filled"
+        rounded="0"
       />
       <v-list
         v-model:opened="openedListGroups"

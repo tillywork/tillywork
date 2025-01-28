@@ -3,11 +3,11 @@ import { type VForm } from 'vuetify/components';
 import validationUtils from '@/utils/validation';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
-import { useCardTypesService } from '@/composables/services/useCardTypesService';
-import { type CardType } from '@/components/project-management/cards/types';
+import { useCardTypesService } from '@/services/useCardTypesService';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from './types';
 import { useAuthStore } from '@/stores/auth';
+import type { CardType } from '@tillywork/shared';
 
 const { rules } = validationUtils;
 const dialog = useDialogStore();
@@ -63,7 +63,7 @@ async function handleCreate() {
 </script>
 
 <template>
-  <v-card color="surface" elevation="24" :loading="isPending">
+  <v-card color="dialog" elevation="12" border="thin" :loading="isPending">
     <v-card-item>
       <v-card-title class="d-flex align-start">
         Delete card type

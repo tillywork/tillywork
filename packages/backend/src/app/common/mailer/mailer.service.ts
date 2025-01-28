@@ -6,9 +6,10 @@ import { Queue } from "bull";
 import nodemailer, { Transporter } from "nodemailer";
 import { MailOptions } from "nodemailer/lib/json-transport";
 import { Repository } from "typeorm";
-import { Email, EmailStatus } from "./email.entity";
+import { Email } from "./email.entity";
 import { UsersService } from "../users/users.service";
 import { SendMentionNotificationParams } from "./mailer.controller";
+import { EmailStatus } from "./types";
 
 export type EmailOptions = MailOptions & {
     id: string;
@@ -99,6 +100,14 @@ export class MailerService {
     }
 
     async processEmail(emailOptions: EmailOptions) {
+        const trackingPixel = `<img src="${this.configService.get(
+            "TW_VITE_API_URL"
+        )}/mailer/tracking/${emailOptions.id}" width="1" height="1" />`;
+
+        if (emailOptions.html) {
+            emailOptions.html += trackingPixel;
+        }
+
         const emailResult = await this.transporter.sendMail(emailOptions);
         await this.updateStatus({
             id: emailOptions.id,
@@ -183,5 +192,22 @@ export class MailerService {
             </p>
             `,
         });
+    }
+
+    async trackEmailOpen(id: string) {
+        const email = await this.findOne(id);
+
+        if (!email) {
+            this.logger.error(`Email with id ${id} not found`);
+            return;
+        }
+
+        email.openCount = (email.openCount || 0) + 1;
+        email.openTimes = email.openTimes || [];
+        email.openTimes.push(new Date().toISOString());
+
+        await this.emailRepository.save(email);
+
+        return email;
     }
 }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export type FilterOperator =
     | "eq" // equals
     | "ne" // not equal

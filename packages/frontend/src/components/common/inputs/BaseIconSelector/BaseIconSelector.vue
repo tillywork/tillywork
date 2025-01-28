@@ -1,6 +1,15 @@
 <script setup lang="ts">
-import Common from './common';
+import Icons from './icons';
+
 import BaseColorPicker from '../BaseColorPicker.vue';
+import VirtualScroller from '../../base/VirtualScroller.vue';
+
+import stringUtils from '@/utils/string';
+
+export type IconSelection = {
+  name: string;
+  icon: string;
+};
 
 defineProps<{
   withColor?: boolean;
@@ -9,27 +18,32 @@ defineProps<{
 const icon = defineModel<string>();
 const iconColor = defineModel<string>('color');
 
-const tab = ref();
 const searchIcon = ref();
 const menu = ref(false);
 const attrs = useAttrs();
 
 const iconDictionary = computed(() => {
   return {
-    common: Common,
+    icons: Icons.filter(
+      (icon) =>
+        stringUtils.fuzzySearch(searchIcon.value, icon.icon) ||
+        stringUtils.fuzzySearch(searchIcon.value, icon.name)
+    ),
   };
 });
 
-function handleSelectIcon(selectedIcon: string) {
-  icon.value = selectedIcon;
-  menu.value = false;
+function handleSelectIcon(selectedIcon: IconSelection) {
+  icon.value = selectedIcon.icon;
 }
 
 watch(
   icon,
   (v) => {
     if (!v) {
-      handleSelectIcon('mdi-tag');
+      handleSelectIcon({
+        icon: 'mdi-tag',
+        name: 'Tag',
+      });
     }
   },
   { immediate: true }
@@ -37,11 +51,13 @@ watch(
 </script>
 
 <template>
-  <base-icon-btn id="activator" v-bind="attrs" :icon />
+  <base-icon-btn id="activator" v-bind="attrs" :icon :color="iconColor" />
   <v-menu v-model="menu" :close-on-content-click="false" activator="#activator">
-    <v-card width="296" height="400">
-      <base-color-picker v-if="withColor" v-model="iconColor" label="Color*" />
-
+    <v-card width="296">
+      <div class="py-2 px-4 border-b-thin" v-if="withColor">
+        <span class="text-body-3 me-3">Color</span>
+        <base-color-picker v-model="iconColor" hide-details icon />
+      </div>
       <v-text-field
         v-model="searchIcon"
         hide-details
@@ -49,43 +65,35 @@ watch(
         autofocus
         autocomplete="off"
         clearable
+        variant="filled"
+        rounded="0"
       />
-      <v-tabs
-        v-model="tab"
-        class="justify-center d-flex"
-        height="40"
-        center-active
-        density="compact"
-      >
-        <v-tab slim>
-          <v-icon icon="mdi-apps" />
-        </v-tab>
-      </v-tabs>
-      <v-divider class="mx-4" />
-      <v-tabs-items v-model="tab">
-        <v-tab-item
-          :key="idx"
-          v-for="(v, k, idx) in iconDictionary"
-          class="overflow-auto py-2"
+      <v-card height="222" border="none" class="overflow-auto pa-2">
+        <virtual-scroller
+          :items="iconDictionary.icons"
+          :columns="8"
+          :row-height="44"
+          :item-size="36"
         >
-          <v-card height="316" border="none" class="overflow-auto">
-            <v-card-text class="pa-2 d-flex flex-wrap ga-1">
-              <template v-for="(i, index) in v" :key="index">
-                <v-btn
-                  icon
-                  color=""
-                  :style="{ backgroundColor: icon === i ? 'accent' : '' }"
-                  density="comfortable"
-                  @click="handleSelectIcon(i)"
-                  :active="icon === i"
-                >
-                  <v-icon>{{ i }}</v-icon>
-                </v-btn>
-              </template>
-            </v-card-text>
-          </v-card>
-        </v-tab-item>
-      </v-tabs-items>
+          <template #default="{ item }">
+            <v-btn
+              icon
+              density="comfortable"
+              @click="handleSelectIcon(item)"
+              :active="icon === item.icon"
+              color="default"
+              size="30"
+              v-tooltip:bottom="item.name"
+            >
+              <v-icon
+                :color="icon === item.icon ? iconColor : undefined"
+                size="small"
+                >{{ item.icon }}</v-icon
+              >
+            </v-btn>
+          </template>
+        </virtual-scroller>
+      </v-card>
     </v-card>
   </v-menu>
 </template>

@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import UserListItem from '@/components/common/navigation/UserListItem.vue';
 import { useAuthStore } from '@/stores/auth';
 import type { NavigationMenuItem } from '@/components/common/navigation/types';
 import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
 import { useLogo } from '@/composables/useLogo';
-import { useDialogStore } from '@/stores/dialog';
-import { DIALOGS } from '@/components/common/dialogs/types';
-import NavigationWorkspaceSelector from '@/components/project-management/navigation/NavigationWorkspaceSelector.vue';
+import NavigationWorkspaceSelector from '@/components/common/navigation/NavigationWorkspaceSelector.vue';
+import UserMenu from '@/components/common/navigation/UserMenu.vue';
+import { useStateStore } from '@/stores/state';
+
+const { isRailFrozen } = storeToRefs(useStateStore());
 
 const authStore = useAuthStore();
-const { isAuthenticated, logout } = authStore;
-const { workspace } = storeToRefs(authStore);
+const { isAuthenticated } = authStore;
 const { hideNavigationDrawer } = useHideNavigationDrawer();
 const navigationDrawer = ref(true);
+const isRail = ref(true);
 const logo = useLogo();
-const dialog = useDialogStore();
 
 const navigationMenuItems = ref<NavigationMenuItem[]>([
   {
-    icon: 'mdi-home',
-    title: 'Home',
-    route: '/crm',
+    icon: 'mdi-draw',
+    title: 'Whiteboard',
+    route: '/whiteboard',
     activeOnExactMatch: true,
   },
 ]);
@@ -73,16 +73,35 @@ if (isAuthenticated()) {
     <v-navigation-drawer
       v-if="!hideNavigationDrawer"
       v-model="navigationDrawer"
+      v-model:rail="isRail"
       app
-      color="background"
+      :expand-on-hover="!isRailFrozen"
     >
-      <v-img
-        :src="logo.getLogoUrlByTheme()"
-        width="125"
-        class="ma-2 mt-4 hidden-md-and-down"
-      />
+      <div class="position-relative">
+        <v-img
+          :src="logo.getCheckUrl()"
+          min-height="25"
+          min-width="25"
+          height="25"
+          width="25"
+          class="ma-2 ms-4 mt-4 hidden-md-and-down"
+        />
+        <v-img
+          v-if="!isRail"
+          :src="logo.getLogoUrlByTheme()"
+          min-height="35"
+          min-width="125"
+          height="35"
+          width="125"
+          class="ms-2 hidden-md-and-down position-absolute"
+          :style="{ top: '-5px', left: '-1px' }"
+        />
+      </div>
       <v-divider class="hidden-md-and-down" />
-      <navigation-workspace-selector v-if="isAuthenticated()" />
+      <navigation-workspace-selector
+        v-if="isAuthenticated()"
+        v-model:only-icon="isRail"
+      />
 
       <v-list class="mt-2">
         <v-list-item
@@ -91,11 +110,14 @@ if (isAuthenticated()) {
           :to="navigationItem.route"
           @click="navigationItem.onClick"
           :exact="navigationItem.activeOnExactMatch"
+          rounded="md"
         >
           <template #prepend v-if="navigationItem.icon">
-            <v-icon :icon="navigationItem.icon" />
+            <v-icon :icon="navigationItem.icon" class="ms-1" />
           </template>
-          <v-list-item-title>{{ navigationItem.title }}</v-list-item-title>
+          <v-list-item-title v-if="!isRail">{{
+            navigationItem.title
+          }}</v-list-item-title>
         </v-list-item>
 
         <v-divider />
@@ -111,7 +133,7 @@ if (isAuthenticated()) {
             :exact="navigationItem.activeOnExactMatch"
           >
             <template #prepend v-if="navigationItem.icon">
-              <v-icon :icon="navigationItem.icon" />
+              <v-icon :icon="navigationItem.icon" class="ms-1" />
             </template>
             <v-list-item-title>{{ navigationItem.title }}</v-list-item-title>
           </v-list-item>
@@ -120,88 +142,12 @@ if (isAuthenticated()) {
 
       <template v-slot:append>
         <!-- User content -->
-        <v-list v-if="isAuthenticated()" :slim="false">
-          <v-menu :close-on-content-click="false">
-            <template #activator="{ props }">
-              <user-list-item v-bind="props" avatar-size="small">
-                <template #append>
-                  <v-icon icon="mdi-dots-vertical" />
-                </template>
-              </user-list-item>
-            </template>
-            <v-card class="border-thin ms-n2">
-              <v-list>
-                <v-menu>
-                  <template #activator="{ props }">
-                    <v-list-item v-bind="props">
-                      <template #prepend>
-                        <v-icon icon="mdi-apps" />
-                      </template>
-                      <v-list-item-title>Apps</v-list-item-title>
-                    </v-list-item>
-                  </template>
-                  <v-card
-                    class="d-flex flex-wrap align-center justify-space-evenly py-4"
-                    width="275"
-                    rounded="lg"
-                  >
-                    <v-card
-                      class="d-flex flex-column align-center justify-center pt-2"
-                      width="70"
-                      height="70"
-                      border="none"
-                      link
-                      rounded="lg"
-                    >
-                      <v-icon icon="mdi-timeline-check" size="24" />
-                      <v-card-title class="text-caption">Projects</v-card-title>
-                    </v-card>
-                    <v-card
-                      class="d-flex flex-column align-center justify-center pt-2"
-                      width="70"
-                      height="70"
-                      border="none"
-                      link
-                      rounded="lg"
-                    >
-                      <v-icon icon="mdi-handshake" size="24" />
-                      <v-card-title class="text-caption">CRM</v-card-title>
-                    </v-card>
-                    <v-card
-                      class="d-flex flex-column align-center justify-center pt-2"
-                      width="70"
-                      height="70"
-                      border="none"
-                      link
-                      rounded="lg"
-                    >
-                      <v-icon icon="mdi-application-braces" size="24" />
-                      <v-card-title class="text-caption">Agile</v-card-title>
-                    </v-card>
-                  </v-card>
-                </v-menu>
-                <v-list-item to="/settings/theme">
-                  <template #prepend>
-                    <v-icon icon="mdi-cog" />
-                  </template>
-                  <v-list-item-title>Settings</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="logout()">
-                  <template #prepend>
-                    <v-icon icon="mdi-logout" />
-                  </template>
-                  <v-list-item-title>Logout</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-card>
-          </v-menu>
-        </v-list>
+        <user-menu />
       </template>
     </v-navigation-drawer>
 
     <v-main>
       <router-view />
-      {{ workspace }}
     </v-main>
   </v-app>
 </template>

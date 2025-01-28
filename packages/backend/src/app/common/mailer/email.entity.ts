@@ -5,14 +5,7 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
 } from "typeorm";
-
-export enum EmailStatus {
-    PENDING = "pending",
-    QUEUED = "queued",
-    SENDING = "sending",
-    SUCCESS = "success",
-    FAILED = "failed",
-}
+import { EmailStatus } from "./types";
 
 @Entity()
 export class Email {
@@ -34,6 +27,12 @@ export class Email {
         default: EmailStatus.PENDING,
     })
     status: EmailStatus;
+
+    @Column("timestamp", { nullable: true, array: true })
+    openTimes: string[];
+
+    @Column({ type: "int", default: 0 })
+    openCount: number;
 
     @CreateDateColumn()
     createdAt: Date;

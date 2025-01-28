@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
-import { type Workspace } from '@/components/project-management/workspaces/types';
+import { useWorkspacesService } from '@/services/useWorkspacesService';
 import { useSnackbarStore } from '@/stores/snackbar';
-import CreateWorkspaceForm from '@/components/project-management/workspaces/CreateWorkspaceForm.vue';
+import CreateWorkspaceForm from '@/components/common/workspaces/CreateWorkspaceForm.vue';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from './types';
 import { useAuthStore } from '@/stores/auth';
 import { useStateStore } from '@/stores/state';
+import type { Workspace } from '@tillywork/shared';
 
 const workspacesService = useWorkspacesService();
 const dialog = useDialogStore();
@@ -17,6 +17,7 @@ const { setSelectedModule } = useStateStore();
 const currentDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CREATE_WORKSPACE)
 );
+const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
 
 const { mutateAsync: createWorkspace, isPending } =
   workspacesService.useCreateWorkspaceMutation();
@@ -39,7 +40,7 @@ async function handleCreate(workspaceDto: Partial<Workspace>) {
 </script>
 
 <template>
-  <v-card color="surface" elevation="24" :loading="isPending">
+  <v-card color="dialog" elevation="12" border="thin" :loading="isPending">
     <div class="d-flex align-center ps-0 pa-4">
       <v-card-subtitle class="text-h6">Create workspace</v-card-subtitle>
       <v-spacer />
@@ -53,6 +54,7 @@ async function handleCreate(workspaceDto: Partial<Workspace>) {
       @submit="handleCreate"
       :loading="isPending"
       card-class="mt-16"
+      :data="currentDialog.data"
     />
   </v-card>
 </template>

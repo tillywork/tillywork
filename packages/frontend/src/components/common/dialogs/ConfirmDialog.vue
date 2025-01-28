@@ -8,11 +8,19 @@ const currentDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
 );
 const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
+
+function handleCancelClick() {
+  if ('onCancel' in currentDialog.value.data) {
+    currentDialog.value.data.onCancel();
+  } else {
+    dialog.closeDialog(currentDialogIndex.value);
+  }
+}
 </script>
 
 <template>
-  <v-card color="accent" class="border-thin">
-    <v-card-title class="text-body-1 pa-4 pb-1 bg-accent">
+  <v-card color="dialog" elevation="12" border="thin">
+    <v-card-title class="text-body-1 pa-4 pb-1">
       {{ currentDialog?.data.title ?? 'Confirm' }}
     </v-card-title>
     <v-card-text class="text-body-3 pa-4">
@@ -21,18 +29,16 @@ const currentDialog = computed(() => dialog.dialogs[currentDialogIndex.value]);
     <v-card-actions class="text-body-3">
       <v-btn
         color="error"
-        class="text-body-3"
-        size="small"
-        @click="currentDialog?.data.onCancel"
+        @click="handleCancelClick"
         :disabled="currentDialog?.data.isLoading"
+        class="text-none"
         >Cancel</v-btn
       >
       <v-btn
         color="info"
-        class="text-body-3"
-        size="small"
         @click="currentDialog?.data.onConfirm"
         :loading="currentDialog?.data.isLoading"
+        class="text-none"
         >Confirm</v-btn
       >
     </v-card-actions>

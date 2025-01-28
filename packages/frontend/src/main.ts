@@ -1,15 +1,21 @@
-import '@/styles/styles.scss';
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import App from './app/App.vue';
-import vuetify from './plugins/vuetify';
+
 import router from './router';
-import { VueQueryPlugin } from '@tanstack/vue-query';
+
+import vuetify from './plugins/vuetify';
 import posthog from './plugins/posthog';
+import { VueQueryPlugin } from '@tanstack/vue-query';
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+
+import shortcutDirective from './directives/shortcut';
+
 import BaseIconBtn from './components/common/base/BaseIconBtn.vue';
 import BaseAvatar from './components/common/base/BaseAvatar.vue';
-import BaseUserSelector from './components/common/inputs/BaseUserSelector.vue';
+import BaseUserSelector from './components/common/inputs/BaseUserSelector/BaseUserSelector.vue';
 import BaseDatePicker from './components/common/inputs/BaseDatePicker.vue';
 import ListStageSelector from './components/common/inputs/ListStageSelector.vue';
+
+import '@/styles/styles.scss';
 
 const app = createApp(App);
 
@@ -44,5 +50,7 @@ app.use(VueQueryPlugin, {
   },
 });
 app.use(posthog);
+
+app.directive('shortcut', shortcutDirective);
 
 app.mount('#root');

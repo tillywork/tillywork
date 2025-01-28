@@ -9,26 +9,34 @@ import {
   FlexRender,
   getSortedRowModel,
 } from '@tanstack/vue-table';
-import type { PaginationParams, TableSortOption } from './types';
+import type {
+  PaginationParams,
+  SortDirection,
+  SortOption,
+} from '@tillywork/shared';
+import type { Slots } from 'vue';
 
 const props = defineProps<{
   columns?: ColumnDef<any, any>[];
   data: any[];
   total?: number;
-  sortBy?: TableSortOption[];
+  sortBy?: SortOption[];
   enableColumnResizing?: boolean;
+  disableSorting?: boolean;
   width?: string;
 }>();
 
 const emit = defineEmits(['update:options', 'click:row']);
-const slots = defineSlots();
+const slots = useSlots() as Slots & {
+  empty?: (props: { props: any }) => VNode[];
+};
 
 const options = defineModel<PaginationParams>('options');
 
-const sortBy = computed<TableSortOption[]>(() => props.sortBy ?? []);
+const sortBy = computed<SortOption[]>(() => props.sortBy ?? []);
 const tableSortState = computed(() =>
   sortBy.value?.map((sortOption) => {
-    return { id: sortOption.key, desc: sortOption.order === 'desc' };
+    return { id: sortOption.key, desc: sortOption.order === 'DESC' };
   })
 );
 
@@ -57,6 +65,7 @@ const table = useVueTable({
   initialState: {
     sorting: tableSortState.value,
   },
+  enableSorting: !props.disableSorting,
 });
 
 const pageSizeDropdownOptions = [1, 5, 10, 25, 50];
@@ -79,7 +88,9 @@ function handleSortingChange(header: Header<unknown, unknown>) {
       options.value.sort = [
         {
           key: header.column.id,
-          order: header.column.getIsSorted() as string,
+          order: (
+            header.column.getIsSorted() as SortDirection
+          ).toUpperCase() as SortDirection,
         },
       ];
     } else {
@@ -249,6 +260,17 @@ function generateColumnDefs(): ColumnDef<any, any>[] {
               </v-card>
             </v-hover>
           </v-list-item>
+        </template>
+
+        <template v-if="!table.getRowCount()">
+          <template v-if="!!slots.empty">
+            <slot name="empty" />
+          </template>
+          <template v-else>
+            <v-list-item lines="two">
+              <v-list-item-title> No data found. </v-list-item-title>
+            </v-list-item>
+          </template>
         </template>
       </v-list>
       <v-card class="table-footer">

@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import {
-  WorkspaceTypes,
-  type Workspace,
-} from '@/components/project-management/workspaces/types';
-import { useUsersService } from '@/composables/services/useUsersService';
-import { useWorkspacesService } from '@/composables/services/useWorkspacesService';
+import { useUsersService } from '@/services/useUsersService';
+import { useWorkspacesService } from '@/services/useWorkspacesService';
 import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
-import { useWorkspaceStore } from '@/stores/workspace';
-import CreateWorkspaceForm from '@/components/project-management/workspaces/CreateWorkspaceForm.vue';
+import CreateWorkspaceForm from '@/components/common/workspaces/CreateWorkspaceForm.vue';
 import { useDialogStore } from '@/stores/dialog';
+import { WorkspaceTypes, type Workspace } from '@tillywork/shared';
 import { DIALOGS } from './types';
+import { useStateStore } from '@/stores/state';
+import posthog from 'posthog-js';
 
 const logo = useLogo();
+
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
-const workspaceStore = useWorkspaceStore();
 const { showSnackbar } = useSnackbarStore();
+const dialog = useDialogStore();
+const { setSpaceExpansionState, navigateToLastList } = useStateStore();
+
 const workspacesService = useWorkspacesService();
 const usersService = useUsersService();
+
 const createWorkspaceMutation = workspacesService.useCreateWorkspaceMutation();
 const updateUserMutation = usersService.updateUserMutation();
-const dialog = useDialogStore();
-const router = useRouter();
 
 const currentDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.ONBOARDING)
@@ -47,6 +47,8 @@ const selectedModuleNames = computed(() =>
 );
 
 function submitStepTwo() {
+  posthog.capture('Onboarding', { step: 2, value: selectedModuleNames.value });
+
   updateUserMutation.mutate({
     ...user.value,
     onboarding: {
@@ -64,12 +66,19 @@ async function createWorkspace(createWorkspaceDto: Partial<Workspace>) {
   createWorkspaceMutation
     .mutateAsync(createWorkspaceDto)
     .then((workspace) => {
-      authStore.setWorkspace(workspace);
+      posthog.capture('Onboarding', { step: 3, value: workspace.type });
+
       dialog.closeDialog(currentDialogIndex.value);
-      workspaceStore.setSpaceExpansionState(workspace.id, [
-        workspace.spaces[0].id,
-      ]);
-      router.push(`/pm/list/${workspace.spaces[0].lists[0].id}`);
+      switch (workspace.type) {
+        case WorkspaceTypes.PROJECT_MANAGEMENT:
+          setSpaceExpansionState(workspace.id, [workspace.spaces[0].id]);
+          break;
+        case WorkspaceTypes.CRM:
+        default:
+          break;
+      }
+
+      navigateToLastList();
     })
     .catch(() => {
       showSnackbar({
@@ -79,10 +88,14 @@ async function createWorkspace(createWorkspaceDto: Partial<Workspace>) {
       });
     });
 }
+
+onMounted(() => {
+  posthog.capture('Onboarding', { step: 1 });
+});
 </script>
 
 <template>
-  <v-card class="onboarding-dialog">
+  <v-card class="onboarding-dialog" color="dialog" elevation="12" border="thin">
     <v-card-text class="pt-0">
       <v-stepper v-model="currentStep" :items="onboardingSteps" hide-actions>
         <template #item.1>
@@ -247,7 +260,6 @@ async function createWorkspace(createWorkspaceDto: Partial<Workspace>) {
           <create-workspace-form
             @submit="createWorkspace"
             :loading="createWorkspaceMutation.isPending.value"
-            onboarding
           />
         </template>
       </v-stepper>
