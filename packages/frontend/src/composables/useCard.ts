@@ -13,10 +13,15 @@ export const useCard = () => {
   const { showSnackbar } = useSnackbarStore();
   const dialog = useDialogStore();
 
-  const { useUpdateCardMutation, useDeleteCardMutation } = useCardsService();
+  const {
+    useUpdateCardMutation,
+    useDeleteCardMutation,
+    useUpdateCardListMutation,
+  } = useCardsService();
   const { mutateAsync: updateCard } = useUpdateCardMutation();
   const { mutateAsync: deleteCard, isPending: isDeleting } =
     useDeleteCardMutation();
+  const { mutateAsync: updateCardList } = useUpdateCardListMutation();
 
   const { copy } = useClipboard();
 
@@ -136,6 +141,30 @@ export const useCard = () => {
     ];
   }
 
+  function updateCardStage({
+    cardId,
+    cardListId,
+    listStageId,
+  }: {
+    cardId: number;
+    cardListId: number;
+    listStageId: number;
+  }) {
+    updateCardList({
+      cardId,
+      cardListId,
+      updateCardListDto: {
+        listStageId,
+      },
+    }).catch(() => {
+      showSnackbar({
+        message: 'Something went wrong, please try again.',
+        color: 'error',
+        timeout: 5000,
+      });
+    });
+  }
+
   return {
     updateFieldValue,
     normalizeFieldValue,
@@ -143,5 +172,6 @@ export const useCard = () => {
     copyLink,
     getCardContextMenuItems,
     updateCard,
+    updateCardStage,
   };
 };

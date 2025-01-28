@@ -1,6 +1,6 @@
 import type { MaybeRef } from 'vue';
 
-import { type Card, type List, type View, dayjs } from '@tillywork/shared';
+import { type List, type View, dayjs } from '@tillywork/shared';
 export type TimelineViewMode = 'day' | 'week' | 'month' | 'year';
 
 export interface TimelineHeader {
@@ -26,10 +26,13 @@ export const useGanttChart = ({
 }) => {
   // Calculate total days in timeline
   const totalDays = computed(() => {
-    return timelineConfig.value.endDate.diff(
+    const diff = timelineConfig.value.endDate.diff(
       timelineConfig.value.startDate,
       'day'
     );
+
+    // dayjs.diff is not inclusive, so we add 1 day to the calculation to get the correct number
+    return diff + 1;
   });
 
   // Calculate column width based on view mode
@@ -39,27 +42,6 @@ export const useGanttChart = ({
   const chartWidth = computed(() => {
     return totalDays.value * columnWidth.value;
   });
-
-  // Calculate card position
-  const getCardPosition = (card: Card) => {
-    if (!card.data.starts_at || !card.data.due_at) {
-      return null;
-    }
-
-    const startsAt = dayjs(card.data.starts_at);
-    const dueAt = dayjs(card.data.due_at);
-
-    const startDiff = startsAt.diff(timelineConfig.value.startDate, 'day');
-    const durationDiff = dueAt.diff(startsAt, 'day');
-
-    const left = startDiff * columnWidth.value;
-    const width = durationDiff * columnWidth.value + columnWidth.value;
-
-    return {
-      left,
-      width,
-    };
-  };
 
   // Update timeline configuration
   const updateTimelineConfig = (config: Partial<TimelineConfig>) => {
@@ -72,12 +54,12 @@ export const useGanttChart = ({
   // Get today's position
   const todayPosition = computed(() => {
     const today = dayjs();
-    const diffDays = today.diff(timelineConfig.value.startDate, 'day') - 1;
+    const diffDays = today.diff(timelineConfig.value.startDate, 'day');
     return diffDays * columnWidth.value;
   });
 
   // Generate headers based on view mode
-  const generateHeaders = computed(() => {
+  const headers = computed(() => {
     const headers: TimelineHeader[] = [];
     const startDate = timelineConfig.value.startDate;
     const endDate = timelineConfig.value.endDate;
@@ -131,8 +113,7 @@ export const useGanttChart = ({
     chartWidth,
     columnWidth,
     todayPosition,
-    getCardPosition,
     updateTimelineConfig,
-    headers: generateHeaders,
+    headers,
   };
 };

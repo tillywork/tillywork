@@ -44,7 +44,7 @@ const viewTypeOptions = ref([
   {
     title: 'Gantt Chart',
     value: ViewTypes.GANTT,
-    icon: 'mdi-list-box-outline',
+    icon: 'mdi-chart-gantt',
   },
 ]);
 

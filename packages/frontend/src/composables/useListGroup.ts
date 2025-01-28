@@ -21,7 +21,6 @@ import { cloneDeep } from 'lodash';
 import { useCard } from './useCard';
 import type { Row } from '@tanstack/vue-table';
 import { useListGroupsService } from '@/services/useListGroupsService';
-import { useQueryClient } from '@tanstack/vue-query';
 import { useStateStore } from '@/stores/state';
 import objectUtils from '@/utils/object';
 import type { MaybeRef } from 'vue';
@@ -110,8 +109,6 @@ export const useListGroup = ({
   const dialog = useDialogStore();
   const { showSnackbar } = useSnackbarStore();
   const { setHoveredCard } = useStateStore();
-
-  const queryClient = useQueryClient();
 
   const { updateFieldValue } = useCard();
   const {
@@ -358,19 +355,13 @@ export const useListGroup = ({
         listStageId,
         order,
       },
-    })
-      .then(() => {
-        queryClient.invalidateQueries({
-          queryKey: ['listGroups', { listId: props.list.id }],
-        });
-      })
-      .catch(() => {
-        showSnackbar({
-          message: 'Something went wrong, please try again.',
-          color: 'error',
-          timeout: 5000,
-        });
+    }).catch(() => {
+      showSnackbar({
+        message: 'Something went wrong, please try again.',
+        color: 'error',
+        timeout: 5000,
       });
+    });
   }
 
   function handleDeleteCard(card: Card) {

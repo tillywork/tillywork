@@ -210,6 +210,7 @@ export const useCardsService = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['cards'] });
         queryClient.invalidateQueries({ queryKey: ['cardActivities'] });
+        queryClient.invalidateQueries({ queryKey: ['listGroups'] });
       },
     });
   }
