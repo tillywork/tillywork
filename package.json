@@ -6,6 +6,7 @@
         "build": "nx run-many -t build -p frontend backend -c production --skip-nx-cache",
         "dev": "nx run-many -t serve -p frontend backend --skip-nx-cache",
         "format": "nx run-many -t format -p frontend backend",
+        "docs": "nx run-many -t serve -p docs",
         "lint": "nx run-many -t lint -p frontend backend",
         "reset": "nx run backend:db:reset",
         "swagger": "nx run backend:metadata"

@@ -2,39 +2,62 @@ import { forwardRef, Module } from "@nestjs/common";
 import { BullModule } from "@nestjs/bull";
 import { AutomationsService } from "./services/automations.service";
 import { AutomationProcessor } from "./processors/automations.processor";
-import { AutomationsController } from "./automations.controller";
+import { AutomationsController } from "./controllers/automations.controller";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Automation } from "./entities/automation.entity";
-import { AutomationAction } from "./entities/automation.action.entity";
-import { AutomationsEngineService } from "./services/automations.engine.service";
-import { ActionHandlerFactory } from "./factories/action.handler.factory";
-import {
-    CreateCardHandler,
-    SendEmailHandler,
-    SendWebhookHandler,
-    UpdateCardFieldHandler,
-} from "./handlers/action.handlers";
+import { AutomationStep } from "./entities/automation.step.entity";
+import { AutomationEventHandler } from "./handlers/automation.event.handler";
+import { CreateCardHandler } from "./handlers/actions/create.card.handler";
+import { AutomationRun } from "./entities/automation.run.entity";
+import { AutomationStepRun } from "./entities/automation.step.run.entity";
+import { AutomationRunsService } from "./services/automation.runs.service";
 import { CardsModule } from "../cards/cards.module";
+import { AuthModule } from "../auth/auth.module";
+import { SetFieldHandler } from "./handlers/actions/set.field.handler";
+import { AutomationLocation } from "./entities/automation.location.entity";
+import { AutomationHandlerRegistry } from "./registries/automation.handler.registry";
+import { AutomationHandlersController } from "./controllers/automation.handlers.controller";
+import { CardCreatedHandler } from "./handlers/triggers/card.created.handler";
+import { FieldsModule } from "../fields/fields.module";
+import { ListsModule } from "../lists/lists.module";
+import { FieldUpdatedHandler } from "./handlers/triggers/field.updated.handler";
+import { CreateCommentHandler } from "./handlers/actions/create.comment.handler";
+import { PlaceholderService } from "./services/placeholder.service";
+const handlers = [
+    CreateCardHandler,
+    SetFieldHandler,
+    CardCreatedHandler,
+    FieldUpdatedHandler,
+    CreateCommentHandler,
+];
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Automation, AutomationAction]),
+        TypeOrmModule.forFeature([
+            Automation,
+            AutomationLocation,
+            AutomationStep,
+            AutomationRun,
+            AutomationStepRun,
+        ]),
         BullModule.registerQueue({
             name: "automation",
         }),
         forwardRef(() => CardsModule),
+        forwardRef(() => AuthModule),
+        forwardRef(() => FieldsModule),
+        forwardRef(() => ListsModule),
     ],
     providers: [
+        ...handlers,
         AutomationsService,
-        AutomationsEngineService,
+        AutomationEventHandler,
+        AutomationRunsService,
         AutomationProcessor,
-        ActionHandlerFactory,
-        UpdateCardFieldHandler,
-        CreateCardHandler,
-        SendEmailHandler,
-        SendWebhookHandler,
+        AutomationHandlerRegistry,
+        PlaceholderService,
     ],
-    controllers: [AutomationsController],
-    exports: [AutomationsService, AutomationsEngineService],
+    controllers: [AutomationsController, AutomationHandlersController],
+    exports: [AutomationsService, AutomationRunsService],
 })
 export class AutomationsModule {}

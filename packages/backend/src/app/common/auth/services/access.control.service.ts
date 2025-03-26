@@ -229,4 +229,26 @@ export class AccessControlService {
         const strategy = this.accessStrategyFactory.getStrategy(resourceType);
         await strategy.applyAccess(resource, resourceType);
     }
+
+    async findAll({
+        userId,
+        resourceType,
+        resourceId,
+    }: {
+        userId?: number;
+        resourceType: AccessControlResourceType;
+        resourceId: number | number[];
+    }): Promise<AccessControl[]> {
+        const accessControl = await this.accessControlRepository.find({
+            where: {
+                user: { id: userId },
+                [resourceType]: {
+                    id: Array.isArray(resourceId) ? In(resourceId) : resourceId,
+                },
+            },
+            relations: ["user"],
+        });
+
+        return accessControl;
+    }
 }

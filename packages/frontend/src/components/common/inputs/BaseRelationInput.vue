@@ -78,7 +78,6 @@ watch(debouncedSearch, () => {
       autocomplete="off"
       chips
       :no-data-text="!searchEnabled ? 'Type to search..' : 'No results'"
-      :width="!fill ? 160 : undefined"
       :rounded
     >
       <template #chip="{ item }">

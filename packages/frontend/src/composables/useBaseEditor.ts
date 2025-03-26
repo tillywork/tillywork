@@ -3,7 +3,7 @@ export const useBaseEditor = ({
   onSubmit,
 }: {
   baseEditor: Ref;
-  onSubmit: () => void;
+  onSubmit?: () => void;
 }) => {
   const { meta, ctrl, enter } = useMagicKeys();
 
@@ -15,7 +15,7 @@ export const useBaseEditor = ({
     [meta, ctrl, enter],
     ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
       if (isEnterPressed && (isMetaPressed || isCtrlPressed)) {
-        onSubmit();
+        onSubmit?.();
       }
     }
   );

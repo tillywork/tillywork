@@ -1,33 +1,36 @@
 import {
     IsArray,
-    IsEnum,
     IsNotEmpty,
     IsOptional,
     ValidateNested,
 } from "class-validator";
-import { FieldFilter } from "../../filters/types";
-import { TriggerType } from "../types";
-import { CreateAutomationActionDto } from "./create.automation.action.dto";
-import { User } from "../../users/user.entity";
 import { Type } from "class-transformer";
+
+import { User } from "../../users/user.entity";
+
+import { CreateAutomationStepDto } from "./create.automation.step.dto";
+
+import { CreateAutomationLocationDto } from "./create.automation.location.dto";
 
 export class CreateAutomationDto {
     @IsNotEmpty()
     name: string;
 
-    @IsNotEmpty()
-    @IsEnum(TriggerType)
-    triggerType: TriggerType;
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreateAutomationStepDto)
+    steps?: CreateAutomationStepDto[];
+
+    @IsOptional()
+    @Type(() => CreateAutomationStepDto)
+    trigger?: CreateAutomationStepDto;
 
     @IsOptional()
     @IsArray()
-    conditions?: FieldFilter[];
-
-    @IsNotEmpty()
-    @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => CreateAutomationActionDto)
-    actions: CreateAutomationActionDto[];
+    @Type(() => CreateAutomationLocationDto)
+    locations?: CreateAutomationLocationDto[];
 
     @IsNotEmpty()
     workspaceId: number;

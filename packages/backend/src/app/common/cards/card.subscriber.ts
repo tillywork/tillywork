@@ -6,21 +6,23 @@ import {
     UpdateEvent,
     MoreThanOrEqual,
     IsNull,
+    JsonContains,
 } from "typeorm";
 import { Card } from "./card.entity";
 import { Injectable, Logger } from "@nestjs/common";
 import { diff } from "deep-object-diff";
 import { ClsService } from "nestjs-cls";
-import { AutomationsEngineService } from "../automations/services/automations.engine.service";
-import { TriggerType } from "../automations/types";
 import {
     ACTIVITY_FIELD_TYPES,
     ActivityType,
     FieldChange,
+    TriggerType,
     UpdateActivityContent,
 } from "@tillywork/shared";
 import { CardActivity } from "./card-activities/card.activity.entity";
 import { Field } from "../fields/field.entity";
+import { TriggerEvent } from "../automations/events/trigger.event";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 const ACTIVITY_GROUPING_WINDOW = 1000 * 60 * 1; // 1 minute in milliseconds
 
@@ -32,7 +34,7 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
     constructor(
         connection: Connection,
         private clsService: ClsService,
-        private readonly automationEngineService: AutomationsEngineService
+        private eventEmitter: EventEmitter2
     ) {
         connection.subscribers.push(this);
     }
@@ -60,6 +62,7 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     },
                 ],
             },
+            createdByType: "user",
             createdBy: event.entity.createdBy,
             createdAt: event.entity.createdAt,
         });
@@ -83,21 +86,18 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     content: {
                         changes: [change],
                     },
+                    createdByType: "user",
                     createdBy: event.entity.createdBy,
                 });
 
                 return activityRepo.save(activity);
             })
         );
-
-        this.automationEngineService.processAutomations({
-            trigger: TriggerType.CARD_CREATED,
-            cardId: event.entity.id,
-        });
     }
 
     async afterUpdate(event: UpdateEvent<Card>) {
         const user = this.clsService.get("user");
+        const isAutomation = this.clsService.get("isAutomation");
 
         if (
             !event.updatedColumns.some(
@@ -114,6 +114,26 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
 
         const changes = await this.getFieldChanges(oldData, newData, event);
 
+        // Trigger automation events for each field change
+        for (const change of changes) {
+            if (change.field) {
+                this.eventEmitter.emit(
+                    "automation.trigger",
+                    new TriggerEvent(
+                        TriggerType.FIELD_UPDATED,
+                        event.entity.id,
+                        {
+                            field: change.field.slug,
+                            oldValue: change.oldValue,
+                            newValue: change.newValue,
+                            addedItems: change.addedItems,
+                            removedItems: change.removedItems,
+                        }
+                    )
+                );
+            }
+        }
+
         if (changes.length) {
             const recentActivity = await activityRepo.findOne({
                 where: {
@@ -122,7 +142,11 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     createdAt: MoreThanOrEqual(
                         new Date(Date.now() - ACTIVITY_GROUPING_WINDOW)
                     ),
-                    createdBy: { id: user.id },
+                    content: JsonContains({
+                        type: "updated",
+                    }),
+                    createdByType: isAutomation ? "automation" : undefined,
+                    createdBy: isAutomation ? undefined : { id: user?.id },
                 },
                 order: { createdAt: "DESC" },
             });
@@ -167,9 +191,12 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     content: {
                         changes,
                     },
-                    createdBy: {
-                        id: user.id,
-                    },
+                    createdByType: isAutomation ? "automation" : "user",
+                    createdBy: isAutomation
+                        ? undefined
+                        : {
+                              id: user.id,
+                          },
                 });
             }
 

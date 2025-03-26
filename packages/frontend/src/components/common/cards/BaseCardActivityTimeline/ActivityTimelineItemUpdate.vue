@@ -48,12 +48,24 @@ const listStage = computed(() =>
 );
 
 const isCurrentUser = computed(
-  () => user.value?.id === props.activity.createdBy.id
+  () => user.value?.id === props.activity.createdBy?.id
 );
 
-const displayName = computed(() =>
-  isCurrentUser.value ? 'You' : props.activity.createdBy.firstName
-);
+const displayName = computed(() => {
+  if (props.activity.createdByType === 'user') {
+    return isCurrentUser.value ? 'You' : props.activity.createdBy?.firstName;
+  }
+
+  if (props.activity.createdByType === 'system') {
+    return 'System';
+  }
+
+  if (props.activity.createdByType === 'automation') {
+    return 'Automation';
+  }
+
+  return 'Unknown origin';
+});
 
 const itemType = computed(() => props.card.type.name.toLowerCase());
 
@@ -77,8 +89,12 @@ const getActivityTypeDetails = (change: any) => {
   <v-timeline-item class="text-caption">
     <template #icon>
       <base-avatar
-        :text="getUserFullName(activity.createdBy)"
-        :photo="activity.createdBy.photo"
+        :text="
+          activity.createdByType === 'user'
+            ? getUserFullName(activity.createdBy)
+            : ''
+        "
+        :photo="activity.createdBy?.photo"
         class="text-xs"
       />
     </template>

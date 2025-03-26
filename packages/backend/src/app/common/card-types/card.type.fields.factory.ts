@@ -30,7 +30,7 @@ export class CardTypeFieldsFactory {
         {
             name: "Title",
             slug: "title",
-            type: FieldTypes.RICH,
+            type: FieldTypes.TEXT,
             isTitle: true,
             icon: "mdi-text-recognition",
         },

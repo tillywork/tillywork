@@ -1,38 +1,46 @@
 <script setup lang="ts">
 import validationUtils from '@/utils/validation';
+
 import BaseRelationInput from '@/components/common/inputs/BaseRelationInput.vue';
+import BaseDatePicker from '../../inputs/BaseDatePicker.vue';
+
 import {
   type FieldFilter,
   type FieldFilterOption,
   type FilterOperator,
-  type List,
-  type User,
   FieldTypes,
 } from '@tillywork/shared';
+
+import { useQueryStore } from '@/stores/query';
 
 const filter = defineModel<FieldFilter>({
   required: true,
 });
-const { index, fields, users, list } = defineProps<{
+const {
+  index,
+  fields,
+  hideDelete = false,
+} = defineProps<{
   index: number;
   fields: FieldFilterOption[];
-  users: User[];
-  list: List;
+  hideDelete?: boolean;
 }>();
 const emit = defineEmits(['delete']);
+
+const { users, listStages } = storeToRefs(useQueryStore());
 
 const { rules } = validationUtils;
 const filterOption = ref<string>();
 
-const selectedFilter = computed(() =>
-  fields.find((f) => f.field === filter.value.field)
+const selectedFilter = computed(
+  () => fields.find((f) => f.field === filter.value.field) ?? fields[0]
 );
 
 const dropdownOptions = computed(() => {
   switch (filter.value.field) {
     case 'listStage.id':
       return (
-        list.listStages.map((listStage) => {
+        listStages.value.map((listStage) => {
           return {
             title: listStage.name,
             value: listStage.id,
@@ -52,6 +60,20 @@ const dropdownOptions = computed(() => {
 
 const hideFilterValue = computed(() => {
   return ['isNull', 'isNotNull'].includes(filterOption.value ?? '');
+});
+
+const fieldStylingProps = computed(() => {
+  const props: Record<string, any> = {
+    class: ['me-2'],
+  };
+
+  if (!hideFilterValue.value) {
+    props.class.push('flex-equal');
+  } else {
+    props.maxWidth = 224;
+  }
+
+  return props;
 });
 
 const textOperators = [
@@ -250,15 +272,14 @@ watch(
     rounded="0"
   >
     <v-autocomplete
+      v-bind="fieldStylingProps"
       :items="fields"
       item-value="field"
       :prepend-inner-icon="selectedFilter?.icon"
       v-model="filter.field"
       label="Field"
-      class="me-2"
       single-line
       hide-details
-      max-width="33%"
       auto-select-first
       @update:modelValue="handleFieldChanged"
       :rules="[rules.required]"
@@ -275,18 +296,18 @@ watch(
       v-if="[FieldTypes.TEXT, FieldTypes.RICH].includes(selectedFilter!.type)"
     >
       <v-autocomplete
+        v-bind="fieldStylingProps"
         :items="textOperators"
         v-model="filter.operator"
         label="Operator"
         single-line
         hide-details
-        max-width="160"
         auto-select-first
         :rules="[rules.required]"
-        class="me-2"
       />
       <v-text-field
         v-if="!hideFilterValue"
+        v-bind="fieldStylingProps"
         v-model="filter.value"
         label="Value"
         hide-details
@@ -299,19 +320,19 @@ watch(
       v-else-if="[FieldTypes.DROPDOWN, FieldTypes.LABEL].includes(selectedFilter!.type)"
     >
       <v-autocomplete
+        v-bind="fieldStylingProps"
         :items="filteringOptions"
         v-model="filterOption"
         @update:model-value="handleFilteringOptionChange"
         label="Operator"
         single-line
         hide-details
-        max-width="160"
         auto-select-first
         :rules="[rules.required]"
-        class="me-2"
       />
       <v-autocomplete
         v-if="!hideFilterValue"
+        v-bind="fieldStylingProps"
         v-model="filter.value"
         single-line
         hide-details
@@ -319,7 +340,6 @@ watch(
         auto-select-first
         :rules="[rules.array.required]"
         multiple
-        width="160"
         autocomplete="off"
         chips
         closable-chips
@@ -332,19 +352,19 @@ watch(
       "
     >
       <v-autocomplete
+        v-bind="fieldStylingProps"
         :items="filteringOptions"
         v-model="filterOption"
         @update:model-value="handleFilteringOptionChange"
         label="Operator"
         single-line
         hide-details
-        max-width="160"
         auto-select-first
         :rules="[rules.required]"
-        class="me-2"
       />
       <base-date-picker
         v-if="!hideFilterValue"
+        v-bind="fieldStylingProps"
         v-model="filter.value"
         text-field
         range
@@ -352,19 +372,19 @@ watch(
     </template>
     <template v-else-if="selectedFilter?.type === FieldTypes.USER">
       <v-autocomplete
+        v-bind="fieldStylingProps"
         :items="filteringOptions"
         v-model="filterOption"
         @update:model-value="handleFilteringOptionChange"
         label="Operator"
         single-line
         hide-details
-        max-width="160"
         auto-select-first
         :rules="[rules.required]"
-        class="me-2"
       />
       <base-user-selector
         v-if="!hideFilterValue"
+        v-bind="fieldStylingProps"
         v-model="filter.value"
         :users
         text-field
@@ -373,19 +393,19 @@ watch(
     </template>
     <template v-else-if="selectedFilter?.type === FieldTypes.CARD">
       <v-autocomplete
+        v-bind="fieldStylingProps"
         :items="filteringOptions"
         v-model="filterOption"
         @update:model-value="handleFilteringOptionChange"
         label="Operator"
         single-line
         hide-details
-        max-width="160"
         auto-select-first
         :rules="[rules.required]"
-        class="me-2"
       />
       <base-relation-input
         v-if="!hideFilterValue && selectedFilter.original"
+        v-bind="fieldStylingProps"
         v-model="filter.value"
         :field="selectedFilter.original"
         :key="selectedFilter.field"
@@ -394,32 +414,31 @@ watch(
     </template>
     <template v-if="selectedFilter?.type === FieldTypes.CHECKBOX">
       <v-autocomplete
+        v-bind="fieldStylingProps"
         :items="checkboxOptions"
         v-model="filterOption"
         @update:model-value="handleFilteringOptionChange"
         label="Value"
         single-line
         hide-details
-        max-width="160"
         auto-select-first
         :rules="[rules.required]"
-        class="me-2"
       />
     </template>
     <template v-if="selectedFilter?.type === FieldTypes.NUMBER">
       <v-autocomplete
+        v-bind="fieldStylingProps"
         :items="numberOperators"
         v-model="filter.operator"
         label="Operator"
         single-line
         hide-details
-        max-width="160"
         auto-select-first
         :rules="[rules.required]"
-        class="me-2"
       />
       <v-number-input
         v-if="!hideFilterValue"
+        v-bind="fieldStylingProps"
         v-model="filter.value"
         label="Value"
         hide-details
@@ -429,9 +448,9 @@ watch(
       />
     </template>
     <base-icon-btn
+      v-if="!hideDelete"
       icon="mdi-close"
       color="error"
-      class="ms-2"
       size="x-small"
       variant="tonal"
       @click="removeFilter"

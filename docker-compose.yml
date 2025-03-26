@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3'
 
 services:
   tillywork:
@@ -29,5 +29,37 @@ services:
     image: redis:7.2.5-alpine
     restart: unless-stopped
 
+  tempo:
+    image: grafana/tempo:latest
+    command: ['-config.file=/etc/tempo.yaml']
+    volumes:
+      - ./tempo.yaml:/etc/tempo.yaml
+      - tempo:/var/tempo
+    ports:
+      - '127.0.0.1:4318:4318'
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - '127.0.0.1:3100:3100'
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki:/loki
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - '3001:3000'
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+    volumes:
+      - ./grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - grafana:/var/lib/grafana
+
 volumes:
   tillywork:
+  tempo:
+  loki:
+  grafana:

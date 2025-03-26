@@ -56,12 +56,3 @@ export type ActivityTypeOption = {
 export type ActivityContent = {
   [key: string]: any;
 };
-
-export interface CardActivity {
-  id: number;
-  card: Card;
-  type: ActivityType;
-  content: ActivityContent;
-  createdAt: Date;
-  createdBy: User;
-}

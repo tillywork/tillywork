@@ -5,16 +5,17 @@ import {
     Entity,
     JoinColumn,
     ManyToOne,
+    OneToMany,
     OneToOne,
     PrimaryGeneratedColumn,
     Relation,
     UpdateDateColumn,
 } from "typeorm";
+
+import { AutomationStep } from "./automation.step.entity";
+import { AutomationLocation } from "./automation.location.entity";
 import { Workspace } from "../../workspaces/workspace.entity";
 import { User } from "../../users/user.entity";
-import { LocationType, TriggerType } from "../types";
-import { FieldFilter } from "../../filters/types";
-import { AutomationAction } from "./automation.action.entity";
 
 @Entity()
 export class Automation {
@@ -24,27 +25,24 @@ export class Automation {
     @Column({ type: "varchar", length: 255 })
     name: string;
 
-    @Column({ type: "enum", enum: TriggerType })
-    triggerType: TriggerType;
-
-    @Column({ type: "jsonb" })
-    conditions: FieldFilter[];
-
-    @Column({ type: "boolean", default: true })
+    @Column({ type: "boolean", default: false })
     isEnabled: boolean;
 
-    @OneToOne(() => AutomationAction, { eager: true })
+    @OneToOne(() => AutomationStep)
     @JoinColumn()
-    firstAction: Relation<AutomationAction>;
+    trigger: Relation<AutomationStep>;
 
-    @Column({ type: "bigint" })
-    locationId: number;
+    /** Virtual column to load steps through the linked list. */
+    steps?: Relation<AutomationStep[]>;
 
-    @Column({ type: "enum", enum: LocationType })
-    locationType: LocationType;
+    @OneToMany(() => AutomationLocation, (location) => location.automation, {
+        cascade: true,
+    })
+    locations: Relation<AutomationLocation[]>;
 
     @ManyToOne(() => Workspace, {
         nullable: false,
+        eager: true,
     })
     workspace: Relation<Workspace>;
 

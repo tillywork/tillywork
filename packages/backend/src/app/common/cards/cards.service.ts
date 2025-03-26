@@ -20,9 +20,12 @@ import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transfor
 import { RelationCountMetadataToAttributeTransformer } from "typeorm/query-builder/relation-count/RelationCountMetadataToAttributeTransformer";
 import { RelationIdMetadataToAttributeTransformer } from "typeorm/query-builder/relation-id/RelationIdMetadataToAttributeTransformer";
 import { ClsService } from "nestjs-cls";
-import { PermissionLevel } from "@tillywork/shared";
+import { PermissionLevel, TriggerType } from "@tillywork/shared";
 import { AccessControlService } from "../auth/services/access.control.service";
 import { Field } from "../fields/field.entity";
+import { AclContext } from "../auth/context/acl.context";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { TriggerEvent } from "../automations/events/trigger.event";
 
 export type CardFindAllResult = {
     total: number;
@@ -52,7 +55,9 @@ export class CardsService {
         private cardListsService: CardListsService,
         @Inject(forwardRef(() => AccessControlService))
         private accessControlService: AccessControlService,
-        private clsService: ClsService
+        private clsService: ClsService,
+        private readonly aclContext: AclContext,
+        private eventEmitter: EventEmitter2
     ) {}
 
     async findAll({
@@ -181,21 +186,23 @@ export class CardsService {
         }
     }
 
-    async findOne(id: number): Promise<Card> {
+    async findOne(id: number, skipWorkspaceId = false): Promise<Card> {
         const user = this.clsService.get("user");
 
+        const loadRelationIds = !skipWorkspaceId ? ["workspace"] : [];
         const card = await this.cardsRepository.findOne({
             where: { id },
             relations: [
                 "cardLists",
                 "cardLists.listStage",
+                "cardLists.list.space",
                 "parent",
                 "children",
                 "children.cardLists",
                 "children.cardLists.listStage",
             ],
             loadRelationIds: {
-                relations: ["workspace"],
+                relations: loadRelationIds,
             },
         });
 
@@ -203,12 +210,14 @@ export class CardsService {
             throw new NotFoundException(`Card with ID ${id} not found`);
         }
 
-        await this.accessControlService.authorize(
-            user,
-            "list",
-            card.cardLists.map((cardList) => cardList.listId),
-            PermissionLevel.VIEWER
-        );
+        if (!this.aclContext.shouldSkipAcl()) {
+            await this.accessControlService.authorize(
+                user,
+                "list",
+                card.cardLists.map((cardList) => cardList.listId),
+                PermissionLevel.VIEWER
+            );
+        }
 
         return card;
     }
@@ -269,27 +278,35 @@ export class CardsService {
         await this.cardsRepository.save(card);
 
         if (createCardDto.listId) {
-            await this.cardListsService.create({
+            const cardList = await this.cardListsService.create({
                 cardId: card.id,
                 listId: createCardDto.listId,
                 listStageId:
                     createCardDto.listStageId ?? createCardDto.listStage?.id,
             });
+            card.cardLists = [cardList];
         }
+
+        this.eventEmitter.emit(
+            "automation.trigger",
+            new TriggerEvent(TriggerType.CARD_CREATED, card.id, card)
+        );
 
         return card;
     }
 
     async update(id: number, updateCardDto: UpdateCardDto): Promise<Card> {
         const user = this.clsService.get("user");
-        const card = await this.findOne(id);
+        const card = await this.findOne(id, true);
 
-        await this.accessControlService.authorize(
-            user,
-            "workspace",
-            card.workspace as unknown as number,
-            PermissionLevel.EDITOR
-        );
+        if (!this.aclContext.shouldSkipAcl()) {
+            await this.accessControlService.authorize(
+                user,
+                "workspace",
+                card.workspace as unknown as number,
+                PermissionLevel.EDITOR
+            );
+        }
 
         this.cardsRepository.merge(card, updateCardDto);
 

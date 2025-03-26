@@ -45,6 +45,8 @@ const value = defineModel<User[] | (number | string)[] | null>({
   default: () => [],
 });
 
+const attrs = useAttrs();
+
 const { getUserFullName } = useUsersService();
 
 const searchTerm = ref('');
@@ -136,7 +138,7 @@ defineExpose({ userMenu });
       <v-autocomplete
         v-if="textField"
         :width="!fill ? 90 : undefined"
-        v-bind="$attrs"
+        v-bind="attrs"
         v-model="selectedUsers"
         v-model:search="searchTerm"
         :label="label ?? 'Select'"
@@ -182,7 +184,10 @@ defineExpose({ userMenu });
         v-else
         class="d-flex align-center justify-start rounded-md cursor-pointer fill-height"
         :class="[contentClass, { 'flex-fill': fill }]"
-        v-bind="menuProps"
+        v-bind="{
+          ...attrs,
+          ...menuProps,
+        }"
         @click.prevent
       >
         <v-tooltip activator="parent" location="top" v-if="!fill">

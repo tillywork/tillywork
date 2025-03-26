@@ -53,3 +53,6 @@ Thumbs.db
 
 # Local file storage
 /uploads
+
+# Redis
+**/dump.rdb

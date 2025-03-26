@@ -8,7 +8,11 @@ import {
 } from "typeorm";
 import { Card } from "../card.entity";
 import { User } from "../../users/user.entity";
-import { ActivityContent, ActivityType } from "@tillywork/shared";
+import {
+    ActivityContent,
+    ActivityType,
+    CreatedByType,
+} from "@tillywork/shared";
 
 @Entity()
 export class CardActivity {
@@ -27,8 +31,11 @@ export class CardActivity {
     @Column("jsonb")
     content: ActivityContent;
 
-    @ManyToOne(() => User)
-    createdBy: Relation<User>;
+    @Column({ type: "varchar", default: "system" })
+    createdByType: CreatedByType;
+
+    @ManyToOne(() => User, { nullable: true })
+    createdBy?: Relation<User>;
 
     @CreateDateColumn()
     createdAt: Date;

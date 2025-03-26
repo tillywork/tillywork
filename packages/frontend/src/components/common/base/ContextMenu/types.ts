@@ -1,6 +1,10 @@
 export type ContextMenuItem = {
-  icon: string;
   title: string;
-  action: () => void;
+  action?: () => void;
+  icon?: string;
+  color?: string;
   shortcut?: string[];
+  photo?: string;
+  avatar?: boolean;
+  value?: unknown;
 };

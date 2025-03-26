@@ -22,7 +22,7 @@ interface UseListKeyboardNavigationOptions {
 
 export function useListKeyboardNavigation({
   enabled = true,
-  wrap,
+  wrap = true,
   itemSelector = '.v-list-item',
   preventDefault,
 }: UseListKeyboardNavigationOptions = {}) {

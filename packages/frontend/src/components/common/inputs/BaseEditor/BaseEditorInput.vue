@@ -26,13 +26,24 @@ import { File } from './extensions/File';
 import { TrailingNode } from './extensions/TrailingNode';
 import { Link } from '@tiptap/extension-link';
 import { CustomKeymap } from './extensions/CustomKeymap';
-import { Mention } from '@tiptap/extension-mention';
+import { Mention, type MentionOptions } from '@tiptap/extension-mention';
 import mentionSuggestions from './extensions/Mention/mentionSuggestions';
 import MentionChip from './extensions/Mention/MentionChip.vue';
 import { Emoji } from './extensions/Emoji';
 import objectUtils from '@/utils/object';
+import type { SuggestionOptions } from '@tiptap/suggestion';
 
-const props = defineProps<{
+const {
+  autofocus,
+  placeholder,
+  heading,
+  singleLine,
+  editable = true,
+  disableCommands,
+  minHeight,
+  rounded = 'md',
+  hideAttachmentButton = false,
+} = defineProps<{
   autofocus?: boolean;
   placeholder?: string;
   heading?: 1 | 2 | 3 | 4 | 5 | 6;
@@ -40,7 +51,11 @@ const props = defineProps<{
   editable?: boolean;
   disableCommands?: boolean;
   minHeight?: string | number;
+  rounded?: 'sm' | 'md' | 'lg' | 'xl' | 'pill';
+  hideAttachmentButton?: boolean;
 }>();
+
+const emit = defineEmits(['focus', 'blur']);
 
 const { uploadFiles } = useFilesService();
 const {
@@ -58,7 +73,7 @@ const extensions = computed(() => {
       codeBlock: false,
     }),
     Placeholder.configure({
-      placeholder: props.placeholder,
+      placeholder,
     }),
     TextDirection.configure({
       types: ['heading', 'paragraph', 'listItem'],
@@ -75,13 +90,13 @@ const extensions = computed(() => {
     Emoji,
   ];
 
-  if (props.singleLine) {
+  if (singleLine) {
     extensions.push(NoNewLine);
   } else {
     extensions.push(Indent);
   }
 
-  if (!props.disableCommands) {
+  if (!disableCommands) {
     extensions.push(
       Commands.configure({
         suggestion,
@@ -93,12 +108,15 @@ const extensions = computed(() => {
           return VueNodeViewRenderer(MentionChip);
         },
       }).configure({
-        suggestion: mentionSuggestions,
+        suggestion: mentionSuggestions as Omit<
+          SuggestionOptions<MentionOptions['suggestion']>,
+          'editor'
+        >,
       })
     );
   }
 
-  if (props.editable && !props.singleLine) {
+  if (editable && !singleLine) {
     extensions.push(TrailingNode);
   }
 
@@ -118,8 +136,8 @@ let editor: Ref<Editor | undefined>;
 function initEditor() {
   editor = useEditor({
     extensions: extensions.value,
-    autofocus: props.autofocus,
-    editable: props.editable,
+    autofocus,
+    editable,
     onCreate: () => {
       enforceHeading();
       fillEditorFromModelValues();
@@ -131,6 +149,12 @@ function initEditor() {
       jsonValue.value = editor.value?.getJSON();
       htmlValue.value = editor.value?.getHTML();
       isEmpty.value = editor.value?.isEmpty;
+    },
+    onFocus: (e) => {
+      emit('focus', e.event);
+    },
+    onBlur: (e) => {
+      emit('blur', e.event);
     },
   });
 }
@@ -159,8 +183,8 @@ function setEditorText(text: string) {
   editor.value?.commands.setContent(
     [
       {
-        attrs: props.heading ? { level: props.heading } : undefined,
-        type: props.heading ? 'heading' : 'paragraph',
+        attrs: heading ? { level: heading } : undefined,
+        type: heading ? 'heading' : 'paragraph',
         content: [
           {
             text,
@@ -183,11 +207,8 @@ function destroyEditor() {
  * and usually single-line.
  */
 function enforceHeading() {
-  if (
-    props.heading &&
-    !editor.value?.isActive('heading', { level: props.heading })
-  ) {
-    editor.value?.chain().focus().toggleHeading({ level: props.heading }).run();
+  if (heading && !editor.value?.isActive('heading', { level: heading })) {
+    editor.value?.chain().focus().toggleHeading({ level: heading }).run();
   }
 }
 
@@ -197,8 +218,8 @@ watch(textValue, (newText) => {
     editor.value.commands.setContent(
       [
         {
-          type: props.heading ? 'heading' : 'paragraph',
-          attrs: { level: props.heading ? props.heading : undefined },
+          type: heading ? 'heading' : 'paragraph',
+          attrs: { level: heading ? heading : undefined },
           content: [{ type: 'text', text: newText }],
         },
       ],
@@ -286,10 +307,31 @@ defineExpose({
 </script>
 
 <template>
-  <editor-content
-    :editor="editor"
-    :style="props.minHeight ? `min-height: ${props.minHeight}` : undefined"
-  />
+  <div
+    class="editor-container border-thin pa-2"
+    :class="{
+      ['rounded-' + (rounded ?? 'md')]: rounded,
+    }"
+  >
+    <editor-content
+      :editor="editor"
+      :style="minHeight ? `min-height: ${minHeight}` : undefined"
+    />
+    <div class="editor-actions d-flex align-center">
+      <v-btn
+        v-if="!hideAttachmentButton"
+        icon
+        size="small"
+        color="default"
+        variant="text"
+        @click="openFileDialog"
+      >
+        <v-icon icon="mdi-paperclip" />
+      </v-btn>
+      <v-spacer />
+      <slot name="actions" />
+    </div>
+  </div>
 </template>
 
 <style lang="scss">

@@ -1,4 +1,4 @@
-import { User, Card, FieldTypes } from '../..';
+import { User, Card, FieldTypes, CreatedByType } from '../..';
 
 export enum ActivityType {
   UPDATE = 'update',
@@ -17,6 +17,7 @@ export interface CardActivity {
   content: ActivityContent;
   createdAt: Date;
   createdBy: User;
+  createdByType: CreatedByType;
 }
 
 interface BaseActivityContent {

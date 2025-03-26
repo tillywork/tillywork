@@ -5,6 +5,7 @@
         "module": "CommonJS",
         "types": ["node"],
         "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
         "paths": {
             "@tillywork/shared": ["../shared/src/index.ts"]
         }

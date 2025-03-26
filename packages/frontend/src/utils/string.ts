@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 const stringUtils = {
   /**
    * Takes a string, and returns the first letter of the first two strings.
@@ -13,12 +15,7 @@ const stringUtils = {
   },
 
   /**
-   * Fuzzy searches for a query in a string with respect to the characters' order. The
-   * query `"ndo"` will be found in string `"John Doe"`, thus the function will return
-   * `true`, while the query `akc` won't be found in the string `"Jack Pearson"` because
-   * the order of characters `'c'` and `'k'` isn't the same, thus the function will
-   * return `false`
-   *
+   * Fuzzy searches for a query in a string with respect to the characters' order.
    * @param query The query to search for.
    * @param string The string to search for the query in.
    * @returns `true` if the query was inside the string, otherwise `false`
@@ -58,6 +55,10 @@ const stringUtils = {
       .split('-')
       .map((s) => s[0].toUpperCase() + s.slice(1))
       .join(' ');
+  },
+
+  objectKeyToDisplayFormat(objectKey: string) {
+    return _.startCase(objectKey);
   },
 };
 

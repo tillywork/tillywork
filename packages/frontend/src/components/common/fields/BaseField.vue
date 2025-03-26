@@ -5,12 +5,16 @@ import BaseDropdownInput from '../inputs/BaseDropdownInput.vue';
 import BaseNumberInput from '../inputs/BaseNumberInput.vue';
 import BaseCurrencyInput from '../inputs/BaseCurrencyInput.vue';
 import BasePercentageInput from '../inputs/BasePercentageInput.vue';
+import BaseEditorInput from '../inputs/BaseEditor/BaseEditorInput.vue';
 
 import { type Field, FieldTypes } from '@tillywork/shared';
 
 import validationUtils from '@/utils/validation';
 
 import { useQueryStore } from '@/stores/query';
+import { useBaseEditor } from '@/composables/useBaseEditor';
+
+const attrs = useAttrs();
 
 const value = defineModel<any>();
 
@@ -28,6 +32,11 @@ const {
 }>();
 
 const { users } = storeToRefs(useQueryStore());
+
+const baseEditor = ref();
+const { openBaseEditorFileDialog } = useBaseEditor({
+  baseEditor,
+});
 
 function getFieldIcon(field: Field) {
   if (!hideIcon) {
@@ -173,6 +182,30 @@ function getFieldLabel(field: Field) {
       :rules="[validationUtils.rules.url]"
     />
   </template>
+  <template v-else-if="field.type === FieldTypes.RICH">
+    <div class="d-flex flex-column ga-2 px-2 border-thin rounded-md">
+      <base-editor-input
+        v-bind="attrs"
+        ref="baseEditor"
+        class="flex-fill"
+        v-model:json="value"
+        editable
+        :placeholder="`${field.name}.. (/ for commands)`"
+      />
+      <v-btn
+        class="align-self-end"
+        icon
+        variant="text"
+        color="default"
+        density="comfortable"
+        v-tooltip:bottom="'Attach a file'"
+        @click="openBaseEditorFileDialog"
+      >
+        <v-icon>mdi-paperclip</v-icon>
+      </v-btn>
+    </div>
+  </template>
+  <template v-else> Unknown field type: {{ field.type }} </template>
 </template>
 
 <style lang="scss">

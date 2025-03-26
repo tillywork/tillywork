@@ -1,7 +1,5 @@
 import { Module } from "@nestjs/common";
 import { AuthModule } from "./auth/auth.module";
-import { LoggingInterceptor } from "../common/logger/logging.interceptor";
-import { APP_INTERCEPTOR } from "@nestjs/core";
 import { CardsModule } from "./cards/cards.module";
 import { ProjectsModule } from "./projects/projects.module";
 import { SpacesModule } from "./spaces/spaces.module";
@@ -55,12 +53,7 @@ import { BullModule } from "@nestjs/bull";
         AutomationsModule,
     ],
     controllers: [],
-    providers: [
-        {
-            provide: APP_INTERCEPTOR,
-            useClass: LoggingInterceptor,
-        },
-    ],
+    providers: [],
     exports: [],
 })
 export class CommonModule {}

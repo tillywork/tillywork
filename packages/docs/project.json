@@ -2,5 +2,51 @@
     "name": "docs",
     "$schema": "../../node_modules/nx/schemas/project-schema.json",
     "projectType": "application",
-    "sourceRoot": "packages/docs/src"
+    "sourceRoot": "packages/docs/src",
+    "targets": {
+        "build": {
+            "dependsOn": [
+                {
+                    "target": "build",
+                    "projects": "shared"
+                }
+            ],
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "docusaurus build",
+                "cwd": "packages/docs"
+            },
+            "configurations": {
+                "production": {
+                    "optimization": true,
+                    "extractLicenses": true,
+                    "inspect": false
+                }
+            }
+        },
+        "serve": {
+            "executor": "nx:run-commands",
+            "defaultConfiguration": "development",
+            "dependsOn": [
+                {
+                    "target": "build",
+                    "projects": "shared"
+                }
+            ],
+            "options": {
+                "command": "docusaurus start",
+                "cwd": "packages/docs"
+            },
+            "configurations": {
+                "development": {
+                    "command": "docusaurus start",
+                    "cwd": "packages/docs"
+                },
+                "production": {
+                    "command": "docusaurus serve",
+                    "cwd": "packages/docs"
+                }
+            }
+        }
+    }
 }

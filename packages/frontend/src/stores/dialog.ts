@@ -27,7 +27,7 @@ export const useDialogStore = defineStore('dialog', {
       dialog: DIALOGS | null;
       data?: any;
       options?: DialogOptions;
-    }) {
+    }): number | undefined {
       if (dialog && this.getDialogIndex(dialog) === -1) {
         const newDialog = {
           dialog,
@@ -43,6 +43,8 @@ export const useDialogStore = defineStore('dialog', {
 
         this.dialogs = [...this.dialogs, newDialog];
         posthog.capture('Dialog Opened', { dialog });
+
+        return this.getDialogIndex(dialog);
       }
     },
     closeDialog(index: number) {

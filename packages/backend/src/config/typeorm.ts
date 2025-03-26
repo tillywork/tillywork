@@ -42,7 +42,6 @@ import { AddIgnoreChildrenToViewTable1720514522438 } from "../migrations/1720514
 import { CreateListFieldsTable1720527075305 } from "../migrations/1720527075305-create-list-fields-table";
 import { AddWorkspaceIdToCardTable1721207599200 } from "../migrations/1721207599200-add-workspaceId-to-card-table";
 import { AddCardTypeIdToFieldTable1721214304859 } from "../migrations/1721214304859-add-cardTypeId-to-field-table";
-import { CreateAutomationTable1721310306344 } from "../migrations/1721310306344-create-automation-table";
 import { UpdateFilterWhereColumnForViews1721641078360 } from "../migrations/1721641078360-update-filter-where-column-for-views";
 import { CreateEmailTable1721766012987 } from "../migrations/1721766012987-create-email-table";
 import { AddWorkspaceIdToListTable1721829339753 } from "../migrations/1721829339753-add-workspaceId-to-list-table";
@@ -74,6 +73,8 @@ import { AddDealToCardTypeLayoutEnum1735135850545 } from "../migrations/17351358
 import { AddDateTimeToFieldTypeEnums1735211235572 } from "../migrations/1735211235572-add-date-time-to-field-type-enums";
 import { RemoveOptionsDefaultValueInViewTable1735588046345 } from "../migrations/1735588046345-remove-options-default-value-in-view-table";
 import { AddHasChildCardsToCardTypeTable1735645745129 } from "../migrations/1735645745129-add-has-child-cards-to-card-type-table";
+import { CreateAutomationTable1738236462639 } from "../migrations/1738236462639-create-automation-table";
+import { AddCreatedByTypeColumnToCardActivityTable1738236462640 } from "../migrations/1738236462640-add-createdByType-column-to-card-activity-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -117,7 +118,6 @@ const migrations = [
     CreateListFieldsTable1720527075305,
     AddWorkspaceIdToCardTable1721207599200,
     AddCardTypeIdToFieldTable1721214304859,
-    CreateAutomationTable1721310306344,
     UpdateFilterWhereColumnForViews1721641078360,
     CreateEmailTable1721766012987,
     AddWorkspaceIdToListTable1721829339753,
@@ -149,6 +149,8 @@ const migrations = [
     AddDateTimeToFieldTypeEnums1735211235572,
     RemoveOptionsDefaultValueInViewTable1735588046345,
     AddHasChildCardsToCardTypeTable1735645745129,
+    CreateAutomationTable1738236462639,
+    AddCreatedByTypeColumnToCardActivityTable1738236462640,
 ];
 
 const config: TypeOrmModuleOptions = {

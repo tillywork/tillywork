@@ -12,6 +12,7 @@ import {
   CallActivityDirection,
   CallActivityOutcome,
   dayjs,
+  type CallActivityContent,
   type Card,
   type CardActivity,
 } from '@tillywork/shared';
@@ -106,7 +107,7 @@ function updateCallOutcome(outcome: CallActivityOutcome) {
   };
 
   updateCall({
-    content: newContent,
+    content: newContent as CallActivityContent,
   });
 }
 
@@ -176,19 +177,19 @@ function updateCallDirection(direction: CallActivityDirection) {
       </v-card-text>
       <v-card-actions class="px-3 border-t-thin">
         <simple-dropdown-selector
-          :model-value="activity.content.outcome"
+          :model-value="(activity.content as CallActivityContent).outcome"
           @update:model-value="(v) => updateCallOutcome(v as CallActivityOutcome)"
           :items="CALL_OUTCOME_OPTIONS"
           label="Call Outcome"
         />
         <simple-dropdown-selector
-          :model-value="activity.content.direction"
+          :model-value="(activity.content as CallActivityContent).direction"
           @update:model-value="(v) => updateCallDirection(v as CallActivityDirection)"
           :items="CALL_DIRECTION_OPTIONS"
           label="Call Direction"
         />
         <base-date-picker
-          :model-value="activity.content.calledAt"
+          :model-value="(activity.content as CallActivityContent).calledAt"
           @update:model-value="(v) => updateCallCalledAt(v as string)"
           include-time
           label="Called At"

@@ -12,6 +12,7 @@ import {
   MeetingActivityOutcome,
   type Card,
   type CardActivity,
+  type MeetingActivityContent,
 } from '@tillywork/shared';
 import { DIALOGS } from '@/components/common/dialogs/types';
 
@@ -159,17 +160,19 @@ function updateMeetingOutcome(outcome: MeetingActivityOutcome) {
         </v-menu>
       </v-card-text>
       <v-card-text>
-        <base-editor-input v-model:json="activity.content.description" />
+        <base-editor-input
+          v-model:json="(activity.content as MeetingActivityContent).description"
+        />
       </v-card-text>
       <v-card-actions class="px-3 border-t-thin">
         <simple-dropdown-selector
-          :model-value="activity.content.outcome"
+          :model-value="(activity.content as MeetingActivityContent).outcome"
           @update:model-value="(v) => updateMeetingOutcome(v as MeetingActivityOutcome)"
           :items="MEETING_OUTCOME_OPTIONS"
           label="Meeting Outcome"
         />
         <base-date-picker
-          :model-value="activity.content.meetingAt"
+          :model-value="(activity.content as MeetingActivityContent).meetingAt"
           @update:model-value="(v) => updateMeetingAt(v as string)"
           include-time
           label="Meeting At"

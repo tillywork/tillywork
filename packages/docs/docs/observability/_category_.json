@@ -1,0 +1,8 @@
+{
+    "label": "Observability",
+    "position": 1,
+    "link": {
+        "type": "generated-index",
+        "description": "Observability stack for tillywork."
+    }
+}

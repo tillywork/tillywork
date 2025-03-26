@@ -4,6 +4,9 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { CommonModule } from "./common/common.module";
 import typeorm from "../config/typeorm";
 import { validationSchema } from "../config/validation.schema";
+import { EventEmitterModule } from "@nestjs/event-emitter";
+import { APP_INTERCEPTOR } from "@nestjs/core";
+import { TracingInterceptor } from "./common/interceptors/tracing.interceptor";
 
 @Module({
     imports: [
@@ -17,10 +20,18 @@ import { validationSchema } from "../config/validation.schema";
             inject: [ConfigService],
             imports: [ConfigModule],
         }),
+        EventEmitterModule.forRoot({
+            wildcard: true,
+        }),
         CommonModule,
     ],
     controllers: [],
-    providers: [],
+    providers: [
+        {
+            provide: APP_INTERCEPTOR,
+            useClass: TracingInterceptor,
+        },
+    ],
     exports: [],
 })
 export class AppModule {}
