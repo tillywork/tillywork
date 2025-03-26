@@ -22,7 +22,7 @@ import { FieldsModule } from "../fields/fields.module";
 import { ListsModule } from "../lists/lists.module";
 import { FieldUpdatedHandler } from "./handlers/triggers/field.updated.handler";
 import { CreateCommentHandler } from "./handlers/actions/create.comment.handler";
-import { PlaceholderService } from "./services/placeholder.service";
+
 const handlers = [
     CreateCardHandler,
     SetFieldHandler,
@@ -55,7 +55,6 @@ const handlers = [
         AutomationRunsService,
         AutomationProcessor,
         AutomationHandlerRegistry,
-        PlaceholderService,
     ],
     controllers: [AutomationsController, AutomationHandlersController],
     exports: [AutomationsService, AutomationRunsService],

@@ -15,7 +15,6 @@ import { AclContext } from "../../auth/context/acl.context";
 import { ListsService } from "../../lists/lists.service";
 import { AutomationHandlerRegistry } from "../registries/automation.handler.registry";
 import { isActionType, isTriggerType } from "../helpers/handler.type.helper";
-import { PlaceholderService } from "../services/placeholder.service";
 import { AutomationsService } from "../services/automations.service";
 import { CardsService } from "../../cards/cards.service";
 import { FieldsService } from "../../fields/fields.service";
@@ -56,8 +55,6 @@ export abstract class BaseAutomationHandler implements AutomationHandler {
     protected readonly listsService: ListsService;
     @Inject()
     private readonly registry: AutomationHandlerRegistry;
-    @Inject()
-    protected readonly placeholderService: PlaceholderService;
     @Inject()
     protected readonly automationsService: AutomationsService;
     @Inject()
