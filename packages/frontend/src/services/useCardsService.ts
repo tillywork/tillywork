@@ -94,7 +94,7 @@ export const useCardsService = () => {
     });
   }
 
-  async function updateCard(card: Card): Promise<Card> {
+  async function updateCard(card: Partial<Card>): Promise<Card> {
     return sendRequest(`/cards/${card.id}`, {
       method: 'PUT',
       data: card,

@@ -34,7 +34,7 @@ export class SetFieldHandler extends BaseAutomationHandler {
     ): Promise<Card> {
         try {
             const { card } = context;
-            this.logger.debug({ card, payload });
+
             const mergedData = this.mergeCardData(card.data, payload);
             const updatedCard = await this.aclContext.run(true, () =>
                 this.cardsService.update(card.id, {

@@ -72,7 +72,6 @@ export class FieldUpdatedHandler extends BaseAutomationHandler {
                 ].includes(selectedField.type);
 
             if (supportedFieldType) {
-                this.logger.debug({ supportedFieldType, selectedField });
                 let toAndFromOptions: AutomationFieldOption[] = [];
 
                 switch (selectedField.type) {

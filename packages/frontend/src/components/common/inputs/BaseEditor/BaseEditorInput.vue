@@ -41,8 +41,6 @@ const {
   editable = true,
   disableCommands,
   minHeight,
-  rounded = 'md',
-  hideAttachmentButton = false,
 } = defineProps<{
   autofocus?: boolean;
   placeholder?: string;
@@ -51,8 +49,6 @@ const {
   editable?: boolean;
   disableCommands?: boolean;
   minHeight?: string | number;
-  rounded?: 'sm' | 'md' | 'lg' | 'xl' | 'pill';
-  hideAttachmentButton?: boolean;
 }>();
 
 const emit = defineEmits(['focus', 'blur']);
@@ -307,30 +303,11 @@ defineExpose({
 </script>
 
 <template>
-  <div
-    class="editor-container border-thin pa-2"
-    :class="{
-      ['rounded-' + (rounded ?? 'md')]: rounded,
-    }"
-  >
+  <div class="editor-container">
     <editor-content
       :editor="editor"
       :style="minHeight ? `min-height: ${minHeight}` : undefined"
     />
-    <div class="editor-actions d-flex align-center">
-      <v-btn
-        v-if="!hideAttachmentButton"
-        icon
-        size="small"
-        color="default"
-        variant="text"
-        @click="openFileDialog"
-      >
-        <v-icon icon="mdi-paperclip" />
-      </v-btn>
-      <v-spacer />
-      <slot name="actions" />
-    </div>
   </div>
 </template>
 

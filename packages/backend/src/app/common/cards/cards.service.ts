@@ -186,10 +186,9 @@ export class CardsService {
         }
     }
 
-    async findOne(id: number, skipWorkspaceId = false): Promise<Card> {
+    async findOne(id: number): Promise<Card> {
         const user = this.clsService.get("user");
 
-        const loadRelationIds = !skipWorkspaceId ? ["workspace"] : [];
         const card = await this.cardsRepository.findOne({
             where: { id },
             relations: [
@@ -200,10 +199,8 @@ export class CardsService {
                 "children",
                 "children.cardLists",
                 "children.cardLists.listStage",
+                "workspace",
             ],
-            loadRelationIds: {
-                relations: loadRelationIds,
-            },
         });
 
         if (!card) {
@@ -297,13 +294,13 @@ export class CardsService {
 
     async update(id: number, updateCardDto: UpdateCardDto): Promise<Card> {
         const user = this.clsService.get("user");
-        const card = await this.findOne(id, true);
+        const card = await this.findOne(id);
 
         if (!this.aclContext.shouldSkipAcl()) {
             await this.accessControlService.authorize(
                 user,
-                "workspace",
-                card.workspace as unknown as number,
+                "list",
+                card.cardLists.map((cardList) => cardList.listId),
                 PermissionLevel.EDITOR
             );
         }

@@ -60,7 +60,6 @@ export class Card {
     @ManyToOne(() => Workspace, { onDelete: "CASCADE" })
     workspace: Relation<Workspace>;
 
-    /** Defined here so we can use the card's workspace ID without loading the workspace */
     @Column({ type: "bigint" })
     workspaceId: number;
 }
