@@ -118,7 +118,7 @@ watch(stepData, (oldData, newData) => {
     width="400"
     overlay-opacity="0.2"
   >
-    <v-card class="h-100 pa-2 step-side-drawer">
+    <v-card class="h-100 pa-2 step-side-drawer overflow-auto">
       <v-card-title class="d-flex align-center px-4 py-3 ga-2">
         <v-icon :icon="selectedOption?.icon" class="me-2" size="20" />
         <span class="text-body-2 text-high-emphasis">

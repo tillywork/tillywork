@@ -10,6 +10,9 @@ import { PlaceholderNode } from './PlaceholderNode';
 
 import { OnClickOutside } from '@vueuse/components';
 import PlaceholderList from './PlaceholderList.vue';
+import BaseCurrencyInput from '../../inputs/BaseCurrencyInput.vue';
+import BasePercentageInput from '../../inputs/BasePercentageInput.vue';
+import BaseNumberInput from '../../inputs/BaseNumberInput.vue';
 
 const {
   title,
@@ -352,6 +355,14 @@ const showPlaceholderEditor = computed(() => {
   return isPlaceholderModeActive.value || hasPlaceholders.value;
 });
 
+const fieldInputComponent = computed(() => {
+  if (showPlaceholderEditor.value) {
+    return null;
+  }
+
+  return getFieldInputComponent();
+});
+
 function getFieldInputComponent() {
   if (showPlaceholderEditor.value) {
     return null;
@@ -359,6 +370,8 @@ function getFieldInputComponent() {
 
   switch (type) {
     case FieldTypes.TEXT:
+    case FieldTypes.EMAIL:
+    case FieldTypes.URL:
       return 'v-text-field';
     case FieldTypes.LABEL:
     case FieldTypes.DROPDOWN:
@@ -366,7 +379,15 @@ function getFieldInputComponent() {
       return 'v-autocomplete';
     case FieldTypes.DATE:
     case FieldTypes.DATETIME:
-      return 'v-date-picker';
+      return 'base-date-picker';
+    case FieldTypes.CHECKBOX:
+      return 'v-checkbox';
+    case FieldTypes.NUMBER:
+      return BaseNumberInput;
+    case FieldTypes.CURRENCY:
+      return BaseCurrencyInput;
+    case FieldTypes.PERCENTAGE:
+      return BasePercentageInput;
     default:
       return null;
   }
@@ -378,6 +399,7 @@ const fieldProps = computed(() => {
     disabled,
     hideDetails: true,
     rounded: 'md',
+    textField: true,
   };
 
   if (options) {
@@ -413,7 +435,7 @@ function handleInputChange(value: any) {
     <div class="dynamic-field-wrapper">
       <div class="d-flex align-center">
         <editor-content
-          v-if="showPlaceholderEditor"
+          v-if="!fieldInputComponent || showPlaceholderEditor"
           :editor="editor"
           class="editor-content"
           :class="editorClass"
@@ -421,7 +443,7 @@ function handleInputChange(value: any) {
 
         <component
           v-else
-          :is="getFieldInputComponent()"
+          :is="fieldInputComponent"
           v-bind="fieldProps"
           class="w-100"
           @update:model-value="handleInputChange"

@@ -187,7 +187,6 @@ watch(
 <style lang="scss" scoped>
 .automation-builder-canvas {
   position: relative;
-  min-height: 400px;
 }
 
 .step-wrapper {

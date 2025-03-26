@@ -195,7 +195,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <v-container class="bg-surface" min-height="100vh">
+  <v-container class="bg-surface">
     <template v-if="!selectedAutomation">
       <v-app-bar
         class="d-flex align-center border-b-thin px-4"
