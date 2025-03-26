@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
-import { useUsersService } from '@/services/useUsersService';
 import {
   dayjs,
   type Card,
@@ -11,6 +10,7 @@ import { useFieldsService } from '@/services/useFieldsService';
 import ActivityTimelineItems from './ActivityTimelineItemUpdateItems.vue';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import { useQueryStore } from '@/stores/query';
+import { useCreatedBy } from '@/composables/useCreatedBy';
 
 interface Props {
   activity: CardActivity;
@@ -22,8 +22,10 @@ const props = defineProps<Props>();
 const { user } = storeToRefs(useAuthStore());
 const { users, listStages } = storeToRefs(useQueryStore());
 
-const { getUserFullName } = useUsersService();
 const { useFieldQuery } = useFieldsService();
+
+const { getCreatedByIcon, getCreatedByName, getCreatedByPhoto } =
+  useCreatedBy();
 
 // Extract activity content and changes
 const activityContent = computed(
@@ -61,10 +63,10 @@ const displayName = computed(() => {
   }
 
   if (props.activity.createdByType === 'automation') {
-    return 'Automation';
+    return 'An automation';
   }
 
-  return 'Unknown origin';
+  return 'Unknown';
 });
 
 const itemType = computed(() => props.card.type.name.toLowerCase());
@@ -89,13 +91,9 @@ const getActivityTypeDetails = (change: any) => {
   <v-timeline-item class="text-caption">
     <template #icon>
       <base-avatar
-        :text="
-          activity.createdByType === 'user'
-            ? getUserFullName(activity.createdBy)
-            : ''
-        "
-        :photo="activity.createdBy?.photo"
-        class="text-xs"
+        :text="getCreatedByName(activity)"
+        :icon="getCreatedByIcon(activity)"
+        :photo="getCreatedByPhoto(activity)"
       />
     </template>
 

@@ -10,6 +10,10 @@ export const useCreatedBy = () => {
       : data.createdBy?.photo;
   }
 
+  function getCreatedByIcon(data: Data) {
+    return data.createdByType === 'automation' ? 'mdi-creation' : undefined;
+  }
+
   function getCreatedByName(data: Data) {
     return data.createdByType === 'system'
       ? 'System'
@@ -19,5 +23,6 @@ export const useCreatedBy = () => {
   return {
     getCreatedByPhoto,
     getCreatedByName,
+    getCreatedByIcon,
   };
 };

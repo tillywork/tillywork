@@ -9,7 +9,6 @@ import LocationSelector, {
   type LocationSelection,
 } from '@/components/common/inputs/LocationSelector.vue';
 import BaseTable from '../tables/BaseTable/BaseTable.vue';
-import AutomationBuilder from './AutomationBuilder.vue';
 import MenuWrapper from '../base/ContextMenu/MenuWrapper.vue';
 
 import {
@@ -26,8 +25,9 @@ const { initialListId } = defineProps<{
   initialListId?: number;
 }>();
 
+const router = useRouter();
+
 const location = ref<LocationSelection | null>(null);
-const selectedAutomation = ref<Automation | null>(null);
 
 const tableColumns: ColumnDef<Automation>[] = [
   {
@@ -35,11 +35,6 @@ const tableColumns: ColumnDef<Automation>[] = [
     header: 'Name',
     accessorKey: 'name',
     size: 300,
-  },
-  {
-    id: 'steps',
-    header: 'Steps',
-    accessorKey: 'firstStep',
   },
   {
     id: 'locations',
@@ -51,6 +46,7 @@ const tableColumns: ColumnDef<Automation>[] = [
     id: 'createdAt',
     header: 'Created On',
     accessorKey: 'createdAt',
+    accessorFn: (row) => new Date(row.createdAt).toLocaleDateString(),
   },
   {
     id: 'isEnabled',
@@ -123,7 +119,7 @@ async function handleCreateAutomation() {
 }
 
 function handleSelectAutomation(automation: Automation) {
-  selectedAutomation.value = automation;
+  router.push(`/automations/${automation.id}`);
 }
 
 function setLocationFromInitialListId() {
@@ -182,123 +178,106 @@ onMounted(() => {
 });
 
 watchEffect(() => {
-  if (!selectedAutomation.value) {
-    setLocationFromInitialListId();
-  }
-
   if (lists.value) {
     setLocationFromInitialListId();
   }
 
-  setTitle(selectedAutomation.value?.name ?? 'Automations');
+  setTitle('Automations');
 });
 </script>
 
 <template>
   <v-container class="bg-surface">
-    <template v-if="!selectedAutomation">
-      <v-app-bar
-        class="d-flex align-center border-b-thin px-4"
-        color="surface"
-        height="60"
+    <v-app-bar
+      class="d-flex align-center border-b-thin px-4"
+      color="surface"
+      height="60"
+    >
+      <h4>Automations</h4>
+    </v-app-bar>
+
+    <div class="mb-4 d-flex align-center">
+      <location-selector v-model="location" clearable />
+
+      <v-spacer />
+      <v-btn
+        class="text-none text-body-3"
+        rounded="pill"
+        prepend-icon="mdi-plus"
+        :loading="isCreating"
+        @click="handleCreateAutomation"
+        >Automate</v-btn
       >
-        <h4>Automations</h4>
-      </v-app-bar>
+    </div>
 
-      <div class="mb-4 d-flex align-center">
-        <location-selector v-model="location" clearable />
-
-        <v-spacer />
-        <v-btn
-          class="text-none text-body-3"
-          rounded="pill"
-          prepend-icon="mdi-plus"
-          :loading="isCreating"
-          @click="handleCreateAutomation"
-          >Automate</v-btn
-        >
-      </div>
-
-      <base-table
-        :data="automations ?? []"
-        :columns="tableColumns"
-        @click:row="handleSelectAutomation"
-      >
-        <template #name="{ row }">
-          <div class="d-flex align-center ga-2">
-            <v-menu>
-              <template #activator="{ props }">
-                <v-btn
-                  v-bind="props"
-                  icon
-                  density="compact"
-                  color="default"
-                  @click.stop
-                >
-                  <v-icon icon="mdi-dots-vertical" size="small" />
-                </v-btn>
-              </template>
-              <menu-wrapper
-                :items="[
-                  {
-                    title: 'Duplicate',
-                    icon: 'mdi-content-duplicate',
-                    action: () => handleDuplicateAutomation(row.original),
-                  },
-                  {
-                    title: 'Delete',
-                    icon: 'mdi-delete-outline',
-                    action: () => handleDeleteAutomation(row.original.id),
-                  },
-                ]"
-              />
-            </v-menu>
-            <span>{{ row.original.name }}</span>
-          </div>
-        </template>
-        <template #isEnabled="{ row }">
-          <v-switch
-            :model-value="row.original.isEnabled"
-            inset
-            hide-details
-            density="compact"
-            v-tooltip="
-              row.original.isEnabled
-                ? 'Disable automation'
-                : 'Enable automation'
-            "
-            @click.stop
-          />
-        </template>
-        <template #empty>
-          <div class="text-center d-flex flex-column my-4 ga-2">
-            <h3 class="mb-4">Let's get started!</h3>
-            <span class="text-body-2"
-              >Create an automation to supercharge your workflows.</span
-            >
-            <span class="text-body-2 text-color-subtitle"
-              >Automations allow you to automate actions in your workspace based
-              on certain triggers.</span
-            >
-            <div class="text-center mt-2">
+    <base-table
+      :data="automations ?? []"
+      :columns="tableColumns"
+      @click:row="handleSelectAutomation"
+    >
+      <template #name="{ row }">
+        <div class="d-flex align-center ga-2">
+          <v-menu>
+            <template #activator="{ props }">
               <v-btn
-                class="text-none text-body-3"
-                rounded="pill"
-                prepend-icon="mdi-plus"
-                :loading="isCreating"
-                @click="handleCreateAutomation"
-                >Automate</v-btn
+                v-bind="props"
+                icon
+                density="compact"
+                color="default"
+                @click.stop
               >
-            </div>
+                <v-icon icon="mdi-dots-vertical" size="small" />
+              </v-btn>
+            </template>
+            <menu-wrapper
+              :items="[
+                {
+                  title: 'Duplicate',
+                  icon: 'mdi-content-duplicate',
+                  action: () => handleDuplicateAutomation(row.original),
+                },
+                {
+                  title: 'Delete',
+                  icon: 'mdi-delete-outline',
+                  action: () => handleDeleteAutomation(row.original.id),
+                },
+              ]"
+            />
+          </v-menu>
+          <span>{{ row.original.name }}</span>
+        </div>
+      </template>
+      <template #isEnabled="{ row }">
+        <v-switch
+          :model-value="row.original.isEnabled"
+          inset
+          hide-details
+          readonly
+          density="compact"
+        />
+      </template>
+      <template #empty>
+        <div class="text-center d-flex flex-column my-4 ga-2">
+          <h3 class="mb-4">Let's get started!</h3>
+          <span class="text-body-2"
+            >Create an automation to supercharge your workflows.</span
+          >
+          <span class="text-body-2 text-color-subtitle"
+            >Automations allow you to automate actions in your workspace based
+            on certain triggers.</span
+          >
+          <div class="text-center mt-2">
+            <v-btn
+              class="text-none text-body-3"
+              rounded="pill"
+              prepend-icon="mdi-plus"
+              :loading="isCreating"
+              @click="handleCreateAutomation"
+              >Automate</v-btn
+            >
           </div>
-        </template>
-      </base-table>
-    </template>
-    <template v-else>
-      <automation-builder
-        :automation="selectedAutomation"
-        @close="selectedAutomation = null"
-      />
-    </template>
+        </div>
+      </template>
+    </base-table>
   </v-container>
 </template>

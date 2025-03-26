@@ -19,10 +19,11 @@ import Step from './Step.vue';
 import draggable from 'vuedraggable';
 import { cloneDeep } from 'lodash';
 
+const router = useRouter();
+
 const { automation } = defineProps<{
   automation: Automation;
 }>();
-const emit = defineEmits(['close']);
 
 export type StepComponentType = InstanceType<typeof Step>;
 
@@ -79,6 +80,10 @@ function isStepSelected(step: AutomationStep, index: number | null = null) {
   }
 }
 
+function handleBack() {
+  router.back();
+}
+
 watch(isSideDrawerOpen, (v) => {
   if (!v) {
     selectedStep.value = null;
@@ -118,7 +123,7 @@ watch(
     <automation-builder-header
       v-model="reactiveAutomation"
       :isAutomationChanged
-      @close="emit('close')"
+      @close="handleBack"
     />
     <v-card
       class="automation-builder-canvas d-flex align-center flex-column ga-2 pt-12"
