@@ -13,7 +13,6 @@ import {
     normalizeFieldValue,
     Field,
 } from "@tillywork/shared";
-import { getSampleDataByField } from "../../helpers/sample.data.helper";
 import { TriggerEvent } from "../../events/trigger.event";
 import { isEqual } from "lodash";
 
@@ -49,7 +48,7 @@ export class FieldUpdatedHandler extends BaseAutomationHandler {
 
         let fromPassed = false;
         let toPassed = false;
-        //If one of them passes, automation runs. If they are both filled, both need to be true
+
         if (triggerData.from) {
             const normalizedFromValue = normalizeFieldValue({
                 v: triggerData.from,
@@ -134,7 +133,7 @@ export class FieldUpdatedHandler extends BaseAutomationHandler {
                     title: "From",
                     type: selectedField.type,
                     options: toAndFromOptions,
-                    multiple: true,
+                    multiple: selectedField.multiple,
                     refreshers: ["field"],
                 };
 
@@ -142,36 +141,12 @@ export class FieldUpdatedHandler extends BaseAutomationHandler {
                     title: "To",
                     type: selectedField.type,
                     options: toAndFromOptions,
-                    multiple: true,
+                    multiple: selectedField.multiple,
                     refreshers: ["field"],
                 };
             }
         }
 
         return stepFields;
-    }
-
-    async getSampleData(
-        params: GetHandlerFieldsParams
-    ): Promise<Record<string, any>> {
-        const { automationId, data } = params;
-        const fields = await this.getCardFields(automationId);
-
-        const sampleData: Record<string, any> = {};
-
-        if (data.field) {
-            const selectedField = fields.find((f) => f.slug === data.field);
-
-            if (selectedField) {
-                sampleData[selectedField.slug] =
-                    getSampleDataByField(selectedField);
-            }
-        } else {
-            for (const field of fields) {
-                sampleData[field.slug] = getSampleDataByField(field);
-            }
-        }
-
-        return sampleData;
     }
 }

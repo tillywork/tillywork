@@ -24,6 +24,7 @@ import { PermissionLevel } from "@tillywork/shared";
 import { AccessControlService } from "../auth/services/access.control.service";
 import slugify from "slugify";
 import { Space } from "../spaces/space.entity";
+import { AclContext } from "../auth/context/acl.context";
 
 export type ListFindAllResult = {
     total: number;
@@ -44,7 +45,8 @@ export class ListsService {
         private listSideEffectsService: ListSideEffectsService,
         @Inject(forwardRef(() => AccessControlService))
         private accessControlService: AccessControlService,
-        private clsService: ClsService
+        private clsService: ClsService,
+        private aclContext: AclContext
     ) {}
 
     async findAll({
@@ -53,28 +55,32 @@ export class ListsService {
         throughSpace,
     }: FindAllParams): Promise<List[]> {
         const user = this.clsService.get("user");
+        const where: FindOptionsWhere<List> = {};
 
-        const accessControlEntries = await this.listsRepository.manager
-            .getRepository(AccessControl)
-            .find({
-                where: {
-                    user: {
-                        id: user.id,
+        if (!this.aclContext.shouldSkipAcl()) {
+            const accessControlEntries = await this.listsRepository.manager
+                .getRepository(AccessControl)
+                .find({
+                    where: {
+                        user: {
+                            id: user.id,
+                        },
+                        list: {
+                            id: Not(IsNull()),
+                        },
+                        permissionLevel: Not(PermissionLevel.NONE),
                     },
-                    list: {
-                        id: Not(IsNull()),
+                    loadRelationIds: {
+                        relations: ["list"],
                     },
-                    permissionLevel: Not(PermissionLevel.NONE),
-                },
-                loadRelationIds: {
-                    relations: ["list"],
-                },
-            });
+                });
 
-        const listIds = accessControlEntries.map((entry) => entry.list);
-        const where: FindOptionsWhere<List> = {
-            id: In(listIds),
-        };
+            const accessibleListIds = accessControlEntries.map(
+                (entry) => entry.list as unknown as number
+            );
+
+            where.id = In(accessibleListIds);
+        }
 
         if (spaceId) {
             where.spaceId = spaceId;
@@ -107,12 +113,14 @@ export class ListsService {
     async findOne(id: number): Promise<List> {
         const user = this.clsService.get("user");
 
-        await this.accessControlService.authorize(
-            user,
-            "list",
-            id,
-            PermissionLevel.VIEWER
-        );
+        if (!this.aclContext.shouldSkipAcl()) {
+            await this.accessControlService.authorize(
+                user,
+                "list",
+                id,
+                PermissionLevel.VIEWER
+            );
+        }
 
         const list = await this.listsRepository.findOne({
             where: {

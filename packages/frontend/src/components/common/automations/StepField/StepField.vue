@@ -376,6 +376,7 @@ function getFieldInputComponent() {
     case FieldTypes.LABEL:
     case FieldTypes.DROPDOWN:
     case FieldTypes.USER:
+    case FieldTypes.STAGE:
       return 'v-autocomplete';
     case FieldTypes.DATE:
     case FieldTypes.DATETIME:

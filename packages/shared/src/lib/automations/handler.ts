@@ -1,7 +1,7 @@
 export enum TriggerType {
   CARD_CREATED = 'card_created',
   FIELD_UPDATED = 'field_updated',
-  CARD_STAGE_CHANGED = 'card_stage_changed',
+  STAGE_CHANGED = 'stage_changed',
   COMMENT_CREATED = 'comment_created',
   DUE_DATE_ARRIVES = 'due_date_arrives',
   DUE_DATE_CHANGES = 'due_date_changes',

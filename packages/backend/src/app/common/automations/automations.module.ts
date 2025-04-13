@@ -22,6 +22,7 @@ import { FieldsModule } from "../fields/fields.module";
 import { ListsModule } from "../lists/lists.module";
 import { FieldUpdatedHandler } from "./handlers/triggers/field.updated.handler";
 import { CreateCommentHandler } from "./handlers/actions/create.comment.handler";
+import { StageUpdatedHandler } from "./handlers/triggers/stage.updated.handler";
 
 const handlers = [
     CreateCardHandler,
@@ -29,6 +30,7 @@ const handlers = [
     CardCreatedHandler,
     FieldUpdatedHandler,
     CreateCommentHandler,
+    StageUpdatedHandler,
 ];
 
 @Module({

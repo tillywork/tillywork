@@ -140,7 +140,10 @@ export abstract class BaseAutomationHandler implements AutomationHandler {
 
         for (const location of automation.locations) {
             if (location.locationType === "list") {
-                lists.push(location.location as List);
+                const list = await this.aclContext.run(true, () => {
+                    return this.listsService.findOne(location.location.id);
+                });
+                lists.push(list);
             } else {
                 const spaceLists = await this.aclContext.run(true, () => {
                     return this.listsService.findAll({
