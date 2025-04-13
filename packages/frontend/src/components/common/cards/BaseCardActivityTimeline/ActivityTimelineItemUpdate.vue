@@ -24,8 +24,7 @@ const { users, listStages } = storeToRefs(useQueryStore());
 
 const { useFieldQuery } = useFieldsService();
 
-const { getCreatedByIcon, getCreatedByName, getCreatedByPhoto } =
-  useCreatedBy();
+const { getCreatedByName, getCreatedByPhoto } = useCreatedBy();
 
 // Extract activity content and changes
 const activityContent = computed(
@@ -92,7 +91,6 @@ const getActivityTypeDetails = (change: any) => {
     <template #icon>
       <base-avatar
         :text="getCreatedByName(activity)"
-        :icon="getCreatedByIcon(activity)"
         :photo="getCreatedByPhoto(activity)"
       />
     </template>

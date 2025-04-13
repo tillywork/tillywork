@@ -9,8 +9,10 @@ import {
 import {
     ActionType,
     AutomationFieldSchema,
+    Field,
     FieldTypes,
     GetHandlerFieldsParams,
+    normalizeFieldValue,
 } from "@tillywork/shared";
 
 export type SetFieldPayload = Record<string, any>;
@@ -33,9 +35,23 @@ export class SetFieldHandler extends BaseAutomationHandler {
         context: AutomationContext
     ): Promise<Card> {
         try {
-            const { card } = context;
+            const { card, automation } = context;
+            const fields = await this.getCardFields(automation.id);
 
-            const mergedData = this.mergeCardData(card.data, payload);
+            const normalizedPayload: SetFieldPayload = {};
+
+            for (const key of Object.keys(payload)) {
+                const updatedField = fields.find((f) => f.slug === key);
+
+                if (updatedField) {
+                    normalizedPayload[key] = normalizeFieldValue({
+                        v: payload[key],
+                        field: updatedField as unknown as Field,
+                    });
+                }
+            }
+
+            const mergedData = this.mergeCardData(card.data, normalizedPayload);
             const updatedCard = await this.aclContext.run(true, () =>
                 this.cardsService.update(card.id, {
                     data: mergedData,
@@ -55,30 +71,45 @@ export class SetFieldHandler extends BaseAutomationHandler {
             params.automationId
         );
 
-        const handlerFields: Record<string, AutomationFieldSchema> = {};
+        const stepFields: Record<string, AutomationFieldSchema> = {
+            field: {
+                title: "Field to update",
+                type: FieldTypes.DROPDOWN,
+                required: true,
+                options: fields.map((field) => ({
+                    title: field.name,
+                    value: field.slug,
+                })),
+                refreshers: [],
+            },
+        };
 
-        for (const field of fields) {
+        if (params.data.field) {
+            const selectedField = fields.find(
+                (f) => f.slug === params.data.field
+            );
+
             let options = [];
-            switch (field.type) {
+            switch (selectedField.type) {
                 case FieldTypes.USER:
                     options = await this.getListUsersAsFieldOptions({
                         automation,
                     });
                     break;
                 default:
-                    options = field.items?.map((item) => ({
+                    options = selectedField.items?.map((item) => ({
                         title: item.item,
                         value: item.item,
                     }));
             }
-            handlerFields[field.slug] = {
-                title: field.name,
-                type: field.type,
+            stepFields[selectedField.slug] = {
+                title: selectedField.name,
+                type: selectedField.type,
                 options,
             };
         }
 
-        return handlerFields;
+        return stepFields;
     }
 
     private mergeCardData(

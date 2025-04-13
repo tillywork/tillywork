@@ -1,7 +1,6 @@
 import { Inject, Logger } from "@nestjs/common";
 
 import { Card } from "../../cards/card.entity";
-import { Space } from "../../spaces/space.entity";
 import { List } from "../../lists/list.entity";
 
 import {
@@ -26,8 +25,6 @@ import { AccessControlService } from "../../auth/services/access.control.service
 export interface AutomationContext {
     automation?: Automation;
     card?: Card;
-    list?: List;
-    space?: Space;
 }
 
 export interface AutomationHandler {
@@ -108,12 +105,18 @@ export abstract class BaseAutomationHandler implements AutomationHandler {
         const [cardTypeFields, listFields] = await Promise.all([
             Promise.all(
                 cardTypes.map((cardType) =>
-                    this.fieldsService.findAll({ cardTypeId: cardType.id })
+                    this.aclContext.run(true, () =>
+                        this.fieldsService.findAll({
+                            cardTypeId: cardType.id,
+                        })
+                    )
                 )
             ),
             Promise.all(
                 activeLists.map((list) =>
-                    this.fieldsService.findAll({ listId: list.id })
+                    this.aclContext.run(true, () =>
+                        this.fieldsService.findAll({ listId: list.id })
+                    )
                 )
             ),
         ]);

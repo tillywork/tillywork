@@ -45,7 +45,13 @@ export class AutomationEventHandler {
         }
 
         for (const automation of automations) {
-            if (this.shouldRunAutomation(automation, event, card)) {
+            const shouldRun = await this.shouldRunAutomation(
+                automation,
+                event,
+                card
+            );
+
+            if (shouldRun) {
                 this.logger.debug(
                     `Adding automation ID ${automation.id} to queue..`
                 );
@@ -68,7 +74,10 @@ export class AutomationEventHandler {
             event.triggerType
         );
 
-        return handler.execute(event, { card });
+        return handler.execute(event, {
+            card,
+            automation,
+        });
     }
 
     private getCardLocation(card: Card) {

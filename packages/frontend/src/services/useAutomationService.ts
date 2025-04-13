@@ -201,15 +201,16 @@ export const useAutomationService = () => {
   function getHandlerSampleData({
     automationId,
     handler,
-  }: {
-    automationId: MaybeRef<string>;
-    handler: MaybeRef<ActionType | TriggerType>;
-  }): Promise<Record<string, any>> {
-    return sendRequest(
-      `/automations/handlers/${toValue(handler)}/${toValue(
-        automationId
-      )}/sample-data`
-    );
+    data,
+  }: GetHandlerFieldsParams): Promise<Record<string, any>> {
+    return sendRequest(`/automations/handlers/sample-data`, {
+      method: 'POST',
+      data: {
+        automationId: toValue(automationId),
+        type: toValue(handler),
+        data: toValue(data),
+      },
+    });
   }
 
   return {

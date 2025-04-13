@@ -6,7 +6,7 @@ import {
     UpdateEvent,
     MoreThanOrEqual,
     IsNull,
-    JsonContains,
+    Raw,
 } from "typeorm";
 import { Card } from "./card.entity";
 import { Injectable, Logger } from "@nestjs/common";
@@ -122,13 +122,7 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     new TriggerEvent(
                         TriggerType.FIELD_UPDATED,
                         event.entity.id,
-                        {
-                            field: change.field.slug,
-                            oldValue: change.oldValue,
-                            newValue: change.newValue,
-                            addedItems: change.addedItems,
-                            removedItems: change.removedItems,
-                        }
+                        change
                     )
                 );
             }
@@ -142,41 +136,33 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     createdAt: MoreThanOrEqual(
                         new Date(Date.now() - ACTIVITY_GROUPING_WINDOW)
                     ),
-                    content: JsonContains({
-                        type: "updated",
-                    }),
+                    content: Raw(
+                        (alias) =>
+                            `${alias} @> '{"changes": [{"type": "updated"}]}'`
+                    ),
                     createdByType: isAutomation ? "automation" : undefined,
                     createdBy: isAutomation ? undefined : { id: user?.id },
                 },
                 order: { createdAt: "DESC" },
             });
+
             const field = await this.getFieldFromChangeKey(
                 changes[0].field.slug,
                 event
             );
 
             let activityToUse: CardActivity;
-            let canGroupChanges = false;
+            let canMergeChanges = false;
 
             if (recentActivity) {
-                canGroupChanges =
-                    field.multiple &&
-                    changes.every((newChange) =>
-                        (
-                            recentActivity.content as UpdateActivityContent
-                        ).changes.some(
-                            (existingChange) =>
-                                existingChange.field?.id ===
-                                    newChange.field?.id &&
-                                ((existingChange.addedItems &&
-                                    newChange.addedItems) ||
-                                    (existingChange.removedItems &&
-                                        newChange.removedItems))
-                        )
-                    );
+                canMergeChanges = this.canMergeChanges({
+                    recentActivity,
+                    field,
+                    changes,
+                });
             }
 
-            if (canGroupChanges) {
+            if (canMergeChanges) {
                 activityToUse = recentActivity;
                 const mergedChanges = this.mergeChanges(
                     (recentActivity.content as UpdateActivityContent).changes,
@@ -235,6 +221,7 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     },
                     type: "updated",
                     newValue: newData[key],
+                    oldValue: oldData[key],
                 };
 
                 if (field.multiple) {
@@ -259,8 +246,6 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     } else if (Array.isArray(oldData[key])) {
                         change.removedItems = oldData[key];
                     }
-                } else if (!newData[key]) {
-                    change.oldValue = oldData[key];
                 }
 
                 return change;
@@ -269,6 +254,29 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
 
         return changes.filter(
             (change): change is FieldChange => change !== null
+        );
+    }
+
+    private canMergeChanges({
+        recentActivity,
+        field,
+        changes,
+    }: {
+        recentActivity: CardActivity;
+        field: Field;
+        changes: FieldChange[];
+    }): boolean {
+        return (
+            field.multiple &&
+            changes.every((newChange) =>
+                (recentActivity.content as UpdateActivityContent).changes.some(
+                    (existingChange) =>
+                        existingChange.field?.id === newChange.field?.id &&
+                        ((existingChange.addedItems && newChange.addedItems) ||
+                            (existingChange.removedItems &&
+                                newChange.removedItems))
+                )
+            )
         );
     }
 

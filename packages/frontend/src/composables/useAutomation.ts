@@ -83,10 +83,12 @@ export const useAutomation = (initialAutomation: Automation) => {
 
     if (automationCopy.value?.trigger?.value) {
       const triggerHandler = automationCopy.value.trigger.value;
+      const triggerData = automationCopy.value.trigger.data;
 
       placeholders['trigger'] = await getHandlerSampleData({
         automationId: automationCopy.value.id,
         handler: triggerHandler,
+        data: triggerData,
       });
     }
 
@@ -95,6 +97,7 @@ export const useAutomation = (initialAutomation: Automation) => {
         placeholders[`step_${index + 1}`] = await getHandlerSampleData({
           automationId: automationCopy.value.id,
           handler: step.value as ActionType,
+          data: step.data,
         });
       }
     }

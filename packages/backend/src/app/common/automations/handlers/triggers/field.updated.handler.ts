@@ -1,21 +1,25 @@
 import { Injectable } from "@nestjs/common";
-import { BaseAutomationHandler } from "../automation.handler";
+import {
+    AutomationContext,
+    BaseAutomationHandler,
+} from "../automation.handler";
 import {
     TriggerType,
     AutomationFieldSchema,
     FieldTypes,
     GetHandlerFieldsParams,
     AutomationFieldOption,
+    FieldChange,
+    normalizeFieldValue,
+    Field,
 } from "@tillywork/shared";
 import { getSampleDataByField } from "../../helpers/sample.data.helper";
+import { TriggerEvent } from "../../events/trigger.event";
+import { isEqual } from "lodash";
 
-export interface FieldUpdatedPayload {
-    field: string;
-    oldValue: any;
-    newValue: any;
-    addedItems?: any[];
-    removedItems?: any[];
-}
+export type FieldUpdatedPayload = Omit<TriggerEvent, "payload"> & {
+    payload: FieldChange;
+};
 
 @Injectable()
 export class FieldUpdatedHandler extends BaseAutomationHandler {
@@ -30,8 +34,45 @@ export class FieldUpdatedHandler extends BaseAutomationHandler {
         });
     }
 
-    async execute(payload: FieldUpdatedPayload): Promise<any> {
-        return payload;
+    async execute(
+        payload: FieldUpdatedPayload,
+        { automation }: AutomationContext
+    ): Promise<any> {
+        const change = payload.payload;
+        const triggerData = automation.trigger.data;
+        const fields = await this.getCardFields(automation.id);
+        const updatedField = fields.find((f) => f.slug === change.field.slug);
+
+        if (change.field.slug !== triggerData.field) {
+            return false;
+        }
+
+        let fromPassed = false;
+        let toPassed = false;
+        //If one of them passes, automation runs. If they are both filled, both need to be true
+        if (triggerData.from) {
+            const normalizedFromValue = normalizeFieldValue({
+                v: triggerData.from,
+                field: updatedField as unknown as Field,
+            });
+
+            fromPassed = isEqual(normalizedFromValue, change.oldValue);
+        } else {
+            fromPassed = true;
+        }
+
+        if (triggerData.to) {
+            const normalizedToValue = normalizeFieldValue({
+                v: triggerData.to,
+                field: updatedField as unknown as Field,
+            });
+
+            toPassed = isEqual(normalizedToValue, change.newValue);
+        } else {
+            toPassed = true;
+        }
+
+        return fromPassed && toPassed;
     }
 
     async getFields(
@@ -95,7 +136,6 @@ export class FieldUpdatedHandler extends BaseAutomationHandler {
                     options: toAndFromOptions,
                     multiple: true,
                     refreshers: ["field"],
-                    allowDynamicValues: true,
                 };
 
                 stepFields["to"] = {
@@ -104,7 +144,6 @@ export class FieldUpdatedHandler extends BaseAutomationHandler {
                     options: toAndFromOptions,
                     multiple: true,
                     refreshers: ["field"],
-                    allowDynamicValues: true,
                 };
             }
         }
@@ -112,12 +151,25 @@ export class FieldUpdatedHandler extends BaseAutomationHandler {
         return stepFields;
     }
 
-    async getSampleData(automationId: string): Promise<Record<string, any>> {
+    async getSampleData(
+        params: GetHandlerFieldsParams
+    ): Promise<Record<string, any>> {
+        const { automationId, data } = params;
         const fields = await this.getCardFields(automationId);
+
         const sampleData: Record<string, any> = {};
 
-        for (const field of fields) {
-            sampleData[field.slug] = getSampleDataByField(field);
+        if (data.field) {
+            const selectedField = fields.find((f) => f.slug === data.field);
+
+            if (selectedField) {
+                sampleData[selectedField.slug] =
+                    getSampleDataByField(selectedField);
+            }
+        } else {
+            for (const field of fields) {
+                sampleData[field.slug] = getSampleDataByField(field);
+            }
         }
 
         return sampleData;

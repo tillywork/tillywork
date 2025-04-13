@@ -58,7 +58,6 @@ export class AutomationProcessor {
 
             while (currentStep) {
                 this.logger.debug(`Processing step ${currentStep.value}..`);
-                this.logger.debug({ data: currentStep.data });
                 const stepStart = Date.now();
                 const stepRun = await this.stepRunRepository.save({
                     run,
@@ -79,6 +78,7 @@ export class AutomationProcessor {
                         );
                     const output = await handler.execute(currentStep.data, {
                         card,
+                        automation,
                     });
 
                     await this.stepRunRepository.update(stepRun.id, {
@@ -93,9 +93,12 @@ export class AutomationProcessor {
 
                     currentStep = automation.steps[++stepOrder];
                 } catch (stepError) {
+                    this.logger.debug(`Action ${currentStep.value} failed.`);
+                    const sanitizedError = this.sanitizeError(stepError);
+                    this.logger.debug(sanitizedError);
                     await this.stepRunRepository.update(stepRun.id, {
                         status: AutomationRunStatus.FAILED,
-                        error: this.sanitizeError(stepError),
+                        error: sanitizedError,
                         duration: Date.now() - stepStart,
                     });
                     throw stepError;

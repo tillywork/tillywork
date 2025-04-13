@@ -4,7 +4,6 @@ import {
     Controller,
     Get,
     NotFoundException,
-    Param,
     Post,
     UseGuards,
     UseInterceptors,
@@ -13,11 +12,7 @@ import {
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../../auth/guards/jwt.auth.guard";
 import { AutomationHandlerRegistry } from "../registries/automation.handler.registry";
-import {
-    ActionType,
-    GetHandlerFieldsParams,
-    TriggerType,
-} from "@tillywork/shared";
+import { GetHandlerFieldsParams } from "@tillywork/shared";
 import { isTriggerType, isActionType } from "../helpers/handler.type.helper";
 
 @ApiBearerAuth()
@@ -69,22 +64,20 @@ export class AutomationHandlersController {
         throw new NotFoundException(`Handler type '${type}' not found`);
     }
 
-    @Get(":type/:automationId/sample-data")
-    async getHandlerSampleData(
-        @Param("automationId") automationId: string,
-        @Param("type") type: ActionType | TriggerType
-    ) {
+    @Post("/sample-data")
+    async getHandlerSampleData(@Body() body: GetHandlerFieldsParams) {
+        const { type } = body;
         if (isTriggerType(type)) {
             const handler = this.handlerRegistry.getTrigger(type);
             if (handler) {
-                return handler.getSampleData(automationId);
+                return handler.getSampleData(body);
             }
         }
 
         if (isActionType(type)) {
             const handler = this.handlerRegistry.getAction(type);
             if (handler) {
-                return handler.getSampleData(automationId);
+                return handler.getSampleData(body);
             }
         }
 

@@ -2,7 +2,6 @@ import {
     BadRequestException,
     ConflictException,
     Injectable,
-    Logger,
     NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -14,6 +13,7 @@ import { ClsService } from "nestjs-cls";
 import { AccessControlService } from "../auth/services/access.control.service";
 import { PermissionLevel } from "@tillywork/shared";
 import { CardType } from "../card-types/card.type.entity";
+import { AclContext } from "../auth/context/acl.context";
 
 export type FindAllParams = {
     workspaceId?: number;
@@ -28,7 +28,8 @@ export class FieldsService {
         @InjectRepository(Field)
         private fieldsRepository: Repository<Field>,
         private clsService: ClsService,
-        private accessControlService: AccessControlService
+        private accessControlService: AccessControlService,
+        private aclContext: AclContext
     ) {}
 
     async findAll({
@@ -45,38 +46,40 @@ export class FieldsService {
 
         const user = this.clsService.get("user");
 
-        if (workspaceId) {
-            await this.accessControlService.authorize(
-                user,
-                "workspace",
-                workspaceId,
-                PermissionLevel.VIEWER
-            );
-        } else if (listId) {
-            await this.accessControlService.authorize(
-                user,
-                "list",
-                listId,
-                PermissionLevel.VIEWER
-            );
-        } else if (cardTypeId) {
-            const cardType = await this.fieldsRepository.manager
-                .getRepository(CardType)
-                .findOneOrFail({
-                    where: {
-                        id: cardTypeId,
-                    },
-                    loadRelationIds: {
-                        relations: ["workspace"],
-                    },
-                });
+        if (!this.aclContext.shouldSkipAcl()) {
+            if (workspaceId) {
+                await this.accessControlService.authorize(
+                    user,
+                    "workspace",
+                    workspaceId,
+                    PermissionLevel.VIEWER
+                );
+            } else if (listId) {
+                await this.accessControlService.authorize(
+                    user,
+                    "list",
+                    listId,
+                    PermissionLevel.VIEWER
+                );
+            } else if (cardTypeId) {
+                const cardType = await this.fieldsRepository.manager
+                    .getRepository(CardType)
+                    .findOneOrFail({
+                        where: {
+                            id: cardTypeId,
+                        },
+                        loadRelationIds: {
+                            relations: ["workspace"],
+                        },
+                    });
 
-            await this.accessControlService.authorize(
-                user,
-                "workspace",
-                cardType.workspace as unknown as number,
-                PermissionLevel.VIEWER
-            );
+                await this.accessControlService.authorize(
+                    user,
+                    "workspace",
+                    cardType.workspace as unknown as number,
+                    PermissionLevel.VIEWER
+                );
+            }
         }
 
         return this.fieldsRepository.find({

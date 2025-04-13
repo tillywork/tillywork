@@ -5,13 +5,9 @@ type Data = { createdByType?: CreatedByType; createdBy?: User };
 
 export const useCreatedBy = () => {
   function getCreatedByPhoto(data: Data) {
-    return data.createdByType === 'system'
-      ? useLogo().getCheckUrl()
-      : data.createdBy?.photo;
-  }
-
-  function getCreatedByIcon(data: Data) {
-    return data.createdByType === 'automation' ? 'mdi-creation' : undefined;
+    return data.createdByType === 'user'
+      ? data.createdBy?.photo
+      : useLogo().getCheckUrl();
   }
 
   function getCreatedByName(data: Data) {
@@ -23,6 +19,5 @@ export const useCreatedBy = () => {
   return {
     getCreatedByPhoto,
     getCreatedByName,
-    getCreatedByIcon,
   };
 };
