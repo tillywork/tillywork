@@ -22,7 +22,7 @@ export class SetFieldHandler extends BaseAutomationHandler {
     constructor() {
         super({
             metadata: {
-                icon: "mdi-text-box-edit-outline",
+                icon: "mdi-pencil-circle",
                 title: "Set a field",
                 section: "Card management",
                 value: ActionType.SET_FIELD,

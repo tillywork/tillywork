@@ -25,7 +25,7 @@ export class FieldUpdatedHandler extends BaseAutomationHandler {
     constructor() {
         super({
             metadata: {
-                icon: "mdi-text-box-edit",
+                icon: "mdi-format-line-height",
                 title: "Field updated",
                 section: "Card changes",
                 value: TriggerType.FIELD_UPDATED,

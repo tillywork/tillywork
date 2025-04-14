@@ -25,7 +25,7 @@ export class ChangeAssigneeHandler extends BaseAutomationHandler {
     constructor() {
         super({
             metadata: {
-                icon: "mdi-text-box-edit-outline",
+                icon: "mdi-account-check",
                 title: "Change assignee",
                 section: "Collaboration",
                 value: ActionType.CHANGE_ASSIGNEE,

@@ -24,7 +24,7 @@ export class SetStageHandler extends BaseAutomationHandler {
     constructor(private cardListsService: CardListsService) {
         super({
             metadata: {
-                icon: "mdi-text-box-edit-outline",
+                icon: "mdi-view-list",
                 title: "Set stage",
                 section: "Card management",
                 value: ActionType.SET_STAGE,

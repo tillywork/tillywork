@@ -9,7 +9,7 @@ export class CardCreatedHandler extends BaseAutomationHandler {
     constructor() {
         super({
             metadata: {
-                icon: "mdi-card-plus",
+                icon: "mdi-new-box",
                 title: "Card created",
                 section: "Card changes",
                 value: TriggerType.CARD_CREATED,

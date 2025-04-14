@@ -21,7 +21,7 @@ export class CreateSubCardHandler extends BaseAutomationHandler {
         super({
             metadata: {
                 title: "Create sub card",
-                icon: "mdi-card-plus",
+                icon: "mdi-file-tree",
                 section: "Card management",
                 value: ActionType.CREATE_SUB_CARD,
             },

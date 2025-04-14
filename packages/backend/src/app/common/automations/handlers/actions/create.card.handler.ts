@@ -21,7 +21,7 @@ export class CreateCardHandler extends BaseAutomationHandler {
         super({
             metadata: {
                 title: "Create a card",
-                icon: "mdi-card-plus",
+                icon: "mdi-plus",
                 section: "Card management",
                 value: ActionType.CREATE_CARD,
             },

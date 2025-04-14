@@ -24,7 +24,7 @@ export class StageUpdatedHandler extends BaseAutomationHandler {
     constructor() {
         super({
             metadata: {
-                icon: "mdi-view-dashboard-variant",
+                icon: "mdi-circle-slice-8",
                 title: "Stage updated",
                 section: "Card changes",
                 value: TriggerType.STAGE_CHANGED,
