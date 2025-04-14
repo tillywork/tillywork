@@ -264,7 +264,6 @@ function openDescriptionFileDialog() {
                 :heading="2"
                 single-line
                 class="flex-1-1-100"
-                editable
                 disable-commands
               />
             </template>
@@ -301,7 +300,6 @@ function openDescriptionFileDialog() {
                 v-model="cardDescription"
                 ref="descriptionInput"
                 placeholder="Enter description.. (/ for commands)"
-                editable
               />
             </template>
             <template v-else>

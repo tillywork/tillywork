@@ -15,6 +15,7 @@ export function normalizeFieldValue({ v, field }: { v: any; field: Field }) {
       break;
     case FieldTypes.CHECKBOX:
     case FieldTypes.NUMBER:
+    case FieldTypes.RICH:
       newValue = v;
       break;
     default:
