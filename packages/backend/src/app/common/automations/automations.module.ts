@@ -25,6 +25,7 @@ import { CreateCommentHandler } from "./handlers/actions/create.comment.handler"
 import { StageUpdatedHandler } from "./handlers/triggers/stage.updated.handler";
 import { CommentCreatedHandler } from "./handlers/triggers/comment.created.handler";
 import { ChangeAssigneeHandler } from "./handlers/actions/change.assignee.handler";
+import { SetStageHandler } from "./handlers/actions/set.stage.handler";
 
 const handlers = [
     CreateCardHandler,
@@ -35,6 +36,7 @@ const handlers = [
     StageUpdatedHandler,
     CommentCreatedHandler,
     ChangeAssigneeHandler,
+    SetStageHandler,
 ];
 
 @Module({

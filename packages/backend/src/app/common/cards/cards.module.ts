@@ -19,6 +19,6 @@ import { AuthModule } from "../auth/auth.module";
     ],
     controllers: [CardsController],
     providers: [CardsService, CardSubscriber],
-    exports: [CardsService, CardActivitiesModule],
+    exports: [CardsService, CardActivitiesModule, CardListsModule],
 })
 export class CardsModule {}
