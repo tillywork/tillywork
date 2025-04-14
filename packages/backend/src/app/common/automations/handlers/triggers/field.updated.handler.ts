@@ -42,7 +42,7 @@ export class FieldUpdatedHandler extends BaseAutomationHandler {
         const fields = await this.getCardFields(automation.id);
         const updatedField = fields.find((f) => f.slug === change.field.slug);
 
-        if (change.field.slug !== triggerData.field) {
+        if (!!triggerData.field && change.field.slug !== triggerData.field) {
             return false;
         }
 

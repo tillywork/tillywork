@@ -34,33 +34,29 @@ export class SetFieldHandler extends BaseAutomationHandler {
         payload: SetFieldPayload,
         context: AutomationContext
     ): Promise<Card> {
-        try {
-            const { card, automation } = context;
-            const fields = await this.getCardFields(automation.id);
+        const { card, automation } = context;
+        const fields = await this.getCardFields(automation.id);
 
-            const normalizedPayload: SetFieldPayload = {};
+        const normalizedPayload: SetFieldPayload = {};
 
-            for (const key of Object.keys(payload)) {
-                const updatedField = fields.find((f) => f.slug === key);
+        for (const key of Object.keys(payload)) {
+            const updatedField = fields.find((f) => f.slug === key);
 
-                if (updatedField) {
-                    normalizedPayload[key] = normalizeFieldValue({
-                        v: payload[key],
-                        field: updatedField as unknown as Field,
-                    });
-                }
+            if (updatedField) {
+                normalizedPayload[key] = normalizeFieldValue({
+                    v: payload[key],
+                    field: updatedField as unknown as Field,
+                });
             }
-
-            const mergedData = this.mergeCardData(card.data, normalizedPayload);
-            const updatedCard = await this.aclContext.run(true, () =>
-                this.cardsService.update(card.id, {
-                    data: mergedData,
-                })
-            );
-            return updatedCard;
-        } catch (error) {
-            throw new Error(error);
         }
+
+        const mergedData = this.mergeCardData(card.data, normalizedPayload);
+        const updatedCard = await this.aclContext.run(true, () =>
+            this.cardsService.update(card.id, {
+                data: mergedData,
+            })
+        );
+        return updatedCard;
     }
 
     async getFields(

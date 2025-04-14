@@ -9,7 +9,7 @@ export class CommentCreatedHandler extends BaseAutomationHandler {
     constructor() {
         super({
             metadata: {
-                icon: "mdi-card-plus",
+                icon: "mdi-comment-text",
                 title: "Comment created",
                 section: "Card activities",
                 value: TriggerType.COMMENT_CREATED,

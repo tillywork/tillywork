@@ -15,6 +15,7 @@ export enum ActionType {
   CREATE_CARD = 'create_card',
   SET_FIELD = 'set_field',
   CREATE_COMMENT = 'create_comment',
+  CHANGE_ASSIGNEE = 'change_assignee',
 }
 
 export interface GetHandlerFieldsParams {

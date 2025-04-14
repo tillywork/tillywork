@@ -37,7 +37,7 @@ export class AutomationEventHandler {
             });
 
         this.logger.debug(`Processing trigger ${event.triggerType}..`);
-        this.logger.debug({ event });
+        this.logger.debug({ type: event.triggerType, cardId: event.cardId });
 
         if (!automations.length) {
             this.logger.debug(`No automations found, skipping..`);
@@ -58,7 +58,10 @@ export class AutomationEventHandler {
                 await this.automationQueue.add("executeAutomation", {
                     automationId: automation.id,
                     cardId: event.cardId,
+                    payload: event.payload,
                 });
+            } else {
+                this.logger.debug(`Conditions not met, skipping..`);
             }
         }
     }
@@ -68,8 +71,6 @@ export class AutomationEventHandler {
         event: TriggerEvent,
         card: Card
     ): Promise<boolean> {
-        if (!automation.isEnabled) return false;
-
         const handler = this.automationHandlerRegistry.getTrigger(
             event.triggerType
         );

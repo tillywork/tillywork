@@ -143,7 +143,7 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                         (alias) =>
                             `${alias} @> '{"changes": [{"type": "updated"}]}'`
                     ),
-                    createdByType: isAutomation ? "automation" : undefined,
+                    createdByType: isAutomation ? "automation" : "user",
                     createdBy: isAutomation ? undefined : { id: user?.id },
                 },
                 order: { createdAt: "DESC" },
