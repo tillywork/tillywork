@@ -19,7 +19,10 @@ export class CardActivity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => Card, (card) => card.activities, { nullable: false })
+    @ManyToOne(() => Card, (card) => card.activities, {
+        nullable: false,
+        cascade: true,
+    })
     card: Relation<Card>;
 
     @Column({

@@ -5,8 +5,10 @@ import { CardActivity } from "./card.activity.entity";
 import { CreateCardActivityDto } from "./dto/create.card.activity.dto";
 import { UpdateCardActivityDto } from "./dto/update.card.activity.dto";
 import { IsEnum, IsNumber, IsOptional } from "class-validator";
-import { ActivityType } from "@tillywork/shared";
+import { ActivityType, TriggerType } from "@tillywork/shared";
 import { QueryBuilderHelper } from "../../helpers/query.builder.helper";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { TriggerEvent } from "../../automations/events/trigger.event";
 
 export class FindAllParams {
     @IsOptional()
@@ -40,7 +42,8 @@ export class FindAllParams {
 export class CardActivitiesService {
     constructor(
         @InjectRepository(CardActivity)
-        private cardActivitiesRepository: Repository<CardActivity>
+        private cardActivitiesRepository: Repository<CardActivity>,
+        private eventEmitter: EventEmitter2
     ) {}
 
     async findAll({
@@ -113,14 +116,24 @@ export class CardActivitiesService {
     async create(
         createCardActivityDto: CreateCardActivityDto
     ): Promise<CardActivity> {
-        const cardActivity = await this.cardActivitiesRepository.insert({
+        const cardActivity = this.cardActivitiesRepository.create({
             ...createCardActivityDto,
             card: {
                 id: createCardActivityDto.card,
             },
         });
+        await this.cardActivitiesRepository.save(cardActivity);
 
-        return cardActivity.raw[0];
+        this.eventEmitter.emit(
+            "automation.trigger",
+            new TriggerEvent(
+                TriggerType.COMMENT_CREATED,
+                createCardActivityDto.card,
+                cardActivity
+            )
+        );
+
+        return cardActivity;
     }
 
     async update(

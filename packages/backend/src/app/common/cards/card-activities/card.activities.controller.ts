@@ -66,6 +66,8 @@ export class CardActivitiesController {
         @CurrentUser() user: User
     ) {
         createActivityDto.createdBy = user;
+        createActivityDto.createdByType = "user";
+
         return this.cardActivitiesService.create(createActivityDto);
     }
 
