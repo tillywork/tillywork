@@ -260,6 +260,9 @@ export class CardsService {
 
     async create(createCardDto: CreateCardDto): Promise<Card> {
         const card = this.cardsRepository.create({
+            parent: {
+                id: createCardDto.parentId,
+            },
             ...createCardDto,
             type: {
                 id: createCardDto.type,

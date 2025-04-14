@@ -13,6 +13,7 @@ export enum TriggerType {
 
 export enum ActionType {
   CREATE_CARD = 'create_card',
+  CREATE_SUB_CARD = 'create_sub_card',
   SET_FIELD = 'set_field',
   CREATE_COMMENT = 'create_comment',
   CHANGE_ASSIGNEE = 'change_assignee',
