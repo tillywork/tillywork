@@ -22,7 +22,7 @@ import BaseEditorInput from '@/components/common/inputs/BaseEditor/BaseEditorInp
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 import SimpleDropdownSelector from '@/components/common/inputs/SimpleDropdownSelector.vue';
 
-const { activity, card } = defineProps<{
+const { activity } = defineProps<{
   activity: CardActivity;
   card: Card;
 }>();
@@ -173,7 +173,7 @@ function updateCallDirection(direction: CallActivityDirection) {
         </v-menu>
       </v-card-text>
       <v-card-text>
-        <base-editor-input v-model:json="activity.content.description" />
+        <base-editor-input :model-value="activity.content.description" />
       </v-card-text>
       <v-card-actions class="px-3 border-t-thin">
         <simple-dropdown-selector

@@ -259,7 +259,7 @@ function openDescriptionFileDialog() {
           <div class="d-flex align-start pt-2">
             <template v-if="titleField">
               <base-editor-input
-                v-model="cardTitle"
+                v-model:text="cardTitle"
                 placeholder="Task title"
                 :heading="2"
                 single-line
@@ -298,7 +298,7 @@ function openDescriptionFileDialog() {
           <div class="mt-4">
             <template v-if="descriptionField">
               <base-editor-input
-                v-model:json="cardDescription"
+                v-model="cardDescription"
                 ref="descriptionInput"
                 placeholder="Enter description.. (/ for commands)"
                 editable

@@ -119,8 +119,8 @@ const extensions = computed(() => {
   return extensions;
 });
 
-const textValue = defineModel<string>();
-const jsonValue = defineModel<Content>('json');
+const jsonValue = defineModel<Content>();
+const textValue = defineModel<string>('text');
 const htmlValue = defineModel<string>('html');
 const isEmpty = defineModel<boolean>('empty');
 
@@ -133,7 +133,7 @@ function initEditor() {
   editor = useEditor({
     extensions: extensions.value,
     autofocus,
-    editable,
+    editable: editable ?? false,
     onCreate: () => {
       enforceHeading();
       fillEditorFromModelValues();

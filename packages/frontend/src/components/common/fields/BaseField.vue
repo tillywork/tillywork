@@ -188,7 +188,7 @@ function getFieldLabel(field: Field) {
         v-bind="attrs"
         ref="baseEditor"
         class="flex-fill"
-        v-model:json="value"
+        v-model="value"
         editable
         :placeholder="`${field.name}.. (/ for commands)`"
       />

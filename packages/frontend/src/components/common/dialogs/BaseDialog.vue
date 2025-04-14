@@ -81,13 +81,3 @@ function handleAfterLeave(index: number) {
     </v-dialog>
   </template>
 </template>
-
-
-
-<style scoped lang="scss">
-:deep(.base-dialog) {
-  position: fixed !important;
-  top: 80px !important;
-  margin-top: 0 !important;
-}
-</style>

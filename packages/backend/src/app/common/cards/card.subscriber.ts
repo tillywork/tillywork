@@ -53,7 +53,9 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
 
         const activity = activityRepo.create({
             type: ActivityType.UPDATE,
-            card: event.entity,
+            card: {
+                id: event.entity.id,
+            },
             content: {
                 changes: [
                     {
@@ -62,10 +64,11 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     },
                 ],
             },
-            createdByType: "user",
+            createdByType: event.entity.createdByType,
             createdBy: event.entity.createdBy,
             createdAt: event.entity.createdAt,
         });
+
         await activityRepo.save(activity);
 
         const changes = await this.getFieldChanges(
@@ -86,7 +89,7 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     content: {
                         changes: [change],
                     },
-                    createdByType: "user",
+                    createdByType: event.entity.createdByType,
                     createdBy: event.entity.createdBy,
                 });
 
@@ -109,8 +112,8 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
 
         const activityRepo = event.manager.getRepository(CardActivity);
 
-        const oldData = event.databaseEntity.data || {};
-        const newData = event.entity.data || {};
+        const oldData = event.databaseEntity?.data || {};
+        const newData = event.entity?.data || {};
 
         const changes = await this.getFieldChanges(oldData, newData, event);
 

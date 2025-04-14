@@ -33,6 +33,7 @@ export class CardListSubscriber implements EntitySubscriberInterface<CardList> {
 
     async afterInsert(event: InsertEvent<CardList>) {
         const user = this.clsService.get("user");
+        const isAutomation = this.clsService.get("isAutomation");
 
         const activityRepo = event.manager.getRepository(CardActivity);
         const listStageRepo = event.manager.getRepository(ListStage);
@@ -61,7 +62,8 @@ export class CardListSubscriber implements EntitySubscriberInterface<CardList> {
                         },
                     ],
                 },
-                createdBy: { id: user.id },
+                createdBy: !isAutomation ? { id: user.id } : undefined,
+                createdByType: isAutomation ? "automation" : "user",
             });
             await activityRepo.save(activity);
         }
@@ -69,7 +71,7 @@ export class CardListSubscriber implements EntitySubscriberInterface<CardList> {
 
     async afterUpdate(event: UpdateEvent<CardList>) {
         const user = this.clsService.get("user");
-        this.logger.debug({ user });
+        const isAutomation = this.clsService.get("isAutomation");
 
         if (
             !event.updatedColumns.some(
@@ -114,8 +116,8 @@ export class CardListSubscriber implements EntitySubscriberInterface<CardList> {
             content: {
                 changes: [change],
             },
-            createdBy: { id: user.id },
-            createdByType: "user",
+            createdBy: !isAutomation ? { id: user.id } : undefined,
+            createdByType: isAutomation ? "automation" : "user",
         });
         await activityRepo.save(activity);
     }

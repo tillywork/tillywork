@@ -143,7 +143,7 @@ function updateEmailSentAt(sentAt: string) {
       <v-card-text>
         <base-editor-input
           v-if="activity.content.subject"
-          v-model="activity.content.subject"
+          v-model:text="activity.content.subject"
           :heading="4"
         />
         <base-editor-input v-model:html="activity.content.body" />

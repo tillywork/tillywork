@@ -51,7 +51,7 @@ const handleUpdateAutomation = () => {
     </v-btn>
     <base-editor-input
       class="border-none font-weight-bold"
-      v-model="automation.name"
+      v-model:text="automation.name"
       :heading="3"
       single-line
       disable-commands

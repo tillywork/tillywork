@@ -1,26 +1,11 @@
-import {
-    IsNotEmpty,
-    IsNumber,
-    IsObject,
-    IsOptional,
-    ValidateNested,
-} from "class-validator";
+import { IsNotEmpty, IsNumber, IsObject, IsOptional } from "class-validator";
 import { Type } from "class-transformer";
 import { ListStage } from "../../lists/list-stages/list.stage.entity";
-
-class CardData {
-    title?: string;
-    description?: any;
-    starts_at?: Date;
-    due_at?: Date;
-    [key: string]: any; // Allow for additional dynamic fields
-}
+import { CreatedByType } from "@tillywork/shared";
 
 export class CreateCardDto {
     @IsObject()
-    @ValidateNested()
-    @Type(() => CardData)
-    data: CardData;
+    data: Record<string, any>;
 
     @IsNotEmpty()
     listId: number;
@@ -41,7 +26,10 @@ export class CreateCardDto {
 
     @IsOptional()
     @IsNumber()
-    createdBy: number;
+    createdBy?: number;
+
+    @IsOptional()
+    createdByType?: CreatedByType;
 
     @IsOptional()
     @IsNumber()

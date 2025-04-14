@@ -13,11 +13,11 @@ import PlaceholderList from './PlaceholderList.vue';
 import BaseCurrencyInput from '../../inputs/BaseCurrencyInput.vue';
 import BasePercentageInput from '../../inputs/BasePercentageInput.vue';
 import BaseNumberInput from '../../inputs/BaseNumberInput.vue';
+import BaseEditorInput from '../../inputs/BaseEditor/BaseEditorInput.vue';
 
 const {
   title,
   type,
-  required = false,
   options,
   allowDynamicValues = false,
   multiple = false,
@@ -62,7 +62,9 @@ function checkForPlaceholders(value: any): boolean {
 
 const hasPlaceholders = computed(() => checkForPlaceholders(modelValue.value));
 
-const editorValue = ref<JSONContent>(valueToNode(modelValue.value));
+const editorValue = ref<JSONContent>(
+  type === FieldTypes.RICH ? {} : valueToNode(modelValue.value)
+);
 
 const placeholders = inject('placeholders', ref({}));
 
@@ -389,13 +391,15 @@ function getFieldInputComponent() {
       return BaseCurrencyInput;
     case FieldTypes.PERCENTAGE:
       return BasePercentageInput;
+    case FieldTypes.RICH:
+      return BaseEditorInput;
     default:
       return null;
   }
 }
 
 const fieldProps = computed(() => {
-  const props: Record<string, any> = {
+  let props: Record<string, any> = {
     modelValue: modelValue.value,
     disabled,
     hideDetails: true,
@@ -421,6 +425,14 @@ const fieldProps = computed(() => {
 
   if (type === FieldTypes.DATE || type === FieldTypes.DATETIME) {
     props.includeTime = type === FieldTypes.DATETIME;
+  }
+
+  if (type === FieldTypes.RICH) {
+    props = {
+      ...props,
+      placeholder: `${title}.. (/ for commands)`,
+      class: [...editorClass.value, 'editor-content'],
+    };
   }
 
   return props;
@@ -456,7 +468,6 @@ function handleInputChange(value: any) {
         v-if="allowDynamicValues"
         v-model="isPlaceholderMenuOpen"
         target="parent"
-        attach="parent"
         location="start"
         :close-on-content-click="false"
         offset="170"

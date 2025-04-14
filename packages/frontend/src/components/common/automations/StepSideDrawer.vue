@@ -157,7 +157,9 @@ watch(stepData, (oldData, newData) => {
           :key="field.title"
         >
           <div class="mt-2 mb-6 px-2">
-            <p class="text-caption font-weight-light mb-1">{{ field.title }}</p>
+            <p class="text-caption font-weight-light mb-1">
+              {{ field.title }} <template v-if="field.required">*</template>
+            </p>
             <step-field v-model="step.data[key]" v-bind="field" />
           </div>
         </template>

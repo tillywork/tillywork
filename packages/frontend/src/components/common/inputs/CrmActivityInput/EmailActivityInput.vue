@@ -52,7 +52,7 @@ function resetDto() {
     <div class="d-flex align-center">
       <span class="text-body-2 me-2 font-weight-bold">Subject:</span>
       <base-editor-input
-        v-model="createEmailDto.subject"
+        v-model:text="createEmailDto.subject"
         single-line
         placeholder="Start typing.."
         editable

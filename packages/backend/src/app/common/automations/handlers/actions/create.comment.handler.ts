@@ -1,16 +1,21 @@
 import { Injectable } from "@nestjs/common";
+
 import {
     BaseAutomationHandler,
     AutomationContext,
 } from "../automation.handler";
-import { ActionType, FieldTypes, ActivityType } from "@tillywork/shared";
+
 import { CardActivitiesService } from "../../../cards/card-activities/card.activities.service";
-import { User } from "src/app/common/users/user.entity";
+
+import {
+    ActionType,
+    FieldTypes,
+    ActivityType,
+    TiptapContent,
+} from "@tillywork/shared";
 
 export interface CreateCommentPayload {
-    content: string;
-    commenterId: number;
-    cardId?: string;
+    content: TiptapContent;
 }
 
 @Injectable()
@@ -22,23 +27,6 @@ export class CreateCommentHandler extends BaseAutomationHandler {
                 title: "Create a comment",
                 section: "Card activities",
                 value: ActionType.CREATE_COMMENT,
-            },
-            fields: {
-                commenterId: {
-                    title: "Commenter",
-                    type: FieldTypes.USER,
-                    required: true,
-                },
-                content: {
-                    title: "Comment",
-                    type: FieldTypes.RICH,
-                    required: true,
-                },
-                cardId: {
-                    title: "Card",
-                    type: FieldTypes.CARD,
-                    required: true,
-                },
             },
         });
     }
@@ -57,25 +45,19 @@ export class CreateCommentHandler extends BaseAutomationHandler {
             this.cardActivitiesService.create({
                 card: card.id,
                 type: ActivityType.COMMENT,
-                content: {
-                    type: "doc",
-                    content: [
-                        {
-                            type: "paragraph",
-                            content: [
-                                {
-                                    type: "text",
-                                    text: payload.content,
-                                },
-                            ],
-                        },
-                    ],
-                },
-                createdBy: {
-                    id: payload.commenterId,
-                } as User,
+                content: payload.content,
                 createdByType: "automation",
             })
         );
+    }
+
+    async getFields() {
+        return {
+            content: {
+                title: "Comment",
+                type: FieldTypes.RICH,
+                required: true,
+            },
+        };
     }
 }

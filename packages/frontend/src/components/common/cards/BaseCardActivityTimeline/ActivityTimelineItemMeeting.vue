@@ -20,7 +20,7 @@ import BaseEditorInput from '@/components/common/inputs/BaseEditor/BaseEditorInp
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 import SimpleDropdownSelector from '@/components/common/inputs/SimpleDropdownSelector.vue';
 
-const { activity, card } = defineProps<{
+const { activity } = defineProps<{
   activity: CardActivity;
   card: Card;
 }>();
@@ -161,7 +161,7 @@ function updateMeetingOutcome(outcome: MeetingActivityOutcome) {
       </v-card-text>
       <v-card-text>
         <base-editor-input
-          v-model:json="(activity.content as MeetingActivityContent).description"
+          v-model="(activity.content as MeetingActivityContent).description"
         />
       </v-card-text>
       <v-card-actions class="px-3 border-t-thin">

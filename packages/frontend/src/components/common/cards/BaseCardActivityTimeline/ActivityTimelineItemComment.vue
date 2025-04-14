@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
 
-import { useUsersService } from '@/services/useUsersService';
-
-import { dayjs, type Card, type CardActivity } from '@tillywork/shared';
+import {
+  type ActivityContent,
+  dayjs,
+  type Card,
+  type CardActivity,
+} from '@tillywork/shared';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 import { useSnackbarStore } from '@/stores/snackbar';
 
 import BaseEditorInput from '@/components/common/inputs/BaseEditor/BaseEditorInput.vue';
+import { useCreatedBy } from '@/composables/useCreatedBy';
 
-const { activity, card } = defineProps<{
+const { activity } = defineProps<{
   activity: CardActivity;
   card: Card;
 }>();
@@ -20,7 +24,8 @@ const { user } = storeToRefs(useAuthStore());
 const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
 
-const { getUserFullName } = useUsersService();
+const { getCreatedByName, getCreatedByPhoto } = useCreatedBy();
+
 const { useDeleteActivityMutation } = useCardActivitiesService();
 const { mutateAsync: deleteActivity, isPending: isDeleting } =
   useDeleteActivityMutation();
@@ -28,6 +33,24 @@ const { mutateAsync: deleteActivity, isPending: isDeleting } =
 const confirmDialogIndex = computed(() =>
   dialog.getDialogIndex(DIALOGS.CONFIRM)
 );
+
+const isCurrentUser = computed(() => user.value?.id === activity.createdBy?.id);
+
+const displayName = computed(() => {
+  if (activity.createdByType === 'user') {
+    return isCurrentUser.value ? 'You' : activity.createdBy?.firstName;
+  }
+
+  if (activity.createdByType === 'system') {
+    return 'System';
+  }
+
+  if (activity.createdByType === 'automation') {
+    return 'An automation';
+  }
+
+  return 'Unknown';
+});
 
 function openConfirmDeleteDialog() {
   dialog.openDialog({
@@ -63,8 +86,8 @@ function deleteComment() {
   <v-timeline-item class="text-caption" size="small">
     <template #icon>
       <base-avatar
-        :text="getUserFullName(activity.createdBy)"
-        :photo="activity.createdBy.photo"
+        :text="getCreatedByName(activity)"
+        :photo="getCreatedByPhoto(activity)"
         class="text-xs"
         size="small"
       />
@@ -74,11 +97,7 @@ function deleteComment() {
         class="py-1 px-3 border-b-thin bg-accent text-caption d-flex align-center"
       >
         <span>
-          {{
-            user?.id === activity.createdBy.id
-              ? 'You'
-              : getUserFullName(activity.createdBy)
-          }}
+          {{ displayName }}
         </span>
         <span class="text-surface-variant">
           &nbsp;commented
@@ -109,7 +128,10 @@ function deleteComment() {
         </v-menu>
       </v-card-text>
       <v-card-text>
-        <base-editor-input v-model:json="activity.content" />
+        <base-editor-input
+          :model-value="activity.content as ActivityContent"
+          :editable="false"
+        />
       </v-card-text>
     </v-card>
   </v-timeline-item>

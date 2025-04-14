@@ -75,6 +75,7 @@ import { RemoveOptionsDefaultValueInViewTable1735588046345 } from "../migrations
 import { AddHasChildCardsToCardTypeTable1735645745129 } from "../migrations/1735645745129-add-has-child-cards-to-card-type-table";
 import { CreateAutomationTable1738236462639 } from "../migrations/1738236462639-create-automation-table";
 import { AddCreatedByTypeColumnToCardActivityTable1738236462640 } from "../migrations/1738236462640-add-createdByType-column-to-card-activity-table";
+import { AddCreatedByTypeColumnToCardTable1744548488644 } from "../migrations/1744548488644-add-createdByType-column-to-card-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -151,6 +152,7 @@ const migrations = [
     AddHasChildCardsToCardTypeTable1735645745129,
     CreateAutomationTable1738236462639,
     AddCreatedByTypeColumnToCardActivityTable1738236462640,
+    AddCreatedByTypeColumnToCardTable1744548488644,
 ];
 
 const config: TypeOrmModuleOptions = {

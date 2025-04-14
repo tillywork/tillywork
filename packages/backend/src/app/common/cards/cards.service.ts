@@ -264,9 +264,11 @@ export class CardsService {
             type: {
                 id: createCardDto.type,
             },
-            createdBy: {
-                id: createCardDto.createdBy,
-            },
+            createdBy: createCardDto.createdBy
+                ? {
+                      id: createCardDto.createdBy,
+                  }
+                : undefined,
             workspace: {
                 id: createCardDto.workspaceId,
             },
@@ -284,10 +286,12 @@ export class CardsService {
             card.cardLists = [cardList];
         }
 
-        this.eventEmitter.emit(
-            "automation.trigger",
-            new TriggerEvent(TriggerType.CARD_CREATED, card.id, card)
-        );
+        if (createCardDto.createdByType !== "automation") {
+            this.eventEmitter.emit(
+                "automation.trigger",
+                new TriggerEvent(TriggerType.CARD_CREATED, card.id, card)
+            );
+        }
 
         return card;
     }
@@ -321,12 +325,14 @@ export class CardsService {
         const user = this.clsService.get("user");
         const card = await this.findOne(id);
 
-        await this.accessControlService.authorize(
-            user,
-            "workspace",
-            card.workspace as unknown as number,
-            PermissionLevel.EDITOR
-        );
+        if (!this.aclContext.shouldSkipAcl()) {
+            await this.accessControlService.authorize(
+                user,
+                "workspace",
+                card.workspace.id,
+                PermissionLevel.EDITOR
+            );
+        }
 
         await this.cardsRepository.softRemove(card);
     }
