@@ -6,6 +6,9 @@ import {
   User,
   Workspace,
   AutomationStep,
+  ActionType,
+  TriggerType,
+  AutomationStepType,
 } from '../..';
 
 export type Automation = {
@@ -43,4 +46,16 @@ export type CreateAutomationLocationDto = {
   locationId: number;
   locationType: LocationType;
   automationId?: string;
+};
+
+export type ValidateStepParams = {
+  type: AutomationStepType;
+  value?: ActionType | TriggerType;
+  data: Record<string, any>;
+  automationId: string;
+};
+
+export type AutomationValidationResponse = {
+  isValid: boolean;
+  message?: string;
 };

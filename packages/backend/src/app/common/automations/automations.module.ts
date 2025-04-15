@@ -27,6 +27,8 @@ import { CommentCreatedHandler } from "./handlers/triggers/comment.created.handl
 import { ChangeAssigneeHandler } from "./handlers/actions/change.assignee.handler";
 import { SetStageHandler } from "./handlers/actions/set.stage.handler";
 import { CreateSubCardHandler } from "./handlers/actions/create.sub.card.handler";
+import { AutomationValidationService } from "./services/automation.validation.service";
+import { AutomationValidationController } from "./controllers/automation.validation.controller";
 
 const handlers = [
     CreateCardHandler,
@@ -65,8 +67,13 @@ const handlers = [
         AutomationRunsService,
         AutomationProcessor,
         AutomationHandlerRegistry,
+        AutomationValidationService,
     ],
-    controllers: [AutomationsController, AutomationHandlersController],
+    controllers: [
+        AutomationsController,
+        AutomationHandlersController,
+        AutomationValidationController,
+    ],
     exports: [AutomationsService, AutomationRunsService],
 })
 export class AutomationsModule {}

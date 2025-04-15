@@ -94,11 +94,13 @@ export const useAutomation = (initialAutomation: Automation) => {
 
     if (automationCopy.value?.steps) {
       for (const [index, step] of automationCopy.value.steps.entries()) {
-        placeholders[`step_${index + 1}`] = await getHandlerSampleData({
-          automationId: automationCopy.value.id,
-          handler: step.value as ActionType,
-          data: step.data,
-        });
+        if (step.value) {
+          placeholders[`step_${index + 1}`] = await getHandlerSampleData({
+            automationId: automationCopy.value.id,
+            handler: step.value as ActionType,
+            data: step.data,
+          });
+        }
       }
     }
 

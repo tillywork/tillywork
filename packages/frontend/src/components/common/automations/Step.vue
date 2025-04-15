@@ -8,6 +8,8 @@ import {
 } from '@tillywork/shared';
 
 import StepOptionsList from './StepOptionsList.vue';
+import { useAutomationService } from '@/services/useAutomationService';
+import { computed, inject, ref, watch } from 'vue';
 
 const emit = defineEmits(['drawer', 'delete']);
 
@@ -17,17 +19,33 @@ const step = defineModel<AutomationStep>({
 const menu = defineModel('menu', {
   default: false,
 });
-const { index, selected = false } = defineProps<{
+const {
+  index,
+  selected = false,
+  automationId,
+} = defineProps<{
   index?: number;
   selected?: boolean;
+  automationId: string;
 }>();
 
 const triggers = inject<Ref<AutomationHandlerMetadata[]>>('triggers', ref([]));
 const actions = inject<Ref<AutomationHandlerMetadata[]>>('actions', ref([]));
+const { useValidateStep } = useAutomationService();
 
 const isTrigger = computed(
   () => step.value.type === AutomationStepType.TRIGGER
 );
+const type = computed(() => step.value.type);
+const value = computed(() => step.value.value);
+const data = computed(() => step.value.data);
+
+const { data: stepValidation } = useValidateStep({
+  type,
+  value,
+  data,
+  automationId,
+});
 
 const stepLabel = computed(() => {
   if (isTrigger.value) {
@@ -94,9 +112,11 @@ watch(
           class="position-relative overflow-visible px-2"
           width="100%"
           border="thin"
-          color="accent-lighten"
+          :color="'accent-lighten'"
           :class="{
-            'border-opacity-75': selected,
+            'border-opacity-75':
+              selected || (stepValidation && !stepValidation?.isValid),
+            'border-error': stepValidation && !stepValidation?.isValid,
           }"
           rounded="pill"
           @click="handleStepClicked"
@@ -113,7 +133,7 @@ watch(
                   size="small"
                   v-tooltip="'Drag to reorder'"
                 >
-                  <v-icon icon="mdi-order-bool-ascending" />
+                  <v-icon icon="mdi-cursor-move" />
                 </v-btn>
                 {{
                   !isTrigger
@@ -145,13 +165,28 @@ watch(
               top: '50%',
               transform: 'translateY(-50%)',
             }"
-            color="error"
+            color="default"
             variant="tonal"
             @click.stop="handleDeleteStep"
             v-tooltip="'Delete step'"
           >
             <v-icon icon="mdi-delete-outline" />
           </v-btn>
+
+          <v-icon
+            v-if="stepValidation && !stepValidation.isValid"
+            :style="{
+              position: 'absolute',
+              left: '-52px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+            }"
+            icon="mdi-alert-circle"
+            color="error"
+            size="x-large"
+            variant="tonal"
+            v-tooltip="stepValidation.message"
+          />
         </v-card>
       </template>
 

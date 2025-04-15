@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Brackets, Not, Repository } from "typeorm";
+import { ClsService } from "nestjs-cls";
 
 import { Automation } from "../entities/automation.entity";
 import { AutomationStep } from "../entities/automation.step.entity";
@@ -8,14 +9,13 @@ import { AutomationLocation } from "../entities/automation.location.entity";
 
 import { CreateAutomationDto } from "../dto/create.automation.dto";
 import { UpdateAutomationDto } from "../dto/update.automation.dto";
+import { CreateAutomationLocationDto } from "../dto/create.automation.location.dto";
 
 import {
     AutomationStepType,
     LocationType,
     TriggerType,
 } from "@tillywork/shared";
-import { ClsService } from "nestjs-cls";
-import { CreateAutomationLocationDto } from "../dto/create.automation.location.dto";
 
 export class FindAllParams {
     workspaceId?: number;
@@ -229,14 +229,10 @@ export class AutomationsService {
         id: string,
         updateAutomationDto: UpdateAutomationDto
     ): Promise<Automation> {
+        const { steps, trigger, ...automationData } = updateAutomationDto;
+
         return this.automationsRepository.manager.transaction(
             async (transactionalEntityManager) => {
-                const {
-                    steps = [],
-                    trigger,
-                    ...automationData
-                } = updateAutomationDto;
-
                 await this.automationLocationRepository.delete({
                     automation: {
                         id,

@@ -3,7 +3,10 @@ import { useAutomationService } from '@/services/useAutomationService';
 
 import { useSnackbarStore } from '@/stores/snackbar';
 
-import type { Automation } from '@tillywork/shared';
+import {
+  type AutomationValidationResponse,
+  type Automation,
+} from '@tillywork/shared';
 
 import LocationSelector from '../inputs/LocationSelector.vue';
 import BaseEditorInput from '../inputs/BaseEditor/BaseEditorInput.vue';
@@ -14,9 +17,29 @@ const automation = defineModel<Automation>({
   required: true,
 });
 
+const automationValidation = inject<Ref<AutomationValidationResponse>>(
+  'automationValidation'
+);
+
 const { isAutomationChanged = false } = defineProps<{
   isAutomationChanged?: boolean;
 }>();
+
+const automationStatusColor = computed(() => {
+  if (automationValidation?.value && !automationValidation?.value.isValid) {
+    return 'error';
+  }
+
+  return isAutomationChanged ? 'warning' : 'success';
+});
+
+const automationStatusTooltip = computed(() => {
+  if (automationValidation?.value && !automationValidation?.value.isValid) {
+    return 'Automation has validation errors and will not run';
+  }
+
+  return isAutomationChanged ? 'Changes were made' : 'Saved';
+});
 
 const { showSnackbar } = useSnackbarStore();
 
@@ -63,9 +86,9 @@ const handleUpdateAutomation = () => {
       <location-selector v-model="automation.locations" multiple />
       <v-icon
         icon="mdi-circle"
-        :color="isAutomationChanged ? 'warning' : 'success'"
+        :color="automationStatusColor"
         size="14"
-        v-tooltip="isAutomationChanged ? 'Changes were made' : 'Saved'"
+        v-tooltip="automationStatusTooltip"
       />
       <v-switch
         v-model="automation.isEnabled"

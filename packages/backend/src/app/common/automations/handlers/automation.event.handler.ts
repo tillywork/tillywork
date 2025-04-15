@@ -10,6 +10,7 @@ import { Card } from "../../cards/card.entity";
 import { CardsService } from "../../cards/cards.service";
 import { TriggerEvent } from "../events/trigger.event";
 import { AutomationHandlerRegistry } from "../registries/automation.handler.registry";
+import { AutomationValidationService } from "../services/automation.validation.service";
 
 @Injectable()
 export class AutomationEventHandler {
@@ -20,7 +21,8 @@ export class AutomationEventHandler {
         private automationService: AutomationsService,
         private readonly aclContext: AclContext,
         private readonly cardsService: CardsService,
-        private readonly automationHandlerRegistry: AutomationHandlerRegistry
+        private readonly automationHandlerRegistry: AutomationHandlerRegistry,
+        private readonly validationService: AutomationValidationService
     ) {}
 
     @OnEvent("automation.trigger")
@@ -45,23 +47,41 @@ export class AutomationEventHandler {
         }
 
         for (const automation of automations) {
-            const shouldRun = await this.shouldRunAutomation(
-                automation,
-                event,
-                card
-            );
+            try {
+                // Validate automation before running
+                const isValid =
+                    await this.validationService.validateAutomationBeforeRun(
+                        automation.id
+                    );
+                if (!isValid) {
+                    this.logger.debug(
+                        `Automation ${automation.id} failed validation, skipping..`
+                    );
+                    continue;
+                }
 
-            if (shouldRun) {
-                this.logger.debug(
-                    `Adding automation ID ${automation.id} to queue..`
+                const shouldRun = await this.shouldRunAutomation(
+                    automation,
+                    event,
+                    card
                 );
-                await this.automationQueue.add("executeAutomation", {
-                    automationId: automation.id,
-                    cardId: event.cardId,
-                    payload: event.payload,
-                });
-            } else {
-                this.logger.debug(`Conditions not met, skipping..`);
+
+                if (shouldRun) {
+                    this.logger.debug(
+                        `Adding automation ID ${automation.id} to queue..`
+                    );
+                    await this.automationQueue.add("executeAutomation", {
+                        automationId: automation.id,
+                        cardId: event.cardId,
+                        payload: event.payload,
+                    });
+                } else {
+                    this.logger.debug(`Conditions not met, skipping..`);
+                }
+            } catch (error) {
+                this.logger.error(
+                    `Failed to run automation ${automation.id}: ${error.message}`
+                );
             }
         }
     }

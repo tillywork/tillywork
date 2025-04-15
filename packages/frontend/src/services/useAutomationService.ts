@@ -8,6 +8,8 @@ import type {
   Automation,
   AutomationFieldSchema,
   AutomationHandlerMetadata,
+  AutomationStepType,
+  AutomationValidationResponse,
   CreateAutomationDto,
   TriggerType,
 } from '@tillywork/shared';
@@ -23,6 +25,13 @@ interface GetHandlerFieldsParams {
   handler: MaybeRef<ActionType | TriggerType>;
   data?: MaybeRef<Record<string, any>>;
   enabled?: MaybeRef<boolean>;
+}
+
+interface ValidateAutomationStepParams {
+  type: MaybeRef<AutomationStepType>;
+  value?: MaybeRef<ActionType | TriggerType | undefined>;
+  data: MaybeRef<any>;
+  automationId: MaybeRef<string>;
 }
 
 export const useAutomationService = () => {
@@ -213,6 +222,46 @@ export const useAutomationService = () => {
     });
   }
 
+  function validateAutomation(id: MaybeRef<string>): Promise<boolean> {
+    return sendRequest(`/automations/validation/${toValue(id)}`);
+  }
+
+  function useValidateAutomation(id: MaybeRef<string>) {
+    return useQuery({
+      queryKey: ['automationValidation', id],
+      queryFn: () => validateAutomation(id),
+    });
+  }
+
+  function validateStep({
+    type,
+    value,
+    data,
+    automationId,
+  }: ValidateAutomationStepParams): Promise<AutomationValidationResponse> {
+    return sendRequest('/automations/validation/step', {
+      method: 'POST',
+      data: {
+        value: toValue(value),
+        type: toValue(type),
+        data: toValue(data),
+        automationId: toValue(automationId),
+      },
+    });
+  }
+
+  function useValidateStep({
+    type,
+    value,
+    data,
+    automationId,
+  }: ValidateAutomationStepParams) {
+    return useQuery({
+      queryKey: ['stepValidation', type, data, value, automationId],
+      queryFn: () => validateStep({ type, data, value, automationId }),
+    });
+  }
+
   return {
     useGetAutomations,
     useGetAutomation,
@@ -224,5 +273,7 @@ export const useAutomationService = () => {
     useGetTriggers,
     useGetHandlerFields,
     getHandlerSampleData,
+    useValidateAutomation,
+    useValidateStep,
   };
 };

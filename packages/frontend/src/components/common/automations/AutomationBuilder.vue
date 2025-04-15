@@ -32,7 +32,10 @@ const selectedStep = ref<AutomationStep | null>(null);
 const selectedStepIndex = ref<number | null>(null);
 
 const { openDialog } = useDialogStore();
-const { useGetActions, useGetTriggers } = useAutomationService();
+const { useGetActions, useGetTriggers, useValidateAutomation } =
+  useAutomationService();
+
+const { data: automationValidation } = useValidateAutomation(automation.id);
 
 const {
   isAutomationChanged,
@@ -49,6 +52,7 @@ provide('actions', actions);
 provide('triggers', triggers);
 provide('placeholders', placeholders);
 provide('automation', reactiveAutomation);
+provide('automationValidation', automationValidation);
 
 const handleDrawerEvent = (
   step: AutomationStep,
@@ -137,6 +141,7 @@ watch(
         </p>
         <step
           v-model="reactiveAutomation.trigger"
+          :automation-id="reactiveAutomation.id"
           :selected="isStepSelected(reactiveAutomation.trigger)"
           @drawer="handleDrawerEvent"
         />
@@ -159,6 +164,7 @@ watch(
               v-model="reactiveAutomation.steps[index]"
               class="mb-4"
               :index
+              :automation-id="reactiveAutomation.id"
               :selected="isStepSelected(element, index)"
               @drawer="(step) => handleDrawerEvent(step, index)"
               @delete="handleRemoveStep(index)"
