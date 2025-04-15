@@ -123,14 +123,14 @@ watch(
 </script>
 
 <template>
-  <v-card>
+  <v-card class="d-flex flex-fill">
     <automation-builder-header
       v-model="reactiveAutomation"
       :isAutomationChanged
       @close="handleBack"
     />
     <v-card
-      class="automation-builder-canvas d-flex align-center flex-column ga-2 pt-12"
+      class="automation-builder-canvas d-flex align-center flex-column ga-2 pt-12 flex-fill"
     >
       <div
         class="trigger-step step-wrapper ga-4 mb-12"
