@@ -3,7 +3,6 @@ import { Injectable } from "@nestjs/common";
 import { TillyLogger } from "../../logger/tilly.logger";
 
 import { AutomationStep } from "../entities/automation.step.entity";
-import { Card } from "../../cards/card.entity";
 
 @Injectable()
 export class PlaceholderProcessorService {
@@ -11,28 +10,25 @@ export class PlaceholderProcessorService {
 
     processStepData(
         step: AutomationStep,
-        card: Card,
         runOutput: any[]
     ): Record<string, any> {
-        return this.processData(step.data, card, runOutput);
+        return this.processData(step.data, runOutput);
     }
 
     processData(
         data: Record<string, any>,
-        card: Card,
         runOutput: any[]
     ): Record<string, any> {
         const processedData: Record<string, any> = {};
 
         for (const [key, value] of Object.entries(data)) {
-            processedData[key] = this.processValue(value, card, runOutput);
+            processedData[key] = this.processValue(value, runOutput);
         }
 
         return processedData;
     }
 
-    //TODO need to make this accept the previous step data instead of card. Maybe also add the card as part of the context?
-    private processValue(value: any, card: Card, runOutput: any[]): any {
+    private processValue(value: any, runOutput: any[]): any {
         if (typeof value !== "string") {
             return value;
         }

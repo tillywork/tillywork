@@ -69,7 +69,6 @@ export class AutomationProcessor {
 
                 const processedData = this.placeholderProcessor.processStepData(
                     currentStep,
-                    card,
                     runOutput
                 );
 
