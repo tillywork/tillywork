@@ -87,4 +87,21 @@ export class StageUpdatedHandler extends BaseAutomationHandler {
 
         return stepFields;
     }
+
+    async getSampleData(
+        params: GetHandlerFieldsParams
+    ): Promise<Record<string, any>> {
+        const automation = await this.automationsService.findOne(
+            params.automationId
+        );
+        const activeLists = await this.getAutomationLists({ automation });
+        const oldStage = activeLists[0].listStages[0];
+        const newStage = activeLists[0].listStages[1];
+
+        return {
+            type: "stage_updated",
+            oldValue: oldStage.id,
+            newValue: newStage.id,
+        };
+    }
 }

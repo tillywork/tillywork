@@ -48,5 +48,5 @@ export function getUserSampleData() {
         email: "john@example.com",
     };
 
-    return user;
+    return [user.id];
 }

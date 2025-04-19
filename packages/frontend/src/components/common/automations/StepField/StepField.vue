@@ -70,9 +70,9 @@ const placeholders = inject('placeholders', ref({}));
 
 const isFocused = ref(false);
 const isPlaceholderMenuOpen = ref(false);
-const isOptionsMenuOpen = ref(false);
 
 const isPlaceholderModeActive = ref(false);
+const menuRef = ref<HTMLElement | null>(null);
 
 const editor = useEditor({
   content: editorValue.value,
@@ -178,23 +178,18 @@ function valueToNode(value: any): JSONContent {
 
   const placeholderRegex = /\{\{([^}]+)\}\}/g;
   let match;
-  const nodes: JSONContent[] = [];
+  const content: JSONContent[] = [];
   let lastIndex = 0;
 
   while ((match = placeholderRegex.exec(text)) !== null) {
     if (match.index > lastIndex) {
-      nodes.push({
-        type: 'paragraph',
-        content: [
-          {
-            type: 'text',
-            text: text.substring(lastIndex, match.index),
-          },
-        ],
+      content.push({
+        type: 'text',
+        text: text.substring(lastIndex, match.index),
       });
     }
 
-    nodes.push({
+    content.push({
       type: 'placeholder',
       attrs: {
         placeholderPath: match[0],
@@ -205,32 +200,27 @@ function valueToNode(value: any): JSONContent {
   }
 
   if (lastIndex < text.length) {
-    nodes.push({
-      type: 'paragraph',
-      content: [
-        {
-          type: 'text',
-          text: text.substring(lastIndex),
-        },
-      ],
+    content.push({
+      type: 'text',
+      text: text.substring(lastIndex),
     });
   }
 
-  if (nodes.length === 0) {
-    nodes.push({
-      type: 'paragraph',
-      content: [
-        {
-          type: 'text',
-          text: text ?? '',
-        },
-      ],
+  if (content.length === 0) {
+    content.push({
+      type: 'text',
+      text: text ?? '',
     });
   }
 
   return {
     type: 'doc',
-    content: nodes,
+    content: [
+      {
+        type: 'paragraph',
+        content,
+      },
+    ],
   };
 }
 
@@ -314,33 +304,17 @@ function handleFocus() {
   if (allowDynamicValues || isPlaceholderModeActive.value) {
     showPlaceholderMenu();
   }
-
-  if (options) {
-    showOptionsMenu();
-  }
 }
 
 function handleBlur() {
   isFocused.value = false;
   hidePlaceholderMenu();
-
-  if (options) {
-    hideOptionsMenu();
-  }
 }
 
 function handleInsertPlaceholder(item: string) {
   editor.value?.commands.setPlaceholder({
     placeholderPath: `{{${item}}}`,
   });
-}
-
-function showOptionsMenu() {
-  isOptionsMenuOpen.value = true;
-}
-
-function hideOptionsMenu() {
-  isOptionsMenuOpen.value = false;
 }
 
 const showPlaceholderEditor = computed(() => {
@@ -444,8 +418,8 @@ function handleInputChange(value: any) {
 </script>
 
 <template>
-  <on-click-outside @trigger="handleBlur">
-    <div class="dynamic-field-wrapper">
+  <on-click-outside @trigger="handleBlur" :options="{ ignore: ['.v-menu'] }">
+    <div class="dynamic-field-wrapper position-relative">
       <div class="d-flex align-center">
         <editor-content
           v-if="!fieldInputComponent || showPlaceholderEditor"
@@ -465,12 +439,15 @@ function handleInputChange(value: any) {
       </div>
 
       <v-menu
+        ref="menuRef"
         v-if="allowDynamicValues"
         v-model="isPlaceholderMenuOpen"
-        target="parent"
         location="start"
+        target="parent"
+        :attach="false"
+        :offset="170"
         :close-on-content-click="false"
-        offset="170"
+        :position-strategy="'fixed'"
       >
         <placeholder-list
           :sample-data="placeholders"

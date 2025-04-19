@@ -14,6 +14,7 @@ import {
     normalizeFieldValue,
 } from "@tillywork/shared";
 import { Card } from "src/app/common/cards/card.entity";
+import { getSampleDataByField } from "../../helpers/sample.data.helper";
 
 @Injectable()
 export class CreateCardHandler extends BaseAutomationHandler {
@@ -93,6 +94,7 @@ export class CreateCardHandler extends BaseAutomationHandler {
                         title: stage.name,
                         value: stage.id,
                     })),
+                    allowDynamicValues: true,
                 };
             }
         }
@@ -122,5 +124,35 @@ export class CreateCardHandler extends BaseAutomationHandler {
         }
 
         return handlerFields;
+    }
+
+    async getSampleData(
+        params: GetHandlerFieldsParams
+    ): Promise<Record<string, any>> {
+        const { automationId, data } = params;
+        const fields = await this.getCardFields(automationId);
+
+        const sampleData: Record<string, any> = {};
+
+        for (const field of fields) {
+            sampleData[field.slug] = getSampleDataByField(field);
+            if (data.field) {
+                const selectedField = fields.find((f) => f.slug === data.field);
+
+                if (selectedField) {
+                    sampleData[selectedField.slug] =
+                        getSampleDataByField(selectedField);
+                }
+            } else {
+                for (const field of fields) {
+                    sampleData[field.slug] = getSampleDataByField(field);
+                }
+            }
+        }
+
+        return {
+            id: 1,
+            data: sampleData,
+        };
     }
 }

@@ -10,6 +10,7 @@ import { AutomationsService } from "../services/automations.service";
 import { AutomationRunsService } from "../services/automation.runs.service";
 import { CardsService } from "../../cards/cards.service";
 import { AclContext } from "../../auth/context/acl.context";
+import { PlaceholderProcessorService } from "../services/placeholder.processor.service";
 
 import { AutomationStepRun } from "../entities/automation.step.run.entity";
 
@@ -29,12 +30,13 @@ export class AutomationProcessor {
         private stepRunRepository: Repository<AutomationStepRun>,
         private readonly cardsService: CardsService,
         private readonly aclContext: AclContext,
-        private readonly clsService: ClsService
+        private readonly clsService: ClsService,
+        private readonly placeholderProcessor: PlaceholderProcessorService
     ) {}
 
     @Process("executeAutomation")
     async executeAutomation(
-        job: Job<{ automationId: string; cardId: number }>
+        job: Job<{ automationId: string; cardId: number; payload: any }>
     ) {
         const run = await this.automationRunsService.create({
             automationId: job.data.automationId,
@@ -52,6 +54,7 @@ export class AutomationProcessor {
 
             let currentStep = automation.steps[0];
             let stepOrder = 0;
+            const runOutput: any[] = [job.data.payload ?? {}];
 
             this.clsService.enter();
             this.clsService.set("isAutomation", true);
@@ -59,24 +62,31 @@ export class AutomationProcessor {
             while (currentStep) {
                 this.logger.debug(`Processing step ${currentStep.value}..`);
                 const stepStart = Date.now();
+
+                const card = await this.aclContext.run(true, () =>
+                    this.cardsService.findOne(job.data.cardId)
+                );
+
+                const processedData = this.placeholderProcessor.processStepData(
+                    currentStep,
+                    card,
+                    runOutput
+                );
+
                 const stepRun = await this.stepRunRepository.save({
                     run,
                     step: currentStep,
                     order: stepOrder,
-                    input: currentStep.data,
+                    input: processedData,
                     status: AutomationRunStatus.PENDING,
                 });
 
                 try {
-                    const card = await this.aclContext.run(true, () =>
-                        this.cardsService.findOne(job.data.cardId)
-                    );
-
                     const handler: AutomationHandler =
                         this.automationHandlerRegistry.getAction(
                             currentStep.value as ActionType
                         );
-                    const output = await handler.execute(currentStep.data, {
+                    const output = await handler.execute(processedData, {
                         card,
                         automation,
                     });
@@ -86,6 +96,8 @@ export class AutomationProcessor {
                         output,
                         duration: Date.now() - stepStart,
                     });
+
+                    runOutput.push(output);
 
                     this.logger.debug(
                         `Action executed successfully, moving to next action..`

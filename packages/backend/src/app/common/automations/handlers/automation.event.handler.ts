@@ -11,6 +11,7 @@ import { CardsService } from "../../cards/cards.service";
 import { TriggerEvent } from "../events/trigger.event";
 import { AutomationHandlerRegistry } from "../registries/automation.handler.registry";
 import { AutomationValidationService } from "../services/automation.validation.service";
+import { PlaceholderProcessorService } from "../services/placeholder.processor.service";
 
 @Injectable()
 export class AutomationEventHandler {
@@ -22,7 +23,8 @@ export class AutomationEventHandler {
         private readonly aclContext: AclContext,
         private readonly cardsService: CardsService,
         private readonly automationHandlerRegistry: AutomationHandlerRegistry,
-        private readonly validationService: AutomationValidationService
+        private readonly validationService: AutomationValidationService,
+        private readonly placeholderProcessor: PlaceholderProcessorService
     ) {}
 
     @OnEvent("automation.trigger")
@@ -95,14 +97,26 @@ export class AutomationEventHandler {
             event.triggerType
         );
 
+        const processedTriggerData = this.placeholderProcessor.processData(
+            automation.trigger.data,
+            card,
+            []
+        );
+
         return handler.execute(event, {
             card,
-            automation,
+            automation: {
+                ...automation,
+                trigger: {
+                    ...automation.trigger,
+                    data: processedTriggerData,
+                },
+            },
         });
     }
 
     private getCardLocation(card: Card) {
-        const listIds = card.cardLists.map((cl) => cl.list.id);
+        const listIds = card.cardLists.map((cl) => cl.listId);
         const spaceIds = Array.from(
             new Set(card.cardLists.map((cl) => cl.list.space.id))
         );

@@ -29,6 +29,7 @@ import { SetStageHandler } from "./handlers/actions/set.stage.handler";
 import { CreateSubCardHandler } from "./handlers/actions/create.sub.card.handler";
 import { AutomationValidationService } from "./services/automation.validation.service";
 import { AutomationValidationController } from "./controllers/automation.validation.controller";
+import { PlaceholderProcessorService } from "./services/placeholder.processor.service";
 
 const handlers = [
     CreateCardHandler,
@@ -68,6 +69,7 @@ const handlers = [
         AutomationProcessor,
         AutomationHandlerRegistry,
         AutomationValidationService,
+        PlaceholderProcessorService,
     ],
     controllers: [
         AutomationsController,
