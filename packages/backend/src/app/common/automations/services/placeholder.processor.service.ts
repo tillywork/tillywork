@@ -29,23 +29,40 @@ export class PlaceholderProcessorService {
     }
 
     private processValue(value: any, runOutput: any[]): any {
-        if (typeof value !== "string") {
+        if (value === null || value === undefined) {
             return value;
         }
 
-        let result = value;
+        if (typeof value === "string") {
+            let result = value;
 
-        // Process trigger placeholders
-        if (value.includes("{{trigger.")) {
-            result = this.processTriggerPlaceholderInString(result, runOutput);
+            if (value.includes("{{trigger.")) {
+                result = this.processTriggerPlaceholderInString(
+                    result,
+                    runOutput
+                );
+            }
+
+            if (value.includes("{{step_")) {
+                result = this.processStepPlaceholderInString(result, runOutput);
+            }
+
+            return result;
         }
 
-        // Process step placeholders
-        if (value.includes("{{step_")) {
-            result = this.processStepPlaceholderInString(result, runOutput);
+        if (Array.isArray(value)) {
+            return value.map((item) => this.processValue(item, runOutput));
         }
 
-        return result;
+        if (typeof value === "object") {
+            const processed: Record<string, any> = {};
+            for (const [key, val] of Object.entries(value)) {
+                processed[key] = this.processValue(val, runOutput);
+            }
+            return processed;
+        }
+
+        return value;
     }
 
     private processTriggerPlaceholderInString(

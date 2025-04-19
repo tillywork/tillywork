@@ -318,6 +318,10 @@ function handleInsertPlaceholder(item: string) {
 }
 
 const showPlaceholderEditor = computed(() => {
+  if (type === FieldTypes.RICH) {
+    return false;
+  }
+
   if (
     modelValue.value !== null &&
     modelValue.value !== undefined &&
@@ -328,7 +332,11 @@ const showPlaceholderEditor = computed(() => {
     return false;
   }
 
-  return isPlaceholderModeActive.value || hasPlaceholders.value;
+  return (
+    !fieldInputComponent ||
+    isPlaceholderModeActive.value ||
+    hasPlaceholders.value
+  );
 });
 
 const fieldInputComponent = computed(() => {
