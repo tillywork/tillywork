@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import AdvancedFiltersItem from './AdvancedFiltersItem.vue';
 import type { VForm } from 'vuetify/components';
-import type {
-  FilterGroup,
-  FieldFilterOption,
-  List,
-  User,
+import {
+  type FilterGroup,
+  type FieldFilterOption,
+  type User,
+  type FieldFilter,
 } from '@tillywork/shared';
 
 const advancedFilters = defineModel<FilterGroup>({
@@ -18,7 +18,6 @@ const advancedFilters = defineModel<FilterGroup>({
 defineProps<{
   fields: FieldFilterOption[];
   users: User[];
-  list: List;
 }>();
 
 const filtersForm = ref<VForm>();
@@ -40,11 +39,10 @@ function removeAdvancedFilter(index: number) {
       :key="filter.type"
     >
       <advanced-filters-item
-        v-model="advancedFilters.and[index]"
+        v-model="advancedFilters.and[index] as FieldFilter"
         :index
         :fields
         :users
-        :list
         @delete="removeAdvancedFilter"
       />
     </template>

@@ -1,4 +1,5 @@
-import { Logger, ValidationPipe, VersioningType } from "@nestjs/common";
+import "./tracing";
+import { ValidationPipe, VersioningType } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import {
     FastifyAdapter,
@@ -13,14 +14,17 @@ import { createBullBoard } from "@bull-board/api";
 import { BullAdapter } from "@bull-board/api/bullAdapter";
 import { ConfigService } from "@nestjs/config";
 import { contentParser } from "fastify-multer";
+import { trace, context } from "@opentelemetry/api";
+import { TillyLogger } from "./app/common/logger/tilly.logger";
 
 async function bootstrap() {
-    const logger = new Logger("main.ts");
+    const logger = new TillyLogger("main.ts");
     const app = await NestFactory.create<NestFastifyApplication>(
         AppModule,
         new FastifyAdapter(),
         {
             cors: true,
+            logger: logger,
         }
     );
     const configService = app.get(ConfigService);
@@ -54,23 +58,38 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup("docs", app, document);
 
-    if (configService.get("TW_MAIL_ENABLE")) {
-        const serverAdapter = new BullFastifyAdapter();
-        serverAdapter.setBasePath("/bullmq");
+    const serverAdapter = new BullFastifyAdapter();
+    serverAdapter.setBasePath("/bullmq");
 
+    const automationQueue = app.get(getQueueToken("automation"));
+    const queues = [new BullAdapter(automationQueue)];
+
+    if (configService.get("TW_MAIL_ENABLE")) {
         const emailQueue = app.get(getQueueToken("email"));
-        createBullBoard({
-            queues: [new BullAdapter(emailQueue)],
-            serverAdapter,
+        queues.push(new BullAdapter(emailQueue));
+    }
+
+    createBullBoard({
+        queues,
+        serverAdapter,
+    });
+
+    app.getHttpAdapter()
+        .getInstance()
+        .register(serverAdapter.registerPlugin(), {
+            basePath: "/bullmq",
+            prefix: "/bullmq",
         });
 
-        app.getHttpAdapter()
-            .getInstance()
-            .register(serverAdapter.registerPlugin(), {
-                basePath: "/bullmq",
-                prefix: "/bullmq",
-            });
-    }
+    // Add OpenTelemetry context middleware
+    app.use((req, res, next) => {
+        const span = trace.getSpan(context.active());
+        if (span) {
+            span.setAttribute("http.request_id", req.id);
+            span.setAttribute("http.route", req.url);
+        }
+        next();
+    });
 
     await app.listen(port, "0.0.0.0");
 

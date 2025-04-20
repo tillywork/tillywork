@@ -1,7 +1,5 @@
 import { Module } from "@nestjs/common";
 import { AuthModule } from "./auth/auth.module";
-import { LoggingInterceptor } from "../common/logger/logging.interceptor";
-import { APP_INTERCEPTOR } from "@nestjs/core";
 import { CardsModule } from "./cards/cards.module";
 import { ProjectsModule } from "./projects/projects.module";
 import { SpacesModule } from "./spaces/spaces.module";
@@ -15,7 +13,10 @@ import { FiltersModule } from "./filters/filters.module";
 import { ClsModule } from "nestjs-cls";
 import { CardTypesModule } from "./card-types/card.types.module";
 import { MailerModule } from "./mailer/mailer.module";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { FilesModule } from "./files/files.module";
+import { AutomationsModule } from "./automations/automations.module";
+import { BullModule } from "@nestjs/bull";
 
 @Module({
     imports: [
@@ -24,6 +25,16 @@ import { FilesModule } from "./files/files.module";
             middleware: {
                 mount: true,
             },
+        }),
+        BullModule.forRootAsync({
+            imports: [ConfigModule],
+            useFactory: async (configService: ConfigService) => ({
+                redis: {
+                    host: configService.get("TW_REDIS_HOST"),
+                    port: configService.get("TW_REDIS_PORT"),
+                },
+            }),
+            inject: [ConfigService],
         }),
         AuthModule,
         CardsModule,
@@ -39,14 +50,10 @@ import { FilesModule } from "./files/files.module";
         CardTypesModule,
         MailerModule,
         FilesModule,
+        AutomationsModule,
     ],
     controllers: [],
-    providers: [
-        {
-            provide: APP_INTERCEPTOR,
-            useClass: LoggingInterceptor,
-        },
-    ],
+    providers: [],
     exports: [],
 })
 export class CommonModule {}

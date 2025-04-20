@@ -6,19 +6,23 @@ import {
     UpdateEvent,
     MoreThanOrEqual,
     IsNull,
+    Raw,
 } from "typeorm";
 import { Card } from "./card.entity";
 import { Injectable, Logger } from "@nestjs/common";
-import { CardActivity } from "./card-activities/card.activity.entity";
 import { diff } from "deep-object-diff";
 import { ClsService } from "nestjs-cls";
-import { Field } from "../fields/field.entity";
 import {
     ACTIVITY_FIELD_TYPES,
     ActivityType,
     FieldChange,
+    TriggerType,
     UpdateActivityContent,
 } from "@tillywork/shared";
+import { CardActivity } from "./card-activities/card.activity.entity";
+import { Field } from "../fields/field.entity";
+import { TriggerEvent } from "../automations/events/trigger.event";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 const ACTIVITY_GROUPING_WINDOW = 1000 * 60 * 1; // 1 minute in milliseconds
 
@@ -27,7 +31,11 @@ const ACTIVITY_GROUPING_WINDOW = 1000 * 60 * 1; // 1 minute in milliseconds
 export class CardSubscriber implements EntitySubscriberInterface<Card> {
     private readonly logger = new Logger("CardSubscriber");
 
-    constructor(connection: Connection, private clsService: ClsService) {
+    constructor(
+        connection: Connection,
+        private clsService: ClsService,
+        private eventEmitter: EventEmitter2
+    ) {
         connection.subscribers.push(this);
     }
     /**
@@ -45,7 +53,9 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
 
         const activity = activityRepo.create({
             type: ActivityType.UPDATE,
-            card: event.entity,
+            card: {
+                id: event.entity.id,
+            },
             content: {
                 changes: [
                     {
@@ -54,9 +64,11 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     },
                 ],
             },
+            createdByType: event.entity.createdByType,
             createdBy: event.entity.createdBy,
             createdAt: event.entity.createdAt,
         });
+
         await activityRepo.save(activity);
 
         const changes = await this.getFieldChanges(
@@ -77,6 +89,7 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     content: {
                         changes: [change],
                     },
+                    createdByType: event.entity.createdByType,
                     createdBy: event.entity.createdBy,
                 });
 
@@ -87,6 +100,7 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
 
     async afterUpdate(event: UpdateEvent<Card>) {
         const user = this.clsService.get("user");
+        const isAutomation = this.clsService.get("isAutomation");
 
         if (
             !event.updatedColumns.some(
@@ -98,10 +112,24 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
 
         const activityRepo = event.manager.getRepository(CardActivity);
 
-        const oldData = event.databaseEntity.data || {};
-        const newData = event.entity.data || {};
+        const oldData = event.databaseEntity?.data || {};
+        const newData = event.entity?.data || {};
 
         const changes = await this.getFieldChanges(oldData, newData, event);
+
+        // Trigger automation events for each field change
+        for (const change of changes) {
+            if (change.field) {
+                this.eventEmitter.emit(
+                    "automation.trigger",
+                    new TriggerEvent(
+                        TriggerType.FIELD_UPDATED,
+                        event.entity.id,
+                        change
+                    )
+                );
+            }
+        }
 
         if (changes.length) {
             const recentActivity = await activityRepo.findOne({
@@ -111,37 +139,33 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     createdAt: MoreThanOrEqual(
                         new Date(Date.now() - ACTIVITY_GROUPING_WINDOW)
                     ),
-                    createdBy: { id: user.id },
+                    content: Raw(
+                        (alias) =>
+                            `${alias} @> '{"changes": [{"type": "updated"}]}'`
+                    ),
+                    createdByType: isAutomation ? "automation" : "user",
+                    createdBy: isAutomation ? undefined : { id: user?.id },
                 },
                 order: { createdAt: "DESC" },
             });
+
             const field = await this.getFieldFromChangeKey(
                 changes[0].field.slug,
                 event
             );
 
             let activityToUse: CardActivity;
-            let canGroupChanges = false;
+            let canMergeChanges = false;
 
             if (recentActivity) {
-                canGroupChanges =
-                    field.multiple &&
-                    changes.every((newChange) =>
-                        (
-                            recentActivity.content as UpdateActivityContent
-                        ).changes.some(
-                            (existingChange) =>
-                                existingChange.field?.id ===
-                                    newChange.field?.id &&
-                                ((existingChange.addedItems &&
-                                    newChange.addedItems) ||
-                                    (existingChange.removedItems &&
-                                        newChange.removedItems))
-                        )
-                    );
+                canMergeChanges = this.canMergeChanges({
+                    recentActivity,
+                    field,
+                    changes,
+                });
             }
 
-            if (canGroupChanges) {
+            if (canMergeChanges) {
                 activityToUse = recentActivity;
                 const mergedChanges = this.mergeChanges(
                     (recentActivity.content as UpdateActivityContent).changes,
@@ -156,9 +180,12 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     content: {
                         changes,
                     },
-                    createdBy: {
-                        id: user.id,
-                    },
+                    createdByType: isAutomation ? "automation" : "user",
+                    createdBy: isAutomation
+                        ? undefined
+                        : {
+                              id: user.id,
+                          },
                 });
             }
 
@@ -197,6 +224,7 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     },
                     type: "updated",
                     newValue: newData[key],
+                    oldValue: oldData[key],
                 };
 
                 if (field.multiple) {
@@ -221,8 +249,6 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                     } else if (Array.isArray(oldData[key])) {
                         change.removedItems = oldData[key];
                     }
-                } else if (!newData[key]) {
-                    change.oldValue = oldData[key];
                 }
 
                 return change;
@@ -231,6 +257,29 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
 
         return changes.filter(
             (change): change is FieldChange => change !== null
+        );
+    }
+
+    private canMergeChanges({
+        recentActivity,
+        field,
+        changes,
+    }: {
+        recentActivity: CardActivity;
+        field: Field;
+        changes: FieldChange[];
+    }): boolean {
+        return (
+            field.multiple &&
+            changes.every((newChange) =>
+                (recentActivity.content as UpdateActivityContent).changes.some(
+                    (existingChange) =>
+                        existingChange.field?.id === newChange.field?.id &&
+                        ((existingChange.addedItems && newChange.addedItems) ||
+                            (existingChange.removedItems &&
+                                newChange.removedItems))
+                )
+            )
         );
     }
 

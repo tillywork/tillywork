@@ -141,7 +141,10 @@ function updateTitle() {
   const newTitle = cardTitle.value.trim();
   if (newTitle !== '' && newTitle !== card.data[titleField.value!.slug]) {
     cardCopy.value.data[titleField.value!.slug] = newTitle;
-    updateCard(cardCopy.value).then(() => {
+    updateCard({
+      id: cardCopy.value.id,
+      data: cardCopy.value.data,
+    }).then(() => {
       showSnackbar({
         message: 'Task title updated.',
         color: 'success',
@@ -166,7 +169,10 @@ function updateDescription(newDescription: Content | undefined) {
 
     const newMentions = getNewMentions(newDescription, oldDescription ?? {});
 
-    updateCard(cardCopy.value).then(async () => {
+    updateCard({
+      id: cardCopy.value.id,
+      data: cardCopy.value.data,
+    }).then(async () => {
       showSnackbar({
         message: 'Task description updated.',
         color: 'success',
@@ -250,15 +256,14 @@ function openDescriptionFileDialog() {
       <base-card-toolbar v-model="cardCopy" :list />
       <div class="base-card-content-wrapper pa-md-6 pa-6 align-start">
         <div class="base-card-content mx-auto">
-          <div class="d-flex align-start">
+          <div class="d-flex align-start pt-2">
             <template v-if="titleField">
               <base-editor-input
-                v-model="cardTitle"
+                v-model:text="cardTitle"
                 placeholder="Task title"
                 :heading="2"
                 single-line
                 class="flex-1-1-100"
-                editable
                 disable-commands
               />
             </template>
@@ -289,13 +294,12 @@ function openDescriptionFileDialog() {
             <base-card-chip :card="cardCopy.parent" class="ms-1" />
           </div>
 
-          <div class="mt-8">
+          <div class="mt-4">
             <template v-if="descriptionField">
               <base-editor-input
-                v-model:json="cardDescription"
+                v-model="cardDescription"
                 ref="descriptionInput"
                 placeholder="Enter description.. (/ for commands)"
-                editable
               />
             </template>
             <template v-else>
@@ -391,8 +395,8 @@ function openDescriptionFileDialog() {
                       :listStages="listStages ?? []"
                       size="default"
                       @update:model-value="
-                      (listStage: ListStage) => updateCardListStage(child, listStage)
-                    "
+                        (listStage) => updateCardListStage(child, listStage as ListStage)
+                      "
                       theme="icon"
                     />
                     {{ child.data[titleField.slug] }}
@@ -439,8 +443,8 @@ function openDescriptionFileDialog() {
                 :listStages="listStages ?? []"
                 size="default"
                 @update:model-value="
-                (listStage: ListStage) => updateCardListStage(cardCopy, listStage)
-              "
+                  (listStage) => updateCardListStage(cardCopy, listStage as ListStage)
+                "
               />
             </div>
             <template v-if="fields">
@@ -453,8 +457,8 @@ function openDescriptionFileDialog() {
                     :field="field"
                     v-model="cardCopy.data[field.slug]"
                     @update:model-value="
-                    (v: any) => updateFieldValue({ card, field, v })
-                  "
+                      (v: any) => updateFieldValue({ card: cardCopy, field, v })
+                    "
                     flex-fill
                     text-field
                     type="field"
@@ -480,12 +484,12 @@ function openDescriptionFileDialog() {
 
 <style lang="scss" scoped>
 .base-card-content-wrapper {
-  max-height: 100vh;
+  max-height: calc(100vh - 48px);
   overflow: scroll;
 }
 
 .base-card-content {
-  width: 650px;
+  width: 700px;
   max-width: 100%;
 }
 

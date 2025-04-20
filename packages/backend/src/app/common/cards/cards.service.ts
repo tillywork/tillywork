@@ -20,9 +20,12 @@ import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transfor
 import { RelationCountMetadataToAttributeTransformer } from "typeorm/query-builder/relation-count/RelationCountMetadataToAttributeTransformer";
 import { RelationIdMetadataToAttributeTransformer } from "typeorm/query-builder/relation-id/RelationIdMetadataToAttributeTransformer";
 import { ClsService } from "nestjs-cls";
-import { PermissionLevel } from "@tillywork/shared";
+import { PermissionLevel, TriggerType } from "@tillywork/shared";
 import { AccessControlService } from "../auth/services/access.control.service";
 import { Field } from "../fields/field.entity";
+import { AclContext } from "../auth/context/acl.context";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { TriggerEvent } from "../automations/events/trigger.event";
 
 export type CardFindAllResult = {
     total: number;
@@ -52,7 +55,9 @@ export class CardsService {
         private cardListsService: CardListsService,
         @Inject(forwardRef(() => AccessControlService))
         private accessControlService: AccessControlService,
-        private clsService: ClsService
+        private clsService: ClsService,
+        private readonly aclContext: AclContext,
+        private eventEmitter: EventEmitter2
     ) {}
 
     async findAll({
@@ -189,26 +194,27 @@ export class CardsService {
             relations: [
                 "cardLists",
                 "cardLists.listStage",
+                "cardLists.list.space",
                 "parent",
                 "children",
                 "children.cardLists",
                 "children.cardLists.listStage",
+                "workspace",
             ],
-            loadRelationIds: {
-                relations: ["workspace"],
-            },
         });
 
         if (!card) {
             throw new NotFoundException(`Card with ID ${id} not found`);
         }
 
-        await this.accessControlService.authorize(
-            user,
-            "list",
-            card.cardLists.map((cardList) => cardList.listId),
-            PermissionLevel.VIEWER
-        );
+        if (!this.aclContext.shouldSkipAcl()) {
+            await this.accessControlService.authorize(
+                user,
+                "list",
+                card.cardLists.map((cardList) => cardList.listId),
+                PermissionLevel.VIEWER
+            );
+        }
 
         return card;
     }
@@ -254,13 +260,18 @@ export class CardsService {
 
     async create(createCardDto: CreateCardDto): Promise<Card> {
         const card = this.cardsRepository.create({
+            parent: {
+                id: createCardDto.parentId,
+            },
             ...createCardDto,
             type: {
                 id: createCardDto.type,
             },
-            createdBy: {
-                id: createCardDto.createdBy,
-            },
+            createdBy: createCardDto.createdBy
+                ? {
+                      id: createCardDto.createdBy,
+                  }
+                : undefined,
             workspace: {
                 id: createCardDto.workspaceId,
             },
@@ -269,12 +280,20 @@ export class CardsService {
         await this.cardsRepository.save(card);
 
         if (createCardDto.listId) {
-            await this.cardListsService.create({
+            const cardList = await this.cardListsService.create({
                 cardId: card.id,
                 listId: createCardDto.listId,
                 listStageId:
                     createCardDto.listStageId ?? createCardDto.listStage?.id,
             });
+            card.cardLists = [cardList];
+        }
+
+        if (createCardDto.createdByType !== "automation") {
+            this.eventEmitter.emit(
+                "automation.trigger",
+                new TriggerEvent(TriggerType.CARD_CREATED, card.id, card)
+            );
         }
 
         return card;
@@ -284,12 +303,14 @@ export class CardsService {
         const user = this.clsService.get("user");
         const card = await this.findOne(id);
 
-        await this.accessControlService.authorize(
-            user,
-            "workspace",
-            card.workspace as unknown as number,
-            PermissionLevel.EDITOR
-        );
+        if (!this.aclContext.shouldSkipAcl()) {
+            await this.accessControlService.authorize(
+                user,
+                "list",
+                card.cardLists.map((cardList) => cardList.listId),
+                PermissionLevel.EDITOR
+            );
+        }
 
         this.cardsRepository.merge(card, updateCardDto);
 
@@ -307,12 +328,14 @@ export class CardsService {
         const user = this.clsService.get("user");
         const card = await this.findOne(id);
 
-        await this.accessControlService.authorize(
-            user,
-            "workspace",
-            card.workspace as unknown as number,
-            PermissionLevel.EDITOR
-        );
+        if (!this.aclContext.shouldSkipAcl()) {
+            await this.accessControlService.authorize(
+                user,
+                "workspace",
+                card.workspace.id,
+                PermissionLevel.EDITOR
+            );
+        }
 
         await this.cardsRepository.softRemove(card);
     }

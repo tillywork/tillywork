@@ -159,7 +159,7 @@ function updateMessageChannel(channel: MessageActivityChannel) {
         </v-menu>
       </v-card-text>
       <v-card-text>
-        <base-editor-input v-model:json="activity.content.description" />
+        <base-editor-input :model-value="activity.content.description" />
       </v-card-text>
       <v-card-actions class="px-3 border-t-thin">
         <simple-dropdown-selector

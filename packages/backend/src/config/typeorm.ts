@@ -73,6 +73,9 @@ import { AddDealToCardTypeLayoutEnum1735135850545 } from "../migrations/17351358
 import { AddDateTimeToFieldTypeEnums1735211235572 } from "../migrations/1735211235572-add-date-time-to-field-type-enums";
 import { RemoveOptionsDefaultValueInViewTable1735588046345 } from "../migrations/1735588046345-remove-options-default-value-in-view-table";
 import { AddHasChildCardsToCardTypeTable1735645745129 } from "../migrations/1735645745129-add-has-child-cards-to-card-type-table";
+import { CreateAutomationTable1738236462639 } from "../migrations/1738236462639-create-automation-table";
+import { AddCreatedByTypeColumnToCardActivityTable1738236462640 } from "../migrations/1738236462640-add-createdByType-column-to-card-activity-table";
+import { AddCreatedByTypeColumnToCardTable1744548488644 } from "../migrations/1744548488644-add-createdByType-column-to-card-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -147,6 +150,9 @@ const migrations = [
     AddDateTimeToFieldTypeEnums1735211235572,
     RemoveOptionsDefaultValueInViewTable1735588046345,
     AddHasChildCardsToCardTypeTable1735645745129,
+    CreateAutomationTable1738236462639,
+    AddCreatedByTypeColumnToCardActivityTable1738236462640,
+    AddCreatedByTypeColumnToCardTable1744548488644,
 ];
 
 const config: TypeOrmModuleOptions = {

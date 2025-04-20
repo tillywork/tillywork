@@ -1,6 +1,7 @@
 import { CardType, List, ListStage, User, Workspace } from '../..';
 
 export * from './card.activity';
+export * from './card.helpers';
 
 export interface Card {
   id: number;
@@ -35,6 +36,7 @@ export interface CreateCardDto {
   users?: User[];
   listStage?: ListStage;
   parent?: Card;
+  parentId?: number;
 }
 
 export enum ActivityType {
@@ -56,12 +58,3 @@ export type ActivityTypeOption = {
 export type ActivityContent = {
   [key: string]: any;
 };
-
-export interface CardActivity {
-  id: number;
-  card: Card;
-  type: ActivityType;
-  content: ActivityContent;
-  createdAt: Date;
-  createdBy: User;
-}

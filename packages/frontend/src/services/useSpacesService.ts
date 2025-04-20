@@ -14,13 +14,16 @@ export const useSpacesService = () => {
 
   async function getSpaces({
     workspaceId,
+    lists,
   }: {
     workspaceId?: MaybeRef<number>;
+    lists?: MaybeRef<boolean>;
   }): Promise<Space[]> {
     return sendRequest('/spaces', {
       method: 'GET',
       params: {
         workspaceId: toValue(workspaceId),
+        lists: toValue(lists),
       },
     });
   }
@@ -53,16 +56,19 @@ export const useSpacesService = () => {
 
   function useGetSpacesQuery({
     workspaceId,
+    lists,
     enabled,
   }: {
     workspaceId: MaybeRef<number>;
+    lists?: MaybeRef<boolean>;
     enabled?: Ref<boolean>;
   }) {
     return useQuery({
-      queryKey: ['spaces', { workspaceId }],
+      queryKey: ['spaces', { workspaceId, lists }],
       queryFn: () =>
         getSpaces({
-          workspaceId: workspaceId,
+          workspaceId,
+          lists,
         }),
       enabled,
     });

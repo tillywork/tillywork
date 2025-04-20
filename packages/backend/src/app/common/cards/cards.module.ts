@@ -6,6 +6,7 @@ import { Card } from "./card.entity";
 import { CardSubscriber } from "./card.subscriber";
 import { CardListsModule } from "./card-lists/card.lists.module";
 import { CardActivitiesModule } from "./card-activities/card.activities.module";
+import { AutomationsModule } from "../automations/automations.module";
 import { AuthModule } from "../auth/auth.module";
 
 @Module({
@@ -13,10 +14,11 @@ import { AuthModule } from "../auth/auth.module";
         TypeOrmModule.forFeature([Card]),
         CardListsModule,
         CardActivitiesModule,
+        forwardRef(() => AutomationsModule),
         forwardRef(() => AuthModule),
     ],
     controllers: [CardsController],
     providers: [CardsService, CardSubscriber],
-    exports: [CardsService],
+    exports: [CardsService, CardActivitiesModule, CardListsModule],
 })
 export class CardsModule {}

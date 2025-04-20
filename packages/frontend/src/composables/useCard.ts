@@ -37,7 +37,10 @@ export const useCard = () => {
     const cardCopy = ref(cloneDeep(card));
     cardCopy.value.data[field.slug] = normalizeFieldValue({ v, field });
 
-    return updateCard(cardCopy.value);
+    return updateCard({
+      id: cardCopy.value.id,
+      data: cardCopy.value.data,
+    });
   }
 
   function normalizeFieldValue({ v, field }: { v: any; field: Field }) {

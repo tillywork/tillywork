@@ -12,6 +12,7 @@ import {
   type FieldFilter,
   type FieldFilterOption,
   type FilterViewOptions,
+  type FilterGroup,
 } from '@tillywork/shared';
 import posthog from 'posthog-js';
 import { useFieldQueryStore } from '@/stores/field.query';
@@ -240,7 +241,7 @@ watch(
       <v-card-text class="pa-0">
         <v-card-item v-if="viewType === 'quick'">
           <quick-filters
-            v-model="filtersCopy.where.quick"
+            v-model="filtersCopy.where.quick as FilterGroup"
             :list-stages="listStages ?? []"
             :fields="filterableFields ?? []"
             :users="users ?? []"
@@ -248,7 +249,7 @@ watch(
         </v-card-item>
         <v-card-item v-else>
           <advanced-filters
-            v-model="filtersCopy.where.advanced"
+            v-model="filtersCopy.where.advanced as FilterGroup"
             :fields
             :users="users ?? []"
           />

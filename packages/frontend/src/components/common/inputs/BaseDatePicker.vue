@@ -11,7 +11,7 @@ const props = defineProps<{
   label?: string;
   closeOnContentClick?: boolean;
   color?: string;
-  class?: string;
+  elClass?: string;
   icon?: string;
   activatorColor?: string;
   textField?: boolean;
@@ -167,7 +167,7 @@ const textColor = computed(() => {
 });
 
 const textClass = computed(() => {
-  return props.class + ' ' + (props.fill ? 'flex-fill' : '');
+  return props.elClass + ' ' + (props.fill ? 'flex-fill' : '');
 });
 
 const dateToText = computed(() => {
@@ -249,7 +249,11 @@ function confirmDateTime() {
     <template #activator="{ props }">
       <template v-if="textField">
         <v-text-field
-          v-bind="props"
+          v-bind="{
+            ...attrs,
+            ...props,
+          }"
+          :class="elClass"
           :value="dateToText"
           readonly
           single-line

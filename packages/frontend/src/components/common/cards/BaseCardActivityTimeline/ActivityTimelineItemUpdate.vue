@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
-import { useUsersService } from '@/services/useUsersService';
 import {
   dayjs,
   type Card,
@@ -11,6 +10,7 @@ import { useFieldsService } from '@/services/useFieldsService';
 import ActivityTimelineItems from './ActivityTimelineItemUpdateItems.vue';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import { useQueryStore } from '@/stores/query';
+import { useCreatedBy } from '@/composables/useCreatedBy';
 
 interface Props {
   activity: CardActivity;
@@ -22,8 +22,9 @@ const props = defineProps<Props>();
 const { user } = storeToRefs(useAuthStore());
 const { users, listStages } = storeToRefs(useQueryStore());
 
-const { getUserFullName } = useUsersService();
 const { useFieldQuery } = useFieldsService();
+
+const { getCreatedByName, getCreatedByPhoto } = useCreatedBy();
 
 // Extract activity content and changes
 const activityContent = computed(
@@ -48,12 +49,24 @@ const listStage = computed(() =>
 );
 
 const isCurrentUser = computed(
-  () => user.value?.id === props.activity.createdBy.id
+  () => user.value?.id === props.activity.createdBy?.id
 );
 
-const displayName = computed(() =>
-  isCurrentUser.value ? 'You' : props.activity.createdBy.firstName
-);
+const displayName = computed(() => {
+  if (props.activity.createdByType === 'user') {
+    return isCurrentUser.value ? 'You' : props.activity.createdBy?.firstName;
+  }
+
+  if (props.activity.createdByType === 'system') {
+    return 'System';
+  }
+
+  if (props.activity.createdByType === 'automation') {
+    return 'An automation';
+  }
+
+  return 'Unknown';
+});
 
 const itemType = computed(() => props.card.type.name.toLowerCase());
 
@@ -77,9 +90,8 @@ const getActivityTypeDetails = (change: any) => {
   <v-timeline-item class="text-caption">
     <template #icon>
       <base-avatar
-        :text="getUserFullName(activity.createdBy)"
-        :photo="activity.createdBy.photo"
-        class="text-xs"
+        :text="getCreatedByName(activity)"
+        :photo="getCreatedByPhoto(activity)"
       />
     </template>
 

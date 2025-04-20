@@ -257,7 +257,7 @@ export class QueryBuilderHelper {
                 }
 
                 return queryBuilder.andWhere(
-                    `${fieldName} NOT ${operator} (${processedValue.join(",")})`
+                    `${fieldName} NOT IN (${processedValue.join(",")})`
                 );
             }
             case "like":

@@ -34,7 +34,7 @@ function handleSubmit() {
   <v-card border="thin" class="pa-4">
     <base-editor-input
       ref="baseEditor"
-      v-model:json="value"
+      v-model="value"
       v-model:html="htmlValue"
       editable
       :placeholder

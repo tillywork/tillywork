@@ -11,7 +11,7 @@ import { CreateSpaceDto } from "./dto/create.space.dto";
 import { UpdateSpaceDto } from "./dto/update.space.dto";
 import { SpaceSideEffectsService } from "./space.side.effects.service";
 import { CardType } from "../card-types/card.type.entity";
-import { IsNotEmpty, IsNumber } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
 import { ClsService } from "nestjs-cls";
 import { AccessControl } from "../auth/entities/access.control.entity";
 import { PermissionLevel } from "@tillywork/shared";
@@ -26,6 +26,10 @@ export class FindAllParams {
     @IsNotEmpty()
     @IsNumber()
     workspaceId: number;
+
+    @IsOptional()
+    @IsBoolean()
+    lists?: boolean;
 }
 
 @Injectable()
@@ -39,7 +43,7 @@ export class SpacesService {
         private clsService: ClsService
     ) {}
 
-    async findAll({ workspaceId }: FindAllParams): Promise<Space[]> {
+    async findAll({ workspaceId, lists }: FindAllParams): Promise<Space[]> {
         const user = this.clsService.get("user");
 
         const accessControlEntries = await this.spacesRepository.manager
@@ -67,6 +71,10 @@ export class SpacesService {
             },
         };
 
+        const relations = [];
+
+        if (lists) relations.push("lists");
+
         return this.spacesRepository.find({
             where,
             order: {
@@ -75,6 +83,7 @@ export class SpacesService {
                     createdAt: "ASC",
                 },
             },
+            relations,
         });
     }
 

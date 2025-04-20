@@ -17,6 +17,7 @@ import { CardActivity } from "./card-activities/card.activity.entity";
 import { CardList } from "./card-lists/card.list.entity";
 import { CardType } from "../card-types/card.type.entity";
 import { Workspace } from "../workspaces/workspace.entity";
+import { CreatedByType } from "@tillywork/shared";
 
 @Entity()
 export class Card {
@@ -28,6 +29,9 @@ export class Card {
 
     @Column({ type: "jsonb", default: {} })
     data: Record<number, any>;
+
+    @Column({ type: "varchar", default: "system" })
+    createdByType: CreatedByType;
 
     @OneToMany(() => CardList, (cardList) => cardList.card, {
         onDelete: "CASCADE",
@@ -59,4 +63,7 @@ export class Card {
 
     @ManyToOne(() => Workspace, { onDelete: "CASCADE" })
     workspace: Relation<Workspace>;
+
+    @Column({ type: "bigint" })
+    workspaceId: number;
 }

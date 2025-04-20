@@ -15,6 +15,7 @@ import { AccessStrategyFactory } from "./factories/access.strategy.factory";
 import { WorkspaceAccessStrategy } from "./strategies/access.strategy/workspace.access.strategy";
 import { SpaceAccessStrategy } from "./strategies/access.strategy/space.access.strategy";
 import { ListAccessStrategy } from "./strategies/access.strategy/list.access.strategy";
+import { AclContext } from "./context/acl.context";
 
 @Module({
     imports: [
@@ -37,8 +38,9 @@ import { ListAccessStrategy } from "./strategies/access.strategy/list.access.str
         WorkspaceAccessStrategy,
         SpaceAccessStrategy,
         ListAccessStrategy,
+        AclContext,
     ],
     controllers: [AuthController],
-    exports: [AuthService, AccessControlService],
+    exports: [AuthService, AccessControlService, AclContext],
 })
 export class AuthModule {}

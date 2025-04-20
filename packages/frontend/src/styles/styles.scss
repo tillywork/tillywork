@@ -88,3 +88,13 @@ textarea {
 .tippy-box {
   overflow: visible !important;
 }
+
+.flex-row .flex-equal {
+  flex: 1 1 0%;
+  min-width: 160px;
+}
+
+.flex-column .flex-equal {
+  width: 100%;
+  flex: none !important;
+}

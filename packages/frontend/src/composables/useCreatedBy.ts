@@ -1,13 +1,13 @@
-import type { User } from '@tillywork/shared';
+import type { CreatedByType, User } from '@tillywork/shared';
 import { useLogo } from './useLogo';
 
-type Data = { createdByType?: 'system' | 'user'; createdBy?: User };
+type Data = { createdByType?: CreatedByType; createdBy?: User };
 
 export const useCreatedBy = () => {
   function getCreatedByPhoto(data: Data) {
-    return data.createdByType === 'system'
-      ? useLogo().getCheckUrl()
-      : data.createdBy?.photo;
+    return data.createdByType === 'user'
+      ? data.createdBy?.photo
+      : useLogo().getCheckUrl();
   }
 
   function getCreatedByName(data: Data) {

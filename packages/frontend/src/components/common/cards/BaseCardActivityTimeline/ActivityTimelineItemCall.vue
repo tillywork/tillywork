@@ -12,6 +12,7 @@ import {
   CallActivityDirection,
   CallActivityOutcome,
   dayjs,
+  type CallActivityContent,
   type Card,
   type CardActivity,
 } from '@tillywork/shared';
@@ -21,7 +22,7 @@ import BaseEditorInput from '@/components/common/inputs/BaseEditor/BaseEditorInp
 import BaseDatePicker from '@/components/common/inputs/BaseDatePicker.vue';
 import SimpleDropdownSelector from '@/components/common/inputs/SimpleDropdownSelector.vue';
 
-const { activity, card } = defineProps<{
+const { activity } = defineProps<{
   activity: CardActivity;
   card: Card;
 }>();
@@ -106,7 +107,7 @@ function updateCallOutcome(outcome: CallActivityOutcome) {
   };
 
   updateCall({
-    content: newContent,
+    content: newContent as CallActivityContent,
   });
 }
 
@@ -172,23 +173,23 @@ function updateCallDirection(direction: CallActivityDirection) {
         </v-menu>
       </v-card-text>
       <v-card-text>
-        <base-editor-input v-model:json="activity.content.description" />
+        <base-editor-input :model-value="activity.content.description" />
       </v-card-text>
       <v-card-actions class="px-3 border-t-thin">
         <simple-dropdown-selector
-          :model-value="activity.content.outcome"
+          :model-value="(activity.content as CallActivityContent).outcome"
           @update:model-value="(v) => updateCallOutcome(v as CallActivityOutcome)"
           :items="CALL_OUTCOME_OPTIONS"
           label="Call Outcome"
         />
         <simple-dropdown-selector
-          :model-value="activity.content.direction"
+          :model-value="(activity.content as CallActivityContent).direction"
           @update:model-value="(v) => updateCallDirection(v as CallActivityDirection)"
           :items="CALL_DIRECTION_OPTIONS"
           label="Call Direction"
         />
         <base-date-picker
-          :model-value="activity.content.calledAt"
+          :model-value="(activity.content as CallActivityContent).calledAt"
           @update:model-value="(v) => updateCallCalledAt(v as string)"
           include-time
           label="Called At"

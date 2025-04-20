@@ -16,6 +16,7 @@ interface FieldDefinition {
     isPinned?: boolean;
     items?: { item: string }[];
     dataCardTypeName?: string;
+    required?: boolean;
 }
 
 @Injectable()
@@ -30,9 +31,10 @@ export class CardTypeFieldsFactory {
         {
             name: "Title",
             slug: "title",
-            type: FieldTypes.RICH,
+            type: FieldTypes.TEXT,
             isTitle: true,
             icon: "mdi-text-recognition",
+            required: true,
         },
         {
             name: "Description",
@@ -150,6 +152,7 @@ export class CardTypeFieldsFactory {
             slug: "name",
             icon: "mdi-handshake",
             isTitle: true,
+            required: true,
         },
         {
             name: "Owner",

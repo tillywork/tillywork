@@ -28,8 +28,8 @@ export class SpacesController {
 
     @Get()
     findAll(@Query() query: FindAllParams): Promise<Space[]> {
-        const { workspaceId } = query;
-        return this.spacesService.findAll({ workspaceId });
+        const { workspaceId, lists } = query;
+        return this.spacesService.findAll({ workspaceId, lists });
     }
 
     @Get(":id")

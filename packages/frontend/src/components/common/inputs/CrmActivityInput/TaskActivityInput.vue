@@ -43,7 +43,7 @@ function resetDto() {
 <template>
   <v-card>
     <base-editor-input
-      v-model="createTaskDto.title"
+      v-model:text="createTaskDto.title"
       :heading="3"
       single-line
       placeholder="Task Title"

@@ -8,9 +8,16 @@ import type { ContextMenuItem } from './types';
 import vuetify from '@/plugins/vuetify';
 
 import 'tippy.js/animations/shift-away.css';
+import { isEqual } from 'lodash';
 
-const { items } = defineProps<{
+const selectedItems = defineModel<unknown | unknown[] | null>({
+  default: null,
+});
+
+const { items, selectable, multiple } = defineProps<{
   items: ContextMenuItem[];
+  selectable?: boolean;
+  multiple?: boolean;
 }>();
 
 let tippyInstance: Instance | null = null;
@@ -22,6 +29,7 @@ const isMenuOpen = ref(false);
 function showMenu(e?: MouseEvent) {
   if (!tippyInstance) return;
 
+  //FIX: if this is called with an event, then called without event, the location doesn't reset
   if (e) {
     tippyInstance.setProps({
       getReferenceClientRect: createClientRect(e),
@@ -55,7 +63,16 @@ function createClientRect(e: MouseEvent) {
   return () => rect;
 }
 
-onMounted(() => {
+const handleContextMenu = (e: MouseEvent) => {
+  e.preventDefault();
+  showMenu(e);
+};
+
+function handleItemSelected(v: unknown | unknown[]) {
+  selectedItems.value = v;
+}
+
+function setup() {
   if (!triggerElement.value) return;
 
   const menuContainer = document.createElement('div');
@@ -74,27 +91,42 @@ onMounted(() => {
   menuApp = createApp(MenuWrapper, {
     items,
     tippy: tippyInstance,
+    selectable,
+    multiple,
+    modelValue: selectedItems.value,
+    onUpdateModelValue: (value: unknown | unknown[]) => {
+      handleItemSelected(value);
+    },
   });
   menuApp.use(vuetify);
   menuApp.mount(menuContainer);
 
   triggerElement.value.addEventListener('contextmenu', handleContextMenu);
-});
+}
 
-const handleContextMenu = (e: MouseEvent) => {
-  e.preventDefault();
-  showMenu(e);
-};
-
-onBeforeUnmount(() => {
+function cleanup() {
   if (triggerElement.value) {
     triggerElement.value.removeEventListener('contextmenu', handleContextMenu);
   }
   menuApp?.unmount();
   tippyInstance?.destroy();
-});
+}
+
+onMounted(setup);
+onBeforeUnmount(cleanup);
 
 defineExpose({ showMenu, hideMenu, isMenuOpen });
+
+watch(
+  () => items,
+  (newValue, oldValue) => {
+    // If items changed, re-render the tippy component
+    if (!isEqual(newValue, oldValue)) {
+      cleanup();
+      setup();
+    }
+  }
+);
 </script>
 
 <template>

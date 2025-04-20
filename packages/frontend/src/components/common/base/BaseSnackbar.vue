@@ -50,8 +50,23 @@ onUnmounted(() => {
     color="surface-variant"
     rounded="pill"
     min-height="44"
+    width="fit-content"
+    min-width="300"
+    max-width="100%"
   >
     <div class="px-4 py-1 d-flex align-center flex-fill">
+      <v-icon
+        v-if="color === 'success'"
+        :icon="'mdi-check-circle'"
+        :color
+        start
+      />
+      <v-icon
+        v-else-if="color === 'error'"
+        :icon="'mdi-close-circle'"
+        :color
+        start
+      />
       <slot />
       <v-spacer />
       <slot name="actions" />

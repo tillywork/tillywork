@@ -219,6 +219,13 @@ watch(
           @update:model-value="handleSortBySelection"
         />
         <base-view-chip-display v-model="viewCopy" :list />
+        <v-spacer />
+        <v-chip color="primary" :to="`/automations?listId=${listId}`">
+          <template #prepend>
+            <v-icon icon="mdi-robot-excited-outline" start />
+          </template>
+          <span class="text-caption">Automate</span>
+        </v-chip>
       </div>
     </div>
 

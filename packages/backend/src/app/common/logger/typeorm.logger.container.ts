@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Logger as TypeOrmLogger, QueryRunner } from "typeorm";
+import { Logger as TypeOrmLogger } from "typeorm";
 import { LoggerOptions as TypeOrmLoggerOptions } from "typeorm/logger/LoggerOptions";
-import { Logger } from "@nestjs/common";
+import { LoggerService } from "@nestjs/common";
+import { TillyLogger } from "./tilly.logger";
 
 /**
  * Effectively ripped out from:
@@ -9,19 +9,19 @@ import { Logger } from "@nestjs/common";
  */
 export class TypeOrmLoggerContainer implements TypeOrmLogger {
     static ForConnection(options: TypeOrmLoggerOptions) {
-        const logger = new Logger(`TypeORM`);
+        const logger = new TillyLogger("TypeORM");
         return new TypeOrmLoggerContainer(logger, options);
     }
 
     constructor(
-        private readonly _logger: Logger,
+        private readonly _logger: LoggerService,
         private readonly _options: TypeOrmLoggerOptions
     ) {}
 
     /**
      * Logs query and parameters used in it.
      */
-    logQuery(query: string, parameters?: any[], queryRunner?: QueryRunner) {
+    logQuery(query: string, parameters?: any[]) {
         if (
             this._options === "all" ||
             this._options === true ||
@@ -40,12 +40,7 @@ export class TypeOrmLoggerContainer implements TypeOrmLogger {
     /**
      * Logs query that is failed.
      */
-    logQueryError(
-        error: string,
-        query: string,
-        parameters?: any[],
-        queryRunner?: QueryRunner
-    ) {
+    logQueryError(error: string, query: string, parameters?: any[]) {
         if (
             this._options === "all" ||
             this._options === true ||
@@ -65,12 +60,7 @@ export class TypeOrmLoggerContainer implements TypeOrmLogger {
     /**
      * Logs query that is slow.
      */
-    logQuerySlow(
-        time: number,
-        query: string,
-        parameters?: any[],
-        queryRunner?: QueryRunner
-    ) {
+    logQuerySlow(time: number, query: string, parameters?: any[]) {
         const sql =
             query +
             (parameters && parameters.length
@@ -83,7 +73,7 @@ export class TypeOrmLoggerContainer implements TypeOrmLogger {
     /**
      * Logs events from the schema build process.
      */
-    logSchemaBuild(message: string, queryRunner?: QueryRunner) {
+    logSchemaBuild(message: string) {
         if (
             this._options === "all" ||
             (this._options instanceof Array &&
@@ -96,7 +86,7 @@ export class TypeOrmLoggerContainer implements TypeOrmLogger {
     /**
      * Logs events from the migrations run process.
      */
-    logMigration(message: string, queryRunner?: QueryRunner) {
+    logMigration(message: string) {
         this._logger.log(message);
     }
 
@@ -104,11 +94,7 @@ export class TypeOrmLoggerContainer implements TypeOrmLogger {
      * Perform logging using given logger, or by default to the this._logger.
      * Log has its own level and message.
      */
-    log(
-        level: "log" | "info" | "warn",
-        message: any,
-        queryRunner?: QueryRunner
-    ) {
+    log(level: "log" | "info" | "warn", message: any) {
         switch (level) {
             case "log":
                 if (

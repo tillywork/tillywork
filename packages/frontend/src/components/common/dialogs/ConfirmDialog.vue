@@ -16,6 +16,14 @@ function handleCancelClick() {
     dialog.closeDialog(currentDialogIndex.value);
   }
 }
+
+async function handleConfirmClick() {
+  if ('onConfirm' in currentDialog.value.data) {
+    await currentDialog.value.data.onConfirm();
+  }
+
+  dialog.closeDialog(currentDialogIndex.value);
+}
 </script>
 
 <template>
@@ -36,7 +44,7 @@ function handleCancelClick() {
       >
       <v-btn
         color="info"
-        @click="currentDialog?.data.onConfirm"
+        @click="handleConfirmClick"
         :loading="currentDialog?.data.isLoading"
         class="text-none"
         >Confirm</v-btn

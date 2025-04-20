@@ -160,7 +160,7 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
       <div class="px-4 pb-2">
         <base-editor-input
           v-if="titleField"
-          v-model="createCardDto.data[titleField.slug]"
+          v-model:text="createCardDto.data[titleField.slug]"
           :placeholder="cardType.name + ` ${titleField.name.toLowerCase()}`"
           autofocus
           :heading="3"
@@ -171,7 +171,7 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
         />
         <base-editor-input
           ref="descriptionEditor"
-          v-model:json="createCardDto.data.description"
+          v-model="createCardDto.data.description"
           placeholder="Enter description.."
           editable
           min-height="80px"
