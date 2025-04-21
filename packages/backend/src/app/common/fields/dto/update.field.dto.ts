@@ -1,4 +1,4 @@
 import { PartialType } from "@nestjs/mapped-types";
-import { Field } from "../field.entity";
+import { CreateFieldDto } from "./create.field.dto";
 
-export class UpdateFieldDto extends PartialType(Field) {}
+export class UpdateFieldDto extends PartialType(CreateFieldDto) {}

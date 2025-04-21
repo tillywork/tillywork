@@ -183,7 +183,7 @@ export class FieldsService {
                 id: createFieldDto.workspaceId,
             },
             dataCardType: {
-                id: createFieldDto.dataCardTypeId,
+                id: createFieldDto.dataCardType?.id,
             },
         });
 
