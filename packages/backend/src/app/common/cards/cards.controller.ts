@@ -8,7 +8,6 @@ import {
     Put,
     UseGuards,
     Logger,
-    Request,
     Query,
     BadRequestException,
 } from "@nestjs/common";
@@ -74,6 +73,8 @@ export class CardsController {
         @CurrentUser() user: User
     ): Promise<Card> {
         createCardDto.createdBy = user.id;
+        createCardDto.createdByType = "user";
+
         return this.cardsService.create(createCardDto);
     }
 

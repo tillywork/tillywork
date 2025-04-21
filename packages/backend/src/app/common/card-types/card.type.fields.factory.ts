@@ -227,7 +227,7 @@ export class CardTypeFieldsFactory {
                 ...field,
                 workspaceId: cardType.workspace.id,
                 cardTypeId: cardType.id,
-                dataCardTypeId: dataCardType?.id,
+                dataCardType,
             });
         }
     }

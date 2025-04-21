@@ -11,6 +11,7 @@ import {
 import { User } from "../../users/user.entity";
 import { FieldItem, FieldTypes } from "@tillywork/shared";
 import { Type } from "class-transformer";
+import { CardType } from "../../card-types/card.type.entity";
 
 export class CreateFieldDto {
     @IsNotEmpty()
@@ -28,8 +29,8 @@ export class CreateFieldDto {
     cardTypeId?: number;
 
     @IsOptional()
-    @IsNumber()
-    dataCardTypeId?: number;
+    @Type(() => CardType)
+    dataCardType: CardType;
 
     @IsNotEmpty()
     @IsString()
