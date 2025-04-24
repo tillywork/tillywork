@@ -7,9 +7,9 @@ description: Learn how to set up and use logging, tracing, and monitoring
 
 ## Logging Stack
 
-Tillywork implements a comprehensive observability stack using:
+tillywork implements a comprehensive observability stack using:
 
-- Application Logging (NestJS Logger + Grafana Loki)
+- Application Logging (NestJS Logger + Loki)
 - Distributed Tracing (OpenTelemetry + Tempo)
 - Metrics Visualization (Grafana)
 
@@ -18,16 +18,16 @@ Tillywork implements a comprehensive observability stack using:
 ### Environment Variables
 
 ```env
-# Logging
-TW_ENABLE_QUERY_LOGGING=true
-TW_ENABLE_REQ_BODY_LOGGING=true
-
 # Loki
 TW_LOKI_HOST=http://loki:3100
 
 # OpenTelemetry
 TW_OTEL_SERVICE_NAME=tw-backend
 TW_OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
+
+# Grafana
+TW_GRAFANA_ADMIN_USER=admin
+TW_GRAFANA_ADMIN_PASSWORD=admin
 ```
 
 ### Docker Compose Setup
@@ -58,8 +58,9 @@ services:
     ports:
       - '3001:3000'
     environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_SECURITY_ADMIN_USER=${TW_GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${TW_GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_AUTH_ANONYMOUS_ENABLED=false
     volumes:
       - ./grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
       - grafana:/var/lib/grafana
@@ -72,7 +73,7 @@ services:
 The `TillyLogger` extends NestJS's `ConsoleLogger` and provides:
 
 - Sensitive data redaction
-- Grafana Loki integration
+- Loki integration
 - OpenTelemetry correlation
 
 Usage example:
@@ -107,7 +108,7 @@ The logger automatically redacts sensitive information including:
 
 ## Distributed Tracing
 
-OpenTelemetry configuration is initialized in `tracing.ts`:
+OpenTelemetry configuration is initialized in `packages/backend/src/tracing.ts`:
 
 ```typescript
 const sdk = new NodeSDK({
@@ -133,7 +134,7 @@ All HTTP requests are automatically traced using the `TracingInterceptor`.
 
 ### Data Sources Configuration
 
-Create the following data sources:
+The datasources are already configured in `grafana-datasources.yaml`.
 
 - Loki: `http://loki:3100`
 - Tempo: `http://tempo:4318`
@@ -200,11 +201,9 @@ try {
 1. Start the observability stack:
 
 ```bash
-docker-compose up tempo loki grafana
+docker compose up tempo loki grafana
 ```
 
-2. Verify services:
+2. Verify Grafana is running by going to:
 
-   - Grafana: http://localhost:3001
-   - Loki: http://localhost:3100
-   - Tempo: http://localhost:4318
+   - http://localhost:3001
