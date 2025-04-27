@@ -52,7 +52,7 @@ function isNotificationActive(notification: Notification) {
           rounded="0"
           height="100%"
         >
-          <v-card-text class="border-b-thin py-2">
+          <v-card-text class="border-b-thin py-2 flex-grow-0">
             <span class="text-body-3">Inbox</span>
           </v-card-text>
           <v-list lines="two" nav>
