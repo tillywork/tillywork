@@ -23,7 +23,7 @@ export class MailerService {
 
     constructor(
         private configService: ConfigService,
-        @InjectQueue("email") private emailQueue: Queue,
+        @InjectQueue("emails") private emailQueue: Queue,
         @InjectRepository(Email) private emailRepository: Repository<Email>,
         private usersService: UsersService
     ) {

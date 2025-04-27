@@ -8,11 +8,12 @@ import {
 import { Injectable, Logger } from "@nestjs/common";
 import { ClsService } from "nestjs-cls";
 import { CardList } from "./card.list.entity";
-import { ActivityType, TriggerType } from "@tillywork/shared";
+import { ActivityType, FieldChange, TriggerType } from "@tillywork/shared";
 import { CardActivity } from "../card-activities/card.activity.entity";
 import { ListStage } from "../../lists/list-stages/list.stage.entity";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { TriggerEvent } from "../../automations/events/trigger.event";
+import { NotificationStageUpdatedEvent } from "../../notifications/events/stage.updated.event";
 
 @Injectable()
 @EventSubscriber()
@@ -93,7 +94,7 @@ export class CardListSubscriber implements EntitySubscriberInterface<CardList> {
             },
         });
 
-        const change = {
+        const change: FieldChange = {
             type: "stage_updated",
             oldValue: +event.databaseEntity.listStageId,
             newValue: +event.entity.listStageId,
@@ -120,5 +121,12 @@ export class CardListSubscriber implements EntitySubscriberInterface<CardList> {
             createdByType: isAutomation ? "automation" : "user",
         });
         await activityRepo.save(activity);
+
+        this.eventEmitter.emit(
+            "notification.stage.updated",
+            new NotificationStageUpdatedEvent({
+                activity,
+            })
+        );
     }
 }

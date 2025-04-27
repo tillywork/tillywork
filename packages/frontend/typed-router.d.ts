@@ -25,6 +25,7 @@ declare module 'vue-router/auto-routes' {
     '/card/[cardId]': RouteRecordInfo<'/card/[cardId]', '/card/:cardId', { cardId: ParamValue<true> }, { cardId: ParamValue<false> }>,
     '/crm/[slug]': RouteRecordInfo<'/crm/[slug]', '/crm/:slug', { slug: ParamValue<true> }, { slug: ParamValue<false> }>,
     '/crm/tasks': RouteRecordInfo<'/crm/tasks', '/crm/tasks', Record<never, never>, Record<never, never>>,
+    '/inbox': RouteRecordInfo<'/inbox', '/inbox', Record<never, never>, Record<never, never>>,
     '/invite/[inviteCode]': RouteRecordInfo<'/invite/[inviteCode]', '/invite/:inviteCode', { inviteCode: ParamValue<true> }, { inviteCode: ParamValue<false> }>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
     '/pm/list/[listId]/': RouteRecordInfo<'/pm/list/[listId]/', '/pm/list/:listId', { listId: ParamValue<true> }, { listId: ParamValue<false> }>,

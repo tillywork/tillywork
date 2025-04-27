@@ -41,6 +41,6 @@ import { AclContext } from "./context/acl.context";
         AclContext,
     ],
     controllers: [AuthController],
-    exports: [AuthService, AccessControlService, AclContext],
+    exports: [AuthService, AccessControlService, AclContext, JwtModule],
 })
 export class AuthModule {}

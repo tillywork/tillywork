@@ -76,6 +76,8 @@ import { AddHasChildCardsToCardTypeTable1735645745129 } from "../migrations/1735
 import { CreateAutomationTable1738236462639 } from "../migrations/1738236462639-create-automation-table";
 import { AddCreatedByTypeColumnToCardActivityTable1738236462640 } from "../migrations/1738236462640-add-createdByType-column-to-card-activity-table";
 import { AddCreatedByTypeColumnToCardTable1744548488644 } from "../migrations/1744548488644-add-createdByType-column-to-card-table";
+import { CreateNotificationTable1745490664066 } from "../migrations/1745490664066-create-notification-table";
+import { CreateWatcherTable1745493772123 } from "../migrations/1745493772123-create-watcher-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -153,6 +155,8 @@ const migrations = [
     CreateAutomationTable1738236462639,
     AddCreatedByTypeColumnToCardActivityTable1738236462640,
     AddCreatedByTypeColumnToCardTable1744548488644,
+    CreateNotificationTable1745490664066,
+    CreateWatcherTable1745493772123,
 ];
 
 const config: TypeOrmModuleOptions = {

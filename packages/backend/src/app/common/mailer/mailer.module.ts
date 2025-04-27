@@ -11,7 +11,7 @@ import { UsersModule } from "../users/users.module";
 @Module({
     imports: [
         BullModule.registerQueue({
-            name: "email",
+            name: "emails",
             // Limited to 1 email per second
             limiter: {
                 max: 1,

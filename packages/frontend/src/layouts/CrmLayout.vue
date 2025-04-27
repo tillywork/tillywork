@@ -6,6 +6,7 @@ import { useLogo } from '@/composables/useLogo';
 import NavigationWorkspaceSelector from '@/components/common/navigation/NavigationWorkspaceSelector.vue';
 import UserMenu from '@/components/common/navigation/UserMenu.vue';
 import { useStateStore } from '@/stores/state';
+import { useNotificationStore } from '@/stores/notification';
 
 const { isRailFrozen } = storeToRefs(useStateStore());
 
@@ -16,14 +17,48 @@ const navigationDrawer = ref(true);
 const isRail = ref(true);
 const logo = useLogo();
 
-const navigationMenuItems = ref<NavigationMenuItem[]>([
-  {
-    icon: 'mdi-draw',
-    title: 'Whiteboard',
-    route: '/whiteboard',
-    activeOnExactMatch: true,
-  },
-]);
+const { unreadNotifications } = storeToRefs(useNotificationStore());
+
+const navigationMenuItems = computed<NavigationMenuItem[]>(() => {
+  const items: NavigationMenuItem[] = [
+    {
+      icon: 'mdi-inbox',
+      title: 'Inbox',
+      route: '/inbox',
+      activeOnExactMatch: true,
+      appendText:
+        unreadNotifications.value && unreadNotifications.value > 0
+          ? unreadNotifications.value.toString()
+          : undefined,
+    },
+    {
+      icon: 'mdi-draw',
+      title: 'Whiteboard',
+      route: '/whiteboard',
+      activeOnExactMatch: true,
+    },
+  ];
+
+  if (isAuthenticated()) {
+    items.push({
+      icon: 'mdi-clipboard-list',
+      title: 'Tasks',
+      route: '/crm/tasks',
+    });
+    items.push({
+      icon: 'mdi-account-group',
+      title: 'Contacts',
+      route: '/crm/contacts',
+    });
+    items.push({
+      icon: 'mdi-factory',
+      title: 'Organizations',
+      route: '/crm/organizations',
+    });
+  }
+
+  return items;
+});
 
 const salesMenuItems = ref<NavigationMenuItem[]>([
   {
@@ -32,24 +67,6 @@ const salesMenuItems = ref<NavigationMenuItem[]>([
     route: '/crm/deals',
   },
 ]);
-
-if (isAuthenticated()) {
-  navigationMenuItems.value.push({
-    icon: 'mdi-clipboard-list',
-    title: 'Tasks',
-    route: '/crm/tasks',
-  });
-  navigationMenuItems.value.push({
-    icon: 'mdi-account-group',
-    title: 'Contacts',
-    route: '/crm/contacts',
-  });
-  navigationMenuItems.value.push({
-    icon: 'mdi-factory',
-    title: 'Organizations',
-    route: '/crm/organizations',
-  });
-}
 </script>
 
 <template>
@@ -118,6 +135,11 @@ if (isAuthenticated()) {
           <v-list-item-title v-if="!isRail">{{
             navigationItem.title
           }}</v-list-item-title>
+          <template #append v-if="navigationItem.appendText">
+            <v-chip rounded="md" size="x-small" class="px-2 font-weight-bold">
+              {{ navigationItem.appendText }}
+            </v-chip>
+          </template>
         </v-list-item>
 
         <v-divider />

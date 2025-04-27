@@ -16,9 +16,18 @@ const card = defineModel<Card>({
   required: true,
 });
 
-const { list, listStages } = defineProps<{
+const emit = defineEmits(['close']);
+
+const {
+  list,
+  listStages,
+  hideBackButton = false,
+  closable = false,
+} = defineProps<{
   list?: List;
   listStages?: ListStage[];
+  hideBackButton?: boolean;
+  closable?: boolean;
 }>();
 
 const { workspace } = storeToRefs(useAuthStore());
@@ -33,12 +42,16 @@ function getListRoute() {
       return `/pm/list/${list?.id}`;
   }
 }
+
+function handleClickClose() {
+  emit('close');
+}
 </script>
 
 <template>
   <v-toolbar color="surface" class="px-2 border-b-thin" density="compact">
     <v-btn
-      v-if="list"
+      v-if="!hideBackButton && list"
       class="text-caption me-4"
       density="comfortable"
       color="primary"
@@ -54,5 +67,9 @@ function getListRoute() {
     <div v-if="list?.type === ListType.DEALS && listStages" class="px-6">
       <base-card-stage-bar v-model="card.cardLists[0].listStage" :listStages />
     </div>
+    <v-spacer />
+    <v-btn v-if="closable" icon density="comfortable" @click="handleClickClose">
+      <v-icon icon="mdi-close" />
+    </v-btn>
   </v-toolbar>
 </template>

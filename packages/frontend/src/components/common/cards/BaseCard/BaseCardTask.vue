@@ -35,9 +35,19 @@ import {
   type ListStage,
 } from '@tillywork/shared';
 
-const { card } = defineProps<{
+const {
+  card,
+  hideBackButton = false,
+  temporaryDrawer = false,
+  closable = false,
+} = defineProps<{
   card: Card;
+  hideBackButton?: boolean;
+  temporaryDrawer?: boolean;
+  closable?: boolean;
 }>();
+
+const emit = defineEmits(['close']);
 
 const cardCopy = ref<Card>(cloneDeep(card));
 const descriptionInput = ref();
@@ -167,8 +177,6 @@ function updateDescription(newDescription: Content | undefined) {
   ) {
     cardCopy.value.data[descriptionField.value!.slug] = newDescription;
 
-    const newMentions = getNewMentions(newDescription, oldDescription ?? {});
-
     updateCard({
       id: cardCopy.value.id,
       data: cardCopy.value.data,
@@ -178,17 +186,6 @@ function updateDescription(newDescription: Content | undefined) {
         color: 'success',
         timeout: 2000,
       });
-
-      for (const userId of newMentions) {
-        await notifyMentionedUser({
-          userId,
-          mentionedBy: user.value!,
-          cardType: cardCopy.value.type,
-          route: `${urlUtils.getCurrentHostUrl()}${
-            router.currentRoute.value.path
-          }`,
-        });
-      }
     });
   }
 }
@@ -248,12 +245,22 @@ function openCustomFieldsSettings() {
 function openDescriptionFileDialog() {
   descriptionInput.value.openFileDialog();
 }
+
+function handleClose() {
+  emit('close');
+}
 </script>
 
 <template>
   <template v-if="cardCopy">
     <v-card class="d-flex flex-column" min-height="100vh">
-      <base-card-toolbar v-model="cardCopy" :list />
+      <base-card-toolbar
+        v-model="cardCopy"
+        :list
+        :hideBackButton
+        :closable
+        @close="handleClose"
+      />
       <div class="base-card-content-wrapper pa-md-6 pa-6 align-start">
         <div class="base-card-content mx-auto">
           <div class="d-flex align-start pt-2">
@@ -422,6 +429,7 @@ function openDescriptionFileDialog() {
         location="end"
         color="surface"
         :key="cardCopy.id"
+        :temporary="temporaryDrawer"
       >
         <v-card color="transparent">
           <div class="pa-4 d-flex align-center">

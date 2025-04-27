@@ -8,6 +8,7 @@ import { CardListsService } from "../../cards/card-lists/card.lists.service";
 import { ClsService } from "nestjs-cls";
 import { AccessControlService } from "../../auth/services/access.control.service";
 import { PermissionLevel } from "@tillywork/shared";
+import { AclContext } from "../../auth/context/acl.context";
 
 export type ListStageFindAllResult = {
     total: number;
@@ -26,7 +27,8 @@ export class ListStagesService {
         private listStagesRepository: Repository<ListStage>,
         private cardListsService: CardListsService,
         private clsService: ClsService,
-        private accessControlService: AccessControlService
+        private accessControlService: AccessControlService,
+        private aclContext: AclContext
     ) {}
 
     async findAll({
@@ -69,12 +71,14 @@ export class ListStagesService {
             throw new NotFoundException(`ListStage with ID ${id} not found`);
         }
 
-        await this.accessControlService.authorize(
-            user,
-            "list",
-            listStage.listId,
-            PermissionLevel.VIEWER
-        );
+        if (!this.aclContext.shouldSkipAcl()) {
+            await this.accessControlService.authorize(
+                user,
+                "list",
+                listStage.listId,
+                PermissionLevel.VIEWER
+            );
+        }
 
         return listStage;
     }
