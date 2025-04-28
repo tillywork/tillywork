@@ -122,17 +122,6 @@ defineExpose({ showMenu, hideMenu, isMenuOpen });
 watch(isMenuOpen, (v) => {
   emit('update:open', v);
 });
-
-// watch(
-//   () => items,
-//   (newValue, oldValue) => {
-//     // If items changed, re-render the tippy component
-//     if (!isEqual(newValue, oldValue)) {
-//       cleanup();
-//       setup();
-//     }
-//   }
-// );
 </script>
 
 <template>
