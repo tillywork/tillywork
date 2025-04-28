@@ -78,6 +78,7 @@ import { AddCreatedByTypeColumnToCardActivityTable1738236462640 } from "../migra
 import { AddCreatedByTypeColumnToCardTable1744548488644 } from "../migrations/1744548488644-add-createdByType-column-to-card-table";
 import { CreateNotificationTable1745490664066 } from "../migrations/1745490664066-create-notification-table";
 import { CreateWatcherTable1745493772123 } from "../migrations/1745493772123-create-watcher-table";
+import { CreateNotificationPreferenceTable1745837558035 } from "../migrations/1745837558035-create-notification-preference-table";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -157,6 +158,7 @@ const migrations = [
     AddCreatedByTypeColumnToCardTable1744548488644,
     CreateNotificationTable1745490664066,
     CreateWatcherTable1745493772123,
+    CreateNotificationPreferenceTable1745837558035,
 ];
 
 const config: TypeOrmModuleOptions = {

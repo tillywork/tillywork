@@ -8,7 +8,6 @@ import type { ContextMenuItem } from './types';
 import vuetify from '@/plugins/vuetify';
 
 import 'tippy.js/animations/shift-away.css';
-import { isEqual } from 'lodash';
 
 const selectedItems = defineModel<unknown | unknown[] | null>({
   default: null,

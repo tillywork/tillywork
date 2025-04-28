@@ -28,3 +28,9 @@ export type Notification = {
   createdAt: string;
   updatedAt: string;
 };
+
+export enum NotificationChannel {
+  IN_APP = 'in_app',
+  SLACK = 'slack',
+  EMAIL = 'email',
+}

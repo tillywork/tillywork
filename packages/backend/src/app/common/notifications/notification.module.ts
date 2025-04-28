@@ -12,6 +12,7 @@ import { ListStagesModule } from "../lists/list-stages/list.stages.module";
 import { BullModule } from "@nestjs/bull";
 import { NotificationProcessor } from "./notification.processor";
 import { NotificationsGateway } from "./notification.gateway";
+import { NotificationPreferenceModule } from "./notification-preference/notification.preference.module";
 
 @Module({
     imports: [
@@ -24,6 +25,7 @@ import { NotificationsGateway } from "./notification.gateway";
         forwardRef(() => AuthModule),
         forwardRef(() => UsersModule),
         forwardRef(() => ListStagesModule),
+        NotificationPreferenceModule,
     ],
     controllers: [NotificationController],
     providers: [

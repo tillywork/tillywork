@@ -16,6 +16,7 @@ import {
     WatchableResourceType,
 } from "@tillywork/shared";
 import { NotificationEvent } from "./events/notification.event";
+import { NotificationPreferenceService } from "./notification-preference/notification.preference.service";
 
 @Processor("notifications")
 export class NotificationProcessor {
@@ -25,7 +26,8 @@ export class NotificationProcessor {
         private readonly cardsService: CardsService,
         private readonly aclContext: AclContext,
         private readonly usersService: UsersService,
-        private readonly listStagesService: ListStagesService
+        private readonly listStagesService: ListStagesService,
+        private readonly notificationPreferenceService: NotificationPreferenceService
     ) {}
 
     @Process("notify")
@@ -84,27 +86,35 @@ export class NotificationProcessor {
                 resourceId: cardId,
             });
 
-            await this.notificationService.create({
-                type: NotificationType.ASSIGNMENT,
-                recipientId: userId,
-                workspaceId,
-                relatedResourceId: cardId.toString(),
-                relatedResourceType: "card",
-                message: `You were added as assignee`,
-            });
+            if (
+                await this.notificationPreferenceService.isInAppEnabled(userId)
+            ) {
+                await this.notificationService.create({
+                    type: NotificationType.ASSIGNMENT,
+                    recipientId: userId,
+                    workspaceId,
+                    relatedResourceId: cardId.toString(),
+                    relatedResourceType: "card",
+                    message: `You were added as assignee`,
+                });
+            }
         }
 
         for (const userId of removedAssignees) {
             if (userId === createdById) continue;
 
-            await this.notificationService.create({
-                type: NotificationType.ASSIGNMENT,
-                recipientId: userId,
-                workspaceId,
-                relatedResourceId: cardId.toString(),
-                relatedResourceType: "card",
-                message: `You were removed as assignee`,
-            });
+            if (
+                await this.notificationPreferenceService.isInAppEnabled(userId)
+            ) {
+                await this.notificationService.create({
+                    type: NotificationType.ASSIGNMENT,
+                    recipientId: userId,
+                    workspaceId,
+                    relatedResourceId: cardId.toString(),
+                    relatedResourceType: "card",
+                    message: `You were removed as assignee`,
+                });
+            }
         }
     }
 
@@ -145,17 +155,21 @@ export class NotificationProcessor {
                 resourceType: WatchableResourceType.CARD,
             });
 
-            await this.notificationService.create({
-                type: NotificationType.MENTION,
-                recipientId: userId,
-                workspaceId: card.workspaceId,
-                relatedResourceId: cardId.toString(),
-                relatedResourceType: "card",
-                message: `${getCreatedByName({
-                    createdBy: commenter as any,
-                    createdByType: comment.createdByType,
-                })} mentioned you in a comment`,
-            });
+            if (
+                await this.notificationPreferenceService.isInAppEnabled(userId)
+            ) {
+                await this.notificationService.create({
+                    type: NotificationType.MENTION,
+                    recipientId: userId,
+                    workspaceId: card.workspaceId,
+                    relatedResourceId: cardId.toString(),
+                    relatedResourceType: "card",
+                    message: `${getCreatedByName({
+                        createdBy: commenter as any,
+                        createdByType: comment.createdByType,
+                    })} mentioned you in a comment`,
+                });
+            }
         }
 
         for (const watcher of watchers) {
@@ -165,17 +179,23 @@ export class NotificationProcessor {
             )
                 continue;
 
-            await this.notificationService.create({
-                type: NotificationType.COMMENT,
-                recipientId: watcher.id,
-                workspaceId: card.workspaceId,
-                relatedResourceId: cardId.toString(),
-                relatedResourceType: "card",
-                message: `${getCreatedByName({
-                    createdBy: commenter as any,
-                    createdByType: comment.createdByType,
-                })} added a comment`,
-            });
+            if (
+                await this.notificationPreferenceService.isInAppEnabled(
+                    watcher.id
+                )
+            ) {
+                await this.notificationService.create({
+                    type: NotificationType.COMMENT,
+                    recipientId: watcher.id,
+                    workspaceId: card.workspaceId,
+                    relatedResourceId: cardId.toString(),
+                    relatedResourceType: "card",
+                    message: `${getCreatedByName({
+                        createdBy: commenter as any,
+                        createdByType: comment.createdByType,
+                    })} added a comment`,
+                });
+            }
         }
     }
 
@@ -215,17 +235,21 @@ export class NotificationProcessor {
                 resourceType: WatchableResourceType.CARD,
             });
 
-            await this.notificationService.create({
-                type: NotificationType.MENTION,
-                recipientId: userId,
-                workspaceId: card.workspaceId,
-                relatedResourceId: cardId.toString(),
-                relatedResourceType: "card",
-                message: `${getCreatedByName({
-                    createdBy: updatedBy as any,
-                    createdByType: createdByType,
-                })} mentioned you in a ${mentionedOnName}`,
-            });
+            if (
+                await this.notificationPreferenceService.isInAppEnabled(userId)
+            ) {
+                await this.notificationService.create({
+                    type: NotificationType.MENTION,
+                    recipientId: userId,
+                    workspaceId: card.workspaceId,
+                    relatedResourceId: cardId.toString(),
+                    relatedResourceType: "card",
+                    message: `${getCreatedByName({
+                        createdBy: updatedBy as any,
+                        createdByType: createdByType,
+                    })} mentioned you in a ${mentionedOnName}`,
+                });
+            }
         }
     }
 
@@ -258,20 +282,26 @@ export class NotificationProcessor {
         for (const watcher of watchers) {
             if (watcher.id === activity.createdBy?.id) continue;
 
-            await this.notificationService.create({
-                type: NotificationType.STAGE_UPDATED,
-                recipientId: watcher.id,
-                workspaceId: card.workspaceId,
-                relatedResourceId: card.id.toString(),
-                relatedResourceType: "card",
-                color: newListStage.color,
-                message: `${getCreatedByName({
-                    createdBy: updatedBy as any,
-                    createdByType: activity.createdByType,
-                })} moved ${card.type.name.toLowerCase()} to ${
-                    newListStage.name
-                }`,
-            });
+            if (
+                await this.notificationPreferenceService.isInAppEnabled(
+                    watcher.id
+                )
+            ) {
+                await this.notificationService.create({
+                    type: NotificationType.STAGE_UPDATED,
+                    recipientId: watcher.id,
+                    workspaceId: card.workspaceId,
+                    relatedResourceId: card.id.toString(),
+                    relatedResourceType: "card",
+                    color: newListStage.color,
+                    message: `${getCreatedByName({
+                        createdBy: updatedBy as any,
+                        createdByType: activity.createdByType,
+                    })} moved ${card.type.name.toLowerCase()} to ${
+                        newListStage.name
+                    }`,
+                });
+            }
         }
     }
 }
