@@ -6,9 +6,7 @@ import {
   type View,
   type Card,
   type ListGroup,
-  type ListStage,
   type List,
-  type Field,
 } from '@tillywork/shared';
 
 import { cloneDeep } from 'lodash';
@@ -16,14 +14,8 @@ import { cloneDeep } from 'lodash';
 import { useCardsService } from '@/services/useCardsService';
 
 import { useListGroup } from '@/composables/useListGroup';
-import { useCard } from '@/composables/useCard';
-import { useFields } from '@/composables/useFields';
 
-import { useFieldQueryStore } from '@/stores/field.query';
-
-import BaseField from '@/components/common/fields/BaseField.vue';
-import ContextMenu from '@/components/common/base/ContextMenu/ContextMenu.vue';
-import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
+import BoardViewCard from './BoardViewCard.vue';
 
 const props = defineProps<{
   listGroup: ListGroup;
@@ -42,17 +34,8 @@ const {
   onDragMove,
   onDragStart,
   onDragUpdate,
-  handleUpdateCardStage,
-  handleHoverCard,
   queryConfig,
 } = useListGroup({ props, cards });
-
-const { updateFieldValue, getCardContextMenuItems } = useCard();
-const { getDateFieldColor } = useFields({});
-
-const { titleField, assigneeField, pinnedFieldsWithoutAssignee } = storeToRefs(
-  useFieldQueryStore()
-);
 
 const groupCopy = ref(cloneDeep(props.listGroup));
 
@@ -165,112 +148,7 @@ watch(
         :style="`min-height: calc(100vh - (40px + 113px + 77px))`"
       >
         <template #item="{ element: card }">
-          <context-menu :items="getCardContextMenuItems(card)">
-            <v-hover
-              #="{ props }"
-              :disabled="isDragging"
-              @update:model-value="
-                (v) => handleHoverCard({ isHovering: v, card })
-              "
-            >
-              <v-card
-                :to="`/card/${card.id}`"
-                :ripple="false"
-                v-bind="props"
-                color="card"
-              >
-                <v-card-item class="pa-2 align-start">
-                  <template #prepend>
-                    <list-stage-selector
-                      :model-value="card.cardLists[0].listStage"
-                      theme="icon"
-                      rounded="circle"
-                      :list-stages="list.listStages"
-                      @update:modelValue="
-                    (modelValue: ListStage) =>
-                      handleUpdateCardStage({
-                        cardId: card.id,
-                        cardListId: card.cardLists[0].id,
-                        listStageId: modelValue.id,
-                      })
-                    "
-                      @click.prevent
-                    />
-                  </template>
-
-                  <template v-if="titleField">
-                    <v-card-title
-                      class="text-wrap text-body-3"
-                      style="line-height: 1.5"
-                    >
-                      {{ card.data[titleField.slug] }}
-                    </v-card-title>
-                  </template>
-                  <template v-else>
-                    <v-skeleton-loader type="text" class="mt-n2" />
-                  </template>
-
-                  <template #append>
-                    <template v-if="assigneeField">
-                      <base-field
-                        :field="assigneeField"
-                        :color="getDateFieldColor(card, assigneeField)"
-                        :model-value="card.data[assigneeField.slug]"
-                        @update:model-value="(v: string) => updateFieldValue({
-                          card,
-                          field: assigneeField as Field,
-                          v
-                        })"
-                        hide-label
-                      />
-                    </template>
-                  </template>
-                </v-card-item>
-                <v-card-actions
-                  class="pa-2 align-end"
-                  style="min-height: fit-content"
-                >
-                  <div class="d-flex align-center flex-wrap flex-fill ga-2">
-                    <template v-if="pinnedFieldsWithoutAssignee">
-                      <template
-                        v-for="field in pinnedFieldsWithoutAssignee"
-                        :key="field.slug"
-                      >
-                        <base-field
-                          :field
-                          :color="getDateFieldColor(card, field)"
-                          :model-value="card.data[field.slug]"
-                          @update:model-value="(v: string) => updateFieldValue({
-                            card,
-                            field,
-                            v
-                          })"
-                        />
-                      </template>
-                    </template>
-                    <template v-else>
-                      <v-skeleton-loader
-                        type="text"
-                        class="mt-n2 flex-fill"
-                        width="100%"
-                      />
-                    </template>
-                  </div>
-
-                  <v-spacer />
-                  <!-- Progress -->
-                  <base-card-children-progress
-                    v-if="card.children.length > 0"
-                    :card
-                    border="thin"
-                    density="compact"
-                    style="padding: 2px !important"
-                    class="text-caption mb-1 flex-0-0"
-                  />
-                </v-card-actions>
-              </v-card>
-            </v-hover>
-          </context-menu>
+          <board-view-card :card :list :isDragging />
         </template>
       </draggable>
     </v-infinite-scroll>

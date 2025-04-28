@@ -14,3 +14,4 @@ export * from './lib/auth';
 export * from './lib/automations';
 export * from './lib/notifications';
 export * from './lib/tiptap';
+export * from './lib/watchers';

@@ -20,6 +20,8 @@ const { items, selectable, multiple } = defineProps<{
   multiple?: boolean;
 }>();
 
+const emit = defineEmits(['update:open']);
+
 let tippyInstance: Instance | null = null;
 let menuApp: ReturnType<typeof createApp> | null = null;
 
@@ -89,7 +91,7 @@ function setup() {
   });
 
   menuApp = createApp(MenuWrapper, {
-    items,
+    items: toRef(() => items),
     tippy: tippyInstance,
     selectable,
     multiple,
@@ -117,16 +119,20 @@ onBeforeUnmount(cleanup);
 
 defineExpose({ showMenu, hideMenu, isMenuOpen });
 
-watch(
-  () => items,
-  (newValue, oldValue) => {
-    // If items changed, re-render the tippy component
-    if (!isEqual(newValue, oldValue)) {
-      cleanup();
-      setup();
-    }
-  }
-);
+watch(isMenuOpen, (v) => {
+  emit('update:open', v);
+});
+
+// watch(
+//   () => items,
+//   (newValue, oldValue) => {
+//     // If items changed, re-render the tippy component
+//     if (!isEqual(newValue, oldValue)) {
+//       cleanup();
+//       setup();
+//     }
+//   }
+// );
 </script>
 
 <template>
