@@ -84,11 +84,8 @@ export class NotificationProcessor {
             (id) => !assigneeChange.newValue.includes(id)
         );
 
-        this.logger.debug({ createdById });
-
         for (const userId of addedAssignees) {
             if (userId == createdById) continue;
-            this.logger.debug({ userId });
 
             await this.watcherService.addWatcher({
                 userId,
