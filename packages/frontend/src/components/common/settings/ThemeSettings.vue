@@ -4,7 +4,9 @@ import BaseThemeSwitch from '../base/BaseThemeSwitch.vue';
 
 <template>
   <h3>Theme</h3>
-  <p class="text-subtitle-2 mb-2">Select the theme to use.</p>
+  <p class="text-subtitle-2 mb-2 text-color-subtitle">
+    Select the theme to use.
+  </p>
 
   <v-divider class="my-6" />
 

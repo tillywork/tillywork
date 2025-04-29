@@ -13,6 +13,7 @@ import { BullModule } from "@nestjs/bull";
 import { NotificationProcessor } from "./notification.processor";
 import { NotificationsGateway } from "./notification.gateway";
 import { NotificationPreferenceModule } from "./notification-preference/notification.preference.module";
+import { UserIntegrationModule } from "../user-integrations/user.integration.module";
 
 @Module({
     imports: [
@@ -26,6 +27,7 @@ import { NotificationPreferenceModule } from "./notification-preference/notifica
         forwardRef(() => UsersModule),
         forwardRef(() => ListStagesModule),
         NotificationPreferenceModule,
+        forwardRef(() => UserIntegrationModule),
     ],
     controllers: [NotificationController],
     providers: [

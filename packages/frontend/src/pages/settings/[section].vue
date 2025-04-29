@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { SETTINGS } from '@/components/common/settings/types';
+import { SettingsType } from '@/components/common/settings/types';
 import { useLogo } from '@/composables/useLogo';
 import { useSettings } from '@/composables/useSettings';
 import stringUtils from '@/utils/string';
+
+import SettingsSection from '@/components/common/settings/SettingsSection.vue';
 
 definePage({
   meta: {
@@ -13,14 +15,23 @@ definePage({
 
 const route = useRoute('/settings/[section]');
 const router = useRouter();
-const { settings, sections } = useSettings();
+const {
+  allSettings,
+  themeSettings,
+  accountSettings,
+  workspaceSettings,
+  cardSettings,
+} = useSettings();
 const logo = useLogo();
 
 const navigationDrawer = ref(true);
 
+const activeSection = computed(() => {
+  return allSettings.find((setting) => setting.type === route.params.section);
+});
+
 onMounted(() => {
-  if (!sections.includes(route.params.section)) {
-    // TEMP: Throw a 404 error.
+  if (!Object.values(SettingsType).includes(route.params.section)) {
     router.replace('/');
   }
 });
@@ -51,20 +62,10 @@ watch(
       </v-btn>
     </div>
     <v-list>
-      <v-list-item
-        v-for="section in sections"
-        :key="section"
-        :to="'/settings/' + section"
-        rounded="md"
-        slim
-      >
-        <template #prepend>
-          <v-icon>{{ settings[section as SETTINGS].icon }}</v-icon>
-        </template>
-        <v-list-item-title>
-          {{ stringUtils.snakeToTitleCase(section) }}
-        </v-list-item-title>
-      </v-list-item>
+      <settings-section title="Account" :settings="accountSettings" />
+      <settings-section title="Card" :settings="cardSettings" />
+      <settings-section title="Theme" :settings="themeSettings" />
+      <settings-section title="Workspace" :settings="workspaceSettings" />
     </v-list>
   </v-navigation-drawer>
 
@@ -87,9 +88,7 @@ watch(
     <v-row justify="center" class="fill-height">
       <v-col cols="12" md="8" class="pt-md-16">
         <v-card class="pa-4" max-width="100%">
-          <component
-            :is="settings[route.params.section as SETTINGS].component"
-          />
+          <component v-if="activeSection" :is="activeSection.component" />
         </v-card>
       </v-col>
     </v-row>

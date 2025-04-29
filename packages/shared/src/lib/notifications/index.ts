@@ -34,3 +34,13 @@ export enum NotificationChannel {
   SLACK = 'slack',
   EMAIL = 'email',
 }
+
+export type NotificationPreference = {
+  id: string;
+  channel: NotificationChannel;
+  user: User;
+  enabled: boolean;
+  config: Record<string, any>;
+  createdAt: string;
+  updatedAt: string;
+};

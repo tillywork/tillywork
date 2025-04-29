@@ -19,6 +19,7 @@ import { AutomationsModule } from "./automations/automations.module";
 import { BullModule } from "@nestjs/bull";
 import { NotificationModule } from "./notifications/notification.module";
 import { WatcherModule } from "./watchers/watcher.module";
+import { UserIntegrationModule } from "./user-integrations/user.integration.module";
 
 @Module({
     imports: [
@@ -55,6 +56,7 @@ import { WatcherModule } from "./watchers/watcher.module";
         AutomationsModule,
         NotificationModule,
         WatcherModule,
+        UserIntegrationModule,
     ],
     controllers: [],
     providers: [],

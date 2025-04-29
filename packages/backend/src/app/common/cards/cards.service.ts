@@ -339,4 +339,19 @@ export class CardsService {
 
         await this.cardsRepository.softRemove(card);
     }
+
+    async getCardTitle(card: Card): Promise<string> {
+        const titleField = await this.cardsRepository.manager
+            .getRepository(Field)
+            .findOne({
+                where: {
+                    cardType: { id: card.type.id },
+                    isTitle: true,
+                },
+            });
+
+        if (!titleField) return "No title field";
+
+        return card.data?.[titleField.slug] ?? "Untitled";
+    }
 }

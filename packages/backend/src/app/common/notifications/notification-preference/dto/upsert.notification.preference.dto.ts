@@ -1,12 +1,20 @@
 import { NotificationChannel } from "@tillywork/shared";
-import { IsBoolean, IsEnum, IsObject, IsOptional } from "class-validator";
+import {
+    IsBoolean,
+    IsEnum,
+    IsNotEmpty,
+    IsObject,
+    IsOptional,
+} from "class-validator";
 
-export class UpdateNotificationPreferenceDto {
+export class UpsertNotificationPreferenceDto {
+    @IsNotEmpty()
     @IsEnum(NotificationChannel)
     channel: NotificationChannel;
 
     @IsBoolean()
-    enabled: boolean;
+    @IsOptional()
+    enabled?: boolean;
 
     @IsOptional()
     @IsObject()

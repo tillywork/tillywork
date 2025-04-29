@@ -36,7 +36,9 @@ async function saveWorkspace() {
 
 <template>
   <h3>Workspace</h3>
-  <p class="text-subtitle-2 mb-4">Update your current workspace.</p>
+  <p class="text-subtitle-2 mb-4 text-color-subtitle">
+    Update your current workspace.
+  </p>
 
   <v-divider class="my-6" />
 

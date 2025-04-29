@@ -9,13 +9,17 @@ import { Notification } from "./notification.entity";
 import { NotificationType } from "@tillywork/shared";
 import { NotificationEvent } from "./events/notification.event";
 import { NotificationsGateway } from "./notification.gateway";
+import { NotificationPreferenceService } from "./notification-preference/notification.preference.service";
+import { SlackIntegrationService } from "../user-integrations/slack.integration.service";
 
 export class NotificationService {
     constructor(
         @InjectRepository(Notification)
         private notificationRepository: Repository<Notification>,
         @InjectQueue("notifications") private notificationQueue: Queue,
-        private notificationGateway: NotificationsGateway
+        private notificationGateway: NotificationsGateway,
+        private notificationPreferenceService: NotificationPreferenceService,
+        private slackIntegrationService: SlackIntegrationService
     ) {}
 
     async create(data: CreateNotificationDto): Promise<Notification> {
@@ -109,5 +113,49 @@ export class NotificationService {
     async delete(notificationId: string): Promise<boolean> {
         const result = await this.notificationRepository.delete(notificationId);
         return result.affected !== undefined && result.affected > 0;
+    }
+
+    async sendUserNotification({
+        type,
+        recipientId,
+        workspaceId,
+        relatedResourceId,
+        relatedResourceType,
+        message,
+        title,
+        color,
+    }: {
+        type: NotificationType;
+        recipientId: number;
+        workspaceId: number;
+        relatedResourceId: string;
+        relatedResourceType: string;
+        message: string;
+        title: string;
+        color?: string;
+    }) {
+        if (
+            await this.notificationPreferenceService.isInAppEnabled(recipientId)
+        ) {
+            await this.create({
+                type,
+                recipientId,
+                workspaceId,
+                relatedResourceId,
+                relatedResourceType,
+                message,
+                color,
+            });
+        }
+
+        if (
+            await this.notificationPreferenceService.isSlackEnabled(recipientId)
+        ) {
+            await this.slackIntegrationService.sendDM({
+                userId: recipientId,
+                message,
+                title,
+            });
+        }
     }
 }

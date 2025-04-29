@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { NotificationPreference } from "./notification.preference.entity";
-import { UpdateNotificationPreferenceDto } from "./dto/update.notification.preference.dto";
+import { UpsertNotificationPreferenceDto } from "./dto/upsert.notification.preference.dto";
 import { NotificationChannel } from "@tillywork/shared";
 
 @Injectable()
@@ -12,7 +12,7 @@ export class NotificationPreferenceService {
         private readonly prefRepo: Repository<NotificationPreference>
     ) {}
 
-    async findAllForUser(userId: number) {
+    async findAll(userId: number) {
         return this.prefRepo.find({
             where: {
                 user: {
@@ -22,7 +22,24 @@ export class NotificationPreferenceService {
         });
     }
 
-    async updateForUser(userId: number, dto: UpdateNotificationPreferenceDto) {
+    async findOne({
+        userId,
+        channel,
+    }: {
+        userId: number;
+        channel: NotificationChannel;
+    }) {
+        return this.prefRepo.findOne({
+            where: {
+                user: {
+                    id: userId,
+                },
+                channel,
+            },
+        });
+    }
+
+    async upsert(userId: number, dto: UpsertNotificationPreferenceDto) {
         let pref = await this.prefRepo.findOne({
             where: {
                 user: {
@@ -54,7 +71,18 @@ export class NotificationPreferenceService {
                 channel: NotificationChannel.IN_APP,
             },
         });
-        // If no preference exists, default to true (enabled)
-        return pref ? !!pref.enabled : true;
+
+        return pref ? pref.enabled : true;
+    }
+
+    async isSlackEnabled(userId: number): Promise<boolean> {
+        const pref = await this.prefRepo.findOne({
+            where: {
+                user: { id: userId },
+                channel: NotificationChannel.SLACK,
+            },
+        });
+
+        return pref ? pref.enabled : false;
     }
 }

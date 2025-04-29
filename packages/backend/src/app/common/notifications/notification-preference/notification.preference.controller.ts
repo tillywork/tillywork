@@ -1,25 +1,40 @@
-import { Controller, Get, Put, Body, UseGuards } from "@nestjs/common";
+import { Controller, Get, Body, UseGuards, Param, Post } from "@nestjs/common";
 import { JwtAuthGuard } from "../../auth/guards/jwt.auth.guard";
 import { NotificationPreferenceService } from "./notification.preference.service";
 import { CurrentUser } from "../../auth/decorators/current.user.decorator";
 import { User } from "../../users/user.entity";
-import { UpdateNotificationPreferenceDto } from "./dto/update.notification.preference.dto";
+import { UpsertNotificationPreferenceDto } from "./dto/upsert.notification.preference.dto";
+import { NotificationChannel } from "@tillywork/shared";
 
-@Controller("notification-preferences")
+@Controller({
+    path: "notification-preferences",
+    version: "1",
+})
 @UseGuards(JwtAuthGuard)
 export class NotificationPreferenceController {
     constructor(private readonly service: NotificationPreferenceService) {}
 
     @Get()
     async getAll(@CurrentUser() user: User) {
-        return this.service.findAllForUser(user.id);
+        return this.service.findAll(user.id);
     }
 
-    @Put()
+    @Get(":channel")
+    async getOne(
+        @CurrentUser() user: User,
+        @Param("channel") channel: NotificationChannel
+    ) {
+        return this.service.findOne({
+            userId: user.id,
+            channel,
+        });
+    }
+
+    @Post()
     async update(
         @CurrentUser() user: User,
-        @Body() dto: UpdateNotificationPreferenceDto
+        @Body() dto: UpsertNotificationPreferenceDto
     ) {
-        return this.service.updateForUser(user.id, dto);
+        return this.service.upsert(user.id, dto);
     }
 }

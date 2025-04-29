@@ -103,7 +103,7 @@ export class AuthService {
         }
 
         const createdUser = await this.usersService.create(createUserDto);
-        await this.notificationPreferenceService.updateForUser(createdUser.id, {
+        await this.notificationPreferenceService.upsert(createdUser.id, {
             channel: NotificationChannel.IN_APP,
             enabled: true,
             config: {},
@@ -154,7 +154,7 @@ export class AuthService {
         }
 
         const createdUser = await this.usersService.create(createUserDto);
-        await this.notificationPreferenceService.updateForUser(createdUser.id, {
+        await this.notificationPreferenceService.upsert(createdUser.id, {
             channel: NotificationChannel.IN_APP,
             enabled: true,
             config: {},

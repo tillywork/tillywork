@@ -15,7 +15,9 @@ const { data: projectUsers } = useProjectUsersQuery({
 <template>
   <div class="user-select-none">
     <h3>Project Members</h3>
-    <p class="text-subtitle-2">Manage who has access to your project.</p>
+    <p class="text-subtitle-2 text-color-subtitle">
+      Manage who has access to your project.
+    </p>
   </div>
 
   <v-divider class="my-6" />

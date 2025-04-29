@@ -17,9 +17,12 @@ import {
 } from "@tillywork/shared";
 import { NotificationEvent } from "./events/notification.event";
 import { NotificationPreferenceService } from "./notification-preference/notification.preference.service";
+import { TillyLogger } from "../logger/tilly.logger";
 
 @Processor("notifications")
 export class NotificationProcessor {
+    private readonly logger = new TillyLogger("NotificationProcessor");
+
     constructor(
         private readonly watcherService: WatcherService,
         private readonly notificationService: NotificationService,
@@ -70,6 +73,10 @@ export class NotificationProcessor {
         const { createdById, workspaceId, cardId, assigneeChange } =
             event.payload;
 
+        const card = await this.aclContext.run(true, () =>
+            this.cardsService.findOne(cardId)
+        );
+
         const addedAssignees = assigneeChange.newValue.filter(
             (id) => !assigneeChange.oldValue.includes(id)
         );
@@ -77,8 +84,11 @@ export class NotificationProcessor {
             (id) => !assigneeChange.newValue.includes(id)
         );
 
+        this.logger.debug({ createdById });
+
         for (const userId of addedAssignees) {
-            if (userId === createdById) continue;
+            if (userId == createdById) continue;
+            this.logger.debug({ userId });
 
             await this.watcherService.addWatcher({
                 userId,
@@ -86,35 +96,29 @@ export class NotificationProcessor {
                 resourceId: cardId,
             });
 
-            if (
-                await this.notificationPreferenceService.isInAppEnabled(userId)
-            ) {
-                await this.notificationService.create({
-                    type: NotificationType.ASSIGNMENT,
-                    recipientId: userId,
-                    workspaceId,
-                    relatedResourceId: cardId.toString(),
-                    relatedResourceType: "card",
-                    message: `You were added as assignee`,
-                });
-            }
+            await this.notificationService.sendUserNotification({
+                type: NotificationType.ASSIGNMENT,
+                recipientId: userId,
+                workspaceId,
+                relatedResourceId: cardId.toString(),
+                relatedResourceType: "card",
+                message: `You were added as assignee`,
+                title: await this.cardsService.getCardTitle(card),
+            });
         }
 
         for (const userId of removedAssignees) {
-            if (userId === createdById) continue;
+            if (userId == createdById) continue;
 
-            if (
-                await this.notificationPreferenceService.isInAppEnabled(userId)
-            ) {
-                await this.notificationService.create({
-                    type: NotificationType.ASSIGNMENT,
-                    recipientId: userId,
-                    workspaceId,
-                    relatedResourceId: cardId.toString(),
-                    relatedResourceType: "card",
-                    message: `You were removed as assignee`,
-                });
-            }
+            await this.notificationService.sendUserNotification({
+                type: NotificationType.ASSIGNMENT,
+                recipientId: userId,
+                workspaceId,
+                relatedResourceId: cardId.toString(),
+                relatedResourceType: "card",
+                message: `You were removed as assignee`,
+                title: await this.cardsService.getCardTitle(card),
+            });
         }
     }
 
@@ -155,21 +159,18 @@ export class NotificationProcessor {
                 resourceType: WatchableResourceType.CARD,
             });
 
-            if (
-                await this.notificationPreferenceService.isInAppEnabled(userId)
-            ) {
-                await this.notificationService.create({
-                    type: NotificationType.MENTION,
-                    recipientId: userId,
-                    workspaceId: card.workspaceId,
-                    relatedResourceId: cardId.toString(),
-                    relatedResourceType: "card",
-                    message: `${getCreatedByName({
-                        createdBy: commenter as any,
-                        createdByType: comment.createdByType,
-                    })} mentioned you in a comment`,
-                });
-            }
+            await this.notificationService.sendUserNotification({
+                type: NotificationType.MENTION,
+                recipientId: userId,
+                workspaceId: card.workspaceId,
+                relatedResourceId: cardId.toString(),
+                relatedResourceType: "card",
+                message: `${getCreatedByName({
+                    createdBy: commenter as any,
+                    createdByType: comment.createdByType,
+                })} mentioned you in a comment`,
+                title: await this.cardsService.getCardTitle(card),
+            });
         }
 
         for (const watcher of watchers) {
@@ -179,23 +180,18 @@ export class NotificationProcessor {
             )
                 continue;
 
-            if (
-                await this.notificationPreferenceService.isInAppEnabled(
-                    watcher.id
-                )
-            ) {
-                await this.notificationService.create({
-                    type: NotificationType.COMMENT,
-                    recipientId: watcher.id,
-                    workspaceId: card.workspaceId,
-                    relatedResourceId: cardId.toString(),
-                    relatedResourceType: "card",
-                    message: `${getCreatedByName({
-                        createdBy: commenter as any,
-                        createdByType: comment.createdByType,
-                    })} added a comment`,
-                });
-            }
+            await this.notificationService.sendUserNotification({
+                type: NotificationType.COMMENT,
+                recipientId: watcher.id,
+                workspaceId: card.workspaceId,
+                relatedResourceId: cardId.toString(),
+                relatedResourceType: "card",
+                message: `${getCreatedByName({
+                    createdBy: commenter as any,
+                    createdByType: comment.createdByType,
+                })} added a comment`,
+                title: await this.cardsService.getCardTitle(card),
+            });
         }
     }
 
@@ -235,21 +231,18 @@ export class NotificationProcessor {
                 resourceType: WatchableResourceType.CARD,
             });
 
-            if (
-                await this.notificationPreferenceService.isInAppEnabled(userId)
-            ) {
-                await this.notificationService.create({
-                    type: NotificationType.MENTION,
-                    recipientId: userId,
-                    workspaceId: card.workspaceId,
-                    relatedResourceId: cardId.toString(),
-                    relatedResourceType: "card",
-                    message: `${getCreatedByName({
-                        createdBy: updatedBy as any,
-                        createdByType: createdByType,
-                    })} mentioned you in a ${mentionedOnName}`,
-                });
-            }
+            await this.notificationService.sendUserNotification({
+                type: NotificationType.MENTION,
+                recipientId: userId,
+                workspaceId: card.workspaceId,
+                relatedResourceId: cardId.toString(),
+                relatedResourceType: "card",
+                message: `${getCreatedByName({
+                    createdBy: updatedBy as any,
+                    createdByType: createdByType,
+                })} mentioned you in a ${mentionedOnName}`,
+                title: await this.cardsService.getCardTitle(card),
+            });
         }
     }
 
@@ -282,26 +275,21 @@ export class NotificationProcessor {
         for (const watcher of watchers) {
             if (watcher.id === activity.createdBy?.id) continue;
 
-            if (
-                await this.notificationPreferenceService.isInAppEnabled(
-                    watcher.id
-                )
-            ) {
-                await this.notificationService.create({
-                    type: NotificationType.STAGE_UPDATED,
-                    recipientId: watcher.id,
-                    workspaceId: card.workspaceId,
-                    relatedResourceId: card.id.toString(),
-                    relatedResourceType: "card",
-                    color: newListStage.color,
-                    message: `${getCreatedByName({
-                        createdBy: updatedBy as any,
-                        createdByType: activity.createdByType,
-                    })} moved ${card.type.name.toLowerCase()} to ${
-                        newListStage.name
-                    }`,
-                });
-            }
+            await this.notificationService.sendUserNotification({
+                type: NotificationType.STAGE_UPDATED,
+                recipientId: watcher.id,
+                workspaceId: card.workspaceId,
+                relatedResourceId: card.id.toString(),
+                relatedResourceType: "card",
+                color: newListStage.color,
+                message: `${getCreatedByName({
+                    createdBy: updatedBy as any,
+                    createdByType: activity.createdByType,
+                })} moved ${card.type.name.toLowerCase()} to ${
+                    newListStage.name
+                }`,
+                title: await this.cardsService.getCardTitle(card),
+            });
         }
     }
 }
