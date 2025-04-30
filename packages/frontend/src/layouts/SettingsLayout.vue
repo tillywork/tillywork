@@ -56,8 +56,8 @@ function handleBackClick() {
     </div>
     <v-list>
       <settings-section title="Account" :settings="accountSettings" />
-      <settings-section title="Card" :settings="cardSettings" />
-      <settings-section title="Theme" :settings="themeSettings" />
+      <settings-section title="Cards" :settings="cardSettings" />
+      <settings-section title="Preferences" :settings="themeSettings" />
       <settings-section title="Workspace" :settings="workspaceSettings" />
     </v-list>
   </v-navigation-drawer>
