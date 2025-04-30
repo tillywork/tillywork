@@ -8,7 +8,7 @@ import {
     Unique,
 } from "typeorm";
 import { User } from "../users/user.entity";
-import { IntegrationType } from "@tillywork/shared";
+import { IntegrationType, UserIntegrationConfig } from "@tillywork/shared";
 
 @Entity()
 @Unique(["user", "type"])
@@ -23,7 +23,7 @@ export class UserIntegration {
     type: IntegrationType;
 
     @Column({ type: "jsonb", default: {} })
-    config: Record<string, any>;
+    config: UserIntegrationConfig;
 
     @CreateDateColumn()
     createdAt: Date;

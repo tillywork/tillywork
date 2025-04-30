@@ -27,10 +27,9 @@ export const useNotificationPreferenceService = () => {
     });
   }
 
-  function upsertPreference(dto: {
-    channel: NotificationChannel;
-    enabled: boolean;
-  }): Promise<NotificationPreference> {
+  function upsertPreference(
+    dto: Partial<NotificationPreference>
+  ): Promise<NotificationPreference> {
     return sendRequest(`/notification-preferences`, {
       method: 'POST',
       data: dto,

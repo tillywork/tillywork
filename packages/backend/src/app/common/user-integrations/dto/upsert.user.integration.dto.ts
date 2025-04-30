@@ -1,4 +1,4 @@
-import { IntegrationType } from "@tillywork/shared";
+import { IntegrationType, UserIntegrationConfig } from "@tillywork/shared";
 import { IsEnum, IsObject } from "class-validator";
 
 export class UpsertUserIntegrationDto {
@@ -6,5 +6,5 @@ export class UpsertUserIntegrationDto {
     type: IntegrationType;
 
     @IsObject()
-    config: Record<string, any>;
+    config: UserIntegrationConfig;
 }

@@ -5,7 +5,8 @@ export enum NotificationType {
   SUBSCRIPTION = 'subscription',
   MENTION = 'mention',
   COMMENT = 'comment',
-  ASSIGNMENT = 'assignment',
+  ASSIGNED = 'assigned',
+  UNASSIGNED = 'unassigned',
   STAGE_UPDATED = 'stage_updated',
   AUTOMATION = 'automation',
 }
@@ -40,7 +41,14 @@ export type NotificationPreference = {
   channel: NotificationChannel;
   user: User;
   enabled: boolean;
-  config: Record<string, any>;
+  config: PreferenceConfig;
   createdAt: string;
   updatedAt: string;
+};
+
+export type PreferenceConfig = SlackNotificationConfig;
+
+export type SlackNotificationConfig = {
+  isDmEnabled?: boolean;
+  channelId?: string;
 };

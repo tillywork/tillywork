@@ -124,6 +124,8 @@ export class NotificationService {
         message,
         title,
         color,
+        actorName,
+        url,
     }: {
         type: NotificationType;
         recipientId: number;
@@ -133,6 +135,8 @@ export class NotificationService {
         message: string;
         title: string;
         color?: string;
+        actorName?: string;
+        url?: string;
     }) {
         if (
             await this.notificationPreferenceService.isInAppEnabled(recipientId)
@@ -148,13 +152,31 @@ export class NotificationService {
             });
         }
 
-        if (
-            await this.notificationPreferenceService.isSlackEnabled(recipientId)
-        ) {
+        const slackConfig =
+            await this.notificationPreferenceService.isSlackEnabled(
+                recipientId
+            );
+
+        if (slackConfig.isDmEnabled) {
             await this.slackIntegrationService.sendDM({
                 userId: recipientId,
                 message,
                 title,
+                url,
+            });
+        }
+
+        if (slackConfig.channelId) {
+            const channelMessage = actorName
+                ? message.replace(/^You\b/, actorName)
+                : message;
+
+            await this.slackIntegrationService.sendChannelMessage({
+                userId: recipientId,
+                channelId: slackConfig.channelId,
+                message: channelMessage,
+                title,
+                url,
             });
         }
     }

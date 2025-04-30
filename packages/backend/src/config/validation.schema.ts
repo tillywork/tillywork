@@ -8,6 +8,8 @@ export const validationSchema = Joi.object({
 
     PORT: Joi.number().port().default(3000),
 
+    TW_FRONTEND_URL: Joi.string().required(),
+
     TW_DB_NAME: Joi.string().required(),
 
     TW_DB_HOST: Joi.string().required(),

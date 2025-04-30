@@ -1,4 +1,4 @@
-import { NotificationChannel } from "@tillywork/shared";
+import { NotificationChannel, PreferenceConfig } from "@tillywork/shared";
 import {
     IsBoolean,
     IsEnum,
@@ -18,5 +18,5 @@ export class UpsertNotificationPreferenceDto {
 
     @IsOptional()
     @IsObject()
-    config?: Record<string, any>;
+    config?: PreferenceConfig;
 }

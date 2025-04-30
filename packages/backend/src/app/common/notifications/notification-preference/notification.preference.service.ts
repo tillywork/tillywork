@@ -3,7 +3,10 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { NotificationPreference } from "./notification.preference.entity";
 import { UpsertNotificationPreferenceDto } from "./dto/upsert.notification.preference.dto";
-import { NotificationChannel } from "@tillywork/shared";
+import {
+    NotificationChannel,
+    SlackNotificationConfig,
+} from "@tillywork/shared";
 
 @Injectable()
 export class NotificationPreferenceService {
@@ -75,7 +78,7 @@ export class NotificationPreferenceService {
         return pref ? pref.enabled : true;
     }
 
-    async isSlackEnabled(userId: number): Promise<boolean> {
+    async isSlackEnabled(userId: number): Promise<SlackNotificationConfig> {
         const pref = await this.prefRepo.findOne({
             where: {
                 user: { id: userId },
@@ -83,6 +86,12 @@ export class NotificationPreferenceService {
             },
         });
 
-        return pref ? pref.enabled : false;
+        if (!pref) {
+            return { isDmEnabled: false };
+        }
+
+        const isDmEnabled = pref.config.isDmEnabled ?? false;
+
+        return { isDmEnabled, channelId: pref.config.channelId };
     }
 }

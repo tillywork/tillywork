@@ -26,6 +26,7 @@ import { Field } from "../fields/field.entity";
 import { AclContext } from "../auth/context/acl.context";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { TriggerEvent } from "../automations/events/trigger.event";
+import { ConfigService } from "@nestjs/config";
 
 export type CardFindAllResult = {
     total: number;
@@ -57,7 +58,8 @@ export class CardsService {
         private accessControlService: AccessControlService,
         private clsService: ClsService,
         private readonly aclContext: AclContext,
-        private eventEmitter: EventEmitter2
+        private eventEmitter: EventEmitter2,
+        private configService: ConfigService
     ) {}
 
     async findAll({
@@ -353,5 +355,9 @@ export class CardsService {
         if (!titleField) return "No title field";
 
         return card.data?.[titleField.slug] ?? "Untitled";
+    }
+
+    getCardUrl(card: Card): string {
+        return `${this.configService.get("TW_FRONTEND_URL")}/card/${card.id}`;
     }
 }

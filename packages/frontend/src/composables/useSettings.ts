@@ -8,17 +8,6 @@ export type SettingsNavigationItem = {
 };
 
 export const useSettings = () => {
-  const themeSettings: SettingsNavigationItem[] = [
-    {
-      icon: 'mdi-monitor-screenshot',
-      component: defineAsyncComponent(
-        () => import('../components/common/settings/ThemeSettings.vue')
-      ),
-      title: 'Theme',
-      type: SettingsType.THEME,
-    },
-  ];
-
   const accountSettings: SettingsNavigationItem[] = [
     {
       icon: 'mdi-bell',
@@ -27,6 +16,36 @@ export const useSettings = () => {
       ),
       title: 'Notifications',
       type: SettingsType.NOTIFICATIONS,
+    },
+  ];
+
+  const cardSettings: SettingsNavigationItem[] = [
+    {
+      icon: 'mdi-toy-brick-outline',
+      component: defineAsyncComponent(
+        () => import('../components/common/settings/CardTypesSettings.vue')
+      ),
+      title: 'Card types',
+      type: SettingsType.CARD_TYPES,
+    },
+    {
+      icon: 'mdi-form-select',
+      component: defineAsyncComponent(
+        () => import('../components/common/settings/CustomFieldsSettings.vue')
+      ),
+      title: 'List fields',
+      type: SettingsType.CUSTOM_FIELDS,
+    },
+  ];
+
+  const themeSettings: SettingsNavigationItem[] = [
+    {
+      icon: 'mdi-monitor-screenshot',
+      component: defineAsyncComponent(
+        () => import('../components/common/settings/ThemeSettings.vue')
+      ),
+      title: 'Theme',
+      type: SettingsType.THEME,
     },
   ];
 
@@ -57,37 +76,18 @@ export const useSettings = () => {
     },
   ];
 
-  const cardSettings: SettingsNavigationItem[] = [
-    {
-      icon: 'mdi-toy-brick-outline',
-      component: defineAsyncComponent(
-        () => import('../components/common/settings/CardTypesSettings.vue')
-      ),
-      title: 'Card types',
-      type: SettingsType.CARD_TYPES,
-    },
-    {
-      icon: 'mdi-form-select',
-      component: defineAsyncComponent(
-        () => import('../components/common/settings/CustomFieldsSettings.vue')
-      ),
-      title: 'List fields',
-      type: SettingsType.CUSTOM_FIELDS,
-    },
-  ];
-
   const allSettings: SettingsNavigationItem[] = [
-    ...themeSettings,
     ...accountSettings,
-    ...workspaceSettings,
     ...cardSettings,
+    ...themeSettings,
+    ...workspaceSettings,
   ];
 
   return {
     allSettings,
-    themeSettings,
     accountSettings,
-    workspaceSettings,
     cardSettings,
+    themeSettings,
+    workspaceSettings,
   };
 };

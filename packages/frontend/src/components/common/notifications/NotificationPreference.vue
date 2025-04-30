@@ -4,9 +4,15 @@ import { useSnackbarStore } from '@/stores/snackbar';
 
 import { NotificationChannel } from '@tillywork/shared';
 
-const { channel, label } = defineProps<{
+const {
+  channel,
+  title,
+  ripple = true,
+} = defineProps<{
   channel: NotificationChannel;
-  label: string;
+  title: string;
+  ripple?: boolean;
+  hideSwitch?: boolean;
 }>();
 
 const { showSnackbar } = useSnackbarStore();
@@ -67,17 +73,25 @@ watch(isEnabled, (v) => {
 </script>
 
 <template>
-  <v-list-item class="px-4" border="thin">
+  <v-list-item
+    class="bg-accent-lighten px-4 mb-4"
+    border="thin"
+    height="64"
+    rounded="md"
+    :ripple
+  >
     <v-list-item-title class="text-body-1 d-flex align-center">
       <v-icon class="me-2" :icon="preferenceIcon" size="18" />
-      {{ label }}
+      {{ title }}
     </v-list-item-title>
     <template #append>
       <v-switch
+        v-if="!hideSwitch"
         v-model="isEnabled"
         hide-details
         :loading="isUpserting"
         v-tooltip="enableSwitchLabel"
+        @click.stop
       />
     </template>
   </v-list-item>

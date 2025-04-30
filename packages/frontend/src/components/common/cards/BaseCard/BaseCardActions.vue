@@ -16,11 +16,15 @@ defineSlots<{
   activator(props: { props: Record<string, unknown> }): void;
 }>();
 
-const { items } = useCardContextMenu(card, closeMenu);
+const { items, onUpdateMenuOpen } = useCardContextMenu(card, closeMenu);
 
 function closeMenu() {
   menu.value = false;
 }
+
+watch(menu, (v) => {
+  onUpdateMenuOpen(v);
+});
 </script>
 
 <template>

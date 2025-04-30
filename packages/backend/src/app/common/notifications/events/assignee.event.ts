@@ -1,4 +1,4 @@
-import { FieldChange } from "@tillywork/shared";
+import { CreatedByType, FieldChange } from "@tillywork/shared";
 
 export class NotificationAssigneeEvent {
     constructor(
@@ -7,6 +7,7 @@ export class NotificationAssigneeEvent {
             workspaceId: number;
             assigneeChange: FieldChange;
             createdById?: number;
+            createdByType: CreatedByType;
         }
     ) {}
 }

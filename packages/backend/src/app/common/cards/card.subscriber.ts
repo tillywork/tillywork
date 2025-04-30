@@ -166,6 +166,7 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
         const diffResult = diff(oldData, newData);
         const user = this.clsService.get("user");
         const isAutomation = this.clsService.get("isAutomation");
+        const createdByType = isAutomation ? "automation" : "user";
 
         const changes = await Promise.all(
             Object.keys(diffResult).map(async (key) => {
@@ -191,7 +192,7 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                         "notification.mention",
                         new NotificationMentionEvent({
                             cardId: event.entity.id,
-                            createdByType: isAutomation ? "automation" : "user",
+                            createdByType,
                             createdById: isAutomation ? undefined : user.id,
                             mentionedUserIds,
                             mentionedOn: "card",
@@ -244,6 +245,7 @@ export class CardSubscriber implements EntitySubscriberInterface<Card> {
                             cardId: event.entity.id,
                             workspaceId: event.entity.workspace.id,
                             createdById: user?.id,
+                            createdByType,
                             assigneeChange: {
                                 oldValue: change.oldValue ?? [],
                                 newValue: change.newValue ?? [],

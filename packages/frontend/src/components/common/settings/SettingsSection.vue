@@ -5,6 +5,12 @@ const { title, settings } = defineProps<{
   title: string;
   settings: SettingsNavigationItem[];
 }>();
+
+const route = useRoute();
+
+const isActive = (sectionType: string) => {
+  return sectionType && route.path.startsWith(`/settings/${sectionType}`);
+};
 </script>
 
 <template>
@@ -15,6 +21,7 @@ const { title, settings } = defineProps<{
     :to="'/settings/' + section.type"
     rounded="md"
     slim
+    :active="isActive(section.type)"
   >
     <template #prepend>
       <v-icon>{{ section.icon }}</v-icon>

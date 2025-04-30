@@ -16,7 +16,7 @@ export class NotificationHandler {
 
     @OnEvent("notification.assignee")
     async handleAssigneeUpdatedEvent(event: NotificationAssigneeEvent) {
-        this.notificationService.addToQueue(NotificationType.ASSIGNMENT, event);
+        this.notificationService.addToQueue(NotificationType.ASSIGNED, event);
     }
 
     @OnEvent("notification.comment")

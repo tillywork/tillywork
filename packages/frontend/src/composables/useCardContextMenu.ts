@@ -19,6 +19,14 @@ export const useCardContextMenu = (card: Card, cb?: () => void) => {
     enabled: isMenuOpen,
   });
 
+  watch(
+    isWatching,
+    (newV) => {
+      console.log('isWatching', newV);
+    },
+    { immediate: true }
+  );
+
   const { mutateAsync: createWatcher } = useCreateWatcher();
   const { mutateAsync: removeWatcher } = useRemoveWatcher();
 

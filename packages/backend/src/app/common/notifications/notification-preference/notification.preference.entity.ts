@@ -8,7 +8,7 @@ import {
     UpdateDateColumn,
 } from "typeorm";
 import { User } from "../../users/user.entity";
-import { NotificationChannel } from "@tillywork/shared";
+import { NotificationChannel, PreferenceConfig } from "@tillywork/shared";
 
 @Entity()
 @Unique(["user", "channel"])
@@ -26,7 +26,7 @@ export class NotificationPreference {
     enabled: boolean;
 
     @Column({ type: "jsonb", default: {} })
-    config: Record<string, any>;
+    config: PreferenceConfig;
 
     @CreateDateColumn()
     createdAt: Date;

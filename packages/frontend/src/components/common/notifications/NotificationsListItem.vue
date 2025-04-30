@@ -31,8 +31,10 @@ const notificationTitle = computed(() => {
 
 const notificationIcon = computed(() => {
   switch (notification.type) {
-    case NotificationType.ASSIGNMENT:
+    case NotificationType.ASSIGNED:
       return 'mdi-account-plus';
+    case NotificationType.UNASSIGNED:
+      return 'mdi-account-minus';
     case NotificationType.COMMENT:
       return 'mdi-comment';
     case NotificationType.STAGE_UPDATED:
