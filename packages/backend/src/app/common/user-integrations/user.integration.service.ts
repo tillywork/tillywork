@@ -34,13 +34,15 @@ export class UserIntegrationService {
         let integration = await this.integrationRepo.findOne({
             where: { user: { id: userId }, type: dto.type },
         });
+
         if (!integration) {
             integration = this.integrationRepo.create({
+                ...dto,
                 user: { id: userId },
-                type: dto.type,
             });
         }
-        integration.config = dto.config;
+
+        this.integrationRepo.merge(integration, dto);
         return this.integrationRepo.save(integration);
     }
 
