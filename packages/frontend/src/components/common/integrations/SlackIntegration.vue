@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { useSnackbarStore } from '@/stores/snackbar';
 
-import { useHttp } from '@/composables/useHttp';
-
 import { useIntegrationsService } from '@/services/useIntegrationsService';
 
 import { IntegrationType } from '@tillywork/shared';
@@ -11,9 +9,8 @@ import slackLogo from '@/assets/logos/slack.png';
 
 const { showSnackbar } = useSnackbarStore();
 
-const { sendRequest } = useHttp();
-
-const { useGetIntegration, useDeleteIntegration } = useIntegrationsService();
+const { useGetIntegration, useDeleteIntegration, getAuthUrl } =
+  useIntegrationsService();
 
 const { data: integration, isFetching } = useGetIntegration({
   type: IntegrationType.SLACK,
@@ -23,11 +20,7 @@ const { mutateAsync: deleteIntegration, isPending: isDeleting } =
   useDeleteIntegration();
 
 async function connectSlack() {
-  const { url } = await sendRequest('/user-integrations/auth', {
-    params: {
-      integration: IntegrationType.SLACK,
-    },
-  });
+  const { url } = await getAuthUrl({ integration: IntegrationType.SLACK });
 
   window.open(url);
 }
@@ -43,7 +36,12 @@ function disconnect() {
 </script>
 
 <template>
-  <v-list-item border="thin">
+  <v-list-item
+    class="bg-accent-lighten mb-4 px-6"
+    border="thin"
+    rounded="md"
+    height="64"
+  >
     <v-list-item-title class="text-body-1 d-flex align-center">
       <v-img class="me-1" :src="slackLogo" alt="Slack" width="36" inline />
       Slack

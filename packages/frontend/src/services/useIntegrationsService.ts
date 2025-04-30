@@ -1,6 +1,6 @@
 import { useHttp } from '@/composables/useHttp';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
-import type { IntegrationType, UserIntegration } from '@tillywork/shared';
+import { IntegrationType, type UserIntegration } from '@tillywork/shared';
 import type { MaybeRef } from 'vue';
 
 export type GetIntegrationsParams = {
@@ -61,9 +61,22 @@ export const useIntegrationsService = () => {
     });
   }
 
+  function getAuthUrl({
+    integration,
+  }: {
+    integration: MaybeRef<IntegrationType>;
+  }): Promise<{ url: string }> {
+    return sendRequest('/user-integrations/auth', {
+      params: {
+        integration,
+      },
+    });
+  }
+
   return {
     useGetIntegrations,
     useGetIntegration,
     useDeleteIntegration,
+    getAuthUrl,
   };
 };
