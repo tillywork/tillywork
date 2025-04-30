@@ -20,7 +20,7 @@ import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transfor
 import { RelationCountMetadataToAttributeTransformer } from "typeorm/query-builder/relation-count/RelationCountMetadataToAttributeTransformer";
 import { RelationIdMetadataToAttributeTransformer } from "typeorm/query-builder/relation-id/RelationIdMetadataToAttributeTransformer";
 import { ClsService } from "nestjs-cls";
-import { PermissionLevel, TriggerType } from "@tillywork/shared";
+import { assertIsSet, PermissionLevel, TriggerType } from "@tillywork/shared";
 import { AccessControlService } from "../auth/services/access.control.service";
 import { Field } from "../fields/field.entity";
 import { AclContext } from "../auth/context/acl.context";
@@ -343,6 +343,11 @@ export class CardsService {
     }
 
     async getCardTitle(card: Card): Promise<string> {
+        assertIsSet(
+            card.type,
+            "[CardsService#getCardTitle] Card type is empty"
+        );
+
         const titleField = await this.cardsRepository.manager
             .getRepository(Field)
             .findOne({
@@ -352,9 +357,12 @@ export class CardsService {
                 },
             });
 
-        if (!titleField) return "No title field";
+        assertIsSet(
+            titleField,
+            "[CardsService#getCardTitle] Title field not found"
+        );
 
-        return card.data?.[titleField.slug] ?? "Untitled";
+        return card.data?.[titleField.slug];
     }
 
     getCardUrl(card: Card): string {
