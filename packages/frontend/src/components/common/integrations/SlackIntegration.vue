@@ -7,6 +7,10 @@ import { IntegrationType } from '@tillywork/shared';
 
 import slackLogo from '@/assets/logos/slack.png';
 
+const { title = 'Slack' } = defineProps<{
+  title?: string;
+}>();
+
 const { showSnackbar } = useSnackbarStore();
 
 const { useGetIntegration, useDeleteIntegration, getAuthUrl } =
@@ -44,7 +48,7 @@ function disconnect() {
   >
     <v-list-item-title class="text-body-1 d-flex align-center">
       <v-img class="me-1" :src="slackLogo" alt="Slack" width="36" inline />
-      Slack
+      {{ title }}
     </v-list-item-title>
     <template #append>
       <template v-if="!integration">

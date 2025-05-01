@@ -1,16 +1,23 @@
 <script setup lang="ts">
 import { useSlackService } from '@/services/useSlackService';
 import { useNotificationPreferenceService } from '@/services/useNotificationPreferenceService';
-import { NotificationChannel, type PreferenceConfig } from '@tillywork/shared';
+import {
+  IntegrationType,
+  NotificationChannel,
+  type PreferenceConfig,
+} from '@tillywork/shared';
 
+import SlackIntegration from '../integrations/SlackIntegration.vue';
 import MenuWrapper from '../base/ContextMenu/MenuWrapper.vue';
 
 import _ from 'lodash';
 import type { ContextMenuItem } from '../base/ContextMenu/types';
+import { useIntegrationsService } from '@/services/useIntegrationsService';
 
 const { useGetNotificationPreference, useUpsertPreference } =
   useNotificationPreferenceService();
 const { useGetChannels } = useSlackService();
+const { useGetIntegration } = useIntegrationsService();
 
 const { data: preference } = useGetNotificationPreference({
   channel: NotificationChannel.SLACK,
@@ -18,6 +25,10 @@ const { data: preference } = useGetNotificationPreference({
 const { mutateAsync: upsertPreference } = useUpsertPreference();
 
 // const { data: slackChannels, isFetching: isLoadingChannels } = useGetChannels();
+
+const { data: slackIntegration } = useGetIntegration({
+  type: IntegrationType.SLACK,
+});
 
 const config = ref<PreferenceConfig>({});
 
@@ -87,6 +98,11 @@ async function save() {
       <v-divider class="my-6" />
 
       <v-list>
+        <slack-integration
+          v-if="!slackIntegration"
+          class="text-warning mb-12"
+          title="You need to connect your Slack workspace to receive notifications"
+        />
         <v-list-item
           class="bg-accent-lighten mb-4 px-6"
           border="thin"

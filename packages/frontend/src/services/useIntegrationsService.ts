@@ -29,6 +29,7 @@ export const useIntegrationsService = () => {
     return useQuery({
       queryKey: ['integrations', { type }],
       queryFn: () => getIntegrations({ type }),
+      staleTime: 1000 * 60 * 1,
     });
   }
 
@@ -43,6 +44,7 @@ export const useIntegrationsService = () => {
       queryKey: ['integrations', { type }],
       queryFn: () => getIntegration({ type }),
       refetchOnWindowFocus: true,
+      staleTime: 1000 * 60 * 1,
     });
   }
 
