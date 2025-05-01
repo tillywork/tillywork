@@ -19,9 +19,7 @@ export class SlackIntegrationService {
             client_id: this.configService.get<string>("TW_SLACK_CLIENT_ID"),
             scope: "chat:write,users:read,im:write,channels:read,groups:read",
             user_scope: "",
-            redirect_uri: this.configService.get<string>(
-                "TW_SLACK_REDIRECT_URI"
-            ),
+            redirect_uri: this.configService.get<string>("TW_REDIRECT_URL"),
             state,
         });
         return `https://slack.com/oauth/v2/authorize?${params.toString()}`;
@@ -42,9 +40,8 @@ export class SlackIntegrationService {
                     client_secret: this.configService.get<string>(
                         "TW_SLACK_CLIENT_SECRET"
                     ),
-                    redirect_uri: this.configService.get<string>(
-                        "TW_SLACK_REDIRECT_URI"
-                    ),
+                    redirect_uri:
+                        this.configService.get<string>("TW_REDIRECT_URL"),
                 },
             }
         );

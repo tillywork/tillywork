@@ -8,15 +8,15 @@ import {
     UseGuards,
     Query,
 } from "@nestjs/common";
-import { JwtAuthGuard } from "../auth/guards/jwt.auth.guard";
-import { CurrentUser } from "../auth/decorators/current.user.decorator";
-import { User } from "../users/user.entity";
-import { UserIntegrationService } from "./user.integration.service";
-import { UpsertUserIntegrationDto } from "./dto/upsert.user.integration.dto";
+import { JwtAuthGuard } from "../../auth/guards/jwt.auth.guard";
+import { CurrentUser } from "../../auth/decorators/current.user.decorator";
+import { User } from "../../users/user.entity";
+import { UserIntegrationService } from "../services/user.integration.service";
+import { UpsertUserIntegrationDto } from "../dto/upsert.user.integration.dto";
 import { IntegrationType } from "@tillywork/shared";
 import { ConfigService } from "@nestjs/config";
-import { TillyLogger } from "../logger/tilly.logger";
-import { SlackIntegrationService } from "./slack.integration.service";
+import { TillyLogger } from "../../logger/tilly.logger";
+import { SlackIntegrationService } from "../services/slack.integration.service";
 
 @Controller({
     path: "user-integrations",

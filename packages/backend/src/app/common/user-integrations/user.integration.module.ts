@@ -1,11 +1,11 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { UserIntegration } from "./user.integration.entity";
-import { UserIntegrationService } from "./user.integration.service";
-import { UserIntegrationController } from "./user.integration.controller";
+import { UserIntegrationService } from "./services/user.integration.service";
+import { UserIntegrationController } from "./controllers/user.integration.controller";
 import { ConfigModule } from "@nestjs/config";
-import { SlackIntegrationService } from "./slack.integration.service";
-import { SlackIntegrationController } from "./slack.integration.controller";
+import { SlackIntegrationService } from "./services/slack.integration.service";
+import { SlackIntegrationController } from "./controllers/slack.integration.controller";
 
 @Module({
     imports: [TypeOrmModule.forFeature([UserIntegration]), ConfigModule],

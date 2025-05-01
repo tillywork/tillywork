@@ -10,7 +10,7 @@ import { NotificationType } from "@tillywork/shared";
 import { NotificationEvent } from "./events/notification.event";
 import { NotificationsGateway } from "./notification.gateway";
 import { NotificationPreferenceService } from "./notification-preference/notification.preference.service";
-import { SlackIntegrationService } from "../user-integrations/slack.integration.service";
+import { SlackIntegrationService } from "../user-integrations/services/slack.integration.service";
 
 export class NotificationService {
     constructor(

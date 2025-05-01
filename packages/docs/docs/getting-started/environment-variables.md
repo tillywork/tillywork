@@ -71,6 +71,24 @@ This page lists and explains the environment variables used by the backend servi
 | `TW_AZURE_CONNECTION_STRING` | Azure storage connection string | Yes      |
 | `TW_AZURE_CONTAINER_NAME`    | Azure container name            | Yes      |
 
+## Integrations
+
+Used to enable integrations in tillywork.
+
+| Variable                  | Description                                                                                         | Required |
+| ------------------------- | --------------------------------------------------------------------------------------------------- | -------- |
+| `TW_ENABLED_INTEGRATIONS` | A comma separated string of enabled integrations. E.g `TW_ENABLED_INTEGRATIONS=slack,gmail,hubspot` | Yes      |
+| `TW_REDIRECT_URL`         | Default is `http://localhost:3000/v1/user-integrations/redirect`                                    | Yes      |
+
+## Slack
+
+Used to enable Slack functionality.
+
+| Variable                 | Description                          | Required |
+| ------------------------ | ------------------------------------ | -------- |
+| `TW_SLACK_CLIENT_ID`     | The client ID for your Slack app     | Yes      |
+| `TW_SLACK_CLIENT_SECRET` | The client secret for your Slack app | Yes      |
+
 ## CDN
 
 | Variable     | Description                    | Required |

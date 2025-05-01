@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { UserIntegration } from "./user.integration.entity";
-import { UpsertUserIntegrationDto } from "./dto/upsert.user.integration.dto";
+import { UserIntegration } from "../user.integration.entity";
+import { UpsertUserIntegrationDto } from "../dto/upsert.user.integration.dto";
 import { IntegrationType } from "@tillywork/shared";
 
 @Injectable()
