@@ -1,5 +1,11 @@
 <script setup lang="ts">
+import { useIntegrations } from '@/composables/useIntegrations';
+
+import { IntegrationType } from '@tillywork/shared';
+
 import SlackIntegration from '../integrations/SlackIntegration.vue';
+
+const { isIntegrationEnabled } = useIntegrations();
 </script>
 
 <template>
@@ -13,7 +19,7 @@ import SlackIntegration from '../integrations/SlackIntegration.vue';
     <v-divider class="my-6" />
 
     <v-list nav lines="two">
-      <slack-integration />
+      <slack-integration v-if="isIntegrationEnabled(IntegrationType.SLACK)" />
     </v-list>
   </v-card>
 </template>

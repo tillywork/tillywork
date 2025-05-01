@@ -4,12 +4,14 @@ import { Repository } from "typeorm";
 import { UserIntegration } from "../user.integration.entity";
 import { UpsertUserIntegrationDto } from "../dto/upsert.user.integration.dto";
 import { IntegrationType } from "@tillywork/shared";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class UserIntegrationService {
     constructor(
         @InjectRepository(UserIntegration)
-        private readonly integrationRepo: Repository<UserIntegration>
+        private readonly integrationRepo: Repository<UserIntegration>,
+        private readonly configService: ConfigService
     ) {}
 
     async findAll({
@@ -48,5 +50,14 @@ export class UserIntegrationService {
 
     async removeForUser(userId: number, type: IntegrationType) {
         return this.integrationRepo.delete({ user: { id: userId }, type });
+    }
+
+    getEnabledIntegrations() {
+        const enabled = this.configService
+            .get("TW_ENABLED_INTEGRATIONS")
+            .split(",")
+            .filter((integration) => Boolean(integration));
+
+        return { enabled };
     }
 }

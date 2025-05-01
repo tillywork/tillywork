@@ -75,10 +75,22 @@ export const useIntegrationsService = () => {
     });
   }
 
+  function getEnabledIntegrations(): Promise<{ enabled: string[] }> {
+    return sendRequest('/user-integrations/enabled');
+  }
+
+  function useGetEnabledIntegrations() {
+    return useQuery({
+      queryKey: ['enabledIntegrations'],
+      queryFn: getEnabledIntegrations,
+    });
+  }
+
   return {
     useGetIntegrations,
     useGetIntegration,
     useDeleteIntegration,
     getAuthUrl,
+    useGetEnabledIntegrations,
   };
 };

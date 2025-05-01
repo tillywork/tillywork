@@ -1,22 +1,42 @@
 <script setup lang="ts">
-import { NotificationChannel } from '@tillywork/shared';
+import { useIntegrations } from '@/composables/useIntegrations';
+
+import { IntegrationType, NotificationChannel } from '@tillywork/shared';
+
 import NotificationPreference from '../notifications/NotificationPreference.vue';
+
+export type ChannelConfig = {
+  channel: NotificationChannel;
+  title: string;
+  ripple?: boolean;
+  hideSwitch?: boolean;
+  onClick?: () => void;
+};
 
 const router = useRouter();
 
-const preferences = [
-  {
-    channel: NotificationChannel.IN_APP,
-    title: 'In-app',
-    ripple: false,
-  },
-  {
-    channel: NotificationChannel.SLACK,
-    title: 'Slack',
-    onClick: () => goToConfig(NotificationChannel.SLACK),
-    hideSwitch: true,
-  },
-];
+const { isIntegrationEnabled } = useIntegrations();
+
+const preferences = computed<ChannelConfig[]>(() => {
+  const channels: ChannelConfig[] = [
+    {
+      channel: NotificationChannel.IN_APP,
+      title: 'In-app',
+      ripple: false,
+    },
+  ];
+
+  if (isIntegrationEnabled(IntegrationType.SLACK)) {
+    channels.push({
+      channel: NotificationChannel.SLACK,
+      title: 'Slack',
+      onClick: () => goToConfig(NotificationChannel.SLACK),
+      hideSwitch: true,
+    });
+  }
+
+  return channels;
+});
 
 function goToConfig(channel: NotificationChannel) {
   router.push(`/settings/notifications/${channel}`);

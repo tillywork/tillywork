@@ -14,7 +14,6 @@ import { User } from "../../users/user.entity";
 import { UserIntegrationService } from "../services/user.integration.service";
 import { UpsertUserIntegrationDto } from "../dto/upsert.user.integration.dto";
 import { IntegrationType } from "@tillywork/shared";
-import { ConfigService } from "@nestjs/config";
 import { TillyLogger } from "../../logger/tilly.logger";
 import { SlackIntegrationService } from "../services/slack.integration.service";
 
@@ -27,7 +26,6 @@ export class UserIntegrationController {
 
     constructor(
         private readonly service: UserIntegrationService,
-        private readonly configService: ConfigService,
         private readonly slackIntegrationService: SlackIntegrationService
     ) {}
 
@@ -47,6 +45,12 @@ export class UserIntegrationController {
         @Param("type") type: IntegrationType
     ) {
         return this.service.findOne({ userId: user.id, type });
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get("enabled")
+    async getEnabledIntegrations() {
+        return this.service.getEnabledIntegrations();
     }
 
     @UseGuards(JwtAuthGuard)
