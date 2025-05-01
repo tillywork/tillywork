@@ -74,7 +74,7 @@ export const useCommandStore = defineStore('command', () => {
         section: 'Settings',
         icon: 'mdi-cog',
         title: 'Settings',
-        action: () => router.push('/settings/' + SettingsType.THEME),
+        action: () => router.push('/settings'),
         shortcut: [','],
       },
       {
