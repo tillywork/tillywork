@@ -68,26 +68,13 @@ export class NotificationProcessor {
     }
 
     private async handleAssigneeEvent(event: NotificationAssigneeEvent) {
-        const {
-            createdById,
-            workspaceId,
-            cardId,
-            assigneeChange,
-            createdByType,
-        } = event.payload;
+        const { createdById, workspaceId, cardId, assigneeChange } =
+            event.payload;
 
         const card = await this.aclContext.run(true, () =>
             this.cardsService.findOne(cardId)
         );
         const cardUrl = this.cardsService.getCardUrl(card);
-
-        const createdBy = createdById
-            ? await this.usersService.findOne(createdById)
-            : null;
-        const actorName = getCreatedByName({
-            createdBy: createdBy as any,
-            createdByType,
-        });
 
         const addedAssignees = assigneeChange.newValue.filter(
             (id) => !assigneeChange.oldValue.includes(id)
@@ -113,7 +100,6 @@ export class NotificationProcessor {
                 relatedResourceType: "card",
                 message: `You were added as assignee`,
                 title: await this.cardsService.getCardTitle(card),
-                actorName,
                 url: cardUrl,
             });
         }
@@ -129,7 +115,6 @@ export class NotificationProcessor {
                 relatedResourceType: "card",
                 message: `You were removed as assignee`,
                 title: await this.cardsService.getCardTitle(card),
-                actorName,
                 url: cardUrl,
             });
         }
@@ -150,12 +135,6 @@ export class NotificationProcessor {
 
             return null;
         });
-        const actorName = commenter
-            ? getCreatedByName({
-                  createdBy: comment.createdBy as any,
-                  createdByType: comment.createdByType,
-              })
-            : undefined;
 
         if (commenter) {
             await this.watcherService.addWatcher({
@@ -190,7 +169,6 @@ export class NotificationProcessor {
                     createdByType: comment.createdByType,
                 })} mentioned you in a comment`,
                 title: await this.cardsService.getCardTitle(card),
-                actorName,
                 url: cardUrl,
             });
         }
@@ -213,7 +191,6 @@ export class NotificationProcessor {
                     createdByType: comment.createdByType,
                 })} added a comment`,
                 title: await this.cardsService.getCardTitle(card),
-                actorName,
                 url: cardUrl,
             });
         }
@@ -240,9 +217,6 @@ export class NotificationProcessor {
 
             return null;
         });
-        const actorName = updatedBy
-            ? getCreatedByName({ createdBy: updatedBy as any, createdByType })
-            : undefined;
 
         let mentionedOnName: string = mentionedOn;
 
@@ -270,7 +244,6 @@ export class NotificationProcessor {
                     createdByType: createdByType,
                 })} mentioned you in a ${mentionedOnName}`,
                 title: await this.cardsService.getCardTitle(card),
-                actorName,
                 url: cardUrl,
             });
         }
@@ -293,12 +266,6 @@ export class NotificationProcessor {
 
             return null;
         });
-        const actorName = updatedBy
-            ? getCreatedByName({
-                  createdBy: activity.createdBy as any,
-                  createdByType: activity.createdByType,
-              })
-            : undefined;
 
         const newListStage = await this.aclContext.run(true, () =>
             this.listStagesService.findOne(activity.content.changes[0].newValue)
@@ -326,7 +293,6 @@ export class NotificationProcessor {
                     newListStage.name
                 }`,
                 title: await this.cardsService.getCardTitle(card),
-                actorName,
                 url: cardUrl,
             });
         }

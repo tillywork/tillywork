@@ -124,7 +124,6 @@ export class NotificationService {
         message,
         title,
         color,
-        actorName,
         url,
     }: {
         type: NotificationType;
@@ -135,7 +134,6 @@ export class NotificationService {
         message: string;
         title: string;
         color?: string;
-        actorName?: string;
         url?: string;
     }) {
         if (
@@ -161,20 +159,6 @@ export class NotificationService {
             await this.slackIntegrationService.sendDM({
                 userId: recipientId,
                 message,
-                title,
-                url,
-            });
-        }
-
-        if (slackConfig.channelId) {
-            const channelMessage = actorName
-                ? message.replace(/^You\b/, actorName)
-                : message;
-
-            await this.slackIntegrationService.sendChannelMessage({
-                userId: recipientId,
-                channelId: slackConfig.channelId,
-                message: channelMessage,
                 title,
                 url,
             });

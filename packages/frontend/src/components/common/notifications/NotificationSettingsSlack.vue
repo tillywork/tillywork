@@ -17,34 +17,34 @@ const { data: preference } = useGetNotificationPreference({
 });
 const { mutateAsync: upsertPreference } = useUpsertPreference();
 
-const { data: slackChannels, isFetching: isLoadingChannels } = useGetChannels();
+// const { data: slackChannels, isFetching: isLoadingChannels } = useGetChannels();
 
 const config = ref<PreferenceConfig>({});
 
-const selectedChannel = computed(() => {
-  return slackChannels.value?.find(
-    (channel) => channel.id === config.value.channelId
-  );
-});
+// const selectedChannel = computed(() => {
+//   return slackChannels.value?.find(
+//     (channel) => channel.id === config.value.channelId
+//   );
+// });
 
-const slackChannelOptions = computed(() => {
-  const channels: ContextMenuItem[] =
-    slackChannels.value?.map((channel) => ({
-      title: `#${channel.name}`,
-      value: channel.id,
-    })) ?? [];
+// const slackChannelOptions = computed(() => {
+//   const channels: ContextMenuItem[] =
+//     slackChannels.value?.map((channel) => ({
+//       title: `#${channel.name}`,
+//       value: channel.id,
+//     })) ?? [];
 
-  const emptyOption: ContextMenuItem = {
-    title: 'None',
-    action: () =>
-      (config.value = {
-        isDmEnabled: config.value.isDmEnabled,
-        channelId: undefined,
-      }),
-  };
+//   const emptyOption: ContextMenuItem = {
+//     title: 'None',
+//     action: () =>
+//       (config.value = {
+//         isDmEnabled: config.value.isDmEnabled,
+//         channelId: undefined,
+//       }),
+//   };
 
-  return [emptyOption, ...channels];
-});
+//   return [emptyOption, ...channels];
+// });
 
 watch(
   preference,
@@ -105,7 +105,7 @@ async function save() {
           </template>
         </v-list-item>
 
-        <v-list-item
+        <!-- <v-list-item
           class="bg-accent-lighten mb-4 px-6"
           border="thin"
           rounded="md"
@@ -154,7 +154,7 @@ async function save() {
               />
             </v-menu>
           </template>
-        </v-list-item>
+        </v-list-item> -->
       </v-list>
     </v-card>
   </v-card>
