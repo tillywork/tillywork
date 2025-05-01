@@ -297,14 +297,6 @@ export class SlackIntegrationService {
     }) {
         const blocks = [
             {
-                type: "header",
-                text: {
-                    type: "plain_text",
-                    text: `🔔 New notification`,
-                    emoji: true,
-                },
-            },
-            {
                 type: "section",
                 text: {
                     type: "mrkdwn",
@@ -314,12 +306,6 @@ export class SlackIntegrationService {
             {
                 type: "context",
                 elements: [
-                    {
-                        type: "image",
-                        image_url:
-                            "https://api.slack.com/img/blocks/bkb_template_images/notificationsGrayWarning.png",
-                        alt_text: "notification icon",
-                    },
                     {
                         type: "mrkdwn",
                         text: message,
