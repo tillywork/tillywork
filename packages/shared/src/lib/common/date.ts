@@ -21,4 +21,48 @@ dayjs.extend(isLeapYear);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
+declare module 'dayjs' {
+  interface Dayjs {
+    formatShort(): string;
+  }
+}
+
+dayjs.prototype.formatShort = function (): string {
+  const now = dayjs();
+  const diffInSeconds = now.diff(this, 'second');
+
+  // Less than a minute
+  if (diffInSeconds < 60) {
+    return `${diffInSeconds}s`;
+  }
+
+  // Less than an hour
+  const diffInMinutes = now.diff(this, 'minute');
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes}m`;
+  }
+
+  // Less than a day
+  const diffInHours = now.diff(this, 'hour');
+  if (diffInHours < 24) {
+    return `${diffInHours}h`;
+  }
+
+  // Less than a month
+  const diffInDays = now.diff(this, 'day');
+  if (diffInDays < 30) {
+    return `${diffInDays}d`;
+  }
+
+  // Less than a year
+  const diffInMonths = now.diff(this, 'month');
+  if (diffInMonths < 12) {
+    return `${diffInMonths}mo`;
+  }
+
+  // Year or more
+  const diffInYears = now.diff(this, 'year');
+  return `${diffInYears}y`;
+};
+
 export default dayjs;

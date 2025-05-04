@@ -1,9 +1,9 @@
-import type { ContextMenuItem } from '@/components/common/base/ContextMenu/types';
 import { DIALOGS } from '@/components/common/dialogs/types';
 import { useCardsService } from '@/services/useCardsService';
 
 import { useDialogStore } from '@/stores/dialog';
 import { useSnackbarStore } from '@/stores/snackbar';
+import { useStateStore } from '@/stores/state';
 
 import { FieldTypes, type Card, type Field } from '@tillywork/shared';
 
@@ -12,6 +12,7 @@ import { cloneDeep } from 'lodash';
 export const useCard = () => {
   const { showSnackbar } = useSnackbarStore();
   const dialog = useDialogStore();
+  const { setHoveredCard } = useStateStore();
 
   const {
     useUpdateCardMutation,
@@ -125,39 +126,23 @@ export const useCard = () => {
     });
   }
 
-  function getCardContextMenuItems(
-    card: Card,
-    cb?: () => void
-  ): ContextMenuItem[] {
-    return [
-      {
-        title: 'Copy link',
-        icon: 'mdi-link',
-        action: () => copyLink(card, cb),
-      },
-      {
-        title: 'Delete',
-        icon: 'mdi-delete-outline',
-        action: () => confirmDelete(card, cb),
-        shortcut: ['DEL'],
-      },
-    ];
-  }
-
   function updateCardStage({
     cardId,
     cardListId,
     listStageId,
+    order,
   }: {
     cardId: number;
     cardListId: number;
     listStageId: number;
+    order?: number;
   }) {
     updateCardList({
       cardId,
       cardListId,
       updateCardListDto: {
         listStageId,
+        order,
       },
     }).catch(() => {
       showSnackbar({
@@ -168,13 +153,27 @@ export const useCard = () => {
     });
   }
 
+  function handleHoverCard({
+    isHovering,
+    card,
+  }: {
+    isHovering: boolean;
+    card: Card;
+  }) {
+    if (isHovering) {
+      setHoveredCard(card);
+    } else {
+      setHoveredCard(null);
+    }
+  }
+
   return {
     updateFieldValue,
     normalizeFieldValue,
     confirmDelete,
     copyLink,
-    getCardContextMenuItems,
     updateCard,
     updateCardStage,
+    handleHoverCard,
   };
 };

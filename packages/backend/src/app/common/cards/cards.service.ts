@@ -20,12 +20,13 @@ import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transfor
 import { RelationCountMetadataToAttributeTransformer } from "typeorm/query-builder/relation-count/RelationCountMetadataToAttributeTransformer";
 import { RelationIdMetadataToAttributeTransformer } from "typeorm/query-builder/relation-id/RelationIdMetadataToAttributeTransformer";
 import { ClsService } from "nestjs-cls";
-import { PermissionLevel, TriggerType } from "@tillywork/shared";
+import { assertIsSet, PermissionLevel, TriggerType } from "@tillywork/shared";
 import { AccessControlService } from "../auth/services/access.control.service";
 import { Field } from "../fields/field.entity";
 import { AclContext } from "../auth/context/acl.context";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { TriggerEvent } from "../automations/events/trigger.event";
+import { ConfigService } from "@nestjs/config";
 
 export type CardFindAllResult = {
     total: number;
@@ -57,7 +58,8 @@ export class CardsService {
         private accessControlService: AccessControlService,
         private clsService: ClsService,
         private readonly aclContext: AclContext,
-        private eventEmitter: EventEmitter2
+        private eventEmitter: EventEmitter2,
+        private configService: ConfigService
     ) {}
 
     async findAll({
@@ -338,5 +340,32 @@ export class CardsService {
         }
 
         await this.cardsRepository.softRemove(card);
+    }
+
+    async getCardTitle(card: Card): Promise<string> {
+        assertIsSet(
+            card.type,
+            "[CardsService#getCardTitle] Card type is empty"
+        );
+
+        const titleField = await this.cardsRepository.manager
+            .getRepository(Field)
+            .findOne({
+                where: {
+                    cardType: { id: card.type.id },
+                    isTitle: true,
+                },
+            });
+
+        assertIsSet(
+            titleField,
+            "[CardsService#getCardTitle] Title field not found"
+        );
+
+        return card.data?.[titleField.slug];
+    }
+
+    getCardUrl(card: Card): string {
+        return `${this.configService.get("TW_FRONTEND_URL")}/card/${card.id}`;
     }
 }

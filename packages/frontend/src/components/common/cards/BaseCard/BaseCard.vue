@@ -6,11 +6,25 @@ import { useStateStore } from '@/stores/state';
 import BaseCardTask from './BaseCardTask.vue';
 import BaseCardEntity from './BaseCardEntity.vue';
 
-const { card } = defineProps<{
+const {
+  card,
+  hideBackButton = false,
+  temporaryDrawer = false,
+  closable = false,
+} = defineProps<{
   card: Card;
+  hideBackButton?: boolean;
+  temporaryDrawer?: boolean;
+  closable?: boolean;
 }>();
 
+const emit = defineEmits(['close']);
+
 const { setCurrentCard } = useStateStore();
+
+function handleClose() {
+  emit('close');
+}
 
 watch(
   () => card,
@@ -25,7 +39,13 @@ onBeforeUnmount(() => {
 
 <template>
   <template v-if="card.type.layout === CardTypeLayout.DEFAULT">
-    <base-card-task :card />
+    <base-card-task
+      :card
+      :hideBackButton
+      :temporaryDrawer
+      :closable
+      @close="handleClose"
+    />
   </template>
   <template v-else>
     <base-card-entity :card />

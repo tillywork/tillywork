@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { useCard } from '@/composables/useCard';
-
 import type { Card } from '@tillywork/shared';
 
 import MenuWrapper from '@/components/common/base/ContextMenu/MenuWrapper.vue';
+import { useCardContextMenu } from '@/composables/useCardContextMenu';
 
 const { card } = defineProps<{
   card: Card;
@@ -17,13 +16,15 @@ defineSlots<{
   activator(props: { props: Record<string, unknown> }): void;
 }>();
 
-const { getCardContextMenuItems } = useCard();
-
-const cardActions = computed(() => getCardContextMenuItems(card, closeMenu));
+const { items, onUpdateMenuOpen } = useCardContextMenu(card, closeMenu);
 
 function closeMenu() {
   menu.value = false;
 }
+
+watch(menu, (v) => {
+  onUpdateMenuOpen(v);
+});
 </script>
 
 <template>
@@ -45,6 +46,6 @@ function closeMenu() {
         </v-btn>
       </slot>
     </template>
-    <menu-wrapper :items="cardActions" />
+    <menu-wrapper :items />
   </v-menu>
 </template>

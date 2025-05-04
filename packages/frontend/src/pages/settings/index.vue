@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useSettings } from '@/composables/useSettings';
+
+import SettingsLayout from '@/layouts/SettingsLayout.vue';
+
 const router = useRouter();
 
 definePage({
@@ -8,5 +12,15 @@ definePage({
   },
 });
 
-onMounted(() => router.replace('/settings/theme'));
+const { allSettings } = useSettings();
+
+watchEffect(() => {
+  if (allSettings) {
+    router.push(`/settings/${allSettings[0].type}`);
+  }
+});
 </script>
+
+<template>
+  <settings-layout />
+</template>

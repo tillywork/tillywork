@@ -1,16 +1,9 @@
 <script setup lang="ts">
-import { useFieldQueryStore } from '@/stores/field.query';
-import { useQueryStore } from '@/stores/query';
-
-import { useCard } from '@/composables/useCard';
-
 import type { Card } from '@tillywork/shared';
 import type { VSheet } from 'vuetify/components';
 
-import ListStageSelector from '../../inputs/ListStageSelector.vue';
+import GanttCard from './GanttCard.vue';
 import type GanttChart from './GanttChart.vue';
-import ContextMenu from '../../base/ContextMenu/ContextMenu.vue';
-import { useStateStore } from '@/stores/state';
 
 const props = defineProps<{
   allCards: Card[];
@@ -32,12 +25,6 @@ const isNextPageEmpty = ref(false);
 watchEffect(() => {
   cardsCopy.value = props.allCards;
 });
-
-const { getCardContextMenuItems, updateCardStage } = useCard();
-
-const { listStages } = storeToRefs(useQueryStore());
-const { titleField } = storeToRefs(useFieldQueryStore());
-const { setHoveredCard } = useStateStore();
 
 const handleScroll = async (e: Event) => {
   emit('scroll', e);
@@ -76,11 +63,6 @@ const handleScrollToCard = (card: Card) => {
     ganttChart.value.scrollToCard(`${card.id}`);
   }
 };
-
-const handleHoverCard = (card: Card, isHovering: boolean) => {
-  if (isHovering) setHoveredCard(card);
-  else setHoveredCard(null);
-};
 </script>
 
 <template>
@@ -91,50 +73,14 @@ const handleHoverCard = (card: Card, isHovering: boolean) => {
     @scroll="handleScroll"
   >
     <v-list v-memo="cardsCopy" class="pa-0">
-      <template v-for="card in cardsCopy" :key="card.id">
-        <context-menu :items="getCardContextMenuItems(card)">
-          <v-hover
-            #="{ props }"
-            @update:model-value="(v) => handleHoverCard(card, v)"
-          >
-            <v-list-item
-              v-bind="props"
-              class="position-relative border-t-thin"
-              :height="rowHeight"
-              :to="`/card/${card.id}`"
-            >
-              <template #prepend v-if="card.cardLists.length">
-                <list-stage-selector
-                  v-model="card.cardLists[0].listStage"
-                  :listStages="listStages"
-                  theme="icon"
-                  @update:modelValue="
-                    (v) =>
-                      updateCardStage({
-                        cardId: card.id,
-                        cardListId: card.cardLists[0].id,
-                        listStageId: v.id,
-                      })
-                  "
-                />
-              </template>
-              <v-list-item-title v-if="titleField" class="ms-1">
-                {{ card.data[titleField.slug] }}
-              </v-list-item-title>
-              <template #append>
-                <v-btn
-                  v-tooltip="`Go to ${card.type.name.toLowerCase()}`"
-                  icon="mdi-arrow-right"
-                  density="compact"
-                  size="small"
-                  variant="tonal"
-                  color="default"
-                  @click.prevent="handleScrollToCard(card)"
-                />
-              </template>
-            </v-list-item>
-          </v-hover>
-        </context-menu>
+      <template v-if="cardsCopy">
+        <template v-for="(card, index) in cardsCopy" :key="card.id">
+          <gantt-card
+            v-model="cardsCopy[index]"
+            :height="rowHeight"
+            @click:scroll="handleScrollToCard"
+          />
+        </template>
       </template>
     </v-list>
   </v-sheet>

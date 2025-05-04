@@ -16,6 +16,7 @@ import { ConfigService } from "@nestjs/config";
 import { contentParser } from "fastify-multer";
 import { trace, context } from "@opentelemetry/api";
 import { TillyLogger } from "./app/common/logger/tilly.logger";
+import { JwtService } from "@nestjs/jwt";
 
 async function bootstrap() {
     const logger = new TillyLogger("main.ts");
@@ -61,11 +62,15 @@ async function bootstrap() {
     const serverAdapter = new BullFastifyAdapter();
     serverAdapter.setBasePath("/bullmq");
 
-    const automationQueue = app.get(getQueueToken("automation"));
-    const queues = [new BullAdapter(automationQueue)];
+    const automationQueue = app.get(getQueueToken("automations"));
+    const notificationQueue = app.get(getQueueToken("notifications"));
+    const queues = [
+        new BullAdapter(automationQueue),
+        new BullAdapter(notificationQueue),
+    ];
 
     if (configService.get("TW_MAIL_ENABLE")) {
-        const emailQueue = app.get(getQueueToken("email"));
+        const emailQueue = app.get(getQueueToken("emails"));
         queues.push(new BullAdapter(emailQueue));
     }
 

@@ -282,5 +282,6 @@ export const useCardsService = () => {
     searchCards,
     calculateCardOrder,
     getCards,
+    getCard,
   };
 };

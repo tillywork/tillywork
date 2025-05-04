@@ -3,7 +3,7 @@ import {
   DIALOGS,
   UpsertDialogMode,
 } from '@/components/common/dialogs/types';
-import { SETTINGS } from '@/components/common/settings/types';
+import { SettingsType } from '@/components/common/settings/types';
 import { useDialogStore } from './dialog';
 import { useThemeStore } from './theme';
 import { type Command } from '@/components/common/commands/types';
@@ -59,7 +59,7 @@ export const useCommandStore = defineStore('command', () => {
         section: 'Workspace',
         icon: 'mdi-briefcase-edit',
         title: 'Update current workspace',
-        action: () => router.push('/settings/' + SETTINGS.WORKSPACE),
+        action: () => router.push('/settings/' + SettingsType.WORKSPACE),
         shortcut: ['F2'],
       },
       {
@@ -67,14 +67,14 @@ export const useCommandStore = defineStore('command', () => {
         section: 'Project',
         icon: 'mdi-account-multiple-outline',
         title: 'Invite and manage members',
-        action: () => router.push('/settings/' + SETTINGS.PROJECT_MEMBERS),
+        action: () => router.push('/settings/' + SettingsType.PROJECT_MEMBERS),
       },
       {
         id: 'settings',
         section: 'Settings',
         icon: 'mdi-cog',
         title: 'Settings',
-        action: () => router.push('/settings/' + SETTINGS.THEME),
+        action: () => router.push('/settings'),
         shortcut: [','],
       },
       {
@@ -82,7 +82,7 @@ export const useCommandStore = defineStore('command', () => {
         section: 'Settings',
         icon: 'mdi-monitor-screenshot',
         title: 'Theme',
-        action: () => router.push('/settings/' + SETTINGS.THEME),
+        action: () => router.push('/settings/' + SettingsType.THEME),
       },
       {
         id: 'toggle-theme',
@@ -97,14 +97,14 @@ export const useCommandStore = defineStore('command', () => {
         section: 'Settings',
         icon: 'mdi-toy-brick-outline',
         title: 'Card types',
-        action: () => router.push('/settings/' + SETTINGS.CARD_TYPES),
+        action: () => router.push('/settings/' + SettingsType.CARD_TYPES),
       },
       {
         id: 'settings-fields',
         section: 'Settings',
         icon: 'mdi-form-select',
         title: 'Custom fields',
-        action: () => router.push('/settings/' + SETTINGS.CUSTOM_FIELDS),
+        action: () => router.push('/settings/' + SettingsType.CUSTOM_FIELDS),
       },
       {
         id: 'contact-support',

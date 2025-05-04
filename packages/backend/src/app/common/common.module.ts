@@ -17,6 +17,9 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { FilesModule } from "./files/files.module";
 import { AutomationsModule } from "./automations/automations.module";
 import { BullModule } from "@nestjs/bull";
+import { NotificationModule } from "./notifications/notification.module";
+import { WatcherModule } from "./watchers/watcher.module";
+import { UserIntegrationModule } from "./user-integrations/user.integration.module";
 
 @Module({
     imports: [
@@ -51,6 +54,9 @@ import { BullModule } from "@nestjs/bull";
         MailerModule,
         FilesModule,
         AutomationsModule,
+        NotificationModule,
+        WatcherModule,
+        UserIntegrationModule,
     ],
     controllers: [],
     providers: [],

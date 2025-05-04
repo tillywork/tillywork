@@ -7,6 +7,7 @@ import { useHideNavigationDrawer } from '@/composables/useHideNavigationDrawer';
 import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
 import CommandPaletteActivator from '@/components/common/navigation/CommandPaletteActivator.vue';
+import { useNotificationStore } from '@/stores/notification';
 
 const { hideNavigationDrawer } = useHideNavigationDrawer();
 const navigationDrawer = ref(true);
@@ -14,26 +15,30 @@ const authStore = useAuthStore();
 const { isAuthenticated } = authStore;
 const logo = useLogo();
 
-const navigationMenuItems = ref<NavigationMenuItem[]>([
-  {
-    icon: 'mdi-draw',
-    title: 'Whiteboard',
-    route: '/whiteboard',
-    activeOnExactMatch: true,
-  },
-]);
+const { unreadNotifications } = storeToRefs(useNotificationStore());
 
-if (isAuthenticated()) {
-  // Initialize with default items
-  //   navigationMenuItems.value = [
-  //     {
-  //       icon: 'mdi-home',
-  //       title: 'Home',
-  //       route: { name: 'PMHome' },
-  //       activeOnExactMatch: true,
-  //     },
-  //   ];
-}
+const navigationMenuItems = computed<NavigationMenuItem[]>(() => {
+  const items: NavigationMenuItem[] = [
+    {
+      icon: 'mdi-inbox',
+      title: 'Inbox',
+      route: '/inbox',
+      activeOnExactMatch: true,
+      appendText:
+        unreadNotifications.value && unreadNotifications.value > 0
+          ? unreadNotifications.value.toString()
+          : undefined,
+    },
+    {
+      icon: 'mdi-draw',
+      title: 'Whiteboard',
+      route: '/whiteboard',
+      activeOnExactMatch: true,
+    },
+  ];
+
+  return items;
+});
 </script>
 
 <template>
@@ -74,7 +79,6 @@ if (isAuthenticated()) {
           v-for="navigationItem in navigationMenuItems"
           :key="navigationItem.title"
           :to="navigationItem.route"
-          @click="navigationItem.onClick"
           :exact="navigationItem.activeOnExactMatch"
           rounded="md"
         >
@@ -82,6 +86,11 @@ if (isAuthenticated()) {
             <v-icon :icon="navigationItem.icon" />
           </template>
           <v-list-item-title>{{ navigationItem.title }}</v-list-item-title>
+          <template #append v-if="navigationItem.appendText">
+            <v-chip rounded="md" size="x-small" class="px-2 font-weight-bold">
+              {{ navigationItem.appendText }}
+            </v-chip>
+          </template>
         </v-list-item>
       </v-list>
 

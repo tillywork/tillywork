@@ -13,6 +13,7 @@ import { TracingInterceptor } from "./common/interceptors/tracing.interceptor";
         ConfigModule.forRoot({
             load: [typeorm],
             validationSchema,
+            isGlobal: true,
         }),
         TypeOrmModule.forRootAsync({
             useFactory: async (configService: ConfigService) =>

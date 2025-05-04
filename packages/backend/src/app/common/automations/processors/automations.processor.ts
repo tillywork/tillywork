@@ -18,7 +18,7 @@ import { ActionType, AutomationRunStatus } from "@tillywork/shared";
 import { AutomationHandlerRegistry } from "../registries/automation.handler.registry";
 import { AutomationHandler } from "../handlers/automation.handler";
 
-@Processor("automation")
+@Processor("automations")
 export class AutomationProcessor {
     private readonly logger = new TillyLogger("AutomationProcessor");
 

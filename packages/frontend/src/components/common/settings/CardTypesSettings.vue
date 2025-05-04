@@ -41,7 +41,7 @@ function openRemoveCardTypeDialog(cardType: CardType) {
       <base-icon-btn @click="openCreateCardTypeDialog" />
     </div>
 
-    <p class="text-subtitle-2 mb-2">
+    <p class="text-subtitle-2 mb-2 text-color-subtitle">
       Cards are the building block of tillywork. They can be tasks, contacts, or
       whatever you need them to be.
     </p>

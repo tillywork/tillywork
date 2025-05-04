@@ -21,7 +21,6 @@ import { cloneDeep } from 'lodash';
 import { useCard } from './useCard';
 import type { Row } from '@tanstack/vue-table';
 import { useListGroupsService } from '@/services/useListGroupsService';
-import { useStateStore } from '@/stores/state';
 import objectUtils from '@/utils/object';
 import type { MaybeRef } from 'vue';
 
@@ -108,9 +107,8 @@ export const useListGroup = ({
 
   const dialog = useDialogStore();
   const { showSnackbar } = useSnackbarStore();
-  const { setHoveredCard } = useStateStore();
 
-  const { updateFieldValue } = useCard();
+  const { updateFieldValue, updateCardStage } = useCard();
   const {
     calculateCardOrder,
     useDeleteCardMutation,
@@ -288,7 +286,7 @@ export const useListGroup = ({
 
     switch (listGroup.value.type) {
       case ListGroupOptions.LIST_STAGE: {
-        handleUpdateCardStage({
+        updateCardStage({
           cardId: currentCard.id,
           cardListId: currentCard.cardLists[0].id,
           listStageId: listGroup.value.entityId as number,
@@ -335,33 +333,6 @@ export const useListGroup = ({
         });
       });
     }
-  }
-
-  function handleUpdateCardStage({
-    cardId,
-    cardListId,
-    listStageId,
-    order,
-  }: {
-    cardId: number;
-    cardListId: number;
-    listStageId: number;
-    order?: number;
-  }) {
-    updateCardList({
-      cardId,
-      cardListId,
-      updateCardListDto: {
-        listStageId,
-        order,
-      },
-    }).catch(() => {
-      showSnackbar({
-        message: 'Something went wrong, please try again.',
-        color: 'error',
-        timeout: 5000,
-      });
-    });
   }
 
   function handleDeleteCard(card: Card) {
@@ -416,20 +387,6 @@ export const useListGroup = ({
     });
   }
 
-  function handleHoverCard({
-    isHovering,
-    card,
-  }: {
-    isHovering: boolean;
-    card: Card;
-  }) {
-    if (isHovering) {
-      setHoveredCard(card);
-    } else {
-      setHoveredCard(null);
-    }
-  }
-
   return {
     openCreateCardDialog,
     onDragAdd,
@@ -442,8 +399,6 @@ export const useListGroup = ({
     toggleGroupExpansion,
     handleDeleteCard,
     handleUpdateCardOrder,
-    handleUpdateCardStage,
-    handleHoverCard,
     queryConfig,
   };
 };

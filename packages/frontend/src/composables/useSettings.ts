@@ -1,41 +1,93 @@
-import { SETTINGS } from '@/components/common/settings/types';
+import { SettingsType } from '@/components/common/settings/types';
+
+export type SettingsNavigationItem = {
+  icon: string;
+  component: any;
+  title: string;
+  type: SettingsType;
+};
 
 export const useSettings = () => {
-  const settings = {
-    [SETTINGS.THEME]: {
-      icon: 'mdi-monitor-screenshot',
+  const accountSettings: SettingsNavigationItem[] = [
+    {
+      icon: 'mdi-bell',
       component: defineAsyncComponent(
-        () => import('../components/common/settings/ThemeSettings.vue')
+        () => import('../components/common/settings/NotificationSettings.vue')
       ),
+      title: 'Notifications',
+      type: SettingsType.NOTIFICATIONS,
     },
-    [SETTINGS.WORKSPACE]: {
-      icon: 'mdi-briefcase-outline',
-      component: defineAsyncComponent(
-        () => import('../components/common/settings/WorkspaceSettings.vue')
-      ),
-    },
-    [SETTINGS.CARD_TYPES]: {
+  ];
+
+  const cardSettings: SettingsNavigationItem[] = [
+    {
       icon: 'mdi-toy-brick-outline',
       component: defineAsyncComponent(
         () => import('../components/common/settings/CardTypesSettings.vue')
       ),
+      title: 'Card types',
+      type: SettingsType.CARD_TYPES,
     },
-    [SETTINGS.CUSTOM_FIELDS]: {
+    {
       icon: 'mdi-form-select',
       component: defineAsyncComponent(
         () => import('../components/common/settings/CustomFieldsSettings.vue')
       ),
+      title: 'List fields',
+      type: SettingsType.CUSTOM_FIELDS,
     },
-    [SETTINGS.PROJECT_MEMBERS]: {
+  ];
+
+  const themeSettings: SettingsNavigationItem[] = [
+    {
+      icon: 'mdi-monitor-screenshot',
+      component: defineAsyncComponent(
+        () => import('../components/common/settings/ThemeSettings.vue')
+      ),
+      title: 'Theme',
+      type: SettingsType.THEME,
+    },
+  ];
+
+  const workspaceSettings: SettingsNavigationItem[] = [
+    {
+      icon: 'mdi-briefcase-outline',
+      component: defineAsyncComponent(
+        () => import('../components/common/settings/WorkspaceSettings.vue')
+      ),
+      title: 'Workspace',
+      type: SettingsType.WORKSPACE,
+    },
+    {
+      icon: 'mdi-tools',
+      component: defineAsyncComponent(
+        () => import('../components/common/settings/IntegrationSettings.vue')
+      ),
+      title: 'Integrations',
+      type: SettingsType.INTEGRATIONS,
+    },
+    {
       icon: 'mdi-account-multiple-outline',
       component: defineAsyncComponent(
         () => import('../components/common/settings/ProjectMembersSettings.vue')
       ),
+      title: 'Invite members',
+      type: SettingsType.PROJECT_MEMBERS,
     },
-  };
+  ];
+
+  const allSettings: SettingsNavigationItem[] = [
+    ...accountSettings,
+    ...cardSettings,
+    ...themeSettings,
+    ...workspaceSettings,
+  ];
 
   return {
-    sections: Object.keys(settings),
-    settings,
+    allSettings,
+    accountSettings,
+    cardSettings,
+    themeSettings,
+    workspaceSettings,
   };
 };

@@ -12,3 +12,7 @@ export * from './lib/cards';
 export * from './lib/files';
 export * from './lib/auth';
 export * from './lib/automations';
+export * from './lib/notifications';
+export * from './lib/tiptap';
+export * from './lib/watchers';
+export * from './lib/integrations';

@@ -6,7 +6,7 @@ defineProps<{
   text?: string;
   color?: string;
   style?: any;
-  size?: number | 'x-small' | 'small' | 'default';
+  size?: string | number | 'x-small' | 'small' | 'default';
   rounded?: string;
 }>();
 </script>

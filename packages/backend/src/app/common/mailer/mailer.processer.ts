@@ -4,7 +4,7 @@ import { MailerService } from "./mailer.service";
 import { Logger } from "@nestjs/common";
 import { EmailStatus } from "./types";
 
-@Processor("email")
+@Processor("emails")
 export class MailerProcessor {
     private readonly logger = new Logger("MailerProcessor");
     constructor(private readonly mailerService: MailerService) {}

@@ -16,9 +16,7 @@ import {
   type List,
   type Card,
   type ListGroup,
-  type ListStage,
   type SortState,
-  type Field,
 } from '@tillywork/shared';
 
 import objectUtils from '@/utils/object';
@@ -27,14 +25,8 @@ import { cloneDeep } from 'lodash';
 import { useCardsService } from '@/services/useCardsService';
 
 import { useListGroup } from '@/composables/useListGroup';
-import { useCard } from '@/composables/useCard';
-import { useFields } from '@/composables/useFields';
 
-import { useFieldQueryStore } from '@/stores/field.query';
-
-import BaseField from '@/components/common/fields/BaseField.vue';
-import BaseCardChildrenProgress from '../../cards/BaseCardChildrenProgress.vue';
-import ContextMenu from '@/components/common/base/ContextMenu/ContextMenu.vue';
+import ListViewCard from './ListViewCard.vue';
 
 const props = defineProps<{
   listGroup: Row<ListGroup>;
@@ -44,13 +36,6 @@ const props = defineProps<{
 }>();
 
 const cardsService = useCardsService();
-
-const { updateFieldValue, getCardContextMenuItems } = useCard();
-const { getDateFieldColor } = useFields({});
-
-const { titleField, assigneeField, pinnedFieldsWithoutAssignee } = storeToRefs(
-  useFieldQueryStore()
-);
 
 const groupCopy = ref(cloneDeep(props.listGroup.original));
 const sortBy = computed<SortState>(() =>
@@ -140,8 +125,6 @@ const {
   onDragStart,
   onDragUpdate,
   toggleGroupExpansion,
-  handleUpdateCardStage,
-  handleHoverCard,
 } = useListGroup({
   props,
   cards: draggableCards,
@@ -284,116 +267,7 @@ watch(
           group="cards"
         >
           <template #item="{ element: row }">
-            <context-menu
-              :items="getCardContextMenuItems(row.original)"
-              #="{ showMenu }"
-            >
-              <v-hover
-                #="{ isHovering: isRowHovering, props: rowProps }"
-                :disabled="isDragging"
-                @update:model-value="
-                  (v) => handleHoverCard({ isHovering: v, card: row.original })
-                "
-              >
-                <v-list-item
-                  class="list-row text-body-3 border-b-thin"
-                  rounded="0"
-                  height="36"
-                  :to="`/card/${row.original.id}`"
-                  :ripple="false"
-                  v-bind="rowProps"
-                >
-                  <template #prepend>
-                    <div
-                      :style="{ width: '30px' }"
-                      class="d-flex justify-end me-2"
-                    >
-                      <template v-if="isRowHovering">
-                        <base-icon-btn
-                          v-bind="props"
-                          icon="mdi-dots-vertical"
-                          @click.prevent="showMenu"
-                        />
-                      </template>
-                    </div>
-                  </template>
-                  <v-list-item-title class="d-flex align-center ga-1">
-                    <list-stage-selector
-                      :model-value="row.original.cardLists[0].listStage"
-                      theme="icon"
-                      rounded="circle"
-                      :list-stages="listStages ?? []"
-                      @update:modelValue="
-                        (modelValue: ListStage) =>
-                        handleUpdateCardStage({
-                            cardId: row.original.id,
-                            cardListId: row.original.cardLists[0].id,
-                            listStageId: modelValue.id,
-                        })
-                    "
-                      @click.prevent
-                    />
-
-                    <template v-if="titleField">
-                      <span class="text-truncate ms-2">
-                        {{ row.original.data[titleField.slug] }}
-                      </span>
-                    </template>
-                    <template v-else>
-                      <v-skeleton-loader type="text" width="100%" />
-                    </template>
-
-                    <!-- Progress -->
-                    <base-card-children-progress
-                      v-if="row.original.children.length > 0"
-                      :card="row.original"
-                      border="thin"
-                      class="text-caption ms-2"
-                      style="
-                        padding-top: 2px !important;
-                        padding-bottom: 2px !important;
-                      "
-                    />
-                  </v-list-item-title>
-                  <template #append>
-                    <div
-                      class="d-flex align-center ga-2 me-6"
-                      :style="{
-                        maxHeight: '28px',
-                      }"
-                    >
-                      <template
-                        v-for="field in pinnedFieldsWithoutAssignee"
-                        :key="field.slug"
-                      >
-                        <base-field
-                          :field
-                          :color="getDateFieldColor(row.original, field)"
-                          :model-value="row.original.data[field.slug]"
-                          @update:model-value="(v: string) => updateFieldValue({
-                                card: row.original,
-                                field,
-                                v
-                            })"
-                        />
-                      </template>
-                      <template v-if="assigneeField">
-                        <base-field
-                          :field="assigneeField"
-                          :model-value="row.original.data[assigneeField.slug]"
-                          @update:model-value="(v: string) => updateFieldValue({
-                            card: row.original,
-                            field: assigneeField as Field,
-                            v
-                          })"
-                          hide-label
-                        />
-                      </template>
-                    </div>
-                  </template>
-                </v-list-item>
-              </v-hover>
-            </context-menu>
+            <list-view-card :card="row.original" :isDragging />
           </template>
         </draggable>
       </v-infinite-scroll>

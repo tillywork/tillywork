@@ -9,6 +9,8 @@ import { CreateProjectDto } from "../../projects/dto/create.project.dto";
 import { Project } from "../../projects/project.entity";
 import { ProjectUsersService } from "../../projects/project-users/project.users.service";
 import { ClsService } from "nestjs-cls";
+import { NotificationPreferenceService } from "../../notifications/notification-preference/notification.preference.service";
+import { NotificationChannel } from "@tillywork/shared";
 
 export type RegisterResponse =
     | (User & {
@@ -27,7 +29,8 @@ export class AuthService {
         private jwtService: JwtService,
         private projectsService: ProjectsService,
         private projectUsersService: ProjectUsersService,
-        private clsService: ClsService
+        private clsService: ClsService,
+        private notificationPreferenceService: NotificationPreferenceService
     ) {}
 
     async login({ user }: { user: User }): Promise<string> {
@@ -100,6 +103,11 @@ export class AuthService {
         }
 
         const createdUser = await this.usersService.create(createUserDto);
+        await this.notificationPreferenceService.upsert(createdUser.id, {
+            channel: NotificationChannel.IN_APP,
+            enabled: true,
+            config: {},
+        });
         const projectDto: CreateProjectDto = {
             name: `${createdUser.firstName}'s Project`,
             ownerId: createdUser.id,
@@ -146,6 +154,11 @@ export class AuthService {
         }
 
         const createdUser = await this.usersService.create(createUserDto);
+        await this.notificationPreferenceService.upsert(createdUser.id, {
+            channel: NotificationChannel.IN_APP,
+            enabled: true,
+            config: {},
+        });
         await this.projectUsersService.create({
             user: createdUser,
             project,

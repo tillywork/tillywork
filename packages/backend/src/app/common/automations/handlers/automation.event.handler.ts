@@ -17,7 +17,7 @@ export class AutomationEventHandler {
     private readonly logger = new Logger("AutomationEventHandler");
 
     constructor(
-        @InjectQueue("automation") private automationQueue: Queue,
+        @InjectQueue("automations") private automationQueue: Queue,
         private automationService: AutomationsService,
         private readonly aclContext: AclContext,
         private readonly cardsService: CardsService,

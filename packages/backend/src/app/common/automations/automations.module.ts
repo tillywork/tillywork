@@ -54,7 +54,7 @@ const handlers = [
             AutomationStepRun,
         ]),
         BullModule.registerQueue({
-            name: "automation",
+            name: "automations",
         }),
         forwardRef(() => CardsModule),
         forwardRef(() => AuthModule),

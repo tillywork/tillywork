@@ -5,10 +5,9 @@ import { CardActivity } from "./card.activity.entity";
 import { CreateCardActivityDto } from "./dto/create.card.activity.dto";
 import { UpdateCardActivityDto } from "./dto/update.card.activity.dto";
 import { IsEnum, IsNumber, IsOptional } from "class-validator";
-import { ActivityType, TriggerType } from "@tillywork/shared";
+import { ActivityType } from "@tillywork/shared";
 import { QueryBuilderHelper } from "../../helpers/query.builder.helper";
 import { EventEmitter2 } from "@nestjs/event-emitter";
-import { TriggerEvent } from "../../automations/events/trigger.event";
 
 export class FindAllParams {
     @IsOptional()
@@ -123,15 +122,6 @@ export class CardActivitiesService {
             },
         });
         await this.cardActivitiesRepository.save(cardActivity);
-
-        this.eventEmitter.emit(
-            "automation.trigger",
-            new TriggerEvent(
-                TriggerType.COMMENT_CREATED,
-                createCardActivityDto.card,
-                cardActivity
-            )
-        );
 
         return cardActivity;
     }

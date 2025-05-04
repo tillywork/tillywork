@@ -16,6 +16,7 @@ import { WorkspaceAccessStrategy } from "./strategies/access.strategy/workspace.
 import { SpaceAccessStrategy } from "./strategies/access.strategy/space.access.strategy";
 import { ListAccessStrategy } from "./strategies/access.strategy/list.access.strategy";
 import { AclContext } from "./context/acl.context";
+import { NotificationPreferenceModule } from "../notifications/notification-preference/notification.preference.module";
 
 @Module({
     imports: [
@@ -28,6 +29,7 @@ import { AclContext } from "./context/acl.context";
         forwardRef(() => ProjectsModule),
         forwardRef(() => ProjectUsersModule),
         TypeOrmModule.forFeature([AccessControl]),
+        NotificationPreferenceModule,
     ],
     providers: [
         AuthService,
@@ -41,6 +43,6 @@ import { AclContext } from "./context/acl.context";
         AclContext,
     ],
     controllers: [AuthController],
-    exports: [AuthService, AccessControlService, AclContext],
+    exports: [AuthService, AccessControlService, AclContext, JwtModule],
 })
 export class AuthModule {}

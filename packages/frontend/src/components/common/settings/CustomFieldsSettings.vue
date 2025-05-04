@@ -210,7 +210,7 @@ watch(
         <h3>Custom Fields</h3>
         <base-icon-btn @click="handleCreateField" />
       </div>
-      <p class="text-subtitle-2 mb-2">
+      <p class="text-subtitle-2 mb-2 text-color-subtitle">
         Create custom fields, and assign them to lists.
       </p>
     </div>

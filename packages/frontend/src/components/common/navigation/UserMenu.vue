@@ -98,7 +98,7 @@ watch(userMenu, () => toggleFreezeRail());
               </template>
             </v-card>
           </v-menu>
-          <v-list-item to="/settings/theme">
+          <v-list-item to="/settings">
             <template #prepend>
               <v-icon icon="mdi-cog" />
             </template>
