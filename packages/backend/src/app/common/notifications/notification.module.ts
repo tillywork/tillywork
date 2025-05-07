@@ -6,7 +6,6 @@ import { NotificationController } from "./notification.controller";
 import { WatcherModule } from "../watchers/watcher.module";
 import { NotificationHandler } from "./notification.handler";
 import { CardsModule } from "../cards/cards.module";
-import { AuthModule } from "../auth/auth.module";
 import { UsersModule } from "../users/users.module";
 import { ListStagesModule } from "../lists/list-stages/list.stages.module";
 import { BullModule } from "@nestjs/bull";
@@ -14,6 +13,8 @@ import { NotificationProcessor } from "./notification.processor";
 import { NotificationsGateway } from "./notification.gateway";
 import { NotificationPreferenceModule } from "./notification-preference/notification.preference.module";
 import { UserIntegrationModule } from "../user-integrations/user.integration.module";
+import { SocketModule } from "../sockets/socket.module";
+import { AuthModule } from "../auth/auth.module";
 
 @Module({
     imports: [
@@ -28,6 +29,7 @@ import { UserIntegrationModule } from "../user-integrations/user.integration.mod
         forwardRef(() => ListStagesModule),
         NotificationPreferenceModule,
         forwardRef(() => UserIntegrationModule),
+        forwardRef(() => SocketModule),
     ],
     controllers: [NotificationController],
     providers: [

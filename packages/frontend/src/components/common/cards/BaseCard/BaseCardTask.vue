@@ -17,7 +17,6 @@ import { useAuthStore } from '@/stores/auth';
 import { useFieldQueryStore } from '@/stores/field.query';
 import { useQueryStore } from '@/stores/query';
 
-import objectUtils from '@/utils/object';
 import { cloneDeep, lowerFirst } from 'lodash';
 import { leaderKey } from '@/utils/keys';
 import urlUtils from '@/utils/url';
@@ -81,7 +80,6 @@ const cardTitle = ref('');
 const debouncedTitle = useDebounce(cardTitle, 2000);
 
 const cardDescription = ref<Content>();
-const debouncedDescription = useDebounce(cardDescription, 2000);
 
 const { mutateAsync: createActivity } = useCreateActivityMutation();
 const { mutateAsync: updateCardList } = useUpdateCardListMutation();
@@ -109,10 +107,6 @@ watch(
   },
   { immediate: true }
 );
-
-watch(debouncedDescription, (newDescription) => {
-  updateDescription(newDescription);
-});
 
 watch(
   titleField,
@@ -157,32 +151,6 @@ function updateTitle() {
     }).then(() => {
       showSnackbar({
         message: 'Task title updated.',
-        color: 'success',
-        timeout: 2000,
-      });
-    });
-  }
-}
-
-function updateDescription(newDescription: Content | undefined) {
-  const oldDescription = card.data[descriptionField.value!.slug];
-
-  if (
-    newDescription &&
-    (!oldDescription ||
-      !objectUtils.isEqual(
-        (newDescription as any) ?? {},
-        (oldDescription as any) ?? {}
-      ))
-  ) {
-    cardCopy.value.data[descriptionField.value!.slug] = newDescription;
-
-    updateCard({
-      id: cardCopy.value.id,
-      data: cardCopy.value.data,
-    }).then(async () => {
-      showSnackbar({
-        message: 'Task description updated.',
         color: 'success',
         timeout: 2000,
       });
@@ -304,9 +272,12 @@ function handleClose() {
           <div class="mt-4">
             <template v-if="descriptionField">
               <base-editor-input
-                v-model="cardDescription"
+                :model-value="cardDescription"
                 ref="descriptionInput"
                 placeholder="Enter description.. (/ for commands)"
+                enable-collaboration
+                doc-type="card"
+                :doc-id="cardCopy.id"
               />
             </template>
             <template v-else>

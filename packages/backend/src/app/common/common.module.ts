@@ -20,6 +20,8 @@ import { BullModule } from "@nestjs/bull";
 import { NotificationModule } from "./notifications/notification.module";
 import { WatcherModule } from "./watchers/watcher.module";
 import { UserIntegrationModule } from "./user-integrations/user.integration.module";
+import { CollaborationModule } from "./collaboration/collaboration.module";
+import { SocketModule } from "./sockets/socket.module";
 
 @Module({
     imports: [
@@ -57,6 +59,8 @@ import { UserIntegrationModule } from "./user-integrations/user.integration.modu
         NotificationModule,
         WatcherModule,
         UserIntegrationModule,
+        CollaborationModule,
+        SocketModule,
     ],
     controllers: [],
     providers: [],

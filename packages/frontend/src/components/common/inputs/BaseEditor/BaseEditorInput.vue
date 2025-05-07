@@ -5,53 +5,65 @@ import {
   Editor,
   type Content,
   VueNodeViewRenderer,
+  type JSONContent,
 } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
+import { Underline } from '@tiptap/extension-underline';
+import { Link } from '@tiptap/extension-link';
+import { Mention, type MentionOptions } from '@tiptap/extension-mention';
+import type { SuggestionOptions } from '@tiptap/suggestion';
+
 import { NoNewLine } from './extensions/NoNewLine';
 import { Commands } from './extensions/Commands';
 import suggestion from './extensions/Commands/suggestions';
 import { Indent } from './extensions/Indent';
 import { TextDirection } from './extensions/TextDirection';
 import { Codeblock } from './extensions/Codeblock';
-import { Underline } from '@tiptap/extension-underline';
 import { Image } from './extensions/Image';
 import { FileHandler } from './extensions/FileHandler';
+import { File } from './extensions/File';
+import { TrailingNode } from './extensions/TrailingNode';
+import { CustomKeymap } from './extensions/CustomKeymap';
+import mentionSuggestions from './extensions/Mention/mentionSuggestions';
+import MentionChip from './extensions/Mention/MentionChip.vue';
+import { Emoji } from './extensions/Emoji';
+import { YjsProsemirrorCollab } from './extensions/Collaboration';
+
 import {
   TWFileType,
   useFilesService,
   type TWFile,
 } from '@/services/useFilesService';
-import { File } from './extensions/File';
-import { TrailingNode } from './extensions/TrailingNode';
-import { Link } from '@tiptap/extension-link';
-import { CustomKeymap } from './extensions/CustomKeymap';
-import { Mention, type MentionOptions } from '@tiptap/extension-mention';
-import mentionSuggestions from './extensions/Mention/mentionSuggestions';
-import MentionChip from './extensions/Mention/MentionChip.vue';
-import { Emoji } from './extensions/Emoji';
+
+import { YjsSocketProvider } from '@/composables/useYjsSocketProvider';
+
 import objectUtils from '@/utils/object';
-import type { SuggestionOptions } from '@tiptap/suggestion';
 
 const {
-  autofocus,
+  autofocus = false,
   placeholder,
   heading,
   singleLine,
   editable = true,
   disableCommands,
   minHeight,
+  enableCollaboration,
+  docId,
 } = defineProps<{
   autofocus?: boolean;
   placeholder?: string;
-  heading?: 1 | 2 | 3 | 4 | 5 | 6;
+  heading?: number;
   singleLine?: boolean;
   editable?: boolean;
   disableCommands?: boolean;
   minHeight?: string | number;
+  enableCollaboration?: boolean;
+  docType?: string;
+  docId?: string | number;
 }>();
 
-const emit = defineEmits(['focus', 'blur']);
+const emit = defineEmits(['focus', 'blur', 'input']);
 
 const { uploadFiles } = useFilesService();
 const {
@@ -63,7 +75,10 @@ const {
     '.pdf,.doc,.docx,.csv,.xls,.xlsx,image/jpeg,image/png,image/gif,application/zip,application/json',
 });
 
-const extensions = computed(() => {
+let provider: YjsSocketProvider | null = null;
+let editor: Ref<Editor | undefined>;
+
+function buildExtensionsArray() {
   const extensions: any[] = [
     StarterKit.configure({
       codeBlock: false,
@@ -116,35 +131,48 @@ const extensions = computed(() => {
     extensions.push(TrailingNode);
   }
 
+  if (enableCollaboration && provider) {
+    extensions.push(
+      YjsProsemirrorCollab.configure({
+        yXmlFragment: provider.yXmlFragment,
+        awareness: provider.awareness,
+      })
+    );
+  }
+
   return extensions;
-});
+}
 
 const jsonValue = defineModel<Content>();
 const textValue = defineModel<string>('text');
 const htmlValue = defineModel<string>('html');
 const isEmpty = defineModel<boolean>('empty');
 
-let editor: Ref<Editor | undefined>;
-
 /**
  * Initializes the editor instance.
  */
 function initEditor() {
   editor = useEditor({
-    extensions: extensions.value,
+    extensions: buildExtensionsArray(),
     autofocus,
-    editable: editable ?? false,
+    editable,
     onCreate: () => {
       enforceHeading();
-      fillEditorFromModelValues();
-      isEmpty.value = editor.value?.isEmpty;
+      if (!enableCollaboration) {
+        fillEditorFromModelValues();
+        isEmpty.value = editor.value?.isEmpty;
+      }
     },
     onUpdate: () => {
       enforceHeading();
-      textValue.value = editor.value?.getText();
-      jsonValue.value = editor.value?.getJSON();
-      htmlValue.value = editor.value?.getHTML();
-      isEmpty.value = editor.value?.isEmpty;
+
+      if (!enableCollaboration) {
+        textValue.value = editor.value?.getText() ?? '';
+        jsonValue.value = editor.value?.getJSON();
+        htmlValue.value = editor.value?.getHTML();
+        isEmpty.value = editor.value?.isEmpty;
+      }
+      emit('input');
     },
     onFocus: (e) => {
       emit('focus', e.event);
@@ -158,15 +186,27 @@ function initEditor() {
 /**
  * Fills the initial content of the editor
  * from the v-model values when the editor
- * is created. Priority: Text -> JSON
+ * is created. Priority: Text -> JSON -> HTML
  */
 function fillEditorFromModelValues() {
+  if (!editor.value) return;
+
+  if (enableCollaboration && provider) {
+    const initialContent = jsonValue.value as JSONContent;
+    const isYDocEmpty = provider.doc.getXmlFragment('prosemirror').length === 0;
+    if (isYDocEmpty) {
+      editor.value.commands.setContent(initialContent, false);
+    }
+
+    return;
+  }
+
   if (textValue.value) {
     setEditorText(textValue.value);
   } else if (jsonValue.value) {
-    editor.value?.commands.setContent(jsonValue.value as Content, true);
+    editor.value.commands.setContent(jsonValue.value as Content, false);
   } else if (htmlValue.value) {
-    editor.value?.commands.setContent(htmlValue.value as Content, true);
+    editor.value.commands.setContent(htmlValue.value as Content, false);
   }
 }
 
@@ -195,23 +235,23 @@ function setEditorText(text: string) {
 
 function destroyEditor() {
   editor.value?.destroy();
+  provider?.destroy();
 }
 
-/**
- * Used for title inputs, where we want
- * the styling to be fixed as a heading,
- * and usually single-line.
- */
 function enforceHeading() {
-  if (heading && !editor.value?.isActive('heading', { level: heading })) {
-    editor.value?.chain().focus().toggleHeading({ level: heading }).run();
+  if (heading && !editor?.value?.isActive('heading', { level: heading })) {
+    editor.value
+      ?.chain()
+      .focus()
+      .toggleHeading({ level: heading as any })
+      .run();
   }
 }
 
-// Watch for changes to textValue and update the editor content
+// Watch for changes to textValue and update the editor content only if collaboration is disabled
 watch(textValue, (newText) => {
-  if (editor.value && newText !== editor.value.getText()) {
-    editor.value.commands.setContent(
+  if (!enableCollaboration && editor && newText !== editor.value?.getText()) {
+    editor.value?.commands.setContent(
       [
         {
           type: heading ? 'heading' : 'paragraph',
@@ -224,38 +264,43 @@ watch(textValue, (newText) => {
   }
 });
 
-// Watch for changes to jsonValue and update the editor content
+// Watch for changes to jsonValue and update the editor content only if collaboration is disabled
 watch(jsonValue, (newJson) => {
-  if (editor.value) {
+  if (!enableCollaboration && editor.value) {
     const currentJson = editor.value.getJSON();
     const areTheyEqual = objectUtils.isEqual(
       currentJson,
       newJson ?? ({} as any)
     );
-
     if (!areTheyEqual) {
       editor.value.commands.setContent(newJson as any, true);
     }
   }
 });
 
-// Watch for changes to htmlValue and update the editor content
+// Watch for changes to htmlValue and update the editor content only if collaboration is disabled
 watch(htmlValue, (newHtml) => {
-  if (editor.value) {
+  if (!enableCollaboration && editor.value) {
     const currentHtml = editor.value.getHTML();
     const areTheyEqual = currentHtml === newHtml;
-
     if (!areTheyEqual) {
       editor.value.commands.setContent(newHtml as any, true);
     }
   }
 });
 
+if (enableCollaboration && docId) {
+  provider = new YjsSocketProvider(`${docId}`, () => {
+    fillEditorFromModelValues();
+    isEmpty.value = editor.value?.isEmpty;
+  });
+}
+
+initEditor();
+
 onBeforeUnmount(() => {
   destroyEditor();
 });
-
-initEditor();
 
 onFilesChange(async (files) => {
   if (editor.value && files) {
@@ -446,6 +491,63 @@ defineExpose({
   blockquote {
     padding-inline-start: 1rem;
     border-inline-start: 3px solid rgba(#0d0d0d, 0.1);
+  }
+
+  .ProseMirror-yjs-cursor.ProseMirror-widget {
+    position: relative;
+    display: inline-block;
+    margin-left: -1px;
+    height: 100%;
+    box-sizing: border-box;
+    z-index: 10;
+
+    .yjs-cursor-edge {
+      position: absolute;
+      top: 0px;
+      left: 0;
+      font-size: 0;
+      height: 5px;
+      width: 3px;
+      border-radius: 0 2px 2px 0;
+      transition: all 0.2s ease;
+    }
+
+    > div {
+      position: absolute;
+      top: -17px;
+      left: -2px;
+      border-radius: 4px 4px 4px 0;
+      padding: 0 6px;
+      white-space: nowrap;
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.8;
+      opacity: 0;
+      transition: all 0.2s ease;
+    }
+
+    &:hover {
+      .yjs-cursor-edge {
+        opacity: 0;
+      }
+
+      > div {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+  }
+
+  .ProseMirror[dir='rtl'] {
+    .ProseMirror-yjs-cursor.ProseMirror-widget {
+      > div {
+        left: auto;
+        right: 100%;
+        margin-left: 0;
+        margin-right: 6px;
+        direction: rtl;
+      }
+    }
   }
 }
 </style>

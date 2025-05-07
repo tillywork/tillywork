@@ -1,4 +1,4 @@
-export function assertIsSet<T>(
+export function assertNotNullOrUndefined<T>(
   value: T | null | undefined,
   message?: string
 ): asserts value is T {
