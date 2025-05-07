@@ -2,40 +2,40 @@ import { useAuthStore } from '@/stores/auth';
 import { io, Socket } from 'socket.io-client';
 import { ref, onUnmounted } from 'vue';
 
-let socket: Socket | null = null;
+const socket: Ref<Socket | null> = ref(null);
 
 export function useSocket() {
   const { token } = storeToRefs(useAuthStore());
   const isConnected = ref(false);
 
   function connect() {
-    if (socket) {
+    if (socket.value) {
       return;
     }
 
-    socket = io(import.meta.env.TW_VITE_WS_URL, {
+    socket.value = io(import.meta.env.TW_VITE_WS_URL, {
       auth: { token: token.value },
     });
 
-    socket.on('connect', () => {
+    socket.value.on('connect', () => {
       isConnected.value = true;
     });
 
-    socket.on('disconnect', () => {
+    socket.value.on('disconnect', () => {
       isConnected.value = false;
     });
   }
 
   function disconnect() {
-    if (socket) {
-      socket.disconnect();
-      socket = null;
+    if (socket.value) {
+      socket.value.disconnect();
+      socket.value = null;
     }
   }
 
   function joinRoom(room: string) {
-    if (socket) {
-      socket.emit('room:join', { room });
+    if (socket.value) {
+      socket.value.emit('room:join', { room });
     }
   }
 

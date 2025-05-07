@@ -48,7 +48,7 @@ export const useState = () => {
   });
 
   const { connect } = useSocket();
-  const { socket } = useNotificationSocket();
+  useNotificationSocket();
 
   function updateAppState() {
     // If no workspaces exist, open onboarding dialog

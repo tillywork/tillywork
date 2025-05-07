@@ -36,7 +36,7 @@ export class YjsSocketProvider {
 
     this.cardId = cardId;
     this.room = `card:${cardId}`;
-    this.socket = socket;
+    this.socket = socket.value;
 
     this.doc = new Y.Doc();
     this.yXmlFragment = this.doc.getXmlFragment('prosemirror');

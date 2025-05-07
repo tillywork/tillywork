@@ -1,6 +1,7 @@
 import { WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { Server } from "socket.io";
 import { TillyLogger } from "../logger/tilly.logger";
+import { Notification } from "./notification.entity";
 
 @WebSocketGateway({
     cors: {
@@ -12,7 +13,7 @@ export class NotificationsGateway {
     server: Server;
     private logger = new TillyLogger("NotificationsGateway");
 
-    sendNotificationToUser(userId: number, notification: any) {
+    sendNotificationToUser(userId: number, notification: Notification) {
         this.server.to(String(userId)).emit("notification", notification);
     }
 }

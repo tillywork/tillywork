@@ -8,17 +8,21 @@ export const useNotificationSocket = () => {
   const { workspace } = storeToRefs(useAuthStore());
   const { socket } = useSocket();
 
-  socket?.on('notification', (notification: Notification) => {
-    const oldNotifications: Notification[] =
-      queryClient.getQueryData([
-        'notifications',
-        { workspaceId: Number(workspace.value?.id) },
-      ]) ?? [];
+  watchEffect(() => {
+    if (socket.value) {
+      socket.value.on('notification', (notification: Notification) => {
+        const oldNotifications: Notification[] =
+          queryClient.getQueryData([
+            'notifications',
+            { workspaceId: Number(workspace.value?.id) },
+          ]) ?? [];
 
-    queryClient.setQueryData(
-      ['notifications', { workspaceId: Number(workspace.value?.id) }],
-      [notification, ...oldNotifications]
-    );
+        queryClient.setQueryData(
+          ['notifications', { workspaceId: Number(workspace.value?.id) }],
+          [notification, ...oldNotifications]
+        );
+      });
+    }
   });
 
   return { socket };
