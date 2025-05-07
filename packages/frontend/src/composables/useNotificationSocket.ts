@@ -9,16 +9,16 @@ export const useNotificationSocket = () => {
   const { socket } = useSocket();
 
   watchEffect(() => {
-    if (socket.value) {
+    if (socket.value && workspace.value) {
       socket.value.on('notification', (notification: Notification) => {
         const oldNotifications: Notification[] =
           queryClient.getQueryData([
             'notifications',
-            { workspaceId: Number(workspace.value?.id) },
+            { workspaceId: notification.workspace.id },
           ]) ?? [];
 
         queryClient.setQueryData(
-          ['notifications', { workspaceId: Number(workspace.value?.id) }],
+          ['notifications', { workspaceId: notification.workspace.id }],
           [notification, ...oldNotifications]
         );
       });
