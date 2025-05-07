@@ -13,6 +13,7 @@ import { WorkspaceTypes } from '@tillywork/shared';
 import posthog from 'posthog-js';
 import { useTheme } from 'vuetify';
 import { useNotificationSocket } from './useNotificationSocket';
+import { useSocket } from './useSocket';
 
 /**
  * Used in App.vue to handle application state. Sets the app's theme, selected module, and whether or not to trigger onboarding dialog.
@@ -23,7 +24,7 @@ export const useState = () => {
   const { selectedModule } = storeToRefs(useStateStore());
   const { isAuthenticated, setProject, setWorkspace, clearWorkspace } =
     useAuthStore();
-  const { project, user, workspace, token } = storeToRefs(useAuthStore());
+  const { project, user, workspace } = storeToRefs(useAuthStore());
 
   const projectsEnabled = computed(() => !project.value && isAuthenticated());
   const workspacesEnabled = computed(
@@ -46,7 +47,8 @@ export const useState = () => {
     enabled: projectsEnabled,
   });
 
-  const { connect } = useNotificationSocket();
+  const { connect } = useSocket();
+  const { socket } = useNotificationSocket();
 
   function updateAppState() {
     // If no workspaces exist, open onboarding dialog
@@ -178,8 +180,8 @@ export const useState = () => {
     });
 
     watchEffect(() => {
-      if (isAuthenticated() && token.value) {
-        connect(token.value);
+      if (isAuthenticated()) {
+        connect();
       }
     });
   }

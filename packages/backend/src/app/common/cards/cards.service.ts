@@ -20,13 +20,18 @@ import { RawSqlResultsToEntityTransformer } from "typeorm/query-builder/transfor
 import { RelationCountMetadataToAttributeTransformer } from "typeorm/query-builder/relation-count/RelationCountMetadataToAttributeTransformer";
 import { RelationIdMetadataToAttributeTransformer } from "typeorm/query-builder/relation-id/RelationIdMetadataToAttributeTransformer";
 import { ClsService } from "nestjs-cls";
-import { assertIsSet, PermissionLevel, TriggerType } from "@tillywork/shared";
+import {
+    assertNotNullOrUndefined,
+    PermissionLevel,
+    TriggerType,
+} from "@tillywork/shared";
 import { AccessControlService } from "../auth/services/access.control.service";
 import { Field } from "../fields/field.entity";
 import { AclContext } from "../auth/context/acl.context";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { TriggerEvent } from "../automations/events/trigger.event";
 import { ConfigService } from "@nestjs/config";
+import { Content } from "@tiptap/core";
 
 export type CardFindAllResult = {
     total: number;
@@ -188,7 +193,7 @@ export class CardsService {
         }
     }
 
-    async findOne(id: number): Promise<Card> {
+    async findOne(id: number, relations: string[] = []): Promise<Card> {
         const user = this.clsService.get("user");
 
         const card = await this.cardsRepository.findOne({
@@ -202,6 +207,7 @@ export class CardsService {
                 "children.cardLists",
                 "children.cardLists.listStage",
                 "workspace",
+                ...relations,
             ],
         });
 
@@ -343,7 +349,7 @@ export class CardsService {
     }
 
     async getCardTitle(card: Card): Promise<string> {
-        assertIsSet(
+        assertNotNullOrUndefined(
             card.type,
             "[CardsService#getCardTitle] Card type is empty"
         );
@@ -357,7 +363,7 @@ export class CardsService {
                 },
             });
 
-        assertIsSet(
+        assertNotNullOrUndefined(
             titleField,
             "[CardsService#getCardTitle] Title field not found"
         );
@@ -367,5 +373,39 @@ export class CardsService {
 
     getCardUrl(card: Card): string {
         return `${this.configService.get("TW_FRONTEND_URL")}/card/${card.id}`;
+    }
+
+    async getCardFields(card: Card): Promise<Field[]> {
+        return this.cardsRepository.manager.getRepository(Field).findBy({
+            cardType: {
+                id: card.type.id,
+            },
+        });
+    }
+
+    async getDescriptionField(card: Card): Promise<Field | null> {
+        return this.cardsRepository.manager.getRepository(Field).findOneBy({
+            isDescription: true,
+            cardType: {
+                id: card.type.id,
+            },
+        });
+    }
+
+    async updateCardDescription(
+        cardId: number,
+        description: Content
+    ): Promise<Card> {
+        const card = await this.aclContext.run(true, () =>
+            this.findOne(cardId)
+        );
+
+        const descriptionField = await this.getDescriptionField(card);
+        assertNotNullOrUndefined(descriptionField, "descriptionField");
+
+        card.data[descriptionField.slug] = description;
+
+        await this.cardsRepository.save(card);
+        return card;
     }
 }

@@ -24,6 +24,7 @@ import { NotificationPreferenceModule } from "../notifications/notification-pref
         JwtModule.register({
             secret: process.env.TW_SECRET_KEY,
             signOptions: { expiresIn: "7d" },
+            global: true,
         }),
         ConfigModule.forRoot(),
         forwardRef(() => ProjectsModule),
