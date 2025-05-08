@@ -60,7 +60,7 @@ watch([workspaceSettingsMenu, selectWorkspaceMenu], () => {
 </script>
 
 <template>
-  <div class="d-flex justify-start align-center mt-4 px-2">
+  <div class="d-flex justify-start align-center mt-4 px-3">
     <v-card
       density="compact"
       link

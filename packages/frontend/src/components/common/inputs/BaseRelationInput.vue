@@ -3,7 +3,7 @@ import { useCardsService } from '@/services/useCardsService';
 import { useAuthStore } from '@/stores/auth';
 import BaseCardChip from '@/components/common/cards/BaseCardChip.vue';
 import type { Card, Field } from '@tillywork/shared';
-import { useFieldQueryStore } from '@/stores/field.query';
+import { useFields } from '@/composables/useFields';
 
 const model = defineModel<string[]>({
   default: [],
@@ -31,7 +31,10 @@ const { data: items, refetch } = useSearchCards({
   cardTypeId: props.field.dataCardType!.id,
 });
 
-const { titleField } = storeToRefs(useFieldQueryStore());
+const { titleField } = useFields({
+  cardTypeId: computed(() => Number(props.field.dataCardType?.id)),
+  enabled: computed(() => !!props.field.dataCardType),
+});
 
 function isItemSelected(item: Card): boolean {
   return model.value.includes(item.id.toString());
