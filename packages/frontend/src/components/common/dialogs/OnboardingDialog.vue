@@ -97,7 +97,12 @@ onMounted(() => {
 <template>
   <v-card class="onboarding-dialog" color="dialog" elevation="12" border="thin">
     <v-card-text class="pt-0">
-      <v-stepper v-model="currentStep" :items="onboardingSteps" hide-actions>
+      <v-stepper
+        v-model="currentStep"
+        :items="onboardingSteps"
+        hide-actions
+        bg-color="dialog"
+      >
         <template #item.1>
           <v-img
             :src="logo.getLogoUrlByTheme()"
@@ -135,11 +140,11 @@ onMounted(() => {
                 >
                   <v-item #="{ isSelected, toggle }">
                     <v-card
-                      color="accent"
+                      color="transparent"
                       class="fill-height text-center py-4 border-thin user-select-none"
                       width="200"
                       @click="toggle"
-                      :class="!isSelected ? 'border-accent' : ''"
+                      :class="!isSelected ? 'border-thin' : ''"
                     >
                       <v-icon
                         icon="mdi-check-circle"
@@ -167,11 +172,11 @@ onMounted(() => {
                   </v-item>
                   <v-item #="{ isSelected, toggle }">
                     <v-card
-                      color="accent"
+                      color="transparent"
                       class="fill-height text-center py-4 border-thin user-select-none"
                       width="200"
                       @click="toggle"
-                      :class="!isSelected ? 'border-accent' : ''"
+                      :class="!isSelected ? 'border-thin' : ''"
                     >
                       <v-icon
                         icon="mdi-check-circle"
@@ -199,11 +204,11 @@ onMounted(() => {
                   </v-item>
                   <v-item #="{ isSelected, toggle }">
                     <v-card
-                      color="accent"
+                      color="transparent"
                       class="fill-height text-center py-4 border-thin user-select-none"
                       width="200"
                       @click="toggle"
-                      :class="!isSelected ? 'border-accent' : ''"
+                      :class="!isSelected ? 'border-thin' : ''"
                     >
                       <v-icon
                         icon="mdi-check-circle"
