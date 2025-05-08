@@ -2,7 +2,7 @@
 import { useCardsService } from '@/services/useCardsService';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import type { Card } from '@tillywork/shared';
-import { useFieldQueryStore } from '@/stores/field.query';
+import { useFields } from '@/composables/useFields';
 
 const props = defineProps<{
   card: Pick<Card, 'id'>;
@@ -18,7 +18,10 @@ const { data: cardCopy } = useGetCardQuery({
   cardId,
 });
 
-const { titleField } = storeToRefs(useFieldQueryStore());
+const { titleField } = useFields({
+  cardTypeId: computed(() => Number(cardCopy.value?.type.id)),
+  enabled: computed(() => !!cardCopy.value),
+});
 </script>
 
 <template>
