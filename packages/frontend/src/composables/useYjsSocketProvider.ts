@@ -22,6 +22,10 @@ export class YjsSocketProvider {
   private room: string | null = null;
   private socket: Socket | null = null;
   private isApplyingRemoteUpdate = false;
+  private socketListeners: {
+    event: string;
+    handler: (...params: any) => void;
+  }[] = [];
 
   constructor(cardId: string, cb?: () => void) {
     const { user } = storeToRefs(useAuthStore());
@@ -54,6 +58,8 @@ export class YjsSocketProvider {
   destroy(): void {
     if (this.socket && this.cardId) {
       this.socket.emit('card:leave', { cardId: this.cardId });
+
+      this.cleanupSocketListeners();
     }
 
     this.awareness.destroy();
@@ -69,10 +75,19 @@ export class YjsSocketProvider {
     });
   }
 
+  private addSocketListener(event: string, handler: (...params: any) => void) {
+    if (!this.socket) return;
+
+    this.socket.on(event, handler as any);
+    this.socketListeners.push({ event, handler });
+  }
+
   private setupSocketListeners(cb?: () => void) {
     assertNotNullOrUndefined(this.socket, 'socket');
 
-    this.socket.on('card:sync', (stateUpdate: string) => {
+    this.cleanupSocketListeners();
+
+    const handleSync = (stateUpdate: string) => {
       this.isApplyingRemoteUpdate = true;
 
       try {
@@ -85,11 +100,17 @@ export class YjsSocketProvider {
           cb();
         }
       }
-    });
+    };
+    this.addSocketListener('card:sync', handleSync);
 
-    this.socket.on('card:update', (data: EditorUpdatePayload) => {
-      if (data.cardId !== this.cardId) {
-        throw new Error("Received cardId doesn't match provider cardId");
+    const handleUpdate = (data: EditorUpdatePayload) => {
+      const currentCardId = this.cardId;
+
+      if (data.cardId !== currentCardId) {
+        console.warn(
+          `Ignoring update for card ${data.cardId} as it doesn't match current card ${currentCardId}`
+        );
+        return;
       }
 
       this.isApplyingRemoteUpdate = true;
@@ -100,22 +121,26 @@ export class YjsSocketProvider {
       } finally {
         this.isApplyingRemoteUpdate = false;
       }
-    });
+    };
+    this.addSocketListener('card:update', handleUpdate);
 
-    this.socket.on(
-      'awareness:update',
-      (data: { room: string; update: string }) => {
-        if (data.room !== this.room) {
-          throw new Error("Received room doesn't match provider room");
-        }
+    const handleAwarenessUpdate = (data: { room: string; update: string }) => {
+      const currentRoom = this.room;
 
-        awarenessProtocol.applyAwarenessUpdate(
-          this.awareness,
-          toUint8Array(data.update),
-          null
+      if (data.room !== currentRoom) {
+        console.warn(
+          `Ignoring awareness update for room ${data.room} as it doesn't match current room ${currentRoom}`
         );
+        return;
       }
-    );
+
+      awarenessProtocol.applyAwarenessUpdate(
+        this.awareness,
+        toUint8Array(data.update),
+        null
+      );
+    };
+    this.addSocketListener('awareness:update', handleAwarenessUpdate);
 
     this.doc.on('update', (update: Uint8Array) => {
       if (this.isApplyingRemoteUpdate) {
@@ -154,13 +179,16 @@ export class YjsSocketProvider {
         });
       }
     );
+  }
 
-    this.socket.on('disconnect', () => {
-      assertNotNullOrUndefined(this.socket, 'socket');
+  private cleanupSocketListeners() {
+    if (!this.socket) return;
 
-      this.socket.off('card:sync');
-      this.socket.off('card:update');
+    this.socketListeners.forEach(({ event, handler }) => {
+      this.socket?.off(event, handler as any);
     });
+
+    this.socketListeners = [];
   }
 
   private hashStringToColorIndex(str: string): number {

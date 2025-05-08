@@ -1,45 +1,58 @@
-import { DIALOGS } from '@/components/common/dialogs/types';
+import { useAuthStore } from '@/stores/auth';
+import { useDialogStore } from '@/stores/dialog';
+import { useStateStore } from '@/stores/state';
+import { useThemeStore } from '@/stores/theme';
 
 import { useProjectsService } from '@/services/useProjectsService';
 import { useUsersService } from '@/services/useUsersService';
 import { useWorkspacesService } from '@/services/useWorkspacesService';
 
-import { useAuthStore } from '@/stores/auth';
-import { useDialogStore } from '@/stores/dialog';
-import { useStateStore } from '@/stores/state';
-import { useThemeStore } from '@/stores/theme';
+import { useSocket } from '@/composables/useSocket';
+import { useNotificationSocket } from '@/composables/useNotificationSocket';
+
+import { DIALOGS } from '@/components/common/dialogs/types';
 import { WorkspaceTypes } from '@tillywork/shared';
 
 import posthog from 'posthog-js';
 import { useTheme } from 'vuetify';
-import { useNotificationSocket } from './useNotificationSocket';
-import { useSocket } from './useSocket';
 
 /**
- * Used in App.vue to handle application state. Sets the app's theme, selected module, and whether or not to trigger onboarding dialog.
- * @returns
+ * Used in App.vue to handle application state. Sets the app's theme, selected module,
+ * and whether or not to trigger onboarding dialog.
  */
 export const useState = () => {
-  const { setSelectedModule, navigateToLastList } = useStateStore();
-  const { selectedModule } = storeToRefs(useStateStore());
-  const { isAuthenticated, setProject, setWorkspace, clearWorkspace } =
-    useAuthStore();
-  const { project, user, workspace } = storeToRefs(useAuthStore());
+  // Route
+  const route = useRoute();
 
+  // Stores
+  const authStore = useAuthStore();
+  const dialogStore = useDialogStore();
+  const stateStore = useStateStore();
+  const themeStore = useThemeStore();
+
+  // Store Refs
+  const { selectedModule } = storeToRefs(stateStore);
+  const { project, user, workspace } = storeToRefs(authStore);
+  const { theme } = storeToRefs(themeStore);
+
+  // Store Functions
+  const { setSelectedModule, navigateToLastList } = stateStore;
+  const { isAuthenticated, setProject, setWorkspace, clearWorkspace } =
+    authStore;
+
+  // Computed Properties
   const projectsEnabled = computed(() => !project.value && isAuthenticated());
   const workspacesEnabled = computed(
     () => !!project.value && isAuthenticated()
   );
 
-  const dialog = useDialogStore();
-  const route = useRoute();
-
+  // Services
   const { useGetWorkspacesQuery } = useWorkspacesService();
   const { useGetProjectsQuery } = useProjectsService();
   const { updateUserMutation } = useUsersService();
-
   const { mutateAsync: updateUser } = updateUserMutation();
 
+  // Query Results
   const { data: workspaces } = useGetWorkspacesQuery({
     enabled: workspacesEnabled,
   });
@@ -47,13 +60,28 @@ export const useState = () => {
     enabled: projectsEnabled,
   });
 
+  // Socket Management
   const { connect } = useSocket();
   const { createListeners } = useNotificationSocket();
 
+  /**
+   * Updates the application state based on current workspaces and selected module
+   */
   function updateAppState() {
+    // Skip if not authenticated
+    if (!isAuthenticated()) {
+      return;
+    }
+
+    // Check if workspaces data is available
+    if (!workspaces.value) {
+      console.log('Waiting for workspaces data...');
+      return;
+    }
+
     // If no workspaces exist, open onboarding dialog
-    if (!workspaces.value?.length) {
-      dialog.openDialog({
+    if (workspaces.value.length === 0) {
+      dialogStore.openDialog({
         dialog: DIALOGS.ONBOARDING,
         options: {
           fullscreen: true,
@@ -65,38 +93,40 @@ export const useState = () => {
 
     // If a module is selected, filter workspaces by module
     if (selectedModule.value) {
-      const moduleWorkspaces = workspaces.value?.filter(
+      const moduleWorkspaces = workspaces.value.filter(
         (w) => w.type === selectedModule.value
       );
 
-      if (moduleWorkspaces?.length) {
+      if (moduleWorkspaces.length > 0) {
         setWorkspace(moduleWorkspaces[0]);
-        return;
       } else {
         clearWorkspace();
-        return;
       }
+      return;
     }
 
     // If a workspace is selected, ensure it still exists
     if (workspace.value) {
-      const existingWorkspace = workspaces.value?.find(
+      const existingWorkspace = workspaces.value.find(
         (w) => w.id === workspace.value?.id
       );
+
       if (existingWorkspace) {
         setSelectedModule(existingWorkspace.type);
         setWorkspace(existingWorkspace);
-        return;
       } else {
         setFirstWorkspace();
-        return;
       }
+      return;
     }
 
     // If no workspace or module is selected, set the first workspace
     setFirstWorkspace();
   }
 
+  /**
+   * Sets the first available workspace as active
+   */
   function setFirstWorkspace() {
     if (workspaces.value?.length) {
       const firstWorkspace = workspaces.value[0];
@@ -105,84 +135,91 @@ export const useState = () => {
     }
   }
 
+  /**
+   * Initialize all watchers for the application state
+   */
   function initWatchers() {
+    // Watch route changes to update selected module
     watch(
       route,
-      () => {
-        if (route.path.startsWith('/pm')) {
+      (newRoute) => {
+        if (newRoute.path.startsWith('/pm')) {
           setSelectedModule(WorkspaceTypes.PROJECT_MANAGEMENT);
-        } else if (route.path.startsWith('/crm')) {
+        } else if (newRoute.path.startsWith('/crm')) {
           setSelectedModule(WorkspaceTypes.CRM);
         }
       },
       { immediate: true }
     );
 
-    /*
-     * This handles setting the user's theme mode (dark or light)
-     * across the application and setting it on Vuetify settings
-     * when the application is opened and when the value is changed.
-     * Default: dark
-     */
-    const { theme } = storeToRefs(useThemeStore());
+    // Watch theme changes to update Vuetify theme
     const appTheme = useTheme();
     watch(
       theme,
-      (v) => {
-        appTheme.global.name.value = v;
+      (newTheme) => {
+        appTheme.global.name.value = newTheme;
       },
-      {
-        immediate: true,
-      }
+      { immediate: true }
     );
 
-    watch(workspaces, (v) => {
-      if (v) {
+    // Watch workspaces changes
+    watch(workspaces, (newWorkspaces) => {
+      if (newWorkspaces) {
         updateAppState();
       }
     });
 
-    watch(projects, (v) => {
-      if (v && v.length && !project.value) {
-        setProject(v[0]);
+    // Watch projects changes
+    watch(projects, (newProjects) => {
+      if (newProjects?.length && !project.value) {
+        setProject(newProjects[0]);
       }
     });
 
+    // Watch project changes to update user preferences
     watch(
       project,
-      (v) => {
-        if (v && user.value) {
+      (newProject) => {
+        if (newProject && user.value) {
           updateUser({
             ...user.value,
-            project: v,
+            project: newProject,
           });
         }
       },
       { immediate: true }
     );
 
+    // Watch user changes for analytics
     watch(
       user,
-      (v) => {
-        if (import.meta.env.MODE === 'production' && isAuthenticated()) {
-          posthog.identify(`${v?.id}`, {
-            email: v?.email,
-            name: `${v?.firstName} ${v?.lastName}`,
+      (newUser) => {
+        if (
+          import.meta.env.MODE === 'production' &&
+          isAuthenticated() &&
+          newUser
+        ) {
+          posthog.identify(`${newUser.id}`, {
+            email: newUser.email,
+            name: `${newUser.firstName} ${newUser.lastName}`,
           });
         }
       },
       { immediate: true }
     );
 
+    // Watch selectedModule changes
     watch(selectedModule, () => {
       updateAppState();
       navigateToLastList();
     });
 
+    // Watch authentication state changes
     watch(
       () => isAuthenticated(),
-      (isAuthenticated) => {
-        if (isAuthenticated) {
+      (isAuth) => {
+        if (isAuth) {
+          // Connect socket and initialize listeners on authentication
           connect(() => {
             createListeners();
           });
@@ -192,9 +229,28 @@ export const useState = () => {
     );
   }
 
+  /**
+   * Initialize the application
+   * This is called from App.vue's onMounted hook
+   */
+  function initialize() {
+    // Set up all watchers
+    initWatchers();
+
+    // Perform initial update if already authenticated
+    if (isAuthenticated()) {
+      updateAppState();
+    }
+  }
+
   return {
+    // State
     selectedModule,
+
+    // Methods
+    initialize,
     initWatchers,
     updateAppState,
+    setFirstWorkspace,
   };
 };

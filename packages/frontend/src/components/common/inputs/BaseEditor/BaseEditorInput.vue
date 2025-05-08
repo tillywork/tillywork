@@ -289,7 +289,27 @@ watch(htmlValue, (newHtml) => {
   }
 });
 
+watch(
+  () => docId,
+  (newDocId, oldDocId) => {
+    if (enableCollaboration && newDocId && newDocId !== oldDocId) {
+      destroyEditor();
+
+      provider = new YjsSocketProvider(`${newDocId}`, () => {
+        initEditor();
+        fillEditorFromModelValues();
+        isEmpty.value = editor.value?.isEmpty;
+      });
+    }
+  }
+);
+
 if (enableCollaboration && docId) {
+  if (provider) {
+    (provider as YjsSocketProvider).destroy();
+    provider = null;
+  }
+
   provider = new YjsSocketProvider(`${docId}`, () => {
     fillEditorFromModelValues();
     isEmpty.value = editor.value?.isEmpty;
