@@ -17,12 +17,21 @@ export function useSocket() {
     console.log(wsUrl);
     socket.value = io(wsUrl, {
       auth: { token: token.value },
+      transports: ['polling', 'websocket'],
     });
 
     socket.value.on('connect', () => {
       isConnected.value = true;
     });
 
+    socket.value.on('connect_error', (err) => {
+      console.error('Connection error');
+      console.error(err);
+    });
+    socket.value.on('connect_failed', (err) => {
+      console.error('Connection failed');
+      console.error(err);
+    });
     socket.value.on('disconnect', () => {
       isConnected.value = false;
     });
