@@ -13,9 +13,8 @@ export function useSocket() {
       return;
     }
 
-    const apiUrl = import.meta.env.TW_VITE_API_URL;
-    const wsUrl = getWebSocketUrl(apiUrl);
-
+    const wsUrl = getWebSocketUrl();
+    console.log(wsUrl);
     socket.value = io(wsUrl, {
       auth: { token: token.value },
     });
@@ -42,16 +41,16 @@ export function useSocket() {
     }
   }
 
-  function getWebSocketUrl(apiUrl: string, wsPath = ''): string {
+  function getWebSocketUrl(): string {
     try {
+      const apiUrl = import.meta.env.TW_VITE_API_URL;
       const url = new URL(apiUrl, window.location.origin);
-      const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+      const basePath = url.pathname.replace(/\/[^/]+$/, '');
+      const protocol = url.protocol;
 
-      return `${protocol}//${url.host}${wsPath}`;
+      return `${protocol}//${url.host}${basePath}`;
     } catch {
-      const origin = window.location.origin;
-
-      return `${origin}${wsPath}`;
+      return `${window.location.origin}`;
     }
   }
 
