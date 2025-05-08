@@ -48,7 +48,7 @@ export const useState = () => {
   });
 
   const { connect } = useSocket();
-  useNotificationSocket();
+  const { createListeners } = useNotificationSocket();
 
   function updateAppState() {
     // If no workspaces exist, open onboarding dialog
@@ -179,11 +179,17 @@ export const useState = () => {
       navigateToLastList();
     });
 
-    watchEffect(() => {
-      if (isAuthenticated()) {
-        connect();
-      }
-    });
+    watch(
+      () => isAuthenticated(),
+      (isAuthenticated) => {
+        if (isAuthenticated) {
+          connect(() => {
+            createListeners();
+          });
+        }
+      },
+      { immediate: true }
+    );
   }
 
   return {

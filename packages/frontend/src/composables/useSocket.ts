@@ -8,20 +8,28 @@ export function useSocket() {
   const { token } = storeToRefs(useAuthStore());
   const isConnected = ref(false);
 
-  function connect() {
+  function connect(cb?: () => void) {
     if (socket.value) {
       return;
     }
 
-    const wsUrl = getWebSocketUrl();
-    console.log(wsUrl);
-    socket.value = io(wsUrl, {
+    const wsUrl = new URL(getWebSocketUrl());
+    socket.value = io(wsUrl.origin, {
+      path:
+        wsUrl.pathname && wsUrl.pathname !== '/'
+          ? wsUrl.pathname + '/socket.io'
+          : undefined,
       auth: { token: token.value },
-      transports: ['polling', 'websocket'],
+      transports: ['polling'],
     });
 
     socket.value.on('connect', () => {
+      console.log('Connected');
       isConnected.value = true;
+
+      if (cb) {
+        cb();
+      }
     });
 
     socket.value.on('connect_error', (err) => {
@@ -33,7 +41,9 @@ export function useSocket() {
       console.error(err);
     });
     socket.value.on('disconnect', () => {
+      console.log('Disconnected');
       isConnected.value = false;
+      socket.value = null;
     });
   }
 

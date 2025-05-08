@@ -8,7 +8,7 @@ export const useNotificationSocket = () => {
   const { workspace } = storeToRefs(useAuthStore());
   const { socket } = useSocket();
 
-  watchEffect(() => {
+  function createListeners() {
     if (socket.value && workspace.value) {
       socket.value.on('notification', (notification: Notification) => {
         const oldNotifications: Notification[] =
@@ -23,7 +23,7 @@ export const useNotificationSocket = () => {
         );
       });
     }
-  });
+  }
 
-  return { socket };
+  return { createListeners };
 };
