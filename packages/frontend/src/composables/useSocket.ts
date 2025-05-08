@@ -13,7 +13,10 @@ export function useSocket() {
       return;
     }
 
-    socket.value = io(import.meta.env.TW_VITE_WS_URL, {
+    const apiUrl = import.meta.env.TW_VITE_API_URL;
+    const wsUrl = getWebSocketUrl(apiUrl);
+
+    socket.value = io(wsUrl, {
       auth: { token: token.value },
     });
 
@@ -36,6 +39,19 @@ export function useSocket() {
   function joinRoom(room: string) {
     if (socket.value) {
       socket.value.emit('room:join', { room });
+    }
+  }
+
+  function getWebSocketUrl(apiUrl: string, wsPath = ''): string {
+    try {
+      const url = new URL(apiUrl, window.location.origin);
+      const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+
+      return `${protocol}//${url.host}${wsPath}`;
+    } catch {
+      const origin = window.location.origin;
+
+      return `${origin}${wsPath}`;
     }
   }
 
