@@ -187,7 +187,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <v-container class="bg-surface h-100">
+  <v-container class="bg-surface h-100" fluid>
     <v-app-bar
       class="d-flex align-center border-b-thin px-4"
       color="surface"
