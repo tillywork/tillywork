@@ -189,8 +189,10 @@ defineExpose({ userMenu });
           ...menuProps,
         }"
         @click.prevent
-        v-tooltip="!fill ? tooltip ?? label : undefined"
       >
+        <v-tooltip activator="parent" location="top" v-if="!fill">
+          {{ tooltip ?? label }}
+        </v-tooltip>
         <SelectedUsersDisplay
           :users="selectedUsers"
           :size
