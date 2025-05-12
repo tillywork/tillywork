@@ -2,6 +2,8 @@
 import type { ContextMenuItem } from './types';
 import { type Instance } from 'tippy.js';
 
+import _ from 'lodash';
+
 import BaseAvatar from '../BaseAvatar.vue';
 
 const selectedItems = defineModel<unknown | unknown[] | null>({
@@ -21,7 +23,7 @@ const isSelected = computed(() => {
   if (multiple) {
     return Array.isArray(modelValue) && modelValue.includes(item.value);
   } else {
-    return modelValue === item.value;
+    return _.isEqual(modelValue, item.value);
   }
 });
 
@@ -55,6 +57,7 @@ function handleItemClick(item: ContextMenuItem) {
     height="30"
     class="py-0 user-select-none"
     min-height="30"
+    tabindex="-1"
   >
     <template #prepend v-if="item.icon || item.avatar">
       <template v-if="item.avatar">

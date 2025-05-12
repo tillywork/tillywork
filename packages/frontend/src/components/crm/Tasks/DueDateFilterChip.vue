@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { quickFilterDateOptions } from '@/components/common/views/BaseViewChipFilter/quickFilter';
-import type { QuickFilterDateOption } from '@tillywork/shared';
+
 import { isEqual } from 'lodash';
+
+import MenuWrapper from '@/components/common/base/ContextMenu/MenuWrapper.vue';
 
 const attrs = useAttrs();
 
@@ -11,16 +13,16 @@ const selectedOption = computed(() =>
   quickFilterDateOptions.find((option) => isEqual(option.value, selected.value))
 );
 
-function isOptionSelected(option: QuickFilterDateOption) {
-  return selectedOption.value?.title === option.title;
-}
-
-function handleOptionSelected(option: QuickFilterDateOption) {
-  if (!isEqual(selected.value, option.value)) {
-    selected.value = option.value;
-  } else {
-    selected.value = undefined;
+const chipLabel = computed(() => {
+  if (!selected.value?.length || !selectedOption.value) {
+    return 'Due date';
   }
+
+  return `Due date is ${selectedOption.value.title}`;
+});
+
+function clearValue() {
+  selected.value = undefined;
 }
 </script>
 
@@ -32,42 +34,36 @@ function handleOptionSelected(option: QuickFilterDateOption) {
           ...props,
           ...attrs,
         }"
-        variant="tonal"
-        rounded="pill"
-        class="text-caption"
-        color="primary"
-        density="comfortable"
+        class="text-caption text-medium-emphasis bg-accent-lighten"
+        density="compact"
+        border="thin"
+        :style="{
+          width: 'fit-content',
+        }"
       >
         <template #prepend>
           <v-icon icon="mdi-calendar" start />
         </template>
-        <template v-if="!selectedOption"> Due Date </template>
-        <template v-else>
-          {{ selectedOption.title }}
+        {{ chipLabel }}
+
+        <template #close v-if="selected?.length">
+          <v-btn
+            icon
+            density="compact"
+            size="small"
+            color="transparent"
+            variant="flat"
+            @click.stop="clearValue"
+          >
+            <v-icon icon="mdi-close" />
+          </v-btn>
         </template>
       </v-chip>
     </template>
-    <v-card>
-      <v-list>
-        <template v-for="option in quickFilterDateOptions" :key="option.title">
-          <v-list-item
-            @click="handleOptionSelected(option)"
-            :active="isOptionSelected(option)"
-          >
-            <v-list-item-title>
-              {{ option.title }}
-            </v-list-item-title>
-            <template #append>
-              <v-icon
-                v-if="isOptionSelected(option)"
-                icon="mdi-check"
-                size="12"
-                end
-              />
-            </template>
-          </v-list-item>
-        </template>
-      </v-list>
-    </v-card>
+    <menu-wrapper
+      v-model="selected"
+      :items="quickFilterDateOptions"
+      selectable
+    />
   </v-menu>
 </template>

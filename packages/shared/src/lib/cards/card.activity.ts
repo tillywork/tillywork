@@ -188,20 +188,32 @@ export const ACTIVITY_FIELD_TYPES = [
   FieldTypes.USER,
 ];
 
-export const TASK_STATUS_OPTIONS = [
+export enum TaskStatus {
+  PENDING = 'pending',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+}
+
+export type TaskStatusOption = {
+  title: string;
+  value: TaskStatus;
+  color: string;
+};
+
+export const TASK_STATUS_OPTIONS: TaskStatusOption[] = [
   {
     title: 'Pending',
-    value: 'pending',
+    value: TaskStatus.PENDING,
     color: 'default',
   },
   {
     title: 'In Progress',
-    value: 'in_progress',
+    value: TaskStatus.IN_PROGRESS,
     color: 'primary',
   },
   {
     title: 'Completed',
-    value: 'completed',
+    value: TaskStatus.COMPLETED,
     color: 'success',
   },
 ];
