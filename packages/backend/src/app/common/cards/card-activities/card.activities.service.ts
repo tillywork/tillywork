@@ -4,10 +4,12 @@ import { Repository } from "typeorm";
 import { CardActivity } from "./card.activity.entity";
 import { CreateCardActivityDto } from "./dto/create.card.activity.dto";
 import { UpdateCardActivityDto } from "./dto/update.card.activity.dto";
-import { IsEnum, IsNumber, IsOptional } from "class-validator";
+import { IsBoolean, IsEnum, IsOptional } from "class-validator";
+import { Transform } from "class-transformer";
 import { ActivityType } from "@tillywork/shared";
 import { QueryBuilderHelper } from "../../helpers/query.builder.helper";
 import { EventEmitter2 } from "@nestjs/event-emitter";
+import { TillyLogger } from "../../logger/tilly.logger";
 
 export class FindAllParams {
     @IsOptional()
@@ -21,8 +23,20 @@ export class FindAllParams {
     type?: ActivityType;
 
     @IsOptional()
-    @IsNumber()
-    assignee?: number;
+    assignee?: number[];
+
+    @IsOptional()
+    @IsBoolean()
+    @Transform(({ value }) => {
+        if (value === true || value === false) return value;
+        if (typeof value === "string") {
+            const lowercased = value.toLowerCase();
+            if (lowercased === "true") return true;
+            if (lowercased === "false") return false;
+        }
+        return undefined;
+    })
+    isCompleted?: boolean;
 
     @IsOptional()
     sortBy?: string;
@@ -39,6 +53,8 @@ export class FindAllParams {
 
 @Injectable()
 export class CardActivitiesService {
+    private readonly logger = new TillyLogger("CardActivitiesService");
+
     constructor(
         @InjectRepository(CardActivity)
         private cardActivitiesRepository: Repository<CardActivity>,
@@ -52,6 +68,7 @@ export class CardActivitiesService {
         assignee,
         dueDateStart,
         dueDateEnd,
+        isCompleted,
         sortBy = "createdAt",
         sortOrder = "asc",
     }: FindAllParams): Promise<CardActivity[]> {
@@ -74,9 +91,13 @@ export class CardActivitiesService {
             queryBuilder.andWhere("cardActivity.type = :type", { type });
         }
 
-        if (assignee) {
+        if (assignee?.length) {
             queryBuilder.andWhere(
-                `"cardActivity".content->'assignee' @> :assignee`,
+                `EXISTS (
+                    SELECT 1
+                    FROM jsonb_array_elements("cardActivity".content->'assignee') as elem
+                    WHERE (elem)::text::int = ANY(:assignee)
+                )`,
                 { assignee }
             );
         }
@@ -91,6 +112,13 @@ export class CardActivitiesService {
                     dueDateStart: newStart,
                     dueDateEnd: newEnd,
                 }
+            );
+        }
+
+        if (isCompleted != null) {
+            queryBuilder.andWhere(
+                `("cardActivity".content->'isCompleted')::boolean = :isCompleted`,
+                { isCompleted }
             );
         }
 

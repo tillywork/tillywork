@@ -1,33 +1,40 @@
 <script setup lang="ts">
-import { useQueryStore } from '@/stores/query';
-
 import MenuWrapper from '@/components/common/base/ContextMenu/MenuWrapper.vue';
+import type { ContextMenuItem } from '@/components/common/base/ContextMenu/types';
 
 const attrs = useAttrs();
-const selected = defineModel<number[]>({
-  default: [],
+
+const selected = defineModel<boolean | null>({
+  default: false,
 });
 
-const { users } = storeToRefs(useQueryStore());
-
-const selectedUsers = computed(
-  () => users.value?.filter((user) => selected.value.includes(user.id)) ?? []
-);
+const options: ContextMenuItem[] = [
+  {
+    title: 'Not completed',
+    color: 'primary',
+    value: false,
+  },
+  {
+    title: 'Completed',
+    color: 'success',
+    value: true,
+  },
+];
 
 const chipLabel = computed(() => {
-  if (!selected.value.length || !selectedUsers.value[0]) {
-    return 'Assignee';
+  if (selected.value === null) {
+    return 'Status';
   }
 
-  if (selected.value.length > 1) {
-    return `Assignee is any of ${selected.value.length}`;
+  if (selected.value) {
+    return 'Status is completed';
   }
 
-  return `Assignee is ${selectedUsers.value[0].firstName}`;
+  return 'Status is not completed';
 });
 
 function clearValue() {
-  selected.value = [];
+  selected.value = null;
 }
 </script>
 
@@ -47,11 +54,11 @@ function clearValue() {
         }"
       >
         <template #prepend>
-          <v-icon icon="mdi-account" start />
+          <v-icon icon="mdi-circle-slice-8" start />
         </template>
         {{ chipLabel }}
 
-        <template #close v-if="selected.length">
+        <template #close v-if="selected !== null">
           <v-btn
             icon
             density="compact"
@@ -65,18 +72,6 @@ function clearValue() {
         </template>
       </v-chip>
     </template>
-    <menu-wrapper
-      v-model="selected"
-      :items="
-        users?.map((u) => ({
-          title: `${u.firstName} ${u.lastName}`,
-          value: u.id,
-          photo: u.photo,
-          avatar: true,
-        }))
-      "
-      selectable
-      multiple
-    />
+    <menu-wrapper v-model="selected" selectable :items="options" />
   </v-menu>
 </template>

@@ -336,7 +336,7 @@ watchEffect(() => {
 watchEffect(() => {
   if (!selectedField.value && filter.value.field !== '') {
     const field = filterableFields.value.find(
-      (f) => f.slug === filter.value.field.split('.').pop()
+      (f) => f.slug === filter.value.field?.split('.').pop()
     );
 
     selectedField.value = field ?? null;

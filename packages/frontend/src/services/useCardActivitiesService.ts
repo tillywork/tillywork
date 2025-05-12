@@ -2,11 +2,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import { useHttp } from '@/composables/useHttp';
 import {
   ActivityType,
+  assertNotNullOrUndefined,
+  TaskStatus,
   type ActivityContent,
   type CardActivity,
   type SortOption,
 } from '@tillywork/shared';
 import type { MaybeRef } from 'vue';
+import { useAuthStore } from '@/stores/auth';
 
 export type FindAllParams = {
   cardId?: MaybeRef<number>;
@@ -18,6 +21,7 @@ export type FindAllParams = {
 export type FindTasksParams = FindAllParams & {
   assignee?: MaybeRef<number[]>;
   dueDate?: MaybeRef<string[] | undefined>;
+  isCompleted?: MaybeRef<boolean>;
 };
 
 export const useCardActivitiesService = () => {
@@ -129,23 +133,34 @@ export const useCardActivitiesService = () => {
     workspaceId,
     assignee,
     dueDate,
+    isCompleted,
     sortBy,
   }: FindTasksParams): Promise<CardActivity[]> {
     const dueDateValues = toValue(dueDate);
     const dueDateStart = dueDateValues ? dueDateValues[0] : undefined;
     const dueDateEnd = dueDateValues ? dueDateValues[1] : undefined;
+    const assigneeValues = toValue(assignee);
+
+    const params: Record<string, any> = {
+      cardId: toValue(cardId),
+      workspaceId: toValue(workspaceId),
+      type: ActivityType.TASK,
+      sortBy: toValue(sortBy)?.key,
+      sortOrder: toValue(sortBy)?.order,
+      dueDateStart,
+      dueDateEnd,
+      isCompleted: toValue(isCompleted),
+    };
+
+    if (assigneeValues?.length) {
+      params.assignee = assigneeValues;
+    }
 
     return sendRequest(`/cards/activities`, {
       method: 'GET',
-      params: {
-        cardId: toValue(cardId),
-        workspaceId: toValue(workspaceId),
-        type: ActivityType.TASK,
-        assignee: toValue(assignee)?.join(','),
-        sortBy: toValue(sortBy)?.key,
-        sortOrder: toValue(sortBy)?.order,
-        dueDateStart,
-        dueDateEnd,
+      params,
+      paramsSerializer: {
+        indexes: null,
       },
     });
   }
@@ -155,6 +170,7 @@ export const useCardActivitiesService = () => {
     workspaceId,
     assignee,
     dueDate,
+    isCompleted,
     sortBy,
   }: FindTasksParams) {
     return useQuery({
@@ -165,11 +181,88 @@ export const useCardActivitiesService = () => {
           workspaceId,
           assignee,
           dueDate,
+          isCompleted,
           sortBy,
         },
       ],
       queryFn: () =>
-        findAllTasks({ cardId, workspaceId, assignee, dueDate, sortBy }),
+        findAllTasks({
+          cardId,
+          workspaceId,
+          assignee,
+          dueDate,
+          isCompleted,
+          sortBy,
+        }),
+    });
+  }
+
+  function setTaskAsCompleted(
+    task: MaybeRef<CardActivity>
+  ): Promise<CardActivity> {
+    assertNotNullOrUndefined(toValue(task), 'Task is undefined');
+
+    return sendRequest(`/cards/activities/${toValue(task).id}`, {
+      method: 'PUT',
+      data: {
+        content: {
+          ...toValue(task).content,
+          isCompleted: true,
+          status: TaskStatus.COMPLETED,
+        },
+      },
+    });
+  }
+
+  function setTaskAsNotCompleted(
+    task: MaybeRef<CardActivity>
+  ): Promise<CardActivity> {
+    assertNotNullOrUndefined(toValue(task), 'Task is undefined');
+
+    return sendRequest(`/cards/activities/${toValue(task).id}`, {
+      method: 'PUT',
+      data: {
+        content: {
+          ...toValue(task).content,
+          isCompleted: false,
+        },
+      },
+    });
+  }
+
+  function useSetTaskAsCompleted() {
+    return useMutation({
+      mutationFn: setTaskAsCompleted,
+      onSuccess: () => {
+        const { workspace } = storeToRefs(useAuthStore());
+
+        queryClient.invalidateQueries({
+          queryKey: [
+            'cardActivities',
+            {
+              workspaceId: toValue(workspace)?.id,
+            },
+          ],
+        });
+      },
+    });
+  }
+
+  function useSetTaskAsNotCompleted() {
+    return useMutation({
+      mutationFn: setTaskAsNotCompleted,
+      onSuccess: () => {
+        const { workspace } = storeToRefs(useAuthStore());
+
+        queryClient.invalidateQueries({
+          queryKey: [
+            'cardActivities',
+            {
+              workspaceId: toValue(workspace)?.id,
+            },
+          ],
+        });
+      },
     });
   }
 
@@ -179,5 +272,7 @@ export const useCardActivitiesService = () => {
     useDeleteActivityMutation,
     useUpdateActivityMutation,
     useFindAllTasksQuery,
+    useSetTaskAsCompleted,
+    useSetTaskAsNotCompleted,
   };
 };

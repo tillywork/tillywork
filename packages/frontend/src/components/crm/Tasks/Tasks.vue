@@ -3,6 +3,7 @@ import { useCardActivitiesService } from '@/services/useCardActivitiesService';
 
 import { useAuthStore } from '@/stores/auth';
 import { useQueryStore } from '@/stores/query';
+import { useSnackbarStore } from '@/stores/snackbar';
 
 import {
   type SortOption,
@@ -13,26 +14,38 @@ import type { ColumnDef } from '@tanstack/vue-table';
 
 import BaseTable from '../../common/tables/BaseTable/BaseTable.vue';
 import BaseDatePicker from '../../common/inputs/BaseDatePicker.vue';
-import AssigneeFilterChip from './AssigneeFilterChip.vue';
-import DueDateFilterChip from './DueDateFilterChip.vue';
 import BaseUserSelector from '@/components/common/inputs/BaseUserSelector/BaseUserSelector.vue';
+import TaskFilters from './TaskFilters.vue';
 
-const { useFindAllTasksQuery } = useCardActivitiesService();
+const {
+  useFindAllTasksQuery,
+  useSetTaskAsCompleted,
+  useSetTaskAsNotCompleted,
+} = useCardActivitiesService();
 
+const { showSnackbar } = useSnackbarStore();
 const { users } = storeToRefs(useQueryStore());
 const { workspace, user } = storeToRefs(useAuthStore());
 
-const assignee = ref<number[]>([user.value!.id]);
-const dueDate = ref<string[]>();
 const sortBy = ref<SortOption>({
   key: 'createdAt',
   order: 'DESC',
 });
 
+const taskFilters = ref({
+  assignee: [Number(user.value?.id)],
+  dueDate: [],
+  isCompleted: false,
+});
+
+const { mutateAsync: setTaskAsCompleted } = useSetTaskAsCompleted();
+const { mutateAsync: setTaskAsNotCompleted } = useSetTaskAsNotCompleted();
+
 const { data: tasks } = useFindAllTasksQuery({
   workspaceId: workspace.value!.id,
-  assignee,
-  dueDate,
+  assignee: computed(() => taskFilters.value.assignee),
+  dueDate: computed(() => taskFilters.value.dueDate ?? []),
+  isCompleted: computed(() => taskFilters.value.isCompleted),
   sortBy,
 });
 
@@ -86,6 +99,42 @@ function getTaskAssociatedCard(task: CardActivity) {
     return getPersonName(card);
   }
 }
+
+function handleIsCompletedToggle({
+  task,
+  isCompleted,
+}: {
+  task: CardActivity;
+  isCompleted: boolean;
+}) {
+  if (isCompleted) {
+    handleSetTaskAsCompleted(task);
+  } else {
+    handleSetTaskAsNotCompleted(task);
+  }
+}
+
+function handleSetTaskAsCompleted(task: CardActivity) {
+  try {
+    setTaskAsCompleted(task);
+  } catch {
+    showSnackbar({
+      message: 'Something went wrong, please try again',
+      color: 'error',
+    });
+  }
+}
+
+function handleSetTaskAsNotCompleted(task: CardActivity) {
+  try {
+    setTaskAsNotCompleted(task);
+  } catch {
+    showSnackbar({
+      message: 'Something went wrong, please try again',
+      color: 'error',
+    });
+  }
+}
 </script>
 
 <template>
@@ -98,10 +147,8 @@ function getTaskAssociatedCard(task: CardActivity) {
     </div>
     <v-divider />
     <v-card class="px-6 py-4" color="transparent">
-      <div class="mb-4 d-flex ga-2">
-        <assignee-filter-chip v-model="assignee" />
-        <due-date-filter-chip v-model="dueDate" />
-      </div>
+      <task-filters v-model="taskFilters" />
+
       <template v-if="tasks">
         <base-table :data="tasks" :columns enable-column-resizing>
           <template #title="{ row }">
@@ -109,6 +156,13 @@ function getTaskAssociatedCard(task: CardActivity) {
               <v-checkbox
                 :model-value="row.original.content.isCompleted"
                 v-tooltip="'Set as completed'"
+                @update:model-value="
+                  (v) =>
+                    handleIsCompletedToggle({
+                      task: row.original,
+                      isCompleted: v,
+                    })
+                "
               />
               {{ row.original.content.title }}
             </v-card>
@@ -132,8 +186,9 @@ function getTaskAssociatedCard(task: CardActivity) {
           <template #assignee="{ row }">
             <base-user-selector
               v-if="users"
-              :users
               :model-value="row.original.content.assignee"
+              :users
+              label="Assignee"
               return-id
             />
           </template>

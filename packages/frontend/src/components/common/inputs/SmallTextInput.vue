@@ -4,10 +4,12 @@ const {
   label,
   placeholder,
   autofocus = false,
+  rounded = 'pill',
 } = defineProps<{
   label?: string;
   placeholder?: string;
   autofocus?: boolean;
+  rounded?: string;
 }>();
 
 const isFocused = ref(false);
@@ -22,8 +24,8 @@ onMounted(() => {
 
 <template>
   <div
-    class="tw-text-input rounded-pill"
-    :class="[{ 'tw-text-input--focused': isFocused }]"
+    class="tw-text-input"
+    :class="[{ 'tw-text-input--focused': isFocused }, `rounded-${rounded}`]"
   >
     <div class="tw-text-input__container">
       <input

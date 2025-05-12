@@ -5,6 +5,7 @@ import {
     Get,
     Logger,
     Param,
+    ParseBoolPipe,
     Post,
     Put,
     Query,
@@ -36,7 +37,11 @@ export class CardActivitiesController {
     ) {}
 
     @Get()
-    find(@Query() query: FindAllParams) {
+    find(
+        @Query() query: FindAllParams,
+        @Query("isCompleted", new ParseBoolPipe({ optional: true }))
+        isCompleted?: boolean
+    ) {
         const {
             cardId,
             workspaceId,
@@ -48,13 +53,20 @@ export class CardActivitiesController {
             dueDateEnd,
         } = query;
 
+        const normalizedAssignee = assignee
+            ? Array.isArray(assignee)
+                ? assignee.map((userId) => Number(userId))
+                : [Number(assignee)]
+            : undefined;
+
         return this.cardActivitiesService.findAll({
             cardId,
             workspaceId,
             type,
-            assignee,
+            assignee: normalizedAssignee,
             dueDateStart,
             dueDateEnd,
+            isCompleted,
             sortBy,
             sortOrder,
         });
