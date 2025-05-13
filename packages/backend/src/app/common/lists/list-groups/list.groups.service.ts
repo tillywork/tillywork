@@ -8,7 +8,6 @@ import { UpdateListGroupDto } from "./dto/update.list.group.dto";
 import { FieldsService } from "../../fields/fields.service";
 import { ListGroupEntityTypes } from "../types";
 import { Field } from "../../fields/field.entity";
-import { isEqual } from "lodash";
 import {
     IsBoolean,
     IsEnum,
@@ -596,10 +595,6 @@ export class ListGroupsService {
         existing: ListGroup,
         generated: CreateListGroupDto
     ) {
-        const fieldCheck =
-            (!existing.field && !generated.fieldId) ||
-            existing.field.id === generated.fieldId;
-        const filterCheck = isEqual(existing.filter, generated.filter);
         const nameCheck = existing.name === generated.name;
         const iconCheck =
             (!existing.icon && !generated.icon) ||
@@ -608,8 +603,6 @@ export class ListGroupsService {
             (!existing.color && !generated.color) ||
             existing.color === generated.color;
 
-        return (
-            fieldCheck && nameCheck && iconCheck && colorCheck && filterCheck
-        );
+        return nameCheck && iconCheck && colorCheck;
     }
 }

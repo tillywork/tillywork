@@ -29,14 +29,12 @@ export const useListGroupsService = () => {
     sortCardsBy,
     hideCompleted,
   }: GetListGroupsByOptionParams): Promise<ListGroup[]> {
-    const groupByValue = computed(() => toValue(groupBy));
-
     return sendRequest(`/lists/${toValue(listId)}/groups`, {
       method: 'POST',
       data: {
         hideCompleted: toValue(hideCompleted),
-        groupBy: groupByValue.value.type,
-        fieldId: groupByValue.value.fieldId,
+        groupBy: toValue(groupBy).type,
+        fieldId: toValue(groupBy).fieldId,
         sortCardsBy: toValue(sortCardsBy),
       },
     });
@@ -65,7 +63,8 @@ export const useListGroupsService = () => {
           sortCardsBy,
         }),
       enabled: params.enabled,
-      staleTime: 1 * 60 * 1000,
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
     });
 
     return getListGroupsQuery;
