@@ -2,12 +2,16 @@
 import type { MaybeRef } from 'vue';
 import MenuItem from './MenuItem.vue';
 
-import type { ContextMenuItem } from './types';
 import { type Instance } from 'tippy.js';
 
-import SmallTextInput from '../../inputs/SmallTextInput.vue';
-import stringUtils from '@/utils/string';
 import { useListKeyboardNavigation } from '@/composables/useListKeyboardNavigation';
+
+import type { ContextMenuItem } from './types';
+
+import stringUtils from '@/utils/string';
+import _ from 'lodash';
+
+import SmallTextInput from '../../inputs/SmallTextInput.vue';
 
 const selectedItems = defineModel<unknown | unknown[] | null>({
   default: null,
@@ -64,15 +68,27 @@ watch(selectedItems, (v) => onUpdateModelValue?.(v));
       bg-color="transparent"
       :selected="[activeItem?.value]"
     >
-      <template v-for="item in filteredItems" :key="item.title">
-        <menu-item
-          v-model="selectedItems"
-          :item="item"
-          :tippy
-          :selectable
-          :multiple
-          :active="item.value === activeItem?.value"
-        />
+      <template v-if="filteredItems.length">
+        <template v-for="item in filteredItems" :key="item.title">
+          <menu-item
+            v-model="selectedItems"
+            :item="item"
+            :tippy
+            :selectable
+            :multiple
+            :active="_.isEqual(item, activeItem)"
+          />
+        </template>
+      </template>
+      <template v-else>
+        <v-list-item height="30" min-height="30">
+          <template #prepend>
+            <v-icon color="warning" icon="mdi-information-outline" />
+          </template>
+          <v-list-item-title class="text-xs text-color-subtitle">
+            No items found
+          </v-list-item-title>
+        </v-list-item>
       </template>
     </v-list>
   </v-card>
