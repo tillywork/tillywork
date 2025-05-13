@@ -21,6 +21,7 @@ const {
   useFindAllTasksQuery,
   useSetTaskAsCompleted,
   useSetTaskAsNotCompleted,
+  useUpdateActivityMutation,
 } = useCardActivitiesService();
 
 const { showSnackbar } = useSnackbarStore();
@@ -38,6 +39,7 @@ const taskFilters = ref({
   isCompleted: false,
 });
 
+const { mutateAsync: updateTask } = useUpdateActivityMutation();
 const { mutateAsync: setTaskAsCompleted } = useSetTaskAsCompleted();
 const { mutateAsync: setTaskAsNotCompleted } = useSetTaskAsNotCompleted();
 
@@ -135,6 +137,44 @@ function handleSetTaskAsNotCompleted(task: CardActivity) {
     });
   }
 }
+
+function handleUpdateDueDate(task: CardActivity, newDate: string | undefined) {
+  try {
+    updateTask({
+      activity: {
+        id: task.id,
+        content: {
+          ...task.content,
+          dueAt: newDate,
+        },
+      },
+    } as any);
+  } catch {
+    showSnackbar({
+      message: 'Something went wrong, please try again',
+      color: 'error',
+    });
+  }
+}
+
+function handleUpdateAssignee(task: CardActivity, newAssignee: number[]) {
+  try {
+    updateTask({
+      activity: {
+        id: task.id,
+        content: {
+          ...task.content,
+          assignee: newAssignee,
+        },
+      },
+    } as any);
+  } catch {
+    showSnackbar({
+      message: 'Something went wrong, please try again',
+      color: 'error',
+    });
+  }
+}
 </script>
 
 <template>
@@ -172,6 +212,9 @@ function handleSetTaskAsNotCompleted(task: CardActivity) {
               <base-date-picker
                 :model-value="row.original.content.dueAt"
                 include-time
+                @update:model-value="
+                  (newDate) => handleUpdateDueDate(row.original, newDate as string | undefined)
+                "
               />
             </v-card>
           </template>
@@ -190,6 +233,9 @@ function handleSetTaskAsNotCompleted(task: CardActivity) {
               :users
               label="Assignee"
               return-id
+              @update:model-value="
+                (newAssignee) => handleUpdateAssignee(row.original, newAssignee as number[])
+              "
             />
           </template>
         </base-table>
