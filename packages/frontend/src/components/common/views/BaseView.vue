@@ -18,6 +18,7 @@ import { useSnackbarStore } from '@/stores/snackbar';
 import { useQueryClient } from '@tanstack/vue-query';
 
 import { cloneDeep } from 'lodash';
+import { isEqual } from 'lodash';
 
 import { DIALOGS } from '@/components/common/dialogs/types';
 import {
@@ -36,10 +37,33 @@ const { view, list } = defineProps<{
   view: View;
   list: List;
 }>();
+
+const viewCopy = ref<View>(cloneDeep(view));
+
+watch(
+  () => view,
+  (newView) => {
+    if (!isEqual(newView, viewCopy.value)) {
+      viewCopy.value = cloneDeep(newView);
+    }
+  },
+  { deep: true }
+);
+
 const listId = computed(() => list.id);
 const viewId = computed(() => view.id);
-const viewCopy = ref<View>(cloneDeep(view));
-const viewsService = useViewsService();
+
+const hideCompleted = computed(() => view.options.hideCompleted ?? false);
+const groupBy = computed(() => {
+  if (view.type === ViewTypes.GANTT) {
+    return {
+      type: ListGroupOptions.ALL,
+    };
+  }
+  return view.options.groupBy;
+});
+
+const { useUpdateViewMutation } = useViewsService();
 const { useGetListGroupsByOptionQuery } = useListGroupsService();
 const { useCreateFilterMutation, useUpdateFilterMutation } =
   useFitlersService();
@@ -47,32 +71,11 @@ const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
 const queryClient = useQueryClient();
 
-const hideCompleted = computed(() => view.options.hideCompleted ?? false);
-const groupBy = computed({
-  get() {
-    if (view.type === ViewTypes.GANTT) {
-      return {
-        type: ListGroupOptions.ALL,
-      };
-    }
-    return view.options.groupBy;
-  },
-  set(v) {
-    viewCopy.value = {
-      ...viewCopy.value,
-      options: {
-        ...viewCopy.value.options,
-        groupBy: v,
-      },
-    };
-  },
-});
-
 const sortBy = computed({
   get() {
     return viewCopy.value.options.sortBy;
   },
-  set(v) {
+  set(v: SortOption | undefined) {
     viewCopy.value = {
       ...viewCopy.value,
       options: {
@@ -83,7 +86,7 @@ const sortBy = computed({
   },
 });
 
-const updateViewMutation = viewsService.useUpdateViewMutation();
+const { mutateAsync: updateView } = useUpdateViewMutation();
 
 const { data: listGroups } = useGetListGroupsByOptionQuery({
   listId,
@@ -96,15 +99,15 @@ const { mutateAsync: createFilter } = useCreateFilterMutation();
 const { mutateAsync: updateFilter } = useUpdateFilterMutation();
 
 function handleGroupBySelection() {
-  updateViewMutation.mutateAsync(viewCopy.value);
+  updateView(viewCopy.value);
 }
 
-function handleSortBySelection(option: SortOption) {
-  updateViewMutation.mutateAsync({
+function handleSortBySelection(option: SortOption | undefined) {
+  updateView({
     ...viewCopy.value,
     options: {
       ...viewCopy.value.options,
-      sortBy: option ?? null,
+      sortBy: option,
     },
   });
 }
@@ -175,11 +178,6 @@ function handleSaveFilters() {
       });
   }
 }
-
-watch(
-  () => view,
-  (v) => (viewCopy.value = cloneDeep(v))
-);
 </script>
 
 <template>
