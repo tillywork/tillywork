@@ -115,6 +115,13 @@ export class CardTypeFieldsFactory {
                 { item: "Bad timing" },
             ],
         },
+        {
+            name: "Description",
+            type: FieldTypes.RICH,
+            slug: "description",
+            icon: "mdi-text-box",
+            isDescription: true,
+        },
     ];
 
     private readonly organizationFields: FieldDefinition[] = [
@@ -142,6 +149,13 @@ export class CardTypeFieldsFactory {
             type: FieldTypes.CURRENCY,
             slug: "annual_revenue",
             icon: "mdi-currency-usd",
+        },
+        {
+            name: "Description",
+            type: FieldTypes.RICH,
+            slug: "description",
+            icon: "mdi-text-box",
+            isDescription: true,
         },
     ];
 
@@ -188,6 +202,13 @@ export class CardTypeFieldsFactory {
             icon: "mdi-domain",
             isPinned: true,
             dataCardTypeName: "Organization",
+        },
+        {
+            name: "Description",
+            type: FieldTypes.RICH,
+            slug: "description",
+            icon: "mdi-text-box",
+            isDescription: true,
         },
     ];
 

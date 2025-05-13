@@ -63,6 +63,7 @@ const {
   docId?: string | number;
 }>();
 
+console.log('minHeight', minHeight);
 const emit = defineEmits(['focus', 'blur', 'input']);
 
 const { uploadFiles } = useFilesService();
@@ -248,6 +249,14 @@ function enforceHeading() {
   }
 }
 
+function focusEditor() {
+  if (!editor.value) {
+    return;
+  }
+
+  editor.value.commands.focus();
+}
+
 // Watch for changes to textValue and update the editor content only if collaboration is disabled
 watch(textValue, (newText) => {
   if (!enableCollaboration && editor && newText !== editor.value?.getText()) {
@@ -368,10 +377,12 @@ defineExpose({
 </script>
 
 <template>
-  <div class="editor-container">
+  <div class="editor-container cursor-text" @click="focusEditor">
     <editor-content
       :editor="editor"
-      :style="minHeight ? `min-height: ${minHeight}` : undefined"
+      :style="{
+        minHeight: `${minHeight}px`,
+      }"
     />
   </div>
 </template>
