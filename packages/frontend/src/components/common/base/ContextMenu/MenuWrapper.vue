@@ -19,19 +19,25 @@ const selectedItems = defineModel<unknown | unknown[] | null>({
 
 const {
   items = [],
+  open = false,
   tippy,
   onUpdateModelValue,
 } = defineProps<{
   items?: MaybeRef<ContextMenuItem[]>;
-  tippy?: Instance;
+  tippy?: Ref<Instance>;
   selectable?: boolean;
   multiple?: boolean;
   onUpdateModelValue?: (v: unknown | unknown[]) => void;
+  open?: MaybeRef<boolean>;
 }>();
 
 const optionSearch = ref('');
 
-const { activeIndex, containerRef } = useListKeyboardNavigation({});
+const isMenuOpen = computed(() => toValue(open));
+
+const { activeIndex, containerRef } = useListKeyboardNavigation({
+  enabled: isMenuOpen,
+});
 
 const filteredItems = computed<ContextMenuItem[]>(() => {
   if (optionSearch.value == '') {

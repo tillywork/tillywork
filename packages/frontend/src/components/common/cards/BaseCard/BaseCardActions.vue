@@ -46,6 +46,6 @@ watch(menu, (v) => {
         </v-btn>
       </slot>
     </template>
-    <menu-wrapper :items />
+    <menu-wrapper :items :open="menu" />
   </v-menu>
 </template>

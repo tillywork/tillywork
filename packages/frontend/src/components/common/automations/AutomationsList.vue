@@ -229,20 +229,23 @@ watchEffect(() => {
                 <v-icon icon="mdi-dots-vertical" size="small" />
               </v-btn>
             </template>
-            <menu-wrapper
-              :items="[
-                {
-                  title: 'Duplicate',
-                  icon: 'mdi-content-duplicate',
-                  action: () => handleDuplicateAutomation(row.original),
-                },
-                {
-                  title: 'Delete',
-                  icon: 'mdi-delete-outline',
-                  action: () => handleDeleteAutomation(row.original.id),
-                },
-              ]"
-            />
+            <template #default="{ isActive }">
+              <menu-wrapper
+                :items="[
+                  {
+                    title: 'Duplicate',
+                    icon: 'mdi-content-duplicate',
+                    action: () => handleDuplicateAutomation(row.original),
+                  },
+                  {
+                    title: 'Delete',
+                    icon: 'mdi-delete-outline',
+                    action: () => handleDeleteAutomation(row.original.id),
+                  },
+                ]"
+                :open="isActive.value"
+              />
+            </template>
           </v-menu>
           <span>{{ row.original.name }}</span>
         </div>

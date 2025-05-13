@@ -21,30 +21,38 @@ const { items, selectable, multiple } = defineProps<{
 
 const emit = defineEmits(['update:open']);
 
-let tippyInstance: Instance | null = null;
 let menuApp: ReturnType<typeof createApp> | null = null;
 
+const tippyInstance = ref<Instance | null>(null);
 const triggerElement = ref<HTMLElement | null>(null);
 const isMenuOpen = ref(false);
 
 function showMenu(e?: MouseEvent) {
-  if (!tippyInstance) return;
+  if (!tippyInstance.value) return;
 
   //FIX: if this is called with an event, then called without event, the location doesn't reset
   if (e) {
-    tippyInstance.setProps({
+    tippyInstance.value.setProps({
       getReferenceClientRect: createClientRect(e),
     });
   }
 
-  tippyInstance.show();
-  isMenuOpen.value = true;
+  tippyInstance.value.show();
+  handleMenuShown();
 }
 
 function hideMenu() {
-  if (!tippyInstance) return;
+  if (!tippyInstance.value) return;
 
-  tippyInstance.hide();
+  tippyInstance.value.hide();
+  handleMenuHidden();
+}
+
+function handleMenuShown() {
+  isMenuOpen.value = true;
+}
+
+function handleMenuHidden() {
   isMenuOpen.value = false;
 }
 
@@ -78,7 +86,7 @@ function setup() {
 
   const menuContainer = document.createElement('div');
 
-  tippyInstance = tippy(triggerElement.value, {
+  tippyInstance.value = tippy(triggerElement.value, {
     content: menuContainer,
     trigger: 'manual',
     interactive: true,
@@ -87,6 +95,8 @@ function setup() {
     appendTo: () => document.body,
     animateFill: true,
     plugins: [animateFill],
+    onHide: handleMenuHidden,
+    onShow: handleMenuShown,
   });
 
   menuApp = createApp(MenuWrapper, {
@@ -98,6 +108,7 @@ function setup() {
     onUpdateModelValue: (value: unknown | unknown[]) => {
       handleItemSelected(value);
     },
+    open: isMenuOpen,
   });
   menuApp.use(vuetify);
   menuApp.mount(menuContainer);
@@ -109,8 +120,9 @@ function cleanup() {
   if (triggerElement.value) {
     triggerElement.value.removeEventListener('contextmenu', handleContextMenu);
   }
+
   menuApp?.unmount();
-  tippyInstance?.destroy();
+  tippyInstance.value?.destroy();
 }
 
 onMounted(setup);
