@@ -72,6 +72,13 @@ function clearValue() {
         </template>
       </v-chip>
     </template>
-    <menu-wrapper v-model="selected" selectable :items="options" />
+    <template #default="{ isActive }">
+      <menu-wrapper
+        v-model="selected"
+        selectable
+        :items="options"
+        :open="isActive.value"
+      />
+    </template>
   </v-menu>
 </template>

@@ -65,18 +65,21 @@ function clearValue() {
         </template>
       </v-chip>
     </template>
-    <menu-wrapper
-      v-model="selected"
-      :items="
-        users?.map((u) => ({
-          title: `${u.firstName} ${u.lastName}`,
-          value: u.id,
-          photo: u.photo,
-          avatar: true,
-        }))
-      "
-      selectable
-      multiple
-    />
+    <template #default="{ isActive }">
+      <menu-wrapper
+        v-model="selected"
+        :items="
+          users?.map((u) => ({
+            title: `${u.firstName} ${u.lastName}`,
+            value: u.id,
+            photo: u.photo,
+            avatar: true,
+          }))
+        "
+        selectable
+        multiple
+        :open="isActive.value"
+      />
+    </template>
   </v-menu>
 </template>

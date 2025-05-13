@@ -12,7 +12,7 @@ const selectedItems = defineModel<unknown | unknown[] | null>({
 
 const { item, tippy, selectable, multiple, modelValue } = defineProps<{
   item: ContextMenuItem;
-  tippy?: Instance;
+  tippy?: Ref<Instance | null>;
   selectable?: boolean;
   multiple?: boolean;
   modelValue?: unknown | unknown[];
@@ -45,8 +45,8 @@ function handleItemClick(item: ContextMenuItem) {
     item.action?.();
   }
 
-  if (tippy && !(selectable && multiple)) {
-    tippy.hide();
+  if (tippy?.value && !(selectable && multiple)) {
+    tippy.value.hide();
   }
 }
 </script>
