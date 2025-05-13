@@ -4,11 +4,14 @@ import { cloneDeep } from 'lodash';
 import { useStateStore } from '@/stores/state';
 import { useAuthStore } from '@/stores/auth';
 import { useSnackbarStore } from '@/stores/snackbar';
+import { useFieldQueryStore } from '@/stores/field.query';
+import { useQueryStore } from '@/stores/query';
 
 import { useCardsService } from '@/services/useCardsService';
 
 import { useCard } from '@/composables/useCard';
 
+import { type Content } from '@tiptap/vue-3';
 import {
   CardTypeLayout,
   WorkspaceTypes,
@@ -20,8 +23,7 @@ import BaseField from '@/components/common/fields/BaseField.vue';
 import ActivityInput from '@/components/common/inputs/CrmActivityInput/ActivityInput.vue';
 import ActivityTimeline from '../BaseCardActivityTimeline/ActivityTimeline.vue';
 import BaseCardToolbar from './BaseCardToolbar.vue';
-import { useFieldQueryStore } from '@/stores/field.query';
-import { useQueryStore } from '@/stores/query';
+import BaseEditorInput from '@/components/common/inputs/BaseEditor/BaseEditorInput.vue';
 
 const { card } = defineProps<{
   card: Card;
@@ -33,13 +35,17 @@ const { showSnackbar } = useSnackbarStore();
 const { listStages, list } = storeToRefs(useQueryStore());
 
 const cardCopy = ref(cloneDeep(card));
+const descriptionInput = ref();
+const cardDescription = ref<Content>();
 
 const { updateFieldValue } = useCard();
 
 const { useUpdateCardListMutation } = useCardsService();
 const { mutateAsync: updateCardStage } = useUpdateCardListMutation();
 
-const { fields, titleField, photoField } = storeToRefs(useFieldQueryStore());
+const { fields, titleField, photoField, descriptionField } = storeToRefs(
+  useFieldQueryStore()
+);
 
 function getPersonName(): string {
   let name = '';
@@ -85,12 +91,23 @@ function handleUpdateCardStage(stage: ListStage) {
   );
 }
 
+function initDescription() {
+  if (descriptionField.value) {
+    cardDescription.value = cardCopy.value.data[descriptionField.value.slug];
+  }
+}
+
+function openDescriptionFileDialog() {
+  descriptionInput.value.openFileDialog();
+}
+
 watch(
   () => card,
   (v) => {
     if (v) {
       cardCopy.value = cloneDeep(v);
       setPageTitle();
+      initDescription();
     }
   },
   { immediate: true }
@@ -197,12 +214,37 @@ watch(
       </v-card>
       <div class="base-card-content-wrapper pa-4 flex-fill align-start">
         <div class="base-card-content mx-auto">
+          <div class="my-8">
+            <template v-if="descriptionField">
+              <base-editor-input
+                :model-value="cardDescription"
+                ref="descriptionInput"
+                placeholder="Enter description.. (/ for commands)"
+                min-height="100"
+                enable-collaboration
+                doc-type="card"
+                :doc-id="cardCopy.id"
+              />
+
+              <base-icon-btn
+                icon="mdi-paperclip"
+                rounded="circle"
+                @click="openDescriptionFileDialog"
+              />
+            </template>
+            <template v-else>
+              <v-skeleton-loader
+                type="article"
+                width="100%"
+                height="150"
+              ></v-skeleton-loader>
+            </template>
+          </div>
+          <v-divider class="my-16" />
           <div>
-            <activity-input
-              v-if="workspace?.type === WorkspaceTypes.CRM"
-              class="mb-4"
-              :card
-            />
+            <template v-if="workspace?.type === WorkspaceTypes.CRM">
+              <activity-input class="mb-4" :card />
+            </template>
             <activity-timeline
               :card
               :hide-comment-input="workspace?.type === WorkspaceTypes.CRM"
@@ -221,7 +263,7 @@ watch(
 }
 
 .base-card-content {
-  width: 650px;
+  width: 700px;
   max-width: 100%;
 }
 </style>

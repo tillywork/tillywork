@@ -80,6 +80,7 @@ import { CreateNotificationTable1745490664066 } from "../migrations/174549066406
 import { CreateWatcherTable1745493772123 } from "../migrations/1745493772123-create-watcher-table";
 import { CreateNotificationPreferenceTable1745837558035 } from "../migrations/1745837558035-create-notification-preference-table";
 import { CreateUserIntegrationTable1745839604390 } from "../migrations/1745839604390-create-user-integration-table";
+import { CreateDescriptionFieldForCrmCardTypes1747137864164 } from "../migrations/1747137864164-create-description-field-for-crm-card-types";
 
 dotenvConfig({ path: "../../.env" });
 
@@ -161,6 +162,7 @@ const migrations = [
     CreateWatcherTable1745493772123,
     CreateNotificationPreferenceTable1745837558035,
     CreateUserIntegrationTable1745839604390,
+    CreateDescriptionFieldForCrmCardTypes1747137864164,
 ];
 
 const config: TypeOrmModuleOptions = {
