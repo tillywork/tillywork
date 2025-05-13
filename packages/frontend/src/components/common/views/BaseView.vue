@@ -54,22 +54,25 @@ const listId = computed(() => list.id);
 const viewId = computed(() => view.id);
 
 const hideCompleted = computed(() => view.options.hideCompleted ?? false);
-const groupBy = computed(() => {
-  if (view.type === ViewTypes.GANTT) {
-    return {
-      type: ListGroupOptions.ALL,
+const groupBy = computed({
+  get() {
+    if (view.type === ViewTypes.GANTT) {
+      return {
+        type: ListGroupOptions.ALL,
+      };
+    }
+    return view.options.groupBy;
+  },
+  set(v) {
+    viewCopy.value = {
+      ...viewCopy.value,
+      options: {
+        ...viewCopy.value.options,
+        groupBy: v,
+      },
     };
-  }
-  return view.options.groupBy;
+  },
 });
-
-const { useUpdateViewMutation } = useViewsService();
-const { useGetListGroupsByOptionQuery } = useListGroupsService();
-const { useCreateFilterMutation, useUpdateFilterMutation } =
-  useFitlersService();
-const dialog = useDialogStore();
-const { showSnackbar } = useSnackbarStore();
-const queryClient = useQueryClient();
 
 const sortBy = computed({
   get() {
@@ -85,6 +88,14 @@ const sortBy = computed({
     };
   },
 });
+
+const { useUpdateViewMutation } = useViewsService();
+const { useGetListGroupsByOptionQuery } = useListGroupsService();
+const { useCreateFilterMutation, useUpdateFilterMutation } =
+  useFitlersService();
+const dialog = useDialogStore();
+const { showSnackbar } = useSnackbarStore();
+const queryClient = useQueryClient();
 
 const { mutateAsync: updateView } = useUpdateViewMutation();
 
