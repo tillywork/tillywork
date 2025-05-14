@@ -11,7 +11,7 @@ import { leaderKey } from '@/utils/keys';
 import BaseField from '../../fields/BaseField.vue';
 import { type CardType, type CreateCardDto } from '@tillywork/shared';
 import { useCard } from '@/composables/useCard';
-import { useFieldQueryStore } from '@/stores/field.query';
+import { useFields } from '@/composables/useFields';
 
 const dialog = useDialogStore();
 const { workspace } = storeToRefs(useAuthStore());
@@ -48,7 +48,10 @@ const cardType = computed<CardType>(() => {
   }
 });
 
-const { fields, titleField } = storeToRefs(useFieldQueryStore());
+const { fields, titleField } = useFields({
+  listId: computed(() => list.value.id),
+  cardTypeId: computed(() => cardType.value.id),
+});
 
 const createCardDto = ref<CreateCardDto>({
   listId: currentDialog.value?.data?.listId ?? list.value?.id,
