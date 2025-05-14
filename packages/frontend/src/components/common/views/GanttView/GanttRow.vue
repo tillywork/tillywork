@@ -7,6 +7,7 @@ import type { TimelineConfig } from '@/composables/useGanttChart';
 import { type Card, dayjs } from '@tillywork/shared';
 import { useGanttCardDrag } from '@/composables/useGanttCardDrag';
 import type GanttChart from './GanttChart.vue';
+import { useCard } from '@/composables/useCard';
 
 const props = defineProps<{
   card: Card;
@@ -28,6 +29,10 @@ const ganttChart = inject<Ref<InstanceType<typeof GanttChart>> | null>(
 );
 
 const { titleField } = storeToRefs(useFieldQueryStore());
+
+const { getCardTitle } = useCard();
+
+const cardTitle = computed(() => getCardTitle(card.value, titleField));
 
 const position = computed(() => {
   if (!card.value.data.starts_at || !card.value.data.due_at) return null;
@@ -111,8 +116,8 @@ const virtualPosition = computed(() => {
         }"
         @mousedown="startCardDrag"
       >
-        <span class="d-block text-truncate" v-if="titleField">
-          {{ card.data[titleField.slug] }}
+        <span class="d-block text-truncate" v-if="cardTitle">
+          {{ cardTitle }}
         </span>
 
         <template v-if="isHovering">

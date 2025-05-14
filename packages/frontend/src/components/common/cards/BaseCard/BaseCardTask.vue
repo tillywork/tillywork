@@ -62,7 +62,7 @@ const dialog = useDialogStore();
 
 const keys = useMagicKeys();
 const { getNewMentions, notifyMentionedUser } = useMentionNotifications();
-const { updateFieldValue } = useCard();
+const { updateFieldValue, getCardTitle } = useCard();
 
 const { useUpdateCardMutation, useUpdateCardListMutation } = useCardsService();
 const { useCreateActivityMutation } = useCardActivitiesService();
@@ -75,9 +75,10 @@ const { titleField, descriptionField, fields } = storeToRefs(
 );
 
 const hasChildren = computed(() => card.type.hasChildren);
+const cardTitle = computed(() => getCardTitle(card, titleField));
 
-const cardTitle = ref('');
-const debouncedTitle = useDebounce(cardTitle, 2000);
+const cardTitleCopy = ref('');
+const debouncedTitle = useDebounce(cardTitleCopy, 2000);
 
 const cardDescription = ref<Content>();
 
@@ -85,6 +86,10 @@ const { mutateAsync: createActivity } = useCreateActivityMutation();
 const { mutateAsync: updateCardList } = useUpdateCardListMutation();
 
 const router = useRouter();
+
+const canEditTitle = computed(
+  () => titleField.value || card.type.titleTemplate
+);
 
 watch(
   () => card,
@@ -108,15 +113,7 @@ watch(
   { immediate: true }
 );
 
-watch(
-  titleField,
-  (v) => {
-    if (v) {
-      initTitle();
-    }
-  },
-  { immediate: true }
-);
+watch(cardTitle, initTitle, { immediate: true });
 
 watch(debouncedTitle, () => {
   updateTitle();
@@ -129,9 +126,9 @@ watch(keys[[leaderKey, 'I'].join('+')], (v) => {
 });
 
 function initTitle() {
-  if (titleField.value) {
-    cardTitle.value = cardCopy.value.data[titleField.value.slug];
-    document.title = `${cardTitle.value} - tillywork`;
+  if (cardTitle.value) {
+    cardTitleCopy.value = cardTitle.value;
+    document.title = `${cardTitleCopy.value} - tillywork`;
   }
 }
 
@@ -142,9 +139,18 @@ function initDescription() {
 }
 
 function updateTitle() {
-  const newTitle = cardTitle.value.trim();
-  if (newTitle !== '' && newTitle !== card.data[titleField.value!.slug]) {
-    cardCopy.value.data[titleField.value!.slug] = newTitle;
+  const newTitle = cardTitleCopy.value.trim();
+  if (newTitle !== '' && newTitle !== cardTitle.value) {
+    if (titleField.value) {
+      cardCopy.value.data[titleField.value.slug] = newTitle;
+    } else if (card.type.titleTemplate) {
+      const match = card.type.titleTemplate.match(/\{\{(\w+)\}\}/);
+      if (match && match[1]) {
+        const primaryField = match[1];
+        cardCopy.value.data[primaryField] = newTitle;
+      }
+    }
+
     updateCard({
       id: cardCopy.value.id,
       data: cardCopy.value.data,
@@ -232,10 +238,12 @@ function handleClose() {
       <div class="base-card-content-wrapper pa-md-6 pa-6 align-start">
         <div class="base-card-content mx-auto">
           <div class="d-flex align-start pt-2">
-            <template v-if="titleField">
+            <template v-if="canEditTitle">
               <base-editor-input
-                v-model:text="cardTitle"
-                placeholder="Task title"
+                v-model:text="cardTitleCopy"
+                :placeholder="`${card.type.name} ${
+                  titleField ? titleField.name : 'name'
+                }`"
                 :heading="2"
                 single-line
                 class="flex-1-1-100"
@@ -377,7 +385,7 @@ function handleClose() {
                       "
                       theme="icon"
                     />
-                    {{ child.data[titleField.slug] }}
+                    {{ getCardTitle(child, titleField) }}
                   </v-list-item-title>
                 </v-list-item>
               </v-list>

@@ -6,7 +6,7 @@ import { useFields } from '@/composables/useFields';
 import { useQueryStore } from '@/stores/query';
 
 import type { Row } from '@tanstack/vue-table';
-import { CardTypeLayout, FieldTypes, type Card } from '@tillywork/shared';
+import { FieldTypes, type Card } from '@tillywork/shared';
 
 import ContextMenu from '../../base/ContextMenu/ContextMenu.vue';
 import ListStageSelector from '../../inputs/ListStageSelector.vue';
@@ -34,8 +34,11 @@ const { titleField, getDateFieldColor } = useFields({
   listId: computed(() => Number(list.value?.id)),
 });
 
-const { handleHoverCard, updateCardStage, updateFieldValue } = useCard();
+const { handleHoverCard, updateCardStage, updateFieldValue, getCardTitle } =
+  useCard();
 const { items, onUpdateMenuOpen } = useCardContextMenu(row.original);
+
+const cardTitle = computed(() => getCardTitle(row.original, titleField));
 
 function getColumnSize(columnId: string) {
   const columnSize = columnSizes.find((cs) => cs.id === columnId);
@@ -124,33 +127,18 @@ function shouldRenderField(fieldType: FieldTypes) {
                   @click.prevent
                 />
 
-                <template v-if="titleField">
+                <template v-if="cardTitle">
                   <span
                     class="ms-2"
                     :class="{
                       'text-truncate': !isRowHovering,
                     }"
                   >
-                    {{ row.original.data[titleField.slug] }}
+                    {{ cardTitle }}
                   </span>
                 </template>
                 <template v-else>
-                  <template
-                    v-if="
-                      list?.defaultCardType.layout === CardTypeLayout.PERSON
-                    "
-                  >
-                    <span
-                      class="ms-2"
-                      :class="{
-                        'text-truncate': !isRowHovering,
-                      }"
-                    >
-                      {{ row.original.data.first_name }}
-                      {{ row.original.data.last_name }}
-                    </span>
-                  </template>
-                  <v-skeleton-loader v-else type="text" width="100%" />
+                  <v-skeleton-loader type="text" width="100%" />
                 </template>
 
                 <!-- Progress -->

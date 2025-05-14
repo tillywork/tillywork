@@ -38,41 +38,19 @@ const cardCopy = ref(cloneDeep(card));
 const descriptionInput = ref();
 const cardDescription = ref<Content>();
 
-const { updateFieldValue } = useCard();
+const { updateFieldValue, getCardTitle } = useCard();
 
 const { useUpdateCardListMutation } = useCardsService();
 const { mutateAsync: updateCardStage } = useUpdateCardListMutation();
 
-const { fields, titleField, photoField, descriptionField } = storeToRefs(
+const { fields, photoField, descriptionField, titleField } = storeToRefs(
   useFieldQueryStore()
 );
 
-function getPersonName(): string {
-  let name = '';
-
-  if (card.data.first_name) {
-    name = card.data.first_name;
-
-    if (card.data.last_name) name += ` ${card.data.last_name}`;
-  } else if (card.data.last_name) {
-    name = card.data.last_name;
-  }
-
-  return name;
-}
-
-function getEntityName(): string {
-  if (titleField.value) {
-    return card.data[titleField.value.slug];
-  } else if (card.type.layout === CardTypeLayout.PERSON) {
-    return getPersonName();
-  } else {
-    return '';
-  }
-}
+const entityName = computed(() => getCardTitle(card, titleField));
 
 function setPageTitle() {
-  const title = getEntityName();
+  const title = entityName.value;
   setTitle(title);
 }
 
@@ -113,7 +91,7 @@ watch(
   { immediate: true }
 );
 
-watch(titleField, () => setPageTitle());
+watch(entityName, () => setPageTitle());
 
 watch(
   () => cardCopy.value.cardLists[0].listStage,
@@ -149,13 +127,13 @@ watch(
         <div class="pa-4 d-flex align-center">
           <base-avatar
             :photo="photoField ? cardCopy.data[photoField.slug] : undefined"
-            :text="getEntityName()"
+            :text="entityName"
             size="64"
             class="text-body-2 me-4"
           />
           <div>
             <p class="text-body-1">
-              {{ getEntityName() }}
+              {{ entityName }}
             </p>
             <p class="text-caption">
               <template
