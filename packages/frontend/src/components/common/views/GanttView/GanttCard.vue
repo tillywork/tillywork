@@ -27,8 +27,10 @@ const { titleField } = useFields({
   listId: computed(() => Number(list.value?.id)),
 });
 
-const { handleHoverCard, updateCardStage } = useCard();
+const { handleHoverCard, updateCardStage, getCardTitle } = useCard();
 const { items, onUpdateMenuOpen } = useCardContextMenu(card.value);
+
+const cardTitle = computed(() => getCardTitle(card.value, titleField));
 
 function handleScrollToCard() {
   emit('click:scroll', card.value);
@@ -71,8 +73,8 @@ function handleScrollToCard() {
             "
           />
         </template>
-        <v-list-item-title v-if="titleField" class="ms-1">
-          {{ card.data[titleField.slug] }}
+        <v-list-item-title v-if="cardTitle" class="ms-1">
+          {{ cardTitle }}
         </v-list-item-title>
         <template #append>
           <v-btn

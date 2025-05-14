@@ -25,6 +25,7 @@ type DefaultWorkspaceCardType = {
     layout?: CardTypeLayout;
     dependsOn?: string[];
     hasChildren?: boolean;
+    titleTemplate?: string;
 };
 
 @Injectable()
@@ -168,7 +169,6 @@ export class CardTypesService {
     ): Promise<CardType[]> {
         const defaultTypes: DefaultWorkspaceCardType[] = [];
 
-        // Define default card types with dependencies
         switch (workspace.type) {
             case WorkspaceTypes.PROJECT_MANAGEMENT:
                 defaultTypes.push({ name: "Task" });
@@ -179,6 +179,7 @@ export class CardTypesService {
                     layout: CardTypeLayout.PERSON,
                     dependsOn: ["Organization"],
                     hasChildren: false,
+                    titleTemplate: "{{first_name}} {{last_name}}",
                 });
                 defaultTypes.push({
                     name: "Organization",
@@ -199,16 +200,13 @@ export class CardTypesService {
 
         const createdCardTypes: Record<string, CardType> = {};
 
-        // Helper function to create a card type, respecting dependencies
         const createCardType = async (
             type: DefaultWorkspaceCardType
         ): Promise<CardType> => {
-            // If already created, return it
             if (createdCardTypes[type.name]) {
                 return createdCardTypes[type.name];
             }
 
-            // Ensure dependencies are created first
             if (type.dependsOn && type.dependsOn.length > 0) {
                 for (const dependencyName of type.dependsOn) {
                     const dependency = defaultTypes.find(
@@ -224,27 +222,24 @@ export class CardTypesService {
                 }
             }
 
-            // Create the card type
             const cardType = await this.create({
                 name: type.name,
                 layout: type.layout,
                 hasChildren: type.hasChildren,
+                titleTemplate: type.titleTemplate,
                 createdByType: "system",
                 workspaceId: workspace.id,
                 workspace,
             });
 
-            // Store the created card type for future references
             createdCardTypes[type.name] = cardType;
             return cardType;
         };
 
-        // Create all card types
         for (const type of defaultTypes) {
             await createCardType(type);
         }
 
-        // Return all created card types
         return Object.values(createdCardTypes);
     }
 }

@@ -3,6 +3,7 @@ import { useCardsService } from '@/services/useCardsService';
 import ListStageSelector from '@/components/common/inputs/ListStageSelector.vue';
 import type { Card } from '@tillywork/shared';
 import { useFields } from '@/composables/useFields';
+import { useCard } from '@/composables/useCard';
 
 const props = defineProps<{
   card: Pick<Card, 'id'>;
@@ -22,6 +23,12 @@ const { titleField } = useFields({
   cardTypeId: computed(() => Number(cardCopy.value?.type.id)),
   enabled: computed(() => !!cardCopy.value),
 });
+
+const { getCardTitle } = useCard();
+
+const cardTitle = computed(() =>
+  getCardTitle(cardCopy as Ref<Card>, titleField)
+);
 </script>
 
 <template>
@@ -37,7 +44,7 @@ const { titleField } = useFields({
     rounded="pill"
   >
     <div class="d-inline-block text-truncate">
-      <template v-if="cardCopy && titleField">
+      <template v-if="cardCopy && cardTitle">
         <list-stage-selector
           v-if="!hideStage && cardCopy.cardLists[0].listStage"
           :model-value="cardCopy.cardLists[0].listStage"
@@ -46,7 +53,7 @@ const { titleField } = useFields({
           readonly
         />
         <span>
-          {{ cardCopy.data[titleField.slug] }}
+          {{ cardTitle }}
         </span>
       </template>
       <template v-else>

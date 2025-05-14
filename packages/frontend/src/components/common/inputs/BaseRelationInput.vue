@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth';
 import BaseCardChip from '@/components/common/cards/BaseCardChip.vue';
 import type { Card, Field } from '@tillywork/shared';
 import { useFields } from '@/composables/useFields';
+import { useCard } from '@/composables/useCard';
 
 const model = defineModel<string[]>({
   default: [],
@@ -23,6 +24,8 @@ const attrs = useAttrs();
 const { workspace } = storeToRefs(useAuthStore());
 
 const searchEnabled = computed(() => search.value.length > 2);
+
+const { getCardTitle } = useCard();
 
 const { useSearchCards } = useCardsService();
 const { data: items, refetch } = useSearchCards({
@@ -149,9 +152,9 @@ watch(debouncedSearch, () => {
               :active="isItemSelected(item)"
               @click="toggleItemSelection(item)"
             >
-              <v-list-item-title>{{
-                item.data[titleField.slug]
-              }}</v-list-item-title>
+              <v-list-item-title>
+                {{ getCardTitle(item.data, titleField) }}
+              </v-list-item-title>
               <template #append>
                 <v-icon
                   icon="mdi-check"

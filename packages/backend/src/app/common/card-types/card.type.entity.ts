@@ -36,6 +36,15 @@ export class CardType {
     })
     fields: Relation<Field[]>;
 
+    /**
+     * Template string for generating card titles.
+     * Uses mustache-style syntax: {{fieldSlug}}
+     * Example: "{{firstName}} {{lastName}}" for contacts
+     * If not set, falls back to the field marked as isTitle
+     */
+    @Column({ type: "varchar", length: 255, nullable: true })
+    titleTemplate: string;
+
     @Column({
         type: "boolean",
         default: false,

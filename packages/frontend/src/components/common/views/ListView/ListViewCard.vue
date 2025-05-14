@@ -30,8 +30,11 @@ const {
   listId: computed(() => Number(list.value?.id)),
 });
 
-const { handleHoverCard, updateCardStage, updateFieldValue } = useCard();
+const { handleHoverCard, updateCardStage, updateFieldValue, getCardTitle } =
+  useCard();
 const { items, onUpdateMenuOpen } = useCardContextMenu(card);
+
+const cardTitle = computed(() => getCardTitle(card, titleField));
 </script>
 
 <template>
@@ -81,9 +84,9 @@ const { items, onUpdateMenuOpen } = useCardContextMenu(card);
             @click.prevent
           />
 
-          <template v-if="titleField">
+          <template v-if="cardTitle">
             <span class="text-truncate ms-2">
-              {{ card.data[titleField.slug] }}
+              {{ cardTitle }}
             </span>
           </template>
           <template v-else>

@@ -12,6 +12,7 @@ export type CardType = {
   hasChildren: boolean;
   workspace: Workspace;
   fields: Field[];
+  titleTemplate?: string;
   createdByType: 'system' | 'user';
   createdBy: User;
   createdAt: Date;

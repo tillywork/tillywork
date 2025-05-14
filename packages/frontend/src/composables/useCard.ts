@@ -5,9 +5,15 @@ import { useDialogStore } from '@/stores/dialog';
 import { useSnackbarStore } from '@/stores/snackbar';
 import { useStateStore } from '@/stores/state';
 
-import { FieldTypes, type Card, type Field } from '@tillywork/shared';
+import {
+  assertNotNullOrUndefined,
+  FieldTypes,
+  type Card,
+  type Field,
+} from '@tillywork/shared';
 
 import { cloneDeep } from 'lodash';
+import type { MaybeRef, ComputedRef } from 'vue';
 
 export const useCard = () => {
   const { showSnackbar } = useSnackbarStore();
@@ -167,6 +173,30 @@ export const useCard = () => {
     }
   }
 
+  function getCardTitle(
+    card: MaybeRef<Card>,
+    titleField?: MaybeRef<Field> | ComputedRef<Field | undefined>
+  ) {
+    const cardValue = toValue(card);
+    const titleFieldValue = toValue(titleField);
+
+    assertNotNullOrUndefined(cardValue, 'card');
+    assertNotNullOrUndefined(cardValue.type, 'card.type');
+
+    if (cardValue.type.titleTemplate) {
+      return cardValue.type.titleTemplate.replace(
+        /\{\{(\w+)\}\}/g,
+        (_match: string, fieldSlug: string) => {
+          return cardValue.data[fieldSlug] || '';
+        }
+      );
+    } else if (titleFieldValue) {
+      return cardValue.data[titleFieldValue.slug];
+    } else {
+      return '';
+    }
+  }
+
   return {
     updateFieldValue,
     normalizeFieldValue,
@@ -175,5 +205,6 @@ export const useCard = () => {
     updateCard,
     updateCardStage,
     handleHoverCard,
+    getCardTitle,
   };
 };

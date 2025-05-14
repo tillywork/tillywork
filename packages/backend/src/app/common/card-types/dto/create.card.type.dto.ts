@@ -29,6 +29,10 @@ export class CreateCardTypeDto {
     hasChildren?: boolean;
 
     @IsOptional()
+    @IsString()
+    titleTemplate?: string;
+
+    @IsOptional()
     @IsInstance(Workspace)
     workspace?: Workspace;
 
