@@ -174,7 +174,7 @@ watch([meta, ctrl, enter], ([isMetaPressed, isCtrlPressed, isEnterPressed]) => {
           v-model="createCardDto.data.description"
           placeholder="Enter description.."
           editable
-          min-height="80px"
+          min-height="80"
         />
 
         <div class="d-flex ga-1 align-center">
