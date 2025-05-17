@@ -103,11 +103,12 @@ For logging and observability environment variables, we have [a dedicated docume
 
 Any frontend environment variable is prefixed with `TW_VITE_`, e.g `TW_VITE_API_URL`.
 
-| Variable              | Description                           | Default                  | Required |
-| --------------------- | ------------------------------------- | ------------------------ | -------- |
-| `TW_VITE_API_URL`     | The URL to the tillywork API          | http://localhost:3000/v1 | No       |
-| `TW_VITE_DOCS_URL`    | URL to tillywork documentation        | https://docs.tilly.work  | No       |
-| `TW_VITE_POSTHOG_KEY` | The Posthog project key for analytics |                          | No       |
+| Variable                             | Description                           | Default                  | Required |
+| ------------------------------------ | ------------------------------------- | ------------------------ | -------- |
+| `TW_VITE_API_URL`                    | The URL to the tillywork API          | http://localhost:3000/v1 | No       |
+| `TW_VITE_DOCS_URL`                   | URL to tillywork documentation        | https://docs.tilly.work  | No       |
+| `TW_VITE_POSTHOG_KEY`                | The Posthog project key for analytics |                          | No       |
+| `TW_VITE_PASSWORD_VALIDATION_POLICY` | Password Validation policy            | none                     | No       |
 
 ---
 
