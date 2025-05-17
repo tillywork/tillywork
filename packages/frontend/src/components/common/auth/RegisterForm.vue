@@ -125,7 +125,7 @@ async function handleRegister() {
                 label="Password*"
                 type="password"
                 required
-                :rules="[rules.required]"
+                :rules="[rules.required, rules.password]"
               />
               <!-- <v-phone-input
                 v-model="createUserDto.phoneNumber"
