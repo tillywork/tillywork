@@ -11,6 +11,7 @@ export interface Field {
   workspaceId: number;
   required: boolean;
   multiple: boolean;
+  cardType?: CardType;
   dataCardType?: CardType;
   items?: FieldItem[];
   createdByType: 'system' | 'user';
@@ -32,9 +33,14 @@ export interface CreateFieldDto {
   required?: boolean;
   multiple?: boolean;
   items?: FieldItem[];
+  cardType?: CardType;
   dataCardType?: CardType;
   lists?: List[];
-  isPinned?: boolean;
+  isTitle: boolean;
+  isDescription: boolean;
+  isPhoto: boolean;
+  isAssignee: boolean;
+  isPinned: boolean;
 }
 
 export enum FieldTypes {

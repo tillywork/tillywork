@@ -5,13 +5,13 @@ import {
     NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { IsNull, Repository } from "typeorm";
 import { Field } from "./field.entity";
 import { CreateFieldDto } from "./dto/create.field.dto";
 import { UpdateFieldDto } from "./dto/update.field.dto";
 import { ClsService } from "nestjs-cls";
 import { AccessControlService } from "../auth/services/access.control.service";
-import { PermissionLevel } from "@tillywork/shared";
+import { CreatedByType, PermissionLevel } from "@tillywork/shared";
 import { CardType } from "../card-types/card.type.entity";
 import { AclContext } from "../auth/context/acl.context";
 
@@ -19,7 +19,8 @@ export type FindAllParams = {
     workspaceId?: number;
     listId?: number;
     cardTypeId?: number;
-    createdByType?: "system" | "user";
+    createdByType?: CreatedByType;
+    excludeCardTypes?: boolean;
 };
 
 @Injectable()
@@ -37,6 +38,7 @@ export class FieldsService {
         listId,
         cardTypeId,
         createdByType,
+        excludeCardTypes,
     }: FindAllParams): Promise<Field[]> {
         if (!workspaceId && !listId && !cardTypeId) {
             throw new BadRequestException(
@@ -90,9 +92,11 @@ export class FieldsService {
                 lists: {
                     id: listId,
                 },
-                cardType: {
-                    id: cardTypeId,
-                },
+                cardType: excludeCardTypes
+                    ? IsNull()
+                    : cardTypeId
+                    ? { id: cardTypeId }
+                    : undefined,
                 createdByType,
             },
             relations: ["lists"],
@@ -165,7 +169,7 @@ export class FieldsService {
         const slugExistsInWorkspace = await this.findOneBySlug({
             slug: createFieldDto.slug,
             workspaceId: createFieldDto.workspaceId,
-            cardTypeId: createFieldDto.cardTypeId,
+            cardTypeId: createFieldDto.cardType?.id,
         });
 
         if (slugExistsInWorkspace) {
@@ -177,7 +181,7 @@ export class FieldsService {
         const field = this.fieldsRepository.create({
             ...createFieldDto,
             cardType: {
-                id: createFieldDto.cardTypeId,
+                id: createFieldDto.cardType?.id,
             },
             workspace: {
                 id: createFieldDto.workspaceId,

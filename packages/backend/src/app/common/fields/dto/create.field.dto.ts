@@ -25,8 +25,8 @@ export class CreateFieldDto {
     type: FieldTypes;
 
     @IsOptional()
-    @IsNumber()
-    cardTypeId?: number;
+    @Type(() => CardType)
+    cardType: CardType;
 
     @IsOptional()
     @Type(() => CardType)

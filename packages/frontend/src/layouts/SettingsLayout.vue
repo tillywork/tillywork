@@ -4,13 +4,6 @@ import { useSettings } from '@/composables/useSettings';
 
 import SettingsSection from '@/components/common/settings/SettingsSection.vue';
 
-definePage({
-  meta: {
-    requiresAuth: true,
-    hideNavigationDrawer: true,
-  },
-});
-
 const router = useRouter();
 const route = useRoute();
 
@@ -62,7 +55,7 @@ function handleBackClick() {
     </v-list>
   </v-navigation-drawer>
 
-  <v-container class="fill-height bg-surface" fluid>
+  <v-container class="bg-surface" fluid :style="{ minHeight: '100%' }">
     <v-app-bar
       v-if="$vuetify.display.mdAndDown"
       height="40"

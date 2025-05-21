@@ -1,12 +1,8 @@
 <script setup lang="ts">
-export type DropdownOption = {
-  title: string;
-  value: string;
-  color?: string;
-  icon?: string;
-};
+import MenuWrapper from '../base/ContextMenu/MenuWrapper.vue';
+import type { ContextMenuItem } from '../base/ContextMenu/types';
 
-const model = defineModel<string>();
+const model = defineModel<string | number | object | null | undefined>();
 
 const {
   items,
@@ -14,21 +10,21 @@ const {
   icon,
   clearable,
   readonly,
+  color,
 } = defineProps<{
-  items: DropdownOption[];
+  items: ContextMenuItem[];
   label?: string;
   icon?: string;
   clearable?: boolean;
   readonly?: boolean;
+  color?: string;
 }>();
+
+const attrs = useAttrs();
 
 const selectedItem = computed(() =>
   items.find((option) => option.value === model.value)
 );
-
-function handleSelectItem(item: string) {
-  model.value = item;
-}
 
 function clearSelection() {
   model.value = undefined;
@@ -39,12 +35,18 @@ function clearSelection() {
   <v-menu :disabled="readonly">
     <template #activator="{ props }">
       <v-chip
-        v-bind="readonly ? undefined : props"
-        :color="selectedItem?.color"
+        :color="selectedItem?.color ?? color"
         density="comfortable"
         class="text-caption"
+        :class="{
+          'pe-2': selectedItem && clearable,
+        }"
         rounded="pill"
         variant="tonal"
+        v-bind="{
+          ...attrs,
+          ...(readonly ? {} : props),
+        }"
       >
         <template #prepend v-if="selectedItem?.icon || icon">
           <v-icon :icon="selectedItem?.icon || icon" class="me-2" />
@@ -60,29 +62,8 @@ function clearSelection() {
         </template>
       </v-chip>
     </template>
-    <v-card>
-      <v-list>
-        <template v-for="option in items" :key="option.value">
-          <v-list-item
-            @click="handleSelectItem(option.value)"
-            :active="selectedItem?.value === option.value"
-          >
-            <template #prepend v-if="option.icon">
-              <v-icon :icon="option.icon" :color="option.color" />
-            </template>
-            <v-list-item-title>
-              {{ option.title }}
-            </v-list-item-title>
-            <template #append>
-              <v-icon
-                v-if="selectedItem?.value === option.value"
-                icon="mdi-check"
-                size="12"
-              />
-            </template>
-          </v-list-item>
-        </template>
-      </v-list>
-    </v-card>
+    <template #default="{ isActive }">
+      <menu-wrapper v-model="model" :items :open="isActive" selectable />
+    </template>
   </v-menu>
 </template>
