@@ -247,7 +247,7 @@ export class CardTypeFieldsFactory {
             await this.fieldsService.create({
                 ...field,
                 workspaceId: cardType.workspace.id,
-                cardTypeId: cardType.id,
+                cardType,
                 dataCardType,
             });
         }

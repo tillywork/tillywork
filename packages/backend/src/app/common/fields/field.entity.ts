@@ -14,7 +14,7 @@ import { Workspace } from "../workspaces/workspace.entity";
 import { User } from "../users/user.entity";
 import { List } from "../lists/list.entity";
 import { CardType } from "../card-types/card.type.entity";
-import { FieldItem, FieldTypes } from "@tillywork/shared";
+import { CreatedByType, FieldItem, FieldTypes } from "@tillywork/shared";
 
 /**
  * This contains card fields.
@@ -74,8 +74,8 @@ export class Field {
     @ManyToOne(() => CardType, { onDelete: "CASCADE", eager: true })
     dataCardType: Relation<CardType>;
 
-    @Column({ type: "enum", enum: ["system", "user"], default: "system" })
-    createdByType: "system" | "user";
+    @Column({ type: "varchar", default: "system" })
+    createdByType: CreatedByType;
 
     @ManyToOne(() => User, { eager: true })
     createdBy: Relation<User>;

@@ -1,13 +1,14 @@
 import { useHttp } from '@/composables/useHttp';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
-import type { CreateFieldDto, Field } from '@tillywork/shared';
+import type { CreatedByType, CreateFieldDto, Field } from '@tillywork/shared';
 import type { MaybeRef } from 'vue';
 
 export type GetFieldsParams = {
   workspaceId?: MaybeRef<number>;
   listId?: MaybeRef<number>;
   cardTypeId?: MaybeRef<number>;
-  createdByType?: MaybeRef<'system' | 'user'>;
+  createdByType?: MaybeRef<CreatedByType>;
+  excludeCardTypes?: MaybeRef<boolean>;
 };
 
 export const useFieldsService = () => {
@@ -38,6 +39,7 @@ export const useFieldsService = () => {
     listId,
     cardTypeId,
     createdByType,
+    excludeCardTypes,
   }: GetFieldsParams): Promise<Field[]> {
     return sendRequest('/fields', {
       method: 'GET',
@@ -46,6 +48,7 @@ export const useFieldsService = () => {
         listId: toValue(listId),
         cardTypeId: toValue(cardTypeId),
         createdByType: toValue(createdByType),
+        excludeCardTypes: toValue(excludeCardTypes),
       },
     });
   }
@@ -61,6 +64,7 @@ export const useFieldsService = () => {
           listId: params.listId,
           cardTypeId: params.cardTypeId,
           createdByType: params.createdByType,
+          excludeCardTypes: params.excludeCardTypes,
         },
       ],
       queryFn: () => getFields(params),

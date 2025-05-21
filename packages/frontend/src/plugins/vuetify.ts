@@ -26,7 +26,7 @@ const themes = {
   dark: {
     dark: true,
     colors: {
-      primary: '#3692ED',
+      primary: '#126ac2',
       background: '#101012',
       surface: '#0D0D0E',
       accent: '#1B1D21',

@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { useCardTypesService } from '@/services/useCardTypesService';
-import { useLogo } from '@/composables/useLogo';
 import { useAuthStore } from '@/stores/auth';
 import BaseTable from '../tables/BaseTable/BaseTable.vue';
 import { useDialogStore } from '@/stores/dialog';
 import { DIALOGS } from '../dialogs/types';
 import { useCreatedBy } from '@/composables/useCreatedBy';
 import type { CardType } from '@tillywork/shared';
+import { SettingsType } from './types';
+
+const router = useRouter();
 
 const { workspace } = storeToRefs(useAuthStore());
 const cardTypesService = useCardTypesService();
@@ -31,6 +33,10 @@ function openRemoveCardTypeDialog(cardType: CardType) {
       cardType,
     },
   });
+}
+
+function handleCardTypeClick(cardType: CardType) {
+  router.push(`/settings/${SettingsType.CARD_TYPES}/${cardType.id}`);
 }
 </script>
 
@@ -73,6 +79,7 @@ function openRemoveCardTypeDialog(cardType: CardType) {
         size: 300,
       },
     ]"
+    @click:row="handleCardTypeClick"
   >
     <!-- ~ Actions -->
     <template #actions="{ row }">

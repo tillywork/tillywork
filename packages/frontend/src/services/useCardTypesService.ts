@@ -2,7 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import { useHttp } from '@/composables/useHttp';
 import type { MaybeRef } from 'vue';
 import { useAuthStore } from '@/stores/auth';
-import type { CardType, CreateCardTypeDto } from '@tillywork/shared';
+import {
+  assertNotNullOrUndefined,
+  type CardType,
+  type CreateCardTypeDto,
+} from '@tillywork/shared';
 
 export type FindAllParams = {
   workspaceId: MaybeRef<number>;
@@ -36,6 +40,26 @@ export const useCardTypesService = () => {
         },
       ],
       queryFn: () => findAll({ workspaceId }),
+      enabled,
+    });
+  }
+
+  function findOne(cardTypeId: MaybeRef<number>): Promise<CardType> {
+    return sendRequest(`/card-types/${toValue(cardTypeId)}`, {
+      method: 'GET',
+    });
+  }
+
+  function useFindCardType({
+    cardTypeId,
+    enabled,
+  }: {
+    cardTypeId: MaybeRef<number>;
+    enabled?: MaybeRef<boolean>;
+  }) {
+    return useQuery({
+      queryKey: ['cardTypes', cardTypeId],
+      queryFn: () => findOne(cardTypeId),
       enabled,
     });
   }
@@ -98,9 +122,40 @@ export const useCardTypesService = () => {
     });
   }
 
+  function update(cardType: Partial<CardType>): Promise<CardType> {
+    assertNotNullOrUndefined(cardType.id, 'cardType.id');
+
+    return sendRequest(`/card-types/${cardType.id}`, {
+      method: 'PUT',
+      data: cardType,
+    });
+  }
+
+  function useUpdateCardType() {
+    return useMutation({
+      mutationFn: update,
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'cardTypes',
+            {
+              workspaceId: workspace.value?.id,
+            },
+          ],
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: ['workspaces'],
+        });
+      },
+    });
+  }
+
   return {
     useFindAllQuery,
+    useFindCardType,
     useCreateMutation,
     useRemoveMutation,
+    useUpdateCardType,
   };
 };
