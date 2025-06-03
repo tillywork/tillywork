@@ -1,7 +1,7 @@
 import { Module, forwardRef } from "@nestjs/common";
 import { AuthService } from "./services/auth.service";
 import { UsersModule } from "../users/users.module";
-import { AuthController } from "./auth.controller";
+import { AuthController } from "./controllers/auth.controller";
 import { JwtModule } from "@nestjs/jwt";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { LocalStrategy } from "./strategies/local.strategy";
@@ -17,10 +17,11 @@ import { SpaceAccessStrategy } from "./strategies/access.strategy/space.access.s
 import { ListAccessStrategy } from "./strategies/access.strategy/list.access.strategy";
 import { AclContext } from "./context/acl.context";
 import { NotificationPreferenceModule } from "../notifications/notification-preference/notification.preference.module";
+import { AccessControlController } from "./controllers/access.control.controller";
 
 @Module({
     imports: [
-        forwardRef(() => UsersModule), // Use forwardRef to avoid circular dependency,
+        forwardRef(() => UsersModule),
         JwtModule.register({
             secret: process.env.TW_SECRET_KEY,
             signOptions: { expiresIn: "7d" },
@@ -43,7 +44,7 @@ import { NotificationPreferenceModule } from "../notifications/notification-pref
         ListAccessStrategy,
         AclContext,
     ],
-    controllers: [AuthController],
+    controllers: [AuthController, AccessControlController],
     exports: [AuthService, AccessControlService, AclContext, JwtModule],
 })
 export class AuthModule {}

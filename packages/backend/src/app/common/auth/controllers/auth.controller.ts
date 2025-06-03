@@ -1,11 +1,11 @@
 import { Body, Controller, Param, Post, Res, UseGuards } from "@nestjs/common";
-import { AuthService, RegisterResponse } from "./services/auth.service";
-import { LocalAuthGuard } from "./guards/local.auth.guard";
-import { JwtAuthGuard } from "./guards/jwt.auth.guard";
-import { CreateUserDto } from "../users/dto/create.user.dto";
+import { AuthService, RegisterResponse } from "../services/auth.service";
+import { LocalAuthGuard } from "../guards/local.auth.guard";
+import { JwtAuthGuard } from "../guards/jwt.auth.guard";
+import { CreateUserDto } from "../../users/dto/create.user.dto";
 import { ApiBody, ApiTags } from "@nestjs/swagger";
-import { CurrentUser } from "./decorators/current.user.decorator";
-import { User } from "../users/user.entity";
+import { CurrentUser } from "../decorators/current.user.decorator";
+import { User } from "../../users/user.entity";
 
 @ApiTags("auth")
 @Controller({

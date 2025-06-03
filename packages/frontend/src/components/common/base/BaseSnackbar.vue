@@ -1,18 +1,16 @@
 <script setup lang="ts">
-// Props
 const { color, timeout = 4000 } = defineProps<{
   color?: string;
   timeout?: number;
 }>();
 
-// Emits
 const emit = defineEmits(['close']);
 
 const snackbarProgress = ref(100);
 let interval: NodeJS.Timeout | null = null;
 
 function startCountdown() {
-  const step = 100 / (timeout / 100); // Calculate the decrement step per interval (100ms)
+  const step = 100 / (timeout / 100);
 
   interval = setInterval(() => {
     snackbarProgress.value -= step;
@@ -20,7 +18,7 @@ function startCountdown() {
       stopCountdown();
       closeSnackbar();
     }
-  }, 100); // Update progress every 100ms
+  }, 100);
 }
 
 function stopCountdown() {
@@ -38,7 +36,6 @@ onMounted(() => {
   startCountdown();
 });
 
-// Cleanup on unmount
 onUnmounted(() => {
   stopCountdown();
 });

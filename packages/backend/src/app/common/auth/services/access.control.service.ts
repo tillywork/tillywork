@@ -93,13 +93,63 @@ export class AccessControlService {
         }
     }
 
+    private async _getChildResources(
+        resourceType: AccessControlResourceType,
+        resourceId: number
+    ) {
+        const childResourceMaps = {
+            project: ["workspace"],
+            workspace: ["space", "list"],
+            space: ["list"],
+        };
+        const childResourceTypes = childResourceMaps[resourceType] || [];
+        const children: { type: AccessControlResourceType; items: any[] }[] =
+            [];
+        for (const childResourceType of childResourceTypes) {
+            let childItems = [];
+            switch (resourceType) {
+                case "project":
+                    childItems = await this.accessControlRepository.manager
+                        .getRepository(Workspace)
+                        .find({
+                            where: {
+                                projectId: resourceId,
+                                accessType: AccessType.PUBLIC,
+                            },
+                        });
+                    break;
+                case "workspace":
+                    childItems = await this.accessControlRepository.manager
+                        .getRepository(
+                            childResourceType === "space" ? Space : List
+                        )
+                        .find({
+                            where: {
+                                workspaceId: resourceId,
+                                accessType: AccessType.PUBLIC,
+                            },
+                        });
+                    break;
+                case "space":
+                    childItems = await this.accessControlRepository.manager
+                        .getRepository(List)
+                        .find({
+                            where: {
+                                spaceId: resourceId,
+                                accessType: AccessType.PUBLIC,
+                            },
+                        });
+                    break;
+                default:
+                    childItems = [];
+            }
+            children.push({ type: childResourceType, items: childItems });
+        }
+        return children;
+    }
+
     /**
      * Grants a user access to a resource, and it's public children.
-     * @param user
-     * @param resourceType
-     * @param resourceId
-     * @param permissionLevel
-     * @returns The AccessControl entity.
      */
     async grantPermission(
         user: User,
@@ -133,78 +183,26 @@ export class AccessControlService {
         await this.accessControlRepository.save(accessControl);
 
         // Give access to all public children of this resource
-        const childResourceMaps = {
-            project: ["workspace"],
-            workspace: ["space", "list"],
-            space: ["list"],
-        };
-        const childResourceTypes = childResourceMaps[resourceType] || [];
-
-        await Promise.all(
-            childResourceTypes.map(async (childResourceType) => {
-                let childResources;
-
-                switch (resourceType) {
-                    case "project":
-                        childResources =
-                            await this.accessControlRepository.manager
-                                .getRepository(Workspace)
-                                .find({
-                                    where: {
-                                        projectId: resourceId,
-                                        accessType: AccessType.PUBLIC,
-                                    },
-                                });
-                        break;
-                    case "workspace":
-                        childResources =
-                            await this.accessControlRepository.manager
-                                .getRepository(
-                                    childResourceType === "space" ? Space : List
-                                )
-                                .find({
-                                    where: {
-                                        workspaceId: resourceId,
-                                        accessType: AccessType.PUBLIC,
-                                    },
-                                });
-                        break;
-                    case "space":
-                        childResources =
-                            await this.accessControlRepository.manager
-                                .getRepository(List)
-                                .find({
-                                    where: {
-                                        spaceId: resourceId,
-                                        accessType: AccessType.PUBLIC,
-                                    },
-                                });
-                        break;
-                    default:
-                        childResources = [];
-                }
-
-                await Promise.all(
-                    childResources.map(async (childResource) => {
-                        await this.grantPermission(
-                            user,
-                            childResourceType,
-                            childResource.id,
-                            permissionLevel
-                        );
-                    })
-                );
-            })
+        const children = await this._getChildResources(
+            resourceType,
+            resourceId
         );
+        for (const child of children) {
+            for (const item of child.items) {
+                await this.grantPermission(
+                    user,
+                    child.type,
+                    item.id,
+                    permissionLevel
+                );
+            }
+        }
 
         return accessControl;
     }
 
     /**
-     * Revokes a user's access to a certain resource.
-     * @param user
-     * @param resourceType
-     * @param resourceId
+     * Revokes a user's access to a certain resource and its public children.
      */
     async revokePermissions(
         user: User,
@@ -215,6 +213,17 @@ export class AccessControlService {
             user: { id: user.id },
             [resourceType]: { id: resourceId },
         });
+
+        // Revoke access to all public children of this resource
+        const children = await this._getChildResources(
+            resourceType,
+            resourceId
+        );
+        for (const child of children) {
+            for (const item of child.items) {
+                await this.revokePermissions(user, child.type, item.id);
+            }
+        }
     }
 
     /**
@@ -250,5 +259,16 @@ export class AccessControlService {
         });
 
         return accessControl;
+    }
+
+    async findAllForUser(userId: number) {
+        return this.accessControlRepository.find({
+            where: {
+                user: {
+                    id: userId,
+                },
+            },
+            relations: ["project", "workspace", "space", "list"],
+        });
     }
 }

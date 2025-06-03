@@ -7,6 +7,7 @@ import { UpdateProjectUserDto } from "./dto/update.project.user.dto";
 import { AccessControlService } from "../../auth/services/access.control.service";
 import { ClsService } from "nestjs-cls";
 import { PermissionLevel } from "@tillywork/shared";
+import { User } from "../../users/user.entity";
 
 export type ProjectUserFindAllResult = {
     total: number;
@@ -98,11 +99,44 @@ export class ProjectUsersService {
     ): Promise<ProjectUser> {
         const projectUser = await this.findOne(id);
         this.projectUsersRepository.merge(projectUser, updateProjectUserDto);
-        return this.projectUsersRepository.save(projectUser);
+        const updatedProjectUser = await this.projectUsersRepository.save(
+            projectUser
+        );
+
+        await this.accessControlService.grantPermission(
+            updatedProjectUser.user,
+            "project",
+            updatedProjectUser.project.id,
+            updatedProjectUser.role === "owner"
+                ? PermissionLevel.OWNER
+                : PermissionLevel.EDITOR
+        );
+
+        return updatedProjectUser;
     }
 
     async remove(id: number): Promise<void> {
         const projectUser = await this.findOne(id);
-        await this.projectUsersRepository.remove(projectUser);
+
+        await this.projectUsersRepository.manager.transaction(
+            async (manager) => {
+                await manager.remove(ProjectUser, projectUser);
+
+                await this.accessControlService.revokePermissions(
+                    projectUser.user,
+                    "project",
+                    projectUser.project.id
+                );
+
+                await manager.getRepository(User).update(
+                    {
+                        id: projectUser.user.id,
+                    },
+                    {
+                        project: null,
+                    }
+                );
+            }
+        );
     }
 }
