@@ -1,3 +1,5 @@
+import { List, Project, Space, User, Workspace } from '../..';
+
 export enum PermissionLevel {
   /** No access at all */
   NONE = 'none',
@@ -28,3 +30,14 @@ export type AccessControlResourceType =
   | 'workspace'
   | 'space'
   | 'list';
+
+export type AccessControl = {
+  id: number;
+  permissionLevel: PermissionLevel;
+  user: User;
+  project?: Project;
+  workspace?: Workspace;
+  space?: Space;
+  list?: List;
+  createdAt: string;
+};

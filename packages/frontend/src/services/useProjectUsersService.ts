@@ -1,10 +1,11 @@
 import { useHttp } from '@/composables/useHttp';
-import { useQuery } from '@tanstack/vue-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import type { ProjectUser } from '@tillywork/shared';
 import type { MaybeRef } from 'vue';
 
 export const useProjectUsersService = () => {
   const { sendRequest } = useHttp();
+  const queryClient = useQueryClient();
 
   async function getProjectUsers({
     projectId,
@@ -34,8 +35,32 @@ export const useProjectUsersService = () => {
     });
   }
 
+  async function deleteProjectUser({
+    projectId,
+    projectUserId,
+  }: {
+    projectId: number;
+    projectUserId: number;
+  }): Promise<void> {
+    return sendRequest(`/projects/${projectId}/users/${projectUserId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  function useDeleteProjectUser() {
+    return useMutation({
+      mutationFn: deleteProjectUser,
+      onSuccess: (_, params) => {
+        return queryClient.invalidateQueries({
+          queryKey: ['users', { projectId: params.projectId }],
+        });
+      },
+    });
+  }
+
   return {
     useProjectUsersQuery,
     getProjectUsers,
+    useDeleteProjectUser,
   };
 };

@@ -26,14 +26,9 @@ app.component('BaseDatePicker', BaseDatePicker);
 app.component('ListStageSelector', ListStageSelector);
 
 const pinia = createPinia();
-// Adds router as a store plugin for each store
-// can be used by this.$router.push('/')
-// from inside the store
 pinia.use(({ store }) => {
   store.$router = markRaw(router);
 });
-// Persist the store through page reload
-// make sure to set persist: true in store
 pinia.use(piniaPluginPersistedstate);
 
 app.use(pinia);
@@ -45,6 +40,7 @@ app.use(VueQueryPlugin, {
       queries: {
         refetchOnReconnect: false,
         refetchOnWindowFocus: false,
+        retry: false,
       },
     },
   },

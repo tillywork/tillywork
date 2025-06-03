@@ -13,7 +13,10 @@ export class ProjectUser {
     @PrimaryGeneratedColumn("increment")
     id: number;
 
-    @ManyToOne(() => Project, (project) => project.users, { nullable: false })
+    @ManyToOne(() => Project, (project) => project.users, {
+        nullable: false,
+        eager: true,
+    })
     project: Relation<Project>;
 
     @ManyToOne(() => User, (user) => user.projects, {

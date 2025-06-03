@@ -162,7 +162,7 @@ export class AuthService {
         await this.projectUsersService.create({
             user: createdUser,
             project,
-            role: "admin",
+            role: "editor",
         });
 
         const accessToken = await this.login({
@@ -194,7 +194,7 @@ export class AuthService {
         await this.projectUsersService.create({
             user,
             project,
-            role: "admin",
+            role: "editor",
         });
 
         const accessToken = await this.login({
