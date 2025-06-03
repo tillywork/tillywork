@@ -117,20 +117,25 @@ export class ProjectUsersService {
 
     async remove(id: number): Promise<void> {
         const projectUser = await this.findOne(id);
-        await this.projectUsersRepository.remove(projectUser);
 
-        await this.accessControlService.revokePermissions(
-            projectUser.user,
-            "project",
-            projectUser.project.id
-        );
+        await this.projectUsersRepository.manager.transaction(
+            async (manager) => {
+                await manager.remove(ProjectUser, projectUser);
 
-        await this.projectUsersRepository.manager.getRepository(User).update(
-            {
-                id: projectUser.user.id,
-            },
-            {
-                project: null,
+                await this.accessControlService.revokePermissions(
+                    projectUser.user,
+                    "project",
+                    projectUser.project.id
+                );
+
+                await manager.getRepository(User).update(
+                    {
+                        id: projectUser.user.id,
+                    },
+                    {
+                        project: null,
+                    }
+                );
             }
         );
     }

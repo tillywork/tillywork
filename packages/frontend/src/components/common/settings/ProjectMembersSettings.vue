@@ -17,7 +17,7 @@ import { DIALOGS } from '../dialogs/types';
 
 import _ from 'lodash';
 
-const { user, workspace } = storeToRefs(useAuthStore());
+const { workspace } = storeToRefs(useAuthStore());
 const dialog = useDialogStore();
 const { showSnackbar } = useSnackbarStore();
 
@@ -32,10 +32,6 @@ const { data: projectUsers } = useProjectUsersQuery({
 const { mutateAsync: deleteProjectUser } = useDeleteProjectUser();
 
 const { hasPermission } = useAccessControlStore();
-
-const currentUserMembership = computed<ProjectUser | null>(() =>
-  projectUsers.value?.find((pU) => pU.user.id === user.value?.id)
-);
 
 function getProjectUserMenuItems(projectUser: ProjectUser): ContextMenuItem[] {
   const userMenuItems: ContextMenuItem[] = [

@@ -41,3 +41,10 @@ export type AccessControl = {
   list?: List;
   createdAt: string;
 };
+
+export const PERMISSION_LEVEL_ORDER = [
+  PermissionLevel.NONE,
+  PermissionLevel.VIEWER,
+  PermissionLevel.EDITOR,
+  PermissionLevel.OWNER,
+];

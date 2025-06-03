@@ -1,6 +1,10 @@
 import { useAccessControlService } from '@/services/useAccessControlService';
 
-import { PermissionLevel } from '@tillywork/shared';
+import {
+  PERMISSION_LEVEL_ORDER,
+  PermissionLevel,
+  type AccessControl,
+} from '@tillywork/shared';
 
 export const useAccessControlStore = defineStore(
   'permissions',
@@ -9,7 +13,7 @@ export const useAccessControlStore = defineStore(
     const { data: permissions } = useGetUserPermissions();
 
     const permissionsMap = computed(() => {
-      const map: Record<string, Record<number, any>> = {
+      const map: Record<string, Record<number, AccessControl>> = {
         project: {},
         workspace: {},
         space: {},
@@ -17,7 +21,7 @@ export const useAccessControlStore = defineStore(
       };
 
       if (permissions.value) {
-        permissions.value.forEach((perm: any) => {
+        permissions.value.forEach((perm: AccessControl) => {
           if (perm.project) map.project[perm.project.id] = perm;
           if (perm.workspace) map.workspace[perm.workspace.id] = perm;
           if (perm.space) map.space[perm.space.id] = perm;
@@ -43,14 +47,10 @@ export const useAccessControlStore = defineStore(
       const current = getPermissionLevel(type, id);
       if (!current) return false;
 
-      const order = [
-        PermissionLevel.NONE,
-        PermissionLevel.VIEWER,
-        PermissionLevel.EDITOR,
-        PermissionLevel.OWNER,
-      ];
-
-      return order.indexOf(current) >= order.indexOf(requiredLevel);
+      return (
+        PERMISSION_LEVEL_ORDER.indexOf(current) >=
+        PERMISSION_LEVEL_ORDER.indexOf(requiredLevel)
+      );
     }
 
     function isProjectOwner(id: number) {
