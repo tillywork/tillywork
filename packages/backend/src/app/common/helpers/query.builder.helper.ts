@@ -11,6 +11,10 @@ import {
 export class QueryBuilderHelper {
     private static readonly logger = new Logger("QueryBuilderHelper");
 
+    static isSafeFieldName(field: string): boolean {
+        return /^([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z0-9_]+)*$/.test(field);
+    }
+
     static processValue(value: any) {
         const utcDayjs = dayjs.utc;
         const datePlaceholders = {
@@ -132,6 +136,12 @@ export class QueryBuilderHelper {
         const pathArray = field.split(".");
         let extractionOperator: "->>" | "->";
 
+        if (!this.isSafeFieldName(field)) {
+            throw new Error(
+                `[QueryBuilderHelper] Disallowed or unsafe field: ${field}`
+            );
+        }
+
         if (["in", "nin"].includes(operator)) {
             extractionOperator = "->";
         } else {
@@ -225,39 +235,65 @@ export class QueryBuilderHelper {
                 return queryBuilder.andWhere(`${fieldName} <= :${field}`, {
                     [field]: processedValue,
                 });
-            case "in":
+            case "in": {
                 if (fieldName.startsWith(cardPrefix)) {
                     return queryBuilder.andWhere(
                         new Brackets((qb) =>
-                            processedValue.map((value: string) => {
-                                return qb.orWhere(
-                                    `${fieldName} @> '["${value}"]'`
-                                );
+                            processedValue.map((value: string, i: number) => {
+                                const paramName = `${field}_in_${i}`;
+                                qb.orWhere(`${fieldName} @> :${paramName}`, {
+                                    [paramName]: `["${value}"]`,
+                                });
                             })
                         )
                     );
                 }
-
-                return queryBuilder.andWhere(
-                    `${fieldName} ${operator} (${processedValue.join(",")})`
+                const paramNames = processedValue.map(
+                    (_: any, i: number) => `:${field}_in_${i}`
                 );
+                const params = Object.fromEntries(
+                    processedValue.map((v: any, i: number) => [
+                        `${field}_in_${i}`,
+                        v,
+                    ])
+                );
+                return queryBuilder.andWhere(
+                    `${fieldName} IN (${paramNames.join(",")})`,
+                    params
+                );
+            }
             case "nin": {
                 if (fieldName.startsWith(cardPrefix)) {
                     return queryBuilder
                         .andWhere(
                             new Brackets((qb) =>
-                                processedValue.map((value: string) => {
-                                    return qb.andWhere(
-                                        `NOT (${fieldName} @> '["${value}"]')`
-                                    );
-                                })
+                                processedValue.map(
+                                    (value: string, i: number) => {
+                                        const paramName = `${field}_nin_${i}`;
+                                        qb.andWhere(
+                                            `NOT (${fieldName} @> :${paramName})`,
+                                            {
+                                                [paramName]: `["${value}"]`,
+                                            }
+                                        );
+                                    }
+                                )
                             )
                         )
                         .orWhere(`${fieldName} IS NULL`);
                 }
-
+                const paramNames = processedValue.map(
+                    (_: any, i: number) => `:${field}_nin_${i}`
+                );
+                const params = Object.fromEntries(
+                    processedValue.map((v: any, i: number) => [
+                        `${field}_nin_${i}`,
+                        v,
+                    ])
+                );
                 return queryBuilder.andWhere(
-                    `${fieldName} NOT IN (${processedValue.join(",")})`
+                    `${fieldName} NOT IN (${paramNames.join(",")})`,
+                    params
                 );
             }
             case "like":
